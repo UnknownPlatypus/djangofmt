@@ -11,30 +11,26 @@ html = _{
 
 //
 // DOCTYPE
-//
+// Ex:
+//    "<!DOCTYPE html>"
+//    "  <!DOCTYPE html SYSTEM "about:legacy-compat">  "
 doctype = { WSP* ~ chevron_left_bang ~ ^"doctype" ~ WSP* ~ attr* ~ WSP* ~ chevron_right_normal}
 
 //
 // NODES
 //
 node = _{ node_comment | node_element | node_text }
-node_comment = { WSP* ~ (comment_if | comment_normal) ~ WSP* }
-node_text = { (!(node_element | comment_tag_start | chevron_left_bang) ~ ANY)+ }
-node_element = { el_void | el_void_xml | el_process_instruct | el_raw_text | el_normal | el_dangling }
+node_comment = { WSP* ~ comment_normal ~ WSP* } // "    <-- dsfd -->     "
+node_text = { (!(node_element | comment_tag_start | chevron_left_bang) ~ ANY)+ } // ?
+node_element = { el_void | el_void_xml | el_process_instruct | el_raw_text | el_normal | el_dangling } // ?
 
 //
 // COMMENTS
 //
-comment_normal = _{ comment_tag_start ~ comment_body ~ comment_tag_end }
+comment_normal = _{ comment_tag_start ~ comment_body ~ comment_tag_end } // "<-- dsfd -->"
 comment_body = { (!comment_tag_end ~ ANY)* }
 comment_tag_start = _{ chevron_left_bang ~ "--" ~ WSP* }
 comment_tag_end = _{ WSP* ~ "--" ~ chevron_right_normal }
-
-// Compatability with old IE browsers... This is not necessary for newer browsers
-comment_if = _{ comment_if_start ~ comment_if_body ~ comment_if_end }
-comment_if_body = { (!comment_if_end ~ ANY)* }
-comment_if_start = _{ comment_tag_start ~ "[" ~ ^"if" }
-comment_if_end = _{ chevron_left_bang ~ "[" ~ ^"endif" ~ "]" ~ comment_tag_end }
 
 //
 // ATTRIBUTES
