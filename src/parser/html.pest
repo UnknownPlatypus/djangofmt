@@ -22,7 +22,7 @@ doctype = { WSP* ~ chevron_left_bang ~ ^"doctype" ~ WSP* ~ attr* ~ WSP* ~ chevro
 node = _{ node_comment | node_element | node_text }
 node_comment = { WSP* ~ comment_normal ~ WSP* } // "    <-- dsfd -->     "
 node_text = { (!(node_element | comment_tag_start | chevron_left_bang) ~ ANY)+ } // ?
-node_element = { el_void | el_void_xml | el_process_instruct | el_raw_text | el_normal | el_dangling } // ?
+node_element = { el_void | el_raw_text | el_normal | el_dangling } // ?
 
 //
 // COMMENTS
@@ -76,7 +76,6 @@ el_void_name_svg = @{
 }
 el_void_name = @{ el_void_name_html | el_void_name_svg }
 el_void = _{ chevron_left_normal ~ WSP* ~ el_void_name ~ WSP* ~ attr* ~ WSP* ~ (chevron_right_normal | chevron_right_closed) }
-el_void_xml = _{ chevron_left_normal ~ WSP* ~ el_name ~ WSP* ~ attr* ~ WSP* ~ chevron_right_closed }
 
 // Open elements are default element that can take children
 // and have both a start tag and an end tag
@@ -98,10 +97,6 @@ el_raw_text = _{ el_raw_text_start ~ el_raw_text_content ~ el_raw_text_end }
 el_raw_text_start = _{ chevron_left_normal ~ WSP* ~ PUSH(el_raw_text_name) ~ WSP* ~ attr* ~ WSP* ~ chevron_right_normal ~ WSP*}
 el_raw_text_end = { WSP* ~ chevron_left_closed ~ WSP* ~ POP ~ WSP* ~ chevron_right_normal}
 
-// XML processing instruction
-// Ex: <?xml version="1.0" ?>
-el_process_instruct = { chevron_left_question ~ WSP* ~ el_name? ~ WSP* ~ attr* ~ WSP* ~ chevron_right_question }
-
 // Catch dangling elements
 // Ex: <div/></div>
 el_dangling = { chevron_left_closed ~ WSP* ~ el_name ~ WSP* ~ chevron_right_normal}
@@ -114,15 +109,13 @@ text_chars = _{'a'..'z' | 'A'..'Z' | "_" | "-" | ":" |'0'..'9'}
 chevron_left_normal = _{ "<" }
 chevron_left_closed = _{ "</" }
 chevron_left_bang = _{ "<!" }
-chevron_left_question = _{ "<?" }
 
 chevron_right_normal = _{ ">" }
 chevron_right_closed = _{ "/>" }
-chevron_right_question = _{ "?>" }
+
 chevron_right = _{
     chevron_right_normal
     | chevron_right_closed
-    | chevron_right_question
 }
 
 equal = _{ "=" }
