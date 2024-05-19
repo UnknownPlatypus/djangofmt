@@ -10,3 +10,4 @@ exclude = ["/tests"]
 
 [dependencies]
 markup_fmt = "0.8.0"
+anyhow = "1.0.86"
