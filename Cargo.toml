@@ -1,0 +1,12 @@
+[package]
+name = "djangofmt"
+version = "0.1.0"
+edition = "2021"
+authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
+description = "Django Template Linter and Formatter."
+repository = "https://github.com/UnknownPlatypus/djangofmt"
+license = "MIT"
+exclude = ["/tests"]
+
+[dependencies]
+markup_fmt = "0.8.0"
