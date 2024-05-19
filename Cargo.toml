@@ -11,3 +11,5 @@ exclude = ["/tests"]
 [dependencies]
 markup_fmt = "0.8.0"
 anyhow = "1.0.86"
+clap = { version = "4.5.4", features = ["derive"] }
+colored = "2.1.0"

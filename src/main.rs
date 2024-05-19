@@ -1,7 +1,34 @@
+use std::process::ExitCode;
+
+use clap::Parser;
+use colored::Colorize;
 use markup_fmt::{format_text, Language};
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 
-fn main() {
+use djangofmt::{Args, ExitStatus, run};
+
+pub fn main() -> ExitCode {
+    let args = std::env::args_os();
+
+    let args = Args::parse_from(args);
+
+    match run(args) {
+        Ok(code) => code.into(),
+        Err(err) => {
+            #[allow(clippy::print_stderr)]
+            {
+                // Unhandled error from djangofmt.
+                eprintln!("{}", "djangofmt failed".red().bold());
+                for cause in err.chain() {
+                    eprintln!("  {} {cause}", "Cause:".bold());
+                }
+            }
+            ExitStatus::Error.into()
+        }
+    }
+}
+
+fn test() {
     let options = FormatOptions {
         layout: LayoutOptions {
             print_width: 120,

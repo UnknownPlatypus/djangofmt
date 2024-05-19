@@ -1,6 +1,8 @@
+use std::path::PathBuf;
 use std::process::ExitCode;
 
 use anyhow::Result;
+use clap::{command, Parser};
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {
@@ -22,6 +24,37 @@ impl From<ExitStatus> for ExitCode {
     }
 }
 
-pub fn run() -> Result<ExitStatus> {
+#[derive(Debug, Parser)]
+#[command(
+    author,
+    name = "djangofmt",
+    about = "Django Template Linter and Formatter",
+    after_help = "For help with a specific command, see: `djangofmt help <command>`."
+)]
+#[command()]
+pub struct Args {
+    #[command(subcommand)]
+    pub(crate) command: Command,
+}
+
+#[derive(Debug, clap::Subcommand)]
+pub enum Command {
+    /// Run the formatter on the given files or directories.
+    Format(FormatCommand),
+}
+
+#[derive(Clone, Debug, clap::Parser)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct FormatCommand {
+    /// List of files or directories to format.
+    #[clap(help = "List of files or directories to format")]
+    pub files: Vec<PathBuf>,
+    /// Set the line-length.
+    #[arg(long, help_heading = "Format configuration")]
+    pub line_length: Option<u8>,
+}
+
+pub fn run(Args { command }: Args) -> Result<ExitStatus> {
+    println!("{:?}", command);
     Ok(ExitStatus::Success)
 }
