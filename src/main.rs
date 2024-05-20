@@ -5,7 +5,8 @@ use colored::Colorize;
 use markup_fmt::{format_text, Language};
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 
-use djangofmt::{Args, ExitStatus, run};
+use djangofmt::{ExitStatus, run};
+use djangofmt::args::Args;
 
 pub fn main() -> ExitCode {
     let args = std::env::args_os();

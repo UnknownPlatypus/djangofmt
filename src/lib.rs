@@ -1,14 +1,20 @@
 use std::fs::File;
 use std::io::Write;
-use std::path::PathBuf;
 use std::process::ExitCode;
 use std::time::Instant;
 
 use anyhow::Result;
-use clap::{command, Parser};
+use clap::Parser;
 use markup_fmt::{format_text, Language};
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+
+use crate::args::{Args, Command, FormatCommand};
+use crate::logging::set_up_logging;
+
+pub mod args;
+mod commands;
+mod logging;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {
@@ -30,40 +36,20 @@ impl From<ExitStatus> for ExitCode {
     }
 }
 
-#[derive(Debug, Parser)]
-#[command(
-    author,
-    name = "djangofmt",
-    about = "Django Template Linter and Formatter",
-    after_help = "For help with a specific command, see: `djangofmt help <command>`."
-)]
-#[command()]
-pub struct Args {
-    #[command(subcommand)]
-    pub(crate) command: Command,
-}
+pub fn run(
+    Args {
+        command,
+        global_options,
+    }: Args,
+) -> Result<ExitStatus> {
+    set_up_logging(global_options.log_level())?;
 
-#[derive(Debug, clap::Subcommand)]
-pub enum Command {
-    /// Run the formatter on the given files or directories.
-    Format(FormatCommand),
-}
-
-#[derive(Clone, Debug, clap::Parser)]
-#[allow(clippy::struct_excessive_bools)]
-pub struct FormatCommand {
-    /// List of files or directories to format.
-    #[clap(help = "List of files or directories to format")]
-    pub files: Vec<PathBuf>,
-    /// Set the line-length.
-    #[arg(long, help_heading = "Format configuration")]
-    pub line_length: Option<usize>,
-}
-
-pub fn run(Args { command }: Args) -> Result<ExitStatus> {
-    println!("{:?}", command);
     match command {
         Command::Format(args) => format(args),
+        Command::Version => {
+            commands::version::version()?;
+            Ok(ExitStatus::Success)
+        }
     }
 }
 
