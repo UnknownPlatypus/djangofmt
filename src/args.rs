@@ -46,7 +46,7 @@ pub enum Command {
 #[allow(clippy::struct_excessive_bools)]
 pub struct FormatCommand {
     /// List of files or directories to format.
-    #[clap(help = "List of files or directories to format")]
+    #[clap(help = "List of files or directories to format", required = true)]
     pub files: Vec<PathBuf>,
     /// Set the line-length.
     #[arg(long, help_heading = "Format configuration")]
