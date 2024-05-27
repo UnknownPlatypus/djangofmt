@@ -72,46 +72,6 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
     }
 }
 
-/// Write a summary of the formatting results to stdout.
-fn write_summary(results: Vec<FormatResult>) -> Result<()> {
-    let mut counts = HashMap::new();
-    results.iter().for_each(|val| {
-        counts
-            .entry(val)
-            .and_modify(|count| *count += 1)
-            .or_insert(1);
-    });
-    let stdout = &mut io::stdout().lock();
-
-    let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
-    let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
-    if changed > 0 && unchanged > 0 {
-        writeln!(
-            stdout,
-            "{} file{} reformatted, {} file{} left unchanged !",
-            changed,
-            if changed == 1 { "" } else { "s" },
-            unchanged,
-            if unchanged == 1 { "" } else { "s" },
-        )?;
-    } else if changed > 0 {
-        writeln!(
-            stdout,
-            "{} file{} reformatted !",
-            changed,
-            if changed == 1 { "" } else { "s" },
-        )?;
-    } else if unchanged > 0 {
-        writeln!(
-            stdout,
-            "{} file{} left unchanged !",
-            unchanged,
-            if unchanged == 1 { "" } else { "s" },
-        )?;
-    }
-    Ok(())
-}
-
 /// Format the file at the given [`Path`].
 #[tracing::instrument(level="debug", skip_all, fields(path = %path.display()))]
 pub(crate) fn format_path(
@@ -201,4 +161,44 @@ pub(crate) enum FormatResult {
 
     /// The file was unchanged, as the formatted contents matched the existing contents.
     Unchanged,
+}
+
+/// Write a summary of the formatting results to stdout.
+fn write_summary(results: Vec<FormatResult>) -> Result<()> {
+    let mut counts = HashMap::new();
+    results.iter().for_each(|val| {
+        counts
+            .entry(val)
+            .and_modify(|count| *count += 1)
+            .or_insert(1);
+    });
+    let stdout = &mut io::stdout().lock();
+
+    let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
+    let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
+    if changed > 0 && unchanged > 0 {
+        writeln!(
+            stdout,
+            "{} file{} reformatted, {} file{} left unchanged !",
+            changed,
+            if changed == 1 { "" } else { "s" },
+            unchanged,
+            if unchanged == 1 { "" } else { "s" },
+        )?;
+    } else if changed > 0 {
+        writeln!(
+            stdout,
+            "{} file{} reformatted !",
+            changed,
+            if changed == 1 { "" } else { "s" },
+        )?;
+    } else if unchanged > 0 {
+        writeln!(
+            stdout,
+            "{} file{} left unchanged !",
+            unchanged,
+            if unchanged == 1 { "" } else { "s" },
+        )?;
+    }
+    Ok(())
 }
