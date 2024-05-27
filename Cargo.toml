@@ -12,5 +12,11 @@ exclude = ["/tests"]
 markup_fmt = "0.8.0"
 anyhow = "1.0.86"
 clap = { version = "4.5.4", features = ["derive"] }
-colored = "2.1.0"
 rayon = "1.10.0"
+
+# Logging
+colored = "2.1.0"
+log = "0.4.21"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-tree = "0.3.1"

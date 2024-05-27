@@ -7,21 +7,17 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use anyhow::Result;
-use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use markup_fmt::{format_text, FormatError, Language};
-use rayon::iter::Either::{Left, Right};
+use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rayon::iter::Either::{Left, Right};
+use tracing::{debug, error};
 
 use crate::args::{FormatCommand, GlobalConfigArgs};
-use crate::logging::LogLevel;
 use crate::ExitStatus;
+use crate::logging::LogLevel;
 
-pub(crate) fn format(
-    args: FormatCommand,
-    global_options: GlobalConfigArgs,
-) -> anyhow::Result<ExitStatus> {
-    let log_level = LogLevel::from(global_options.log_level());
-
+pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> Result<ExitStatus> {
     let format_options = FormatOptions {
         layout: LayoutOptions {
             print_width: args.line_length.unwrap_or(120),
@@ -56,7 +52,7 @@ pub(crate) fn format(
         });
 
     let duration = start.elapsed();
-    println!(
+    debug!(
         "Formatted {} files in {:.2?}",
         results.len() + errors.len(),
         duration
@@ -64,35 +60,59 @@ pub(crate) fn format(
 
     // Report on any errors.
     errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-
     for error in &errors {
-        eprintln!("{error}");
+        error!("{error}");
     }
 
     // Report on the formatting changes.
     if global_options.log_level() >= LogLevel::Default {
-        let mut counts = HashMap::new();
-        results.iter().for_each(|val| {
-            counts
-                .entry(&val.result)
-                .and_modify(|count| *count += 1)
-                .or_insert(1);
-        });
-        counts.into_iter().for_each(|(res, count)| {
-            println!(
-                "{} file{} {:?}!",
-                count,
-                if count == 1 { "" } else { "s" },
-                res
-            );
-        })
+        write_summary(results)?;
     }
-
     if errors.is_empty() {
         Ok(ExitStatus::Success)
     } else {
         Ok(ExitStatus::Error)
     }
+}
+
+/// Write a summary of the formatting results to stdout.
+fn write_summary(results: Vec<FormatPathResult>) -> Result<()> {
+    let mut counts = HashMap::new();
+    results.iter().for_each(|val| {
+        counts
+            .entry(&val.result)
+            .and_modify(|count| *count += 1)
+            .or_insert(1);
+    });
+    let stdout = &mut io::stdout().lock();
+
+    let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
+    let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
+    if changed > 0 && unchanged > 0 {
+        writeln!(
+            stdout,
+            "{} file{} reformatted, {} file{} left unchanged !",
+            changed,
+            if changed == 1 { "" } else { "s" },
+            unchanged,
+            if unchanged == 1 { "" } else { "s" },
+        )?;
+    } else if changed > 0 {
+        writeln!(
+            stdout,
+            "{} file{} reformatted !",
+            changed,
+            if changed == 1 { "" } else { "s" },
+        )?;
+    } else if unchanged > 0 {
+        writeln!(
+            stdout,
+            "{} file{} left unchanged !",
+            unchanged,
+            if unchanged == 1 { "" } else { "s" },
+        )?;
+    }
+    Ok(())
 }
 
 /// Format the file at the given [`Path`].
@@ -111,7 +131,7 @@ pub(crate) fn format_path(
     let formatted = match format_text(
         &unformatted,
         Language::Jinja,
-        &format_options,
+        format_options,
         |_, code, _| Ok::<_, ()>(code.into()),
     ) {
         Ok(formatted) => formatted,
@@ -123,7 +143,7 @@ pub(crate) fn format_path(
         Ok(FormatResult::Unchanged)
     } else {
         let mut writer = File::create(path)
-            .map_err(|err| FormatCommandError::Write(Some(path.to_path_buf()), err.into()))?;
+            .map_err(|err| FormatCommandError::Write(Some(path.to_path_buf()), err))?;
 
         writer
             .write_all(formatted.as_bytes())

@@ -1,11 +1,9 @@
-use std::io::Write;
 use std::process::ExitCode;
 
 use anyhow::Result;
-use clap::Parser;
 
 use crate::args::{Args, Command};
-use crate::logging::set_up_logging;
+use crate::logging::setup_tracing;
 
 pub mod args;
 mod commands;
@@ -39,7 +37,7 @@ pub fn run(
         global_options,
     }: Args,
 ) -> Result<ExitStatus> {
-    set_up_logging(global_options.log_level())?;
+    setup_tracing(global_options.log_level())?;
 
     match command {
         Command::Format(args) => commands::format::format(args, global_options),
