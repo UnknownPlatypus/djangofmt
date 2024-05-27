@@ -41,10 +41,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             // println!("Formatting {}", path.display());
 
             // Format the source.
-            format_path(path, &format_options).map(|result| FormatPathResult {
-                path: entry.to_path_buf(),
-                result,
-            })
+            format_path(path, &format_options)
         })
         .partition_map(|result| match result {
             Ok(diagnostic) => Left(diagnostic),
@@ -76,11 +73,11 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
 }
 
 /// Write a summary of the formatting results to stdout.
-fn write_summary(results: Vec<FormatPathResult>) -> Result<()> {
+fn write_summary(results: Vec<FormatResult>) -> Result<()> {
     let mut counts = HashMap::new();
     results.iter().for_each(|val| {
         counts
-            .entry(&val.result)
+            .entry(val)
             .and_modify(|count| *count += 1)
             .or_insert(1);
     });
@@ -204,11 +201,4 @@ pub(crate) enum FormatResult {
 
     /// The file was unchanged, as the formatted contents matched the existing contents.
     Unchanged,
-}
-
-/// The coupling of a [`FormatResult`] with the path of the file that was analyzed.
-#[derive(Debug)]
-struct FormatPathResult {
-    path: PathBuf,
-    result: FormatResult,
 }
