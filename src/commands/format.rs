@@ -25,7 +25,19 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             ..LayoutOptions::default()
         },
         language: LanguageOptions {
-            closing_bracket_same_line: false, // This is default, remove later
+            // This makes code more compact and is Prettier default.
+            prefer_attrs_single_line: true,
+            // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
+            //  `<br/>` -> `<br>`
+            html_void_self_closing: Some(false),
+            // `<circle cx="50" cy="50" r="50">` -> ParseError
+            // `<circle cx="50" cy="50" r="50"></circle>` -> `<circle cx="50" cy="50" r="50" />`
+            svg_self_closing: Some(true),
+            // Same reasoning as SVG
+            mathml_self_closing: Some(true),
+            // `<div/>desfsdf` -> `<div></div>desfsdf`
+            // This is actually still incorrect (but slightly better than nothing), we need `<div>desfsdf</div>` (or a parse error)
+            html_normal_self_closing: Some(false),
             ..LanguageOptions::default()
         },
     };
@@ -38,8 +50,6 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
         .par_iter()
         .map(|entry| {
             let path = entry.as_path();
-            // println!("Formatting {}", path.display());
-
             // Format the source.
             format_path(path, &format_options)
         })
