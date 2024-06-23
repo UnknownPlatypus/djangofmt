@@ -9,7 +9,7 @@ license = "MIT"
 exclude = ["/tests"]
 
 [dependencies]
-markup_fmt = "0.8.0"
+markup_fmt = { path = "/home/thibaut/workspace/markup_fmt/markup_fmt" }
 anyhow = "1.0.86"
 clap = { version = "4.5.4", features = ["derive"] }
 rayon = "1.10.0"
