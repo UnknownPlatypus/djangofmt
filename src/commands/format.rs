@@ -25,8 +25,6 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             ..LayoutOptions::default()
         },
         language: LanguageOptions {
-            // This makes code more compact and is Prettier default.
-            prefer_attrs_single_line: true,
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             //  `<br/>` -> `<br>`
             html_void_self_closing: Some(false),
@@ -38,6 +36,10 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             // `<div/>desfsdf` -> `<div></div>desfsdf`
             // This is actually still incorrect (but slightly better than nothing), we need `<div>desfsdf</div>` (or a parse error)
             html_normal_self_closing: Some(false),
+            // This is actually nice to keep this setting false, it makes it possible to control wrapping
+            // of props semi manually by inserting or not a newline before the first prop. 
+            // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
+            prefer_attrs_single_line: false,
             ..LanguageOptions::default()
         },
     };
