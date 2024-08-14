@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 use std::fs::File;
@@ -80,6 +81,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
     if errors.is_empty() {
         Ok(ExitStatus::Success)
     } else {
+        error!("Couldn't format {} files!", errors.len());
         Ok(ExitStatus::Error)
     }
 }
@@ -97,12 +99,46 @@ pub(crate) fn format_path(
     };
 
     // Format the source.
-    let formatted = match format_text(
+    let format_result = format_text(
         &unformatted,
         Language::Jinja,
         format_options,
-        |_, code, _| Ok::<_, ()>(code.into()),
-    ) {
+        |code, hints| -> Result<Cow<str>> {
+            let ext = hints.ext;
+            let additional_config =
+                dprint_plugin_markup::build_additional_config(hints, format_options);
+            if let Some(syntax) =
+                malva::detect_syntax(&Path::new("file").with_extension(ext))
+            {
+                malva::format_text(
+                    code,
+                    syntax,
+                    &serde_json::to_value(additional_config)
+                        .and_then(serde_json::from_value)?,
+                )
+                    .map(Cow::from)
+                    .map_err(anyhow::Error::from)
+            } else {
+                Ok(code.into())
+                // dprint_plugin_biome::format_text(
+                //     &Path::new("file").with_extension(ext),
+                //     code,
+                //     &serde_json::to_value(additional_config)
+                //         .and_then(serde_json::from_value)
+                //         .unwrap_or_default(),
+                // )
+                //     .map(|formatted| {
+                //         if let Some(formatted) = formatted {
+                //             Cow::from(formatted)
+                //         } else {
+                //             Cow::from(code)
+                //         }
+                //     })
+            }
+        },
+    );
+
+    let formatted = match format_result {
         Ok(formatted) => formatted,
         Err(err) => return Err(FormatCommandError::Parse(Some(path.to_path_buf()), err)),
     };
@@ -126,7 +162,7 @@ pub(crate) fn format_path(
 #[derive(Debug)]
 pub(crate) enum FormatCommandError {
     Read(Option<PathBuf>, io::Error),
-    Parse(Option<PathBuf>, FormatError<()>),
+    Parse(Option<PathBuf>, FormatError<anyhow::Error>),
     Write(Option<PathBuf>, io::Error),
 }
 
