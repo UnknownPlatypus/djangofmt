@@ -10,6 +10,12 @@ exclude = ["/tests"]
 
 [dependencies]
 markup_fmt = { path = "/home/thibaut/workspace/markup_fmt/markup_fmt" }
+dprint_plugin_markup = { path = "/home/thibaut/workspace/markup_fmt/dprint_plugin" }
+dprint-plugin-biome = "0.0"
+dprint-plugin-json = { version = "0.19", features = ["wasm"] }
+malva = { version = "0.9", features = ["config_serde"] }
+
+serde_json = "1.0"
 anyhow = "1.0.86"
 clap = { version = "4.5.4", features = ["derive"] }
 rayon = "1.10.0"
