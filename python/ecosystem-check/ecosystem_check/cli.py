@@ -57,7 +57,7 @@ def entrypoint():
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
                 targets=DEFAULT_TARGETS,
-                format=OutputFormat(args.output_format),
+                output_format=OutputFormat(args.output_format),
                 project_dir=Path(cache),
                 raise_on_failure=args.pdb,
                 format_comparison=(

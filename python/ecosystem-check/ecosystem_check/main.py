@@ -32,7 +32,7 @@ async def main(
     comparison_executable: Path,
     targets: list[Project],
     project_dir: Path,
-    format: OutputFormat,
+    output_format: OutputFormat,
     format_comparison: FormatComparison | None,
     max_parallelism: int = 50,
     raise_on_failure: bool = False,
@@ -81,7 +81,7 @@ async def main(
 
     result = Result(completed=completed, errored=errored)
 
-    match format:
+    match output_format:
         case OutputFormat.json:
             print(json.dumps(result, indent=4, cls=JSONEncoder))
         case OutputFormat.markdown:
