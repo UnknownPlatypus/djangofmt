@@ -5,18 +5,18 @@ from enum import Enum
 from pathlib import Path
 from typing import Awaitable, TypeVar
 
-from ruff_ecosystem import logger
-from ruff_ecosystem.check import compare_check, markdown_check_result
-from ruff_ecosystem.format import (
+from ecosystem_check import logger
+from ecosystem_check.check import compare_check, markdown_check_result
+from ecosystem_check.format import (
     FormatComparison,
     compare_format,
     markdown_format_result,
 )
-from ruff_ecosystem.projects import (
+from ecosystem_check.projects import (
     Project,
     RuffCommand,
 )
-from ruff_ecosystem.types import Comparison, Result, Serializable
+from ecosystem_check.types import Comparison, Result, Serializable
 
 T = TypeVar("T")
 GITHUB_MAX_COMMENT_LENGTH = 65536

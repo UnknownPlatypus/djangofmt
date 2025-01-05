@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ruff_ecosystem.projects import CommandOptions, Project
+    from ecosystem_check.projects import CommandOptions, Project
 
 
 def markdown_project_section(

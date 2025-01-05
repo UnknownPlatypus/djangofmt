@@ -13,12 +13,12 @@ from typing import TYPE_CHECKING, Sequence
 
 from unidiff import PatchSet
 
-from ruff_ecosystem import logger
-from ruff_ecosystem.markdown import markdown_project_section
-from ruff_ecosystem.types import Comparison, Diff, Result, ToolError
+from ecosystem_check import logger
+from ecosystem_check.markdown import markdown_project_section
+from ecosystem_check.types import Comparison, Diff, Result, ToolError
 
 if TYPE_CHECKING:
-    from ruff_ecosystem.projects import ClonedRepository, ConfigOverrides, FormatOptions
+    from ecosystem_check.projects import ClonedRepository, ConfigOverrides, FormatOptions
 
 
 def markdown_format_result(result: Result) -> str:

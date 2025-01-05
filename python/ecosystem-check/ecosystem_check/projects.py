@@ -18,8 +18,8 @@ from typing import Any, Self
 import tomli
 import tomli_w
 
-from ruff_ecosystem import logger
-from ruff_ecosystem.types import Serializable
+from ecosystem_check import logger
+from ecosystem_check.types import Serializable
 
 
 @dataclass(frozen=True)

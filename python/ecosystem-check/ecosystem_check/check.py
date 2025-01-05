@@ -15,13 +15,13 @@ from pathlib import Path
 from subprocess import PIPE
 from typing import TYPE_CHECKING, Iterable, Iterator, Self, Sequence
 
-from ruff_ecosystem import logger
-from ruff_ecosystem.markdown import (
+from ecosystem_check import logger
+from ecosystem_check.markdown import (
     markdown_details,
     markdown_plus_minus,
     markdown_project_section,
 )
-from ruff_ecosystem.types import (
+from ecosystem_check.types import (
     Comparison,
     Diff,
     Result,
@@ -29,7 +29,7 @@ from ruff_ecosystem.types import (
 )
 
 if TYPE_CHECKING:
-    from ruff_ecosystem.projects import (
+    from ecosystem_check.projects import (
         CheckOptions,
         ClonedRepository,
         ConfigOverrides,

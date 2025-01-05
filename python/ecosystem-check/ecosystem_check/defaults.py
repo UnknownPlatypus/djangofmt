@@ -2,7 +2,7 @@
 Default projects for ecosystem checks
 """
 
-from ruff_ecosystem.projects import (
+from ecosystem_check.projects import (
     CheckOptions,
     Project,
     Repository,

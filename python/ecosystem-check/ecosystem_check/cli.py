@@ -10,11 +10,11 @@ from contextlib import nullcontext
 from pathlib import Path
 from signal import SIGINT, SIGTERM
 
-from ruff_ecosystem import logger
-from ruff_ecosystem.defaults import DEFAULT_TARGETS
-from ruff_ecosystem.format import FormatComparison
-from ruff_ecosystem.main import OutputFormat, main
-from ruff_ecosystem.projects import RuffCommand
+from ecosystem_check import logger
+from ecosystem_check.defaults import DEFAULT_TARGETS
+from ecosystem_check.format import FormatComparison
+from ecosystem_check.main import OutputFormat, main
+from ecosystem_check.projects import RuffCommand
 
 
 def excepthook(type, value, tb):
