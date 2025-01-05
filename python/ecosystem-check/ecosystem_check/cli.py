@@ -105,7 +105,7 @@ def parse_args() -> argparse.Namespace:
         "--output-format",
         choices=[option.value for option in OutputFormat],
         default="markdown",
-        help="Location for caching cloned repositories",
+        help="The format in which the output should be generated.",
     )
     parser.add_argument(
         "-v",
