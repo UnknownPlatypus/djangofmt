@@ -1,3 +1,3 @@
 import logging
 
-logger = logging.getLogger("ruff-ecosystem")
+logger = logging.getLogger("ecosystem-check")

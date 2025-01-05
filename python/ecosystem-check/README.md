@@ -1,40 +1,34 @@
-# ruff-ecosystem
+# ecosystem-check
 
-Compare lint and format results for two different ruff versions (e.g. main and a PR) on real world projects.
+Compare format results for two different executable versions (e.g. main and a PR) on real world projects.
 
 ## Installation
 
-From the Ruff project root, install with `pip`:
+From this project root, install with `pip`:
 
 ```shell
-pip install -e ./python/ruff-ecosystem
+pip install -e ./python/ecosystem-check
 ```
 
 ## Usage
 
 ```shell
-ruff-ecosystem <check | format> <baseline executable> <comparison executable>
+ecosystem-check format <baseline executable> <comparison executable>
 ```
 
 Note executable paths may be absolute, relative to the current working directory, or will be looked up in the
 current Python environment and PATH.
 
-Run `ruff check` ecosystem checks comparing your debug build to your system Ruff:
+Run `djangofmt format` ecosystem checks comparing your debug build to your system Ruff:
 
 ```shell
-ruff-ecosystem check ruff "./target/debug/ruff"
+ecosystem-check format djangofmt "./target/debug/djangofmt"
 ```
 
-Run `ruff format` ecosystem checks comparing your debug build to your system Ruff:
+Run `djangofmt format` ecosystem checks comparing with changes to code that is already formatted:
 
 ```shell
-ruff-ecosystem format ruff "./target/debug/ruff"
-```
-
-Run `ruff format` ecosystem checks comparing with changes to code that is already formatted:
-
-```shell
-ruff-ecosystem format ruff "./target/debug/ruff" --format-comparison ruff-then-ruff
+ecosystem-check format djangofmt "./target/debug/djangofmt" --format-comparison ruff-then-ruff
 ```
 
 The default output format is markdown, which includes nice summaries of the changes. You can use `--output-format json` to display the raw data — this is
@@ -45,11 +39,11 @@ particularly useful when making changes to the ecosystem checks.
 When developing, it can be useful to set the `--pdb` flag to drop into a debugger on failure:
 
 ```shell
-ruff-ecosystem check ruff "./target/debug/ruff" --pdb
+ecosystem-check format djangofmt "./target/debug/djangofmt" --pdb
 ```
 
 You can also provide a path to cache checkouts to speed up repeated runs:
 
 ```shell
-ruff-ecosystem check ruff "./target/debug/ruff" --cache ./repos
+ecosystem-check format djangofmt "./target/debug/djangofmt" --cache ./repos
 ```
