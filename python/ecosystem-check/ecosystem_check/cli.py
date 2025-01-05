@@ -9,6 +9,7 @@ import tempfile
 from contextlib import nullcontext
 from pathlib import Path
 from signal import SIGINT, SIGTERM
+from typing import Literal
 
 from ecosystem_check import logger
 from ecosystem_check.defaults import DEFAULT_TARGETS
@@ -46,35 +47,8 @@ def entrypoint():
         tempfile.TemporaryDirectory() if not args.cache else nullcontext(args.cache)
     )
 
-    baseline_executable = args.baseline_executable
-    if not args.baseline_executable.exists():
-        baseline_executable = get_executable_path(str(args.baseline_executable))
-        if not baseline_executable:
-            print(
-                f"Could not find ruff baseline executable: {args.baseline_executable}",
-                sys.stderr,
-            )
-            exit(1)
-        logger.info(
-            "Resolved baseline executable %s to %s",
-            args.baseline_executable,
-            baseline_executable,
-        )
-
-    comparison_executable = args.comparison_executable
-    if not args.comparison_executable.exists():
-        comparison_executable = get_executable_path(str(args.comparison_executable))
-        if not comparison_executable:
-            print(
-                f"Could not find ruff comparison executable: {args.comparison_executable}",
-                sys.stderr,
-            )
-            exit(1)
-        logger.info(
-            "Resolved comparison executable %s to %s",
-            args.comparison_executable,
-            comparison_executable,
-        )
+    baseline_executable = resolve_executable(args.baseline_executable, "baseline")
+    comparison_executable = resolve_executable(args.comparison_executable, "comparison")
 
     targets = DEFAULT_TARGETS
     if args.force_preview:
@@ -173,7 +147,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def get_executable_path(name: str) -> Path | None:
+def _get_executable_path(name: str) -> Path | None:
     # Add suffix for Windows executables
     name += ".exe" if sys.platform == "win32" and not name.endswith(".exe") else ""
 
@@ -189,3 +163,22 @@ def get_executable_path(name: str) -> Path | None:
         return Path(environment_path)
 
     return None
+
+def resolve_executable(executable: Path, executable_type: Literal["baseline", "comparison"]):
+    if executable.exists():
+        return executable
+
+    resolved_executable = _get_executable_path(str(executable))
+    if not resolved_executable:
+        print(
+            f"Could not find ruff {executable_type} executable: {resolved_executable}",
+            sys.stderr,
+        )
+        exit(1)
+    logger.info(
+        "Resolved %s executable %s to %s",
+        executable_type,
+        executable,
+        resolved_executable,
+    )
+    return resolved_executable
