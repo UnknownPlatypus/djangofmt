@@ -20,7 +20,6 @@ from ecosystem_check.types import Comparison, Diff, Result, ToolError
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
         ClonedRepository,
-        ConfigOverrides,
         FormatOptions,
     )
 
@@ -141,7 +140,6 @@ async def compare_format(
     baseline_executable: Path,
     comparison_executable: Path,
     options: FormatOptions,
-    config_overrides: ConfigOverrides,
     cloned_repo: ClonedRepository,
     format_comparison: FormatComparison,
 ):
@@ -149,7 +147,6 @@ async def compare_format(
         baseline_executable,
         comparison_executable,
         options,
-        config_overrides,
         cloned_repo,
     )
     match format_comparison:
@@ -168,25 +165,23 @@ async def format_then_format(
     baseline_executable: Path,
     comparison_executable: Path,
     options: FormatOptions,
-    config_overrides: ConfigOverrides,
     cloned_repo: ClonedRepository,
 ) -> Sequence[str]:
-    with config_overrides.patch_config(cloned_repo.path):
-        # Run format to get the baseline
-        await format(
-            executable=baseline_executable.resolve(),
-            path=cloned_repo.path,
-            name=cloned_repo.fullname,
-            options=options,
-        )
-        # Then get the diff from stdout
-        diff = await format(
-            executable=comparison_executable.resolve(),
-            path=cloned_repo.path,
-            name=cloned_repo.fullname,
-            options=options,
-            diff=True,
-        )
+    # Run format to get the baseline
+    await format(
+        executable=baseline_executable.resolve(),
+        path=cloned_repo.path,
+        name=cloned_repo.fullname,
+        options=options,
+    )
+    # Then get the diff from stdout
+    diff = await format(
+        executable=comparison_executable.resolve(),
+        path=cloned_repo.path,
+        name=cloned_repo.fullname,
+        options=options,
+        diff=True,
+    )
     return diff
 
 
@@ -194,17 +189,15 @@ async def format_and_format(
     baseline_executable: Path,
     comparison_executable: Path,
     options: FormatOptions,
-    config_overrides: ConfigOverrides,
     cloned_repo: ClonedRepository,
 ) -> Sequence[str]:
-    with config_overrides.patch_config(cloned_repo.path):
-        # Run format without diff to get the baseline
-        await format(
-            executable=baseline_executable.resolve(),
-            path=cloned_repo.path,
-            name=cloned_repo.fullname,
-            options=options,
-        )
+    # Run format without diff to get the baseline
+    await format(
+        executable=baseline_executable.resolve(),
+        path=cloned_repo.path,
+        name=cloned_repo.fullname,
+        options=options,
+    )
 
     # Commit the changes
     commit = await cloned_repo.commit(
@@ -213,14 +206,13 @@ async def format_and_format(
     # Then reset
     await cloned_repo.reset()
 
-    with config_overrides.patch_config(cloned_repo.path):
-        # Then run format again
-        await format(
-            executable=comparison_executable.resolve(),
-            path=cloned_repo.path,
-            name=cloned_repo.fullname,
-            options=options,
-        )
+    # Then run format again
+    await format(
+        executable=comparison_executable.resolve(),
+        path=cloned_repo.path,
+        name=cloned_repo.fullname,
+        options=options,
+    )
 
     # Then get the diff from the commit
     diff = await cloned_repo.diff(commit)
