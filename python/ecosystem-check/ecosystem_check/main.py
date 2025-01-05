@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Awaitable, TypeVar
 
 from ecosystem_check import logger
-from ecosystem_check.check import compare_check, markdown_check_result
 from ecosystem_check.format import (
     FormatComparison,
     compare_format,
@@ -87,8 +86,6 @@ async def main(
             print(json.dumps(result, indent=4, cls=JSONEncoder))
         case OutputFormat.markdown:
             match command:
-                case RuffCommand.check:
-                    print(markdown_check_result(result))
                 case RuffCommand.format:
                     print(markdown_format_result(result))
                 case _:
@@ -112,13 +109,6 @@ async def clone_and_compare(
     assert ":" not in target.repo.name
 
     match command:
-        case RuffCommand.check:
-            compare, options, overrides, kwargs = (
-                compare_check,
-                target.check_options,
-                target.config_overrides,
-                {},
-            )
         case RuffCommand.format:
             compare, options, overrides, kwargs = (
                 compare_format,

@@ -158,7 +158,6 @@ class ConfigOverrides(Serializable):
 
 
 class RuffCommand(Enum):
-    check = "check"
     format = "format"
 
 
