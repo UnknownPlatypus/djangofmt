@@ -28,7 +28,7 @@ ecosystem-check format djangofmt "./target/debug/djangofmt"
 Run `djangofmt format` ecosystem checks comparing with changes to code that is already formatted:
 
 ```shell
-ecosystem-check format djangofmt "./target/debug/djangofmt" --format-comparison ruff-then-ruff
+ecosystem-check format djangofmt "./target/debug/djangofmt" --format-comparison base-then-comp
 ```
 
 The default output format is markdown, which includes nice summaries of the changes. You can use `--output-format json` to display the raw data — this is

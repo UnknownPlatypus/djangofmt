@@ -1,5 +1,5 @@
 """
-Execution, comparison, and summary of `ruff format` ecosystem checks.
+Execution, comparison, and summary of `djangofmt format` ecosystem checks.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 def markdown_format_result(result: Result) -> str:
     """
-    Render a `ruff format` ecosystem check result as markdown.
+    Render a `djangofmt format` ecosystem check result as markdown.
     """
     lines: list[str] = []
     total_lines_removed = total_lines_added = 0
@@ -228,7 +228,7 @@ async def format(
     options: FormatOptions,
     diff: bool = False,
 ) -> Sequence[str]:
-    """Run the given ruff binary against the specified path."""
+    """Run the given djangofmt binary against the specified path."""
     args = options.to_args()
     logger.debug(f"Formatting {name} with {executable} " + " ".join(args))
 

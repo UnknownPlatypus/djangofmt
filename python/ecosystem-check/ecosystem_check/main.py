@@ -104,16 +104,15 @@ async def clone_and_compare(
     project_dir: Path,
     format_comparison: FormatComparison | None,
 ) -> Comparison:
-    """Check a specific repository against two versions of ruff."""
+    """Check a specific repository against two versions of djangofmt."""
     assert ":" not in target.repo.owner
     assert ":" not in target.repo.name
 
     match command:
         case DjangoFmtCommand.format:
-            compare, options, overrides, kwargs = (
+            compare, options, kwargs = (
                 compare_format,
                 target.format_options,
-                target.config_overrides,
                 {"format_comparison": format_comparison},
             )
         case _:
@@ -127,7 +126,6 @@ async def clone_and_compare(
             baseline_executable,
             comparison_executable,
             options,
-            overrides,
             cloned_repo,
             **kwargs,
         )
