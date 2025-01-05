@@ -4,6 +4,7 @@ Execution, comparison, and summary of `djangofmt format` ecosystem checks.
 
 from __future__ import annotations
 
+import glob
 import time
 from asyncio import create_subprocess_exec
 from enum import Enum
@@ -171,7 +172,7 @@ async def format_then_format(
     await format(
         executable=baseline_executable.resolve(),
         path=cloned_repo.path,
-        name=cloned_repo.fullname,
+        repo_fullname=cloned_repo.fullname,
         options=options,
     )
 
@@ -184,7 +185,7 @@ async def format_then_format(
     await format(
         executable=comparison_executable.resolve(),
         path=cloned_repo.path,
-        name=cloned_repo.fullname,
+        repo_fullname=cloned_repo.fullname,
         options=options,
     )
 
@@ -204,7 +205,7 @@ async def format_and_format(
     await format(
         executable=baseline_executable.resolve(),
         path=cloned_repo.path,
-        name=cloned_repo.fullname,
+        repo_fullname=cloned_repo.fullname,
         options=options,
     )
 
@@ -219,7 +220,7 @@ async def format_and_format(
     await format(
         executable=comparison_executable.resolve(),
         path=cloned_repo.path,
-        name=cloned_repo.fullname,
+        repo_fullname=cloned_repo.fullname,
         options=options,
     )
 
@@ -233,30 +234,27 @@ async def format(
     *,
     executable: Path,
     path: Path,
-    name: str,
+    repo_fullname: str,
     options: FormatOptions,
-    diff: bool = False,
 ) -> Sequence[str]:
     """Run the given djangofmt binary against the specified path."""
     args = options.to_args()
-    logger.debug(f"Formatting {name} with {executable} " + " ".join(args))
+    files = glob.glob("**/*templates/**/*.html", recursive=True, root_dir=path)
+    logger.debug(f"Formatting {repo_fullname} with cmd '{executable} {' '.join(args)}' ({len(files)} files)")
 
-    if diff:
-        args.append("--diff")
-
-    start = time.time()
+    start = time.perf_counter()
     proc = await create_subprocess_exec(
         executable.absolute(),
         *args,
-        ".",
+        *files,
         stdout=PIPE,
         stderr=PIPE,
         cwd=path,
     )
     result, err = await proc.communicate()
-    end = time.time()
+    end = time.perf_counter()
 
-    logger.debug(f"Finished formatting {name} with {executable} in {end - start:.2f}s")
+    logger.debug(f"Finished formatting {repo_fullname} with {executable} in {end - start:.2f}s")
 
     if proc.returncode not in [0, 1]:
         raise ToolError(err.decode("utf8"))
