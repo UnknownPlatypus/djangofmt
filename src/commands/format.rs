@@ -41,6 +41,16 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             // of props semi manually by inserting or not a newline before the first prop. 
             // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
             prefer_attrs_single_line: false,
+            // Removes a lot of vertical space, breaking a tag with a single attr doesn't really
+            // help with readability.
+            // prefer_single_line_opening_tag: true,
+            // Some custom blocks we use
+            // custom_blocks: Some(
+            //     "stage, cache, flatblock, section, csp_compress"
+            //         .split(",")
+            //         .map(|s| s.trim().to_string())
+            //         .collect()
+            // ),
             ..LanguageOptions::default()
         },
     };
@@ -102,6 +112,7 @@ pub(crate) fn format_path(
     let format_result = format_text(
         &unformatted,
         Language::Jinja,
+        // Language::Django,
         format_options,
         |code, hints| -> Result<Cow<str>> {
             let ext = hints.ext;
