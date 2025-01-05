@@ -33,14 +33,6 @@ class Project(Serializable):
     format_options: FormatOptions = field(default_factory=lambda: FormatOptions())
     config_overrides: ConfigOverrides = field(default_factory=lambda: ConfigOverrides())
 
-    def with_preview_enabled(self: Self) -> Self:
-        return type(self)(
-            repo=self.repo,
-            check_options=self.check_options.with_options(preview=True),
-            format_options=self.format_options.with_options(preview=True),
-            config_overrides=self.config_overrides,
-        )
-
     def __post_init__(self):
         # Convert bare dictionaries for `config_overrides` into the correct type
         if isinstance(self.config_overrides, dict):

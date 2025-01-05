@@ -45,10 +45,6 @@ def entrypoint():
     baseline_executable = resolve_executable(args.baseline_executable, "baseline")
     comparison_executable = resolve_executable(args.comparison_executable, "comparison")
 
-    targets = DEFAULT_TARGETS
-    if args.force_preview:
-        targets = [target.with_preview_enabled() for target in targets]
-
     format_comparison = (
         FormatComparison(args.format_comparison)
         if args.ruff_command == RuffCommand.format.value
@@ -66,7 +62,7 @@ def entrypoint():
                 command=RuffCommand(args.ruff_command),
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
-                targets=targets,
+                targets=DEFAULT_TARGETS,
                 format=OutputFormat(args.output_format),
                 project_dir=Path(cache),
                 raise_on_failure=args.pdb,
@@ -117,11 +113,6 @@ def parse_args() -> argparse.Namespace:
         "--pdb",
         action="store_true",
         help="Enable debugging on failure",
-    )
-    parser.add_argument(
-        "--force-preview",
-        action="store_true",
-        help="Force preview mode to be enabled for all projects",
     )
     parser.add_argument(
         "--format-comparison",
