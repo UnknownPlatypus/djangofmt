@@ -174,14 +174,23 @@ async def format_then_format(
         name=cloned_repo.fullname,
         options=options,
     )
-    # Then get the diff from stdout
-    diff = await format(
+
+    # Commit the changes
+    commit = await cloned_repo.commit(
+        message=f"Formatted with baseline {baseline_executable}"
+    )
+
+    # Then run format again
+    await format(
         executable=comparison_executable.resolve(),
         path=cloned_repo.path,
         name=cloned_repo.fullname,
         options=options,
-        diff=True,
     )
+
+    # Then get the diff from the commit
+    diff = await cloned_repo.diff(commit)
+
     return diff
 
 
