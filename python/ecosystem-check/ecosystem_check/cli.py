@@ -42,11 +42,6 @@ def entrypoint():
     else:
         logging.basicConfig(level=logging.INFO)
 
-    # Use a temporary directory for caching if no cache is specified
-    cache_context = (
-        tempfile.TemporaryDirectory() if not args.cache else nullcontext(args.cache)
-    )
-
     baseline_executable = resolve_executable(args.baseline_executable, "baseline")
     comparison_executable = resolve_executable(args.comparison_executable, "comparison")
 
@@ -60,6 +55,10 @@ def entrypoint():
         else None
     )
 
+    # Use a temporary directory for caching if no cache is specified
+    cache_context = (
+        tempfile.TemporaryDirectory() if not args.cache else nullcontext(args.cache)
+    )
     with cache_context as cache:
         loop = asyncio.get_event_loop()
         main_task = asyncio.ensure_future(
