@@ -138,16 +138,16 @@ def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
 
 
 async def compare_format(
-    ruff_baseline_executable: Path,
-    ruff_comparison_executable: Path,
+    baseline_executable: Path,
+    comparison_executable: Path,
     options: FormatOptions,
     config_overrides: ConfigOverrides,
     cloned_repo: ClonedRepository,
     format_comparison: FormatComparison,
 ):
     args = (
-        ruff_baseline_executable,
-        ruff_comparison_executable,
+        baseline_executable,
+        comparison_executable,
         options,
         config_overrides,
         cloned_repo,
@@ -165,23 +165,23 @@ async def compare_format(
 
 
 async def format_then_format(
-    ruff_baseline_executable: Path,
-    ruff_comparison_executable: Path,
+    baseline_executable: Path,
+    comparison_executable: Path,
     options: FormatOptions,
     config_overrides: ConfigOverrides,
     cloned_repo: ClonedRepository,
 ) -> Sequence[str]:
-    with config_overrides.patch_config(cloned_repo.path, options.preview):
+    with config_overrides.patch_config(cloned_repo.path):
         # Run format to get the baseline
         await format(
-            executable=ruff_baseline_executable.resolve(),
+            executable=baseline_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
             options=options,
         )
         # Then get the diff from stdout
         diff = await format(
-            executable=ruff_comparison_executable.resolve(),
+            executable=comparison_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
             options=options,
@@ -191,16 +191,16 @@ async def format_then_format(
 
 
 async def format_and_format(
-    ruff_baseline_executable: Path,
-    ruff_comparison_executable: Path,
+    baseline_executable: Path,
+    comparison_executable: Path,
     options: FormatOptions,
     config_overrides: ConfigOverrides,
     cloned_repo: ClonedRepository,
 ) -> Sequence[str]:
-    with config_overrides.patch_config(cloned_repo.path, options.preview):
+    with config_overrides.patch_config(cloned_repo.path):
         # Run format without diff to get the baseline
         await format(
-            executable=ruff_baseline_executable.resolve(),
+            executable=baseline_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
             options=options,
@@ -208,15 +208,15 @@ async def format_and_format(
 
     # Commit the changes
     commit = await cloned_repo.commit(
-        message=f"Formatted with baseline {ruff_baseline_executable}"
+        message=f"Formatted with baseline {baseline_executable}"
     )
     # Then reset
     await cloned_repo.reset()
 
-    with config_overrides.patch_config(cloned_repo.path, options.preview):
+    with config_overrides.patch_config(cloned_repo.path):
         # Then run format again
         await format(
-            executable=ruff_comparison_executable.resolve(),
+            executable=comparison_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
             options=options,
@@ -237,7 +237,7 @@ async def format(
     diff: bool = False,
 ) -> Sequence[str]:
     """Run the given ruff binary against the specified path."""
-    args = options.to_ruff_args()
+    args = options.to_args()
     logger.debug(f"Formatting {name} with {executable} " + " ".join(args))
 
     if diff:

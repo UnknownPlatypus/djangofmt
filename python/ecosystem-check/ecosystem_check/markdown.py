@@ -3,18 +3,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ecosystem_check.projects import CommandOptions, Project
+    from ecosystem_check.projects import FormatOptions, Project
 
 
 def markdown_project_section(
-    title: str, content: str | list[str], options: CommandOptions, project: Project
+    title: str, content: str | list[str], options: FormatOptions, project: Project
 ) -> list[str]:
     return markdown_details(
         summary=f'<a href="{project.repo.url}">{project.repo.fullname}</a> ({title})',
         content=content,
         preface=(
             # Show the command used for the check if the options are non-default
-            "<pre>ruff " + " ".join(options.to_ruff_args()) + "</pre>"
+            "<pre>ruff " + " ".join(options.to_args()) + "</pre>"
             if options != type(options)()
             else None
         ),

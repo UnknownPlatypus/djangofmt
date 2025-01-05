@@ -4,13 +4,10 @@ Abstractions and utilities for working with projects to run ecosystem checks on.
 
 from __future__ import annotations
 
-import abc
 import contextlib
-import dataclasses
 from asyncio import create_subprocess_exec
 from dataclasses import dataclass, field
 from enum import StrEnum
-from functools import cache
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
 from typing import Any, Self
@@ -29,7 +26,6 @@ class Project(Serializable):
     """
 
     repo: Repository
-    check_options: CheckOptions = field(default_factory=lambda: CheckOptions())
     format_options: FormatOptions = field(default_factory=lambda: FormatOptions())
     config_overrides: ConfigOverrides = field(default_factory=lambda: ConfigOverrides())
 
@@ -60,29 +56,11 @@ class ConfigOverrides(Serializable):
     """
 
     always: dict[str, Any] = field(default_factory=dict)
-    when_preview: dict[str, Any] = field(default_factory=dict)
-    when_no_preview: dict[str, Any] = field(default_factory=dict)
-
-    def __hash__(self) -> int:
-        # Avoid computing this hash repeatedly since this object is intended
-        # to be immutable and serializing to toml is not necessarily cheap
-        @cache
-        def as_string():
-            return tomli_w.dumps(
-                {
-                    "always": self.always,
-                    "when_preview": self.when_preview,
-                    "when_no_preview": self.when_no_preview,
-                }
-            )
-
-        return hash(as_string())
 
     @contextlib.contextmanager
     def patch_config(
         self,
         dirpath: Path,
-        preview: bool,
     ) -> None:
         """
         Temporarily patch the Ruff configuration file in the given directory.
@@ -105,7 +83,6 @@ class ConfigOverrides(Serializable):
         overrides = {
             **ALWAYS_CONFIG_OVERRIDES,
             **self.always,
-            **(self.when_preview if preview else self.when_no_preview),
         }
 
         if not overrides:
@@ -162,71 +139,15 @@ class DjangoFmtCommand(StrEnum):
 
 
 @dataclass(frozen=True)
-class CommandOptions(Serializable, abc.ABC):
-    preview: bool = False
-
-    def with_options(self: Self, **kwargs) -> Self:
-        """
-        Return a copy of self with the given options set.
-        """
-        return type(self)(**{**dataclasses.asdict(self), **kwargs})
-
-    @abc.abstractmethod
-    def to_ruff_args(self) -> list[str]:
-        pass
-
-
-@dataclass(frozen=True)
-class CheckOptions(CommandOptions):
-    """
-    Ruff check options
-    """
-
-    select: str = ""
-    ignore: str = ""
-    exclude: str = ""
-
-    # Generating fixes is slow and verbose
-    show_fixes: bool = False
-
-    # Limit the number of reported lines per rule
-    max_lines_per_rule: int | None = 50
-
-    def to_ruff_args(self) -> list[str]:
-        args = [
-            "check",
-            "--no-cache",
-            "--exit-zero",
-            # Ignore internal test rules
-            "--ignore",
-            "RUF9",
-            # Use the concise format for comparing violations
-            "--output-format",
-            "concise",
-            f"--{'' if self.preview else 'no-'}preview",
-        ]
-        if self.select:
-            args.extend(["--select", self.select])
-        if self.ignore:
-            args.extend(["--ignore", self.ignore])
-        if self.exclude:
-            args.extend(["--exclude", self.exclude])
-        if self.show_fixes:
-            args.extend(["--show-fixes"])
-        return args
-
-
-@dataclass(frozen=True)
-class FormatOptions(CommandOptions):
+class FormatOptions(Serializable):
     """
     Format ecosystem check options.
     """
 
-    preview: bool = False
     exclude: str = ""
 
-    def to_ruff_args(self) -> list[str]:
-        args = ["format", f"--{'' if self.preview else 'no-'}preview"]
+    def to_args(self) -> list[str]:
+        args = ["format"]
         if self.exclude:
             args.extend(["--exclude", self.exclude])
         return args

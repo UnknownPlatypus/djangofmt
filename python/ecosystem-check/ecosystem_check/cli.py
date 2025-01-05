@@ -150,7 +150,10 @@ def _get_executable_path(name: str) -> Path | None:
 
     return None
 
-def resolve_executable(executable: Path, executable_type: Literal["baseline", "comparison"]):
+
+def resolve_executable(
+    executable: Path, executable_type: Literal["baseline", "comparison"]
+):
     if executable.exists():
         return executable
 
