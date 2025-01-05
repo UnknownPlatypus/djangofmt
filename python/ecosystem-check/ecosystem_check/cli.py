@@ -53,7 +53,7 @@ def entrypoint():
         loop = asyncio.get_event_loop()
         main_task = asyncio.ensure_future(
             main(
-                command=DjangoFmtCommand(args.ruff_command),
+                command=DjangoFmtCommand(args.command),
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
                 targets=DEFAULT_TARGETS,
@@ -62,7 +62,7 @@ def entrypoint():
                 raise_on_failure=args.pdb,
                 format_comparison=(
                     FormatComparison(args.format_comparison)
-                    if args.ruff_command == DjangoFmtCommand.format
+                    if args.command == DjangoFmtCommand.format
                     else None
                 ),
             )
@@ -80,7 +80,6 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Check two versions of ruff against a corpus of open-source code.",
     )
-
     # TODO: Support non-default `--targets`
     # parser.add_argument(
     #     "--targets",
@@ -115,13 +114,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--format-comparison",
         choices=[option.value for option in FormatComparison],
-        default=FormatComparison.ruff_and_ruff,
+        default=FormatComparison.base_and_comp,
         help="Type of comparison to make when checking formatting.",
     )
     parser.add_argument(
-        "ruff_command",
-        choices=[option.value for option in DjangoFmtCommand],
-        help="The Ruff command to test",
+        "command",
+        choices=[option for option in DjangoFmtCommand],
+        help="The command to test",
     )
     parser.add_argument(
         "baseline_executable",
@@ -131,7 +130,6 @@ def parse_args() -> argparse.Namespace:
         "comparison_executable",
         type=Path,
     )
-
     return parser.parse_args()
 
 

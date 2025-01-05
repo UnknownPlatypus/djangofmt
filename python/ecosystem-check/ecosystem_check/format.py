@@ -153,9 +153,9 @@ async def compare_format(
         cloned_repo,
     )
     match format_comparison:
-        case FormatComparison.ruff_then_ruff:
+        case FormatComparison.base_then_comp:
             coro = format_then_format(*args)
-        case FormatComparison.ruff_and_ruff:
+        case FormatComparison.base_and_comp:
             coro = format_and_format(*args)
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
@@ -265,12 +265,10 @@ async def format(
 
 
 class FormatComparison(Enum):
-    ruff_then_ruff = "ruff-then-ruff"
-    """
-    Run Ruff baseline then Ruff comparison; checks for changes in behavior when formatting previously "formatted" code
-    """
+    # Run baseline executable then comparison executable.
+    # Checks for changes in behavior when formatting previously "formatted" code
+    base_then_comp = "base-then-comp"
 
-    ruff_and_ruff = "ruff-and-ruff"
-    """
-    Run Ruff baseline then reset and run Ruff comparison; checks changes in behavior when formatting "unformatted" code
-    """
+    # Run Ruff baseline then reset and run Ruff comparison.
+    # Checks changes in behavior when formatting "unformatted" code
+    base_and_comp = "base-and-comp"
