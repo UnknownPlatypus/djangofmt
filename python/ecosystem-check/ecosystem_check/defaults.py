@@ -3,7 +3,6 @@ Default projects for ecosystem checks
 """
 
 from ecosystem_check.projects import (
-    CheckOptions,
     Project,
     Repository,
 )

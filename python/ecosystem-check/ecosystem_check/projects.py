@@ -231,14 +231,6 @@ class FormatOptions(CommandOptions):
             args.extend(["--exclude", self.exclude])
         return args
 
-    def to_black_args(self) -> list[str]:
-        args: list[str] = []
-        if self.exclude:
-            args.extend(["--exclude", self.exclude])
-        if self.preview:
-            args.append("--preview")
-        return args
-
 
 class ProjectSetupError(Exception):
     """An error setting up a project."""

@@ -18,7 +18,11 @@ from ecosystem_check.markdown import markdown_project_section
 from ecosystem_check.types import Comparison, Diff, Result, ToolError
 
 if TYPE_CHECKING:
-    from ecosystem_check.projects import ClonedRepository, ConfigOverrides, FormatOptions
+    from ecosystem_check.projects import (
+        ClonedRepository,
+        ConfigOverrides,
+        FormatOptions,
+    )
 
 
 def markdown_format_result(result: Result) -> str:
@@ -150,13 +154,9 @@ async def compare_format(
     )
     match format_comparison:
         case FormatComparison.ruff_then_ruff:
-            coro = format_then_format(Formatter.ruff, *args)
+            coro = format_then_format(*args)
         case FormatComparison.ruff_and_ruff:
-            coro = format_and_format(Formatter.ruff, *args)
-        case FormatComparison.black_then_ruff:
-            coro = format_then_format(Formatter.black, *args)
-        case FormatComparison.black_and_ruff:
-            coro = format_and_format(Formatter.black, *args)
+            coro = format_and_format(*args)
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
 
@@ -165,7 +165,6 @@ async def compare_format(
 
 
 async def format_then_format(
-    baseline_formatter: Formatter,
     ruff_baseline_executable: Path,
     ruff_comparison_executable: Path,
     options: FormatOptions,
@@ -175,7 +174,6 @@ async def format_then_format(
     with config_overrides.patch_config(cloned_repo.path, options.preview):
         # Run format to get the baseline
         await format(
-            formatter=baseline_formatter,
             executable=ruff_baseline_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
@@ -183,7 +181,6 @@ async def format_then_format(
         )
         # Then get the diff from stdout
         diff = await format(
-            formatter=Formatter.ruff,
             executable=ruff_comparison_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
@@ -194,7 +191,6 @@ async def format_then_format(
 
 
 async def format_and_format(
-    baseline_formatter: Formatter,
     ruff_baseline_executable: Path,
     ruff_comparison_executable: Path,
     options: FormatOptions,
@@ -204,7 +200,6 @@ async def format_and_format(
     with config_overrides.patch_config(cloned_repo.path, options.preview):
         # Run format without diff to get the baseline
         await format(
-            formatter=baseline_formatter,
             executable=ruff_baseline_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
@@ -221,7 +216,6 @@ async def format_and_format(
     with config_overrides.patch_config(cloned_repo.path, options.preview):
         # Then run format again
         await format(
-            formatter=Formatter.ruff,
             executable=ruff_comparison_executable.resolve(),
             path=cloned_repo.path,
             name=cloned_repo.fullname,
@@ -236,7 +230,6 @@ async def format_and_format(
 
 async def format(
     *,
-    formatter: Formatter,
     executable: Path,
     path: Path,
     name: str,
@@ -244,11 +237,7 @@ async def format(
     diff: bool = False,
 ) -> Sequence[str]:
     """Run the given ruff binary against the specified path."""
-    args = (
-        options.to_ruff_args()
-        if formatter == Formatter.ruff
-        else options.to_black_args()
-    )
+    args = options.to_ruff_args()
     logger.debug(f"Formatting {name} with {executable} " + " ".join(args))
 
     if diff:
@@ -285,18 +274,3 @@ class FormatComparison(Enum):
     """
     Run Ruff baseline then reset and run Ruff comparison; checks changes in behavior when formatting "unformatted" code
     """
-
-    black_then_ruff = "black-then-ruff"
-    """
-    Run Black baseline then Ruff comparison; checks for changes in behavior when formatting previously "formatted" code
-    """
-
-    black_and_ruff = "black-and-ruff"
-    """"
-    Run Black baseline then reset and run Ruff comparison; checks changes in behavior when formatting "unformatted" code
-    """
-
-
-class Formatter(Enum):
-    black = "black"
-    ruff = "ruff"

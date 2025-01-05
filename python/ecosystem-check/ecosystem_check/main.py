@@ -12,8 +12,8 @@ from ecosystem_check.format import (
     markdown_format_result,
 )
 from ecosystem_check.projects import (
-    Project,
     DjangoFmtCommand,
+    Project,
 )
 from ecosystem_check.types import Comparison, Result, Serializable
 
