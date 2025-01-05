@@ -15,7 +15,7 @@ from ecosystem_check import logger
 from ecosystem_check.defaults import DEFAULT_TARGETS
 from ecosystem_check.format import FormatComparison
 from ecosystem_check.main import OutputFormat, main
-from ecosystem_check.projects import RuffCommand
+from ecosystem_check.projects import DjangoFmtCommand
 
 
 def excepthook(type, value, tb):
@@ -45,12 +45,6 @@ def entrypoint():
     baseline_executable = resolve_executable(args.baseline_executable, "baseline")
     comparison_executable = resolve_executable(args.comparison_executable, "comparison")
 
-    format_comparison = (
-        FormatComparison(args.format_comparison)
-        if args.ruff_command == RuffCommand.format.value
-        else None
-    )
-
     # Use a temporary directory for caching if no cache is specified
     cache_context = (
         tempfile.TemporaryDirectory() if not args.cache else nullcontext(args.cache)
@@ -59,14 +53,18 @@ def entrypoint():
         loop = asyncio.get_event_loop()
         main_task = asyncio.ensure_future(
             main(
-                command=RuffCommand(args.ruff_command),
+                command=DjangoFmtCommand(args.ruff_command),
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
                 targets=DEFAULT_TARGETS,
                 format=OutputFormat(args.output_format),
                 project_dir=Path(cache),
                 raise_on_failure=args.pdb,
-                format_comparison=format_comparison,
+                format_comparison=(
+                    FormatComparison(args.format_comparison)
+                    if args.ruff_command == DjangoFmtCommand.format
+                    else None
+                ),
             )
         )
         # https://stackoverflow.com/a/58840987/3549270
@@ -122,7 +120,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "ruff_command",
-        choices=[option.value for option in RuffCommand],
+        choices=[option.value for option in DjangoFmtCommand],
         help="The Ruff command to test",
     )
     parser.add_argument(

@@ -13,7 +13,7 @@ from ecosystem_check.format import (
 )
 from ecosystem_check.projects import (
     Project,
-    RuffCommand,
+    DjangoFmtCommand,
 )
 from ecosystem_check.types import Comparison, Result, Serializable
 
@@ -27,7 +27,7 @@ class OutputFormat(Enum):
 
 
 async def main(
-    command: RuffCommand,
+    command: DjangoFmtCommand,
     baseline_executable: Path,
     comparison_executable: Path,
     targets: list[Project],
@@ -86,7 +86,7 @@ async def main(
             print(json.dumps(result, indent=4, cls=JSONEncoder))
         case OutputFormat.markdown:
             match command:
-                case RuffCommand.format:
+                case DjangoFmtCommand.format:
                     print(markdown_format_result(result))
                 case _:
                     raise ValueError(f"Unknown target Ruff command {command}")
@@ -97,7 +97,7 @@ async def main(
 
 
 async def clone_and_compare(
-    command: RuffCommand,
+    command: DjangoFmtCommand,
     baseline_executable: Path,
     comparison_executable: Path,
     target: Project,
@@ -109,7 +109,7 @@ async def clone_and_compare(
     assert ":" not in target.repo.name
 
     match command:
-        case RuffCommand.format:
+        case DjangoFmtCommand.format:
             compare, options, overrides, kwargs = (
                 compare_format,
                 target.format_options,

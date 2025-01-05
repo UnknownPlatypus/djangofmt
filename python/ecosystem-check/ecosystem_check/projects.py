@@ -9,7 +9,7 @@ import contextlib
 import dataclasses
 from asyncio import create_subprocess_exec
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from functools import cache
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
@@ -157,7 +157,7 @@ class ConfigOverrides(Serializable):
                 path.write_text(contents)
 
 
-class RuffCommand(Enum):
+class DjangoFmtCommand(StrEnum):
     format = "format"
 
 
