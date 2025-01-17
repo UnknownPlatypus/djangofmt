@@ -12,6 +12,23 @@ from ecosystem_check.projects import (
 DEFAULT_TARGETS = [
     # Jinja templates
     Project(repo=Repository(owner="zulip", name="zulip", ref="main")),
+    Project(
+        repo=Repository(
+            owner="cookiecutter",
+            name="cookiecutter-django",
+            ref="master",
+        ),
+        format_options=FormatOptions(
+            exclude=(
+                # Conditionals using raw tags, similar to https://github.com/g-plane/markup_fmt/issues/97
+                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/elements/button.html",
+                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/layouts/entrance.html",
+                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/base.html",
+                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
+                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
+            )
+        ),
+    ),
     # Django templates
     Project(repo=Repository(owner="django", name="django", ref="main")),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
@@ -22,9 +39,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="django-commons", name="django-debug-toolbar", ref="main")
     ),
-    Project(
-        repo=Repository(owner="cookiecutter", name="cookiecutter-django", ref="master")
-    ),
+
     # TODO: All fail because of Django custom blocks https://github.com/UnknownPlatypus/djangofmt/issues/9
     # Project(repo=Repository(owner="pennersr", name="django-allauth", ref="main")),
     Project(
