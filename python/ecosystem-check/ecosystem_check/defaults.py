@@ -3,9 +3,9 @@ Default projects for ecosystem checks
 """
 
 from ecosystem_check.projects import (
+    FormatOptions,
     Project,
     Repository,
-    FormatOptions,
 )
 
 # TODO(zanieb): Consider exporting this as JSON and loading from there instead
@@ -32,14 +32,29 @@ DEFAULT_TARGETS = [
     # Django templates
     Project(repo=Repository(owner="django", name="django", ref="main")),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
-    Project(repo=Repository(owner="wagtail", name="wagtail", ref="main")),
-    Project(repo=Repository(owner="django-cms", name="django-cms", ref="develop-4")),
-    Project(repo=Repository(owner="django-oscar", name="django-oscar", ref="master")),
-    Project(repo=Repository(owner="saleor", name="saleor", ref="main")),
     Project(
-        repo=Repository(owner="django-commons", name="django-debug-toolbar", ref="main")
+        repo=Repository(owner="saleor", name="saleor", ref="main"),
+        format_options=FormatOptions(
+            exclude=(
+                # TODO: Fails to parse <a href={% url "api" %}  target="_blank">
+                "templates/home/index.html",
+            )
+        ),
     ),
-
+    # TODO: All fail because of {% trans %} tag https://github.com/UnknownPlatypus/djangofmt/issues/7
+    # Project(
+    #     repo=Repository(owner="django-commons", name="django-debug-toolbar", ref="main")
+    # ),
+    # Project(
+    #     repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
+    #     format_options=FormatOptions(
+    #         exclude=(
+    #             "tests/_site/templates/oscar/layout.html",  # Actual invalid html
+    #         )
+    #     ),
+    # ),
+    # Project(repo=Repository(owner="django-cms", name="django-cms", ref="develop-4")),
+    # Project(repo=Repository(owner="wagtail", name="wagtail", ref="main")),
     # TODO: All fail because of Django custom blocks https://github.com/UnknownPlatypus/djangofmt/issues/9
     # Project(repo=Repository(owner="pennersr", name="django-allauth", ref="main")),
     Project(
