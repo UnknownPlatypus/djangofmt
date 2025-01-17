@@ -239,8 +239,14 @@ async def format(
 ) -> Sequence[str]:
     """Run the given djangofmt binary against the specified path."""
     args = options.to_args()
-    files = glob.glob("**/*templates/**/*.html", recursive=True, root_dir=path)
-    logger.debug(f"Formatting {repo_fullname} with cmd '{executable} {' '.join(args)}' ({len(files)} files)")
+    files = set(
+        glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
+    ) - set(options.exclude)
+    logger.debug(
+        f"Formatting {repo_fullname} with cmd {executable!r} ({len(files)} files)"
+    )
+    if options.exclude:
+        logger.debug(f"Excluding {options.exclude}")
 
     start = time.perf_counter()
     proc = await create_subprocess_exec(
@@ -254,7 +260,9 @@ async def format(
     result, err = await proc.communicate()
     end = time.perf_counter()
 
-    logger.debug(f"Finished formatting {repo_fullname} with {executable} in {end - start:.2f}s")
+    logger.debug(
+        f"Finished formatting {repo_fullname} with {executable} in {end - start:.2f}s"
+    )
 
     if proc.returncode not in [0, 1]:
         raise ToolError(err.decode("utf8"))

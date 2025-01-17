@@ -14,8 +14,8 @@ def markdown_project_section(
         content=content,
         preface=(
             # Show the command used for the check if the options are non-default
-            "<pre>djangofmt " + " ".join(options.to_args()) + "</pre>"
-            if options != type(options)()
+            f"<pre>djangofmt (excluding {' '.join(options.exclude)})</pre>"
+            if options.exclude
             else None
         ),
     )

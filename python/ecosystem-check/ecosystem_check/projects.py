@@ -35,13 +35,10 @@ class FormatOptions(Serializable):
     Format ecosystem check options.
     """
 
-    exclude: str = ""
+    exclude: tuple[str, ...] = field(default_factory=tuple)
 
     def to_args(self) -> list[str]:
-        args = ["format"]
-        if self.exclude:
-            args.extend(["--exclude", self.exclude])
-        return args
+        return ["format"]
 
 
 class ProjectSetupError(Exception):
