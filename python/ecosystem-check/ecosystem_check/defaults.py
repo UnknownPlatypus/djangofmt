@@ -25,11 +25,18 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="cookiecutter", name="cookiecutter-django", ref="master")
     ),
-    Project(repo=Repository(owner="pennersr", name="django-allauth", ref="main")),
+    # TODO: All fail because of Django custom blocks https://github.com/UnknownPlatypus/djangofmt/issues/9
+    # Project(repo=Repository(owner="pennersr", name="django-allauth", ref="main")),
     Project(
         repo=Repository(
             owner="silentsokolov", name="django-admin-rangefilter", ref="master"
-        )
+        ),
+        format_options=FormatOptions(
+            exclude=(
+                # Django comments https://github.com/UnknownPlatypus/djangofmt/issues/8
+                "rangefilter/templates/rangefilter/date_range_quick_select_list_filter.html",
+            )
+        ),
     ),
     Project(
         repo=Repository(
