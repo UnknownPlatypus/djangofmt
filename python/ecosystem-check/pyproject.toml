@@ -30,6 +30,7 @@ select = [
   "PYI", # flake8-pyi
   "RUF", # Ruff specific
 ]
+ignore = ["E501"]
 preview = true
 
 [tool.ruff.lint.isort]

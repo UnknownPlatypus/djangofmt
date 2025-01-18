@@ -12,7 +12,10 @@ from ecosystem_check.projects import (
 
 DEFAULT_TARGETS = [
     # Jinja templates
-    Project(repo=Repository(owner="zulip", name="zulip", ref="main"), format_options=FormatOptions(profile="jinja")),
+    Project(
+        repo=Repository(owner="zulip", name="zulip", ref="main"),
+        format_options=FormatOptions(profile="jinja"),
+    ),
     Project(
         repo=Repository(
             owner="cookiecutter",
@@ -28,7 +31,7 @@ DEFAULT_TARGETS = [
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
             ),
-            profile="jinja"
+            profile="jinja",
         ),
     ),
     # Django templates
@@ -37,6 +40,7 @@ DEFAULT_TARGETS = [
         format_options=FormatOptions(
             exclude=(
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "django/contrib/admin/templates/admin/edit_inline/stacked.html",
                 "django/contrib/admin/templates/admin/edit_inline/tabular.html",
                 "django/contrib/admin/templates/admin/includes/fieldset.html",
                 "django/contrib/admin/templates/admin/widgets/clearable_file_input.html",
@@ -63,20 +67,57 @@ DEFAULT_TARGETS = [
             )
         ),
     ),
-    # TODO: All fail because of {% trans %} tag https://github.com/UnknownPlatypus/djangofmt/issues/7
-    # Project(
-    #   repo=Repository(owner="django-commons", name="django-debug-toolbar", ref="main")
-    # ),
-    # Project(
-    #     repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
-    #     format_options=FormatOptions(
-    #         exclude=(
-    #             "tests/_site/templates/oscar/layout.html",  # Actual invalid html
-    #         )
-    #     ),
-    # ),
-    # Project(repo=Repository(owner="django-cms", name="django-cms", ref="develop-4")),
-    # Project(repo=Repository(owner="wagtail", name="wagtail", ref="main")),
+    Project(
+        repo=Repository(
+            owner="django-commons", name="django-debug-toolbar", ref="main"
+        ),
+        format_options=FormatOptions(
+            exclude=(
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "debug_toolbar/templates/debug_toolbar/includes/panel_button.html",
+                "debug_toolbar/templates/debug_toolbar/panels/sql_explain.html",
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
+        format_options=FormatOptions(
+            exclude=(
+                "tests/_site/templates/oscar/layout.html",  # Actual invalid html
+                "src/oscar/templates/oscar/dashboard/partners/partner_manage.html",  # Missing closing div
+                "src/oscar/templates/oscar/dashboard/shipping/messages/band_deleted.html",  # Missing closing p
+                "src/oscar/templates/oscar/dashboard/users/detail.html",  # Last endblock should be in div
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "src/oscar/templates/oscar/catalogue/browse.html",
+                "src/oscar/templates/oscar/catalogue/reviews/partials/review_stars.html",
+                "src/oscar/templates/oscar/checkout/shipping_address.html",
+                "src/oscar/templates/oscar/dashboard/reviews/review_list.html",
+            ),
+        ),
+    ),
+    Project(
+        repo=Repository(owner="django-cms", name="django-cms", ref="develop-4"),
+        format_options=FormatOptions(
+            exclude=(
+                "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # Invalid <span>{% trans "Copy" %}<span>
+                "cms/templates/admin/cms/page/tree/base.html",  # Weird </form> tag placement
+                "cms/templates/cms/headless/placeholder.html",  # Unconventional use of {% spaceless %}
+                "cms/templates/cms/noapphook.html",  # Missing html closing tag
+                # Weird comment that look like a tag error <--noplaceholder-->
+                "cms/test_utils/project/sampleapp/templates/sampleapp/home.html",
+            ),
+        ),
+    ),
+    Project(
+        repo=Repository(owner="wagtail", name="wagtail", ref="main"),
+        format_options=FormatOptions(
+            exclude=(
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "wagtail/admin/templates/wagtailadmin/shared/icon.html",
+                "wagtail/admin/templates/wagtailadmin/tables/references_cell.html",
+            ),
+        ),
+    ),
     Project(
         repo=Repository(owner="pennersr", name="django-allauth", ref="main"),
         format_options=FormatOptions(

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
-from typing import Self, Literal
+from typing import Literal, Self
 
 from ecosystem_check import logger
 from ecosystem_check.types import Serializable
