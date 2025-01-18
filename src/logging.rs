@@ -1,7 +1,7 @@
 use anyhow::Result;
-use tracing_subscriber::{Layer, Registry};
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::{Layer, Registry};
 use tracing_tree::time::Uptime;
 
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Copy, Clone)]

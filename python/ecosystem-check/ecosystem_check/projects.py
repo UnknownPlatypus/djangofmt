@@ -26,7 +26,7 @@ class Project(Serializable):
 
 
 class DjangoFmtCommand(StrEnum):
-    format = "format"
+    format = "format"  # type: ignore[assignment]
 
 
 @dataclass(frozen=True)

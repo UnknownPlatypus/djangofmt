@@ -8,15 +8,15 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use anyhow::Result;
-use markup_fmt::{format_text, FormatError, Language};
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use markup_fmt::{format_text, FormatError, Language};
 use rayon::iter::Either::{Left, Right};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
 
 use crate::args::{FormatCommand, GlobalConfigArgs};
-use crate::ExitStatus;
 use crate::logging::LogLevel;
+use crate::ExitStatus;
 
 pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> Result<ExitStatus> {
     let format_options = FormatOptions {
@@ -38,7 +38,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             // This is actually still incorrect (but slightly better than nothing), we need `<div>desfsdf</div>` (or a parse error)
             html_normal_self_closing: Some(false),
             // This is actually nice to keep this setting false, it makes it possible to control wrapping
-            // of props semi manually by inserting or not a newline before the first prop. 
+            // of props semi manually by inserting or not a newline before the first prop.
             // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
             prefer_attrs_single_line: false,
             ..LanguageOptions::default()
@@ -107,20 +107,17 @@ pub(crate) fn format_path(
             let ext = hints.ext;
             let additional_config =
                 dprint_plugin_markup::build_additional_config(hints, format_options);
-            if let Some(syntax) =
-                malva::detect_syntax(&Path::new("file").with_extension(ext))
-            {
+            if let Some(syntax) = malva::detect_syntax(&Path::new("file").with_extension(ext)) {
                 Ok(malva::format_text(
                     code,
                     syntax,
-                    &serde_json::to_value(additional_config)
-                        .and_then(serde_json::from_value)?,
+                    &serde_json::to_value(additional_config).and_then(serde_json::from_value)?,
                 )
-                    .map(Cow::from)
-                    // TODO: Don't skip errors and actually handle these cases.
-                    //       Currently we have errors when there is templating blocks inside style tags
-                    // .map_err(anyhow::Error::from)
-                    .unwrap_or_default())
+                .map(Cow::from)
+                // TODO: Don't skip errors and actually handle these cases.
+                //       Currently we have errors when there is templating blocks inside style tags
+                // .map_err(anyhow::Error::from)
+                .unwrap_or_default())
             } else {
                 Ok(code.into())
                 // dprint_plugin_biome::format_text(

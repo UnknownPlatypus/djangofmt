@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import asyncio
 import dataclasses
 import json
+from collections.abc import Awaitable
 from enum import Enum
 from pathlib import Path
-from typing import Awaitable, TypeVar
+from typing import TypeVar
 
 from ecosystem_check import logger
 from ecosystem_check.format import (
@@ -110,6 +113,7 @@ async def clone_and_compare(
 
     match command:
         case DjangoFmtCommand.format:
+            assert format_comparison is not None
             compare, options, kwargs = (
                 compare_format,
                 target.format_options,
@@ -138,7 +142,7 @@ class JSONEncoder(json.JSONEncoder):
         if isinstance(o, Serializable):
             return o.jsonable()
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            return dataclasses.asdict(o)  # type: ignore[arg-type]
         if isinstance(o, set):
             return tuple(o)
         if isinstance(o, Path):

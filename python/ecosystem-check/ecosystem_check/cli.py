@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import asyncio
 import logging
@@ -78,7 +80,9 @@ def entrypoint():
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Check two versions of an executable against a corpus of open-source code.",
+        description=(
+            "Check two versions of an executable against a corpus of open-source code."
+        ),
     )
     # TODO: Support non-default `--targets`
     # parser.add_argument(
@@ -119,7 +123,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "command",
-        choices=[option for option in DjangoFmtCommand],
+        choices=list(DjangoFmtCommand),
         help="The command to test",
     )
     parser.add_argument(
@@ -160,7 +164,10 @@ def resolve_executable(
     resolved_executable = _get_executable_path(str(executable))
     if not resolved_executable:
         print(
-            f"Could not find djangofmt {executable_type} executable: {resolved_executable}",
+            (
+                f"Could not find djangofmt {executable_type} "
+                f"executable: {resolved_executable}"
+            ),
             sys.stderr,
         )
         exit(1)
