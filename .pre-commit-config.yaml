@@ -32,14 +32,14 @@ repos:
     rev: v1.14.1
     hooks:
       - id: mypy
-  - repo: local
+  - repo: https://github.com/AndrejOrsula/pre-commit-cargo
+    rev: 0.4.0
     hooks:
       - id: cargo-fmt
-        name: cargo fmt
-        entry: cargo fmt --
-        language: system
-        types: [rust]
-        pass_filenames: false
+      - id: cargo-clippy
+        args: ["--all-targets", "--all-features", "--fix", "--allow-dirty"]
+  - repo: local
+    hooks:
       - id: dprint-fmt
         name: dprint
         entry: /home/thibaut/.dprint/bin/dprint fmt --config dprint.json

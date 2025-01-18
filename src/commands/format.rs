@@ -96,7 +96,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
 pub(crate) fn format_path(
     path: &Path,
     format_options: &FormatOptions,
-    profile: &Profile
+    profile: &Profile,
 ) -> Result<FormatResult, FormatCommandError> {
     // Extract the source from the file.
     let unformatted = match std::fs::read_to_string(path) {
@@ -113,7 +113,7 @@ pub(crate) fn format_path(
             let ext = hints.ext;
             let additional_config =
                 dprint_plugin_markup::build_additional_config(hints, format_options);
-            if let Some(syntax) = malva::detect_syntax(&Path::new("file").with_extension(ext)) {
+            if let Some(syntax) = malva::detect_syntax(Path::new("file").with_extension(ext)) {
                 Ok(malva::format_text(
                     code,
                     syntax,
@@ -185,7 +185,7 @@ impl Display for FormatCommandError {
         match self {
             Self::Parse(path, err) => {
                 if let Some(path) = path {
-                    write!(f, "Failed to parse {:?} with error {err:?}", path)
+                    write!(f, "Failed to parse {path:?} with error {err:?}")
                 } else {
                     write!(f, "Failed to parse with error {err:?}")
                 }
@@ -220,12 +220,12 @@ pub(crate) enum FormatResult {
 /// Write a summary of the formatting results to stdout.
 fn write_summary(results: Vec<FormatResult>) -> Result<()> {
     let mut counts = HashMap::new();
-    results.iter().for_each(|val| {
+    for val in &results {
         counts
             .entry(val)
             .and_modify(|count| *count += 1)
             .or_insert(1);
-    });
+    }
     let stdout = &mut io::stdout().lock();
 
     let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);

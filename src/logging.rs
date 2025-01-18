@@ -24,8 +24,7 @@ impl LogLevel {
         match self {
             LogLevel::Default => LevelFilter::INFO,
             LogLevel::Verbose => LevelFilter::DEBUG,
-            LogLevel::Quiet => LevelFilter::OFF,
-            LogLevel::Silent => LevelFilter::OFF,
+            LogLevel::Quiet | LogLevel::Silent => LevelFilter::OFF,
         }
     }
 }

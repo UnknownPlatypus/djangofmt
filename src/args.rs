@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
+use crate::logging::LogLevel;
 use clap::Parser;
 use markup_fmt::Language;
-use crate::logging::LogLevel;
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands
@@ -56,7 +56,7 @@ pub struct FormatCommand {
         long,
         value_enum,
         default_value = "django",
-        help_heading = "Format configuration",
+        help_heading = "Format configuration"
     )]
     pub profile: Profile,
     /// Comma-separated list of custom block name to enable
