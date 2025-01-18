@@ -12,7 +12,7 @@ from ecosystem_check.projects import (
 
 DEFAULT_TARGETS = [
     # Jinja templates
-    Project(repo=Repository(owner="zulip", name="zulip", ref="main")),
+    Project(repo=Repository(owner="zulip", name="zulip", ref="main"), format_options=FormatOptions(profile="jinja")),
     Project(
         repo=Repository(
             owner="cookiecutter",
@@ -27,11 +27,32 @@ DEFAULT_TARGETS = [
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/base.html",
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
-            )
+            ),
+            profile="jinja"
         ),
     ),
     # Django templates
-    Project(repo=Repository(owner="django", name="django", ref="main")),
+    Project(
+        repo=Repository(owner="django", name="django", ref="main"),
+        format_options=FormatOptions(
+            exclude=(
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "django/contrib/admin/templates/admin/edit_inline/tabular.html",
+                "django/contrib/admin/templates/admin/includes/fieldset.html",
+                "django/contrib/admin/templates/admin/widgets/clearable_file_input.html",
+                "django/contrib/admin/templates/admin/widgets/foreign_key_raw_id.html",
+                "django/contrib/admin/templates/admin/widgets/url.html",
+                "django/forms/templates/django/forms/field.html",
+                "django/forms/templates/django/forms/widgets/input_option.html",
+                "django/forms/templates/django/forms/widgets/multiple_input.html",
+                "django/forms/templates/django/forms/widgets/select.html",
+                "django/views/templates/technical_500.html",
+                "tests/forms_tests/templates/forms_tests/use_fieldset.html",
+                "tests/template_backends/templates/template_backends/syntax_error.html",
+                "tests/test_client_regress/bad_templates/404.html",
+            )
+        ),
+    ),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
     Project(
         repo=Repository(owner="saleor", name="saleor", ref="main"),
@@ -56,8 +77,15 @@ DEFAULT_TARGETS = [
     # ),
     # Project(repo=Repository(owner="django-cms", name="django-cms", ref="develop-4")),
     # Project(repo=Repository(owner="wagtail", name="wagtail", ref="main")),
-    # TODO: All fail because of Django custom blocks https://github.com/UnknownPlatypus/djangofmt/issues/9
-    # Project(repo=Repository(owner="pennersr", name="django-allauth", ref="main")),
+    Project(
+        repo=Repository(owner="pennersr", name="django-allauth", ref="main"),
+        format_options=FormatOptions(
+            custom_blocks="slot,element",
+            exclude=(
+                "examples/regular-django/example/templates/allauth/elements/form.html",
+            ),
+        ),
+    ),
     Project(
         repo=Repository(
             owner="silentsokolov", name="django-admin-rangefilter", ref="master"

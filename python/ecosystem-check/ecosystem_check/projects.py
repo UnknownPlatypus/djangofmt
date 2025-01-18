@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
-from typing import Self
+from typing import Self, Literal
 
 from ecosystem_check import logger
 from ecosystem_check.types import Serializable
@@ -36,9 +36,14 @@ class FormatOptions(Serializable):
     """
 
     exclude: tuple[str, ...] = field(default_factory=tuple)
+    custom_blocks: str = ""  # Comma-separated list of custom blocks
+    profile: Literal["jinja", "django"] = "django"
 
     def to_args(self) -> list[str]:
-        return ["format"]
+        args = ["format", "--profile", self.profile]
+        if self.custom_blocks:
+            args.extend(("--custom-blocks", self.custom_blocks))
+        return args
 
 
 class ProjectSetupError(Exception):
