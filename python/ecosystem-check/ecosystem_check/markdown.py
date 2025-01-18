@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from unidiff import PatchSet
 
 if TYPE_CHECKING:
-    from ecosystem_check.projects import FormatOptions, Project, ClonedRepository
+    from ecosystem_check.projects import ClonedRepository, FormatOptions, Project
 
 
 def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
@@ -33,6 +33,7 @@ def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
 
     return "\n".join(lines)
 
+
 def markdown_project_section(
     title: str, content: str | list[str], options: FormatOptions, project: Project
 ) -> list[str]:
@@ -53,13 +54,13 @@ def markdown_details(
 ) -> list[str]:
     lines: list[str] = [f"<details><summary>{summary}</summary>"]
     if preface:
-        lines.extend(('<p>', preface, '</p>'))
-    lines.extend(('<p>', ''))
+        lines.extend(("<p>", preface, "</p>"))
+    lines.extend(("<p>", ""))
 
     if isinstance(content, str):
         lines.append(content)
     else:
         lines.extend(content)
 
-    lines.extend(('', '</p>', '</details>'))
+    lines.extend(("", "</p>", "</details>"))
     return lines

@@ -11,6 +11,26 @@ dependencies = ["unidiff==0.7.5", "tomli_w==1.1.0", "tomli==2.2.1"]
 [project.scripts]
 ecosystem-check = "ecosystem_check.cli:entrypoint"
 
+[tool.ruff]
+unsafe-fixes = true
+fix = true
+
 [tool.ruff.lint]
-extend-select = ["I"]
+select = [
+  "E", # pycodestyle (error)
+  "F", # pyflakes
+  "B", # bugbear
+  "B9",
+  "C4", # flake8-comprehensions
+  "SIM", # flake8-simplify
+  "I", # isort
+  "UP", # pyupgrade
+  "PIE", # flake8-pie
+  "PGH", # pygrep-hooks
+  "PYI", # flake8-pyi
+  "RUF", # Ruff specific
+]
 preview = true
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]

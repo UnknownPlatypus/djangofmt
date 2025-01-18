@@ -1,24 +1,24 @@
 [package]
 name = "djangofmt"
 version = "0.1.0"
-edition = "2021"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
-description = "Django Template Linter and Formatter."
-repository = "https://github.com/UnknownPlatypus/djangofmt"
-license = "MIT"
+edition = "2021"
 exclude = ["/tests"]
+license = "MIT"
+repository = "https://github.com/UnknownPlatypus/djangofmt"
+description = "Django Template Formatter."
 
 [dependencies]
-markup_fmt = { path = "/home/thibaut/workspace/markup_fmt/markup_fmt" }
-dprint_plugin_markup = { path = "/home/thibaut/workspace/markup_fmt/dprint_plugin" }
 dprint-plugin-biome = "0.0"
 dprint-plugin-json = { version = "0.19", features = ["wasm"] }
+dprint_plugin_markup = { path = "/home/thibaut/workspace/markup_fmt/dprint_plugin" }
 malva = { version = "0.9", features = ["config_serde"] }
+markup_fmt = { path = "/home/thibaut/workspace/markup_fmt/markup_fmt" }
 
-serde_json = "1.0"
 anyhow = "1.0.86"
 clap = { version = "4.5.4", features = ["derive"] }
 rayon = "1.10.0"
+serde_json = "1.0"
 
 # Logging
 colored = "2.1.0"

@@ -7,15 +7,16 @@ from __future__ import annotations
 import glob
 import time
 from asyncio import create_subprocess_exec
+from collections.abc import Sequence
 from enum import Enum
 from pathlib import Path
 from subprocess import PIPE
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING
 
 from unidiff import PatchSet
 
 from ecosystem_check import logger
-from ecosystem_check.markdown import markdown_project_section, format_patchset
+from ecosystem_check.markdown import format_patchset, markdown_project_section
 from ecosystem_check.types import Comparison, Diff, Result, ToolError
 
 if TYPE_CHECKING:
@@ -36,7 +37,7 @@ def markdown_format_result(result: Result) -> str:
     error_count = len(result.errored)
     patch_sets: list[PatchSet] = []
 
-    for project, comparison in result.completed:
+    for _, comparison in result.completed:
         total_lines_added += comparison.diff.lines_added
         total_lines_removed += comparison.diff.lines_removed
 
@@ -55,7 +56,8 @@ def markdown_format_result(result: Result) -> str:
         # Only errors
         s = "s" if error_count != 1 else ""
         lines.append(
-            f"\u2139\ufe0f ecosystem check **encountered format errors**. (no format changes; {error_count} project error{s})"
+            f"\u2139\ufe0f ecosystem check **encountered format errors**. "
+            f"(no format changes; {error_count} project error{s})"
         )
     else:
         s = "s" if total_files_modified != 1 else ""
@@ -81,13 +83,18 @@ def markdown_format_result(result: Result) -> str:
     lines.append("")
 
     # Then per-project changes
-    for (project, comparison), patch_set in zip(result.completed, patch_sets):
+    for (project, comparison), patch_set in zip(
+        result.completed, patch_sets, strict=False
+    ):
         if not comparison.diff:
             continue  # Skip empty diffs
 
         files = len(patch_set.modified_files)
         s = "s" if files != 1 else ""
-        title = f"+{comparison.diff.lines_added} -{comparison.diff.lines_removed} lines across {files} file{s}"
+        title = (
+            f"+{comparison.diff.lines_added} -{comparison.diff.lines_removed} "
+            f"lines across {files} file{s}"
+        )
 
         lines.extend(
             markdown_project_section(
@@ -109,7 +116,6 @@ def markdown_format_result(result: Result) -> str:
         )
 
     return "\n".join(lines)
-
 
 
 async def compare_format(

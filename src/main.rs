@@ -3,8 +3,8 @@ use std::process::ExitCode;
 use clap::Parser;
 use colored::Colorize;
 
-use djangofmt::{ExitStatus, run};
 use djangofmt::args::Args;
+use djangofmt::{run, ExitStatus};
 
 pub fn main() -> ExitCode {
     let args = std::env::args_os();

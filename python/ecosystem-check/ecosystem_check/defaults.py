@@ -2,6 +2,8 @@
 Default projects for ecosystem checks
 """
 
+from __future__ import annotations
+
 from ecosystem_check.projects import (
     FormatOptions,
     Project,
@@ -42,7 +44,7 @@ DEFAULT_TARGETS = [
     ),
     # TODO: All fail because of {% trans %} tag https://github.com/UnknownPlatypus/djangofmt/issues/7
     # Project(
-    #     repo=Repository(owner="django-commons", name="django-debug-toolbar", ref="main")
+    #   repo=Repository(owner="django-commons", name="django-debug-toolbar", ref="main")
     # ),
     # Project(
     #     repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
