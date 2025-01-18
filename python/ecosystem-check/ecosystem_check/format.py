@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Sequence
 from unidiff import PatchSet
 
 from ecosystem_check import logger
-from ecosystem_check.markdown import markdown_project_section
+from ecosystem_check.markdown import markdown_project_section, format_patchset
 from ecosystem_check.types import Comparison, Diff, Result, ToolError
 
 if TYPE_CHECKING:
@@ -110,31 +110,6 @@ def markdown_format_result(result: Result) -> str:
 
     return "\n".join(lines)
 
-
-def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
-    """
-    Convert a patchset to markdown, adding permalinks to the start of each hunk.
-    """
-    lines: list[str] = []
-    for file_patch in patch_set:
-        for hunk in file_patch:
-            # Note:  When used for `format` checks, the line number is not exact because
-            #        we formatted the repository for a baseline; we can't know the exact
-            #        line number in the original
-            #        source file.
-            hunk_link = repo.url_for(file_patch.path, hunk.source_start)
-            hunk_lines = str(hunk).splitlines()
-
-            # Add a link before the hunk
-            link_title = file_patch.path + "~L" + str(hunk.source_start)
-            lines.append(f"<a href='{hunk_link}'>{link_title}</a>")
-
-            # Wrap the contents of the hunk in a diff code block
-            lines.append("```diff")
-            lines.extend(hunk_lines[1:])
-            lines.append("```")
-
-    return "\n".join(lines)
 
 
 async def compare_format(

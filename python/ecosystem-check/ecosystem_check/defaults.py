@@ -8,7 +8,6 @@ from ecosystem_check.projects import (
     Repository,
 )
 
-# TODO(zanieb): Consider exporting this as JSON and loading from there instead
 DEFAULT_TARGETS = [
     # Jinja templates
     Project(repo=Repository(owner="zulip", name="zulip", ref="main")),

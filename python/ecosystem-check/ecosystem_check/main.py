@@ -89,7 +89,7 @@ async def main(
                 case DjangoFmtCommand.format:
                     print(markdown_format_result(result))
                 case _:
-                    raise ValueError(f"Unknown target Ruff command {command}")
+                    raise ValueError(f"Unknown target command {command}")
         case _:
             raise ValueError(f"Unknown output format {format}")
 
@@ -116,7 +116,7 @@ async def clone_and_compare(
                 {"format_comparison": format_comparison},
             )
         case _:
-            raise ValueError(f"Unknown target Ruff command {command}")
+            raise ValueError(f"Unknown target command {command}")
 
     checkout_dir = project_dir.joinpath(f"{target.repo.owner}:{target.repo.name}")
     cloned_repo = await target.repo.clone(checkout_dir)
