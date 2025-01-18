@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use clap::Parser;
-
+use markup_fmt::Language;
 use crate::logging::LogLevel;
 
 /// All configuration options that can be passed "globally",
@@ -51,8 +51,38 @@ pub struct FormatCommand {
     /// Set the line-length.
     #[arg(long, help_heading = "Format configuration")]
     pub line_length: Option<usize>,
+    /// Template language profile to use (django or jinja)
+    #[arg(
+        long,
+        value_enum,
+        default_value = "django",
+        help_heading = "Format configuration",
+    )]
+    pub profile: Profile,
+    /// Comma-separated list of custom block name to enable
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "BLOCK_NAMES",
+        help_heading = "Format configuration"
+    )]
+    pub custom_blocks: Option<Vec<String>>,
 }
 
+#[derive(Clone, Debug, clap::ValueEnum)]
+pub enum Profile {
+    Django,
+    Jinja,
+}
+
+impl From<&Profile> for Language {
+    fn from(profile: &Profile) -> Self {
+        match profile {
+            Profile::Django => Language::Django,
+            Profile::Jinja => Language::Jinja,
+        }
+    }
+}
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Default, Clone, clap::Args)]
 pub struct LogLevelArgs {

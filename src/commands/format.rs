@@ -14,7 +14,7 @@ use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
 
-use crate::args::{FormatCommand, GlobalConfigArgs};
+use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
 use crate::logging::LogLevel;
 use crate::ExitStatus;
 
@@ -41,6 +41,11 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             // of props semi manually by inserting or not a newline before the first prop.
             // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
             prefer_attrs_single_line: false,
+            // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
+            custom_blocks: args.custom_blocks,
+            // Removes a lot of vertical space, breaking a tag with a single attr doesn't really
+            // help with readability.
+            // prefer_single_line_opening_tag: true,
             ..LanguageOptions::default()
         },
     };
@@ -54,7 +59,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
         .map(|entry| {
             let path = entry.as_path();
             // Format the source.
-            format_path(path, &format_options)
+            format_path(path, &format_options, &args.profile)
         })
         .partition_map(|result| match result {
             Ok(diagnostic) => Left(diagnostic),
@@ -91,6 +96,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
 pub(crate) fn format_path(
     path: &Path,
     format_options: &FormatOptions,
+    profile: &Profile
 ) -> Result<FormatResult, FormatCommandError> {
     // Extract the source from the file.
     let unformatted = match std::fs::read_to_string(path) {
@@ -101,7 +107,7 @@ pub(crate) fn format_path(
     // Format the source.
     let format_result = format_text(
         &unformatted,
-        Language::Jinja,
+        Language::from(profile),
         format_options,
         |code, hints| -> Result<Cow<str>> {
             let ext = hints.ext;
