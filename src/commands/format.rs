@@ -110,14 +110,17 @@ pub(crate) fn format_path(
             if let Some(syntax) =
                 malva::detect_syntax(&Path::new("file").with_extension(ext))
             {
-                malva::format_text(
+                Ok(malva::format_text(
                     code,
                     syntax,
                     &serde_json::to_value(additional_config)
                         .and_then(serde_json::from_value)?,
                 )
                     .map(Cow::from)
-                    .map_err(anyhow::Error::from)
+                    // TODO: Don't skip errors and actually handle these cases.
+                    //       Currently we have errors when there is templating blocks inside style tags
+                    // .map_err(anyhow::Error::from)
+                    .unwrap_or_default())
             } else {
                 Ok(code.into())
                 // dprint_plugin_biome::format_text(
