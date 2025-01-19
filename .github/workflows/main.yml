@@ -40,7 +40,9 @@ jobs:
         run: cargo build --release --verbose && mv target/release/djangofmt ./main_build
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v5 # zizmor: ignore[cache-poisoning]
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: false
 
       - name: Run `djangofmt` ecosystem check
         run: |
@@ -49,7 +51,6 @@ jobs:
 
           uv venv --python 3.12
           uv pip install ./python/ecosystem-check
-          ls -al
           uv run ecosystem-check format ./main_build ./pr_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
