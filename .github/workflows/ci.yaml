@@ -60,8 +60,49 @@ jobs:
             echo ""
           } >> ecosystem-result
 
-      - uses: actions/upload-artifact@v4
-        name: Upload Results
+      - name: Generate comment content
+        id: generate-comment
+        run: |
+          # Guard against malicious ecosystem results that symlink to a secret
+          # file on this runner
+          if [[ -L pr/ecosystem/ecosystem-result ]]
+          then
+              echo "Error: ecosystem-result cannot be a symlink"
+              exit 1
+          fi
+
+          # Note this identifier is used to find the comment to update on
+          # subsequent runs
+          echo '<!-- generated-comment ecosystem -->' >> comment.txt
+          
+          {
+            echo '## `ecosystem-check` results'
+            cat pr/ecosystem/ecosystem-result
+            echo ""
+          } >> comment.txt
+          
+          {
+            echo 'comment<<EOF'
+            cat comment.txt
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        if: steps.generate-comment.outcome == 'success'
+        id: find-comment
         with:
-          name: ecosystem-result
-          path: ecosystem-result
+          issue-number: ${{ steps.pr-number.outputs.pr-number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "<!-- generated-comment ecosystem -->"
+
+      - name: Create or update comment
+        if: steps.find-comment.outcome == 'success'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ steps.pr-number.outputs.pr-number }}
+          body-path: comment.txt
+          edit-mode: replace
+
+
