@@ -42,7 +42,7 @@ jobs:
 
       - name: Install ecosystem-check
         run: |
-          uv pip install ./python/ecosystem-check
+          uv pip install ./python/ecosystem-check --system
 
       - name: Run `djangofmt` ecosystem check
         run: |
