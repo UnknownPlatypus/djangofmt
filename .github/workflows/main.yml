@@ -40,16 +40,14 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
 
-      - name: Install ecosystem-check
-        run: |
-          uv pip install ./python/ecosystem-check --system
-
       - name: Run `djangofmt` ecosystem check
         run: |
           # Set pipefail to avoid hiding errors with tee
           set -eo pipefail
-
-          ecosystem-check format target/release/pr_build target/release/main_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
+          
+          uv venv --python 3.12
+          uv pip install ./python/ecosystem-check          
+          uv run ecosystem-check format target/release/pr_build target/release/main_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
           echo "### Formatter (stable)" >> ecosystem-result
