@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
 
       - name: Build main version
-        run: cargo build --release --verbose && mv target/release/djangofmt target/release/main_build
+        run: cargo build --release --verbose && mv target/release/djangofmt target/release/main_build && ls -al target/release
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v5 # zizmor: ignore[cache-poisoning]
@@ -48,7 +48,8 @@ jobs:
 
           uv venv --python 3.12
           uv pip install ./python/ecosystem-check
-          uv run ecosystem-check format target/release/pr_build target/release/main_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
+          ls -al
+          uv run ecosystem-check format ./target/release/pr_build ./target/release/main_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
           {
