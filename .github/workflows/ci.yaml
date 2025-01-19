@@ -65,6 +65,6 @@ jobs:
         with:
           name: ecosystem-result
           path: ecosystem-result
-          
+
   pr-comment:
-    uses: astral-sh/ruff/.github/workflows/pr-comment.yaml
+    uses: astral-sh/ruff/.github/workflows/pr-comment.yaml@0.9.2
