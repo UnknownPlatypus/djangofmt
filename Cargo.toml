@@ -9,20 +9,18 @@ repository = "https://github.com/UnknownPlatypus/djangofmt"
 description = "Django Template Formatter."
 
 [dependencies]
-dprint-plugin-biome = "0.0"
-dprint-plugin-json = { version = "0.19", features = ["wasm"] }
-dprint_plugin_markup = { path = "/home/thibaut/workspace/markup_fmt/dprint_plugin" }
-malva = { version = "0.9", features = ["config_serde"] }
-markup_fmt = { path = "/home/thibaut/workspace/markup_fmt/markup_fmt" }
+dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", branch = "django/test-all-2", package = "dprint_plugin_markup" }
+malva = { version = "0.11.1", features = ["config_serde"] }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", branch = "django/test-all-2", package = "markup_fmt" }
 
-anyhow = "1.0.86"
-clap = { version = "4.5.4", features = ["derive"] }
+anyhow = "1.0.95"
+clap = { version = "4.5.26", features = ["derive"] }
 rayon = "1.10.0"
 serde_json = "1.0"
 
 # Logging
-colored = "2.1.0"
-log = "0.4.21"
+colored = "3.0.0"
+log = "0.4.25"
 tracing = "0.1"
 tracing-subscriber = "0.3"
-tracing-tree = "0.3.1"
+tracing-tree = "0.4.0"
