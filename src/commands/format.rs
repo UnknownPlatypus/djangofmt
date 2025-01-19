@@ -42,7 +42,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
             prefer_attrs_single_line: false,
             // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
-            custom_blocks: args.custom_blocks,
+            custom_blocks: Some(vec![]),
             // Removes a lot of vertical space, breaking a tag with a single attr doesn't really
             // help with readability.
             // prefer_single_line_opening_tag: true,
