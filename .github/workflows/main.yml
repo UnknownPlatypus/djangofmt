@@ -23,12 +23,15 @@ jobs:
   build-and-compare:
     runs-on: ubuntu-24.04
     steps:
+      - name: Create builds directory
+        run: mkdir -p ./builds
+
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Build PR version
-        run: cargo build --release --verbose && mv target/release/djangofmt ./pr_build && ls -al target/release
+        run: cargo build --release --verbose && mv target/release/djangofmt ./builds/pr_build
 
       - uses: actions/checkout@v4
         with:
@@ -36,7 +39,7 @@ jobs:
           persist-credentials: false
 
       - name: Build main version
-        run: cargo build --release --verbose && mv target/release/djangofmt ./main_build && ls -al target/release
+        run: cargo build --release --verbose && mv target/release/djangofmt ./builds/main_build
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v5 # zizmor: ignore[cache-poisoning]
@@ -48,9 +51,8 @@ jobs:
 
           uv venv --python 3.12
           uv pip install ./python/ecosystem-check
-          ls -al target/release
           ls -al
-          uv run ecosystem-check format ./main_build ./pr_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
+          uv run ecosystem-check format ./builds/main_build ./builds/pr_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
           {
