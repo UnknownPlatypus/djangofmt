@@ -38,6 +38,10 @@ repos:
       - id: cargo-fmt
       - id: cargo-clippy
         args: ["--all-targets", "--all-features", "--fix", "--allow-dirty"]
+  - repo: https://github.com/woodruffw/zizmor-pre-commit
+    rev: v1.2.2
+    hooks:
+      - id: zizmor
   - repo: local
     hooks:
       - id: dprint-fmt

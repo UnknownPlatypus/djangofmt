@@ -1,0 +1,52 @@
+name: Ecosystem check
+
+on:
+  pull_request:
+    branches:
+      - main
+    tags:
+      - "**"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  UV_VERSION: 0.1.23
+
+jobs:
+  build-and-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build PR version
+        run: cargo build --release --verbose && mv target/release/djangofmt target/release/pr_build
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Build main version
+        run: cargo build --release --verbose && mv target/release/djangofmt target/release/main_build
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run `djangofmt format` stable ecosystem check
+        run: |
+          # Set pipefail to avoid hiding errors with tee
+          set -eo pipefail
+
+          uv run ecosystem-check format target/release/pr_build target/release/main_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
+
+          cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
+          echo "### Formatter (stable)" >> ecosystem-result
+          cat ecosystem-result-format-stable >> ecosystem-result
+          echo "" >> ecosystem-result
