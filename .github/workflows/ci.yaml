@@ -91,7 +91,7 @@ jobs:
         if: steps.generate-comment.outcome == 'success'
         id: find-comment
         with:
-          issue-number: ${{ steps.pr-number.outputs.pr-number }}
+          issue-number: ${{ github.event.pull_request.number }}
           comment-author: "github-actions[bot]"
           body-includes: "<!-- generated-comment ecosystem -->"
 
@@ -100,6 +100,6 @@ jobs:
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
-          issue-number: ${{ steps.pr-number.outputs.pr-number }}
+          issue-number: ${{ github.event.pull_request.number }}
           body-path: comment.txt
           edit-mode: replace
