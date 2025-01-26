@@ -65,19 +65,18 @@ jobs:
         run: |
           # Guard against malicious ecosystem results that symlink to a secret
           # file on this runner
-          if [[ -L pr/ecosystem/ecosystem-result ]]
+          if [[ -L ecosystem-result ]]
           then
               echo "Error: ecosystem-result cannot be a symlink"
               exit 1
           fi
 
-          # Note this identifier is used to find the comment to update on
-          # subsequent runs
+          # Note this identifier is used to find the comment to update on subsequent runs
           echo '<!-- generated-comment ecosystem -->' >> comment.txt
           
           {
             echo '## `ecosystem-check` results'
-            cat pr/ecosystem/ecosystem-result
+            cat ecosystem-result
             echo ""
           } >> comment.txt
           
@@ -104,5 +103,3 @@ jobs:
           issue-number: ${{ steps.pr-number.outputs.pr-number }}
           body-path: comment.txt
           edit-mode: replace
-
-
