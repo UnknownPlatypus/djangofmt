@@ -1,0 +1,112 @@
+name: Ecosystem check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  UV_VERSION: 0.1.23
+
+jobs:
+  build-and-compare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Build PR version
+        run: cargo build --release --verbose && mv target/release/djangofmt ./pr_build
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+          clean: false
+
+      - name: Build main version
+        run: cargo build --release --verbose && mv target/release/djangofmt ./main_build
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: false
+
+      - name: Run `djangofmt` ecosystem check
+        run: |
+          # Set pipefail to avoid hiding errors with tee
+          set -eo pipefail
+
+          uv venv --python 3.12
+          uv pip install ./python/ecosystem-check
+          uv run ecosystem-check format ./main_build ./pr_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
+
+          cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
+          cat ecosystem-result-format-stable >> ecosystem-result
+
+      - name: Generate comment content
+        id: generate-comment
+        run: |
+          # Guard against malicious ecosystem results that symlink to a secret
+          # file on this runner
+          if [[ -L ecosystem-result ]]
+          then
+              echo "Error: ecosystem-result cannot be a symlink"
+              exit 1
+          fi
+
+          # Note this identifier is used to find the comment to update on subsequent runs
+          echo '<!-- generated-comment ecosystem -->' >> placeholder-comment.txt
+
+          {
+            cat placeholder-comment.txt
+            echo "## \`ecosystem-check\` results"
+            cat ecosystem-result
+          } >> full-comment.txt
+
+          # Determine if the comment exceeds 65536 characters
+          char_count=$(wc -c < full-comment.txt)
+          if [ "$char_count" -gt 65536 ]; then
+              {
+                cat placeholder-comment.txt
+                echo "## \`ecosystem-check\` results (partial, see full diff [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
+                cat ecosystem-result
+              } > full-comment.txt
+          fi
+
+          {
+            echo 'comment<<EOF'
+            cat full-comment.txt
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        if: steps.generate-comment.outcome == 'success'
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "<!-- generated-comment ecosystem -->"
+
+      - name: Create or update comment
+        if: steps.find-comment.outcome == 'success'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: full-comment.txt
+          edit-mode: replace
