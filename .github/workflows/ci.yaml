@@ -82,7 +82,7 @@ jobs:
           if [ $char_count -gt 65536 ]; then
               {
                 cat placeholder-comment.txt
-                echo '## `ecosystem-check` results (partial, see full diff [here](https://github.com/UnknownPlatypus/djangofmt/actions/runs/$GITHUB_RUN_ID)'
+                echo '## `ecosystem-check` results (partial, see full diff [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))'
                 cat ecosystem-result
               } > full-comment.txt
           fi
