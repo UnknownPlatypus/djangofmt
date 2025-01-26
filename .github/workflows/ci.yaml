@@ -76,7 +76,17 @@ jobs:
             echo '## `ecosystem-check` results'
             cat ecosystem-result
           } >> full-comment.txt
-  
+          
+          # Determine if the comment exceeds 65536 characters
+          char_count=$(wc -c < full-comment.txt)
+          if [ $char_count -gt 65536 ]; then
+              {
+                cat placeholder-comment.txt
+                echo '## `ecosystem-check` results (partial, see full diff [here](https://github.com/UnknownPlatypus/djangofmt/actions/runs/$GITHUB_RUN_ID)'
+                cat ecosystem-result
+              } > full-comment.txt
+          fi
+          
           {
             echo 'comment<<EOF'
             cat full-comment.txt
@@ -98,5 +108,5 @@ jobs:
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
-          body-path: comment.txt
+          body-path: full-comment.txt
           edit-mode: replace
