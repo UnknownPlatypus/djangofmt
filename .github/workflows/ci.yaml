@@ -69,24 +69,24 @@ jobs:
           fi
 
           # Note this identifier is used to find the comment to update on subsequent runs
-          echo '<!-- generated-comment ecosystem -->' >> placeholder-comment.txt          
+          echo '<!-- generated-comment ecosystem -->' >> placeholder-comment.txt
 
           {
             cat placeholder-comment.txt
-            echo '## `ecosystem-check` results'
+            echo "## \`ecosystem-check\` results"
             cat ecosystem-result
           } >> full-comment.txt
-          
+
           # Determine if the comment exceeds 65536 characters
           char_count=$(wc -c < full-comment.txt)
-          if [ $char_count -gt 65536 ]; then
+          if [ "$char_count" -gt 65536 ]; then
               {
                 cat placeholder-comment.txt
-                echo '## `ecosystem-check` results (partial, see full diff [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))'
+                echo "## \`ecosystem-check\` results (partial, see full diff [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
                 cat ecosystem-result
               } > full-comment.txt
           fi
-          
+
           {
             echo 'comment<<EOF'
             cat full-comment.txt
