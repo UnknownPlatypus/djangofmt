@@ -55,11 +55,7 @@ jobs:
           uv run ecosystem-check format ./main_build ./pr_build --cache ./checkouts --output-format markdown | tee ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
-          {
-            echo "### Formatter (stable)"
-            cat ecosystem-result-format-stable
-            echo ""
-          } >> ecosystem-result
+          cat ecosystem-result-format-stable >> ecosystem-result
 
       - name: Generate comment content
         id: generate-comment
@@ -73,17 +69,17 @@ jobs:
           fi
 
           # Note this identifier is used to find the comment to update on subsequent runs
-          echo '<!-- generated-comment ecosystem -->' >> comment.txt
-          
+          echo '<!-- generated-comment ecosystem -->' >> placeholder-comment.txt          
+
           {
+            cat placeholder-comment.txt
             echo '## `ecosystem-check` results'
             cat ecosystem-result
-            echo ""
-          } >> comment.txt
-          
+          } >> full-comment.txt
+  
           {
             echo 'comment<<EOF'
-            cat comment.txt
+            cat full-comment.txt
             echo 'EOF'
           } >> "$GITHUB_OUTPUT"
 
