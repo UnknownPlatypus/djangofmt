@@ -9,9 +9,9 @@ repository = "https://github.com/UnknownPlatypus/djangofmt"
 description = "Django Template Formatter."
 
 [dependencies]
-dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", branch = "django/baseline", package = "dprint_plugin_markup" }
+dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "ba0dd1dc87c5e8fff685e71ab388c177656ba169", package = "dprint_plugin_markup" }
 malva = { version = "0.11.1", features = ["config_serde"] }
-markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", branch = "django/baseline", package = "markup_fmt" }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "ba0dd1dc87c5e8fff685e71ab388c177656ba169", package = "markup_fmt" }
 
 anyhow = "1.0.95"
 clap = { version = "4.5.26", features = ["derive"] }

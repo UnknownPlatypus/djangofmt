@@ -43,9 +43,6 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
             prefer_attrs_single_line: false,
             // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
             custom_blocks: args.custom_blocks,
-            // Removes a lot of vertical space, breaking a tag with a single attr doesn't really
-            // help with readability.
-            // prefer_single_line_opening_tag: true,
             ..LanguageOptions::default()
         },
     };
