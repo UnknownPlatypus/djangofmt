@@ -37,7 +37,13 @@ repos:
     hooks:
       - id: cargo-fmt
       - id: cargo-clippy
-        args: ["--all-targets", "--all-features", "--fix", "--allow-staged"]
+        args: [
+          "--all-targets",
+          "--all-features",
+          "--fix",
+          "--allow-staged",
+          "--allow-dirty",
+        ]
   - repo: https://github.com/woodruffw/zizmor-pre-commit
     rev: v1.2.2
     hooks:
