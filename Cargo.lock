@@ -167,7 +167,6 @@ dependencies = [
  "clap",
  "colored",
  "dprint_plugin_markup",
- "log",
  "malva",
  "markup_fmt",
  "rayon",

@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
@@ -24,6 +23,9 @@ jobs:
   build-and-compare:
     runs-on: ubuntu-24.04
     if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -111,3 +113,14 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-path: full-comment.txt
           edit-mode: replace
+
+  cargo-shear:
+    name: "cargo shear"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: cargo-bins/cargo-binstall@main
+      - run: cargo binstall --no-confirm cargo-shear
+      - run: cargo shear
