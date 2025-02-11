@@ -25,6 +25,7 @@ jobs:
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
