@@ -120,7 +120,7 @@ pub(crate) fn format_path(
                 // TODO: Don't skip errors and actually handle these cases.
                 //       Currently we have errors when there is templating blocks inside style tags
                 // .map_err(anyhow::Error::from)
-                .unwrap_or_default())
+                .unwrap_or(code.into()))
             } else {
                 Ok(code.into())
                 // dprint_plugin_biome::format_text(
