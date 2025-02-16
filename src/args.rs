@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use crate::logging::LogLevel;
-use clap::Parser;
+
 use markup_fmt::Language;
 
 /// All configuration options that can be passed "globally",
@@ -18,7 +18,7 @@ impl GlobalConfigArgs {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, clap::Parser)]
 #[command(
     author,
     name = "djangofmt",
@@ -63,6 +63,7 @@ pub struct FormatCommand {
     #[arg(
         long,
         value_delimiter = ',',
+        value_parser = clap::builder::ValueParser::new(|s: &str| Ok::<String, String>(s.trim().to_string())),
         value_name = "BLOCK_NAMES",
         help_heading = "Format configuration"
     )]
