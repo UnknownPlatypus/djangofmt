@@ -19,13 +19,13 @@ ecosystem-check format <baseline executable> <comparison executable>
 Note executable paths may be absolute, relative to the current working directory, or will be looked up in the
 current Python environment and PATH.
 
-Run `djangofmt format` ecosystem checks comparing your debug build to your system djangofmt:
+Run `djangofmt` ecosystem checks comparing your debug build to your system djangofmt:
 
 ```shell
 ecosystem-check format djangofmt "./target/debug/djangofmt"
 ```
 
-Run `djangofmt format` ecosystem checks comparing with changes to code that is already formatted:
+Run `djangofmt` ecosystem checks comparing with changes to code that is already formatted:
 
 ```shell
 ecosystem-check format djangofmt "./target/debug/djangofmt" --format-comparison base-then-comp

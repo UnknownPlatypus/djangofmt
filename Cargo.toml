@@ -6,7 +6,7 @@ edition = "2021"
 exclude = ["/tests"]
 license = "MIT"
 repository = "https://github.com/UnknownPlatypus/djangofmt"
-description = "Django Template Formatter."
+description = "A fast Django Template Formatter"
 
 [dependencies]
 dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "33ffa4032f76bcf9d59fcfc37061f028f6583d42", package = "dprint_plugin_markup" }

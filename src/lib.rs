@@ -2,7 +2,7 @@ use std::process::ExitCode;
 
 use anyhow::Result;
 
-use crate::args::{Args, Command};
+use crate::args::Args;
 use crate::logging::setup_tracing;
 
 pub mod args;
@@ -33,17 +33,11 @@ impl From<ExitStatus> for ExitCode {
 /// Will set up logging and call the correct Command Handler.
 pub fn run(
     Args {
-        command,
+        fmt,
         global_options,
     }: Args,
 ) -> Result<ExitStatus> {
     setup_tracing(global_options.log_level())?;
 
-    match command {
-        Command::Format(args) => commands::format::format(args, global_options),
-        Command::Version => {
-            commands::version::version()?;
-            Ok(ExitStatus::Success)
-        }
-    }
+    commands::format::format(fmt, global_options)
 }

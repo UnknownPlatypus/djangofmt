@@ -1,5 +1,5 @@
 """
-Execution, comparison, and summary of `djangofmt format` ecosystem checks.
+Execution, comparison, and summary of `djangofmt` ecosystem checks.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 def markdown_format_result(result: Result) -> str:
     """
-    Render a `djangofmt format` ecosystem check result as markdown.
+    Render a `djangofmt` ecosystem check result as markdown.
     """
     lines: list[str] = []
     total_lines_removed = total_lines_added = 0

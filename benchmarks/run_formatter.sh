@@ -8,7 +8,7 @@ LINE_LENGTH=${LINE_LENGTH:-120}
 
 # Setup run commands
 _XARGS_FILES="cat /tmp/files-list | xargs --max-procs=0"
-DJANGOFMT_CMD="$_XARGS_FILES ../target/release/djangofmt format --profile django --line-length $LINE_LENGTH --silent"
+DJANGOFMT_CMD="$_XARGS_FILES ../target/release/djangofmt --profile django --line-length $LINE_LENGTH --silent"
 PRETTIER_CMD="$_XARGS_FILES ./node_modules/.bin/prettier --ignore-unknown --write --print-width $LINE_LENGTH --log-level silent"
 DJLINT_CMD="$_XARGS_FILES djlint --reformat --profile=django --max-line-length $LINE_LENGTH"
 DJADE_CMD="$_XARGS_FILES djade --target-version 5.1"

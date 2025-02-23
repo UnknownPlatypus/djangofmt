@@ -19,45 +19,25 @@ impl GlobalConfigArgs {
 }
 
 #[derive(Debug, clap::Parser)]
-#[command(
-    author,
-    name = "djangofmt",
-    about = "Django Template Linter and Formatter",
-    after_help = "For help with a specific command, see: `djangofmt help <command>`."
-)]
-#[command()]
+#[command(author, version, next_line_help = true, about)]
 pub struct Args {
-    #[command(subcommand)]
-    pub(crate) command: Command,
+    #[clap(flatten)]
+    pub(crate) fmt: FormatCommand,
+
     #[clap(flatten)]
     pub(crate) global_options: GlobalConfigArgs,
 }
 
-#[derive(Debug, clap::Subcommand)]
-pub enum Command {
-    /// Run the formatter on the given files or directories.
-    Format(FormatCommand),
-    /// Display Djangofmt's version
-    #[clap(alias = "--version")]
-    Version,
-}
-
 #[derive(Clone, Debug, clap::Parser)]
-#[allow(clippy::struct_excessive_bools)]
 pub struct FormatCommand {
-    /// List of files or directories to format.
-    #[clap(help = "List of files or directories to format", required = true)]
+    /// List of files to format.
+    #[clap(help = "List of files to format", required = true)]
     pub files: Vec<PathBuf>,
     /// Set the line-length.
-    #[arg(long, help_heading = "Format configuration")]
-    pub line_length: Option<usize>,
-    /// Template language profile to use (django or jinja)
-    #[arg(
-        long,
-        value_enum,
-        default_value = "django",
-        help_heading = "Format configuration"
-    )]
+    #[arg(long, default_value = "120")]
+    pub line_length: usize,
+    /// Template language profile to use
+    #[arg(long, value_enum, default_value = "django")]
     pub profile: Profile,
     /// Comma-separated list of custom block name to enable
     #[arg(
@@ -65,11 +45,11 @@ pub struct FormatCommand {
         value_delimiter = ',',
         value_parser = clap::builder::ValueParser::new(|s: &str| Ok::<String, String>(s.trim().to_string())),
         value_name = "BLOCK_NAMES",
-        help_heading = "Format configuration"
     )]
     pub custom_blocks: Option<Vec<String>>,
 }
 
+// TODO: , help_heading = "Format Options"
 #[derive(Clone, Debug, clap::ValueEnum)]
 pub enum Profile {
     Django,
