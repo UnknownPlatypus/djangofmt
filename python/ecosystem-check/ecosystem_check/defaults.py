@@ -124,6 +124,9 @@ DEFAULT_TARGETS = [
             custom_blocks="slot,element",
             exclude=(
                 "examples/regular-django/example/templates/allauth/elements/form.html",
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "allauth/templates/allauth/elements/button.html",
+                "examples/regular-django/example/templates/allauth/elements/button.html",
             ),
         ),
     ),

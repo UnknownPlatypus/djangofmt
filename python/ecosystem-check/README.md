@@ -19,7 +19,7 @@ ecosystem-check format <baseline executable> <comparison executable>
 Note executable paths may be absolute, relative to the current working directory, or will be looked up in the
 current Python environment and PATH.
 
-Run `djangofmt format` ecosystem checks comparing your debug build to your system Ruff:
+Run `djangofmt format` ecosystem checks comparing your debug build to your system djangofmt:
 
 ```shell
 ecosystem-check format djangofmt "./target/debug/djangofmt"
@@ -45,5 +45,5 @@ ecosystem-check format djangofmt "./target/debug/djangofmt" --pdb
 You can also provide a path to cache checkouts to speed up repeated runs:
 
 ```shell
-ecosystem-check format djangofmt "./target/debug/djangofmt" --cache ./repos
+ecosystem-check format djangofmt "./target/debug/djangofmt" --cache /tmp/repos
 ```
