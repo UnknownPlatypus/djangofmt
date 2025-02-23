@@ -21,7 +21,7 @@ use crate::ExitStatus;
 pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> Result<ExitStatus> {
     let format_options = FormatOptions {
         layout: LayoutOptions {
-            print_width: args.line_length.unwrap_or(120),
+            print_width: args.line_length,
             indent_width: 4,
             ..LayoutOptions::default()
         },
