@@ -257,6 +257,6 @@ class FormatComparison(Enum):
     # Checks for changes in behavior when formatting previously "formatted" code
     base_then_comp = "base-then-comp"
 
-    # Run Ruff baseline then reset and run Ruff comparison.
+    # Run baseline executable then reset and run comparison executable.
     # Checks changes in behavior when formatting "unformatted" code
     base_and_comp = "base-and-comp"

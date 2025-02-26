@@ -1,5 +1,6 @@
 default_language_version:
   python: python3.12
+  golang: 1.23.0
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -19,13 +20,13 @@ repos:
       - id: pyupgrade
         args: [--py39-plus]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.6
+    rev: v0.9.7
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/crate-ci/typos
-    rev: v1.29.7
+    rev: v1.29.10
     hooks:
       - id: typos
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -45,7 +46,7 @@ repos:
           "--allow-dirty",
         ]
   - repo: https://github.com/woodruffw/zizmor-pre-commit
-    rev: v1.3.1
+    rev: v1.4.1
     hooks:
       - id: zizmor
   - repo: https://github.com/rhysd/actionlint
