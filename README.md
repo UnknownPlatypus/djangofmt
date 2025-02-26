@@ -18,6 +18,25 @@ uv add --dev djangofmt            # Or add djangofmt to your project.
 pipx install djangofmt
 ```
 
+## As a pre-commit hook
+
+See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
+
+Sample `.pre-commit-config.yaml`:
+
+```yaml
+- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
+  rev: v0.1.0
+  hooks:
+    - id: djangofmt
+```
+
+The separate repository enables installation without compiling the Rust code.
+
+By default, the configuration uses pre-commit’s [`files` option](https://pre-commit.com/#creating-new-hooks) to detect
+all text files in directories named `templates`. If your templates are stored elsewhere, you can override this behavior
+by specifying the desired files in the hook configuration within your `.pre-commit-config.yaml` file.
+
 ## Usage
 
 ```shell
