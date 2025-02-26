@@ -19,9 +19,30 @@ env:
   UV_VERSION: 0.1.23
 
 jobs:
+  changed_files:
+    name: "Determine which files changed"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      code: ${{ steps.changed.outputs.code_any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - uses: tj-actions/changed-files@v45
+        id: changed
+        with:
+          files_yaml: |
+            code:
+              - python/**
+              - src/**
+
   build-and-compare:
     runs-on: ubuntu-24.04
-    if: github.event_name == 'pull_request'
+    needs: changed_files
+    if: ${{ github.event_name == 'pull_request' && needs.changed_files.outputs.code == 'true' }}
     permissions:
       pull-requests: write
       contents: read
@@ -116,6 +137,8 @@ jobs:
   cargo-shear:
     name: "cargo shear"
     runs-on: ubuntu-latest
+    needs: changed_files
+    if: needs.changed_files.outputs.code == 'true'
     permissions:
       contents: read
     steps:
