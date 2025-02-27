@@ -5,6 +5,7 @@ authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 edition = "2021"
 exclude = ["/tests"]
 license = "MIT"
+publish = false
 repository = "https://github.com/UnknownPlatypus/djangofmt"
 description = "A fast Django Template Formatter"
 
