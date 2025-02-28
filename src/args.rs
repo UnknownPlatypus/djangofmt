@@ -1,6 +1,7 @@
-use std::path::PathBuf;
-
 use crate::logging::LogLevel;
+use clap::builder::styling::{AnsiColor, Effects};
+use clap::builder::Styles;
+use std::path::PathBuf;
 
 use markup_fmt::Language;
 
@@ -18,8 +19,16 @@ impl GlobalConfigArgs {
     }
 }
 
+// Configures Clap v3-style help menu colors
+const STYLES: Styles = Styles::styled()
+    .header(AnsiColor::Green.on_default().effects(Effects::BOLD))
+    .usage(AnsiColor::Green.on_default().effects(Effects::BOLD))
+    .literal(AnsiColor::Cyan.on_default().effects(Effects::BOLD))
+    .placeholder(AnsiColor::Cyan.on_default());
+
 #[derive(Debug, clap::Parser)]
 #[command(author, version, next_line_help = true, about)]
+#[command(styles=STYLES)]
 pub struct Args {
     #[clap(flatten)]
     pub(crate) fmt: FormatCommand,
@@ -31,7 +40,7 @@ pub struct Args {
 #[derive(Clone, Debug, clap::Parser)]
 pub struct FormatCommand {
     /// List of files to format.
-    #[clap(help = "List of files to format", required = true)]
+    #[arg(help = "List of files to format", required = true)]
     pub files: Vec<PathBuf>,
     /// Set the line-length.
     #[arg(long, default_value = "120")]
