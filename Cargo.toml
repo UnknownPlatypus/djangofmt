@@ -7,7 +7,8 @@ exclude = ["/tests"]
 license = "MIT"
 publish = false
 repository = "https://github.com/UnknownPlatypus/djangofmt"
-description = "A fast Django Template Formatter"
+rust-version = "1.83"
+description = "A fast, HTML aware, Django template formatter, written in Rust."
 
 [dependencies]
 dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "33ffa4032f76bcf9d59fcfc37061f028f6583d42", package = "dprint_plugin_markup" }
