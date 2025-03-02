@@ -13,7 +13,7 @@ Then measures binary sizes, build times, and performance using hyperfine.
 It should be provided with a file containing a list of html file to format.
 
 Usage:
-    python benchmark_cargo_profiles.py --files-list /path/to/your/files-list
+    uv run --script python/benchmark_cargo_profiles.py --files-list /path/to/your/files-list
 
 Output:
 ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -30,37 +30,20 @@ Output:
 Based on https://github.com/astral-sh/ruff/pull/9031
 """
 
+import argparse
+import enum
 import json
 import os
-import subprocess
+import re
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
-import re
-import argparse
 from typing import NamedTuple
 
 from rich import print as _rich_print
-from rich.table import Table
 from rich.console import Console
-
-
-def _get_profile_name(lto_option: str | bool, codegen_unit: int) -> str:
-    return f"{lto_option if isinstance(lto_option, str) else 'nolto'}cg{codegen_unit}"
-
-
-# Configuration for benchmarking
-CODEGEN_UNITS = [1, 16]
-LTO_OPTIONS: list[str | bool] = ["fat", "thin", False]
-PROFILES = [
-    _get_profile_name(lto_option, codegen_unit)
-    for lto_option in LTO_OPTIONS
-    for codegen_unit in CODEGEN_UNITS
-]
-BENCHMARK_ARGS = "--profile django --line-length 120 --silent"
-WARMUP_RUNS = 10
-BENCHMARK_RUNS = 100
-CARGO_TOML_PATH = Path("Cargo.toml")
+from rich.table import Table
 
 
 class BuildResult(NamedTuple):
@@ -72,6 +55,37 @@ class BuildResult(NamedTuple):
 class BenchResult(NamedTuple):
     mean: float
     stddev: float
+
+
+class CodegenUnits(enum.IntEnum):
+    ONE = 1
+    SIXTEEN = 16
+
+
+class LtoOptions(enum.Enum):
+    FAT = "fat"
+    THIN = "thin"
+    NO = False
+
+
+class Profile(NamedTuple):
+    codegen_unit: CodegenUnits
+    lto_option: LtoOptions
+
+    def __str__(self):
+        return f"lto{self.lto_option.name.lower()}_cg{self.codegen_unit}"
+
+
+##### Configuration for benchmarking #####
+BENCHMARK_ARGS = "--profile django --line-length 120 --silent"
+WARMUP_RUNS = 10
+BENCHMARK_RUNS = 100
+CARGO_TOML_PATH = Path("Cargo.toml")
+ALL_PROFILES = [
+    Profile(codegen_unit, lto_option)
+    for lto_option in LtoOptions
+    for codegen_unit in CodegenUnits
+]
 
 
 def rich_print(msg: str):
@@ -95,15 +109,14 @@ def update_cargo_toml(initial_cargo_toml_content: str):
 
 def _generate_additional_profiles():
     profile_strings = []
-    for codegen_unit in CODEGEN_UNITS:
-        for lto_option in LTO_OPTIONS:
-            profile_str = (
-                f"[profile.{_get_profile_name(lto_option, codegen_unit)}]\n"
-                f'inherits = "release"\n'
-                f"lto = {repr(lto_option).lower()}\n"
-                f"codegen-units = {codegen_unit}\n"
-            )
-            profile_strings.append(profile_str)
+    for profile in ALL_PROFILES:
+        profile_str = (
+            f"[profile.{profile!s}]\n"
+            f'inherits = "release"\n'
+            f"lto = {repr(profile.lto_option.value).lower()}\n"
+            f"codegen-units = {profile.codegen_unit}\n"
+        )
+        profile_strings.append(profile_str)
 
     return "\n".join(profile_strings)
 
@@ -138,7 +151,7 @@ def _sanity_checks():
         )
 
 
-def build_binaries() -> dict[str, BuildResult]:
+def build_binaries() -> dict[Profile, BuildResult]:
     """Build all binaries and wheels, measuring build time"""
     rich_print("Building binaries and wheels for each profile")
 
@@ -150,12 +163,12 @@ def build_binaries() -> dict[str, BuildResult]:
 
     results = {}
 
-    for profile in PROFILES:
+    for profile in ALL_PROFILES:
         rich_print(f":wrench: Building profile: {profile}")
 
         # Build binary and get file size
         process = subprocess.run(
-            ["cargo", "build", "--profile", profile],
+            ["cargo", "build", "--profile", str(profile)],
             capture_output=True,
             text=True,
             check=True,
@@ -179,7 +192,7 @@ def build_binaries() -> dict[str, BuildResult]:
                 "build",
                 "--release",
                 "--profile",
-                profile,
+                str(profile),
             ],
             check=True,
         )
@@ -204,7 +217,7 @@ def build_binaries() -> dict[str, BuildResult]:
     return results
 
 
-def run_benchmarks(files_list_path) -> dict[str, BenchResult]:
+def run_benchmarks(files_list_path) -> dict[Profile, BenchResult]:
     """Run benchmarks for all profiles and collect results"""
     rich_print("Running benchmarks")
     if not os.path.exists(files_list_path):
@@ -222,7 +235,7 @@ def run_benchmarks(files_list_path) -> dict[str, BenchResult]:
             f.name,
             "--show-output",
         ]
-        for profile in PROFILES:
+        for profile in ALL_PROFILES:
             cmd_str = f'"cat {files_list_path} | xargs --max-procs=0 ./target/release/djangofmt-{profile} {BENCHMARK_ARGS}"'
             benchmark_cmd.append(cmd_str)
 
@@ -232,12 +245,12 @@ def run_benchmarks(files_list_path) -> dict[str, BenchResult]:
 
         return {
             profile: BenchResult(result["mean"], result["stddev"])
-            for profile, result in zip(PROFILES, results, strict=True)
+            for profile, result in zip(ALL_PROFILES, results, strict=True)
         }
 
 
 def output_rich_table(
-    build_results: dict[str, BuildResult], bench_results: dict[str, BenchResult]
+    build_results: dict[Profile, BuildResult], bench_results: dict[Profile, BenchResult]
 ):
     """Generate a formatted rich table with all results"""
     table = Table()
@@ -252,25 +265,21 @@ def output_rich_table(
 
     # Add content
     table_data = []
-    for profile in PROFILES:
+    for profile in ALL_PROFILES:
         build_info = build_results[profile]
+        table_data.append(
+            [
+                str(profile),
+                f"{build_info.build_time_seconds:.2f}",
+                f"{build_info.binary_size_mb:.2f}",
+                f"{build_info.wheel_size_mb:.2f}",
+                f"{bench_results[profile].mean * 1000:.2f}",
+                f"{bench_results[profile].stddev * 1000:.2f}",
+            ]
+        )
 
-        row = [
-            profile,
-            f"{build_info.build_time_seconds:.2f}",
-            f"{build_info.binary_size_mb:.2f}",
-            f"{build_info.wheel_size_mb:.2f}",
-            f"{bench_results[profile].mean * 1000:.2f}",
-            f"{bench_results[profile].stddev * 1000:.2f}",
-        ]
-
-        table_data.append(row)
-
-    # Sort by benchmark time (fastest first)
-    table_data.sort(key=lambda x: float(x[4]))
-
-    # Add rows to table
-    for row in table_data:
+    # Add rows to table, sorted by benchmark time
+    for row in sorted(table_data, key=lambda x: float(x[4])):
         table.add_row(*row)
 
     console = Console()
@@ -299,17 +308,14 @@ def main():
     try:
         update_cargo_toml(initial_cargo_toml_content)
 
-        # Build binaries and collect results
         build_results = build_binaries()
 
-        # Run benchmarks
         bench_results = run_benchmarks(args.files_list)
 
-        # Output table
         output_rich_table(build_results, bench_results)
 
     finally:
-        # Reset the cargo toml file to previous state
+        # Reset the cargo toml file to the initial state
         CARGO_TOML_PATH.write_text(initial_cargo_toml_content)
     return 0
 
