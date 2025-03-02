@@ -21,7 +21,7 @@ env:
 jobs:
   changed_files:
     name: "Determine which files changed"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     outputs:
@@ -136,9 +136,9 @@ jobs:
 
   cargo-shear:
     name: "cargo shear"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: changed_files
-    if: needs.changed_files.outputs.code == 'true'
+    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
     permissions:
       contents: read
     steps:
