@@ -27,6 +27,6 @@ tracing-subscriber = "0.3"
 tracing-tree = "0.4.0"
 
 [profile.release]
-# See python/benchmark_cargo_profiles
+# See python/benchmark_cargo_profiles.py
 lto = "thin"
 strip = true

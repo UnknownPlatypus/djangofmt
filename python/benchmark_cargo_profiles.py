@@ -15,17 +15,28 @@ It should be provided with a file containing a list of html file to format.
 Usage:
     uv run --script python/benchmark_cargo_profiles.py --files-list /path/to/your/files-list
 
-Output:
-┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Profile   ┃ Build Time (s) ┃ Binary Size (MB) ┃ Wheel Size (MB) ┃ Benchmark Time Avg (ms) ┃ Benchmark Time ±σ (ms) ┃
-┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ fatcg16   │          19.28 │             3.49 │            1.30 │                   19.26 │                   0.62 │
-│ fatcg1    │          18.95 │             3.29 │            1.24 │                   19.37 │                   0.71 │
-│ thincg1   │          10.87 │             3.58 │            1.27 │                   19.38 │                   0.68 │
-│ thincg16  │           8.57 │             4.25 │            1.37 │                   19.40 │                   0.79 │
-│ noltocg16 │           8.42 │             4.25 │            1.36 │                   19.54 │                   0.65 │
-│ noltocg1  │           9.94 │             3.55 │            1.25 │                   19.67 │                   0.74 │
-└───────────┴────────────────┴──────────────────┴─────────────────┴─────────────────────────┴────────────────────────┘
+Output (strip=false):
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Profile      ┃ Build Time (s) ┃ Binary Size (MB) ┃ Wheel Size (MB) ┃ Benchmark Time Avg (ms) ┃ Benchmark Time ±σ (ms) ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ ltofat_cg16  │          19.28 │             3.49 │            1.30 │                   19.28 │                   0.70 │
+│ ltofat_cg1   │          18.95 │             3.29 │            1.24 │                   19.42 │                   0.74 │
+│ ltothin_cg1  │          10.97 │             3.58 │            1.27 │                   19.43 │                   0.84 │
+│ ltothin_cg16 │           8.49 │             4.25 │            1.37 │                   19.52 │                   0.64 │
+│ ltono_cg1    │          10.12 │             3.55 │            1.25 │                   19.60 │                   0.85 │
+│ ltono_cg16   │           8.41 │             4.25 │            1.36 │                   19.68 │                   0.70 │
+└──────────────┴────────────────┴──────────────────┴─────────────────┴─────────────────────────┴────────────────────────┘
+Output (strip=true):
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Profile      ┃ Build Time (s) ┃ Binary Size (MB) ┃ Wheel Size (MB) ┃ Benchmark Time Avg (ms) ┃ Benchmark Time ±σ (ms) ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ ltofat_cg1   │          19.27 │             2.89 │            1.24 │                   19.28 │                   0.69 │
+│ ltothin_cg16 │           8.56 │             3.44 │            1.37 │                   19.29 │                   0.64 │
+│ ltono_cg1    │          10.01 │             3.05 │            1.25 │                   19.35 │                   0.75 │
+│ ltothin_cg1  │          10.97 │             3.05 │            1.27 │                   19.47 │                   0.68 │
+│ ltofat_cg16  │          18.91 │             3.04 │            1.30 │                   19.48 │                   0.73 │
+│ ltono_cg16   │           8.53 │             3.46 │            1.36 │                   19.62 │                   0.98 │
+└──────────────┴────────────────┴──────────────────┴─────────────────┴─────────────────────────┴────────────────────────┘
 
 Based on https://github.com/astral-sh/ruff/pull/9031
 """
@@ -72,7 +83,7 @@ class Profile(NamedTuple):
     codegen_unit: CodegenUnits
     lto_option: LtoOptions
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"lto{self.lto_option.name.lower()}_cg{self.codegen_unit}"
 
 
@@ -88,12 +99,12 @@ ALL_PROFILES = [
 ]
 
 
-def rich_print(msg: str):
+def rich_print(msg: str) -> None:
     msg = f" {msg} ".center(80, "=")
     _rich_print(f"[bold cyan]{msg}[/bold cyan]")
 
 
-def update_cargo_toml(initial_cargo_toml_content: str):
+def update_cargo_toml(initial_cargo_toml_content: str) -> str:
     """Create a temporary Cargo.toml based on the original"""
     rich_print("Setting up temporary Cargo.toml...")
 
@@ -107,8 +118,12 @@ def update_cargo_toml(initial_cargo_toml_content: str):
     return initial_cargo_toml_content
 
 
-def _generate_additional_profiles():
-    profile_strings = []
+def _generate_additional_profiles() -> str:
+    """Generate Cargo.toml profiles for different configurations"""
+    profile_strings = [
+        "# Auto-generated profiles for benchmarking.\n",
+        "# These will be removed after benchmarking completes.\n",
+    ]
     for profile in ALL_PROFILES:
         profile_str = (
             f"[profile.{profile!s}]\n"
@@ -121,21 +136,20 @@ def _generate_additional_profiles():
     return "\n".join(profile_strings)
 
 
-def _get_file_size_mb(file_path):
+def _get_file_size_mb(file_path: str) -> float:
     """Get file size in MB"""
-    size_bytes = os.path.getsize(file_path)
-    return size_bytes / (1024 * 1024)  # Convert to MB
+    return os.path.getsize(file_path) / (1024 * 1024)
 
 
-def _parse_build_time_seconds(output):
+def _parse_build_time_seconds(output: str) -> float:
     """Parse build time from cargo output"""
     match = re.search(r"Finished .+ in (\d+\.\d+)s", output)
     if match:
         return float(match.group(1))
-    return None
+    return 0.0
 
 
-def _sanity_checks():
+def _sanity_checks(args: argparse.Namespace) -> None:
     """Check for required tool and files"""
     for tool in ["cargo", "maturin", "hyperfine"]:
         tool_path = shutil.which(tool)
@@ -148,6 +162,11 @@ def _sanity_checks():
     if not CARGO_TOML_PATH.exists():
         raise FileNotFoundError(
             "Cargo.toml not found. Please run this script from your project root."
+        )
+
+    if not Path(args.files_list).exists():
+        raise FileNotFoundError(
+            f"{args.files_list} not found. Please provide a valid --files-list path."
         )
 
 
@@ -217,7 +236,7 @@ def build_binaries() -> dict[Profile, BuildResult]:
     return results
 
 
-def run_benchmarks(files_list_path) -> dict[Profile, BenchResult]:
+def run_benchmarks(files_list_path: str) -> dict[Profile, BenchResult]:
     """Run benchmarks for all profiles and collect results"""
     rich_print("Running benchmarks")
     if not os.path.exists(files_list_path):
@@ -251,7 +270,7 @@ def run_benchmarks(files_list_path) -> dict[Profile, BenchResult]:
 
 def output_rich_table(
     build_results: dict[Profile, BuildResult], bench_results: dict[Profile, BenchResult]
-):
+) -> None:
     """Generate a formatted rich table with all results"""
     table = Table()
 
@@ -286,7 +305,7 @@ def output_rich_table(
     console.print(table)
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(
         description="Build and benchmark different cargo profiles"
@@ -299,10 +318,10 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def main():
+def main() -> int:
     args = parse_arguments()
 
-    _sanity_checks()
+    _sanity_checks(args)
 
     initial_cargo_toml_content = CARGO_TOML_PATH.read_text()
     try:
