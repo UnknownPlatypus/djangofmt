@@ -6,7 +6,7 @@ import json
 from collections.abc import Awaitable
 from enum import Enum
 from pathlib import Path
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from ecosystem_check import logger
 from ecosystem_check.format import (
@@ -138,7 +138,7 @@ async def clone_and_compare(
 
 
 class JSONEncoder(json.JSONEncoder):
-    def default(self, o: object):
+    def default(self, o: object) -> Any:
         if isinstance(o, Serializable):
             return o.jsonable()
         if dataclasses.is_dataclass(o):

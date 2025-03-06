@@ -124,7 +124,7 @@ async def compare_format(
     options: FormatOptions,
     cloned_repo: ClonedRepository,
     format_comparison: FormatComparison,
-):
+) -> Comparison:
     args = (
         baseline_executable,
         comparison_executable,

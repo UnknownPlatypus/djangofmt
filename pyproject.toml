@@ -32,6 +32,9 @@ classifiers = [
 [project.urls]
 Repository = "https://github.com/UnknownPlatypus/djangofmt"
 
+[tool.mypy]
+strict = true
+
 [tool.maturin]
 bindings = "bin"
 manifest-path = "Cargo.toml"

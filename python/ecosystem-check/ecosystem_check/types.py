@@ -4,7 +4,7 @@ import dataclasses
 import difflib
 from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass, is_dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import ClonedRepository, Project
@@ -50,15 +50,15 @@ class Diff(Serializable):
         yield from self.lines
 
     @property
-    def lines_added(self):
+    def lines_added(self) -> int:
         return len(self.added)
 
     @property
-    def lines_removed(self):
+    def lines_removed(self) -> int:
         return len(self.removed)
 
     @classmethod
-    def from_pair(cls, baseline: Sequence[str], comparison: Sequence[str]):
+    def from_pair(cls, baseline: Sequence[str], comparison: Sequence[str]) -> Self:
         """
         Construct a diff from before and after.
         """

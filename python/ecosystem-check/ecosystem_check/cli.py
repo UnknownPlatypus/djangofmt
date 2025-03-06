@@ -11,6 +11,7 @@ import tempfile
 from contextlib import nullcontext
 from pathlib import Path
 from signal import SIGINT, SIGTERM
+from types import TracebackType
 from typing import Literal
 
 from ecosystem_check import logger
@@ -20,7 +21,9 @@ from ecosystem_check.main import OutputFormat, main
 from ecosystem_check.projects import DjangoFmtCommand
 
 
-def excepthook(type, value, tb):
+def excepthook(
+    type: type[BaseException], value: BaseException, tb: TracebackType | None
+) -> None:
     if hasattr(sys, "ps1") or not sys.stderr.isatty():
         # we are in interactive mode or we don't have a tty so call the default
         sys.__excepthook__(type, value, tb)
@@ -33,7 +36,7 @@ def excepthook(type, value, tb):
         pdb.post_mortem(tb)
 
 
-def entrypoint():
+def entrypoint() -> None:
     args = parse_args()
 
     if args.pdb:
@@ -157,7 +160,7 @@ def _get_executable_path(name: str) -> Path | None:
 
 def resolve_executable(
     executable: Path, executable_type: Literal["baseline", "comparison"]
-):
+) -> Path:
     if executable.exists():
         return executable
 

@@ -187,7 +187,7 @@ class ClonedRepository(Repository, Serializable):
         return f"https://github.com/{self.owner}/{self.name}@{self.commit_hash}"
 
     @classmethod
-    async def from_path(cls, path: Path, repo: Repository):
+    async def from_path(cls, path: Path, repo: Repository) -> Self:
         return cls(
             name=repo.name,
             owner=repo.owner,
