@@ -9,13 +9,18 @@ Documentation about how to run various performance benchmark for `djangofmt` ver
 
 ## Setup
 
-First go into `./benchmarks` and then run this to build `djangofmt` & install other tools needed to benchmark:
+First `cd ./python/benchmarks` and then run this to build `djangofmt` & install other tools needed to benchmark:
 
 ```bash
 cargo build --release &&
 uv sync --project . -p 3.11 &&
-. .venv/bin/activate &&
 npm i
+```
+
+Then activate the python env
+
+```shell
+. .venv/bin/activate
 ```
 
 ## Running Benchmarks

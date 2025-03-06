@@ -9,10 +9,11 @@ You will also need [uv](https://docs.astral.sh/uv/getting-started/installation/)
 to run various python tools.
 
 Linting & formatting is managed using [pre-commit](https://pre-commit.com/)
-so you'll need to have it installed.
+so you'll need to have it installed and to install the hooks.
 
 ```shell
 uv tool install pre-commit
+pre-commit install
 ```
 
 ## Development
@@ -26,3 +27,7 @@ pre-commit run --all-files
 
 You can also run the ecosystem check locally (it will run in CI anyways).
 See the [README](./python/ecosystem-check/README.md).
+
+## Other tools / scripts
+
+You can run the benchmarks locally followingthe [README](./python/benchmarks/README.md).
