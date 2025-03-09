@@ -333,7 +333,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: x86_64
-          args: --release --locked --out dist --features self-update
+          args: --release --locked --out dist
       - name: "Upload wheels"
         uses: actions/upload-artifact@v4
         with:
@@ -372,7 +372,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: aarch64
-          args: --release --locked --out dist --features self-update
+          args: --release --locked --out dist
       - name: "Test wheels"
         run: |
           pip install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
@@ -424,7 +424,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --locked --out dist --features self-update
+          args: --release --locked --out dist
       - name: "Test wheels"
         if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
         shell: bash
