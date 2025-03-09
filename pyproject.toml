@@ -35,10 +35,10 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 [tool.mypy]
 strict = true
 
+# https://www.maturin.rs/config.html#maturin-options
 [tool.maturin]
 bindings = "bin"
 manifest-path = "Cargo.toml"
-module-name = "djangofmt"
 strip = true
 include = [
   "rust-toolchain.toml",
