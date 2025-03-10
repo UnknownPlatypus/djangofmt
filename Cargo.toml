@@ -5,7 +5,7 @@ authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 edition = "2021"
 exclude = ["/tests"]
 license = "MIT"
-publish = false
+publish = true
 repository = "https://github.com/UnknownPlatypus/djangofmt"
 rust-version = "1.83"
 description = "A fast, HTML aware, Django template formatter, written in Rust."
@@ -30,3 +30,7 @@ tracing-tree = "0.4.0"
 # See python/benchmark_cargo_profiles.py
 lto = "thin"
 strip = true
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"

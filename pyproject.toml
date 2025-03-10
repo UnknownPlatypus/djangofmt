@@ -13,7 +13,7 @@ keywords = [
 authors = [
   { name = "Thibaut Decombe", email = "thibaut.decombe@gmail.com" },
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.8"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Framework :: Django",
@@ -35,10 +35,10 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 [tool.mypy]
 strict = true
 
+# https://www.maturin.rs/config.html#maturin-options
 [tool.maturin]
 bindings = "bin"
 manifest-path = "Cargo.toml"
-module-name = "djangofmt"
 strip = true
 include = [
   "rust-toolchain.toml",
