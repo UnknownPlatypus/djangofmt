@@ -157,4 +157,64 @@ DEFAULT_TARGETS = [
             )
         ),
     ),
+    Project(
+        repo=Repository(owner="unfoldadmin", name="django-unfold", ref="main"),
+        format_options=FormatOptions(
+            exclude=(
+                "src/unfold/contrib/simple_history/templates/simple_history/object_history_list.html",  # Broken close tag
+                "src/unfold/templates/admin/auth/user/add_form.html",  # Broken close tag
+                "src/unfold/templates/unfold/helpers/display_header.html",  # Broken close tag
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "src/unfold/templates/admin/actions.html",
+                "src/unfold/templates/admin/date_hierarchy.html",
+                "src/unfold/templates/admin/edit_inline/stacked.html",
+                "src/unfold/templates/admin/edit_inline/tabular.html",
+                "src/unfold/templates/unfold/widgets/radio.html",
+                "src/unfold/templates/unfold/widgets/radio_option.html",
+                # conditional tag name with differing end tag like </{% if cl.model_admin.list_filter_submit %}form{% else %}div{% endif %}>
+                "src/unfold/templates/unfold/components/button.html",
+                "src/unfold/templates/unfold/helpers/change_list_filter.html",
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(
+            owner="DmytroLitvinov",
+            name="django-admin-inline-paginator-plus",
+            ref="master",
+        ),
+    ),
+    Project(
+        repo=Repository(owner="getsentry", name="sentry", ref="master"),
+        format_options=FormatOptions(
+            exclude=(
+                "src/sentry/templates/sentry/debug/error-page-embed.html",  # Broken close tag
+                "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
+                "src/sentry/templates/sentry/integrations/notify-disable.html",  # Dangling </a>
+                "src/sentry/templates/sentry/integrations/sentry-app-notify-disable.html",  # Dangling </a>
+                "src/sentry/templates/sentry/toolbar/iframe.html",  # Intentionally unclosed body tag
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "src/sentry/templates/sentry/emails/reports/body.html",
+                "src/sentry/templates/sentry/partial/system-status.html",
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="makeplane", name="plane", ref="preview"),
+        format_options=FormatOptions(
+            exclude=(
+                "apiserver/templates/emails/test_email.html",  # Invalid </br> tag
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="jumpserver", name="jumpserver", ref="master"),
+        format_options=FormatOptions(
+            exclude=(
+                "apps/acls/templates/acls/asset_login_reminder.html",  # Invalid close tag
+                "apps/acls/templates/acls/user_login_reminder.html",  # Invalid close tag
+                "apps/authentication/templates/authentication/login.html",
+            )
+        ),
+    ),
 ]
