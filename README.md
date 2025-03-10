@@ -131,3 +131,17 @@ Summary
   162.80 ± 7.96 times faster than cat /tmp/test-files | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
 </code></pre>
 </details>
+
+## Shell Completions
+
+You can generate shell completions for your preferred
+shell using the `djangofmt completions` command.
+
+```shell
+Usage: djangofmt completions <SHELL>
+
+Arguments:
+  <SHELL>
+      The shell to generate the completions for
+      [possible values: bash, elvish, fish, nushell, powershell, zsh]
+```
