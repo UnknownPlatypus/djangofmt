@@ -27,14 +27,23 @@ const STYLES: Styles = Styles::styled()
     .placeholder(AnsiColor::Cyan.on_default());
 
 #[derive(Debug, clap::Parser)]
-#[command(author, version, next_line_help = true, about)]
-#[command(styles=STYLES)]
+#[command(
+    author,
+    version,
+    next_line_help = true,
+    about,
+    styles=STYLES,
+    subcommand_negates_reqs = true
+)]
 pub struct Args {
     #[clap(flatten)]
     pub(crate) fmt: FormatCommand,
 
     #[clap(flatten)]
     pub(crate) global_options: GlobalConfigArgs,
+
+    #[command(subcommand)]
+    pub command: Option<Commands>,
 }
 
 #[derive(Clone, Debug, clap::Parser)]
@@ -58,7 +67,6 @@ pub struct FormatCommand {
     pub custom_blocks: Option<Vec<String>>,
 }
 
-// TODO: , help_heading = "Format Options"
 #[derive(Clone, Debug, clap::ValueEnum)]
 pub enum Profile {
     Django,
@@ -73,6 +81,18 @@ impl From<&Profile> for Language {
         }
     }
 }
+
+#[derive(Debug, clap::Subcommand)]
+pub enum Commands {
+    /// Generate shell completions
+    #[clap(hide = true)]
+    Completions {
+        /// The shell to generate the completions for
+        #[arg(value_enum)]
+        shell: clap_complete_command::Shell,
+    },
+}
+
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug, Default, Clone, clap::Args)]
 pub struct LogLevelArgs {

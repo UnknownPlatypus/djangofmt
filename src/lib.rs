@@ -35,6 +35,7 @@ pub fn run(
     Args {
         fmt,
         global_options,
+        ..
     }: Args,
 ) -> Result<ExitStatus> {
     setup_tracing(global_options.log_level())?;
