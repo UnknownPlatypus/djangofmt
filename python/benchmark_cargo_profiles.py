@@ -88,7 +88,7 @@ class Profile(NamedTuple):
 
 
 ##### Configuration for benchmarking #####
-BENCHMARK_ARGS = "--profile django --line-length 120 --silent"
+BENCHMARK_ARGS = "--profile django --line-length 120 --quiet"
 WARMUP_RUNS = 10
 BENCHMARK_RUNS = 100
 CARGO_TOML_PATH = Path("Cargo.toml")

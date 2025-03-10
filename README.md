@@ -97,7 +97,7 @@ Tools versions:
 - djade: v1.3.2
 - djhtml: v3.0.7
 
-<pre><code>Benchmark 1: cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --silent
+<pre><code>Benchmark 1: cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --quiet
   Time (mean ± σ):      19.8 ms ±   0.9 ms    [User: 179.6 ms, System: 73.7 ms]
   Range (min … max):    18.3 ms …  23.3 ms    73 runs
 
@@ -124,7 +124,7 @@ Benchmark 5: cat /tmp/test-files | xargs --max-procs=0 ./node_modules/.bin/prett
   Warning: Ignoring non-zero exit code.
 
 Summary
-  cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --silent ran
+  cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --quiet ran
     3.63 ± 0.17 times faster than cat /tmp/test-files | xargs --max-procs=0 djade --target-version 5.1
    70.71 ± 3.45 times faster than cat /tmp/test-files | xargs --max-procs=0 djhtml
   118.28 ± 5.48 times faster than cat /tmp/test-files | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
