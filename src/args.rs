@@ -85,7 +85,7 @@ pub struct LogLevelArgs {
         help_heading = "Log levels"
     )]
     pub verbose: bool,
-    /// Print diagnostics, but nothing else.
+    /// Disable all logging.
     #[arg(
         short,
         long,
@@ -94,22 +94,11 @@ pub struct LogLevelArgs {
         help_heading = "Log levels"
     )]
     pub quiet: bool,
-    /// Disable all logging (but still exit with status code "1" upon detecting diagnostics).
-    #[arg(
-        short,
-        long,
-        global = true,
-        group = "verbosity",
-        help_heading = "Log levels"
-    )]
-    pub silent: bool,
 }
 
 impl From<&LogLevelArgs> for LogLevel {
     fn from(args: &LogLevelArgs) -> Self {
-        if args.silent {
-            Self::Silent
-        } else if args.quiet {
+        if args.quiet {
             Self::Quiet
         } else if args.verbose {
             Self::Verbose

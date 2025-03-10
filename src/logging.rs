@@ -7,9 +7,6 @@ use tracing_tree::time::Uptime;
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Copy, Clone)]
 pub enum LogLevel {
     /// No output ([`log::LevelFilter::Off`]).
-    Silent,
-    /// Only show lint violations, with no decorative output
-    /// ([`log::LevelFilter::Off`]).
     Quiet,
     /// All user-facing output ([`log::LevelFilter::Info`]).
     #[default]
@@ -24,7 +21,7 @@ impl LogLevel {
         match self {
             LogLevel::Default => LevelFilter::INFO,
             LogLevel::Verbose => LevelFilter::DEBUG,
-            LogLevel::Quiet | LogLevel::Silent => LevelFilter::OFF,
+            LogLevel::Quiet => LevelFilter::OFF,
         }
     }
 }
