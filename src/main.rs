@@ -1,15 +1,17 @@
 use std::process::ExitCode;
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use colored::Colorize;
 
-use djangofmt::args::Args;
+use djangofmt::args::{Args, Commands};
 use djangofmt::{run, ExitStatus};
 
 pub fn main() -> ExitCode {
-    let args = std::env::args_os();
+    let args = Args::parse();
 
-    let args = Args::parse_from(args);
+    if let Some(Commands::Completions { shell }) = args.command {
+        shell.generate(&mut Args::command(), &mut std::io::stdout());
+    }
 
     match run(args) {
         Ok(code) => code.into(),
