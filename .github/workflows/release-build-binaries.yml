@@ -16,7 +16,6 @@ on:
   pull_request:
     paths:
       # When we change project metadata, we want to ensure that the maturin builds still work.
-      - pyproject.toml
       - Cargo.toml
       - Cargo.lock
       - rust-toolchain.toml
