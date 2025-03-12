@@ -1,4 +1,4 @@
-name: Ecosystem check
+name: CI
 
 on:
   pull_request:
@@ -40,6 +40,7 @@ jobs:
               - src/**
 
   build-and-compare:
+    name: "Ecosystem check"
     runs-on: ubuntu-24.04
     needs: changed_files
     if: ${{ github.event_name == 'pull_request' && needs.changed_files.outputs.code == 'true' }}
