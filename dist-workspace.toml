@@ -46,9 +46,9 @@ dispatch-releases = true
 github-release = "announce"
 # Whether CI should include auto-generated code to build local artifacts
 build-local-artifacts = false
-# Local artifacts jobs to run in CI
+# This setting determines which custom jobs to run during the "build local artifacts" phase, during which binaries are built.
 local-artifacts-jobs = ["./release-build-binaries"]
-# Publish jobs to run in CI
+# This setting determines which publish jobs to run
 publish-jobs = ["./release-publish-pypi"]
 # Post-announce jobs to run in CI
 post-announce-jobs = ["./release-notify-pre-commit-mirror"]
