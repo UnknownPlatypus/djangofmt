@@ -7,6 +7,8 @@
 
 A fast, HTML aware, Django template formatter, written in Rust.
 
+Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) with some additions to support Django fully.
+
 ## Installation
 
 djangofmt is available on PyPI.
@@ -64,6 +66,86 @@ Options:
           Print version
 ```
 
+## Controlling the formatting
+
+DjangoFmt gives users control over formatting in cases where 
+static analysis struggles to determine the optimal approach.
+
+### Splitting an opening tag across multiple lines
+
+You can control this formatting by choosing whether to insert a newline before the first attribute:
+
+```diff
+# Unchanged
+<div class="flex" id="great" data-a>
+  This is nice!
+</div>
+
+# Wrap on multiple lines
+<div 
+-    class="flex" id="great" data-a>
++    class="flex"
++    id="great"
++    data-a
++>
+    This is nice!
+</div>
+```
+
+
+### Class attribute formatting
+
+The `class` attribute will be formatted as a space-separated sequence of strings, 
+unless there are already newlines inside the attribute value.
+
+This makes it possible to accommodate the 2 following use cases:
+
+```html
+<div class="
+  mt-8 p-8
+  bg-indigo-600 hover:bg-indigo-700
+  border border-transparent
+  font-medium text-white
+">
+    Hello world
+</div>
+
+<div class="mt-8 p-8 bg-indigo-600 hover:bg-indigo-700 border border-transparent font-medium text-white">
+    Hello world
+</div>
+```
+
+See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for the rationale.
+
+## Known limitations
+
+All of these could be solved but were not prioritized for now.
+
+### `style` attributes formatting
+
+The `style` attribute will be formatted using a CSS formatter ([Malva](https://github.com/g-plane/malva)),
+but the output will always be on a single line.
+
+**Before:**
+
+```html
+<div class="flex flex-col items-center absolute z-10"
+     style="top:60%;
+            transform:translate(0,-50%)">
+    Such a lovely day
+</div>
+```
+
+**After:**
+
+```html
+<div class="flex flex-col items-center absolute z-10"
+     style="top:60%; transform:translate(0,-50%)">
+    Such a lovely day
+</div>
+```
+
+
 ## Benchmarks
 
 Here are the results benchmarking `djangofmt` against similar tools on 100k lines of HTML across 1.7k files.
@@ -80,14 +162,13 @@ Here are the results benchmarking `djangofmt` against similar tools on 100k line
   <i>Formatting 100k+ lines of HTML across 1.7k+ files from scratch.</i>
 </p>
 
-This is important to note that only `djlint` covers the same scope in terms of formatting capabilities. `djade`
-only touch django templating, `djhtml` only fix indentation and `prettier` only understand html (and **will** break
-templates)
+This is important to note that only `djlint` covers the same scope in terms of formatting capabilities. 
+`djade` only alter django templating, `djhtml` only fix indentation and `prettier` only understand html (and **will** break templates)
 
-As always, it should be taken with a grain of salt. Results on my machine will differ on yours, especially
-when you have a lot of CPU cores because some tools take advantage of that better than others.
-But in the end, what matters to me is that it's fast on my machine, so this benchmark at least means something to me
-(and was fun to build thanks to the wonderful [hyperfine](https://github.com/sharkdp/hyperfine) tool).
+As always, these results should be taken with a grain of salt. 
+Results on my machine will differ from yours, especially if you have many CPU cores because some tools take better advantage of parallelization than others.
+
+But at least it was fun to build thanks to the wonderful [hyperfine](https://github.com/sharkdp/hyperfine) tool.
 
 <details>
   <summary>Benchmark details (2025-02-28)</summary>
