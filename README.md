@@ -66,9 +66,23 @@ Options:
           Print version
 ```
 
+Djangofmt does not have any ability to recurse through directories.
+Use the pre-commit integration, globbing, or another technique to apply it to many files.
+For example, [git ls-files | xargs](https://adamj.eu/tech/2022/03/09/how-to-run-a-command-on-many-files-in-your-git-repository/):
+
+```shell
+git ls-files -z -- '*.html' | xargs -0r djangofmt
+```
+
+…or PowerShell’s [`ForEach-Object`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/foreach-object):
+
+```shell
+git ls-files -- '*.html' | %{djangofmt $_}
+```
+
 ## Controlling the formatting
 
-DjangoFmt gives users control over formatting in cases where 
+DjangoFmt gives users control over formatting in cases where
 static analysis struggles to determine the optimal approach.
 
 ### Splitting an opening tag across multiple lines
@@ -82,7 +96,7 @@ You can control this formatting by choosing whether to insert a newline before t
 </div>
 
 # Wrap on multiple lines
-<div 
+<div
 -    class="flex" id="great" data-a>
 +    class="flex"
 +    id="great"
@@ -92,10 +106,9 @@ You can control this formatting by choosing whether to insert a newline before t
 </div>
 ```
 
-
 ### Class attribute formatting
 
-The `class` attribute will be formatted as a space-separated sequence of strings, 
+The `class` attribute will be formatted as a space-separated sequence of strings,
 unless there are already newlines inside the attribute value.
 
 This makes it possible to accommodate the 2 following use cases:
@@ -145,7 +158,6 @@ but the output will always be on a single line.
 </div>
 ```
 
-
 ## Benchmarks
 
 Here are the results benchmarking `djangofmt` against similar tools on 100k lines of HTML across 1.7k files.
@@ -162,10 +174,10 @@ Here are the results benchmarking `djangofmt` against similar tools on 100k line
   <i>Formatting 100k+ lines of HTML across 1.7k+ files from scratch.</i>
 </p>
 
-This is important to note that only `djlint` covers the same scope in terms of formatting capabilities. 
+This is important to note that only `djlint` covers the same scope in terms of formatting capabilities.
 `djade` only alter django templating, `djhtml` only fix indentation and `prettier` only understand html (and **will** break templates)
 
-As always, these results should be taken with a grain of salt. 
+As always, these results should be taken with a grain of salt.
 Results on my machine will differ from yours, especially if you have many CPU cores because some tools take better advantage of parallelization than others.
 
 But at least it was fun to build thanks to the wonderful [hyperfine](https://github.com/sharkdp/hyperfine) tool.
