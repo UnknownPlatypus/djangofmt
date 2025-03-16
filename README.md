@@ -38,7 +38,7 @@ Sample `.pre-commit-config.yaml`:
     - id: djangofmt
 ```
 
-The separate repository enables installation without compiling the Rust code.
+The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
 
 By default, the configuration uses pre-commit’s [`files` option](https://pre-commit.com/#creating-new-hooks) to detect
 all text files in directories named `templates`. If your templates are stored elsewhere, you can override this behavior
