@@ -157,7 +157,7 @@ jobs:
           docker-options: ${{ matrix.platform.maturin_docker_options }}
           args: --release --locked --out dist
       - uses: uraimo/run-on-arch-action@v2
-        if: matrix.platform.arch != 'ppc64'
+        if: ${{ matrix.platform.arch != 'ppc64' && matrix.platform.arch != 'powerpc64le' }}
         name: "Test wheels"
         with:
           arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
