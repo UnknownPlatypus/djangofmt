@@ -1,6 +1,6 @@
 ci:
   autoupdate_schedule: monthly
-  skip: [dprint-fmt, actionlint]
+  skip: [dprint-fmt, actionlint, cargo-clippy, cargo-fmt]
 
 default_language_version:
   python: python3.12
