@@ -47,8 +47,6 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
         },
     };
 
-    // TODO handle cache here
-
     let start = Instant::now();
     let (results, mut errors): (Vec<_>, Vec<_>) = args
         .files
@@ -75,15 +73,18 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
     for error in &errors {
         error!("{error}");
     }
+    if !errors.is_empty() {
+        error!("Couldn't format {} files!", errors.len());
+    }
 
     // Report on the formatting changes.
     if global_options.log_level() >= LogLevel::Default {
         write_summary(results)?;
     }
+
     if errors.is_empty() {
         Ok(ExitStatus::Success)
     } else {
-        error!("Couldn't format {} files!", errors.len());
         Ok(ExitStatus::Error)
     }
 }

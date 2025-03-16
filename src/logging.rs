@@ -11,7 +11,7 @@ pub enum LogLevel {
     /// All user-facing output ([`log::LevelFilter::Info`]).
     #[default]
     Default,
-    /// All user-facing output ([`log::LevelFilter::Debug`]).
+    /// All outputs ([`log::LevelFilter::Debug`]).
     Verbose,
 }
 
