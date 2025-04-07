@@ -25,13 +25,13 @@ repos:
       - id: pyupgrade
         args: [--py311-plus]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.0
+    rev: v0.11.4
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/crate-ci/typos
-    rev: v1.30.2
+    rev: v1
     hooks:
       - id: typos
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -51,7 +51,7 @@ repos:
           "--allow-dirty",
         ]
   - repo: https://github.com/woodruffw/zizmor-pre-commit
-    rev: v1.5.1
+    rev: v1.5.2
     hooks:
       - id: zizmor
   - repo: https://github.com/rhysd/actionlint
