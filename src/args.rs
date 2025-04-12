@@ -130,3 +130,62 @@ impl From<&LogLevelArgs> for LogLevel {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
+    use std::process::Command;
+
+    fn cli() -> Command {
+        Command::new(get_cargo_bin("djangofmt"))
+    }
+
+    #[test]
+    fn test_cli_help() {
+        assert_cmd_snapshot!(cli().arg("--help"), @r###"
+        success: true
+        exit_code: 0
+        ----- stdout -----
+        A fast, HTML aware, Django template formatter, written in Rust.
+
+        Usage: djangofmt [OPTIONS] <FILES>...
+
+        Arguments:
+          <FILES>...
+                  List of files to format
+
+        Options:
+              --line-length <LINE_LENGTH>
+                  Set the line-length [default: 120]
+              --indent-width <INDENT_WIDTH>
+                  Set the indent width [default: 4]
+              --profile <PROFILE>
+                  Template language profile to use [default: django] [possible values: django, jinja]
+              --custom-blocks <BLOCK_NAMES>
+                  Comma-separated list of custom block name to enable
+          -h, --help
+                  Print help
+          -V, --version
+                  Print version
+
+        Log levels:
+          -v, --verbose
+                  Enable verbose logging
+          -q, --quiet
+                  Disable all logging
+
+        ----- stderr -----
+        "###);
+    }
+    #[test]
+    fn test_cli_version() {
+        assert_cmd_snapshot!(cli().arg("--version"), @r###"
+        success: true
+        exit_code: 0
+        ----- stdout -----
+        djangofmt 0.1.0
+
+        ----- stderr -----
+        "###);
+    }
+}
