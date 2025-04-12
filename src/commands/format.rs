@@ -22,7 +22,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
     let format_options = FormatOptions {
         layout: LayoutOptions {
             print_width: args.line_length,
-            indent_width: 4,
+            indent_width: args.indent_width,
             ..LayoutOptions::default()
         },
         language: LanguageOptions {

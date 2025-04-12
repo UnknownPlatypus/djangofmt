@@ -149,3 +149,16 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - run: cargo binstall --no-confirm cargo-shear
       - run: cargo shear
+  test:
+    name: "cargo test"
+    runs-on: ubuntu-24.04
+    needs: changed_files
+    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: cargo build
+      - run: cargo test
