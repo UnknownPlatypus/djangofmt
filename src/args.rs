@@ -54,6 +54,9 @@ pub struct FormatCommand {
     /// Set the line-length.
     #[arg(long, default_value = "120")]
     pub line_length: usize,
+    /// Set the indent width.
+    #[arg(long, default_value = "4")]
+    pub indent_width: usize,
     /// Template language profile to use
     #[arg(long, value_enum, default_value = "django")]
     pub profile: Profile,
