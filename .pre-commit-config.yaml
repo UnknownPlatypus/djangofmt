@@ -25,13 +25,13 @@ repos:
       - id: pyupgrade
         args: [--py311-plus]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.4
+    rev: v0.11.5
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/crate-ci/typos
-    rev: v1
+    rev: v1.31.1
     hooks:
       - id: typos
   - repo: https://github.com/pre-commit/mirrors-mypy
