@@ -85,7 +85,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
     if errors.is_empty() {
         Ok(ExitStatus::Success)
     } else {
-        Ok(ExitStatus::Error)
+        Ok(ExitStatus::Failure)
     }
 }
 
