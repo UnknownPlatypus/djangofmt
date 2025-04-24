@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "djangofmt"
-version = "0.1.0"
+version = "0.2.0"
 description = "A fast, HTML aware, Django template formatter, written in Rust."
 readme = "README.md"
 keywords = [
@@ -65,10 +65,9 @@ body = """
 {%- endmacro -%}
 
 {% macro print_commit(commit) -%}
-    - {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
+    - {% if commit.scope %}_({{ commit.scope }})_ {% endif %}\
         {% if commit.breaking %}[**breaking**] {% endif %}\
-        {{ commit.message | upper_first }} - \
-        ([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))\
+        {{ commit.message | upper_first }} - ([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))\
 {% endmacro -%}
 
 {% if version %}\
@@ -102,7 +101,7 @@ body = """
   ## New Contributors ❤️
 {% endif %}\
 {% for contributor in github_contributors %}
-  * @{{ contributor.username }} made their first contribution
+  - @{{ contributor.username }} made their first contribution
     {%- if contributor.pr_number %} in \
       [#{{ contributor.pr_number }}]({{ self::remote_url() }}/pull/{{ contributor.pr_number }}) \
     {%- endif %}
@@ -148,7 +147,7 @@ commit_preprocessors = [
 # Assigns commits to groups.
 # Optionally sets the commit's scope and can decide to exclude commits from further processing.
 commit_parsers = [
-  { message = "^feat", group = "<!-- 0 -->⛰️  Features" },
+  { message = "^feat", group = "<!-- 0 -->⛰️ Features" },
   { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
   { message = "^doc", group = "<!-- 3 -->📚 Documentation" },
   { message = "^perf", group = "<!-- 4 -->⚡ Performance" },
