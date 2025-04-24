@@ -171,9 +171,14 @@ DEFAULT_TARGETS = [
                 "src/unfold/templates/admin/edit_inline/tabular.html",
                 "src/unfold/templates/unfold/widgets/radio.html",
                 "src/unfold/templates/unfold/widgets/radio_option.html",
+                "src/unfold/templates/unfold_crispy/layout/table_inline_formset.html",
+                "src/unfold/templates/unfold_crispy/whole_uni_form.html",
                 # conditional tag name with differing end tag like </{% if cl.model_admin.list_filter_submit %}form{% else %}div{% endif %}>
                 "src/unfold/templates/unfold/components/button.html",
                 "src/unfold/templates/unfold/helpers/change_list_filter.html",
+                "src/unfold/templates/unfold/helpers/display_dropdown.html",
+                "src/unfold/templates/unfold/helpers/site_icon.html",
+                "src/unfold/templates/unfold_crispy/field.html",
             )
         ),
     ),
