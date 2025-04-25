@@ -212,14 +212,4 @@ DEFAULT_TARGETS = [
             )
         ),
     ),
-    Project(
-        repo=Repository(owner="jumpserver", name="jumpserver", ref="master"),
-        format_options=FormatOptions(
-            exclude=(
-                "apps/acls/templates/acls/asset_login_reminder.html",  # Invalid close tag
-                "apps/acls/templates/acls/user_login_reminder.html",  # Invalid close tag
-                "apps/authentication/templates/authentication/login.html",
-            )
-        ),
-    ),
 ]
