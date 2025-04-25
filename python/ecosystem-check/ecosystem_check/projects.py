@@ -29,6 +29,11 @@ class DjangoFmtCommand(StrEnum):
     format = "format"  # type: ignore[assignment]
 
 
+class Formatter(StrEnum):
+    DJANGOFMT = "djangofmt"
+    DJADE = "djade"
+
+
 @dataclass(frozen=True)
 class FormatOptions(Serializable):
     """
@@ -39,11 +44,17 @@ class FormatOptions(Serializable):
     custom_blocks: str = ""  # Comma-separated list of custom blocks
     profile: Literal["jinja", "django"] = "django"
 
-    def to_args(self) -> list[str]:
-        args = ["--profile", self.profile]
-        if self.custom_blocks:
-            args.extend(("--custom-blocks", self.custom_blocks))
-        return args
+    def to_args(self, executable_name: str) -> list[str]:
+        if executable_name == Formatter.DJANGOFMT:
+            args = ["--profile", self.profile]
+            if self.custom_blocks:
+                args.extend(("--custom-blocks", self.custom_blocks))
+            return args
+        elif executable_name == Formatter.DJADE:
+            return []
+        raise AssertionError(
+            f"Cannot cast format options for this executable: {executable_name}"
+        )
 
 
 class ProjectSetupError(Exception):

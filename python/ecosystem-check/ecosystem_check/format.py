@@ -219,7 +219,7 @@ async def format(
     options: FormatOptions,
 ) -> Sequence[str]:
     """Run the given djangofmt binary against the specified path."""
-    args = options.to_args()
+    args = options.to_args(executable_name=executable.name)
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
     ) - set(options.exclude)
