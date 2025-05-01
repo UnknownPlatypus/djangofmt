@@ -52,7 +52,9 @@ def entrypoint() -> None:
 
     # Use a temporary directory for caching if no cache is specified
     cache_context = (
-        tempfile.TemporaryDirectory() if not args.cache else nullcontext(args.cache)
+        tempfile.TemporaryDirectory()
+        if not args.cache_dir
+        else nullcontext(args.cache_dir)
     )
     with cache_context as cache:
         loop = asyncio.get_event_loop()
@@ -82,29 +84,19 @@ def entrypoint() -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description=(
-            "Check two versions of an executable against a corpus of open-source code."
-        ),
+        description="Check two versions of an executable against a corpus of open-source code."
     )
-    # TODO: Support non-default `--targets`
-    # parser.add_argument(
-    #     "--targets",
-    #     type=Path,
-    #     help=(
-    #         "Optional JSON files to use over the default repositories. "
-    #         "Supports both github_search_*.jsonl and known-github-tomls.jsonl."
-    #     ),
-    # )
     parser.add_argument(
-        "--cache",
+        "--cache-dir",
         type=Path,
         help="Location for caching cloned repositories",
     )
     parser.add_argument(
         "--output-format",
-        choices=[option.value for option in OutputFormat],
-        default="markdown",
+        choices=list(OutputFormat),
+        default=OutputFormat.MARKDOWN,
         help="The format in which the output should be generated.",
     )
     parser.add_argument(
@@ -120,8 +112,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--format-comparison",
-        choices=[option.value for option in FormatComparison],
-        default=FormatComparison.base_and_comp,
+        choices=list(FormatComparison),
+        default=FormatComparison.BASE_AND_COMP,
         help="Type of comparison to make when checking formatting.",
     )
     parser.add_argument(

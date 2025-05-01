@@ -4,7 +4,7 @@ import asyncio
 import dataclasses
 import json
 from collections.abc import Awaitable
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any, TypeVar
 
@@ -24,9 +24,9 @@ T = TypeVar("T")
 GITHUB_MAX_COMMENT_LENGTH = 65536
 
 
-class OutputFormat(Enum):
-    markdown = "markdown"
-    json = "json"
+class OutputFormat(StrEnum):
+    MARKDOWN = "markdown"
+    JSON = "json"
 
 
 async def main(
@@ -85,9 +85,9 @@ async def main(
     result = Result(completed=completed, errored=errored)
 
     match output_format:
-        case OutputFormat.json:
+        case OutputFormat.JSON:
             print(json.dumps(result, indent=4, cls=JSONEncoder))
-        case OutputFormat.markdown:
+        case OutputFormat.MARKDOWN:
             match command:
                 case Command.format:
                     print(markdown_format_result(result))

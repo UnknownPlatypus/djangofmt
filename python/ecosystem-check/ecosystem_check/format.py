@@ -8,7 +8,7 @@ import glob
 import time
 from asyncio import create_subprocess_exec
 from collections.abc import Sequence
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from subprocess import PIPE
 from typing import TYPE_CHECKING
@@ -132,9 +132,9 @@ async def compare_format(
         cloned_repo,
     )
     match format_comparison:
-        case FormatComparison.base_then_comp:
+        case FormatComparison.BASE_THEN_COMP:
             coro = format_then_format(*args)
-        case FormatComparison.base_and_comp:
+        case FormatComparison.BASE_AND_COMP:
             coro = format_and_format(*args)
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
@@ -252,11 +252,11 @@ async def format(
     return lines
 
 
-class FormatComparison(Enum):
+class FormatComparison(StrEnum):
     # Run baseline executable then comparison executable.
     # Checks for changes in behavior when formatting previously "formatted" code
-    base_then_comp = "base-then-comp"
+    BASE_THEN_COMP = "base-then-comp"
 
     # Run baseline executable then reset and run comparison executable.
     # Checks changes in behavior when formatting "unformatted" code
-    base_and_comp = "base-and-comp"
+    BASE_AND_COMP = "base-and-comp"
