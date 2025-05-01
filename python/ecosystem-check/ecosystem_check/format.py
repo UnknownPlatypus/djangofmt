@@ -140,7 +140,7 @@ async def compare_format(
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
 
     diff = await coro
-    return Comparison(diff=Diff(diff), repo=cloned_repo)
+    return Comparison(diff=diff, repo=cloned_repo)
 
 
 async def format_then_format(
@@ -148,7 +148,7 @@ async def format_then_format(
     comparison_executable: Path,
     options: FormatOptions,
     cloned_repo: ClonedRepository,
-) -> Sequence[str]:
+) -> Diff:
     # Run format to get the baseline
     await format(
         executable=baseline_executable.resolve(),
@@ -171,9 +171,7 @@ async def format_then_format(
     )
 
     # Then get the diff from the commit
-    diff = await cloned_repo.diff(commit)
-
-    return diff
+    return Diff(await cloned_repo.diff(commit))
 
 
 async def format_and_format(
@@ -181,7 +179,7 @@ async def format_and_format(
     comparison_executable: Path,
     options: FormatOptions,
     cloned_repo: ClonedRepository,
-) -> Sequence[str]:
+) -> Diff:
     # Run format without diff to get the baseline
     await format(
         executable=baseline_executable.resolve(),
@@ -206,9 +204,7 @@ async def format_and_format(
     )
 
     # Then get the diff from the commit
-    diff = await cloned_repo.diff(commit)
-
-    return diff
+    return Diff(await cloned_repo.diff(commit))
 
 
 async def format(
