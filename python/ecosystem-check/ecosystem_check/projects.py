@@ -25,11 +25,13 @@ class Project(Serializable):
     format_options: FormatOptions = field(default_factory=lambda: FormatOptions())
 
 
-class DjangoFmtCommand(StrEnum):
+class Command(StrEnum):
     format = "format"  # type: ignore[assignment]
 
 
 class Formatter(StrEnum):
+    """A tool name expected to do formatting work on files"""
+
     DJANGOFMT = "djangofmt"
     DJADE = "djade"
 

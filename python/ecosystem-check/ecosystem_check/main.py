@@ -15,7 +15,7 @@ from ecosystem_check.format import (
     markdown_format_result,
 )
 from ecosystem_check.projects import (
-    DjangoFmtCommand,
+    Command,
     Project,
 )
 from ecosystem_check.types import Comparison, Result, Serializable
@@ -30,7 +30,7 @@ class OutputFormat(Enum):
 
 
 async def main(
-    command: DjangoFmtCommand,
+    command: Command,
     baseline_executable: Path,
     comparison_executable: Path,
     targets: list[Project],
@@ -89,7 +89,7 @@ async def main(
             print(json.dumps(result, indent=4, cls=JSONEncoder))
         case OutputFormat.markdown:
             match command:
-                case DjangoFmtCommand.format:
+                case Command.format:
                     print(markdown_format_result(result))
                 case _:
                     raise ValueError(f"Unknown target command {command}")
@@ -100,7 +100,7 @@ async def main(
 
 
 async def clone_and_compare(
-    command: DjangoFmtCommand,
+    command: Command,
     baseline_executable: Path,
     comparison_executable: Path,
     target: Project,
@@ -112,7 +112,7 @@ async def clone_and_compare(
     assert ":" not in target.repo.name
 
     match command:
-        case DjangoFmtCommand.format:
+        case Command.format:
             assert format_comparison is not None
             compare, options, kwargs = (
                 compare_format,

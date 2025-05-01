@@ -18,7 +18,7 @@ from ecosystem_check import logger
 from ecosystem_check.defaults import DEFAULT_TARGETS
 from ecosystem_check.format import FormatComparison
 from ecosystem_check.main import OutputFormat, main
-from ecosystem_check.projects import DjangoFmtCommand
+from ecosystem_check.projects import Command
 
 
 def excepthook(
@@ -58,7 +58,7 @@ def entrypoint() -> None:
         loop = asyncio.get_event_loop()
         main_task = asyncio.ensure_future(
             main(
-                command=DjangoFmtCommand(args.command),
+                command=Command(args.command),
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
                 targets=DEFAULT_TARGETS,
@@ -67,7 +67,7 @@ def entrypoint() -> None:
                 raise_on_failure=args.pdb,
                 format_comparison=(
                     FormatComparison(args.format_comparison)
-                    if args.command == DjangoFmtCommand.format
+                    if args.command == Command.format
                     else None
                 ),
             )
@@ -126,7 +126,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "command",
-        choices=list(DjangoFmtCommand),
+        choices=list(Command),
         help="The command to test",
     )
     parser.add_argument(
