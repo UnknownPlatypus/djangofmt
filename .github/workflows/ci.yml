@@ -80,7 +80,7 @@ jobs:
           echo "### \`pr\` vs \`main\` diff" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./main_build ./pr_build --cache-dir ./checkouts --output-format markdown | tee -a ecosystem-result-format-stable
 
-          echo "### \`pr\` stability (consecutive runs)" >> ecosystem-result-format-stable
+          echo "### \`pr\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./pr_build ./pr_build --cache-dir ./checkouts --output-format markdown --format-comparison base-then-comp | tee -a ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
