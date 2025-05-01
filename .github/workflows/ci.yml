@@ -50,19 +50,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           persist-credentials: false
-
-      - name: Build PR version
-        run: cargo build --release --verbose && mv target/release/djangofmt ./pr_build
+      - name: Build main version
+        run: cargo build --release --verbose && mv target/release/djangofmt ./main_build
 
       - uses: actions/checkout@v4
         with:
-          ref: main
           persist-credentials: false
           clean: false
 
-      - name: Build main version
-        run: cargo build --release --verbose && mv target/release/djangofmt ./main_build
+      - name: Build PR version
+        run: cargo build --release --verbose && mv target/release/djangofmt ./pr_build
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
