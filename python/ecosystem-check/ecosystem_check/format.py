@@ -38,15 +38,16 @@ def markdown_format_result(result: Result) -> str:
     patch_sets: list[PatchSet] = []
 
     for _, comparison in result.completed:
-        total_lines_added += comparison.diff.lines_added
-        total_lines_removed += comparison.diff.lines_removed
+        for diff in comparison.diffs:
+            total_lines_added += diff.lines_added
+            total_lines_removed += diff.lines_removed
 
-        patch_set = PatchSet("\n".join(comparison.diff.lines))
-        patch_sets.append(patch_set)
-        total_files_modified += len(patch_set.modified_files)
+            patch_set = PatchSet("\n".join(diff.lines))
+            patch_sets.append(patch_set)
+            total_files_modified += len(patch_set.modified_files)
 
-        if comparison.diff:
-            projects_with_changes += 1
+            if diff:
+                projects_with_changes += 1
 
     if total_lines_removed == 0 and total_lines_added == 0 and error_count == 0:
         return "\u2705 ecosystem check detected no format changes."
@@ -86,15 +87,12 @@ def markdown_format_result(result: Result) -> str:
     for (project, comparison), patch_set in zip(
         result.completed, patch_sets, strict=False
     ):
-        if not comparison.diff:
+        if all(not diff for diff in comparison.diffs):
             continue  # Skip empty diffs
 
         files = len(patch_set.modified_files)
         s = "s" if files != 1 else ""
-        title = (
-            f"+{comparison.diff.lines_added} -{comparison.diff.lines_removed} "
-            f"lines across {files} file{s}"
-        )
+        title = f"+{patch_set.added} -{patch_set.removed} lines across {files} file{s}"
 
         lines.extend(
             markdown_project_section(
@@ -132,46 +130,16 @@ async def compare_format(
         cloned_repo,
     )
     match format_comparison:
-        case FormatComparison.BASE_THEN_COMP:
-            coro = format_then_format(*args)
         case FormatComparison.BASE_AND_COMP:
-            coro = format_and_format(*args)
+            diffs = [await format_and_format(*args)]
+        case FormatComparison.BASE_THEN_COMP:
+            diffs = [await format_then_format(*args)]
+        case FormatComparison.BASE_THEN_COMP_CONVERGE:
+            diffs = await format_then_format_converge(*args)
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
 
-    diff = await coro
-    return Comparison(diff=diff, repo=cloned_repo)
-
-
-async def format_then_format(
-    baseline_executable: Path,
-    comparison_executable: Path,
-    options: FormatOptions,
-    cloned_repo: ClonedRepository,
-) -> Diff:
-    # Run format to get the baseline
-    await format(
-        executable=baseline_executable.resolve(),
-        path=cloned_repo.path,
-        repo_fullname=cloned_repo.fullname,
-        options=options,
-    )
-
-    # Commit the changes
-    commit = await cloned_repo.commit(
-        message=f"Formatted with baseline {baseline_executable}"
-    )
-
-    # Then run format again
-    await format(
-        executable=comparison_executable.resolve(),
-        path=cloned_repo.path,
-        repo_fullname=cloned_repo.fullname,
-        options=options,
-    )
-
-    # Then get the diff from the commit
-    return Diff(await cloned_repo.diff(commit))
+    return Comparison(diffs=diffs, repo=cloned_repo)
 
 
 async def format_and_format(
@@ -205,6 +173,63 @@ async def format_and_format(
 
     # Then get the diff from the commit
     return Diff(await cloned_repo.diff(commit))
+
+
+async def format_then_format(
+    baseline_executable: Path,
+    comparison_executable: Path,
+    options: FormatOptions,
+    cloned_repo: ClonedRepository,
+) -> Diff:
+    # Run format to get the baseline
+    await format(
+        executable=baseline_executable.resolve(),
+        path=cloned_repo.path,
+        repo_fullname=cloned_repo.fullname,
+        options=options,
+    )
+
+    # Commit the changes
+    commit = await cloned_repo.commit(
+        message=f"Formatted with baseline {baseline_executable}"
+    )
+
+    # Then run format again
+    await format(
+        executable=comparison_executable.resolve(),
+        path=cloned_repo.path,
+        repo_fullname=cloned_repo.fullname,
+        options=options,
+    )
+
+    # Then get the diff from the commit
+    return Diff(await cloned_repo.diff(commit))
+
+
+async def format_then_format_converge(
+    baseline_executable: Path,
+    comparison_executable: Path,
+    options: FormatOptions,
+    cloned_repo: ClonedRepository,
+) -> list[Diff]:
+    """Run format_then_format twice, collecting every intermediary diffs"""
+    diffs = []
+    for i, executable in enumerate(
+        [baseline_executable, comparison_executable] * 2, start=1
+    ):
+        await format(
+            executable=executable.resolve(),
+            path=cloned_repo.path,
+            repo_fullname=cloned_repo.fullname,
+            options=options,
+        )
+        commit = await cloned_repo.commit(
+            message=f"Formatted with {executable.name} - #{i}"
+        )
+        if i > 2:
+            diffs.append(Diff(await cloned_repo.diff(f"{commit}^", commit)))
+
+    return diffs
 
 
 async def format(
@@ -249,10 +274,14 @@ async def format(
 
 
 class FormatComparison(StrEnum):
+    # Run baseline executable then reset and run comparison executable.
+    # Checks changes in behavior when formatting "unformatted" code
+    BASE_AND_COMP = "base-and-comp"
+
     # Run baseline executable then comparison executable.
     # Checks for changes in behavior when formatting previously "formatted" code
     BASE_THEN_COMP = "base-then-comp"
 
-    # Run baseline executable then reset and run comparison executable.
-    # Checks changes in behavior when formatting "unformatted" code
-    BASE_AND_COMP = "base-and-comp"
+    # Run baseline executable then comparison executable.
+    # Do that multiple time to ensure it converges.
+    BASE_THEN_COMP_CONVERGE = "base-then-comp-converge"

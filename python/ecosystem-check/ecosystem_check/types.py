@@ -76,7 +76,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diff: Diff
+    diffs: list[Diff]
     repo: ClonedRepository
 
 
