@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import dataclasses
-import difflib
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, is_dataclass
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import ClonedRepository, Project
@@ -56,16 +55,6 @@ class Diff(Serializable):
     @property
     def lines_removed(self) -> int:
         return len(self.removed)
-
-    @classmethod
-    def from_pair(cls, baseline: Sequence[str], comparison: Sequence[str]) -> Self:
-        """
-        Construct a diff from before and after.
-        """
-        return cls(difflib.ndiff(baseline, comparison), leading_spaces=1)
-
-    def without_unchanged_lines(self) -> Diff:
-        return Diff(line for line in self.lines if line.startswith(("+", "-")))
 
     def jsonable(self) -> Any:
         return self.lines
