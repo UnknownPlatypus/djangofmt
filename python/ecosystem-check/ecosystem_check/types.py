@@ -61,6 +61,15 @@ class Diff(Serializable):
 
 
 @dataclass(frozen=True)
+class HunkDetail:
+    """The minimal details of a patch hunk that makes it unique."""
+
+    path: str
+    start: int
+    length: int
+
+
+@dataclass(frozen=True)
 class Result(Serializable):
     """
     The result of an ecosystem check for a collection of projects.

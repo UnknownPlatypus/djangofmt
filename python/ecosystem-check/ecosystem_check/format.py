@@ -4,6 +4,7 @@ Execution, comparison, and summary of `djangofmt` ecosystem checks.
 
 from __future__ import annotations
 
+import asyncio
 import glob
 import time
 from asyncio import create_subprocess_exec
@@ -17,7 +18,7 @@ from unidiff import PatchSet
 
 from ecosystem_check import logger
 from ecosystem_check.markdown import format_patchset, markdown_project_section
-from ecosystem_check.types import Comparison, Diff, Result, ToolError
+from ecosystem_check.types import Comparison, Diff, HunkDetail, Result, ToolError
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
@@ -90,7 +91,8 @@ def markdown_format_result(result: Result) -> str:
         if all(not diff for diff in comparison.diffs):
             continue  # Skip empty diffs
 
-        files = len(patch_set.modified_files)
+        files = len({patch_file.path for patch_file in patch_set.modified_files})
+        logger.error(patch_set)
         s = "s" if files != 1 else ""
         title = f"+{patch_set.added} -{patch_set.removed} lines across {files} file{s}"
 
@@ -213,7 +215,9 @@ async def format_then_format_converge(
     cloned_repo: ClonedRepository,
 ) -> list[Diff]:
     """Run format_then_format twice, collecting every intermediary diffs"""
-    diffs = []
+    executables = [baseline_executable, comparison_executable] * 2
+
+    hunk_details: set[HunkDetail] = set()
     for i, executable in enumerate(
         [baseline_executable, comparison_executable] * 2, start=1
     ):
@@ -227,9 +231,29 @@ async def format_then_format_converge(
             message=f"Formatted with {executable.name} - #{i}"
         )
         if i > 2:
-            diffs.append(Diff(await cloned_repo.diff(f"{commit}^", commit)))
+            # Skip the 2 first runs that are just setting the baseline
+            diff = Diff(await cloned_repo.diff(f"{commit}^", commit))
+            if diff:
+                hunk_details.update(
+                    HunkDetail(
+                        path=patch_file.path,
+                        start=hunk.source_start,
+                        length=hunk.source_length,
+                    )
+                    for patch_file in PatchSet(diff)
+                    for hunk in patch_file
+                )
 
-    return diffs
+    if not hunk_details:
+        return []
+
+    logger.debug(f"Processing hunks {hunk_details}")
+    diff_tasks = [
+        cloned_repo.diff_for_hunk(hunk_detail, f"HEAD~{len(executables)}..HEAD")
+        for hunk_detail in hunk_details
+    ]
+    diff_results = await asyncio.gather(*diff_tasks)
+    return [Diff(result) for result in diff_results if result]
 
 
 async def format(

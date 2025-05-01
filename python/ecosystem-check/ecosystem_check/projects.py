@@ -12,7 +12,7 @@ from subprocess import DEVNULL, PIPE
 from typing import Literal, Self
 
 from ecosystem_check import logger
-from ecosystem_check.types import Serializable
+from ecosystem_check.types import HunkDetail, Serializable
 
 
 @dataclass(frozen=True)
@@ -284,6 +284,34 @@ class ClonedRepository(Repository, Serializable):
         """
         process = await create_subprocess_exec(
             *["git", "diff", *args],
+            cwd=self.path,
+            env={"GIT_TERMINAL_PROMPT": "0"},
+            stdout=PIPE,
+            stderr=PIPE,
+        )
+        stdout, stderr = await process.communicate()
+        if await process.wait() != 0:
+            raise RuntimeError(f"Failed to commit: {stderr.decode()}")
+
+        return stdout.decode().splitlines()
+
+    async def diff_for_hunk(
+        self: Self, hunk_range: HunkDetail, *args: str
+    ) -> list[str]:
+        """
+        Get the current diff for a specific file and range.
+
+        Arguments are passed to `git log ...`
+        """
+        process = await create_subprocess_exec(
+            *[
+                "git",
+                "log",
+                "--reverse",
+                "-L",
+                f"{hunk_range.start},+{hunk_range.length}:./{hunk_range.path}",
+                *args,
+            ],
             cwd=self.path,
             env={"GIT_TERMINAL_PROMPT": "0"},
             stdout=PIPE,
