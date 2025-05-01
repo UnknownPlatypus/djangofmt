@@ -129,6 +129,8 @@ def parse_args() -> argparse.Namespace:
         "comparison_executable",
         type=Path,
     )
+    # https://docs.python.org/3.14/library/argparse.html#suggest-on-error
+    parser.suggest_on_error = True  # type: ignore[attr-defined]
     return parser.parse_args()
 
 
