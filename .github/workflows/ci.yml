@@ -82,6 +82,9 @@ jobs:
           echo "### \`pr\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./pr_djangofmt ./pr_djangofmt --cache-dir ./checkouts --output-format markdown --format-comparison base-then-comp | tee -a ecosystem-result-format-stable
 
+          echo "### \`pr\` & \`djade\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
+          uv run ecosystem-check format ./pr_djangofmt djade --cache-dir ./checkouts --output-format markdown --format-comparison base-then-comp-converge | tee -a ecosystem-result-format-stable
+
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
           cat ecosystem-result-format-stable >> ecosystem-result
 
