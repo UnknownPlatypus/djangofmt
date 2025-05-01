@@ -47,7 +47,7 @@ class FormatOptions(Serializable):
     profile: Literal["jinja", "django"] = "django"
 
     def to_args(self, executable_name: str) -> list[str]:
-        if executable_name == Formatter.DJANGOFMT:
+        if Formatter.DJANGOFMT in executable_name:
             args = ["--profile", self.profile]
             if self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))

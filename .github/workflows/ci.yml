@@ -53,7 +53,7 @@ jobs:
           ref: main
           persist-credentials: false
       - name: Build main version
-        run: cargo build --release --verbose && mv target/release/djangofmt ./main_build
+        run: cargo build --release --verbose && mv target/release/djangofmt ./main_djangofmt
 
       - uses: actions/checkout@v4
         with:
@@ -61,7 +61,7 @@ jobs:
           clean: false
 
       - name: Build PR version
-        run: cargo build --release --verbose && mv target/release/djangofmt ./pr_build
+        run: cargo build --release --verbose && mv target/release/djangofmt ./pr_djangofmt
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v5
@@ -77,10 +77,10 @@ jobs:
           uv pip install ./python/ecosystem-check
 
           echo "### \`pr\` vs \`main\` diff" >> ecosystem-result-format-stable
-          uv run ecosystem-check format ./main_build ./pr_build --cache-dir ./checkouts --output-format markdown | tee -a ecosystem-result-format-stable
+          uv run ecosystem-check format ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts --output-format markdown | tee -a ecosystem-result-format-stable
 
           echo "### \`pr\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
-          uv run ecosystem-check format ./pr_build ./pr_build --cache-dir ./checkouts --output-format markdown --format-comparison base-then-comp | tee -a ecosystem-result-format-stable
+          uv run ecosystem-check format ./pr_djangofmt ./pr_djangofmt --cache-dir ./checkouts --output-format markdown --format-comparison base-then-comp | tee -a ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
           cat ecosystem-result-format-stable >> ecosystem-result
