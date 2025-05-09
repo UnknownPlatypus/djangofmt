@@ -82,13 +82,13 @@ jobs:
           echo "### \`pr\` vs \`main\` diff" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result-format-stable
 
-          echo "### \`pr\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
+          echo "### \`pr\` stability" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./pr_djangofmt ./pr_djangofmt --cache-dir ./checkouts --format-comparison base-then-comp | tee -a ecosystem-result-format-stable
 
-          echo "### \`pr\` + \`rustywind\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
+          echo "### \`pr\` + \`rustywind\` stability" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./pr_djangofmt rustywind --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result-format-stable
 
-          echo "### \`pr\` + \`djade\` stability (2 consecutive runs)" >> ecosystem-result-format-stable
+          echo "### \`pr\` + \`djade\` stability" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./pr_djangofmt djade --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result-format-stable
 
           cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"

@@ -14,11 +14,9 @@ from pathlib import Path
 from subprocess import PIPE
 from typing import TYPE_CHECKING
 
-from unidiff import PatchSet
-
 from ecosystem_check import logger
 from ecosystem_check.markdown import format_patchset, markdown_project_section
-from ecosystem_check.types import Comparison, Diff, HunkDetail, Result, ToolError
+from ecosystem_check.types import Comparison, Diff, Diffs, HunkDetail, Result, ToolError
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
@@ -36,16 +34,12 @@ def markdown_format_result(result: Result) -> str:
     total_files_modified = 0
     projects_with_changes = 0
     error_count = len(result.errored)
-    patch_sets: list[PatchSet] = []
 
     for _, comparison in result.completed:
         for diff in comparison.diffs:
             total_lines_added += diff.lines_added
             total_lines_removed += diff.lines_removed
-
-            patch_set = PatchSet("\n".join(diff.lines))
-            patch_sets.append(patch_set)
-            total_files_modified += len(patch_set.modified_files)
+            total_files_modified += len(diff.patch_set.modified_files)
 
             if diff:
                 projects_with_changes += 1
@@ -85,21 +79,21 @@ def markdown_format_result(result: Result) -> str:
     lines.append("")
 
     # Then per-project changes
-    for (project, comparison), patch_set in zip(
-        result.completed, patch_sets, strict=False
-    ):
-        if all(not diff for diff in comparison.diffs):
+    for project, comparison in result.completed:
+        if comparison.diffs.all_empty:
             continue  # Skip empty diffs
 
-        files = len({patch_file.path for patch_file in patch_set.modified_files})
-        logger.error(patch_set)
+        files = comparison.diffs.modified_files
         s = "s" if files != 1 else ""
-        title = f"+{patch_set.added} -{patch_set.removed} lines across {files} file{s}"
+        title = f"+{comparison.diffs.added} -{comparison.diffs.removed} lines across {files} file{s}"
 
         lines.extend(
             markdown_project_section(
                 title=title,
-                content=format_patchset(patch_set, comparison.repo),
+                content="\n".join(
+                    format_patchset(diff.patch_set, comparison.repo)
+                    for diff in comparison.diffs
+                ),
                 options=project.format_options,
                 project=project,
             )
@@ -133,9 +127,9 @@ async def compare_format(
     )
     match format_comparison:
         case FormatComparison.BASE_AND_COMP:
-            diffs = [await format_and_format(*args)]
+            diffs = Diffs([await format_and_format(*args)])
         case FormatComparison.BASE_THEN_COMP:
-            diffs = [await format_then_format(*args)]
+            diffs = Diffs([await format_then_format(*args)])
         case FormatComparison.BASE_THEN_COMP_CONVERGE:
             diffs = await format_then_format_converge(*args)
         case _:
@@ -213,14 +207,12 @@ async def format_then_format_converge(
     comparison_executable: Path,
     options: FormatOptions,
     cloned_repo: ClonedRepository,
-) -> list[Diff]:
+) -> Diffs:
     """Run format_then_format twice, collecting every intermediary diffs"""
     executables = [baseline_executable, comparison_executable] * 2
 
     hunk_details: set[HunkDetail] = set()
-    for i, executable in enumerate(
-        [baseline_executable, comparison_executable] * 2, start=1
-    ):
+    for i, executable in enumerate(executables, start=1):
         await format(
             executable=executable.resolve(),
             path=cloned_repo.path,
@@ -240,12 +232,12 @@ async def format_then_format_converge(
                         start=hunk.source_start,
                         length=hunk.source_length,
                     )
-                    for patch_file in PatchSet(diff)
+                    for patch_file in diff.patch_set
                     for hunk in patch_file
                 )
 
     if not hunk_details:
-        return []
+        return Diffs()
 
     logger.debug(f"Processing hunks {hunk_details}")
     diff_tasks = [
@@ -253,7 +245,7 @@ async def format_then_format_converge(
         for hunk_detail in hunk_details
     ]
     diff_results = await asyncio.gather(*diff_tasks)
-    return [Diff(result) for result in diff_results if result]
+    return Diffs(Diff(result) for result in diff_results if result)
 
 
 async def format(
