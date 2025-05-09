@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import dataclasses
-import difflib
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, is_dataclass
-from typing import TYPE_CHECKING, Any, Self
+from functools import cached_property
+from typing import TYPE_CHECKING, Any
+
+from unidiff import PatchSet
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import ClonedRepository, Project
@@ -49,6 +51,10 @@ class Diff(Serializable):
     def __iter__(self) -> Iterator[str]:
         yield from self.lines
 
+    @cached_property
+    def patch_set(self) -> PatchSet:
+        return PatchSet("\n".join(self.lines))
+
     @property
     def lines_added(self) -> int:
         return len(self.added)
@@ -57,18 +63,42 @@ class Diff(Serializable):
     def lines_removed(self) -> int:
         return len(self.removed)
 
-    @classmethod
-    def from_pair(cls, baseline: Sequence[str], comparison: Sequence[str]) -> Self:
-        """
-        Construct a diff from before and after.
-        """
-        return cls(difflib.ndiff(baseline, comparison), leading_spaces=1)
-
-    def without_unchanged_lines(self) -> Diff:
-        return Diff(line for line in self.lines if line.startswith(("+", "-")))
-
     def jsonable(self) -> Any:
         return self.lines
+
+
+class Diffs(list[Diff]):
+    """A collection of Diff objects with a few added properties"""
+
+    @property
+    def all_empty(self) -> bool:
+        return all(not diff for diff in self)
+
+    @property
+    def modified_files(self) -> int:
+        file_paths = set()
+        for diff in self:
+            for patch_file in diff.patch_set.modified_files:
+                file_paths.add(patch_file.path)
+
+        return len(file_paths)
+
+    @property
+    def added(self) -> int:
+        return sum(diff.patch_set.added for diff in self)
+
+    @property
+    def removed(self) -> int:
+        return sum(diff.patch_set.removed for diff in self)
+
+
+@dataclass(frozen=True)
+class HunkDetail:
+    """The minimal details of a patch hunk that makes it unique."""
+
+    path: str
+    start: int
+    length: int
 
 
 @dataclass(frozen=True)
@@ -87,7 +117,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diff: Diff
+    diffs: Diffs
     repo: ClonedRepository
 
 
