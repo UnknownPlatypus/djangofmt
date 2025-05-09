@@ -34,6 +34,7 @@ class Formatter(StrEnum):
 
     DJANGOFMT = "djangofmt"
     DJADE = "djade"
+    RUSTYWIND = "rustywind"
 
 
 @dataclass(frozen=True)
@@ -54,6 +55,8 @@ class FormatOptions(Serializable):
             return args
         elif executable_name == Formatter.DJADE:
             return []
+        elif executable_name == Formatter.RUSTYWIND:
+            return ["--write"]
         raise AssertionError(
             f"Cannot cast format options for this executable: {executable_name}"
         )
