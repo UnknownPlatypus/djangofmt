@@ -26,6 +26,8 @@ class Serializable:
 
 
 class Diff(Serializable):
+    """A full Diff object for a project or a Hunk"""
+
     def __init__(self, lines: Iterable[str], leading_spaces: int = 0) -> None:
         self.lines = list(lines)
 
@@ -84,11 +86,11 @@ class Diffs(list[Diff]):
         return len(file_paths)
 
     @property
-    def added(self) -> int:
+    def lines_added(self) -> int:
         return sum(diff.patch_set.added for diff in self)
 
     @property
-    def removed(self) -> int:
+    def lines_removed(self) -> int:
         return sum(diff.patch_set.removed for diff in self)
 
 

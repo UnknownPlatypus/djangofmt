@@ -36,13 +36,11 @@ def markdown_format_result(result: Result) -> str:
     error_count = len(result.errored)
 
     for _, comparison in result.completed:
-        for diff in comparison.diffs:
-            total_lines_added += diff.lines_added
-            total_lines_removed += diff.lines_removed
-            total_files_modified += len(diff.patch_set.modified_files)
-
-            if diff:
-                projects_with_changes += 1
+        if not comparison.diffs.all_empty:
+            projects_with_changes += 1
+        total_lines_added += comparison.diffs.lines_added
+        total_lines_removed += comparison.diffs.lines_removed
+        total_files_modified += comparison.diffs.modified_files
 
     if total_lines_removed == 0 and total_lines_added == 0 and error_count == 0:
         return "\u2705 ecosystem check detected no format changes."
@@ -85,7 +83,7 @@ def markdown_format_result(result: Result) -> str:
 
         files = comparison.diffs.modified_files
         s = "s" if files != 1 else ""
-        title = f"+{comparison.diffs.added} -{comparison.diffs.removed} lines across {files} file{s}"
+        title = f"+{comparison.diffs.lines_added} -{comparison.diffs.lines_removed} lines across {files} file{s}"
 
         lines.extend(
             markdown_project_section(
