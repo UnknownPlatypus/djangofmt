@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 from unidiff import PatchSet
 
+from ecosystem_check.markdown import format_patchset
+
 if TYPE_CHECKING:
     from ecosystem_check.projects import ClonedRepository, Project
 
@@ -26,7 +28,7 @@ class Serializable:
 
 
 class Diff(Serializable):
-    """A full Diff object for a project or a Hunk"""
+    """A full diff for a project"""
 
     def __init__(self, lines: Iterable[str], leading_spaces: int = 0) -> None:
         self.lines = list(lines)
@@ -58,6 +60,10 @@ class Diff(Serializable):
         return PatchSet("\n".join(self.lines))
 
     @property
+    def modified_files(self) -> int:
+        return len(self.patch_set.modified_files)
+
+    @property
     def lines_added(self) -> int:
         return len(self.added)
 
@@ -68,13 +74,15 @@ class Diff(Serializable):
     def jsonable(self) -> Any:
         return self.lines
 
+    def format_markdown(self, repo: ClonedRepository) -> str:
+        return format_patchset(self.patch_set, repo)
+
 
 class DiffsForHunk(list[Diff]):
-    """A collection of Diff objects with a few added properties"""
+    """A collection of diffs for a specific Hunk"""
 
-    @property
-    def all_empty(self) -> bool:
-        return all(not diff for diff in self)
+    def __bool__(self) -> bool:
+        return any(diff for diff in self)
 
     @property
     def modified_files(self) -> int:
@@ -92,6 +100,11 @@ class DiffsForHunk(list[Diff]):
     @property
     def lines_removed(self) -> int:
         return sum(diff.patch_set.removed for diff in self)
+
+    def format_markdown(self, repo: ClonedRepository) -> str:
+        return "\n---\n".join(
+            format_patchset(diff.patch_set, repo, add_hunk_suffix=True) for diff in self
+        )
 
 
 @dataclass(frozen=True)
@@ -119,7 +132,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diffs: Diff | DiffsForHunk
+    diff: Diff | DiffsForHunk
     repo: ClonedRepository
 
 

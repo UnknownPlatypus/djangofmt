@@ -15,7 +15,7 @@ from subprocess import PIPE
 from typing import TYPE_CHECKING
 
 from ecosystem_check import logger
-from ecosystem_check.markdown import format_patchset, markdown_project_section
+from ecosystem_check.markdown import markdown_project_section
 from ecosystem_check.types import (
     Comparison,
     Diff,
@@ -32,50 +32,46 @@ if TYPE_CHECKING:
     )
 
 
+def add_s(n: int) -> str:
+    return "s" if n != 1 else ""
+
+
 def markdown_format_result(result: Result) -> str:
     """
     Render a `djangofmt` ecosystem check result as markdown.
     """
-    lines: list[str] = []
-    total_lines_removed = total_lines_added = 0
-    total_files_modified = 0
-    projects_with_changes = 0
     error_count = len(result.errored)
-
-    for _, comparison in result.completed:
-        if not comparison.diffs.all_empty:
-            projects_with_changes += 1
-        total_lines_added += comparison.diffs.lines_added
-        total_lines_removed += comparison.diffs.lines_removed
-        total_files_modified += comparison.diffs.modified_files
+    projects_with_changes = sum(bool(comp.diff) for _, comp in result.completed)
+    total_lines_added = sum(comp.diff.lines_added for _, comp in result.completed)
+    total_lines_removed = sum(comp.diff.lines_removed for _, comp in result.completed)
+    total_files_modified = sum(comp.diff.modified_files for _, comp in result.completed)
 
     if total_lines_removed == 0 and total_lines_added == 0 and error_count == 0:
         return "\u2705 ecosystem check detected no format changes."
 
     # Summarize the total changes
+    lines: list[str] = []
     if total_lines_added == 0 and total_lines_added == 0:
         # Only errors
-        s = "s" if error_count != 1 else ""
         lines.append(
             f"\u2139\ufe0f ecosystem check **encountered format errors**. "
-            f"(no format changes; {error_count} project error{s})"
+            f"(no format changes; {error_count} project error{add_s(error_count)})"
         )
     else:
-        s = "s" if total_files_modified != 1 else ""
         changes = (
             f"+{total_lines_added} -{total_lines_removed} lines "
-            f"in {total_files_modified} file{s} in "
+            f"in {total_files_modified} file{add_s(total_files_modified)} in "
             f"{projects_with_changes} projects"
         )
 
         if error_count:
-            s = "s" if error_count != 1 else ""
-            changes += f"; {error_count} project error{s}"
+            changes += f"; {error_count} project error{add_s(error_count)}"
 
         unchanged_projects = len(result.completed) - projects_with_changes
         if unchanged_projects:
-            s = "s" if unchanged_projects != 1 else ""
-            changes += f"; {unchanged_projects} project{s} unchanged"
+            changes += (
+                f"; {unchanged_projects} project{add_s(unchanged_projects)} unchanged"
+            )
 
         lines.append(
             f"\u2139\ufe0f ecosystem check **detected format changes**. ({changes})"
@@ -85,20 +81,20 @@ def markdown_format_result(result: Result) -> str:
 
     # Then per-project changes
     for project, comparison in result.completed:
-        if comparison.diffs.all_empty:
+        if not comparison.diff:
             continue  # Skip empty diffs
 
-        files = comparison.diffs.modified_files
-        s = "s" if files != 1 else ""
-        title = f"+{comparison.diffs.lines_added} -{comparison.diffs.lines_removed} lines across {files} file{s}"
+        files = comparison.diff.modified_files
+        title = f"+{comparison.diff.lines_added} -{comparison.diff.lines_removed} lines across {files} file{add_s(files)}"
 
         lines.extend(
             markdown_project_section(
                 title=title,
-                content="\n".join(
-                    format_patchset(diff.patch_set, comparison.repo)
-                    for diff in comparison.diffs
-                ),
+                content=comparison.diff.format_markdown(repo=comparison.repo),
+                # content="\n".join(
+                #     format_patchset(diff.patch_set, comparison.repo)
+                #     for diff in comparison.diffs
+                # ),
                 options=project.format_options,
                 project=project,
             )
@@ -132,15 +128,15 @@ async def compare_format(
     )
     match format_comparison:
         case FormatComparison.BASE_AND_COMP:
-            diff = format_and_format(*args)
+            diff: Diff | DiffsForHunk = await format_and_format(*args)
         case FormatComparison.BASE_THEN_COMP:
-            diff = format_then_format(*args)
+            diff = await format_then_format(*args)
         case FormatComparison.BASE_THEN_COMP_CONVERGE:
-            diff = format_then_format_converge(*args)
+            diff = await format_then_format_converge(*args)
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
 
-    return Comparison(diffs=await diff, repo=cloned_repo)
+    return Comparison(diff=diff, repo=cloned_repo)
 
 
 async def format_and_format(

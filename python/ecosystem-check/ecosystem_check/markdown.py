@@ -8,12 +8,14 @@ if TYPE_CHECKING:
     from ecosystem_check.projects import ClonedRepository, FormatOptions, Project
 
 
-def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
+def format_patchset(
+    patch_set: PatchSet, repo: ClonedRepository, add_hunk_suffix: bool = False
+) -> str:
     """
     Convert a patchset to markdown, adding permalinks to the start of each hunk.
     """
     lines: list[str] = []
-    for file_patch in patch_set:
+    for i, file_patch in enumerate(patch_set, start=1):
         for hunk in file_patch:
             # Note:  When used for `format` checks, the line number is not exact because
             #        we formatted the repository for a baseline; we can't know the exact
@@ -24,7 +26,8 @@ def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
 
             # Add a link before the hunk
             link_title = file_patch.path + "~L" + str(hunk.source_start)
-            lines.append(f"<a href='{hunk_link}'>{link_title}</a>")
+            title_suffix = f" - #{i} run." if add_hunk_suffix else ""
+            lines.append(f"<a href='{hunk_link}'>{link_title}{title_suffix}</a>")
 
             # Wrap the contents of the hunk in a diff code block
             lines.append("```diff")
