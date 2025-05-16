@@ -11,6 +11,7 @@ from typing import Any, TypeVar
 from ecosystem_check import logger
 from ecosystem_check.format import (
     FormatComparison,
+    can_format_project,
     compare_format,
     markdown_format_result,
 )
@@ -46,6 +47,11 @@ async def main(
     logger.debug("Using checkout_dir directory %s", project_dir)
     if format_comparison:
         logger.debug("Using format comparison type %s", format_comparison.value)
+    targets = [
+        target
+        for target in targets
+        if can_format_project(baseline_executable, comparison_executable, target)
+    ]
     logger.debug("Checking %s targets", len(targets))
 
     # Limit parallelism to avoid high memory consumption

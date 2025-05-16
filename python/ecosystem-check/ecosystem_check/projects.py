@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
-from typing import Literal, Self
+from typing import Self
 
 from ecosystem_check import logger
 from ecosystem_check.types import HunkDetail, Serializable
@@ -37,6 +37,13 @@ class Formatter(StrEnum):
     RUSTYWIND = "rustywind"
 
 
+class Profile(StrEnum):
+    """A tool name expected to do formatting work on files"""
+
+    DJANGO = "django"
+    JINJA = "jinja"
+
+
 @dataclass(frozen=True)
 class FormatOptions(Serializable):
     """
@@ -45,7 +52,7 @@ class FormatOptions(Serializable):
 
     exclude: tuple[str, ...] = field(default_factory=tuple)
     custom_blocks: str = ""  # Comma-separated list of custom blocks
-    profile: Literal["jinja", "django"] = "django"
+    profile: Profile = Profile.DJANGO
 
     def to_args(self, executable_name: str) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:

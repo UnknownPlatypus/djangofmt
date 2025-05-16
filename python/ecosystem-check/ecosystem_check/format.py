@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING
 
 from ecosystem_check import logger
 from ecosystem_check.markdown import markdown_project_section
+from ecosystem_check.projects import Formatter, Profile
 from ecosystem_check.types import (
     Comparison,
     Diff,
@@ -29,11 +30,23 @@ if TYPE_CHECKING:
     from ecosystem_check.projects import (
         ClonedRepository,
         FormatOptions,
+        Project,
     )
 
 
 def add_s(n: int) -> str:
     return "s" if n != 1 else ""
+
+
+def can_format_project(
+    baseline_executable: Path, comparison_executable: Path, target: Project
+) -> bool:
+    """Skip project if one of the executables is djade and the profile is jinja."""
+    return not any(
+        executable.name == Formatter.DJADE
+        and target.format_options.profile == Profile.JINJA
+        for executable in [baseline_executable, comparison_executable]
+    )
 
 
 def markdown_format_result(result: Result) -> str:

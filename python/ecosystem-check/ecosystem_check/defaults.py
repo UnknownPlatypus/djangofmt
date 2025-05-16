@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from ecosystem_check.projects import (
     FormatOptions,
+    Profile,
     Project,
     Repository,
 )
@@ -14,7 +15,9 @@ DEFAULT_TARGETS = [
     # Jinja templates
     Project(
         repo=Repository(owner="zulip", name="zulip", ref="main"),
-        format_options=FormatOptions(profile="jinja"),
+        format_options=FormatOptions(
+            profile=Profile.JINJA,
+        ),
     ),
     Project(
         repo=Repository(
@@ -31,7 +34,7 @@ DEFAULT_TARGETS = [
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
             ),
-            profile="jinja",
+            profile=Profile.JINJA,
         ),
     ),
     # Django templates
