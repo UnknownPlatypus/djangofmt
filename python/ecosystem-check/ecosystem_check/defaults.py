@@ -96,7 +96,7 @@ DEFAULT_TARGETS = [
         ),
     ),
     Project(
-        repo=Repository(owner="django-cms", name="django-cms", ref="develop-4"),
+        repo=Repository(owner="django-cms", name="django-cms", ref="main"),
         format_options=FormatOptions(
             exclude=(
                 "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # Invalid <span>{% trans "Copy" %}<span>
