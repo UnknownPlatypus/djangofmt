@@ -69,7 +69,7 @@ class Diff(Serializable):
         return self.lines
 
 
-class Diffs(list[Diff]):
+class DiffsForHunk(list[Diff]):
     """A collection of Diff objects with a few added properties"""
 
     @property
@@ -119,7 +119,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diffs: Diffs
+    diffs: Diff | DiffsForHunk
     repo: ClonedRepository
 
 

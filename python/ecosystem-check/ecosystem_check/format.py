@@ -16,7 +16,14 @@ from typing import TYPE_CHECKING
 
 from ecosystem_check import logger
 from ecosystem_check.markdown import format_patchset, markdown_project_section
-from ecosystem_check.types import Comparison, Diff, Diffs, HunkDetail, Result, ToolError
+from ecosystem_check.types import (
+    Comparison,
+    Diff,
+    DiffsForHunk,
+    HunkDetail,
+    Result,
+    ToolError,
+)
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
@@ -125,15 +132,15 @@ async def compare_format(
     )
     match format_comparison:
         case FormatComparison.BASE_AND_COMP:
-            diffs = Diffs([await format_and_format(*args)])
+            diff = format_and_format(*args)
         case FormatComparison.BASE_THEN_COMP:
-            diffs = Diffs([await format_then_format(*args)])
+            diff = format_then_format(*args)
         case FormatComparison.BASE_THEN_COMP_CONVERGE:
-            diffs = await format_then_format_converge(*args)
+            diff = format_then_format_converge(*args)
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
 
-    return Comparison(diffs=diffs, repo=cloned_repo)
+    return Comparison(diffs=await diff, repo=cloned_repo)
 
 
 async def format_and_format(
@@ -205,7 +212,7 @@ async def format_then_format_converge(
     comparison_executable: Path,
     options: FormatOptions,
     cloned_repo: ClonedRepository,
-) -> Diffs:
+) -> DiffsForHunk:
     """Run format_then_format twice, collecting every intermediary diffs"""
     executables = [baseline_executable, comparison_executable] * 2
 
@@ -235,7 +242,7 @@ async def format_then_format_converge(
                 )
 
     if not hunk_details:
-        return Diffs()
+        return DiffsForHunk()
 
     logger.debug(f"Processing hunks {hunk_details}")
     diff_tasks = [
@@ -243,7 +250,7 @@ async def format_then_format_converge(
         for hunk_detail in hunk_details
     ]
     diff_results = await asyncio.gather(*diff_tasks)
-    return Diffs(Diff(result) for result in diff_results if result)
+    return DiffsForHunk(Diff(result) for result in diff_results if result)
 
 
 async def format(
