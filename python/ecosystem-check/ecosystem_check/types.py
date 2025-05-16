@@ -78,8 +78,8 @@ class Diff(Serializable):
         return format_patchset(self.patch_set, repo)
 
 
-class DiffsForHunk(list[Diff]):
-    """A collection of diffs for a specific Hunk"""
+class HistoriesForHunks(list[Diff]):
+    """A collection of git histories for Hunks"""
 
     def __bool__(self) -> bool:
         return any(diff for diff in self)
@@ -103,7 +103,14 @@ class DiffsForHunk(list[Diff]):
 
     def format_markdown(self, repo: ClonedRepository) -> str:
         return "\n---\n".join(
-            format_patchset(diff.patch_set, repo, add_hunk_suffix=True) for diff in self
+            format_patchset(
+                patch_set=diff.patch_set,
+                repo=repo,
+                commit_msgs=[
+                    line.strip() for line in diff.lines if "Formatted with " in line
+                ],
+            )
+            for diff in self
         )
 
 
@@ -132,7 +139,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diff: Diff | DiffsForHunk
+    diff: Diff | HistoriesForHunks
     repo: ClonedRepository
 
 
