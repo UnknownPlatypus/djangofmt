@@ -114,7 +114,7 @@ class HistoriesForHunks(list[Diff]):
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class HunkDetail:
     """The minimal details of a patch hunk that makes it unique."""
 
@@ -123,7 +123,7 @@ class HunkDetail:
     length: int
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Result(Serializable):
     """
     The result of an ecosystem check for a collection of projects.
@@ -133,7 +133,7 @@ class Result(Serializable):
     completed: list[tuple[Project, Comparison]]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Comparison(Serializable):
     """
     The result of a completed ecosystem comparison for a single project.

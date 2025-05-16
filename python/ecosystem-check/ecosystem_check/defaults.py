@@ -57,7 +57,11 @@ DEFAULT_TARGETS = [
                 "tests/forms_tests/templates/forms_tests/use_fieldset.html",
                 "tests/template_backends/templates/template_backends/syntax_error.html",
                 "tests/test_client_regress/bad_templates/404.html",
-            )
+            ),
+            djade_stability_exclude=(
+                "tests/i18n/commands/templates/test.html",  # Contains invalid blocktranslate syntax
+                "django/contrib/admindocs/templates/admin_doc/missing_docutils.html",  # `val as key` syntax swapped to `key=val`, changing line width
+            ),
         ),
     ),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
@@ -204,7 +208,12 @@ DEFAULT_TARGETS = [
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "src/sentry/templates/sentry/emails/reports/body.html",
                 "src/sentry/templates/sentry/partial/system-status.html",
-            )
+            ),
+            djade_stability_exclude=(
+                # Djade changes `with plugin.auth_provider as auth_provider` to `with auth_provider=plugin.auth_provider`
+                # This causes the line to be shorter, and djangofmt format it again
+                "src/sentry/templates/sentry/plugins/bases/issue/not_configured.html",
+            ),
         ),
     ),
     Project(

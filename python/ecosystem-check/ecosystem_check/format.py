@@ -269,7 +269,7 @@ async def format(
     args = options.to_args(executable_name=executable.name)
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
-    ) - set(options.exclude)
+    ) - set(options.excluded_files(executable.name))
     logger.debug(
         f"Formatting {repo_fullname} with cmd {executable!r} ({len(files)} files)"
     )

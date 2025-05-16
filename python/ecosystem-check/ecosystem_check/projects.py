@@ -15,7 +15,7 @@ from ecosystem_check import logger
 from ecosystem_check.types import HunkDetail, Serializable
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Project(Serializable):
     """
     An ecosystem target
@@ -44,15 +44,16 @@ class Profile(StrEnum):
     JINJA = "jinja"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class FormatOptions(Serializable):
     """
     Format ecosystem check options.
     """
 
-    exclude: tuple[str, ...] = field(default_factory=tuple)
-    custom_blocks: str = ""  # Comma-separated list of custom blocks
     profile: Profile = Profile.DJANGO
+    custom_blocks: str = ""  # Comma-separated list of custom blocks
+    exclude: tuple[str, ...] = field(default_factory=tuple)
+    djade_stability_exclude: tuple[str, ...] = field(default_factory=tuple)
 
     def to_args(self, executable_name: str) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:
@@ -68,12 +69,17 @@ class FormatOptions(Serializable):
             f"Cannot cast format options for this executable: {executable_name}"
         )
 
+    def excluded_files(self, executable_name: str) -> tuple[str, ...]:
+        if Formatter.DJADE in executable_name:
+            return self.exclude + self.djade_stability_exclude
+        return self.exclude
+
 
 class ProjectSetupError(Exception):
     """An error setting up a project."""
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Repository(Serializable):
     """
     A remote GitHub repository.
@@ -180,7 +186,7 @@ class Repository(Serializable):
         return await ClonedRepository.from_path(checkout_dir, self)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ClonedRepository(Repository, Serializable):
     """
     A cloned GitHub repository, which includes the hash of the current commit.
