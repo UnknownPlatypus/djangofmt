@@ -35,7 +35,12 @@ def format_patchset(
 
             # Wrap the contents of the hunk in a diff code block
             lines.append("```diff")
-            lines.extend(hunk_lines[1:])
+            min_offset = min(
+                len(line[1:]) - len(line[1:].lstrip(" "))
+                for line in hunk_lines[1:]
+                if line.strip()
+            )
+            lines.extend(line[:1] + line[min_offset + 1 :] for line in hunk_lines[1:])
             lines.append("```")
 
     return "\n".join(lines)
