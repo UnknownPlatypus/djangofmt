@@ -12,7 +12,7 @@ description = "A fast, HTML aware, Django template formatter, written in Rust."
 
 [dependencies]
 dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.19.1.0", package = "dprint_plugin_markup" }
-malva = { version = "0.11.1", features = ["config_serde"] }
+malva = { version = "0.12.0", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.19.1.0", package = "markup_fmt" }
 
 anyhow = "1.0.96"
