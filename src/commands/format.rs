@@ -9,14 +9,14 @@ use std::time::Instant;
 
 use anyhow::Result;
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use markup_fmt::{format_text, FormatError, Language};
+use markup_fmt::{FormatError, Language, format_text};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
 
+use crate::ExitStatus;
 use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
 use crate::logging::LogLevel;
-use crate::ExitStatus;
 
 pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> Result<ExitStatus> {
     let format_options = FormatOptions {

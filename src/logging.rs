@@ -1,9 +1,9 @@
 use anyhow::Result;
+use tracing_subscriber::Layer;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::format;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::Layer;
 use tracing_tree::time::Uptime;
 
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Copy, Clone)]

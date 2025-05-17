@@ -4,7 +4,7 @@ use clap::{CommandFactory, Parser};
 use colored::Colorize;
 
 use djangofmt::args::{Args, Commands};
-use djangofmt::{run, ExitStatus};
+use djangofmt::{ExitStatus, run};
 
 pub fn main() -> ExitCode {
     let args = Args::parse();
