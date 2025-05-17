@@ -26,7 +26,7 @@ jobs:
       UV_PUBLISH_URL: ${{ vars.UV_PUBLISH_URL }}
     steps:
       - name: "Install uv"
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
       - uses: actions/download-artifact@v4
         with:
           pattern: wheels-*
