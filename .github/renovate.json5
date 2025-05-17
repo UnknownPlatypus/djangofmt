@@ -8,6 +8,7 @@
   separateMajorMinor: false,
   prHourlyLimit: 10,
   enabledManagers: ["github-actions","cargo", "pep621", "npm"],
+  pinDigests: true, // Pin GitHub Actions to immutable SHAs.
   cargo: {
     // See https://docs.renovatebot.com/configuration-options/#rangestrategy
     rangeStrategy: "update-lockfile",
@@ -18,11 +19,6 @@
     managerFilePatterns: ["/^python/.*pyproject\\.toml$/"],
   },
   packageRules: [
-    // Pin GitHub Actions to immutable SHAs.
-    {
-      matchDepTypes: ["action"],
-      pinDigests: true,
-    },
     // Annotate GitHub Actions SHAs with a SemVer version.
     {
       extends: ["helpers:pinGitHubActionDigests"],
