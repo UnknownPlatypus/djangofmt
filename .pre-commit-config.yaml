@@ -61,6 +61,11 @@ repos:
         language_version: 1.23.0
         additional_dependencies:
           - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
+  - repo: https://github.com/renovatebot/pre-commit-hooks
+    rev: 40.13.0
+    hooks:
+      - id: renovate-config-validator
+        args: [--strict]
   - repo: local
     hooks:
       - id: dprint-fmt

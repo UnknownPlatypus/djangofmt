@@ -15,7 +15,7 @@
   pep621: {
     // The default for this package manager is to only search for `pyproject.toml` files
     // found at the repository root: https://docs.renovatebot.com/modules/manager/pep621/#file-matching
-    fileMatch: ["^python/.*pyproject\\.toml$"],
+    managerFilePatterns: ["/^python/.*pyproject\\.toml$/"],
   },
   packageRules: [
     // Pin GitHub Actions to immutable SHAs.
