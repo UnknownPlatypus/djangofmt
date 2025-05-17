@@ -37,5 +37,5 @@ uv run ecosystem-check format djangofmt "../../target/debug/djangofmt" --pdb
 You can also provide a path to cache checkouts to speed up repeated runs:
 
 ```shell
-uv run ecosystem-check format djangofmt "../../target/debug/djangofmt" --cache /tmp/repos
+uv run ecosystem-check format djangofmt "../../target/debug/djangofmt" --cache-dir /tmp/repos
 ```

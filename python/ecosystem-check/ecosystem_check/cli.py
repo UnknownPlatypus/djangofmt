@@ -18,7 +18,7 @@ from ecosystem_check import logger
 from ecosystem_check.defaults import DEFAULT_TARGETS
 from ecosystem_check.format import FormatComparison
 from ecosystem_check.main import OutputFormat, main
-from ecosystem_check.projects import DjangoFmtCommand
+from ecosystem_check.projects import Command
 
 
 def excepthook(
@@ -52,13 +52,15 @@ def entrypoint() -> None:
 
     # Use a temporary directory for caching if no cache is specified
     cache_context = (
-        tempfile.TemporaryDirectory() if not args.cache else nullcontext(args.cache)
+        tempfile.TemporaryDirectory()
+        if not args.cache_dir
+        else nullcontext(args.cache_dir)
     )
     with cache_context as cache:
         loop = asyncio.get_event_loop()
         main_task = asyncio.ensure_future(
             main(
-                command=DjangoFmtCommand(args.command),
+                command=Command(args.command),
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
                 targets=DEFAULT_TARGETS,
@@ -67,7 +69,7 @@ def entrypoint() -> None:
                 raise_on_failure=args.pdb,
                 format_comparison=(
                     FormatComparison(args.format_comparison)
-                    if args.command == DjangoFmtCommand.format
+                    if args.command == Command.format
                     else None
                 ),
             )
@@ -82,29 +84,19 @@ def entrypoint() -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description=(
-            "Check two versions of an executable against a corpus of open-source code."
-        ),
+        description="Check two versions of an executable against a corpus of open-source code."
     )
-    # TODO: Support non-default `--targets`
-    # parser.add_argument(
-    #     "--targets",
-    #     type=Path,
-    #     help=(
-    #         "Optional JSON files to use over the default repositories. "
-    #         "Supports both github_search_*.jsonl and known-github-tomls.jsonl."
-    #     ),
-    # )
     parser.add_argument(
-        "--cache",
+        "--cache-dir",
         type=Path,
         help="Location for caching cloned repositories",
     )
     parser.add_argument(
         "--output-format",
-        choices=[option.value for option in OutputFormat],
-        default="markdown",
+        choices=list(OutputFormat),
+        default=OutputFormat.MARKDOWN,
         help="The format in which the output should be generated.",
     )
     parser.add_argument(
@@ -120,13 +112,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--format-comparison",
-        choices=[option.value for option in FormatComparison],
-        default=FormatComparison.base_and_comp,
+        choices=list(FormatComparison),
+        default=FormatComparison.BASE_AND_COMP,
         help="Type of comparison to make when checking formatting.",
     )
     parser.add_argument(
         "command",
-        choices=list(DjangoFmtCommand),
+        choices=list(Command),
         help="The command to test",
     )
     parser.add_argument(
@@ -137,6 +129,8 @@ def parse_args() -> argparse.Namespace:
         "comparison_executable",
         type=Path,
     )
+    # https://docs.python.org/3.14/library/argparse.html#suggest-on-error
+    parser.suggest_on_error = True  # type: ignore[attr-defined]
     return parser.parse_args()
 
 

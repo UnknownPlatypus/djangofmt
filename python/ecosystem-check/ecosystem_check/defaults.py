@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from ecosystem_check.projects import (
     FormatOptions,
+    Profile,
     Project,
     Repository,
 )
@@ -14,7 +15,9 @@ DEFAULT_TARGETS = [
     # Jinja templates
     Project(
         repo=Repository(owner="zulip", name="zulip", ref="main"),
-        format_options=FormatOptions(profile="jinja"),
+        format_options=FormatOptions(
+            profile=Profile.JINJA,
+        ),
     ),
     Project(
         repo=Repository(
@@ -31,7 +34,7 @@ DEFAULT_TARGETS = [
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
             ),
-            profile="jinja",
+            profile=Profile.JINJA,
         ),
     ),
     # Django templates
@@ -54,7 +57,11 @@ DEFAULT_TARGETS = [
                 "tests/forms_tests/templates/forms_tests/use_fieldset.html",
                 "tests/template_backends/templates/template_backends/syntax_error.html",
                 "tests/test_client_regress/bad_templates/404.html",
-            )
+            ),
+            djade_stability_exclude=(
+                "tests/i18n/commands/templates/test.html",  # Contains invalid blocktranslate syntax
+                "django/contrib/admindocs/templates/admin_doc/missing_docutils.html",  # `val as key` syntax swapped to `key=val`, changing line width
+            ),
         ),
     ),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
@@ -96,7 +103,7 @@ DEFAULT_TARGETS = [
         ),
     ),
     Project(
-        repo=Repository(owner="django-cms", name="django-cms", ref="develop-4"),
+        repo=Repository(owner="django-cms", name="django-cms", ref="main"),
         format_options=FormatOptions(
             exclude=(
                 "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # Invalid <span>{% trans "Copy" %}<span>
@@ -201,7 +208,12 @@ DEFAULT_TARGETS = [
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "src/sentry/templates/sentry/emails/reports/body.html",
                 "src/sentry/templates/sentry/partial/system-status.html",
-            )
+            ),
+            djade_stability_exclude=(
+                # Djade changes `with plugin.auth_provider as auth_provider` to `with auth_provider=plugin.auth_provider`
+                # This causes the line to be shorter, and djangofmt format it again
+                "src/sentry/templates/sentry/plugins/bases/issue/not_configured.html",
+            ),
         ),
     ),
     Project(
@@ -209,16 +221,6 @@ DEFAULT_TARGETS = [
         format_options=FormatOptions(
             exclude=(
                 "apiserver/templates/emails/test_email.html",  # Invalid </br> tag
-            )
-        ),
-    ),
-    Project(
-        repo=Repository(owner="jumpserver", name="jumpserver", ref="master"),
-        format_options=FormatOptions(
-            exclude=(
-                "apps/acls/templates/acls/asset_login_reminder.html",  # Invalid close tag
-                "apps/acls/templates/acls/user_login_reminder.html",  # Invalid close tag
-                "apps/authentication/templates/authentication/login.html",
             )
         ),
     ),

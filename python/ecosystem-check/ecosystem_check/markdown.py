@@ -8,12 +8,16 @@ if TYPE_CHECKING:
     from ecosystem_check.projects import ClonedRepository, FormatOptions, Project
 
 
-def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
+def format_patchset(
+    patch_set: PatchSet, repo: ClonedRepository, commit_msgs: list[str] | None = None
+) -> str:
     """
     Convert a patchset to markdown, adding permalinks to the start of each hunk.
     """
     lines: list[str] = []
-    for file_patch in patch_set:
+    for file_patch, commit_msg in zip(
+        patch_set, commit_msgs or [""] * len(patch_set), strict=False
+    ):
         for hunk in file_patch:
             # Note:  When used for `format` checks, the line number is not exact because
             #        we formatted the repository for a baseline; we can't know the exact
@@ -24,11 +28,19 @@ def format_patchset(patch_set: PatchSet, repo: ClonedRepository) -> str:
 
             # Add a link before the hunk
             link_title = file_patch.path + "~L" + str(hunk.source_start)
-            lines.append(f"<a href='{hunk_link}'>{link_title}</a>")
+            title = f"<a href='{hunk_link}'>{link_title}</a>"
+            if commit_msg:
+                title += f" <span style='white-space: nowrap;'>(`{commit_msg}`)</span>"
+            lines.append(title)
 
             # Wrap the contents of the hunk in a diff code block
             lines.append("```diff")
-            lines.extend(hunk_lines[1:])
+            min_offset = min(
+                len(line[1:]) - len(line[1:].lstrip(" "))
+                for line in hunk_lines[1:]
+                if line.strip()
+            )
+            lines.extend(line[:1] + line[min_offset + 1 :] for line in hunk_lines[1:])
             lines.append("```")
 
     return "\n".join(lines)

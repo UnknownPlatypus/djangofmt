@@ -9,13 +9,13 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
-from typing import Literal, Self
+from typing import Self
 
 from ecosystem_check import logger
-from ecosystem_check.types import Serializable
+from ecosystem_check.types import HunkDetail, Serializable
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Project(Serializable):
     """
     An ecosystem target
@@ -25,32 +25,61 @@ class Project(Serializable):
     format_options: FormatOptions = field(default_factory=lambda: FormatOptions())
 
 
-class DjangoFmtCommand(StrEnum):
+class Command(StrEnum):
     format = "format"  # type: ignore[assignment]
 
 
-@dataclass(frozen=True)
+class Formatter(StrEnum):
+    """A tool name expected to do formatting work on files"""
+
+    DJANGOFMT = "djangofmt"
+    DJADE = "djade"
+    RUSTYWIND = "rustywind"
+
+
+class Profile(StrEnum):
+    """A tool name expected to do formatting work on files"""
+
+    DJANGO = "django"
+    JINJA = "jinja"
+
+
+@dataclass(frozen=True, slots=True)
 class FormatOptions(Serializable):
     """
     Format ecosystem check options.
     """
 
-    exclude: tuple[str, ...] = field(default_factory=tuple)
+    profile: Profile = Profile.DJANGO
     custom_blocks: str = ""  # Comma-separated list of custom blocks
-    profile: Literal["jinja", "django"] = "django"
+    exclude: tuple[str, ...] = field(default_factory=tuple)
+    djade_stability_exclude: tuple[str, ...] = field(default_factory=tuple)
 
-    def to_args(self) -> list[str]:
-        args = ["--profile", self.profile]
-        if self.custom_blocks:
-            args.extend(("--custom-blocks", self.custom_blocks))
-        return args
+    def to_args(self, executable_name: str) -> list[str]:
+        if Formatter.DJANGOFMT in executable_name:
+            args = ["--profile", self.profile]
+            if self.custom_blocks:
+                args.extend(("--custom-blocks", self.custom_blocks))
+            return args
+        elif executable_name == Formatter.DJADE:
+            return []
+        elif executable_name == Formatter.RUSTYWIND:
+            return ["--write"]
+        raise AssertionError(
+            f"Cannot cast format options for this executable: {executable_name}"
+        )
+
+    def excluded_files(self, executable_name: str) -> tuple[str, ...]:
+        if Formatter.DJADE in executable_name:
+            return self.exclude + self.djade_stability_exclude
+        return self.exclude
 
 
 class ProjectSetupError(Exception):
     """An error setting up a project."""
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class Repository(Serializable):
     """
     A remote GitHub repository.
@@ -136,7 +165,7 @@ class Repository(Serializable):
         # Configure git user — needed for `self.commit` to work
         await (
             await create_subprocess_exec(
-                *["git", "config", "user.email", "ecosystem@astral.sh"],
+                *["git", "config", "user.email", "thibaut.decombe+bot@gmail.com"],
                 cwd=checkout_dir,
                 env={"GIT_TERMINAL_PROMPT": "0"},
                 stdout=DEVNULL,
@@ -157,7 +186,7 @@ class Repository(Serializable):
         return await ClonedRepository.from_path(checkout_dir, self)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ClonedRepository(Repository, Serializable):
     """
     A cloned GitHub repository, which includes the hash of the current commit.
@@ -271,6 +300,34 @@ class ClonedRepository(Repository, Serializable):
         """
         process = await create_subprocess_exec(
             *["git", "diff", *args],
+            cwd=self.path,
+            env={"GIT_TERMINAL_PROMPT": "0"},
+            stdout=PIPE,
+            stderr=PIPE,
+        )
+        stdout, stderr = await process.communicate()
+        if await process.wait() != 0:
+            raise RuntimeError(f"Failed to commit: {stderr.decode()}")
+
+        return stdout.decode().splitlines()
+
+    async def diff_for_hunk(
+        self: Self, hunk_range: HunkDetail, *args: str
+    ) -> list[str]:
+        """
+        Get the current diff for a specific file and range.
+
+        Arguments are passed to `git log ...`
+        """
+        process = await create_subprocess_exec(
+            *[
+                "git",
+                "log",
+                "--reverse",
+                "-L",
+                f"{hunk_range.start},+{hunk_range.length}:./{hunk_range.path}",
+                *args,
+            ],
             cwd=self.path,
             env={"GIT_TERMINAL_PROMPT": "0"},
             stdout=PIPE,

@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "ecosystem-check"
 version = "0.0.0"
 requires-python = ">=3.11"
-dependencies = ["unidiff==0.7.5", "tomli_w==1.1.0", "tomli==2.2.1"]
+dependencies = ["unidiff==0.7.5", "tomli_w==1.1.0", "tomli==2.2.1", "djade==1.4.0"]
 
 [project.scripts]
 ecosystem-check = "ecosystem_check.cli:entrypoint"
