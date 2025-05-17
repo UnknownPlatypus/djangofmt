@@ -4,7 +4,7 @@ members = ["cargo:."]
 # Config for 'dist'
 [dist]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.28.0"
+cargo-dist-version = "0.28.5-prerelease.1"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
@@ -16,39 +16,38 @@ unix-archive = ".tar.gz"
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = [
   "aarch64-apple-darwin",
-  "aarch64-pc-windows-msvc",
   "aarch64-unknown-linux-gnu",
   "aarch64-unknown-linux-musl",
+  "aarch64-pc-windows-msvc",
   "arm-unknown-linux-musleabihf",
   "armv7-unknown-linux-gnueabihf",
   "armv7-unknown-linux-musleabihf",
-  "i686-pc-windows-msvc",
-  "i686-unknown-linux-gnu",
-  "i686-unknown-linux-musl",
+  "x86_64-apple-darwin",
   "powerpc64-unknown-linux-gnu",
   "powerpc64le-unknown-linux-gnu",
   "s390x-unknown-linux-gnu",
-  "x86_64-apple-darwin",
-  "x86_64-pc-windows-msvc",
   "x86_64-unknown-linux-gnu",
   "x86_64-unknown-linux-musl",
+  "x86_64-pc-windows-msvc",
+  "i686-unknown-linux-gnu",
+  "i686-unknown-linux-musl",
+  "i686-pc-windows-msvc",
 ]
 # Whether to auto-include files like READMEs, LICENSEEs, and CHANGELOGs (default true)
 auto-includes = false
 # Whether dist should create a Github Release or use an existing draft
 create-release = true
 # Which actions to run on pull requests
-pr-run-mode = "skip"
+pr-run-mode = "plan"
 # Whether CI should trigger releases with dispatches instead of tag pushes
 dispatch-releases = true
 # Which phase dist should use to create the GitHub release
-# See https://opensource.axo.dev/cargo-dist/book/reference/config.html?highlight=auto-includes#github-release
 github-release = "announce"
 # Whether CI should include auto-generated code to build local artifacts
 build-local-artifacts = false
-# This setting determines which custom jobs to run during the "build local artifacts" phase, during which binaries are built.
+# Local artifacts jobs to run in CI
 local-artifacts-jobs = ["./release-build-binaries"]
-# This setting determines which publish jobs to run
+# Publish jobs to run in CI
 publish-jobs = ["./release-publish-pypi"]
 # Post-announce jobs to run in CI
 post-announce-jobs = ["./release-notify-pre-commit-mirror"]
