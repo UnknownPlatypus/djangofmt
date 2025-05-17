@@ -2,12 +2,12 @@
 name = "djangofmt"
 version = "0.1.0"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
-edition = "2021"
+edition = "2024"
 exclude = ["/tests"]
 license = "MIT"
 publish = true
 repository = "https://github.com/UnknownPlatypus/djangofmt"
-rust-version = "1.83"
+rust-version = "1.85"
 description = "A fast, HTML aware, Django template formatter, written in Rust."
 
 [dependencies]

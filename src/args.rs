@@ -1,6 +1,6 @@
 use crate::logging::LogLevel;
-use clap::builder::styling::{AnsiColor, Effects};
 use clap::builder::Styles;
+use clap::builder::styling::{AnsiColor, Effects};
 use std::path::PathBuf;
 
 use markup_fmt::Language;
