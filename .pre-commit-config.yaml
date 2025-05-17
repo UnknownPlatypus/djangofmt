@@ -1,6 +1,11 @@
 ci:
   autoupdate_schedule: monthly
-  skip: [dprint-fmt, actionlint, cargo-clippy, cargo-fmt]
+  skip:
+    - dprint-fmt
+    - actionlint
+    - cargo-clippy
+    - cargo-fmt
+    - renovate-config-validator
 
 default_language_version:
   python: python3.12
