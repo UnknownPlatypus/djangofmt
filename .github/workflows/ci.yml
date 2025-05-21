@@ -39,6 +39,7 @@ jobs:
               - python/**
               - src/**
               - .github/workflows/ci.yml
+              - Cargo.toml
 
   build-and-compare:
     name: "Ecosystem check"
