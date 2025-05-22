@@ -241,7 +241,7 @@ dependencies = [
 [[package]]
 name = "dprint_plugin_markup"
 version = "0.20.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=e5ebee1f7e27a506025bcf9f8b77695e1b077c56#e5ebee1f7e27a506025bcf9f8b77695e1b077c56"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=5a54c390a6046016c2d4fe9da7316bb56507ddab#5a54c390a6046016c2d4fe9da7316bb56507ddab"
 dependencies = [
  "anyhow",
  "dprint-core",
@@ -394,7 +394,7 @@ dependencies = [
 [[package]]
 name = "markup_fmt"
 version = "0.20.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=e5ebee1f7e27a506025bcf9f8b77695e1b077c56#e5ebee1f7e27a506025bcf9f8b77695e1b077c56"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=5a54c390a6046016c2d4fe9da7316bb56507ddab#5a54c390a6046016c2d4fe9da7316bb56507ddab"
 dependencies = [
  "aho-corasick",
  "css_dataset",
