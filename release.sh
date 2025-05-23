@@ -14,7 +14,7 @@ echo "Preparing $1..."
 # update the version in various files
 sed -E -i "s/^version = .*$/version = \"${1#v}\"/" Cargo.toml pyproject.toml
 sed -E -i "s/rev: v.*$/rev: v${1#v}/" README.md
-sed -E -i "s/djangofmt \d+.\d+.\d+/djangofmt ${1#v}/" src/args.rs
+sed -E -i "s/(djangofmt) [0-9]+\.[0-9]+\.[0-9]+/\1 ${1#v}/" src/args.rs
 # sync cargo.lock
 cargo build
 # update the changelog
