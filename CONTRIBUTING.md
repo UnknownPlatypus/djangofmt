@@ -8,8 +8,9 @@ Djangofmt is written in Rust, so you'll need to install the
 You will also need [uv](https://docs.astral.sh/uv/getting-started/installation/) (or [pipx](https://github.com/pypa/pipx))
 to run various python tools.
 
-Linting & formatting is managed using [pre-commit](https://pre-commit.com/)
-so you'll need to have it installed and to install the hooks.
+Linting & formatting is managed using [pre-commit](https://pre-commit.com/).
+
+It's recommended to install the pre-commit hooks to automatically run the validation checks when making a commit (it will be checked in CI otherwise):
 
 ```shell
 uv tool install pre-commit
@@ -18,11 +19,12 @@ pre-commit install
 
 ## Development
 
-Before opening a pull request, make sure build / linting / formatting and the pass.
+Before opening a pull request, make sure build / linting / formatting / test are passing.
 
 ```shell
 cargo build --release &&
-pre-commit run --all-files
+pre-commit run --all-files &&
+cargo test
 ```
 
 You can also run the ecosystem check locally (it will run in CI anyways).
