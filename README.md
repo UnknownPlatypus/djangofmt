@@ -133,8 +133,6 @@ See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for 
 
 ## Known limitations
 
-All of these could be solved but were not prioritized for now.
-
 ### `style` attributes formatting
 
 The `style` attribute will be formatted using a CSS formatter ([Malva](https://github.com/g-plane/malva)),
@@ -158,6 +156,24 @@ but the output will always be on a single line.
     Such a lovely day
 </div>
 ```
+
+### Conditional open/close tags
+
+Djangofmt doesn't accept and will produce parsing errors for any syntax that could cut off HTML in obvious ways, e.g.:
+
+```html
+{% if condition %}
+    <div class="container">
+{% endif %}
+    Some content
+{% if condition %}
+    </div>
+{% endif %}
+```
+
+This is generally discouraged and should be avoided because it's an easy way to create invalid HTML.
+
+See upstream tracking issue: https://github.com/g-plane/markup_fmt/issues/97
 
 ## Benchmarks
 
