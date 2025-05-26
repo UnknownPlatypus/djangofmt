@@ -58,9 +58,9 @@ wheels = [
 
 [[package]]
 name = "djhtml"
-version = "3.0.7"
+version = "3.0.8"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/9f/e8/1919adec35e3a7e02ec874b7a95b811f03ad6dc9efcfe72d18e0a359f12a/djhtml-3.0.7.tar.gz", hash = "sha256:558c905b092a0c8afcbed27dea2f50aa6eb853a658b309e4e0f2bb378bdf6178", size = 27322, upload-time = "2024-10-17T18:50:35.399Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/49/e8/c2d12facfc47fec732633ea3c2d820298e0e314331fc43bcf694099abcb5/djhtml-3.0.8.tar.gz", hash = "sha256:ec3b4cf25f0959474c7793da1becba654ca9587689ce143955bcbc2638eeabce", size = 27886, upload-time = "2025-05-22T07:32:23.81Z" }
 
 [[package]]
 name = "djlint"
@@ -235,7 +235,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "djade", specifier = "==1.4.0" },
-    { name = "djhtml", specifier = "==3.0.7" },
+    { name = "djhtml", specifier = "==3.0.8" },
     { name = "djlint", specifier = "==1.36.4" },
 ]
 
