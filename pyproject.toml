@@ -65,7 +65,7 @@ body = """
 {%- endmacro -%}
 
 {% macro print_commit(commit) -%}
-    - {% if commit.scope %}_({{ commit.scope }})_ {% endif %}\
+    - {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
         {% if commit.breaking %}[**breaking**] {% endif %}\
         {{ commit.message | upper_first }} - ([{{ commit.id | truncate(length=7, end="") }}]({{ self::remote_url() }}/commit/{{ commit.id }}))\
 {% endmacro -%}
