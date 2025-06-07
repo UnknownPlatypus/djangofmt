@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.0..v0.2.1) - 2025-06-07
+
+### ⛰️ Features
+
+- *(format)* Improve whitespace-sensitive node formatting ([#70](https://github.com/UnknownPlatypus/djangofmt/issues/70)) - ([cfaa21e](https://github.com/UnknownPlatypus/djangofmt/commit/cfaa21e2ca37134bb9e315b17a0bc6f82f6ac289))
+
 ## [0.2.0](https://github.com/UnknownPlatypus/djangofmt/compare/v0.1.0..v0.2.0) - 2025-05-23
 
 ### ⛰️ Features

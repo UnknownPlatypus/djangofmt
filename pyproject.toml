@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "djangofmt"
-version = "0.2.0"
+version = "0.2.1"
 description = "A fast, HTML aware, Django template formatter, written in Rust."
 readme = "README.md"
 keywords = [
