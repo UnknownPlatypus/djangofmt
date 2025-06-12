@@ -175,6 +175,20 @@ This is generally discouraged and should be avoided because it's an easy way to 
 
 See upstream tracking issue: https://github.com/g-plane/markup_fmt/issues/97
 
+## `.svg` files support
+
+Djangofmt can format svg files too.
+It will behave exactly the same way as if they were html files.
+
+There is a dedicated pre-commit for these:
+
+```yaml
+- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
+  rev: v0.2.1
+  hooks:
+    - id: djangofmt-svg
+```
+
 ## Benchmarks
 
 Here are the results benchmarking `djangofmt` against similar tools on 100k lines of HTML across 1.7k files.
