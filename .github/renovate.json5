@@ -44,6 +44,11 @@
       description: "Disable PRs updating GitHub runners (e.g. 'runs-on: macos-14')",
       enabled: false,
     },
+    {
+      // This file is managed by cargo-dist, don't try to update it.
+      "matchFileNames": [".github/workflows/release.yml"],
+      "enabled": false
+    }
   ],
   vulnerabilityAlerts: {
     commitMessageSuffix: "",
