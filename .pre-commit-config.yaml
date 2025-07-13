@@ -30,7 +30,7 @@ repos:
       - id: pyupgrade
         args: [--py311-plus]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 0b19ef1fd6ad680ed7752d6daba883ce1265a6de  # frozen: v0.12.2
+    rev: 3d44372123ca5e8617fdb65d9f11facd159b9e95  # frozen: v0.12.3
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -44,7 +44,7 @@ repos:
     hooks:
       - id: mypy
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: v3.11.0-1
+    rev: a74ad1444733aa990b9130b3115a576d24dcf368  # frozen: v3.12.0-1
     hooks:
       - id: shfmt
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
