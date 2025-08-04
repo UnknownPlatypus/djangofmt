@@ -30,21 +30,21 @@ repos:
       - id: pyupgrade
         args: [--py311-plus]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 3d44372123ca5e8617fdb65d9f11facd159b9e95  # frozen: v0.12.3
+    rev: 4cbc74d53fe5634e58e0e65db7d28939c9cec3f7  # frozen: v0.12.7
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/crate-ci/typos
-    rev: 3d97dc5b9833a60a62e70d5b56af2cc7ddd522f6  # frozen: v1
+    rev: 8d96c408b0dca5cc2e5b125482e8aabe5473e153  # frozen: v1
     hooks:
       - id: typos
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 0f86793af5ef5f6dc63c8d04a3cabfa3ea8f9c6a  # frozen: v1.16.1
+    rev: 412de98d50e846f31ea6f4b0ad036f2c24a7a024  # frozen: v1.17.1
     hooks:
       - id: mypy
   - repo: https://github.com/scop/pre-commit-shfmt
-    rev: a74ad1444733aa990b9130b3115a576d24dcf368  # frozen: v3.12.0-1
+    rev: 2a30809d16bc7a60d9b97353c797f42b510d3368  # frozen: v3.12.0-2
     hooks:
       - id: shfmt
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
@@ -71,7 +71,7 @@ repos:
         additional_dependencies:
           - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: f85c5c260ab38ecfb47045a6f0957985a1b7623c  # frozen: 41.23.5
+    rev: 943642a690b57e66b12a6f039bb4640b29e19130  # frozen: 41.43.0
     hooks:
       - id: renovate-config-validator
         args: [--strict]
