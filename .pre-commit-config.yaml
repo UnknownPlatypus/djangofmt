@@ -25,18 +25,18 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/asottile/pyupgrade
-    rev: 37bfa06d791fd38fb4e54910b36a2ff57641b074 # frozen: v3.20.0
+    rev: f90119b1b8bd9e46949d9592972b2c4c27d62a97  # frozen: v3.21.0
     hooks:
       - id: pyupgrade
         args: [--py311-plus]
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: 9c89adb347f6b973f4905a4be0051eb2ecf85dea  # frozen: v0.13.3
+    rev: aad66557af3b56ba6d4d69cd1b6cba87cef50cbb  # frozen: v0.14.3
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
   - repo: https://github.com/crate-ci/typos
-    rev: a078fb205d445ce8d249ddb64fa61de0f4381759  # frozen: v1.37.3
+    rev: b04a3e939a8f2800a1dc330d7e569e7557879d41  # frozen: v1
     hooks:
       - id: typos
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -60,18 +60,18 @@ repos:
           "--allow-dirty",
         ]
   - repo: https://github.com/woodruffw/zizmor-pre-commit
-    rev: 3c10df247c55cf21f75003105b879f145096bd4a  # frozen: v1.14.2
+    rev: bbd57e2e77d04e39722d2976d5d6bfa227f101e8  # frozen: v1.16.2
     hooks:
       - id: zizmor
   - repo: https://github.com/rhysd/actionlint
-    rev: 03d0035246f3e81f36aed592ffb4bebf33a03106 # frozen: v1.7.7
+    rev: e7d448ef7507c20fc4c88a95d0c448b848cd6127  # frozen: v1.7.8
     hooks:
       - id: actionlint
         language_version: 1.23.0
         additional_dependencies:
           - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
   - repo: https://github.com/renovatebot/pre-commit-hooks
-    rev: e423b55cd095370675e75f4804819b4c324c5240  # frozen: 41.137.1
+    rev: aeb655674a239a9006f8bbc04a75749748f56a95  # frozen: 41.169.2
     hooks:
       - id: renovate-config-validator
         args: [--strict]
