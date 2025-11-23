@@ -22,15 +22,19 @@ pub enum ExitStatus {
 impl From<ExitStatus> for ExitCode {
     fn from(status: ExitStatus) -> Self {
         match status {
-            ExitStatus::Success => ExitCode::from(0),
-            ExitStatus::Failure => ExitCode::from(1),
-            ExitStatus::Error => ExitCode::from(2),
+            ExitStatus::Success => Self::from(0),
+            ExitStatus::Failure => Self::from(1),
+            ExitStatus::Error => Self::from(2),
         }
     }
 }
 
 /// Main entrypoint to any command.
 /// Will set up logging and call the correct Command Handler.
+///
+/// # Errors
+///
+/// Will return `Err` on any formatting error (e.g. invalid file path, parse errors, formatting errors.).
 pub fn run(
     Args {
         fmt,
@@ -38,7 +42,7 @@ pub fn run(
         ..
     }: Args,
 ) -> Result<ExitStatus> {
-    setup_tracing(global_options.log_level())?;
+    setup_tracing(global_options.log_level());
 
-    commands::format::format(fmt, global_options)
+    commands::format::format(fmt, &global_options)
 }

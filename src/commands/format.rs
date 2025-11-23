@@ -18,7 +18,7 @@ use crate::ExitStatus;
 use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
 use crate::logging::LogLevel;
 
-pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> Result<ExitStatus> {
+pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
     let format_options = FormatOptions {
         layout: LayoutOptions {
             print_width: args.line_length,
@@ -79,7 +79,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
 
     // Report on the formatting changes.
     if global_options.log_level() >= LogLevel::Default {
-        write_summary(results)?;
+        write_summary(results.as_ref())?;
     }
 
     if errors.is_empty() {
@@ -91,7 +91,7 @@ pub(crate) fn format(args: FormatCommand, global_options: GlobalConfigArgs) -> R
 
 /// Format the file at the given [`Path`].
 #[tracing::instrument(level="debug", skip_all, fields(path = %path.display()))]
-pub(crate) fn format_path(
+fn format_path(
     path: &Path,
     format_options: &FormatOptions,
     profile: &Profile,
@@ -117,11 +117,10 @@ pub(crate) fn format_path(
                     syntax,
                     &serde_json::to_value(additional_config).and_then(serde_json::from_value)?,
                 )
-                .map(Cow::from)
                 // TODO: Don't skip errors and actually handle these cases.
                 //       Currently we have errors when there is templating blocks inside style tags
                 // .map_err(anyhow::Error::from)
-                .unwrap_or(code.into()))
+                .map_or_else(|_| code.into(), Cow::from))
             } else {
                 Ok(code.into())
                 // dprint_plugin_biome::format_text(
@@ -164,7 +163,7 @@ pub(crate) fn format_path(
 
 /// An error that can occur while formatting a set of files.
 #[derive(Debug)]
-pub(crate) enum FormatCommandError {
+enum FormatCommandError {
     Read(Option<PathBuf>, io::Error),
     Parse(Option<PathBuf>, FormatError<anyhow::Error>),
     Write(Option<PathBuf>, io::Error),
@@ -183,21 +182,21 @@ impl Display for FormatCommandError {
         match self {
             Self::Parse(path, err) => {
                 if let Some(path) = path {
-                    write!(f, "Failed to parse {path:?} with error {err:?}")
+                    write!(f, "Failed to parse {} with error {err:?}", path.display())
                 } else {
                     write!(f, "Failed to parse with error {err:?}")
                 }
             }
             Self::Read(path, err) => {
                 if let Some(path) = path {
-                    write!(f, "Failed to read {path:?} with error {err:?}",)
+                    write!(f, "Failed to read {} with error {err:?}", path.display())
                 } else {
                     write!(f, "Failed to read with error {err:?}",)
                 }
             }
             Self::Write(path, err) => {
                 if let Some(path) = path {
-                    write!(f, "Failed to write {path:?} with error {err:?}")
+                    write!(f, "Failed to write {} with error {err:?}", path.display())
                 } else {
                     write!(f, "Failed to write with error {err:?}")
                 }
@@ -207,7 +206,7 @@ impl Display for FormatCommandError {
 }
 /// The result of an individual formatting operation.
 #[derive(Eq, PartialEq, Hash, Debug)]
-pub(crate) enum FormatResult {
+enum FormatResult {
     /// The file was formatted.
     Formatted,
 
@@ -216,9 +215,9 @@ pub(crate) enum FormatResult {
 }
 
 /// Write a summary of the formatting results to stdout.
-fn write_summary(results: Vec<FormatResult>) -> Result<()> {
+fn write_summary(results: &[FormatResult]) -> Result<()> {
     let mut counts = HashMap::new();
-    for val in &results {
+    for val in results {
         counts
             .entry(val)
             .and_modify(|count| *count += 1)
