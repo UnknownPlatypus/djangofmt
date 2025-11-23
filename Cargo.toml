@@ -2,6 +2,7 @@
 name = "djangofmt"
 version = "0.2.2"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
+# Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
 exclude = ["/tests"]
 license = "MIT"
@@ -38,3 +39,8 @@ strip = true
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+unwrap_used = "deny"

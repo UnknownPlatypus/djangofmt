@@ -1,4 +1,3 @@
-use anyhow::Result;
 use tracing_subscriber::Layer;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::format;
@@ -21,14 +20,14 @@ impl LogLevel {
     #[allow(clippy::trivially_copy_pass_by_ref)]
     const fn level_filter(&self) -> LevelFilter {
         match self {
-            LogLevel::Default => LevelFilter::INFO,
-            LogLevel::Verbose => LevelFilter::DEBUG,
-            LogLevel::Quiet => LevelFilter::OFF,
+            Self::Default => LevelFilter::INFO,
+            Self::Verbose => LevelFilter::DEBUG,
+            Self::Quiet => LevelFilter::OFF,
         }
     }
 }
 
-pub fn setup_tracing(level: LogLevel) -> Result<()> {
+pub fn setup_tracing(level: LogLevel) {
     let filter = level.level_filter();
 
     if level == LogLevel::Verbose {
@@ -44,7 +43,7 @@ pub fn setup_tracing(level: LogLevel) -> Result<()> {
                     .with_timer(Uptime::default())
                     .with_filter(filter),
             )
-            .init()
+            .init();
     } else {
         tracing_subscriber::registry()
             .with(
@@ -52,8 +51,6 @@ pub fn setup_tracing(level: LogLevel) -> Result<()> {
                     .event_format(format().compact().without_time().with_target(false))
                     .with_filter(filter),
             )
-            .init()
-    };
-
-    Ok(())
+            .init();
+    }
 }
