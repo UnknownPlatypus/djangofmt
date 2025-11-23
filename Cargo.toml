@@ -38,3 +38,8 @@ strip = true
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+unwrap_used = "deny"

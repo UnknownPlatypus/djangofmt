@@ -6,6 +6,7 @@ use colored::Colorize;
 use djangofmt::args::{Args, Commands};
 use djangofmt::{ExitStatus, run};
 
+#[must_use]
 pub fn main() -> ExitCode {
     let args = Args::parse();
 
