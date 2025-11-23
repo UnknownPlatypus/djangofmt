@@ -14,6 +14,7 @@ pub struct GlobalConfigArgs {
 }
 
 impl GlobalConfigArgs {
+    #[must_use]
     pub fn log_level(&self) -> LogLevel {
         LogLevel::from(&self.log_level_args)
     }
@@ -79,8 +80,8 @@ pub enum Profile {
 impl From<&Profile> for Language {
     fn from(profile: &Profile) -> Self {
         match profile {
-            Profile::Django => Language::Django,
-            Profile::Jinja => Language::Jinja,
+            Profile::Django => Self::Django,
+            Profile::Jinja => Self::Jinja,
         }
     }
 }
