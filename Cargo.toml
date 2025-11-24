@@ -16,7 +16,6 @@ dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", 
 malva = { version = "0.12.1", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.22.0.0" }
 
-anyhow = "1.0.98"
 clap = { version = "4.5.38", features = ["derive", "wrap_help"] }
 clap_complete_command = "0.6.1"
 rayon = "1.10.0"
@@ -47,3 +46,4 @@ inherits = "release"
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "deny", priority = -1 }
 unwrap_used = "deny"
+missing_errors_doc = "allow"

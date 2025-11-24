@@ -1,12 +1,10 @@
-use std::process::ExitCode;
-
-use anyhow::Result;
-
 use crate::args::Args;
 use crate::logging::setup_tracing;
+use std::process::ExitCode;
 
 pub mod args;
-mod commands;
+pub mod commands;
+pub mod error;
 mod logging;
 
 #[derive(Copy, Clone)]
@@ -41,7 +39,7 @@ pub fn run(
         global_options,
         ..
     }: Args,
-) -> Result<ExitStatus> {
+) -> error::Result<ExitStatus> {
     setup_tracing(global_options.log_level());
 
     commands::format::format(fmt, &global_options)

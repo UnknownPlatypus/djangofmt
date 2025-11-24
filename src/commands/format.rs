@@ -7,7 +7,6 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use anyhow::Result;
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use markup_fmt::{FormatError, Language, format_text};
 use rayon::iter::Either::{Left, Right};
@@ -16,6 +15,7 @@ use tracing::{debug, error};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
+use crate::error::{Error, Result};
 use crate::logging::LogLevel;
 
 pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
@@ -95,12 +95,10 @@ fn format_path(
     path: &Path,
     format_options: &FormatOptions,
     profile: &Profile,
-) -> Result<FormatResult, FormatCommandError> {
+) -> std::result::Result<FormatResult, FormatCommandError> {
     // Extract the source from the file.
-    let unformatted = match std::fs::read_to_string(path) {
-        Ok(unformatted) => unformatted,
-        Err(err) => return Err(FormatCommandError::Read(Some(path.to_path_buf()), err)),
-    };
+    let unformatted = std::fs::read_to_string(path)
+        .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
 
     // Format the source.
     let format_result = format_text(
@@ -141,10 +139,8 @@ fn format_path(
         },
     );
 
-    let formatted = match format_result {
-        Ok(formatted) => formatted,
-        Err(err) => return Err(FormatCommandError::Parse(Some(path.to_path_buf()), err)),
-    };
+    let formatted =
+        format_result.map_err(|err| FormatCommandError::Parse(Some(path.to_path_buf()), err))?;
 
     // Checked if something changed and write to file if necessary
     if formatted.len() == unformatted.len() && formatted == unformatted {
@@ -163,9 +159,9 @@ fn format_path(
 
 /// An error that can occur while formatting a set of files.
 #[derive(Debug)]
-enum FormatCommandError {
+pub enum FormatCommandError {
     Read(Option<PathBuf>, io::Error),
-    Parse(Option<PathBuf>, FormatError<anyhow::Error>),
+    Parse(Option<PathBuf>, FormatError<Error>),
     Write(Option<PathBuf>, io::Error),
 }
 
@@ -204,6 +200,7 @@ impl Display for FormatCommandError {
         }
     }
 }
+
 /// The result of an individual formatting operation.
 #[derive(Eq, PartialEq, Hash, Debug)]
 enum FormatResult {

@@ -1,5 +1,3 @@
-mod error;
-
 use std::process::ExitCode;
 
 use clap::{CommandFactory, Parser};
@@ -17,15 +15,13 @@ pub fn main() -> ExitCode {
     }
 
     match run(args) {
-        Ok(code) => code.into(),
+        Ok(exit_status) => exit_status.into(),
         Err(err) => {
             #[allow(clippy::print_stderr)]
             {
                 // Unhandled error from djangofmt.
                 eprintln!("{}", "djangofmt failed".red().bold());
-                for cause in err.chain() {
-                    eprintln!("  {} {cause}", "Cause:".bold());
-                }
+                eprintln!("  {} {err}", "Error:".bold());
             }
             ExitStatus::Error.into()
         }
