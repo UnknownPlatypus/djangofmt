@@ -240,7 +240,7 @@ dependencies = [
  "dprint_plugin_markup",
  "insta-cmd",
  "malva",
- "markup_fmt",
+ "markup_fmt 0.22.0 (git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0)",
  "rayon",
  "serde_json",
  "tracing",
@@ -262,11 +262,11 @@ dependencies = [
 [[package]]
 name = "dprint_plugin_markup"
 version = "0.22.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0#821dd7458ae7415239b28fbab165a7a47dcbfec3"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=821dd7458ae7415239b28fbab165a7a47dcbfec3#821dd7458ae7415239b28fbab165a7a47dcbfec3"
 dependencies = [
  "anyhow",
  "dprint-core",
- "markup_fmt",
+ "markup_fmt 0.22.0 (git+https://github.com/UnknownPlatypus/markup_fmt?rev=821dd7458ae7415239b28fbab165a7a47dcbfec3)",
  "serde_json",
 ]
 
@@ -415,13 +415,25 @@ dependencies = [
 [[package]]
 name = "markup_fmt"
 version = "0.22.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0#821dd7458ae7415239b28fbab165a7a47dcbfec3"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=821dd7458ae7415239b28fbab165a7a47dcbfec3#821dd7458ae7415239b28fbab165a7a47dcbfec3"
 dependencies = [
  "aho-corasick",
  "css_dataset",
  "itertools 0.13.0",
  "memchr",
  "serde",
+ "tiny_pretty",
+]
+
+[[package]]
+name = "markup_fmt"
+version = "0.22.0"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0#821dd7458ae7415239b28fbab165a7a47dcbfec3"
+dependencies = [
+ "aho-corasick",
+ "css_dataset",
+ "itertools 0.13.0",
+ "memchr",
  "tiny_pretty",
 ]
 
