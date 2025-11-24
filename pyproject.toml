@@ -121,10 +121,10 @@ postprocessors = [
 ]
 
 [tool.git-cliff.git]
-# Parse commits according to the conventional commits specification.
+# Parse commits according to the conventional commit's specification.
 # See https://www.conventionalcommits.org
 conventional_commits = true
-# Exclude commits that do not match the conventional commits specification.
+# Exclude commits that do not match the conventional commit's specification.
 filter_unconventional = true
 # Split commits on newlines, treating each line as an individual commit.
 split_commits = false

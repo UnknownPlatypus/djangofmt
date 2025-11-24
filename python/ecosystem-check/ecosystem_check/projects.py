@@ -88,6 +88,7 @@ class Repository(Serializable):
     owner: str
     name: str
     ref: str | None
+    domain: str = "github.com"
 
     @property
     def fullname(self) -> str:
@@ -95,7 +96,7 @@ class Repository(Serializable):
 
     @property
     def url(self: Self) -> str:
-        return f"https://github.com/{self.owner}/{self.name}"
+        return f"https://{self.domain}/{self.fullname}"
 
     async def clone(self: Self, checkout_dir: Path) -> ClonedRepository:
         """
@@ -144,7 +145,7 @@ class Repository(Serializable):
 
         command.extend(
             [
-                f"https://github.com/{self.owner}/{self.name}",
+                self.url,
                 str(checkout_dir),
             ],
         )
@@ -194,6 +195,18 @@ class ClonedRepository(Repository, Serializable):
 
     commit_hash: str
     path: Path
+    domain: str
+
+    @classmethod
+    async def from_path(cls, path: Path, repo: Repository) -> Self:
+        return cls(
+            name=repo.name,
+            owner=repo.owner,
+            ref=repo.ref,
+            domain=repo.domain,
+            path=path,
+            commit_hash=await cls._get_head_commit(path),
+        )
 
     def url_for(
         self: Self,
@@ -204,26 +217,12 @@ class ClonedRepository(Repository, Serializable):
         """
         Return the remote GitHub URL for the given path in this repository.
         """
-        url = f"https://github.com/{self.owner}/{self.name}/blob/{self.commit_hash}/{path}"
+        url = f"{self.url}@{self.commit_hash}/blob/{self.commit_hash}/{path}"
         if line_number:
             url += f"#L{line_number}"
         if end_line_number:
             url += f"-L{end_line_number}"
         return url
-
-    @property
-    def url(self: Self) -> str:
-        return f"https://github.com/{self.owner}/{self.name}@{self.commit_hash}"
-
-    @classmethod
-    async def from_path(cls, path: Path, repo: Repository) -> Self:
-        return cls(
-            name=repo.name,
-            owner=repo.owner,
-            ref=repo.ref,
-            path=path,
-            commit_hash=await cls._get_head_commit(path),
-        )
 
     @staticmethod
     async def _get_head_commit(checkout_dir: Path) -> str:
@@ -260,7 +259,7 @@ class ClonedRepository(Repository, Serializable):
         """
         Pull the latest changes.
 
-        Typically `reset` should be run first.
+        Typically, `reset` should be run first.
         """
         process = await create_subprocess_exec(
             *["git", "pull"],

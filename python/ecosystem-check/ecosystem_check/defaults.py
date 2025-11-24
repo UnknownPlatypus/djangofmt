@@ -23,7 +23,7 @@ DEFAULT_TARGETS = [
         repo=Repository(
             owner="cookiecutter",
             name="cookiecutter-django",
-            ref="master",
+            ref="main",
         ),
         format_options=FormatOptions(
             exclude=(
@@ -222,6 +222,14 @@ DEFAULT_TARGETS = [
             exclude=(
                 "apiserver/templates/emails/test_email.html",  # Invalid </br> tag
             )
+        ),
+    ),
+    Project(
+        repo=Repository(
+            owner="emmaDelescolle",
+            name="django-admin-deux",
+            ref="main",
+            domain="codeberg.org",
         ),
     ),
 ]

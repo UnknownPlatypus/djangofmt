@@ -1,0 +1,8 @@
+version = 1
+revision = 3
+requires-python = ">=3.8"
+
+[[package]]
+name = "djangofmt"
+version = "0.2.2"
+source = { editable = "." }

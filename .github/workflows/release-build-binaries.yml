@@ -4,7 +4,7 @@
 #
 # Should be part of `local-artifacts-jobs` in `dist-workspace.toml` configuration.
 # See https://opensource.axo.dev/cargo-dist/book/reference/config.html#local-artifacts-jobs
-# Most of this was adapted from `maturin generate-ci github` output, adding test steps.
+# Most of this was adapted from `maturin generate-ci GitHub` output, adding test steps.
 name: "[djangofmt] Build release binaries"
 
 on:
