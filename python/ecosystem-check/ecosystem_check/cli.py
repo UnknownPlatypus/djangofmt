@@ -25,7 +25,7 @@ def excepthook(
     type: type[BaseException], value: BaseException, tb: TracebackType | None
 ) -> None:
     if hasattr(sys, "ps1") or not sys.stderr.isatty():
-        # we are in interactive mode or we don't have a tty so call the default
+        # we are in interactive mode, or we don't have a tty so call the default
         sys.__excepthook__(type, value, tb)
     else:
         import pdb

@@ -27,9 +27,9 @@ pre-commit run --all-files &&
 cargo test
 ```
 
-You can also run the ecosystem check locally (it will run in CI anyways).
+You can also run the ecosystem check locally (it will run in CI anyway).
 See the [README](./python/ecosystem-check/README.md).
 
 ## Other tools / scripts
 
-You can run the benchmarks locally followingthe [README](./python/benchmarks/README.md).
+You can run the benchmarks locally following the [README](./python/benchmarks/README.md).

@@ -35,7 +35,7 @@ targets = [
 ]
 # Whether to auto-include files like READMEs, LICENSEEs, and CHANGELOGs (default true)
 auto-includes = false
-# Whether dist should create a Github Release or use an existing draft
+# Whether dist should create a GitHub Release or use an existing draft
 create-release = true
 # Which actions to run on pull requests
 pr-run-mode = "plan"

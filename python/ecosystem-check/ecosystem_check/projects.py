@@ -260,7 +260,7 @@ class ClonedRepository(Repository, Serializable):
         """
         Pull the latest changes.
 
-        Typically `reset` should be run first.
+        Typically, `reset` should be run first.
         """
         process = await create_subprocess_exec(
             *["git", "pull"],
