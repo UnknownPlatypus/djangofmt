@@ -8,6 +8,18 @@
 
 A fast, HTML aware, Django template formatter, written in Rust.
 
+<p align="center">
+  <picture align="center">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3b09a8a2-b5cb-4f1b-a0bc-5f4e3ca169db">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
+    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
+  </picture>
+</p>
+
+<p align="center">
+  <i>Formatting 100k+ lines of HTML across 1.7k+ files from scratch.</i>
+</p>
+
 Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) with some additions to support Django fully.
 
 ## Installation
@@ -163,11 +175,11 @@ Djangofmt doesn't accept and will produce parsing errors for any syntax that cou
 
 ```html
 {% if condition %}
-    <div class="container">
-{% endif %}
+<div class="container">
+    {% endif %}
     Some content
-{% if condition %}
-    </div>
+    {% if condition %}
+</div>
 {% endif %}
 ```
 
