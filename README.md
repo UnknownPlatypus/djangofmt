@@ -175,11 +175,11 @@ Djangofmt doesn't accept and will produce parsing errors for any syntax that cou
 
 ```html
 {% if condition %}
-<div class="container">
-    {% endif %}
+    <div class="container">
+{% endif %}
     Some content
-    {% if condition %}
-</div>
+{% if condition %}
+    </div>
 {% endif %}
 ```
 

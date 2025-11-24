@@ -231,10 +231,5 @@ DEFAULT_TARGETS = [
             ref="main",
             domain="codeberg.org",
         ),
-        format_options=FormatOptions(
-            exclude=(
-                # "apiserver/templates/emails/test_email.html",  # Invalid </br> tag
-            )
-        ),
     ),
 ]
