@@ -48,6 +48,14 @@
       // This file is managed by cargo-dist, don't try to update it.
       "matchFileNames": [".github/workflows/release.yml"],
       "enabled": false
+    },
+    {
+      // Group markup_fmt git dependencies together since they share the same source
+      groupName: "markup_fmt git dependencies",
+      matchManagers: ["cargo"],
+      matchPackageNames: ["dprint_plugin_markup", "markup_fmt"],
+      matchSourceUrls: ["https://github.com/UnknownPlatypus/markup_fmt"],
+      description: "Group dprint_plugin_markup and markup_fmt updates together",
     }
   ],
   vulnerabilityAlerts: {
