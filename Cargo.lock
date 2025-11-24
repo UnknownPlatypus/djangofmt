@@ -240,7 +240,7 @@ dependencies = [
  "dprint_plugin_markup",
  "insta-cmd",
  "malva",
- "markup_fmt 0.22.0 (git+https://github.com/UnknownPlatypus/markup_fmt?rev=821dd7458ae7415239b28fbab165a7a47dcbfec3)",
+ "markup_fmt",
  "rayon",
  "serde_json",
  "tracing",
@@ -250,23 +250,24 @@ dependencies = [
 
 [[package]]
 name = "dprint-core"
-version = "0.66.2"
+version = "0.67.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3ab0dd2bedc109d25f0d21afb09b7d329f6c6fa83b095daf31d2d967e091548"
+checksum = "2c1d827947704a9495f705d6aeed270fa21a67f825f22902c28f38dc3af7a9ae"
 dependencies = [
  "anyhow",
  "indexmap",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
 name = "dprint_plugin_markup"
-version = "0.22.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0#821dd7458ae7415239b28fbab165a7a47dcbfec3"
+version = "0.25.0"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.25.0.0#fcdb744152b7afc1420524fdb53241020e0acbab"
 dependencies = [
  "anyhow",
  "dprint-core",
- "markup_fmt 0.22.0 (git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0)",
+ "markup_fmt",
  "serde_json",
 ]
 
@@ -352,15 +353,6 @@ checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
 
 [[package]]
 name = "itertools"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
-dependencies = [
- "either",
-]
-
-[[package]]
-name = "itertools"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
@@ -405,7 +397,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d929173e755e816829682615f222df6011c61e787e2a2585333f05570bfb117b"
 dependencies = [
  "aho-corasick",
- "itertools 0.14.0",
+ "itertools",
  "memchr",
  "raffia",
  "serde",
@@ -414,24 +406,12 @@ dependencies = [
 
 [[package]]
 name = "markup_fmt"
-version = "0.22.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=821dd7458ae7415239b28fbab165a7a47dcbfec3#821dd7458ae7415239b28fbab165a7a47dcbfec3"
+version = "0.25.0"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.25.0.0#fcdb744152b7afc1420524fdb53241020e0acbab"
 dependencies = [
  "aho-corasick",
  "css_dataset",
- "itertools 0.13.0",
- "memchr",
- "tiny_pretty",
-]
-
-[[package]]
-name = "markup_fmt"
-version = "0.22.0"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.22.0.0#821dd7458ae7415239b28fbab165a7a47dcbfec3"
-dependencies = [
- "aho-corasick",
- "css_dataset",
- "itertools 0.13.0",
+ "itertools",
  "memchr",
  "serde",
  "tiny_pretty",
@@ -579,6 +559,7 @@ version = "1.0.145"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "402a6f66d8c709116cf22f558eab210f5a50187f702eb4d7e5ef38d9a7f1c79c"
 dependencies = [
+ "indexmap",
  "itoa",
  "memchr",
  "ryu",
