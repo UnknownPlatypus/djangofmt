@@ -217,7 +217,7 @@ class ClonedRepository(Repository, Serializable):
         """
         Return the remote GitHub URL for the given path in this repository.
         """
-        url = f"{self.url}@{self.commit_hash}/blob/{self.commit_hash}/{path}"
+        url = f"{self.url}/blob/{self.commit_hash}/{path}"
         if line_number:
             url += f"#L{line_number}"
         if end_line_number:
