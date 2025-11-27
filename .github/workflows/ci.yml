@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  UV_VERSION: 0.1.23
+  UV_VERSION: 0.9.13
 
 jobs:
   changed_files:

@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from ecosystem_check.projects import (
     FormatOptions,
+    GitDomain,
     Profile,
     Project,
     Repository,
@@ -229,7 +230,7 @@ DEFAULT_TARGETS = [
             owner="emmaDelescolle",
             name="django-admin-deux",
             ref="main",
-            domain="codeberg.org",
+            domain=GitDomain.CODEBERG,
         ),
     ),
 ]

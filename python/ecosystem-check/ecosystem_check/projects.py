@@ -29,6 +29,18 @@ class Command(StrEnum):
     format = "format"  # type: ignore[assignment]
 
 
+class GitDomain(StrEnum):
+    GITHUB = "github.com"
+    CODEBERG = "codeberg.org"
+
+    @property
+    def blob_path(self) -> str:
+        return {
+            GitDomain.GITHUB: "blob",
+            GitDomain.CODEBERG: "src/commit",
+        }[self]
+
+
 class Formatter(StrEnum):
     """A tool name expected to do formatting work on files"""
 
@@ -88,7 +100,7 @@ class Repository(Serializable):
     owner: str
     name: str
     ref: str | None
-    domain: str = "github.com"
+    domain: GitDomain = GitDomain.GITHUB
 
     @property
     def fullname(self) -> str:
@@ -121,8 +133,8 @@ class Repository(Serializable):
                         f"Failed to checkout {self.ref}: {stderr.decode()}"
                     )
 
+            await self.reset(checkout_dir)
             cloned_repo = await ClonedRepository.from_path(checkout_dir, self)
-            await cloned_repo.reset()
 
             logger.debug(f"Pulling latest changes for {self.fullname} @ {self.ref}")
             await cloned_repo.pull()
@@ -186,6 +198,21 @@ class Repository(Serializable):
 
         return await ClonedRepository.from_path(checkout_dir, self)
 
+    async def reset(self: Self, checkout_dir: Path) -> None:
+        """
+        Reset the cloned repository to the ref it started at.
+        """
+        process = await create_subprocess_exec(
+            *["git", "reset", "--hard", "origin/" + self.ref] if self.ref else [],
+            cwd=checkout_dir,
+            env={"GIT_TERMINAL_PROMPT": "0"},
+            stdout=PIPE,
+            stderr=PIPE,
+        )
+        _, stderr = await process.communicate()
+        if await process.wait() != 0:
+            raise RuntimeError(f"Failed to reset: {stderr.decode()}")
+
 
 @dataclass(frozen=True, slots=True)
 class ClonedRepository(Repository, Serializable):
@@ -195,7 +222,7 @@ class ClonedRepository(Repository, Serializable):
 
     commit_hash: str
     path: Path
-    domain: str
+    domain: GitDomain
 
     @classmethod
     async def from_path(cls, path: Path, repo: Repository) -> Self:
@@ -217,7 +244,7 @@ class ClonedRepository(Repository, Serializable):
         """
         Return the remote GitHub URL for the given path in this repository.
         """
-        url = f"{self.url}@{self.commit_hash}/blob/{self.commit_hash}/{path}"
+        url = f"{self.url}/{self.domain.blob_path}/{self.commit_hash}/{path}"
         if line_number:
             url += f"#L{line_number}"
         if end_line_number:
@@ -239,21 +266,6 @@ class ClonedRepository(Repository, Serializable):
             raise ProjectSetupError(f"Failed to retrieve commit sha at {checkout_dir}")
 
         return stdout.decode().strip()
-
-    async def reset(self: Self) -> None:
-        """
-        Reset the cloned repository to the ref it started at.
-        """
-        process = await create_subprocess_exec(
-            *["git", "reset", "--hard", "origin/" + self.ref] if self.ref else [],
-            cwd=self.path,
-            env={"GIT_TERMINAL_PROMPT": "0"},
-            stdout=PIPE,
-            stderr=PIPE,
-        )
-        _, stderr = await process.communicate()
-        if await process.wait() != 0:
-            raise RuntimeError(f"Failed to reset: {stderr.decode()}")
 
     async def pull(self: Self) -> None:
         """

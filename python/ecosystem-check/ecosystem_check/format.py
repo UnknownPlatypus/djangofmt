@@ -167,7 +167,7 @@ async def format_and_format(
         message=f"Formatted with baseline {baseline_executable}"
     )
     # Then reset
-    await cloned_repo.reset()
+    await cloned_repo.reset(cloned_repo.path)
 
     # Then run format again
     await format(
