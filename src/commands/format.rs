@@ -9,6 +9,8 @@ use std::time::Instant;
 
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use markup_fmt::{FormatError, Language, format_text};
+use pretty_jinja;
+use pretty_jinja::config::OperatorLineBreak;
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
@@ -123,7 +125,41 @@ fn format_path(
                 // .map_err(anyhow::Error::from)
                 .map_or_else(|_| code.into(), Cow::from))
             } else {
-                Ok(code.into())
+                let pretty_jinja_config = pretty_jinja::config::FormatOptions {
+                    layout: serde_json::from_value(serde_json::to_value(&format_options.layout)?)?,
+                    language: pretty_jinja::config::LanguageOptions {
+                        operator_linebreak: OperatorLineBreak::Before,
+                        trailing_comma: pretty_jinja::config::TrailingComma::OnlyMultiLine,
+                        args_trailing_comma: None,
+                        expr_dict_trailing_comma: None,
+                        expr_list_trailing_comma: None,
+                        expr_tuple_trailing_comma: None,
+                        params_trailing_comma: None,
+                        prefer_single_line: true,
+                        args_prefer_single_line: Some(true),
+                        expr_dict_prefer_single_line: Some(true),
+                        expr_list_prefer_single_line: Some(true),
+                        expr_tuple_prefer_single_line: Some(true),
+                        params_prefer_single_line: Some(true),
+                        brace_spacing: true,
+                        bracket_spacing: false,
+                        args_paren_spacing: false,
+                        params_paren_spacing: false,
+                        tuple_paren_spacing: false,
+                    },
+                };
+                Ok(match ext {
+                    "markup-fmt-jinja-expr" => {
+                        pretty_jinja::format_expr(code, &pretty_jinja_config)
+                            .map_or_else(|_| code.into(), Cow::from)
+                    }
+                    "markup-fmt-jinja-stmt" => {
+                        pretty_jinja::format_stmt(code, &pretty_jinja_config)
+                            .map_or_else(|_| code.into(), Cow::from)
+                    }
+                    _ => code.into(),
+                })
+
                 // dprint_plugin_biome::format_text(
                 //     &Path::new("file").with_extension(ext),
                 //     code,

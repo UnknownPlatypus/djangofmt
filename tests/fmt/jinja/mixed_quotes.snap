@@ -1,0 +1,22 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ "double quotes" }}
+    {{ 'single quotes' }}
+    {{ "string with 'nested' quotes" }}
+    {{ 'string with "nested" quotes' }}
+
+    {% if value == "test" %}
+        <p>Double quotes in condition</p>
+    {% endif %}
+
+    {% if value == 'test' %}
+        <p>Single quotes in condition</p>
+    {% endif %}
+
+    {% set name = "John" %}
+    {% set name = 'Jane' %}
+
+    {{ func("arg1", 'arg2', "arg3") }}
+</div>

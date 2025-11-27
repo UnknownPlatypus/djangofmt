@@ -1,0 +1,17 @@
+<div>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}!</p>
+    {% elif user.is_anonymous %}
+        <p>Please log in</p>
+    {% else %}
+        <p>Unknown user state</p>
+    {% endif %}
+
+    {% if items and items|length > 0 %}
+        <ul>
+            {% for item in items %}
+                <li>{{ item.name }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>

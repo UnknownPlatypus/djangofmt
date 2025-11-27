@@ -1,0 +1,11 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ value | lower | capfirst }}
+    {{ text | striptags | truncatewords:20 | safe }}
+    {{ date | date:"Y-m-d" | default:"N/A" }}
+    {{ items | length | add:5 | default:0 }}
+    {{ content | linebreaks | safe | truncatechars:100 }}
+    {{ name | slugify | upper | cut:"-" }}
+</div>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Page Title{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ page.title }}</h1>
+        {% block inner_content %}
+            <p>Default inner content</p>
+        {% endblock %}
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/custom.js' %}"></script>
+{% endblock %}

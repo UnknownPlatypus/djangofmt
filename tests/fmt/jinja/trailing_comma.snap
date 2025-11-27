@@ -1,0 +1,9 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ my_function(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) }}
+    {{ my_dict['key1']['key2']['key3']['key4']['key5']['key6']['key7'] }}
+    {{ [item1, item2, item3, item4, item5, item6, item7, item8, item9, item10] }}
+    {{ (value1, value2, value3, value4, value5, value6, value7, value8) }}
+</div>

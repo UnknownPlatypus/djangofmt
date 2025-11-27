@@ -1,0 +1,12 @@
+<div>
+    {% autoescape on %}
+        <p>{{ user_input }}</p>
+        <p>{{ html_content|safe }}</p>
+    {% endautoescape %}
+
+    {% autoescape off %}
+        <p>{{ trusted_html }}</p>
+    {% endautoescape %}
+
+    <p>{{ dangerous_content|escape }}</p>
+</div>

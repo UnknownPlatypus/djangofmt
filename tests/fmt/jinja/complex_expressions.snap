@@ -1,0 +1,11 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ user.profile.settings.preferences.theme if user.is_authenticated else default_theme }}
+    {{ items | filter(lambda x: x.is_active and x.priority > 5) | map('name') | join(', ') }}
+    {% for item in collection if item.visible and item.published and not item.archived %}
+        <li>{{ item.title }}</li>
+    {% endfor %}
+    {{ calculate_total(prices, tax_rate, discount_percentage, shipping_cost, handling_fee) }}
+</div>

@@ -1,0 +1,9 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ [1, 2, 3, 4, 5] }}
+    {{ ['apple', 'banana', 'cherry'] }}
+    {{ my_list[0][1][2] }}
+    {% set items = [a, b, c, d] %}
+</div>

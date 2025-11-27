@@ -1,0 +1,13 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ value | default("test") }}
+    {{ text | truncate(30) }}
+    {{ items | length }}
+    {{ list | join(", ") }}
+    {{ name | upper }}
+    {{ content | safe }}
+    {{ number | round(2) }}
+    {{ text | replace("old", "new") }}
+</div>

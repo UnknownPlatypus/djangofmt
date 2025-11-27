@@ -1,0 +1,23 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ value }}
+    {{ value }}
+    {{ value }}
+    {{ value|filter }}
+    {{ value | filter }}
+    {{ value  |  filter }}
+
+    {% if condition %}
+        <p>No spaces</p>
+    {% endif %}
+
+    {% if condition %}
+        <p>Normal spaces</p>
+    {% endif %}
+
+    {% if  condition %}
+        <p>Extra spaces</p>
+    {% endif %}
+</div>

@@ -1,0 +1,14 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ attrs.form | crispy }}
+    {{ value | default:"test" }}
+    {{ text | truncatewords:30 }}
+    {{ items | slice:":5" }}
+    {{ date | date:"Y-m-d" }}
+    {{ number | floatformat:2 }}
+    {{ list | join:", " }}
+    {{ value | add:10 }}
+    {{ text | cut:" " }}
+</div>

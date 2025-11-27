@@ -1,0 +1,12 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ value | lower | capitalize }}
+    {{ text | striptags | truncate(20) | safe }}
+    {{ items | length | default(0) }}
+    {{ content | safe | truncate(100) }}
+    {{ name | slugify | upper | replace("-", "_") }}
+    {{ data | tojson | safe }}
+    {{ list | map('upper') | join(', ') }}
+</div>

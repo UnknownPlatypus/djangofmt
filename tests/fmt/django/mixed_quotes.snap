@@ -1,0 +1,20 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ "double quotes" }}
+    {{ 'single quotes' }}
+    {{ "string with 'nested' quotes" }}
+    {{ 'string with "nested" quotes' }}
+
+    {% if value == "test" %}
+        <p>Double quotes in condition</p>
+    {% endif %}
+
+    {% if value == 'test' %}
+        <p>Single quotes in condition</p>
+    {% endif %}
+
+    <a href="{% url 'home' %}">Link</a>
+    <a href="{% url "home" %}">Link</a>
+</div>

@@ -39,14 +39,20 @@ fn run_format_test(path: &Path, input: &str) -> String {
         },
     };
 
-    let output = format_text(input, Language::Django, &options, |code, _| {
+    let language = if path.components().any(|c| c.as_os_str() == "jinja") {
+        Language::Jinja
+    } else {
+        Language::Django
+    };
+
+    let output = format_text(input, language, &options, |code, _| {
         Ok::<_, ()>(Cow::from(code))
     })
     .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))
     .unwrap();
 
     // Stability test: format the output again and ensure it's the same
-    let regression_format = format_text(&output, Language::Django, &options, |code, _| {
+    let regression_format = format_text(&output, language, &options, |code, _| {
         Ok::<_, ()>(Cow::from(code))
     })
     .map_err(|err| {

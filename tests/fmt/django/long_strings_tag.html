@@ -1,0 +1,9 @@
+<div>
+    {% if user.is_authenticated and user.has_permission and user.profile.settings.allow_access and not user.is_banned %}
+        <p>Access granted</p>
+    {% endif %}
+
+    {% include "very/long/path/to/template/that/exceeds/normal/line/length/limits/component.html" %}
+
+    {% url 'very-long-url-name-that-should-be-handled' arg1=value1 arg2=value2 arg3=value3 arg4=value4 %}
+</div>

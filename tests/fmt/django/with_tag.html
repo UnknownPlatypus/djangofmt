@@ -1,0 +1,14 @@
+<div>
+    {% with total=business.employees.count %}
+        <p>Total employees: {{ total }}</p>
+    {% endwith %}
+
+    {% with alpha=1 beta=2 gamma=3 %}
+        <p>{{ alpha }}, {{ beta }}, {{ gamma }}</p>
+    {% endwith %}
+
+    {% with user.profile.settings as settings %}
+        <p>Theme: {{ settings.theme }}</p>
+        <p>Language: {{ settings.language }}</p>
+    {% endwith %}
+</div>

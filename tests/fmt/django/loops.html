@@ -1,0 +1,16 @@
+<div>
+    {% for product in products %}
+        <div class="product">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            <span>{{ product.price }}</span>
+        </div>
+    {% empty %}
+        <p>No products available</p>
+    {% endfor %}
+
+    {% for key, value in settings.items %}
+        <dt>{{ key }}</dt>
+        <dd>{{ value }}</dd>
+    {% endfor %}
+</div>
