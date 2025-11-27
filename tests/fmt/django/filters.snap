@@ -1,0 +1,11 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {{ article.title|upper }}
+    {{ user.name|default:"Anonymous"|truncatewords:10 }}
+    {{ post.content|safe|linebreaks }}
+    {{ date_value|date:"Y-m-d H:i:s" }}
+    {{ items|length }}
+    {{ text|slugify|lower }}
+</div>

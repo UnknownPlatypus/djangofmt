@@ -1,0 +1,9 @@
+<div>
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'article-detail' article.id %}">View Article</a>
+    <a href="{% url 'user-profile' username=user.username %}">Profile</a>
+    <form action="{% url 'form-submit' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Submit</button>
+    </form>
+</div>

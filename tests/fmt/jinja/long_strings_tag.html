@@ -1,0 +1,13 @@
+<div>
+    {% if user.is_authenticated and user.has_permission and user.profile.settings.allow_access and not user.is_banned %}
+        <p>Access granted</p>
+    {% endif %}
+
+    {% include "very/long/path/to/template/that/exceeds/normal/line/length/limits/component.html" %}
+
+    {% set very_long_variable_name_that_exceeds_normal_limits = some_function(arg1, arg2, arg3, arg4, arg5) %}
+
+    {% for item in collection if item.is_active and item.published and item.visible and not item.archived %}
+        <li>{{ item.name }}</li>
+    {% endfor %}
+</div>

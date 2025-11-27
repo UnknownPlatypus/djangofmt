@@ -1,0 +1,15 @@
+<div>
+    {# This is a single-line comment #}
+
+    {% comment %}
+    This is a multi-line comment
+    that spans multiple lines
+    and can contain Django template syntax
+    {% endcomment %}
+
+    <p>{{ value }}</p> {# inline comment #}
+
+    {% comment "Optional note" %}
+    This comment has a note attached
+    {% endcomment %}
+</div>

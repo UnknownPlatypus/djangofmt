@@ -1,0 +1,9 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {% block content %}
+        <p>{% translate "Welcome to our site" %}</p>
+        {% include "partials/header.html" with title="Home" %}
+    {% endblock %}
+</div>

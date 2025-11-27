@@ -1,0 +1,21 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    {% spaceless %}
+        <p>
+            <a href="/home/">Home</a>
+        </p>
+        <p>
+            <a href="/about/">About</a>
+        </p>
+    {% endspaceless %}
+
+    <ul>
+        {% spaceless %}
+            <li><a href="#">Link 1</a></li>
+            <li><a href="#">Link 2</a></li>
+            <li><a href="#">Link 3</a></li>
+        {% endspaceless %}
+    </ul>
+</div>
