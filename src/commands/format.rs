@@ -9,6 +9,7 @@ use std::time::Instant;
 
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
 use markup_fmt::{FormatError, Language, format_text};
+use pretty_jinja::{format_expr, format_stmt};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
@@ -123,7 +124,17 @@ fn format_path(
                 // .map_err(anyhow::Error::from)
                 .map_or_else(|_| code.into(), Cow::from))
             } else {
-                Ok(code.into())
+                let pretty_jinja_config = pretty_jinja::config::FormatOptions::default();
+                Ok(match ext {
+                    "markup-fmt-jinja-expr" => format_expr(code, &pretty_jinja_config)
+                        .map(Cow::from)
+                        .unwrap_or(code.into()),
+                    "markup-fmt-jinja-stmt" => format_stmt(code, &pretty_jinja_config)
+                        .map(Cow::from)
+                        .unwrap_or(code.into()),
+                    _ => code.into(),
+                })
+
                 // dprint_plugin_biome::format_text(
                 //     &Path::new("file").with_extension(ext),
                 //     code,
