@@ -127,8 +127,7 @@ fn format_path(
                 let pretty_jinja_config = pretty_jinja::config::FormatOptions::default();
                 Ok(match ext {
                     "markup-fmt-jinja-expr" => format_expr(code, &pretty_jinja_config)
-                        .map(Cow::from)
-                        .unwrap_or(code.into()),
+                        .map_or_else(|_| code.into(), Cow::from),
                     "markup-fmt-jinja-stmt" => format_stmt(code, &pretty_jinja_config)
                         .map(Cow::from)
                         .unwrap_or(code.into()),
