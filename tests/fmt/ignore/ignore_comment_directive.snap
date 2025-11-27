@@ -1,0 +1,9 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    <!-- djangofmt:ignore -->
+    <p     class="unformatted"      >This should not be formatted</p>
+    <!-- end djangofmt:ignore -->
+</div>
+<p class="formatted">This should be formatted</p>
