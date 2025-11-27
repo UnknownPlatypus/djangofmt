@@ -29,6 +29,18 @@ class Command(StrEnum):
     format = "format"  # type: ignore[assignment]
 
 
+class GitDomain(StrEnum):
+    GITHUB = "github.com"
+    CODEBERG = "codeberg.org"
+
+    @property
+    def blob_path(self) -> str:
+        return {
+            GitDomain.GITHUB: "blob",
+            GitDomain.CODEBERG: "src/commit",
+        }[self]
+
+
 class Formatter(StrEnum):
     """A tool name expected to do formatting work on files"""
 
@@ -88,7 +100,7 @@ class Repository(Serializable):
     owner: str
     name: str
     ref: str | None
-    domain: str = "github.com"
+    domain: GitDomain = GitDomain.GITHUB
 
     @property
     def fullname(self) -> str:
@@ -195,7 +207,7 @@ class ClonedRepository(Repository, Serializable):
 
     commit_hash: str
     path: Path
-    domain: str
+    domain: GitDomain
 
     @classmethod
     async def from_path(cls, path: Path, repo: Repository) -> Self:
@@ -217,7 +229,7 @@ class ClonedRepository(Repository, Serializable):
         """
         Return the remote GitHub URL for the given path in this repository.
         """
-        url = f"{self.url}/blob/{self.commit_hash}/{path}"
+        url = f"{self.url}/{self.domain.blob_path}/{self.commit_hash}/{path}"
         if line_number:
             url += f"#L{line_number}"
         if end_line_number:

@@ -23,7 +23,11 @@ def format_patchset(
             #        we formatted the repository for a baseline; we can't know the exact
             #        line number in the original
             #        source file.
-            hunk_link = repo.url_for(file_patch.path, hunk.source_start)
+            hunk_link = repo.url_for(
+                file_patch.path,
+                hunk.source_start,
+                hunk.source_start + hunk.source_length,
+            )
             hunk_lines = str(hunk).splitlines()
 
             # Add a link before the hunk
