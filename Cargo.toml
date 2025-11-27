@@ -31,7 +31,9 @@ tracing-tree = "0.4.0"
 derive_more = { version = "2.0.1", features = ["from", "display"] }
 
 [dev-dependencies]
+insta = { version = "1.44.2", features = ["yaml", "glob"] }
 insta-cmd = "=0.6.0"
+similar-asserts = "1.7"
 
 [profile.release]
 # See python/benchmark_cargo_profiles.py

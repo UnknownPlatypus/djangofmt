@@ -1,0 +1,6 @@
+---
+source: tests/fmt.rs
+---
+<div>
+    <p class="should-format">This should be formatted</p>
+</div>

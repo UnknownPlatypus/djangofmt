@@ -43,6 +43,9 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
             prefer_attrs_single_line: false,
             // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
             custom_blocks: args.custom_blocks,
+            // Custom ignore comment directives for djangofmt
+            ignore_comment_directive: "djangofmt:ignore".into(),
+            ignore_file_comment_directive: "djangofmt:ignore".into(),
             ..LanguageOptions::default()
         },
     };
