@@ -1,0 +1,52 @@
+{% load humanize %}
+{% load premailer %}
+{% premailer %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width">
+    {% include 'comparator/email/email_marketing_style.html' %}
+</head>
+
+<body>
+<div class="body group-buying">
+    <br>
+    Hello,
+    <br>
+    <br>
+    This is {{ responder.first_name }}, your {% if responder.customer.gender == "man" %}assigned specialist{% else %}
+    assigned specialist{% endif %} from the TechSuite Support Team. I noticed that you have not yet installed the
+    latest software update for your {% if not house or not house.home_type %}
+    device{% elif house.home_type == 'house' %}
+    workstation{% elif house.home_type == 'flat' %}system{% endif %} located in {{ house.area.city|title }} as part of your maintenance plan.
+    <br>
+    <br>
+    You can download the update directly by following <a href="{{ group_buying_url }}link">this link.</a>
+    <br>
+    This version includes major stability improvements and important security enhancements.
+    <br>
+    <br>
+    Still unsure about updating?
+    <ul>
+        <li>The installation takes less than 3 minutes, and having your current configuration on hand helps speed up the process
+        </li>
+        <li>You can revert your setup at any time if the update doesn’t meet your expectations
+        </li>
+    </ul>
+    <br>
+    <br>
+    If you need assistance, feel free to call me directly at 09 74 59 59 68 and ask for {{ responder.first_name }}.
+    <br>
+    <br>
+    Best regards,<br>
+    <br>
+    The TechSuite Team<br>
+    <br>
+    <br><font color="#999999"><a style="color: #999999;" href="{{ domain }}">TechSuite</a>, your trusted software partner.</font>
+    <br><font color="#999999">Optimize and update your tools in just a few minutes.</font>
+    <br/>
+    <br/><a href="{{ domain }}{{ url_unsubscribe }}?{{ utm }}unsubscribe">Unsubscribe</a>
+</div>
+</body>
+{% endpremailer %}
