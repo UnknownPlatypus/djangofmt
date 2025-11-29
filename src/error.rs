@@ -6,7 +6,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[display("{self:?}")]
 pub enum Error {
     #[from]
-    FormatCommand(crate::commands::format::FormatCommandError),
+    FormatCommand(Box<crate::commands::format::FormatCommandError>),
     // -- Externals
     #[from]
     Io(std::io::Error),
