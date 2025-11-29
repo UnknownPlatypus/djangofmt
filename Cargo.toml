@@ -29,9 +29,7 @@ tracing-tree = "0.4.0"
 
 # Error reporting
 miette = { version = "7.6.0", features = ["fancy"] }
-
-# Others
-derive_more = { version = "2.0.1", features = ["from", "display"] }
+thiserror = "2.0"
 
 [dev-dependencies]
 insta = { version = "1.44.2", features = ["yaml", "glob"] }

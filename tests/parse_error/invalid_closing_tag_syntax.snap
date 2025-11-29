@@ -1,0 +1,9 @@
+---
+source: tests/parse_error/main.rs
+---
+  × expected close tag for opening tag <p>
+   ╭─[invalid_closing_tag_syntax.html:1:1]
+ 1 │ <p>blabla: <p/>
+   · ▲
+   · ╰── here
+   ╰────

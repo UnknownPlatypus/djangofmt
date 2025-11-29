@@ -1,22 +1,20 @@
-use derive_more::{Display, From};
+use miette::Diagnostic;
+use thiserror::Error;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug, Display, From)]
-#[display("{self:?}")]
+#[derive(Debug, Error, Diagnostic)]
 pub enum Error {
-    #[from]
-    FormatCommand(Box<crate::commands::format::FormatCommandError>),
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    FormatCommand(#[from] Box<crate::commands::format::FormatCommandError>),
+
     // -- Externals
-    #[from]
-    Io(std::io::Error),
+    #[error(transparent)]
+    #[diagnostic(code(djangofmt::io_error))]
+    Io(#[from] std::io::Error),
 
-    #[from]
-    SerdeJson(serde_json::Error),
+    #[error(transparent)]
+    #[diagnostic(code(djangofmt::serde_json_error))]
+    SerdeJson(#[from] serde_json::Error),
 }
-
-// region:    --- Error Boilerplate
-
-impl std::error::Error for Error {}
-
-// endregion: --- Error Boilerplate
