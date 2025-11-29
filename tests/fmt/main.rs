@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use insta::{Settings, assert_snapshot, glob};
 use markup_fmt::{
     Language,

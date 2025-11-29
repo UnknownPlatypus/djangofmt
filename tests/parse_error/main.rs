@@ -1,10 +1,14 @@
+#![allow(clippy::unwrap_used, clippy::result_large_err)]
+use std::borrow::Cow;
+use std::path::{Path, PathBuf};
+use std::{fs, path};
+
+use djangofmt::args::Profile;
+use djangofmt::commands::format::{ParseError, build_format_options};
 use insta::{Settings, assert_snapshot, glob};
-use markup_fmt::{
-    Language,
-    config::{FormatOptions, LanguageOptions, LayoutOptions},
-    format_text,
-};
-use std::{borrow::Cow, fs, path::Path};
+use markup_fmt::config::FormatOptions;
+use markup_fmt::{Language, format_text};
+use miette::{GraphicalReportHandler, GraphicalTheme};
 
 #[test]
 fn parse_error_snapshot() {
@@ -19,40 +23,38 @@ fn parse_error_snapshot() {
     });
 }
 
-fn run_parse_error_test(path: &Path, input: &str) -> String {
-    let options = FormatOptions {
-        layout: LayoutOptions {
-            print_width: 120,
-            indent_width: 4,
-            ..LayoutOptions::default()
-        },
-        language: LanguageOptions {
-            html_void_self_closing: Some(false),
-            svg_self_closing: Some(true),
-            mathml_self_closing: Some(true),
-            html_normal_self_closing: Some(false),
-            prefer_attrs_single_line: false,
-            custom_blocks: None,
-            ignore_comment_directive: "djangofmt:ignore".into(),
-            ignore_file_comment_directive: "djangofmt:ignore".into(),
-            ..LanguageOptions::default()
-        },
-    };
+fn run_parse_error_test(path: &path::Path, input: &str) -> String {
+    let options = build_format_options(120, 4, None);
+    // Use just the filename for display to avoid absolute paths in snapshots
+    let display_path = path.file_name().map(Path::new).map(Path::to_path_buf);
 
-    let result = format_text(input, Language::Django, &options, |code, _| {
+    match format_str(input, display_path, &options, &Profile::Django) {
+        Ok(_) => format!(
+            "Expected parse error for '{}' but formatting succeeded",
+            path.file_name().unwrap_or_default().to_string_lossy()
+        ),
+        Err(err) => render_miette_error(&err),
+    }
+}
+
+fn format_str(
+    input: &str,
+    name: Option<PathBuf>,
+    format_options: &FormatOptions,
+    profile: &Profile,
+) -> Result<String, ParseError> {
+    let format_result = format_text(input, Language::from(profile), format_options, |code, _| {
         Ok::<_, ()>(Cow::from(code))
     });
 
-    match result {
-        Ok(_) => format!(
-            "Expected parse error for '{}' but formatting succeeded",
-            path.display()
-        ),
-        Err(err) => {
-            // Format the error as it would appear with miette
-            format!("{err:?}")
-        }
-    }
+    format_result.map_err(|err| ParseError::new(name, input.to_string(), &err))
+}
+
+fn render_miette_error(error: &dyn miette::Diagnostic) -> String {
+    let mut output = String::new();
+    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
+    handler.render_report(&mut output, error).unwrap();
+    output
 }
 
 fn build_settings(path: &Path) -> Settings {

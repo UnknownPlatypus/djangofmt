@@ -17,6 +17,8 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   UV_VERSION: 0.9.13
+  # Make sure CI fails on all warnings, including Clippy lints
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
   changed_files:
@@ -150,6 +152,15 @@ jobs:
           body-path: full-comment.txt
           edit-mode: replace
 
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features
+
   cargo-shear:
     name: "cargo shear"
     runs-on: ubuntu-24.04
@@ -164,6 +175,7 @@ jobs:
       - uses: cargo-bins/cargo-binstall@3fc81674af4165a753833a94cae9f91d8849049f # v1.16.2
       - run: cargo binstall --no-confirm cargo-shear
       - run: cargo shear
+
   test:
     name: "cargo test"
     runs-on: ubuntu-24.04
