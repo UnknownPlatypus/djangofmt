@@ -1,6 +1,6 @@
 [package]
 name = "djangofmt"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
