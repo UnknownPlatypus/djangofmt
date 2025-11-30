@@ -86,7 +86,7 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
     errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
     let error_count = errors.len();
     for error in errors {
-        eprintln!("{:?}", miette::Report::new(error));
+        eprintln!("{:?}", miette::Report::new(*error));
     }
     if error_count > 0 {
         error!("Couldn't format {} files!", error_count);
@@ -110,7 +110,7 @@ fn format_path(
     path: &Path,
     format_options: &FormatOptions,
     profile: &Profile,
-) -> std::result::Result<FormatResult, FormatCommandError> {
+) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
     // Extract the source from the file.
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;

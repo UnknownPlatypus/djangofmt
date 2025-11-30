@@ -153,11 +153,14 @@ jobs:
           edit-mode: replace
 
   clippy_check:
-    runs-on: ubuntu-latest
+    name: "cargo clippy"
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           persist-credentials: false
+      - name: Install Rust toolchain
+        run: rustup component add clippy
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
 
