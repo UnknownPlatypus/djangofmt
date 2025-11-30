@@ -1,0 +1,11 @@
+---
+source: tests/parse_error/main.rs
+---
+  × expected close tag for opening tag <div>
+   ╭─[unclosed_div_tag.html:7:6]
+ 6 │ <body>
+ 7 │     <div class="container">
+   ·      ▲
+   ·      ╰── here
+ 8 │         <h1>Unclosed div tag</h1>
+   ╰────

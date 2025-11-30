@@ -1,0 +1,10 @@
+---
+source: tests/parse_error/main.rs
+---
+  × expected attribute value
+   ╭─[malformed_attribute.html:1:22]
+ 1 │ <div class="test" id=>
+   ·                      ▲
+   ·                      ╰── here
+ 2 │     <p>Malformed attribute with missing value</p>
+   ╰────

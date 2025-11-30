@@ -1,0 +1,11 @@
+---
+source: tests/parse_error/main.rs
+---
+  × expected close tag for opening tag <p>
+   ╭─[nested_unclosed_tags.html:4:14]
+ 3 │         <article>
+ 4 │             <p>Multiple unclosed tags
+   ·              ▲
+   ·              ╰── here
+ 5 │         </article>
+   ╰────

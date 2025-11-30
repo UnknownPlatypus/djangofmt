@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::fmt::{Display, Formatter};
 use std::fs::File;
 use std::io;
 use std::io::Write;
@@ -8,21 +7,28 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use markup_fmt::{FormatError, Language, format_text};
+use markup_fmt::{FormatError, Language, SyntaxErrorKind, format_text};
+use miette::{Diagnostic, NamedSource, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::logging::LogLevel;
 
-pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
-    let format_options = FormatOptions {
+/// Build default format options with optional overrides.
+#[must_use]
+pub fn build_format_options(
+    print_width: usize,
+    indent_width: usize,
+    custom_blocks: Option<Vec<String>>,
+) -> FormatOptions {
+    FormatOptions {
         layout: LayoutOptions {
-            print_width: args.line_length,
-            indent_width: args.indent_width,
+            print_width,
+            indent_width,
             ..LayoutOptions::default()
         },
         language: LanguageOptions {
@@ -42,13 +48,18 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
             // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
             prefer_attrs_single_line: false,
             // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
-            custom_blocks: args.custom_blocks,
+            custom_blocks,
             // Custom ignore comment directives for djangofmt
             ignore_comment_directive: "djangofmt:ignore".into(),
             ignore_file_comment_directive: "djangofmt:ignore".into(),
             ..LanguageOptions::default()
         },
-    };
+    }
+}
+
+pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
+    let format_options =
+        build_format_options(args.line_length, args.indent_width, args.custom_blocks);
 
     let start = Instant::now();
     let (results, mut errors): (Vec<_>, Vec<_>) = args
@@ -73,11 +84,12 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
 
     // Report on any errors.
     errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    for error in &errors {
-        error!("{error}");
+    let error_count = errors.len();
+    for error in errors {
+        eprintln!("{:?}", miette::Report::new(*error));
     }
-    if !errors.is_empty() {
-        error!("Couldn't format {} files!", errors.len());
+    if error_count > 0 {
+        error!("Couldn't format {} files!", error_count);
     }
 
     // Report on the formatting changes.
@@ -85,7 +97,7 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
         write_summary(results.as_ref())?;
     }
 
-    if errors.is_empty() {
+    if error_count == 0 {
         Ok(ExitStatus::Success)
     } else {
         Ok(ExitStatus::Failure)
@@ -98,7 +110,7 @@ fn format_path(
     path: &Path,
     format_options: &FormatOptions,
     profile: &Profile,
-) -> std::result::Result<FormatResult, FormatCommandError> {
+) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
     // Extract the source from the file.
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
@@ -142,8 +154,13 @@ fn format_path(
         },
     );
 
-    let formatted =
-        format_result.map_err(|err| FormatCommandError::Parse(Some(path.to_path_buf()), err))?;
+    let formatted = format_result.map_err(|err| {
+        FormatCommandError::Parse(ParseError::new(
+            Some(path.to_path_buf()),
+            unformatted.clone(),
+            &err,
+        ))
+    })?;
 
     // Checked if something changed and write to file if necessary
     if formatted.len() == unformatted.len() && formatted == unformatted {
@@ -161,47 +178,97 @@ fn format_path(
 }
 
 /// An error that can occur while formatting a set of files.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error, Diagnostic)]
 pub enum FormatCommandError {
+    #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
     Read(Option<PathBuf>, io::Error),
-    Parse(Option<PathBuf>, FormatError<Error>),
+    #[error("{}", .0.message)]
+    #[diagnostic(transparent)]
+    Parse(ParseError),
+    #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
     Write(Option<PathBuf>, io::Error),
+}
+
+fn path_display(path: Option<&PathBuf>) -> String {
+    path.map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string())
 }
 
 impl FormatCommandError {
     fn path(&self) -> Option<&Path> {
         match self {
-            Self::Parse(path, _) | Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
+            Self::Parse(err) => err.path.as_deref(),
+            Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
         }
     }
 }
 
-impl Display for FormatCommandError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Parse(path, err) => {
-                if let Some(path) = path {
-                    write!(f, "Failed to parse {} with error {err:?}", path.display())
-                } else {
-                    write!(f, "Failed to parse with error {err:?}")
+#[derive(Debug, Diagnostic, thiserror::Error)]
+#[error("{message}")]
+pub struct ParseError {
+    path: Option<PathBuf>,
+    message: String,
+    #[source_code]
+    src: NamedSource<String>,
+    #[label("here")]
+    span: SourceSpan,
+}
+
+impl ParseError {
+    #[must_use]
+    pub fn new<E: std::fmt::Debug>(
+        path: Option<PathBuf>,
+        source: String,
+        err: &FormatError<E>,
+    ) -> Self {
+        let (message, offset) = match err {
+            FormatError::Syntax(syntax_err) => {
+                match &syntax_err.kind {
+                    // Point to the opening tag instead of where the error was detected (which is always the end of the file)
+                    SyntaxErrorKind::ExpectCloseTag {
+                        tag_name,
+                        line,
+                        column,
+                    } => (
+                        format!("expected close tag for opening tag <{tag_name}>",),
+                        line_col_to_offset(&source, *line, *column),
+                    ),
+                    _ => (syntax_err.kind.to_string(), syntax_err.pos),
                 }
             }
-            Self::Read(path, err) => {
-                if let Some(path) = path {
-                    write!(f, "Failed to read {} with error {err:?}", path.display())
-                } else {
-                    write!(f, "Failed to read with error {err:?}",)
-                }
+            FormatError::External(errors) => {
+                let msg = errors
+                    .iter()
+                    .map(|e| format!("{e:?}"))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                (format!("external formatter error: {msg}"), 0)
             }
-            Self::Write(path, err) => {
-                if let Some(path) = path {
-                    write!(f, "Failed to write {} with error {err:?}", path.display())
-                } else {
-                    write!(f, "Failed to write with error {err:?}")
-                }
-            }
+        };
+        let name = path
+            .as_ref()
+            .map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string());
+        Self {
+            path,
+            message,
+            src: NamedSource::new(name, source),
+            span: SourceSpan::from(offset),
         }
     }
+}
+
+/// Convert 1-indexed line and column to a byte offset in the source.
+fn line_col_to_offset(source: &str, line: usize, column: usize) -> usize {
+    let mut offset = 0;
+    for (i, src_line) in source.lines().enumerate() {
+        if i + 1 == line {
+            // Found the line, add column offset (1-indexed)
+            return offset + column.saturating_sub(1);
+        }
+        // +1 for the newline character
+        offset += src_line.len() + 1;
+    }
+    // Fallback to end of file
+    source.len()
 }
 
 /// The result of an individual formatting operation.
@@ -252,4 +319,46 @@ fn write_summary(results: &[FormatResult]) -> Result<()> {
         )?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn format_command_error_read_display() {
+        let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
+        let err = FormatCommandError::Read(Some(PathBuf::from("/path/to/file.html")), io_err);
+        assert_eq!(
+            err.to_string(),
+            "Failed to read /path/to/file.html: file not found"
+        );
+    }
+
+    #[test]
+    fn format_command_error_read_display_unknown_path() {
+        let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
+        let err = FormatCommandError::Read(None, io_err);
+        assert_eq!(
+            err.to_string(),
+            "Failed to read <unknown>: permission denied"
+        );
+    }
+
+    #[test]
+    fn format_command_error_write_display() {
+        let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
+        let err = FormatCommandError::Write(Some(PathBuf::from("/path/to/output.html")), io_err);
+        assert_eq!(
+            err.to_string(),
+            "Failed to write /path/to/output.html: permission denied"
+        );
+    }
+
+    #[test]
+    fn format_command_error_write_display_unknown_path() {
+        let io_err = io::Error::other("disk full");
+        let err = FormatCommandError::Write(None, io_err);
+        assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
+    }
 }

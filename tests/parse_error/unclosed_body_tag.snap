@@ -1,0 +1,11 @@
+---
+source: tests/parse_error/main.rs
+---
+  × expected close tag for opening tag <html>
+   ╭─[unclosed_body_tag.html:5:2]
+ 4 │ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+ 5 │ <html xmlns="http://www.w3.org/1999/xhtml">
+   ·  ▲
+   ·  ╰── here
+ 6 │ <head>
+   ╰────
