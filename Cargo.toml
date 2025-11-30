@@ -13,28 +13,28 @@ description = "A fast, HTML aware, Django template formatter, written in Rust."
 
 [dependencies]
 dprint_plugin_markup = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.0" }
-malva = { version = "0.15.0", features = ["config_serde"] }
+malva = { version = "0.15.1", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.0" }
 
-clap = { version = "4.5.38", features = ["derive", "wrap_help"] }
+clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
 clap_complete_command = "0.6.1"
 rayon = "1.10.0"
-serde_json = "1.0"
+serde_json = "1.0.145"
 
 # Logging
 colored = "3.0.0"
-tracing = "0.1"
-tracing-subscriber = "0.3"
-tracing-tree = "0.4.0"
+tracing = "0.1.43"
+tracing-subscriber = "0.3.22"
+tracing-tree = "0.4.1"
 
 # Error reporting
 miette = { version = "7.6.0", features = ["fancy"] }
-thiserror = "2.0"
+thiserror = "2.0.17"
 
 [dev-dependencies]
-insta = { version = "1.44.2", features = ["yaml", "glob"] }
-insta-cmd = "=0.6.0"
-similar-asserts = "1.7"
+insta = { version = "1.44.3", features = ["yaml", "glob"] }
+insta-cmd = "0.6.0"
+similar-asserts = "1.7.0"
 
 [profile.release]
 # See python/benchmark_cargo_profiles.py
