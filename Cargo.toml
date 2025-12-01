@@ -32,9 +32,9 @@ miette = { version = "7.6.0", features = ["fancy"] }
 thiserror = "2.0.17"
 
 [dev-dependencies]
-insta = { version = "1.44.3", features = ["yaml", "glob"] }
-insta-cmd = "0.6.0"
-similar-asserts = "1.7.0"
+insta = { version = "=1.44.3", features = ["yaml", "glob"] }
+insta-cmd = "=0.6.0"
+similar-asserts = "=1.7.0"
 
 [profile.release]
 # See python/benchmark_cargo_profiles.py
