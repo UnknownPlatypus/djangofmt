@@ -1,4 +1,8 @@
 #![allow(clippy::unwrap_used)]
+#[path = "../common.rs"]
+mod common;
+
+use common::build_settings;
 use insta::{Settings, assert_snapshot, glob};
 use markup_fmt::{
     Language,
@@ -67,15 +71,4 @@ fn run_format_test(path: &Path, input: &str) -> String {
     );
 
     output
-}
-
-fn build_settings(path: &Path) -> Settings {
-    let mut settings = Settings::clone_current();
-    settings.set_snapshot_path(path.parent().unwrap());
-    settings.remove_snapshot_suffix();
-    settings.set_prepend_module_to_snapshot(false);
-    settings.remove_input_file();
-    settings.set_omit_expression(true);
-    settings.remove_info();
-    settings
 }
