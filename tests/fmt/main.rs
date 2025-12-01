@@ -1,10 +1,11 @@
 #![allow(clippy::unwrap_used)]
-use insta::{Settings, assert_snapshot, glob};
-use markup_fmt::{
-    Language,
-    config::{FormatOptions, LanguageOptions, LayoutOptions},
-    format_text,
-};
+#[path = "../common.rs"]
+mod common;
+
+use common::build_settings;
+use djangofmt::commands::format::build_markup_options;
+use insta::{assert_snapshot, glob};
+use markup_fmt::{Language, format_text};
 use std::{borrow::Cow, fs, path::Path};
 
 #[test]
@@ -21,24 +22,7 @@ fn fmt_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str) -> String {
-    let options = FormatOptions {
-        layout: LayoutOptions {
-            print_width: 120,
-            indent_width: 4,
-            ..LayoutOptions::default()
-        },
-        language: LanguageOptions {
-            html_void_self_closing: Some(false),
-            svg_self_closing: Some(true),
-            mathml_self_closing: Some(true),
-            html_normal_self_closing: Some(false),
-            prefer_attrs_single_line: false,
-            custom_blocks: None,
-            ignore_comment_directive: "djangofmt:ignore".into(),
-            ignore_file_comment_directive: "djangofmt:ignore".into(),
-            ..LanguageOptions::default()
-        },
-    };
+    let options = build_markup_options(120, 4, None);
 
     let output = format_text(input, Language::Django, &options, |code, _| {
         Ok::<_, ()>(Cow::from(code))
@@ -67,15 +51,4 @@ fn run_format_test(path: &Path, input: &str) -> String {
     );
 
     output
-}
-
-fn build_settings(path: &Path) -> Settings {
-    let mut settings = Settings::clone_current();
-    settings.set_snapshot_path(path.parent().unwrap());
-    settings.remove_snapshot_suffix();
-    settings.set_prepend_module_to_snapshot(false);
-    settings.remove_input_file();
-    settings.set_omit_expression(true);
-    settings.remove_info();
-    settings
 }

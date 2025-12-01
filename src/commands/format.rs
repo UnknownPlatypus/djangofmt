@@ -1,3 +1,7 @@
+use markup_fmt::{FormatError, Language, SyntaxErrorKind, format_text};
+use miette::{Diagnostic, NamedSource, SourceSpan};
+use rayon::iter::Either::{Left, Right};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs::File;
@@ -5,12 +9,6 @@ use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-
-use markup_fmt::config::{FormatOptions, LanguageOptions, LayoutOptions};
-use markup_fmt::{FormatError, Language, SyntaxErrorKind, format_text};
-use miette::{Diagnostic, NamedSource, SourceSpan};
-use rayon::iter::Either::{Left, Right};
-use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use tracing::{debug, error};
 
 use crate::ExitStatus;
@@ -18,20 +16,45 @@ use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
 use crate::error::Result;
 use crate::logging::LogLevel;
 
-/// Build default format options with optional overrides.
+/// Pre-built configuration for all formatters.
+pub struct FormatterConfig {
+    /// Config for main HTML/Jinja formatter
+    pub markup: markup_fmt::config::FormatOptions,
+    /// Config for CSS/SCSS formatter
+    pub malva: malva::config::FormatOptions,
+}
+
+impl FormatterConfig {
+    #[must_use]
+    pub fn new(
+        print_width: usize,
+        indent_width: usize,
+        custom_blocks: Option<Vec<String>>,
+    ) -> Self {
+        Self {
+            markup: build_markup_options(print_width, indent_width, custom_blocks),
+            malva: build_malva_config(print_width, indent_width),
+        }
+    }
+}
+
+const DJANGOFMT_IGNORE_COMMENT: &str = "djangofmt:ignore";
+
+/// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
-pub fn build_format_options(
+pub fn build_markup_options(
     print_width: usize,
     indent_width: usize,
     custom_blocks: Option<Vec<String>>,
-) -> FormatOptions {
-    FormatOptions {
-        layout: LayoutOptions {
+) -> markup_fmt::config::FormatOptions {
+    markup_fmt::config::FormatOptions {
+        layout: markup_fmt::config::LayoutOptions {
             print_width,
             indent_width,
-            ..LayoutOptions::default()
+            ..markup_fmt::config::LayoutOptions::default()
         },
-        language: LanguageOptions {
+        language: markup_fmt::config::LanguageOptions {
+            format_comments: false,
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             //  `<br/>` -> `<br>`
             html_void_self_closing: Some(false),
@@ -50,16 +73,44 @@ pub fn build_format_options(
             // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
             custom_blocks,
             // Custom ignore comment directives for djangofmt
-            ignore_comment_directive: "djangofmt:ignore".into(),
-            ignore_file_comment_directive: "djangofmt:ignore".into(),
-            ..LanguageOptions::default()
+            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            style_indent: true,
+            ..markup_fmt::config::LanguageOptions::default()
+        },
+    }
+}
+
+/// Build default `malva` options for CSS/SCSS/SASS/LESS formatting.
+fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config::FormatOptions {
+    malva::config::FormatOptions {
+        layout: malva::config::LayoutOptions {
+            print_width,
+            indent_width,
+            ..malva::config::LayoutOptions::default()
+        },
+        language: malva::config::LanguageOptions {
+            // Because markup_fmt uses DoubleQuotes
+            quotes: malva::config::Quotes::AlwaysSingle,
+            operator_linebreak: malva::config::OperatorLineBreak::Before,
+            format_comments: true,
+            linebreak_in_pseudo_parens: true,
+            // Todo: "smacss" or "concentric" seem nice
+            declaration_order: None,
+            // TODO: "keyword" or "percentage" would be nice for consistency
+            keyframe_selector_notation: None,
+            // TODO: We might want to switch that to false if we properly handle multiline style attr.
+            single_line_top_level_declarations: true,
+            selector_override_comment_directive: "djangofmt-selector-override".into(),
+            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            ..malva::config::LanguageOptions::default()
         },
     }
 }
 
 pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
-    let format_options =
-        build_format_options(args.line_length, args.indent_width, args.custom_blocks);
+    let config = FormatterConfig::new(args.line_length, args.indent_width, args.custom_blocks);
 
     let start = Instant::now();
     let (results, mut errors): (Vec<_>, Vec<_>) = args
@@ -67,8 +118,7 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
         .par_iter()
         .map(|entry| {
             let path = entry.as_path();
-            // Format the source.
-            format_path(path, &format_options, &args.profile)
+            format_path(path, &config, &args.profile)
         })
         .partition_map(|result| match result {
             Ok(diagnostic) => Left(diagnostic),
@@ -108,7 +158,7 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
 #[tracing::instrument(level="debug", skip_all, fields(path = %path.display()))]
 fn format_path(
     path: &Path,
-    format_options: &FormatOptions,
+    config: &FormatterConfig,
     profile: &Profile,
 ) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
     // Extract the source from the file.
@@ -119,37 +169,23 @@ fn format_path(
     let format_result = format_text(
         &unformatted,
         Language::from(profile),
-        format_options,
+        &config.markup,
         |code, hints| -> Result<Cow<str>> {
-            let ext = hints.ext;
-            let additional_config =
-                dprint_plugin_markup::build_additional_config(hints, format_options);
-            if let Some(syntax) = malva::detect_syntax(Path::new("file").with_extension(ext)) {
-                Ok(malva::format_text(
-                    code,
-                    syntax,
-                    &serde_json::to_value(additional_config).and_then(serde_json::from_value)?,
-                )
-                // TODO: Don't skip errors and actually handle these cases.
-                //       Currently we have errors when there is templating blocks inside style tags
-                // .map_err(anyhow::Error::from)
-                .map_or_else(|_| code.into(), Cow::from))
-            } else {
-                Ok(code.into())
-                // dprint_plugin_biome::format_text(
-                //     &Path::new("file").with_extension(ext),
-                //     code,
-                //     &serde_json::to_value(additional_config)
-                //         .and_then(serde_json::from_value)
-                //         .unwrap_or_default(),
-                // )
-                //     .map(|formatted| {
-                //         if let Some(formatted) = formatted {
-                //             Cow::from(formatted)
-                //         } else {
-                //             Cow::from(code)
-                //         }
-                //     })
+            match hints.ext {
+                "css" | "scss" | "sass" | "less" => {
+                    let mut malva_config = config.malva.clone();
+                    malva_config.layout.print_width = hints.print_width;
+                    Ok(malva::format_text(
+                        code,
+                        malva::detect_syntax(path).unwrap_or(malva::Syntax::Css),
+                        &malva_config,
+                    )
+                    // TODO: Don't skip errors and actually handle these cases.
+                    //       Currently we have errors when there is templating blocks inside style tags
+                    // .map_err(anyhow::Error::from)
+                    .map_or_else(|_| code.into(), Cow::from))
+                }
+                _ => Ok(code.into()),
             }
         },
     );
