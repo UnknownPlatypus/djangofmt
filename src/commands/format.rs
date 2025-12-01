@@ -20,7 +20,7 @@ use crate::logging::LogLevel;
 
 /// Build default format options with optional overrides.
 #[must_use]
-pub fn build_format_options(
+pub fn build_markup_options(
     print_width: usize,
     indent_width: usize,
     custom_blocks: Option<Vec<String>>,

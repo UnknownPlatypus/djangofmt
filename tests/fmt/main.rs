@@ -3,6 +3,7 @@
 mod common;
 
 use common::build_settings;
+use djangofmt::commands::format::build_markup_options;
 use insta::{Settings, assert_snapshot, glob};
 use markup_fmt::{
     Language,
@@ -25,24 +26,7 @@ fn fmt_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str) -> String {
-    let options = FormatOptions {
-        layout: LayoutOptions {
-            print_width: 120,
-            indent_width: 4,
-            ..LayoutOptions::default()
-        },
-        language: LanguageOptions {
-            html_void_self_closing: Some(false),
-            svg_self_closing: Some(true),
-            mathml_self_closing: Some(true),
-            html_normal_self_closing: Some(false),
-            prefer_attrs_single_line: false,
-            custom_blocks: None,
-            ignore_comment_directive: "djangofmt:ignore".into(),
-            ignore_file_comment_directive: "djangofmt:ignore".into(),
-            ..LanguageOptions::default()
-        },
-    };
+    let options = build_markup_options(120, 4, None);
 
     let output = format_text(input, Language::Django, &options, |code, _| {
         Ok::<_, ()>(Cow::from(code))
