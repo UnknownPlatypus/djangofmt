@@ -79,3 +79,4 @@ repos:
         language: system
         require_serial: true
         types: [text]
+        exclude: ".pre-commit-config.yaml"
