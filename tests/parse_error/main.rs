@@ -28,7 +28,7 @@ fn parse_error_snapshot() {
 }
 
 fn run_parse_error_test(path: &path::Path, input: &str) -> String {
-    let options = build_format_options(120, 4, None);
+    let options = build_markup_options(120, 4, None);
     // Use just the filename for display to avoid absolute paths in snapshots
     let display_path = path.file_name().map(Path::new).map(Path::to_path_buf);
 

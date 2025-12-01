@@ -4,12 +4,8 @@ mod common;
 
 use common::build_settings;
 use djangofmt::commands::format::build_markup_options;
-use insta::{Settings, assert_snapshot, glob};
-use markup_fmt::{
-    Language,
-    config::{FormatOptions, LanguageOptions, LayoutOptions},
-    format_text,
-};
+use insta::{assert_snapshot, glob};
+use markup_fmt::{Language, format_text};
 use std::{borrow::Cow, fs, path::Path};
 
 #[test]

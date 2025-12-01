@@ -1,7 +1,9 @@
+#![allow(clippy::missing_panics_doc, clippy::unwrap_used)]
 use std::path::Path;
 
 use insta::Settings;
 
+#[must_use]
 pub fn build_settings(path: &Path) -> Settings {
     let mut settings = Settings::clone_current();
     settings.set_snapshot_path(path.parent().unwrap());
