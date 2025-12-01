@@ -269,7 +269,7 @@ dependencies = [
  "insta",
  "insta-cmd",
  "malva",
- "markup_fmt",
+ "markup_fmt 0.25.0 (git+https://github.com/UnknownPlatypus/markup_fmt?rev=fcdb744152b7afc1420524fdb53241020e0acbab)",
  "miette",
  "rayon",
  "serde_json",
@@ -299,7 +299,7 @@ source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.25.0.0#fcdb74
 dependencies = [
  "anyhow",
  "dprint-core",
- "markup_fmt",
+ "markup_fmt 0.25.0 (git+https://github.com/UnknownPlatypus/markup_fmt?rev=v0.25.0.0)",
  "serde_json",
 ]
 
@@ -460,6 +460,18 @@ dependencies = [
  "memchr",
  "raffia",
  "serde",
+ "tiny_pretty",
+]
+
+[[package]]
+name = "markup_fmt"
+version = "0.25.0"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=fcdb744152b7afc1420524fdb53241020e0acbab#fcdb744152b7afc1420524fdb53241020e0acbab"
+dependencies = [
+ "aho-corasick",
+ "css_dataset",
+ "itertools",
+ "memchr",
  "tiny_pretty",
 ]
 
