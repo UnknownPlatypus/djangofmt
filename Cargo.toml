@@ -31,8 +31,10 @@ miette = { version = "7.6.0", features = ["fancy"] }
 thiserror = "2.0.17"
 
 [dev-dependencies]
+gag = "=1.0.0"
 insta = { version = "=1.44.3", features = ["yaml", "glob"] }
 insta-cmd = "=0.6.0"
+rstest = "=0.26.1"
 similar-asserts = "=1.7.0"
 
 [profile.release]

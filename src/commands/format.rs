@@ -55,27 +55,50 @@ pub fn build_markup_options(
         },
         language: markup_fmt::config::LanguageOptions {
             format_comments: false,
+            // HTML void elements should not be self-closing:
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
-            //  `<br/>` -> `<br>`
+            // <br/> -> <br>
             html_void_self_closing: Some(false),
-            // `<circle cx="50" cy="50" r="50">` -> ParseError
-            // `<circle cx="50" cy="50" r="50"></circle>` -> `<circle cx="50" cy="50" r="50" />`
+            // SVG elements should be self-closing:
+            // <circle cx="50" cy="50" r="50"></circle> -> <circle cx="50" cy="50" r="50" />
             svg_self_closing: Some(true),
-            // Same reasoning as SVG
+            // MathML elements should be self-closing:
+            // <mspace width="1em"></mspace> -> <mspace width="1em" />
             mathml_self_closing: Some(true),
-            // `<div/>desfsdf` -> `<div></div>desfsdf`
-            // This is actually still incorrect (but slightly better than nothing), we need `<div>desfsdf</div>` (or a parse error)
+            // HTML normal elements should not be self-closing:
+            // <div/> -> <div></div>
+            // <div/>desfsdf -> <div></div>desfsdf
+            // TODO: This is actually slightly incorrect (but better than nothing).
+            //       We need a parse error or to match browser recovery to <div>desfsdf</div>
             html_normal_self_closing: Some(false),
             // This is actually nice to keep this setting false, it makes it possible to control wrapping
             // of props semi manually by inserting or not a newline before the first prop.
             // See https://github.com/g-plane/markup_fmt/issues/10 that showcase this.
+            // <div
+            //     class="foo"
+            //     id="bar">
+            // </div>
             prefer_attrs_single_line: false,
-            // Parse some additional custom blocks, for ex "stage,cache,flatblock,section,csp_compress"
+            // Parse custom Django template blocks:
+            // For ex "stage,cache,flatblock,section,csp_compress"
+            // {% stage %}...{% endstage %}
+            // {% cache %}...{% endcache %}
             custom_blocks,
-            // Custom ignore comment directives for djangofmt
+            // Ignore formatting with comment directive:
+            // <!-- djangofmt:ignore -->
+            // <div>unformatted</div>
             ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
             ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            // Indent style tags content:
+            // <style>
+            //     body { color: red }
+            // </style>
             style_indent: true,
+            // Indent script tags content:
+            // <script>
+            //     console.log("hello");
+            // </script>
+            script_indent: true,
             ..markup_fmt::config::LanguageOptions::default()
         },
     }
@@ -165,6 +188,9 @@ fn format_path(
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
 
+    if unformatted.starts_with(DJANGOFMT_IGNORE_COMMENT) {
+        return Ok(FormatResult::Skipped);
+    }
     // Format the source.
     let format_result = format_text(
         &unformatted,
@@ -315,6 +341,9 @@ enum FormatResult {
 
     /// The file was unchanged, as the formatted contents matched the existing contents.
     Unchanged,
+
+    /// The file was skipped due to a top-level ignore comment.
+    Skipped,
 }
 
 /// Write a summary of the formatting results to stdout.
@@ -330,7 +359,20 @@ fn write_summary(results: &[FormatResult]) -> Result<()> {
 
     let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
     let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
-    if changed > 0 && unchanged > 0 {
+    let skipped = counts.get(&FormatResult::Skipped).copied().unwrap_or(0);
+
+    if changed > 0 && unchanged > 0 && skipped > 0 {
+        writeln!(
+            stdout,
+            "{} file{} reformatted, {} file{} left unchanged, {} file{} skipped !",
+            changed,
+            if changed == 1 { "" } else { "s" },
+            unchanged,
+            if unchanged == 1 { "" } else { "s" },
+            skipped,
+            if skipped == 1 { "" } else { "s" },
+        )?;
+    } else if changed > 0 && unchanged > 0 {
         writeln!(
             stdout,
             "{} file{} reformatted, {} file{} left unchanged !",
@@ -338,6 +380,24 @@ fn write_summary(results: &[FormatResult]) -> Result<()> {
             if changed == 1 { "" } else { "s" },
             unchanged,
             if unchanged == 1 { "" } else { "s" },
+        )?;
+    } else if changed > 0 && skipped > 0 {
+        writeln!(
+            stdout,
+            "{} file{} reformatted, {} file{} skipped !",
+            changed,
+            if changed == 1 { "" } else { "s" },
+            skipped,
+            if skipped == 1 { "" } else { "s" },
+        )?;
+    } else if unchanged > 0 && skipped > 0 {
+        writeln!(
+            stdout,
+            "{} file{} left unchanged, {} file{} skipped !",
+            unchanged,
+            if unchanged == 1 { "" } else { "s" },
+            skipped,
+            if skipped == 1 { "" } else { "s" },
         )?;
     } else if changed > 0 {
         writeln!(
@@ -353,11 +413,19 @@ fn write_summary(results: &[FormatResult]) -> Result<()> {
             unchanged,
             if unchanged == 1 { "" } else { "s" },
         )?;
+    } else if skipped > 0 {
+        writeln!(
+            stdout,
+            "{} file{} skipped !",
+            skipped,
+            if skipped == 1 { "" } else { "s" },
+        )?;
     }
     Ok(())
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -396,5 +464,60 @@ mod tests {
         let io_err = io::Error::other("disk full");
         let err = FormatCommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
+    }
+
+    use rstest::rstest;
+    use std::sync::Mutex;
+
+    static STDOUT_LOCK: Mutex<()> = Mutex::new(());
+
+    #[rstest]
+    #[case(vec![], "")]
+    #[case(vec![FormatResult::Formatted], "1 file reformatted !\n")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files reformatted !\n")]
+    #[case(vec![FormatResult::Unchanged], "1 file left unchanged !\n")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged], "2 files left unchanged !\n")]
+    #[case(vec![FormatResult::Skipped], "1 file skipped !\n")]
+    #[case(vec![FormatResult::Skipped, FormatResult::Skipped], "2 files skipped !\n")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file reformatted, 1 file left unchanged !\n"
+    )]
+    #[case(vec![FormatResult::Formatted, FormatResult::Formatted, FormatResult::Unchanged], "2 files reformatted, 1 file left unchanged !\n"
+    )]
+    #[case(vec![FormatResult::Formatted, FormatResult::Skipped], "1 file reformatted, 1 file skipped !\n"
+    )]
+    #[case(vec![FormatResult::Formatted, FormatResult::Skipped, FormatResult::Skipped], "1 file reformatted, 2 files skipped !\n"
+    )]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Skipped], "1 file left unchanged, 1 file skipped !\n"
+    )]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged, FormatResult::Skipped], "2 files left unchanged, 1 file skipped !\n"
+    )]
+    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged, FormatResult::Skipped], "1 file reformatted, 1 file left unchanged, 1 file skipped !\n"
+    )]
+    #[case(vec![
+        FormatResult::Formatted,
+        FormatResult::Formatted,
+        FormatResult::Unchanged,
+        FormatResult::Skipped,
+        FormatResult::Skipped,
+        FormatResult::Skipped,
+    ], "2 files reformatted, 1 file left unchanged, 3 files skipped !\n")]
+    fn test_write_summary(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
+        use gag::BufferRedirect;
+        use std::io::Read;
+        let _guard = STDOUT_LOCK.lock().unwrap();
+
+        let output = {
+            // Capture stdout in a scope to ensure it's dropped before assertion
+            let mut buf = BufferRedirect::stdout().unwrap();
+            write_summary(&results).unwrap();
+            let mut output = String::new();
+            buf.read_to_string(&mut output).unwrap();
+            output
+        };
+
+        assert!(
+            output.ends_with(expected),
+            "Expected output to end with {expected:?}, but got {output:?}"
+        );
     }
 }
