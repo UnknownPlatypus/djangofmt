@@ -14,6 +14,7 @@ rust-version = "1.89"
 
 [workspace.dependencies]
 # Formatting
+dprint-plugin-typescript = "0.95.13"
 malva = { version = "0.15.1", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.0" }
 
