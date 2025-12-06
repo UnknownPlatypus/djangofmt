@@ -113,10 +113,8 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
             operator_linebreak: malva::config::OperatorLineBreak::Before,
             format_comments: true,
             linebreak_in_pseudo_parens: true,
-            // Todo: "smacss" or "concentric" seem nice
-            declaration_order: None,
-            // TODO: "keyword" or "percentage" would be nice for consistency
-            keyframe_selector_notation: None,
+            declaration_order: Some(malva::config::DeclarationOrder::Smacss),
+            keyframe_selector_notation: Some(malva::config::KeyframeSelectorNotation::Percentage),
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
             ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
