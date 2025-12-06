@@ -25,6 +25,9 @@ pub struct FormatterConfig {
     pub malva: malva::config::FormatOptions,
     /// Config for JSON formatter
     pub json: dprint_plugin_json::configuration::Configuration,
+    /// Config for JS/TS formatter used for `<script>` tags.
+    /// TODO: also format inline event handler attributes (`quote_style` will need adjusting).
+    pub typescript: dprint_plugin_typescript::configuration::Configuration,
 }
 
 impl FormatterConfig {
@@ -46,6 +49,7 @@ impl FormatterConfig {
             ),
             malva: build_malva_config(print_width, indent_width),
             json: build_json_config(print_width, indent_width),
+            typescript: build_typescript_config(print_width, indent_width),
         }
     }
 
@@ -186,6 +190,9 @@ pub fn build_markup_options(
             //     console.log("hello");
             // </script>
             script_indent: true,
+            // Delegate script tag content to the external formatter closure.
+            // Should match the formatter used in `FormatterConfig::typescript`
+            script_formatter: Some(markup_fmt::config::ScriptFormatter::Dprint),
             ..markup_fmt::config::LanguageOptions::default()
         },
     }
@@ -224,6 +231,18 @@ fn build_json_config(
     indent_width: IndentWidth,
 ) -> dprint_plugin_json::configuration::Configuration {
     dprint_plugin_json::configuration::ConfigurationBuilder::new()
+        .line_width(print_width.value().into())
+        .indent_width(indent_width.value())
+        .build()
+}
+
+fn build_typescript_config(
+    print_width: LineLength,
+    indent_width: IndentWidth,
+) -> dprint_plugin_typescript::configuration::Configuration {
+    // The deno preset notably uses `QuoteStyle::PreferDouble`, matching markup_fmt.
+    dprint_plugin_typescript::configuration::ConfigurationBuilder::new()
+        .deno()
         .line_width(print_width.value().into())
         .indent_width(indent_width.value())
         .build()
@@ -374,6 +393,31 @@ pub fn format_text(
                             .collect::<Vec<_>>()
                             .join(" ")
                             .into())
+                    }
+                }
+                "js" | "mjs" | "jsx" | "ts" | "mts" | "tsx" => {
+                    let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
+                    let mut ts_config = config.typescript.clone();
+                    ts_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+
+                    match dprint_plugin_typescript::format_text(
+                        dprint_plugin_typescript::FormatTextOptions {
+                            path: &fake_filename,
+                            extension: Some(hints.ext),
+                            text: code.into(),
+                            config: &ts_config,
+                            external_formatter: None,
+                        },
+                    ) {
+                        Ok(Some(formatted)) => Ok(formatted.into()),
+                        Ok(None) => Ok(code.into()),
+                        Err(error) => {
+                            debug!(
+                                "Failed to format JS/TS, falling back to original code. Error: {:?}",
+                                error
+                            );
+                            Ok(code.into())
+                        }
                     }
                 }
                 _ => Ok(code.into()),
