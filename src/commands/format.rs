@@ -356,77 +356,34 @@ enum FormatResult {
 fn write_summary(results: &[FormatResult]) -> Result<()> {
     let mut counts = HashMap::new();
     for val in results {
-        counts
-            .entry(val)
-            .and_modify(|count| *count += 1)
-            .or_insert(1);
+        *counts.entry(val).or_insert(0) += 1;
     }
-    let stdout = &mut io::stdout().lock();
 
     let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
     let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
     let skipped = counts.get(&FormatResult::Skipped).copied().unwrap_or(0);
 
-    if changed > 0 && unchanged > 0 && skipped > 0 {
-        writeln!(
-            stdout,
-            "{} file{} reformatted, {} file{} left unchanged, {} file{} skipped !",
-            changed,
-            if changed == 1 { "" } else { "s" },
-            unchanged,
-            if unchanged == 1 { "" } else { "s" },
-            skipped,
-            if skipped == 1 { "" } else { "s" },
-        )?;
-    } else if changed > 0 && unchanged > 0 {
-        writeln!(
-            stdout,
-            "{} file{} reformatted, {} file{} left unchanged !",
-            changed,
-            if changed == 1 { "" } else { "s" },
-            unchanged,
-            if unchanged == 1 { "" } else { "s" },
-        )?;
-    } else if changed > 0 && skipped > 0 {
-        writeln!(
-            stdout,
-            "{} file{} reformatted, {} file{} skipped !",
-            changed,
-            if changed == 1 { "" } else { "s" },
-            skipped,
-            if skipped == 1 { "" } else { "s" },
-        )?;
-    } else if unchanged > 0 && skipped > 0 {
-        writeln!(
-            stdout,
-            "{} file{} left unchanged, {} file{} skipped !",
-            unchanged,
-            if unchanged == 1 { "" } else { "s" },
-            skipped,
-            if skipped == 1 { "" } else { "s" },
-        )?;
-    } else if changed > 0 {
-        writeln!(
-            stdout,
-            "{} file{} reformatted !",
-            changed,
-            if changed == 1 { "" } else { "s" },
-        )?;
-    } else if unchanged > 0 {
-        writeln!(
-            stdout,
-            "{} file{} left unchanged !",
-            unchanged,
-            if unchanged == 1 { "" } else { "s" },
-        )?;
-    } else if skipped > 0 {
-        writeln!(
-            stdout,
-            "{} file{} skipped !",
-            skipped,
-            if skipped == 1 { "" } else { "s" },
-        )?;
+    let parts: Vec<String> = [
+        (changed, "reformatted"),
+        (unchanged, "left unchanged"),
+        (skipped, "skipped"),
+    ]
+    .iter()
+    .filter(|(count, _)| *count > 0)
+    .map(|(count, label)| {
+        format!(
+            "{} file{} {}",
+            count,
+            if *count == 1 { "" } else { "s" },
+            label
+        )
+    })
+    .collect();
+
+    if !parts.is_empty() {
+        writeln!(io::stdout().lock(), "{} !", parts.join(", "))?;
     }
+
     Ok(())
 }
 
