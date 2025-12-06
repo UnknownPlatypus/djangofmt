@@ -14,6 +14,7 @@ doctest = false
 clap = { workspace = true, optional = true }
 djangofmt_syntax = { workspace = true }
 dprint-plugin-json = { workspace = true }
+dprint-plugin-typescript = { workspace = true }
 malva = { workspace = true }
 markup_fmt = { workspace = true }
 serde = { workspace = true }
