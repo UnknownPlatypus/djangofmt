@@ -94,11 +94,6 @@ pub fn build_markup_options(
             //     body { color: red }
             // </style>
             style_indent: true,
-            // Indent script tags content:
-            // <script>
-            //     console.log("hello");
-            // </script>
-            script_indent: true,
             ..markup_fmt::config::LanguageOptions::default()
         },
     }
