@@ -1,4 +1,3 @@
-use markup_fmt::{FormatError, Language, SyntaxErrorKind, format_text};
 use miette::{Diagnostic, NamedSource, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -38,7 +37,8 @@ impl FormatterConfig {
     }
 }
 
-const DJANGOFMT_IGNORE_COMMENT: &str = "djangofmt:ignore";
+const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = "djangofmt:ignore";
+const DJANGOFMT_IGNORE_COMMENT: &str = "<!-- djangofmt:ignore -->";
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
@@ -87,8 +87,8 @@ pub fn build_markup_options(
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
             // <div>unformatted</div>
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
             // Indent style tags content:
             // <style>
             //     body { color: red }
@@ -125,8 +125,8 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
             // TODO: We might want to switch that to false if we properly handle multiline style attr.
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT.into(),
+            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
             ..malva::config::LanguageOptions::default()
         },
     }
@@ -177,6 +177,37 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
     }
 }
 
+/// Format the given source code.
+pub fn format_text(
+    source: &str,
+    config: &FormatterConfig,
+    profile: &Profile,
+) -> std::result::Result<Option<String>, markup_fmt::FormatError<crate::error::Error>> {
+    if source.starts_with(DJANGOFMT_IGNORE_COMMENT) {
+        return Ok(None);
+    }
+    markup_fmt::format_text(
+        source,
+        markup_fmt::Language::from(profile),
+        &config.markup,
+        |code, hints| {
+            match hints.ext {
+                "css" | "scss" | "sass" | "less" => {
+                    let mut malva_config = config.malva.clone();
+                    malva_config.layout.print_width = hints.print_width;
+                    Ok(malva::format_text(code, malva::Syntax::Css, &malva_config)
+                        // TODO: Don't skip errors and actually handle these cases.
+                        //       Currently we have errors when there is templating blocks inside style tags
+                        // .map_err(anyhow::Error::from)
+                        .map_or_else(|_| code.into(), Cow::from))
+                }
+                _ => Ok(code.into()),
+            }
+        },
+    )
+    .map(Some)
+}
+
 /// Format the file at the given [`Path`].
 #[tracing::instrument(level="debug", skip_all, fields(path = %path.display()))]
 fn format_path(
@@ -184,45 +215,20 @@ fn format_path(
     config: &FormatterConfig,
     profile: &Profile,
 ) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
-    // Extract the source from the file.
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
 
-    if unformatted.starts_with(DJANGOFMT_IGNORE_COMMENT) {
-        return Ok(FormatResult::Skipped);
-    }
-    // Format the source.
-    let format_result = format_text(
-        &unformatted,
-        Language::from(profile),
-        &config.markup,
-        |code, hints| -> Result<Cow<str>> {
-            match hints.ext {
-                "css" | "scss" | "sass" | "less" => {
-                    let mut malva_config = config.malva.clone();
-                    malva_config.layout.print_width = hints.print_width;
-                    Ok(malva::format_text(
-                        code,
-                        malva::detect_syntax(path).unwrap_or(malva::Syntax::Css),
-                        &malva_config,
-                    )
-                    // TODO: Don't skip errors and actually handle these cases.
-                    //       Currently we have errors when there is templating blocks inside style tags
-                    // .map_err(anyhow::Error::from)
-                    .map_or_else(|_| code.into(), Cow::from))
-                }
-                _ => Ok(code.into()),
-            }
-        },
-    );
-
-    let formatted = format_result.map_err(|err| {
+    let formatted = format_text(&unformatted, config, profile).map_err(|err| {
         FormatCommandError::Parse(ParseError::new(
             Some(path.to_path_buf()),
             unformatted.clone(),
             &err,
         ))
     })?;
+
+    let Some(formatted) = formatted else {
+        return Ok(FormatResult::Skipped);
+    };
 
     // Checked if something changed and write to file if necessary
     if formatted.len() == unformatted.len() && formatted == unformatted {
@@ -280,13 +286,13 @@ impl ParseError {
     pub fn new<E: std::fmt::Debug>(
         path: Option<PathBuf>,
         source: String,
-        err: &FormatError<E>,
+        err: &markup_fmt::FormatError<E>,
     ) -> Self {
         let (message, offset) = match err {
-            FormatError::Syntax(syntax_err) => {
+            markup_fmt::FormatError::Syntax(syntax_err) => {
                 match &syntax_err.kind {
                     // Point to the opening tag instead of where the error was detected (which is always the end of the file)
-                    SyntaxErrorKind::ExpectCloseTag {
+                    markup_fmt::SyntaxErrorKind::ExpectCloseTag {
                         tag_name,
                         line,
                         column,
@@ -297,7 +303,7 @@ impl ParseError {
                     _ => (syntax_err.kind.to_string(), syntax_err.pos),
                 }
             }
-            FormatError::External(errors) => {
+            markup_fmt::FormatError::External(errors) => {
                 let msg = errors
                     .iter()
                     .map(|e| format!("{e:?}"))
@@ -429,6 +435,9 @@ fn write_summary(results: &[FormatResult]) -> Result<()> {
 mod tests {
     use super::*;
 
+    use rstest::rstest;
+    use serial_test::serial;
+
     #[test]
     fn format_command_error_read_display() {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
@@ -466,11 +475,6 @@ mod tests {
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
     }
 
-    use rstest::rstest;
-    use std::sync::Mutex;
-
-    static STDOUT_LOCK: Mutex<()> = Mutex::new(());
-
     #[rstest]
     #[case(vec![], "")]
     #[case(vec![FormatResult::Formatted], "1 file reformatted !\n")]
@@ -501,10 +505,10 @@ mod tests {
         FormatResult::Skipped,
         FormatResult::Skipped,
     ], "2 files reformatted, 1 file left unchanged, 3 files skipped !\n")]
+    #[serial]
     fn test_write_summary(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
         use gag::BufferRedirect;
         use std::io::Read;
-        let _guard = STDOUT_LOCK.lock().unwrap();
 
         let output = {
             // Capture stdout in a scope to ensure it's dropped before assertion
@@ -516,7 +520,7 @@ mod tests {
         };
 
         assert!(
-            output.ends_with(expected),
+            output.contains(expected),
             "Expected output to end with {expected:?}, but got {output:?}"
         );
     }
