@@ -19,6 +19,7 @@ clap_complete_command = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 djangofmt_macros = { workspace = true }
 dprint-plugin-json = { workspace = true }
+dprint-plugin-typescript = { workspace = true }
 editorconfig-parser = { workspace = true }
 globset = { workspace = true }
 ignore = { workspace = true }
