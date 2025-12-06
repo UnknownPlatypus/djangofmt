@@ -1,0 +1,6 @@
+---
+source: tests/fmt/main.rs
+---
+<div style="background-image: url('{{ MEDIA_URL }}{{ picture }}')">
+    Content
+</div>
