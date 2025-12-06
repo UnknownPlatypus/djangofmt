@@ -1,0 +1,21 @@
+---
+source: tests/fmt/main.rs
+---
+<div
+    class="city-card rounded"
+    style="background-image: linear-gradient(180deg, rgba(96, 115, 128, 0) 27.18%, #153e5c 95.88%), url('/shared-assets/images/examples/lizard.png')"
+>
+    Content
+</div>
+<div
+    class="city-card rounded"
+    style="background-image: linear-gradient(180deg, rgba(96, 115, 128, 0) 27.18%, #153e5c 95.88%), url({{ MEDIA_URL }}{{ city.picture }})"
+>
+    Content
+</div>
+<div
+    class="city-card rounded"
+    style="background-image: linear-gradient(180deg, rgba(96, 115, 128, 0) 27.18%, #153e5c 95.88%), url({{ MEDIA_URL }}{{ city.picture }})"
+>
+    Content
+</div>

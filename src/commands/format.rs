@@ -117,7 +117,6 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
             declaration_order: None,
             // TODO: "keyword" or "percentage" would be nice for consistency
             keyframe_selector_notation: None,
-            // TODO: We might want to switch that to false if we properly handle multiline style attr.
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
             ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
@@ -190,11 +189,26 @@ pub fn format_text(
                 "css" | "scss" | "sass" | "less" => {
                     let mut malva_config = config.malva.clone();
                     malva_config.layout.print_width = hints.print_width;
-                    Ok(malva::format_text(code, malva::Syntax::Css, &malva_config)
+
+                    let formatted_css = malva::format_text(code, malva::Syntax::Css, &malva_config)
                         // TODO: Don't skip errors and actually handle these cases.
                         //       Currently we have errors when there is templating blocks inside style tags
                         // .map_err(anyhow::Error::from)
-                        .map_or_else(|_| code.into(), Cow::from))
+                        .map_or_else(|_| code.into(), Cow::from);
+
+                    // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
+                    // Tries to keep on formatting style attr on a single line like expected with
+                    // single_line_top_level_declarations = true
+                    if code.contains('{') {
+                        Ok(formatted_css)
+                    } else {
+                        Ok(formatted_css
+                            .lines()
+                            .map(str::trim)
+                            .collect::<Vec<_>>()
+                            .join(" ")
+                            .into())
+                    }
                 }
                 _ => Ok(code.into()),
             }
