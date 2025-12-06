@@ -3,10 +3,10 @@
 mod common;
 
 use common::build_settings;
-use djangofmt::commands::format::build_markup_options;
+use djangofmt::args::Profile;
+use djangofmt::commands::format::{FormatterConfig, format_text};
 use insta::{assert_snapshot, glob};
-use markup_fmt::{Language, format_text};
-use std::{borrow::Cow, fs, path::Path};
+use std::{fs, path::Path};
 
 #[test]
 fn fmt_snapshot() {
@@ -22,30 +22,28 @@ fn fmt_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str) -> String {
-    let options = build_markup_options(120, 4, None);
+    let config = FormatterConfig::new(120, 4, None);
+    let profile = Profile::Django;
 
-    let output = format_text(input, Language::Django, &options, |code, _| {
-        Ok::<_, ()>(Cow::from(code))
-    })
-    .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))
-    .unwrap();
-
+    let output = format_text(input, &config, &profile)
+        .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))
+        .unwrap()
+        .unwrap_or_else(|| input.to_string());
     // Stability test: format the output again and ensure it's the same
-    let regression_format = format_text(&output, Language::Django, &options, |code, _| {
-        Ok::<_, ()>(Cow::from(code))
-    })
-    .map_err(|err| {
-        format!(
-            "syntax error in stability test '{}': {:?}",
-            path.display(),
-            err
-        )
-    })
-    .unwrap();
+    let regression_format = format_text(&output, &config, &profile)
+        .map_err(|err| {
+            format!(
+                "syntax error in stability test '{}': {:?}",
+                path.display(),
+                err
+            )
+        })
+        .unwrap()
+        .unwrap_or_else(|| input.to_string());
 
     similar_asserts::assert_eq!(
-        output,
-        regression_format,
+        &output,
+        &regression_format,
         "'{}' format is unstable",
         path.display()
     );
