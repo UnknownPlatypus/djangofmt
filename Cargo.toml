@@ -4,7 +4,7 @@ default-members = ["crates/djangofmt"]
 resolver = "3"
 
 [workspace.package]
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"

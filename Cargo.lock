@@ -260,7 +260,7 @@ checksum = "25670139e591f1c2869eb8d0d977028f8d05e859132b4c874ecd02a00d3c9174"
 
 [[package]]
 name = "djangofmt"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "clap",
  "clap_complete_command",
@@ -284,7 +284,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_wasm"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "djangofmt",
  "wasm-bindgen",

@@ -46,7 +46,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.3
+  rev: v0.2.4
   hooks:
     - id: djangofmt
 ```
@@ -196,7 +196,7 @@ There is a dedicated pre-commit for these:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.3
+  rev: v0.2.4
   hooks:
     - id: djangofmt-svg
 ```

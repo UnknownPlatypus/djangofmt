@@ -1,6 +1,34 @@
 # Changelog
 
-## [0.2.3](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.2..0.2.3) - 2025-11-30
+## [0.2.4](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.3..0.2.4) - 2025-12-15
+
+### ⛰️ Features
+
+- *(format)* Auto-sort css statements using `smacss` ordering and enforce `%` in keyframes ([#114](https://github.com/UnknownPlatypus/djangofmt/issues/114)) - ([1dd641f](https://github.com/UnknownPlatypus/djangofmt/commit/1dd641fedc4a07f826c95935d4ceb9d68e0a0070))
+- *(format)* Auto-indent `<script>` tag content ([#115](https://github.com/UnknownPlatypus/djangofmt/issues/115)) - ([d959cf0](https://github.com/UnknownPlatypus/djangofmt/commit/d959cf060622a9e6b20f022e22b9c7ad538852f3))
+- *(format)* Keep style attribute value on a single line ([#113](https://github.com/UnknownPlatypus/djangofmt/issues/113)) - ([7c2f33c](https://github.com/UnknownPlatypus/djangofmt/commit/7c2f33ca3987ed659dcfb91e4b13999bb4694dde))
+- *(format)* Skip file parsing if there is a top-level `<!-- djangofmt:ignore -->` ([#112](https://github.com/UnknownPlatypus/djangofmt/issues/112)) - ([fcbab9b](https://github.com/UnknownPlatypus/djangofmt/commit/fcbab9b3cc2315b930314a78b4643dd23ce5ba10))
+- *(format)* Improve formatting of `style` tags and attributes ([#111](https://github.com/UnknownPlatypus/djangofmt/issues/111)) - ([24920db](https://github.com/UnknownPlatypus/djangofmt/commit/24920db6e561ae3360d5b972dd66c7d8fe3b777b))
+- *(playground)* Add playground deploy to release workflow ([#124](https://github.com/UnknownPlatypus/djangofmt/issues/124)) - ([124b149](https://github.com/UnknownPlatypus/djangofmt/commit/124b14995a7a5611bc84f00d6493f1cddb1ca928))
+- *(playground)* Add an online playground ([#118](https://github.com/UnknownPlatypus/djangofmt/issues/118)) - ([a655190](https://github.com/UnknownPlatypus/djangofmt/commit/a655190832fbd78e06c86f00cc5d7ecb3e7bb28b))
+- *(playground)* Expose a wasm format command ([#122](https://github.com/UnknownPlatypus/djangofmt/issues/122)) - ([847d3d8](https://github.com/UnknownPlatypus/djangofmt/commit/847d3d830a66239ef06d07827a73ec7d4914aa1a))
+
+### 🚜 Refactor
+
+- *(cargo)* Switch to workspace setup ([#121](https://github.com/UnknownPlatypus/djangofmt/issues/121)) - ([ad75960](https://github.com/UnknownPlatypus/djangofmt/commit/ad75960ee2a7d972a92b7ec078837d9031ef451e))
+
+### ⚙️ Miscellaneous Tasks
+
+- *(rust)* Bump rust version to 1.89 ([#110](https://github.com/UnknownPlatypus/djangofmt/issues/110)) - ([dcf68aa](https://github.com/UnknownPlatypus/djangofmt/commit/dcf68aa2b68ff01dc8e959d32b7b31fff6173cfe))
+- Update release script - ([815fd8c](https://github.com/UnknownPlatypus/djangofmt/commit/815fd8c6470dfc19656b74412b72bf6f7a58e2bf))
+
+## New Contributors ❤️
+
+- @UnknownPlatypus made their first contribution in [#124](https://github.com/UnknownPlatypus/djangofmt/pull/124)
+- @renovate[bot] made their first contribution in [#119](https://github.com/UnknownPlatypus/djangofmt/pull/119)
+- @pre-commit-ci[bot] made their first contribution in [#109](https://github.com/UnknownPlatypus/djangofmt/pull/109)
+
+## [0.2.3](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.2..v0.2.3) - 2025-11-30
 
 ### ⛰️ Features
 
