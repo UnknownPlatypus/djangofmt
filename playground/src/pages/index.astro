@@ -1,0 +1,49 @@
+---
+import Navbar from '../components/Navbar.astro';
+import EditorPanel from '../components/EditorPanel.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+---
+<html
+    data-signals="{lightTheme: window.matchMedia('(prefers-color-scheme: light)').matches ? 'on': ''}"
+    data-attr:data-theme="$lightTheme == 'on' ? 'light' : 'dark'"
+    data-effect="monaco.editor.setTheme($lightTheme == 'on' ? 'vs-light' : 'vs-dark')"
+>
+    <head>
+        <title>Djangofmt Playground</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="UTF-8">
+        <link rel="apple-touch-icon" sizes="180x180" href="/djangofmt/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/djangofmt/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/djangofmt/favicon-16x16.png">
+        <script src="../scripts/main.ts"></script>
+    </head>
+    <body
+        class="h-screen flex flex-col overflow-hidden text-base-content"
+        data-signals="{
+            mode: new URLSearchParams(window.location.search).get('mode') || 'Django',
+            width: Number(new URLSearchParams(window.location.search).get('width') || '120'),
+            indent: Number(new URLSearchParams(window.location.search).get('indent') || '4'),
+        }"
+        data-effect="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode)"
+    >
+        <Navbar />
+
+        <main
+            class="relative flex-1 flex flex-col h-full md:flex-row"
+            data-on:input__debounce.10ms="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode)"
+        >
+            <EditorPanel id="monacoInput">
+                <span class="text-xs font-bold text-base-content/50 uppercase tracking-wider">Input Template</span>
+            </EditorPanel>
+            <EditorPanel id="monacoOutput">
+                <span class="text-xs font-bold text-success uppercase tracking-wider flex items-center gap-1">
+                    <span class="size-2 rounded-full bg-success inline-block"></span>
+                    Formatted Result
+                </span>
+            </EditorPanel>
+        </main>
+
+        <Footer />
+    </body>
+</html>

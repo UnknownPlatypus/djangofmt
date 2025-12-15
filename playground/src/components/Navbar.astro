@@ -1,0 +1,44 @@
+---
+import IconShare from './icons/IconShare.astro';
+import LightTheme from "./icons/LightTheme.astro";
+import DarkTheme from "./icons/DarkTheme.astro";
+import PlusMinusInput from './PlusMinusInput.astro';
+---
+<nav class="navbar bg-base-300 border-b border-base-300 min-h-16 px-4 flex justify-between gap-8 shrink-0 overflow-x-auto">
+    <div class="flex items-center gap-2">
+        <img src="/djangofmt/android-chrome-192x192.png" alt="djangofmt" width="32" height="32" class="h-8 w-8" />
+        <span class="font-bold text-lg tracking-tight">djangofmt</span>
+    </div>
+
+    <div id="controls" class="flex items-end gap-8">
+        <fieldset class="fieldset">
+            <legend class="fieldset-legend text-xs font-bold text-base-content/90">
+                Profile
+            </legend>
+            <select
+                class="select select-sm w-24 font-medium bg-base-100 text-base-content/70"
+                data-bind="mode"
+            >
+                <option>Django</option>
+                <option>Jinja</option>
+            </select>
+        </fieldset>
+        <PlusMinusInput signalName='width' title='Line Length'/>
+        <PlusMinusInput signalName='indent' title='Indent'/>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <button
+            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
+            data-tip="Copy permalink"
+            data-on:click="savePermalinkToClipboard(monacoInput.editor.getValue(), $mode, $width, $indent)"
+        >
+            <IconShare />
+        </button>
+        <label class="swap swap-rotate btn btn-sm btn-circle btn-ghost text-base-content/60">
+            <input type="checkbox" data-bind="lightTheme">
+            <LightTheme />
+            <DarkTheme />
+        </label>
+    </div>
+</nav>
