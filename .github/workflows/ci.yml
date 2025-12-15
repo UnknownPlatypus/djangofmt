@@ -33,7 +33,7 @@ jobs:
         with:
           persist-credentials: true
 
-      - uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47.0.0
+      - uses: tj-actions/changed-files@e0021407031f5be11a464abee9a0776171c79891 # v47.0.1
         id: changed
         with:
           files_yaml: |
@@ -68,7 +68,7 @@ jobs:
         run: cargo build --release --verbose && mv target/release/djangofmt ./pr_djangofmt
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@ed21f2f24f8dd64503750218de024bcf64c7250a # v7.1.5
+        uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
         with:
           enable-cache: false
 
@@ -172,7 +172,7 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           persist-credentials: false
-      - uses: cargo-bins/cargo-binstall@8110b3aa84cb581a90696bc57469b0656f972494 # v1.16.3
+      - uses: cargo-bins/cargo-binstall@ea60fcf749c6a52a729e0eaabb5eb33391d44823 # v1.16.4
       - run: cargo binstall --no-confirm cargo-shear
       - run: cargo shear
 
