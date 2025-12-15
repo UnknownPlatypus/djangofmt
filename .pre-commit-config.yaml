@@ -71,6 +71,20 @@ repos:
     hooks:
       - id: renovate-config-validator
         args: [--strict]
+  - repo: https://github.com/shssoichiro/oxipng
+    rev: c7d462f909e9c6ebc8d32820d83a6119b681cad6  # frozen: v9.1.5
+    hooks:
+      - id: oxipng
+        language_version: "1.85"
+        args: ["-o", "max", "--strip", "safe", "--alpha"]
+        exclude: "^tests-e2e"
+  - repo: https://github.com/UnknownPlatypus/jpegoptim-py
+    rev: df67172373fc005b84dbc651f848075f9ca5d124  # frozen: v1.5.5.2
+    hooks:
+      - id: jpegoptim
+        args: [--strip-all, --all-progressive, --max=85, --threshold=3]
+        exclude: "^tests-e2e"
+
   - repo: local
     hooks:
       - id: dprint-fmt
