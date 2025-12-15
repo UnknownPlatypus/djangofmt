@@ -31,7 +31,7 @@ import '../styles/global.css';
 
         <main
             class="relative flex-1 flex flex-col h-full md:flex-row"
-            data-on:input="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode)"
+            data-on:input__debounce.10ms="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode)"
         >
             <EditorPanel id="monacoInput">
                 <span class="text-xs font-bold text-base-content/50 uppercase tracking-wider">Input Template</span>

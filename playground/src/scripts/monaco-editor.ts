@@ -40,6 +40,9 @@ function createEditors() {
     value: initialTemplate,
     ...monacoOptions,
   });
+  inputEditor.onDidChangeModelContent(() => {
+    inputContainer.dispatchEvent(new Event("input", { bubbles: true }));
+  });
   (inputContainer as any).editor = inputEditor;
 
   const outputContainer = document.getElementById(
