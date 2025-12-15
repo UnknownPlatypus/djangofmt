@@ -42,6 +42,10 @@ jobs:
       - uses: jetli/wasm-bindgen-action@20b33e20595891ab1a0ed73145d8a21fc96e7c29 # v0.2.0
       - name: "Run wasm-pack build"
         run: wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: 24
+          package-manager-cache: false
       - name: Install dependencies
         run: npm ci
         working-directory: playground
