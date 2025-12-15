@@ -91,6 +91,4 @@ input[type='number'] {
 
     --vscode-input-foreground: var(--color-base-content) !important;
     --vscode-input-background: var(--color-base-100) !important;
-    --vscode-editor-lineHighlightBorder: red;
-    --vscode-editor-lineHighlightBackground: red;
 }
