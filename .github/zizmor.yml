@@ -1,0 +1,17 @@
+# Configuration for the zizmor static analysis tool, run via pre-commit in CI
+# https://woodruffw.github.io/zizmor/configuration/
+#
+# TODO: can we remove the ignores here so that our workflows are more secure?
+rules:
+  secrets-inherit:
+    # `cargo dist` makes extensive use of `secrets: inherit`,
+    # and we can't easily fix that until an upstream release changes that.
+    disable: true
+  template-injection:
+    ignore:
+      # like with `secrets-inherit`, `cargo dist` introduces some
+      # template injections. We've manually audited these usages for safety.
+      - release.yml
+  excessive-permissions:
+    ignore:
+      - release.yml
