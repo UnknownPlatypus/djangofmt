@@ -4,9 +4,12 @@
 name: "[djangofmt] Publish Playground"
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ["playground"]
+  # Runs during release workflow
+  workflow_call:
+    inputs:
+      plan:
+        required: true
+        type: string
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

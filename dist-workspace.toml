@@ -4,7 +4,7 @@ members = ["cargo:."]
 # Config for 'dist'
 [dist]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.28.5-prerelease.1"
+cargo-dist-version = "0.30.3"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
@@ -35,7 +35,7 @@ targets = [
 ]
 # Whether to auto-include files like READMEs, LICENSEEs, and CHANGELOGs (default true)
 auto-includes = false
-# Whether dist should create a GitHub Release or use an existing draft
+# Whether dist should create a Github Release or use an existing draft
 create-release = true
 # Which actions to run on pull requests
 pr-run-mode = "plan"
@@ -50,7 +50,7 @@ local-artifacts-jobs = ["./release-build-binaries"]
 # Publish jobs to run in CI
 publish-jobs = ["./release-publish-pypi"]
 # Post-announce jobs to run in CI
-post-announce-jobs = ["./release-notify-pre-commit-mirror"]
+post-announce-jobs = ["./release-notify-pre-commit-mirror", "./publish-playground"]
 # Whether to install an updater program
 install-updater = false
 # Path that installers should place binaries in
