@@ -1,0 +1,11 @@
+---
+import DevDatastarSignals from "./DevDatastarSignals.astro";
+---
+<footer class="bg-primary text-primary-content text-xs px-3 py-1 flex justify-between items-center font-mono">
+    <div id="format-duration">Formatted in 0.1ms!</div>
+    <div class="flex gap-4 opacity-80">
+        <DevDatastarSignals/>
+        <span>UTF-8</span>
+        <span class="min-w-20"><span data-text="$mode"></span> Mode</span>
+    </div>
+</footer>
