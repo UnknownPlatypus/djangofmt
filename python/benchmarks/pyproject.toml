@@ -8,4 +8,4 @@ authors = [
 
 requires-python = ">=3.11"
 
-dependencies = ["djlint==1.36.4", "djade==1.6.0", "djhtml==3.0.10"]
+dependencies = ["djlint==1.36.4", "djade==1.7.0", "djhtml==3.0.10"]
