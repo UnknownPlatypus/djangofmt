@@ -75,7 +75,6 @@ repos:
     rev: c7d462f909e9c6ebc8d32820d83a6119b681cad6  # frozen: v9.1.5
     hooks:
       - id: oxipng
-        language_version: "1.85"
         args: ["-o", "max", "--strip", "safe", "--alpha"]
         exclude: "^tests-e2e"
   - repo: https://github.com/UnknownPlatypus/jpegoptim-py
