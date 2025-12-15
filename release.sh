@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 if ! command -v typos &>/dev/null; then
 	echo "typos is not installed. Run 'cargo install typos-cli' to install it, otherwise the typos won't be fixed"
 fi
@@ -14,13 +16,13 @@ echo "Preparing $1..."
 # update the version in various files
 sed -E -i "s/^version = .*$/version = \"${1#v}\"/" Cargo.toml pyproject.toml
 sed -E -i "s/rev: v.*$/rev: v${1#v}/" README.md
-sed -E -i "s/(djangofmt) [0-9]+\.[0-9]+\.[0-9]+/\1 ${1#v}/" src/args.rs
+sed -E -i "s/(djangofmt) [0-9]+\.[0-9]+\.[0-9]+/\1 ${1#v}/" crates/djangofmt/src/args.rs
 # sync cargo.lock
 cargo build
 # update the changelog
 git cliff --tag "$1" -o
-git add -A && pre-commit run
-git add -A && git commit -m "chore(release): prepare for $1"
+git add -A && pre-commit run || true
+git add -A && pre-commit run && git commit -m "chore(release): prepare for $1"
 
 # generate a changelog for the tag message
 export GIT_CLIFF_TEMPLATE="\
