@@ -1,5 +1,6 @@
 ---
 import IconCopy from './icons/IconCopy.astro';
+import ScrollToTopIcon from "./icons/ScrollToTopIcon.astro";
 
 interface Props {
     id: string;
@@ -11,6 +12,28 @@ const { id } = Astro.props;
     <div class="h-8 bg-base-200/50 border-b border-base-300 flex items-center pl-4 pr-2 justify-between">
         <slot />
         <div class="flex gap-2">
+            <button
+                class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
+                data-tip="Scroll to Top"
+                data-on:click=`
+                  ${id}.editor.revealLine(1);
+                  ${id}.editor.setPosition({lineNumber: 1, column: 1});
+                  ${id}.editor.focus();
+                `
+            >
+                <ScrollToTopIcon />
+            </button>
+            <button
+                class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
+                data-tip="Scroll to Bottom"
+                data-on:click=`
+                  ${id}.editor.revealLine(${id}.editor.getModel().getLineCount());
+                  ${id}.editor.setPosition({lineNumber: ${id}.editor.getModel().getLineCount(), column: 1});
+                  ${id}.editor.focus();
+                `
+            >
+                <ScrollToTopIcon extraClass="rotate-180"/>
+            </button>
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Copy"
