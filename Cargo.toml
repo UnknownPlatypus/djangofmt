@@ -1,20 +1,23 @@
-[package]
-name = "djangofmt"
+[workspace]
+members = ["crates/*"]
+default-members = ["crates/djangofmt"]
+resolver = "3"
+
+[workspace.package]
 version = "0.2.3"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
-exclude = ["/tests"]
 license = "MIT"
-publish = true
 repository = "https://github.com/UnknownPlatypus/djangofmt"
 rust-version = "1.89"
-description = "A fast, HTML aware, Django template formatter, written in Rust."
 
-[dependencies]
+[workspace.dependencies]
+# Formatting
 malva = { version = "0.15.1", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.0" }
 
+# CLI
 clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
 clap_complete_command = "0.6.1"
 rayon = "1.11.0"
@@ -30,7 +33,7 @@ tracing-tree = "0.4.1"
 miette = { version = "7.6.0", features = ["fancy"] }
 thiserror = "2.0.17"
 
-[dev-dependencies]
+# Dev dependencies
 gag = "=1.0.0"
 insta = { version = "=1.44.3", features = ["yaml", "glob"] }
 insta-cmd = "=0.6.0"
@@ -47,7 +50,7 @@ strip = true
 [profile.dist]
 inherits = "release"
 
-[lints.clippy]
+[workspace.lints.clippy]
 pedantic = { level = "deny", priority = -1 }
 nursery = { level = "deny", priority = -1 }
 unwrap_used = "deny"

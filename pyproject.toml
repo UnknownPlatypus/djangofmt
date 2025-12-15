@@ -39,7 +39,7 @@ strict = true
 # https://www.maturin.rs/config.html#maturin-options
 [tool.maturin]
 bindings = "bin"
-manifest-path = "Cargo.toml"
+manifest-path = "crates/djangofmt/Cargo.toml"
 strip = true
 include = [
   "rust-toolchain.toml",
