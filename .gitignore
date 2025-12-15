@@ -16,3 +16,10 @@ node_modules/
 # Share intellij runconfigs
 !.idea/runConfigurations/
 !.idea/runConfigurations/*.xml
+
+# playground output
+public
+playground/**/*.js
+dist
+*.tgz
+.astro
