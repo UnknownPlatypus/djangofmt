@@ -42,7 +42,7 @@ async function initWasm() {
   runFormat();
 }
 
-await initWasm();
+initWasm();
 
 // Expose functions globally for Datastar expressions
 window.monaco = monaco;
