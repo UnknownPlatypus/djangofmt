@@ -22,10 +22,14 @@ import '../styles/global.css';
             width: Number(new URLSearchParams(window.location.search).get('width') || '120'),
             indent: Number(new URLSearchParams(window.location.search).get('indent') || '4'),
         }"
+        data-effect="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode)"
     >
         <Navbar />
 
-        <main class="relative flex-1 flex flex-col h-full md:flex-row">
+        <main
+            class="relative flex-1 flex flex-col h-full md:flex-row"
+            data-on:input="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode)"
+        >
             <EditorPanel id="monacoInput">
                 <span class="text-xs font-bold text-base-content/50 uppercase tracking-wider">Input Template</span>
             </EditorPanel>
