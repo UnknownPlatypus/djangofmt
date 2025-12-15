@@ -1,0 +1,42 @@
+---
+import IconMinus from "./icons/IconMinus.astro";
+import IconPlus from "./icons/IconPlus.astro";
+
+interface Props {
+    signalName: string;
+    title: string;
+}
+
+const { signalName, title } = Astro.props;
+---
+
+<fieldset class="fieldset">
+    <legend class="fieldset-legend text-xs font-bold text-base-content/90">
+        {title}
+    </legend>
+    <label
+        class="join rounded-field input input-sm w-24 text-base-content/70 px-0 gap-0"
+    >
+        <button
+            class="join-item text-xl cursor-pointer px-2 h-full disabled:bg-base-content/10 disabled:border-0"
+            data-on:click=`if ($${signalName} > 0) $${signalName}--`
+            data-attr:disabled=`$${signalName} == 0`
+        >
+            <IconMinus />
+        </button>
+        <input
+            type="number"
+            class="join-item text-center font-mono w-full"
+            min="0"
+            max="10000"
+            title="Must be between 0 and 10000"
+            data-bind={signalName}
+        >
+        <button
+            class="join-item text-xl cursor-pointer px-2 h-full disabled:bg-base-content/10 disabled:border-0"
+            data-on:click=`$${signalName}++`
+        >
+            <IconPlus />
+        </button>
+    </label>
+</fieldset>
