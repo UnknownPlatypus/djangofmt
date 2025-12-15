@@ -3,7 +3,9 @@ import "monaco-editor/min/vs/editor/editor.main.css";
 import "monaco-editor/esm/vs/editor/editor.all.js";
 import "monaco-editor/esm/vs/basic-languages/html/html.contribution";
 import "monaco-editor/esm/vs/language/html/monaco.contribution";
+// @ts-expect-error - Vite worker import
 import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
+// @ts-expect-error - Vite worker import
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { parsePermalinkCode } from "./permalink";
 
