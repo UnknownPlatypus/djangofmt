@@ -19,8 +19,10 @@ name = "formatter"
 harness = false
 
 [dependencies]
-divan = { workspace = true }
 djangofmt = { path = "../djangofmt" }
+
+[dev-dependencies]
+divan = { workspace = true }
 
 [lints]
 workspace = true
