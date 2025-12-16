@@ -111,7 +111,7 @@ def update_cargo_toml(initial_cargo_toml_content: str) -> str:
     if "[profile.fatcg1]" in initial_cargo_toml_content:
         rich_print("Profiles already set-up in Cargo.toml")
     else:
-        with open("Cargo.toml", "a") as f:
+        with open(CARGO_TOML_PATH, "a") as f:
             f.write(_generate_additional_profiles())
         rich_print("Profiles added to Cargo.toml")
 
@@ -209,7 +209,6 @@ def build_binaries() -> dict[Profile, BuildResult]:
             [
                 "maturin",
                 "build",
-                "--release",
                 "--profile",
                 str(profile),
             ],
