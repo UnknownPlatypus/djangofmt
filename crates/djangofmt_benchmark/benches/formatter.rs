@@ -5,9 +5,9 @@ fn main() {
     divan::main();
 }
 
-#[divan::bench(name = "Large jinja template (2.7k LoC)")]
-fn large_jinja_template(bencher: divan::Bencher) {
-    let config = FormatterConfig::new(120, 4, None);
+#[divan::bench(name = "Large jinja template (2.7k LoC)", args = [1, 120, 100_000_000])]
+fn large_jinja_template(bencher: divan::Bencher, print_width: usize) {
+    let config = FormatterConfig::new(print_width, 4, None);
 
     bencher.bench_local(|| {
         format_text(
@@ -19,11 +19,11 @@ fn large_jinja_template(bencher: divan::Bencher) {
     });
 }
 
-#[divan::bench(name = "Large Django template (1.3k LoC)")]
-fn large_django_template(bencher: divan::Bencher) {
-    let config = FormatterConfig::new(120, 4, None);
+#[divan::bench(name = "Large Django template (1.3k LoC)", args = [1, 120, 100_000_000])]
+fn large_django_template(bencher: divan::Bencher, print_width: usize) {
+    let config = FormatterConfig::new(print_width, 4, None);
 
-    bencher.bench(|| {
+    bencher.bench_local(|| {
         format_text(
             divan::black_box(LARGE_DJANGO_TEMPLATE.code),
             divan::black_box(&config),
@@ -33,11 +33,11 @@ fn large_django_template(bencher: divan::Bencher) {
     });
 }
 
-#[divan::bench(name = "Nested Django template (0.3k LoC)")]
-fn nested_django_template(bencher: divan::Bencher) {
-    let config = FormatterConfig::new(120, 4, None);
+#[divan::bench(name = "Nested Django template (0.3k LoC)", args = [1, 120, 100_000_000])]
+fn nested_django_template(bencher: divan::Bencher, print_width: usize) {
+    let config = FormatterConfig::new(print_width, 4, None);
 
-    bencher.bench(|| {
+    bencher.bench_local(|| {
         format_text(
             divan::black_box(NESTED_DJANGO_TEMPLATE.code),
             divan::black_box(&config),
