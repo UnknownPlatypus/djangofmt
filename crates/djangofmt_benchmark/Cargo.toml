@@ -1,0 +1,28 @@
+[package]
+name = "djangofmt_benchmark"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+repository.workspace = true
+rust-version.workspace = true
+description = "djangofmt Micro-benchmarks"
+
+[lib]
+bench = false
+test = false
+doctest = false
+
+[[bench]]
+name = "formatter"
+harness = false
+
+[dependencies]
+djangofmt = { path = "../djangofmt" }
+
+[dev-dependencies]
+divan = { workspace = true }
+
+[lints]
+workspace = true

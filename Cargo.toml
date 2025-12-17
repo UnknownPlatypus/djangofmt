@@ -36,6 +36,9 @@ thiserror = "2.0.17"
 # WASM
 wasm-bindgen = "0.2"
 
+# Benchmarking
+divan = { package = "codspeed-divan-compat", version = "*" }
+
 # Dev dependencies
 gag = "=1.0.0"
 insta = { version = "=1.44.3", features = ["yaml", "glob"] }
