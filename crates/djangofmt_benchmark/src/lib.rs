@@ -2,29 +2,29 @@ use djangofmt::args::Profile;
 use std::fmt;
 
 pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {
-    name: "django/404.html",
+    name: "small/404.html",
     code: include_str!("../resources/django/404.html"),
     profile: Profile::Django,
 };
 pub static DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS: TestFile = TestFile {
-    name: "django/technical_500.html",
+    name: "external_format/technical_500.html",
     code: include_str!("../resources/django/technical_500.html"),
     profile: Profile::Django,
 };
 
 pub static DJANGO_TEMPLATE_LARGE: TestFile = TestFile {
-    name: "django/strip_tags1.html",
+    name: "large/strip_tags1.html",
     code: include_str!("../resources/django/strip_tags1.html"),
     profile: Profile::Django,
 };
 pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile = TestFile {
-    name: "makeplane/project_invitation.html",
+    name: "deeply_nested/project_invitation.html",
     code: include_str!("../resources/makeplane/project_invitation.html"),
     profile: Profile::Django,
 };
 
 pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
-    name: "zulip/comparison_table_integrated.html",
+    name: "jinja_large/comparison_table_integrated.html",
     code: include_str!("../resources/zulip/comparison_table_integrated.html"),
     profile: Profile::Jinja,
 };
