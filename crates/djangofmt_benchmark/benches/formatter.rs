@@ -1,47 +1,28 @@
 use djangofmt::commands::format::{FormatterConfig, format_text};
-use djangofmt_benchmark::{LARGE_DJANGO_TEMPLATE, LARGE_JINJA_TEMPLATE, NESTED_DJANGO_TEMPLATE};
+use djangofmt_benchmark::{
+    DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, DJANGO_TEMPLATE_SMALL,
+    DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS, JINJA_TEMPLATE_LARGE, TestFile,
+};
 
 fn main() {
     divan::main();
 }
 
-#[divan::bench(name = "Large jinja template (2.7k LoC)")]
-fn large_jinja_template(bencher: divan::Bencher) {
-    let config = FormatterConfig::new(120, 4, None);
-
-    bencher.bench_local(|| {
-        format_text(
-            divan::black_box(LARGE_JINJA_TEMPLATE.code),
-            divan::black_box(&config),
-            divan::black_box(&LARGE_JINJA_TEMPLATE.profile),
-        )
-        .expect("Formatting to succeed")
-    });
-}
-
-#[divan::bench(name = "Large Django template (1.3k LoC)")]
-fn large_django_template(bencher: divan::Bencher) {
+#[divan::bench(args = [
+  &DJANGO_TEMPLATE_SMALL,
+  &DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
+  &DJANGO_TEMPLATE_LARGE,
+  &DJANGO_TEMPLATE_DEEPLY_NESTED,
+  &JINJA_TEMPLATE_LARGE]
+)]
+fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
     let config = FormatterConfig::new(120, 4, None);
 
     bencher.bench(|| {
         format_text(
-            divan::black_box(LARGE_DJANGO_TEMPLATE.code),
+            divan::black_box(template.code),
             divan::black_box(&config),
-            divan::black_box(&LARGE_DJANGO_TEMPLATE.profile),
-        )
-        .expect("Formatting to succeed")
-    });
-}
-
-#[divan::bench(name = "Nested Django template (0.3k LoC)")]
-fn nested_django_template(bencher: divan::Bencher) {
-    let config = FormatterConfig::new(120, 4, None);
-
-    bencher.bench(|| {
-        format_text(
-            divan::black_box(NESTED_DJANGO_TEMPLATE.code),
-            divan::black_box(&config),
-            divan::black_box(&NESTED_DJANGO_TEMPLATE.profile),
+            divan::black_box(&template.profile),
         )
         .expect("Formatting to succeed")
     });
