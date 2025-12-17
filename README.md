@@ -5,6 +5,7 @@
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/djangofmt.svg)](https://pypi.python.org/pypi/djangofmt)
 [![Actions status](https://github.com/UnknownPlatypus/djangofmt/actions/workflows/ci.yml/badge.svg)](https://github.com/UnknownPlatypus/djangofmt/actions)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/UnknownPlatypus/djangofmt/main.svg)](https://results.pre-commit.ci/latest/github/UnknownPlatypus/djangofmt/main)
+[![CodSpeed Badge](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/UnknownPlatypus/djangofmt?utm_source=badge)
 
 A fast, HTML aware, Django template formatter, written in Rust.
 
