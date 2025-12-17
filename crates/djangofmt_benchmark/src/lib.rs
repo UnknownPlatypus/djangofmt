@@ -39,9 +39,21 @@ impl TestFile {
     pub fn loc(&self) -> usize {
         self.code.lines().count()
     }
+
+    #[must_use]
+    pub const fn total_len(&self) -> usize {
+        self.code.len()
+    }
 }
+
 impl fmt::Debug for TestFile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} ({} LoC)", self.name, self.loc())
+        write!(
+            f,
+            "{} ({} lines, {} bytes)",
+            self.name,
+            self.loc(),
+            self.total_len()
+        )
     }
 }
