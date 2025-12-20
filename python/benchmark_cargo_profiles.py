@@ -48,9 +48,12 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
-from typing import NamedTuple
+from subprocess import CompletedProcess
+from typing import NamedTuple, Any
+from collections.abc import Sequence
 
 from rich import print as _rich_print
 from rich.console import Console
@@ -97,6 +100,17 @@ ALL_PROFILES = [
     for lto_option in LtoOptions
     for codegen_unit in CodegenUnits
 ]
+
+
+def _run(cmd: Sequence[str], **kwargs: Any) -> CompletedProcess[str]:
+    """Run subprocess and print stderr on failure"""
+    try:
+        return subprocess.run(cmd, check=True, **kwargs)
+    except subprocess.CalledProcessError as e:
+        if stderr := getattr(e, "stderr", None):
+            print(f"Command failed: '{' '.join(cmd)}'", file=sys.stderr)
+            print(stderr, file=sys.stderr)
+        raise SystemExit(e.returncode)
 
 
 def rich_print(msg: str) -> None:
@@ -175,7 +189,7 @@ def build_binaries() -> dict[Profile, BuildResult]:
     rich_print("Building binaries and wheels for each profile")
 
     # Clean target directory
-    subprocess.run(["cargo", "clean"], check=True)
+    _run(["cargo", "clean"])
 
     # Create target/release directory
     os.makedirs("target/release", exist_ok=True)
@@ -186,15 +200,14 @@ def build_binaries() -> dict[Profile, BuildResult]:
         rich_print(f":wrench: Building profile: {profile}")
 
         # Build binary and get file size
-        process = subprocess.run(
+        process = _run(
             ["cargo", "build", "--profile", str(profile)],
             capture_output=True,
             text=True,
-            check=True,
         )
         binary_src = f"target/{profile}/djangofmt"
         binary_dest = f"target/release/djangofmt-{profile}"
-        subprocess.run(["cp", binary_src, binary_dest])
+        _run(["cp", binary_src, binary_dest])
         # shutil.copyfile(binary_src, binary_dest)
         # os.chmod(binary_dest, 0o777)
 
@@ -205,14 +218,13 @@ def build_binaries() -> dict[Profile, BuildResult]:
             build_time_seconds = 0
 
         # Build wheel
-        subprocess.run(
+        _run(
             [
                 "maturin",
                 "build",
                 "--profile",
                 str(profile),
             ],
-            check=True,
         )
         # Find the wheel file
         wheel_files = list(Path("target/wheels").glob("djangofmt*.whl"))
@@ -257,7 +269,7 @@ def run_benchmarks(files_list_path: str) -> dict[Profile, BenchResult]:
             cmd_str = f'"cat {files_list_path} | xargs --max-procs=0 ./target/release/djangofmt-{profile} {BENCHMARK_ARGS}"'
             benchmark_cmd.append(cmd_str)
 
-        subprocess.run(" ".join(benchmark_cmd), check=True, shell=True)
+        _run(" ".join(benchmark_cmd), shell=True)
 
         results = json.loads(f.read())["results"]
 
