@@ -40,6 +40,10 @@ wasm-bindgen = { version = "0.2" }
 # Benchmarking
 divan = { package = "codspeed-divan-compat", version = "*" }
 
+# Perf
+# This has to be kept in sync with src/main.rs where the allocator for the program is set.
+tikv-jemallocator = { version = "0.6.1" }
+
 # Dev dependencies
 gag = { version = "=1.0.0" }
 insta = { version = "=1.44.3", features = ["yaml", "glob"] }
