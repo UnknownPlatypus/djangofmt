@@ -239,6 +239,7 @@ pub fn format_text(
                 "tsx" | "ts" | "mts" | "jsx" | "js" | "mjs" => {
                     let mut ts_config = config.typescript.clone();
                     ts_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+                    ts_config.file_indent_level = u32::from(hints.indent_level);
 
                     let file_path = Path::new("file").with_extension(hints.ext);
                     match dprint_plugin_typescript::format_text(
