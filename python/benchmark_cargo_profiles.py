@@ -15,7 +15,7 @@ It should be provided with a file containing a list of html file to format.
 Usage:
     uv run --script python/benchmark_cargo_profiles.py --files-list /path/to/your/files-list
 
-Output (strip=false):
+06/03/2025 (strip=false):
 ┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Profile      ┃ Build Time (s) ┃ Binary Size (MB) ┃ Wheel Size (MB) ┃ Benchmark Time Avg (ms) ┃ Benchmark Time ±σ (ms) ┃
 ┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
@@ -26,7 +26,7 @@ Output (strip=false):
 │ ltono_cg1    │          10.12 │             3.55 │            1.25 │                   19.60 │                   0.85 │
 │ ltono_cg16   │           8.41 │             4.25 │            1.36 │                   19.68 │                   0.70 │
 └──────────────┴────────────────┴──────────────────┴─────────────────┴─────────────────────────┴────────────────────────┘
-Output (strip=true):
+06/03/2025 (strip=true):
 ┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Profile      ┃ Build Time (s) ┃ Binary Size (MB) ┃ Wheel Size (MB) ┃ Benchmark Time Avg (ms) ┃ Benchmark Time ±σ (ms) ┃
 ┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
@@ -37,7 +37,17 @@ Output (strip=true):
 │ ltofat_cg16  │          18.91 │             3.04 │            1.30 │                   19.48 │                   0.73 │
 │ ltono_cg16   │           8.53 │             3.46 │            1.36 │                   19.62 │                   0.98 │
 └──────────────┴────────────────┴──────────────────┴─────────────────┴─────────────────────────┴────────────────────────┘
-
+20/12/2025 (strip=true) -- benchmark time are higher because my benchmark set of files increased:
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Profile      ┃ Build Time (s) ┃ Binary Size (MB) ┃ Wheel Size (MB) ┃ Benchmark Time Avg (ms) ┃ Benchmark Time ±σ (ms) ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ ltofat_cg1   │          20.30 │             3.28 │            1.43 │                   29.11 │                   0.80 │
+│ ltofat_cg16  │          19.77 │             3.46 │            1.50 │                   29.36 │                   0.87 │
+│ ltothin_cg1  │          10.36 │             3.46 │            1.47 │                   30.21 │                   0.78 │
+│ ltothin_cg16 │           7.83 │             3.91 │            1.59 │                   30.38 │                   0.82 │
+│ ltono_cg1    │           9.48 │             3.46 │            1.44 │                   31.45 │                   0.88 │
+│ ltono_cg16   │           6.95 │             3.96 │            1.58 │                   31.80 │                   0.65 │
+└──────────────┴────────────────┴──────────────────┴─────────────────┴─────────────────────────┴────────────────────────┘
 Based on https://github.com/astral-sh/ruff/pull/9031
 """
 
@@ -48,9 +58,12 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
-from typing import NamedTuple
+from subprocess import CompletedProcess
+from typing import NamedTuple, Any
+from collections.abc import Sequence
 
 from rich import print as _rich_print
 from rich.console import Console
@@ -99,6 +112,17 @@ ALL_PROFILES = [
 ]
 
 
+def _run(cmd: Sequence[str], **kwargs: Any) -> CompletedProcess[str]:
+    """Run subprocess and print stderr on failure"""
+    try:
+        return subprocess.run(cmd, check=True, **kwargs)
+    except subprocess.CalledProcessError as e:
+        if stderr := getattr(e, "stderr", None):
+            print(f"Command failed: '{' '.join(cmd)}'", file=sys.stderr)
+            print(stderr, file=sys.stderr)
+        raise SystemExit(e.returncode)
+
+
 def rich_print(msg: str) -> None:
     msg = f" {msg} ".center(80, "=")
     _rich_print(f"[bold cyan]{msg}[/bold cyan]")
@@ -111,7 +135,7 @@ def update_cargo_toml(initial_cargo_toml_content: str) -> str:
     if "[profile.fatcg1]" in initial_cargo_toml_content:
         rich_print("Profiles already set-up in Cargo.toml")
     else:
-        with open("Cargo.toml", "a") as f:
+        with open(CARGO_TOML_PATH, "a") as f:
             f.write(_generate_additional_profiles())
         rich_print("Profiles added to Cargo.toml")
 
@@ -175,7 +199,7 @@ def build_binaries() -> dict[Profile, BuildResult]:
     rich_print("Building binaries and wheels for each profile")
 
     # Clean target directory
-    subprocess.run(["cargo", "clean"], check=True)
+    _run(["cargo", "clean"])
 
     # Create target/release directory
     os.makedirs("target/release", exist_ok=True)
@@ -186,15 +210,14 @@ def build_binaries() -> dict[Profile, BuildResult]:
         rich_print(f":wrench: Building profile: {profile}")
 
         # Build binary and get file size
-        process = subprocess.run(
+        process = _run(
             ["cargo", "build", "--profile", str(profile)],
             capture_output=True,
             text=True,
-            check=True,
         )
         binary_src = f"target/{profile}/djangofmt"
         binary_dest = f"target/release/djangofmt-{profile}"
-        subprocess.run(["cp", binary_src, binary_dest])
+        _run(["cp", binary_src, binary_dest])
         # shutil.copyfile(binary_src, binary_dest)
         # os.chmod(binary_dest, 0o777)
 
@@ -205,15 +228,13 @@ def build_binaries() -> dict[Profile, BuildResult]:
             build_time_seconds = 0
 
         # Build wheel
-        subprocess.run(
+        _run(
             [
                 "maturin",
                 "build",
-                "--release",
                 "--profile",
                 str(profile),
             ],
-            check=True,
         )
         # Find the wheel file
         wheel_files = list(Path("target/wheels").glob("djangofmt*.whl"))
@@ -258,7 +279,7 @@ def run_benchmarks(files_list_path: str) -> dict[Profile, BenchResult]:
             cmd_str = f'"cat {files_list_path} | xargs --max-procs=0 ./target/release/djangofmt-{profile} {BENCHMARK_ARGS}"'
             benchmark_cmd.append(cmd_str)
 
-        subprocess.run(" ".join(benchmark_cmd), check=True, shell=True)
+        _run(" ".join(benchmark_cmd), shell=True)
 
         results = json.loads(f.read())["results"]
 
