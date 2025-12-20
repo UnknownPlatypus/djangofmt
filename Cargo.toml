@@ -27,7 +27,7 @@ serde_json = { version = "1.0.145" }
 colored = { version = "3.0.0" }
 tracing = { version = "0.1.43" }
 # Pin to avoid https://github.com/tokio-rs/tracing/issues/3369
-tracing-subscriber = { version = "=0.3.19" }
+tracing-subscriber = { version = "=0.3.20" }
 tracing-tree = { version = "0.4.1" }
 
 # Error reporting
