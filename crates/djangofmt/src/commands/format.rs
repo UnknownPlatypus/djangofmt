@@ -156,7 +156,7 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
     errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
     let error_count = errors.len();
     for error in errors {
-        eprintln!("{:?}", miette::Report::new(*error));
+        error!("{:?}", miette::Report::new(*error));
     }
     if error_count > 0 {
         error!("Couldn't format {} files!", error_count);
