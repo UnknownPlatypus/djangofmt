@@ -399,6 +399,7 @@ pub fn format_text(
                     let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
                     let mut ts_config = config.typescript.clone();
                     ts_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+                    ts_config.file_indent_level = u32::from(hints.indent_level);
 
                     match dprint_plugin_typescript::format_text(
                         dprint_plugin_typescript::FormatTextOptions {
