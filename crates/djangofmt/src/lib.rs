@@ -1,7 +1,7 @@
 use crate::args::Args;
 use crate::logging::setup_tracing;
+use clap::CommandFactory;
 use std::process::ExitCode;
-
 pub mod args;
 pub mod commands;
 pub mod error;
@@ -37,10 +37,17 @@ pub fn run(
     Args {
         fmt,
         global_options,
-        ..
+        command,
     }: Args,
 ) -> error::Result<ExitStatus> {
     setup_tracing(global_options.log_level());
 
-    commands::format::format(fmt, &global_options)
+    match command {
+        Some(args::Commands::Check(ref check_args)) => commands::check::check(check_args),
+        Some(args::Commands::Completions { shell }) => {
+            shell.generate(&mut Args::command(), &mut std::io::stdout());
+            Ok(ExitStatus::Success)
+        }
+        None => commands::format::format(fmt),
+    }
 }

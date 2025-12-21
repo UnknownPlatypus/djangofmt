@@ -1,9 +1,9 @@
 use std::process::ExitCode;
 
-use clap::{CommandFactory, Parser};
+use clap::Parser;
 use colored::Colorize;
 
-use djangofmt::args::{Args, Commands};
+use djangofmt::args::Args;
 use djangofmt::{ExitStatus, run};
 
 // We use jemalloc for performance reasons.
@@ -27,10 +27,6 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[must_use]
 pub fn main() -> ExitCode {
     let args = Args::parse();
-
-    if let Some(Commands::Completions { shell }) = args.command {
-        shell.generate(&mut Args::command(), &mut std::io::stdout());
-    }
 
     match run(args) {
         Ok(exit_status) => exit_status.into(),
