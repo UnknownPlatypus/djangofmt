@@ -1,18 +1,28 @@
 //! E002: Invalid attribute value.
 //!
 //! Validates attribute values against the HTML specification.
-//! Currently only validates enum-type attributes.
+//! Currently only validates enum-type attributes (e.g., `<input type>`, `<button type>`).
+//!
+//! Also validates HTMX attributes (`hx-boost`, `hx-swap`, etc.) and Alpine.js attributes.
+//!
+//! ## Skipped cases
+//!
+//! - **Interpolation**: Values containing `{{` or `{%` are skipped (dynamic values)
+//! - **Unknown elements**: Web components and custom elements are skipped
+//! - **Unknown attributes**: Attributes not in the spec are skipped
 
 use djangofmt_html_spec::{AttributeValueType, ELEMENTS, GLOBAL_ATTRS};
 use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
 
+/// Returns true if the value contains Jinja/Django interpolation markers.
 #[inline]
 fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%")
 }
 
+/// Check an element's attributes for invalid enum values.
 pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
     let tag = element.tag_name.to_ascii_lowercase();
 

@@ -1,3 +1,13 @@
+//! Build script for `djangofmt_html_spec`.
+//!
+//! This script runs at compile time to:
+//! 1. Fetch the HTML spec from markuplint's CDN
+//! 2. Load local HTMX and Alpine.js attribute definitions
+//! 3. Generate Rust code with `phf` perfect hash maps for O(1) lookups
+//!
+//! The generated code is written to `$OUT_DIR/generated_specs.rs` and included
+//! via `include!()` in `lib.rs`.
+
 #![allow(
     clippy::pedantic,
     clippy::nursery,
@@ -124,12 +134,8 @@ fn generate_global_attrs(
                 let deprecated = attr_def.deprecated.unwrap_or(false);
                 let value_type = convert_attr_type(&attr_def.attr_type);
 
-                let attr_code = format!(
-                    "AttributeSpec {{ name: {:?}, deprecated: {}, value_type: {} }}",
-                    name.to_ascii_lowercase(),
-                    deprecated,
-                    value_type
-                );
+                let attr_code =
+                    format_attr_spec(&name.to_ascii_lowercase(), deprecated, &value_type);
                 global_map.entry(name.to_ascii_lowercase(), &attr_code);
             }
         }
@@ -139,13 +145,7 @@ fn generate_global_attrs(
     for (name, attr_def) in &htmx_spec.global_attrs {
         let deprecated = attr_def.deprecated.unwrap_or(false);
         let value_type = convert_local_attr_type(&attr_def.attr_type);
-
-        let attr_code = format!(
-            "AttributeSpec {{ name: {:?}, deprecated: {}, value_type: {} }}",
-            name.to_ascii_lowercase(),
-            deprecated,
-            value_type
-        );
+        let attr_code = format_attr_spec(&name.to_ascii_lowercase(), deprecated, &value_type);
         global_map.entry(name.to_ascii_lowercase(), &attr_code);
     }
 
@@ -153,13 +153,7 @@ fn generate_global_attrs(
     for (name, attr_def) in &alpine_spec.global_attrs {
         let deprecated = attr_def.deprecated.unwrap_or(false);
         let value_type = convert_local_attr_type(&attr_def.attr_type);
-
-        let attr_code = format!(
-            "AttributeSpec {{ name: {:?}, deprecated: {}, value_type: {} }}",
-            name.to_ascii_lowercase(),
-            deprecated,
-            value_type
-        );
+        let attr_code = format_attr_spec(&name.to_ascii_lowercase(), deprecated, &value_type);
         global_map.entry(name.to_ascii_lowercase(), &attr_code);
     }
 
@@ -171,6 +165,15 @@ fn generate_global_attrs(
     .unwrap();
 }
 
+/// Format an `AttributeSpec` struct literal.
+fn format_attr_spec(name: &str, deprecated: bool, value_type: &str) -> String {
+    format!(
+        "AttributeSpec {{ name: {:?}, deprecated: {}, value_type: {} }}",
+        name, deprecated, value_type
+    )
+}
+
+/// Convert markuplint's attribute type to our `AttributeValueType` code.
 fn convert_attr_type(attr_type: &Option<AttrType>) -> String {
     match attr_type {
         None => "AttributeValueType::Any".to_string(),
@@ -194,6 +197,7 @@ fn convert_attr_type(attr_type: &Option<AttrType>) -> String {
     }
 }
 
+/// Convert local (HTMX/Alpine) attribute type to our `AttributeValueType` code.
 fn convert_local_attr_type(attr_type: &LocalAttrType) -> String {
     match attr_type {
         LocalAttrType::String(s) => match s.as_str() {
@@ -213,7 +217,9 @@ fn convert_local_attr_type(attr_type: &LocalAttrType) -> String {
     }
 }
 
+// ---------------------------------------------------------------------------
 // Serde types for markuplint HTML spec
+// ---------------------------------------------------------------------------
 
 #[derive(Debug, Deserialize)]
 struct MarkuplintSpec {

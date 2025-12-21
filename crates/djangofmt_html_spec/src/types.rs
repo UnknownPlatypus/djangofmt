@@ -42,14 +42,3 @@ pub enum AttributeValueType {
     /// Floating point value.
     Number,
 }
-
-impl AttributeValueType {
-    /// Returns the enum values if this is an Enum type.
-    #[must_use]
-    pub const fn as_enum(&self) -> Option<&'static [&'static str]> {
-        match self {
-            Self::Enum(values) => Some(values),
-            _ => None,
-        }
-    }
-}
