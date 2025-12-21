@@ -43,7 +43,7 @@ pub fn run(
     setup_tracing(global_options.log_level());
 
     match command {
-        Some(args::Commands::Check(check_args)) => {
+        Some(args::Commands::Check(ref check_args)) => {
             commands::check::check(check_args, &global_options)
         }
         Some(args::Commands::Completions { shell }) => {

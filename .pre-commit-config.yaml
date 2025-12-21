@@ -19,6 +19,7 @@ repos:
       - id: check-toml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        exclude: \.snap$
   - repo: https://github.com/asottile/pyupgrade
     rev: 75992aaa40730136014f34227e0135f63fc951b4  # frozen: v3.21.2
     hooks:

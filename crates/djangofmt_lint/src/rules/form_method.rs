@@ -14,27 +14,26 @@ pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
     }
 
     for attr in &element.attrs {
-        if let Attribute::Native(NativeAttribute { name, value, .. }) = attr {
-            if name.eq_ignore_ascii_case("method") {
-                if let Some((value_str, offset)) = value {
-                    // Skip if value contains Jinja interpolation
-                    if contains_interpolation(value_str) {
-                        continue;
-                    }
+        if let Attribute::Native(NativeAttribute { name, value, .. }) = attr
+            && name.eq_ignore_ascii_case("method")
+            && let Some((value_str, offset)) = value
+        {
+            // Skip if value contains Jinja interpolation
+            if contains_interpolation(value_str) {
+                continue;
+            }
 
-                    let normalized = value_str.to_ascii_lowercase();
-                    if !VALID_METHODS.contains(&normalized.as_str()) {
-                        checker.report(
-                            "E001",
-                            format!(
-                                "Invalid form method '{value_str}'. Expected one of: get, post, dialog"
-                            ),
-                            (*offset, value_str.len()).into(),
-                            "invalid method".into(),
-                            Some("Use 'get', 'post', or 'dialog'".into()),
-                        );
-                    }
-                }
+            let normalized = value_str.to_ascii_lowercase();
+            if !VALID_METHODS.contains(&normalized.as_str()) {
+                checker.report(
+                    "E001",
+                    format!(
+                        "Invalid form method '{value_str}'. Expected one of: get, post, dialog"
+                    ),
+                    (*offset, value_str.len()).into(),
+                    "invalid method".into(),
+                    Some("Use 'get', 'post', or 'dialog'".into()),
+                );
             }
         }
     }

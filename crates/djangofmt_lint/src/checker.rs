@@ -10,7 +10,8 @@ pub struct Checker<'a> {
 }
 
 impl<'a> Checker<'a> {
-    pub fn new(source: &'a str) -> Self {
+    #[must_use]
+    pub const fn new(source: &'a str) -> Self {
         Self {
             source,
             diagnostics: Vec::new(),
@@ -35,6 +36,7 @@ impl<'a> Checker<'a> {
         });
     }
 
+    #[must_use]
     pub fn into_diagnostics(self) -> Vec<LintDiagnostic> {
         self.diagnostics
     }

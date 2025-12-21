@@ -152,6 +152,13 @@ mod tests {
         A fast, HTML aware, Django template formatter, written in Rust.
 
         Usage: djangofmt [OPTIONS] <FILES>...
+               djangofmt [OPTIONS] [FILES]... <COMMAND>
+
+        Commands:
+          check
+                  Check files for lint errors
+          help
+                  Print this message or the help of the given subcommand(s)
 
         Arguments:
           <FILES>...

@@ -21,6 +21,7 @@ pub struct LintDiagnostic {
 }
 
 /// Check the AST for lint errors.
+#[must_use]
 pub fn check_ast(source: &str, ast: &Root<'_>) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source);
     checker.visit_root(ast);

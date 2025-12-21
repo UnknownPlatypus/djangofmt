@@ -11,7 +11,7 @@ use crate::ExitStatus;
 use crate::args::GlobalConfigArgs;
 use crate::error::Result;
 
-pub fn check(args: CheckCommand, _global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
+pub fn check(args: &CheckCommand, _global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
     let results: Vec<(PathBuf, Vec<LintDiagnostic>)> = args
         .files
         .par_iter()
