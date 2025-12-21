@@ -1,11 +1,11 @@
 ---
 ---
 {import.meta.env.DEV && (
-    <label class="swap link relative">
+    <label class="swap link">
       <input type="checkbox" />
-      <div class="toast swap-on bottom-8 right-8">
-          <div class="alert alert-info">
-              <pre data-json-signals></pre>
+      <div class="swap-on fixed bottom-12 left-4 z-50 max-w-md max-h-64 overflow-auto">
+          <div class="alert alert-info shadow-lg">
+              <pre class="text-xs" data-json-signals></pre>
           </div>
       </div>
       <div class="swap-off">Show signals</div>
