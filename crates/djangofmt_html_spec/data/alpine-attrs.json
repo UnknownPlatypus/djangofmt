@@ -1,0 +1,58 @@
+{
+  "globalAttrs": {
+    "x-data": {
+      "type": "Any"
+    },
+    "x-init": {
+      "type": "Any"
+    },
+    "x-show": {
+      "type": "Any"
+    },
+    "x-bind": {
+      "type": "Any"
+    },
+    "x-on": {
+      "type": "Any"
+    },
+    "x-text": {
+      "type": "Any"
+    },
+    "x-html": {
+      "type": "Any"
+    },
+    "x-model": {
+      "type": "Any"
+    },
+    "x-modelable": {
+      "type": "Any"
+    },
+    "x-for": {
+      "type": "Any"
+    },
+    "x-transition": {
+      "type": "Any"
+    },
+    "x-effect": {
+      "type": "Any"
+    },
+    "x-ignore": {
+      "type": "Boolean"
+    },
+    "x-ref": {
+      "type": "Any"
+    },
+    "x-cloak": {
+      "type": "Boolean"
+    },
+    "x-teleport": {
+      "type": "Any"
+    },
+    "x-if": {
+      "type": "Any"
+    },
+    "x-id": {
+      "type": "Any"
+    }
+  }
+}

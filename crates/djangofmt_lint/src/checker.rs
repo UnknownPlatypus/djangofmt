@@ -66,7 +66,7 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_element(&mut self, element: &Element<'_>) {
-        rules::form_method::check(element, self);
+        rules::invalid_attr_value::check(element, self);
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

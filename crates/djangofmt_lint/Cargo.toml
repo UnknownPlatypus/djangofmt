@@ -10,6 +10,7 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
+djangofmt_html_spec = { path = "../djangofmt_html_spec" }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
 thiserror = { workspace = true }

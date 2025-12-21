@@ -1,39 +1,39 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Invalid form method 'put'. Expected one of: get, post, dialog
+  × Invalid value 'put' for attribute 'method'. Expected one of: post, get, dialog
     ╭─[9:15]
   8 │ <!-- Invalid methods - errors expected -->
   9 │ <form method="put"></form>
     ·               ─┬─
-    ·                ╰── invalid method
+    ·                ╰── invalid value
  10 │ <form method="delete"></form>
     ╰────
-  help: Use 'get', 'post', or 'dialog'
-  × Invalid form method 'delete'. Expected one of: get, post, dialog
+  help: Use one of: post, get, dialog
+  × Invalid value 'delete' for attribute 'method'. Expected one of: post, get, dialog
     ╭─[10:15]
   9 │ <form method="put"></form>
  10 │ <form method="delete"></form>
     ·               ───┬──
-    ·                  ╰── invalid method
+    ·                  ╰── invalid value
  11 │ <form method="patch"></form>
     ╰────
-  help: Use 'get', 'post', or 'dialog'
-  × Invalid form method 'patch'. Expected one of: get, post, dialog
+  help: Use one of: post, get, dialog
+  × Invalid value 'patch' for attribute 'method'. Expected one of: post, get, dialog
     ╭─[11:15]
  10 │ <form method="delete"></form>
  11 │ <form method="patch"></form>
     ·               ──┬──
-    ·                 ╰── invalid method
+    ·                 ╰── invalid value
  12 │ 
     ╰────
-  help: Use 'get', 'post', or 'dialog'
-  × Invalid form method 'invalid'. Expected one of: get, post, dialog
+  help: Use one of: post, get, dialog
+  × Invalid value 'invalid' for attribute 'method'. Expected one of: post, get, dialog
     ╭─[19:19]
  18 │ {% if show_form %}
  19 │     <form method="invalid"></form>
     ·                   ───┬───
-    ·                      ╰── invalid method
+    ·                      ╰── invalid value
  20 │ {% endif %}
     ╰────
-  help: Use 'get', 'post', or 'dialog'
+  help: Use one of: post, get, dialog

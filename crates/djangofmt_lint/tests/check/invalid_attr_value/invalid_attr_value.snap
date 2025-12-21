@@ -1,0 +1,40 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Invalid value 'invalid' for attribute 'type'. Expected one of: hidden, text, search, tel, url, email, password, date, month, week, time, datetime-local, number, range, color, checkbox, radio,
+  │ file, submit, image, reset, button
+    ╭─[10:14]
+  9 │ <!-- Invalid enum values - errors expected -->
+ 10 │ <input type="invalid">
+    ·              ───┬───
+    ·                 ╰── invalid value
+ 11 │ <button type="invalid"></button>
+    ╰────
+  help: Use one of: hidden, text, search, tel, url, email, password, date, month, week, time, datetime-local, number, range, color, checkbox, radio, file, submit, image, reset, button
+  × Invalid value 'invalid' for attribute 'type'. Expected one of: submit, reset, button
+    ╭─[11:15]
+ 10 │ <input type="invalid">
+ 11 │ <button type="invalid"></button>
+    ·               ───┬───
+    ·                  ╰── invalid value
+ 12 │ 
+    ╰────
+  help: Use one of: submit, reset, button
+  × Invalid value 'invalid' for attribute 'hx-boost'. Expected one of: true, false
+    ╭─[16:16]
+ 15 │ <div hx-boost="false"></div>
+ 16 │ <div hx-boost="invalid"></div>
+    ·                ───┬───
+    ·                   ╰── invalid value
+ 17 │ <div hx-swap="innerHTML"></div>
+    ╰────
+  help: Use one of: true, false
+  × Invalid value 'invalid' for attribute 'hx-swap'. Expected one of: innerHTML, outerHTML, beforebegin, afterbegin, beforeend, afterend, delete, none
+    ╭─[19:15]
+ 18 │ <div hx-swap="outerHTML"></div>
+ 19 │ <div hx-swap="invalid"></div>
+    ·               ───┬───
+    ·                  ╰── invalid value
+ 20 │ 
+    ╰────
+  help: Use one of: innerHTML, outerHTML, beforebegin, afterbegin, beforeend, afterend, delete, none

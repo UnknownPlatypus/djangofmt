@@ -1,0 +1,27 @@
+<!-- Valid enum values - no errors expected -->
+<input type="text">
+<input type="checkbox">
+<input type="submit">
+<button type="button"></button>
+<button type="submit"></button>
+<button type="reset"></button>
+
+<!-- Invalid enum values - errors expected -->
+<input type="invalid">
+<button type="invalid"></button>
+
+<!-- HTMX attributes -->
+<div hx-boost="true"></div>
+<div hx-boost="false"></div>
+<div hx-boost="invalid"></div>
+<div hx-swap="innerHTML"></div>
+<div hx-swap="outerHTML"></div>
+<div hx-swap="invalid"></div>
+
+<!-- Alpine attributes (type: Any, no validation) -->
+<div x-data="{ open: false }"></div>
+<template x-if="open"></template>
+
+<!-- Interpolation - no errors expected -->
+<input type="{{ input_type }}">
+<div hx-boost="{{ boost }}"></div>
