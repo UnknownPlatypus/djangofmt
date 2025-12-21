@@ -33,7 +33,7 @@ import '../styles/global.css';
         <Navbar />
 
         <main
-            class="relative flex-1 flex flex-col h-full md:flex-row"
+            class="relative flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden"
             data-on:input__debounce.10ms="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode); $lintOutput = lintCode(monacoInput.editor.getValue())"
         >
             <EditorPanel id="monacoInput">
