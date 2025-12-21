@@ -56,6 +56,13 @@
       matchPackageNames: ["dprint_plugin_markup", "markup_fmt"],
       matchSourceUrls: ["https://github.com/UnknownPlatypus/markup_fmt"],
       description: "Group dprint_plugin_markup and markup_fmt updates together",
+    },
+    {
+      // Pin tracing-subscriber to avoid https://github.com/tokio-rs/tracing/issues/3369
+      matchManagers: ["cargo"],
+      matchPackageNames: ["tracing-subscriber"],
+      enabled: false,
+      description: "Disable updates for tracing-subscriber due to known issue",
     }
   ],
   vulnerabilityAlerts: {
