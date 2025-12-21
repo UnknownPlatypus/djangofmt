@@ -1,6 +1,7 @@
 use djangofmt_lint::check_ast;
 use insta::assert_yaml_snapshot;
-use markup_fmt::{Language, Parser};
+use markup_fmt::Language;
+use markup_fmt::parser::Parser;
 
 fn check(source: &str) -> Vec<String> {
     let mut parser = Parser::new(source, Language::Jinja, vec![]);

@@ -1,10 +1,11 @@
 use markup_fmt::ast::{Attribute, Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
+use miette::SourceSpan;
 
-use crate::rules;
 use crate::LintDiagnostic;
+use crate::rules;
 
 pub struct Checker<'a> {
-    pub source: &'a str,
+    source: &'a str,
     diagnostics: Vec<LintDiagnostic>,
 }
 
@@ -16,8 +17,22 @@ impl<'a> Checker<'a> {
         }
     }
 
-    pub fn report(&mut self, diagnostic: LintDiagnostic) {
-        self.diagnostics.push(diagnostic);
+    pub fn report(
+        &mut self,
+        code: &'static str,
+        message: String,
+        span: SourceSpan,
+        label: String,
+        help: Option<String>,
+    ) {
+        self.diagnostics.push(LintDiagnostic {
+            source_code: self.source.to_string(),
+            code,
+            message,
+            span,
+            label,
+            help,
+        });
     }
 
     pub fn into_diagnostics(self) -> Vec<LintDiagnostic> {

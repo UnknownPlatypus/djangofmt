@@ -1,6 +1,6 @@
 use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
-use crate::{Checker, LintDiagnostic};
+use crate::Checker;
 
 const VALID_METHODS: &[&str] = &["get", "post", "dialog"];
 
@@ -15,15 +15,15 @@ pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
                 if let Some((value_str, offset)) = value {
                     let normalized = value_str.to_ascii_lowercase();
                     if !VALID_METHODS.contains(&normalized.as_str()) {
-                        checker.report(LintDiagnostic {
-                            code: "E001",
-                            message: format!(
+                        checker.report(
+                            "E001",
+                            format!(
                                 "Invalid form method '{value_str}'. Expected one of: get, post, dialog"
                             ),
-                            span: (*offset, value_str.len()).into(),
-                            label: "invalid method".into(),
-                            help: Some("Use 'get', 'post', or 'dialog'".into()),
-                        });
+                            (*offset, value_str.len()).into(),
+                            "invalid method".into(),
+                            Some("Use 'get', 'post', or 'dialog'".into()),
+                        );
                     }
                 }
             }
