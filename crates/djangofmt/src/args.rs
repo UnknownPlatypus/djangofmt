@@ -88,6 +88,8 @@ impl From<&Profile> for Language {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
+    /// Check files for lint errors
+    Check(crate::commands::check::CheckCommand),
     /// Generate shell completions
     #[clap(hide = true)]
     Completions {

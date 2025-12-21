@@ -37,10 +37,22 @@ pub fn run(
     Args {
         fmt,
         global_options,
-        ..
+        command,
     }: Args,
 ) -> error::Result<ExitStatus> {
     setup_tracing(global_options.log_level());
 
-    commands::format::format(fmt, &global_options)
+    match command {
+        Some(args::Commands::Check(check_args)) => {
+            commands::check::check(check_args, &global_options)
+        }
+        Some(args::Commands::Completions { shell }) => {
+            shell.generate(
+                &mut <Args as clap::CommandFactory>::command(),
+                &mut std::io::stdout(),
+            );
+            Ok(ExitStatus::Success)
+        }
+        None => commands::format::format(fmt, &global_options),
+    }
 }

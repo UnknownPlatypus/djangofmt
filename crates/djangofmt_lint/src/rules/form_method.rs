@@ -4,6 +4,10 @@ use crate::Checker;
 
 const VALID_METHODS: &[&str] = &["get", "post", "dialog"];
 
+fn contains_interpolation(value: &str) -> bool {
+    value.contains("{{") || value.contains("{%")
+}
+
 pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
     if !element.tag_name.eq_ignore_ascii_case("form") {
         return;
@@ -13,6 +17,11 @@ pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
         if let Attribute::Native(NativeAttribute { name, value, .. }) = attr {
             if name.eq_ignore_ascii_case("method") {
                 if let Some((value_str, offset)) = value {
+                    // Skip if value contains Jinja interpolation
+                    if contains_interpolation(value_str) {
+                        continue;
+                    }
+
                     let normalized = value_str.to_ascii_lowercase();
                     if !VALID_METHODS.contains(&normalized.as_str()) {
                         checker.report(

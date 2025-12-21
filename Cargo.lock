@@ -389,6 +389,7 @@ dependencies = [
  "clap",
  "clap_complete_command",
  "colored 3.0.0",
+ "djangofmt_lint",
  "gag",
  "insta",
  "insta-cmd",

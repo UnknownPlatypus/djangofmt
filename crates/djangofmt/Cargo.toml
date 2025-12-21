@@ -11,6 +11,7 @@ rust-version.workspace = true
 description = "A fast, HTML aware, Django template formatter, written in Rust."
 
 [dependencies]
+djangofmt_lint = { path = "../djangofmt_lint" }
 malva = { workspace = true }
 markup_fmt = { workspace = true }
 
