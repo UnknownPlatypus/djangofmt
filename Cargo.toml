@@ -15,7 +15,7 @@ rust-version = "1.89"
 [workspace.dependencies]
 # Formatting
 malva = { version = "0.15.1", features = ["config_serde"] }
-markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.0" }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.1" }
 
 # CLI
 clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
