@@ -4,6 +4,7 @@ use crate::Checker;
 
 const VALID_METHODS: &[&str] = &["get", "post", "dialog"];
 
+#[inline]
 fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%")
 }

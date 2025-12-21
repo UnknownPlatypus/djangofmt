@@ -25,7 +25,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  11 │ <form method="patch"></form>
     ·               ──┬──
     ·                 ╰── invalid method
- 12 │
+ 12 │ 
     ╰────
   help: Use 'get', 'post', or 'dialog'
   × Invalid form method 'invalid'. Expected one of: get, post, dialog
