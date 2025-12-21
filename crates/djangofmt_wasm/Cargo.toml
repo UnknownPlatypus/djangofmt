@@ -17,6 +17,9 @@ wasm-opt = false
 
 [dependencies]
 djangofmt = { path = "../djangofmt" }
+djangofmt_lint = { path = "../djangofmt_lint" }
+markup_fmt = { workspace = true }
+miette = { workspace = true }
 wasm-bindgen = { workspace = true }
 
 [lints]

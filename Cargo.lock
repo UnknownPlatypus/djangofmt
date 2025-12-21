@@ -469,6 +469,9 @@ name = "djangofmt_wasm"
 version = "0.2.4"
 dependencies = [
  "djangofmt",
+ "djangofmt_lint",
+ "markup_fmt",
+ "miette",
  "wasm-bindgen",
 ]
 

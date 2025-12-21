@@ -1,0 +1,42 @@
+---
+import IconChevronUp from './icons/IconChevronUp.astro';
+---
+<div
+    class="bg-base-200 border-t border-base-300 transition-all duration-200"
+    data-class:h-8="!$lintPanelOpen"
+    data-class:h-64="$lintPanelOpen"
+>
+    <button
+        class="h-8 w-full flex items-center justify-between px-4 hover:bg-base-300/50 transition-colors"
+        data-on:click="$lintPanelOpen = !$lintPanelOpen"
+    >
+        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+            <span
+                class="size-2 rounded-full inline-block"
+                data-class:bg-success="$lintOutput === ''"
+                data-class:bg-error="$lintOutput !== ''"
+            ></span>
+            <span data-text="$lintOutput === '' ? 'No Issues' : 'Lint Issues'">Lint Issues</span>
+            <span
+                class="text-base-content/50"
+                data-show="$lintOutput !== ''"
+                data-text="`(${($lintOutput.match(/×/g) || []).length} errors)`"
+            ></span>
+        </span>
+        <span
+            class="transition-transform duration-200"
+            data-class:rotate-180="$lintPanelOpen"
+        >
+            <IconChevronUp />
+        </span>
+    </button>
+    <div
+        class="h-56 overflow-auto font-mono text-xs p-4 bg-base-100"
+        data-show="$lintPanelOpen"
+    >
+        <pre
+            class="whitespace-pre-wrap text-error"
+            data-text="$lintOutput || 'No lint issues found.'"
+        ></pre>
+    </div>
+</div>

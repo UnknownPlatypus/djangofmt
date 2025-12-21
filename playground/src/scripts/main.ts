@@ -1,4 +1,4 @@
-import init, { format } from "../../pkg/djangofmt_wasm.js";
+import init, { format, lint } from "../../pkg/djangofmt_wasm.js";
 import { writeClipboardText } from "./clipboard";
 import { createEditors, monaco } from "./monaco-editor";
 import { savePermalinkToClipboard } from "./permalink";
@@ -26,10 +26,19 @@ function formatCode(
   }
 }
 
+function lintCode(source: string): string {
+  try {
+    return lint(source);
+  } catch (e) {
+    return `Lint error: ${e}`;
+  }
+}
+
 declare global {
   interface Window {
     monaco: typeof monaco;
     formatCode: typeof formatCode;
+    lintCode: typeof lintCode;
     writeClipboardText: typeof writeClipboardText;
     savePermalinkToClipboard: typeof savePermalinkToClipboard;
   }
@@ -38,6 +47,7 @@ declare global {
 // Initialize WASM & expose some functions globally for Datastar expressions
 init().then(() => {
   window.formatCode = formatCode;
+  window.lintCode = lintCode;
   window.savePermalinkToClipboard = savePermalinkToClipboard;
   window.writeClipboardText = writeClipboardText;
 
