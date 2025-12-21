@@ -19,6 +19,7 @@ repos:
       - id: check-toml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        exclude: \.snap$
   - repo: https://github.com/asottile/pyupgrade
     rev: 75992aaa40730136014f34227e0135f63fc951b4  # frozen: v3.21.2
     hooks:
@@ -75,13 +76,11 @@ repos:
     hooks:
       - id: oxipng
         args: ["-o", "max", "--strip", "safe", "--alpha"]
-        exclude: "^tests-e2e"
   - repo: https://github.com/UnknownPlatypus/jpegoptim-py
     rev: df67172373fc005b84dbc651f848075f9ca5d124  # frozen: v1.5.5.2
     hooks:
       - id: jpegoptim
         args: [--strip-all, --all-progressive, --max=85, --threshold=3]
-        exclude: "^tests-e2e"
 
   - repo: local
     hooks:
