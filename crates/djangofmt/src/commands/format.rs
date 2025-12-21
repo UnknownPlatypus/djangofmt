@@ -136,23 +136,16 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
     let (results, mut errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
-        .map(|entry| {
-            let path = entry.as_path();
-            format_path(path, &config, &args.profile)
-        })
+        .map(|entry| format_path(entry, &config, &args.profile))
         .partition_map(|result| match result {
-            Ok(diagnostic) => Left(diagnostic),
+            Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
         });
 
     let duration = start.elapsed();
-    debug!(
-        "Formatted {} files in {:.2?}",
-        results.len() + errors.len(),
-        duration
-    );
+    debug!("Formatted {} files in {:.2?}", args.files.len(), duration);
 
-    // Report on any errors.
+    // Report on any parsing errors.
     errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
     let error_count = errors.len();
     for error in errors {
@@ -269,7 +262,8 @@ pub enum FormatCommandError {
     Write(Option<PathBuf>, io::Error),
 }
 
-fn path_display(path: Option<&PathBuf>) -> String {
+#[must_use]
+pub fn path_display(path: Option<&PathBuf>) -> String {
     path.map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string())
 }
 
@@ -285,8 +279,8 @@ impl FormatCommandError {
 #[derive(Debug, Diagnostic, thiserror::Error)]
 #[error("{message}")]
 pub struct ParseError {
-    path: Option<PathBuf>,
-    message: String,
+    pub path: Option<PathBuf>,
+    pub message: String,
     #[source_code]
     src: NamedSource<String>,
     #[label("here")]
