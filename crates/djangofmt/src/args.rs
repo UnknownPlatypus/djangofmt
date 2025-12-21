@@ -50,7 +50,7 @@ pub struct Args {
 #[derive(Clone, Debug, clap::Parser)]
 pub struct FormatCommand {
     /// List of files to format.
-    #[arg(help = "List of files to format", required = true)]
+    #[arg(required = true)]
     pub files: Vec<PathBuf>,
     /// Set the line-length.
     #[arg(long, default_value = "120")]
@@ -88,6 +88,9 @@ impl From<&Profile> for Language {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
+    /// Check files for lint errors
+    #[clap(hide = true)]
+    Check(crate::commands::check::CheckCommand),
     /// Generate shell completions
     #[clap(hide = true)]
     Completions {
