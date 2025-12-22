@@ -46,7 +46,7 @@ tikv-jemallocator = { version = "0.6.1" }
 
 # Dev dependencies
 gag = { version = "=1.0.0" }
-insta = { version = "=1.44.3", features = ["yaml", "glob"] }
+insta = { version = "=1.45.0", features = ["yaml", "glob"] }
 insta-cmd = { version = "=0.6.0" }
 rstest = { version = "=0.26.1" }
 serial_test = { version = "=3.2.0" }
