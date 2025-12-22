@@ -18,10 +18,16 @@ doctest = false
 name = "formatter"
 harness = false
 
+[[bench]]
+name = "whitespace_sensitive"
+harness = false
+
 [dependencies]
 djangofmt = { path = "../djangofmt" }
 
 [dev-dependencies]
+css_dataset = "0.4"
+cssparser = "0.34"
 divan = { workspace = true }
 
 [lints]
