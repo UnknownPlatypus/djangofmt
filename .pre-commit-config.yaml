@@ -86,7 +86,8 @@ repos:
     hooks:
       - id: dprint-fmt
         name: dprint
-        entry: /home/thibaut/.dprint/bin/dprint fmt --config dprint.json --allow-no-files
+        entry: dprint
+        args: [fmt, --config, dprint.json, --allow-no-files]
         language: system
         require_serial: true
         types: [text]
