@@ -6,6 +6,7 @@ pub mod args;
 pub mod commands;
 pub mod error;
 mod logging;
+pub mod options;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {

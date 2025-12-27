@@ -1,4 +1,4 @@
-use djangofmt::args::Profile;
+use djangofmt::options::Profile;
 use std::fmt;
 
 pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {

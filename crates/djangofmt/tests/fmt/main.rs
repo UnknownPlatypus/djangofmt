@@ -2,8 +2,8 @@
 mod common;
 
 use common::build_settings;
-use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::options::Profile;
 use insta::{assert_snapshot, glob};
 use std::{fs, path::Path};
 

@@ -11,8 +11,9 @@ use std::time::Instant;
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
-use crate::args::{FormatCommand, Profile};
+use crate::args::FormatCommand;
 use crate::error::Result;
+use crate::options::Profile;
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {

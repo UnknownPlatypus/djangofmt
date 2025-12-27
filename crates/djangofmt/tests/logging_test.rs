@@ -1,5 +1,6 @@
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::options::Profile;
 use tracing_test::traced_test;
 
 #[test]
