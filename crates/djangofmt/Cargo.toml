@@ -13,6 +13,7 @@ description = "A fast, HTML aware, Django template formatter, written in Rust."
 [dependencies]
 malva = { workspace = true }
 markup_fmt = { workspace = true }
+dprint-plugin-typescript = { workspace = true }
 
 clap = { workspace = true }
 clap_complete_command = { workspace = true }

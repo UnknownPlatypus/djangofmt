@@ -19,8 +19,15 @@ use crate::logging::LogLevel;
 pub struct FormatterConfig {
     /// Config for main HTML/Jinja formatter
     pub markup: markup_fmt::config::FormatOptions,
-    /// Config for CSS/SCSS formatter
+    /// Config for CSS/SCSS formatter.
+    /// This will be used to format `<style>` tags and `style="..."` attributes.
     pub malva: malva::config::FormatOptions,
+    /// Config for JS/TS formatter.
+    /// This will be used to format `<script>` tags.
+    /// TODO: support event handler attribute formatting. `quote_style` might need to be updated.
+    /// See <https://github.com/g-plane/markup_fmt/issues/174>
+    ///
+    pub typescript: dprint_plugin_typescript::configuration::Configuration,
 }
 
 impl FormatterConfig {
@@ -33,6 +40,7 @@ impl FormatterConfig {
         Self {
             markup: build_markup_options(print_width, indent_width, custom_blocks),
             malva: build_malva_config(print_width, indent_width),
+            typescript: build_typescript_config(print_width, indent_width),
         }
     }
 }
@@ -99,6 +107,8 @@ pub fn build_markup_options(
             //     console.log("hello");
             // </script>
             script_indent: true,
+            // Should match the formatter used in `FormatterConfig::typescript`
+            script_formatter: Some(markup_fmt::config::ScriptFormatter::Dprint),
             ..markup_fmt::config::LanguageOptions::default()
         },
     }
@@ -127,6 +137,19 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
             ..malva::config::LanguageOptions::default()
         },
     }
+}
+
+/// Build dprint-plugin-typescript config for JS/TS formatting.
+fn build_typescript_config(
+    print_width: usize,
+    indent_width: usize,
+) -> dprint_plugin_typescript::configuration::Configuration {
+    dprint_plugin_typescript::configuration::ConfigurationBuilder::new()
+        .deno()
+        .line_width(print_width.try_into().unwrap_or(u32::MAX))
+        .indent_width(indent_width.try_into().unwrap_or(u8::MAX))
+        .quote_style(dprint_plugin_typescript::configuration::QuoteStyle::PreferDouble)
+        .build()
 }
 
 pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
@@ -204,6 +227,25 @@ pub fn format_text(
                             .collect::<Vec<_>>()
                             .join(" ")
                             .into())
+                    }
+                }
+                "tsx" | "ts" | "mts" | "jsx" | "js" | "mjs" => {
+                    let mut ts_config = config.typescript.clone();
+                    ts_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+                    ts_config.file_indent_level = u32::from(hints.indent_level);
+
+                    let file_path = Path::new("file").with_extension(hints.ext);
+                    match dprint_plugin_typescript::format_text(
+                        dprint_plugin_typescript::FormatTextOptions {
+                            path: &file_path,
+                            extension: Some(hints.ext),
+                            text: code.into(),
+                            config: &ts_config,
+                            external_formatter: None,
+                        },
+                    ) {
+                        Ok(Some(formatted)) => Ok(Cow::from(formatted)),
+                        Ok(None) | Err(_) => Ok(code.into()),
                     }
                 }
                 _ => Ok(code.into()),
