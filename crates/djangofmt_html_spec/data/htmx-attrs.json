@@ -1,0 +1,125 @@
+{
+  "globalAttrs": {
+    "hx-boost": {
+      "type": { "enum": ["true", "false"] }
+    },
+    "hx-confirm": {
+      "type": "Any"
+    },
+    "hx-delete": {
+      "type": "URL"
+    },
+    "hx-disable": {
+      "type": "Boolean"
+    },
+    "hx-disabled-elt": {
+      "type": "Any"
+    },
+    "hx-disinherit": {
+      "type": "Any"
+    },
+    "hx-encoding": {
+      "type": { "enum": ["multipart/form-data"] }
+    },
+    "hx-ext": {
+      "type": "Any"
+    },
+    "hx-get": {
+      "type": "URL"
+    },
+    "hx-headers": {
+      "type": "Any"
+    },
+    "hx-history-elt": {
+      "type": "Boolean"
+    },
+    "hx-history": {
+      "type": { "enum": ["false"] }
+    },
+    "hx-include": {
+      "type": "Any"
+    },
+    "hx-indicator": {
+      "type": "Any"
+    },
+    "hx-on": {
+      "type": "Any",
+      "deprecated": true
+    },
+    "hx-params": {
+      "type": "Any"
+    },
+    "hx-patch": {
+      "type": "URL"
+    },
+    "hx-post": {
+      "type": "URL"
+    },
+    "hx-preserve": {
+      "type": { "enum": ["true"] }
+    },
+    "hx-prompt": {
+      "type": "Any"
+    },
+    "hx-push-url": {
+      "type": "Any"
+    },
+    "hx-put": {
+      "type": "URL"
+    },
+    "hx-replace-url": {
+      "type": "Any"
+    },
+    "hx-request": {
+      "type": "Any"
+    },
+    "hx-select": {
+      "type": "Any"
+    },
+    "hx-select-oob": {
+      "type": "Any"
+    },
+    "hx-sse": {
+      "type": "Any"
+    },
+    "hx-swap": {
+      "type": {
+        "enum": [
+          "innerHTML",
+          "outerHTML",
+          "beforebegin",
+          "afterbegin",
+          "beforeend",
+          "afterend",
+          "delete",
+          "none"
+        ]
+      }
+    },
+    "hx-swap-oob": {
+      "type": "Any"
+    },
+    "hx-sync": {
+      "type": "Any"
+    },
+    "hx-target": {
+      "type": "Any"
+    },
+    "hx-trigger": {
+      "type": "Any"
+    },
+    "hx-validate": {
+      "type": { "enum": ["true"] }
+    },
+    "hx-vals": {
+      "type": "Any"
+    },
+    "hx-vars": {
+      "type": "Any",
+      "deprecated": true
+    },
+    "hx-ws": {
+      "type": "Any"
+    }
+  }
+}
