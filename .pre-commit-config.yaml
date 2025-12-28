@@ -1,6 +1,7 @@
 ci:
   autoupdate_schedule: monthly
   skip:
+    - dprint # dprint does not work offline https://github.com/dprint/dprint/issues/895
     - actionlint
     - cargo-clippy
     - cargo-fmt
