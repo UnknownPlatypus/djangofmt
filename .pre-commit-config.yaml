@@ -82,7 +82,7 @@ repos:
       - id: jpegoptim
         args: [--strip-all, --all-progressive, --max=85, --threshold=3]
   - repo: https://github.com/trim21/dprint-pre-commit
-    rev: v0.50.2.0
+    rev: v0.51.0.0
     hooks:
       - id: dprint
         types: [text]
