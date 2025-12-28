@@ -9,7 +9,14 @@ import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { parsePermalinkCode } from "./permalink";
 
-const defaultTemplate = `{% extends "base.html" %}\n\n{% block content %}\n<div class="badly-formatted"><h1>Welcome {{ user.username }}</h1>\n  </div>\n{% endblock %}\n`;
+const defaultTemplate = `\
+{% extends "base.html" %}
+
+{% block content %}
+<div class="badly-formatted"><h1>Welcome {{ user.username }}</h1>
+  </div>
+{% endblock %}
+`;
 const initialTemplate = parsePermalinkCode() ?? defaultTemplate;
 
 // Setup monaco code editors
@@ -36,25 +43,17 @@ const monacoOptions = {
 function createEditors() {
   // Setup input and output editors
   const inputContainer = document.getElementById("monacoInput") as HTMLElement;
-  const inputEditor = monaco.editor.create(inputContainer, {
-    value: initialTemplate,
-    ...monacoOptions,
-  });
+  const inputEditor = monaco.editor.create(inputContainer, { value: initialTemplate, ...monacoOptions });
   inputEditor.onDidChangeModelContent(() => {
     inputContainer.dispatchEvent(new Event("input", { bubbles: true }));
   });
   (inputContainer as any).editor = inputEditor;
 
-  const outputContainer = document.getElementById(
-    "monacoOutput",
-  ) as HTMLElement;
-  const outputEditor = monaco.editor.create(outputContainer, {
-    readOnly: true,
-    ...monacoOptions,
-  });
+  const outputContainer = document.getElementById("monacoOutput") as HTMLElement;
+  const outputEditor = monaco.editor.create(outputContainer, { readOnly: true, ...monacoOptions });
   (outputContainer as any).editor = outputEditor;
 
   return { inputEditor, outputEditor };
 }
 
-export { monaco, createEditors };
+export { createEditors, monaco };
