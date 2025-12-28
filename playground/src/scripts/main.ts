@@ -7,12 +7,7 @@ import { savePermalinkToClipboard } from "./permalink";
 const { outputEditor } = createEditors();
 window.monaco = monaco;
 
-function formatCode(
-  source: string,
-  width: number,
-  indent: number,
-  mode: string,
-) {
+function formatCode(source: string, width: number, indent: number, mode: string) {
   const footer = document.querySelector("#format-duration") as HTMLDivElement;
 
   try {

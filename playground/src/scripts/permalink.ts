@@ -1,19 +1,9 @@
 import LZString from "lz-string";
 import { writeClipboardText } from "./clipboard";
 
-function savePermalinkToClipboard(
-  code: string,
-  mode: string,
-  width: number,
-  indent: number,
-): void {
+function savePermalinkToClipboard(code: string, mode: string, width: number, indent: number): void {
   const compressed = LZString.compressToEncodedURIComponent(code);
-  const params = new URLSearchParams({
-    mode: mode,
-    width: String(width),
-    indent: String(indent),
-    code: compressed,
-  });
+  const params = new URLSearchParams({ mode: mode, width: String(width), indent: String(indent), code: compressed });
   const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
   writeClipboardText(url);
 }
@@ -35,4 +25,4 @@ function parsePermalinkCode(): string | null {
   }
 }
 
-export { savePermalinkToClipboard, parsePermalinkCode };
+export { parsePermalinkCode, savePermalinkToClipboard };
