@@ -82,12 +82,7 @@ repos:
       - id: jpegoptim
         args: [--strip-all, --all-progressive, --max=85, --threshold=3]
   - repo: https://github.com/trim21/dprint-pre-commit
-    rev: v0.51.0.0
+    rev: v0.51.0.0-2
     hooks:
       - id: dprint
-        types: [text]
-        entry: dprint fmt --allow-no-files
-        # Because dprint already does parallelization internally
-        # See https://dprint.dev/setup/#limiting-parallelism
-        require_serial: true
         exclude: ".pre-commit-config.yaml"
