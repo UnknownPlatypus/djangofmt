@@ -1,0 +1,39 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Invalid value 'put' for attribute 'method'.
+    ╭─[9:15]
+  8 │ <!-- Invalid methods - errors expected -->
+  9 │ <form method="put"></form>
+    ·               ─┬─
+    ·                ╰── invalid value
+ 10 │ <form method="delete"></form>
+    ╰────
+  help: Use one of: post, get, dialog
+  × Invalid value 'delete' for attribute 'method'.
+    ╭─[10:15]
+  9 │ <form method="put"></form>
+ 10 │ <form method="delete"></form>
+    ·               ───┬──
+    ·                  ╰── invalid value
+ 11 │ <form method="patch"></form>
+    ╰────
+  help: Use one of: post, get, dialog
+  × Invalid value 'patch' for attribute 'method'.
+    ╭─[11:15]
+ 10 │ <form method="delete"></form>
+ 11 │ <form method="patch"></form>
+    ·               ──┬──
+    ·                 ╰── invalid value
+ 12 │ 
+    ╰────
+  help: Use one of: post, get, dialog
+  × Invalid value 'invalid' for attribute 'method'.
+    ╭─[19:19]
+ 18 │ {% if show_form %}
+ 19 │     <form method="invalid"></form>
+    ·                   ───┬───
+    ·                      ╰── invalid value
+ 20 │ {% endif %}
+    ╰────
+  help: Use one of: post, get, dialog

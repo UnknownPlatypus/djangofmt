@@ -21,6 +21,7 @@ markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.
 clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 rayon = { version = "1.11.0" }
+serde = { version = "1.0.217", features = ["derive"] }
 serde_json = { version = "1.0.145" }
 
 # Logging
@@ -42,7 +43,12 @@ divan = { package = "codspeed-divan-compat", version = "*" }
 
 # Perf
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.
+rustc-hash = { version = "2.1.1" }
 tikv-jemallocator = { version = "0.6.1" }
+
+# Misc
+strum = { version = "0.27.2", features = ["derive"] }
+strum_macros = { version = "0.27.2" }
 
 # Dev dependencies
 gag = { version = "=1.0.0" }
