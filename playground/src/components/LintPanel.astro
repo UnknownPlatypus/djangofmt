@@ -1,0 +1,82 @@
+---
+import IconChevronUp from './icons/IconChevronUp.astro';
+---
+<div id="lint-panel" class="flex-shrink-0 bg-base-200 border-t border-base-300 flex flex-col">
+    <!-- Resize handle - top border -->
+    <div
+        id="lint-resize-handle"
+        class="h-1 cursor-ns-resize bg-base-300 hover:bg-primary transition-colors hidden"
+        data-class:hidden="!$lintPanelOpen"
+        data-class:block="$lintPanelOpen"
+    ></div>
+
+    <!-- Header bar - always visible -->
+    <button
+        class="h-8 flex-shrink-0 w-full flex items-center justify-between px-4 hover:bg-base-300/50 transition-colors cursor-pointer"
+        data-on:click="$lintPanelOpen = !$lintPanelOpen"
+    >
+        <span class="text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+            <span class="badge badge-xs" data-class:badge-success="$lintOutput === ''" data-class:badge-error="$lintOutput !== ''"></span>
+            <span data-text="$lintOutput === '' ? 'No Issues' : 'Lint Issues'">Lint Issues</span>
+            <span
+                class="text-base-content/50"
+                data-show="$lintOutput !== ''"
+                data-text="`(${($lintOutput.match(/×/g) || []).length} errors)`"
+            ></span>
+        </span>
+        <span
+            class="transition-transform duration-200"
+            data-class:rotate-180="$lintPanelOpen"
+        >
+            <IconChevronUp />
+        </span>
+    </button>
+
+    <!-- Content area -->
+    <div
+        id="lint-content"
+        class="overflow-auto font-mono text-xs bg-base-100"
+        style="height: 192px;"
+        data-show="$lintPanelOpen"
+    >
+        <pre
+            class="whitespace-pre-wrap p-4"
+            data-class:text-success="$lintOutput === ''"
+            data-class:text-error="$lintOutput !== ''"
+            data-text="$lintOutput || 'No lint issues found.'"
+        ></pre>
+    </div>
+</div>
+
+<script>
+    const handle = document.getElementById('lint-resize-handle');
+    const content = document.getElementById('lint-content');
+
+    if (handle && content) {
+        let startY = 0;
+        let startHeight = 0;
+
+        handle.addEventListener('mousedown', (e: MouseEvent) => {
+            e.preventDefault();
+            startY = e.clientY;
+            startHeight = content.offsetHeight;
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+            document.body.style.cursor = 'ns-resize';
+            document.body.style.userSelect = 'none';
+        });
+
+        function onMouseMove(e: MouseEvent) {
+            const delta = startY - e.clientY;
+            const newHeight = Math.max(100, Math.min(window.innerHeight * 0.6, startHeight + delta));
+            content.style.height = `${newHeight}px`;
+        }
+
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    }
+</script>
