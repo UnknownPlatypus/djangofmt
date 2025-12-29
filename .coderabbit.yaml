@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+early_access: true
+reviews:
+  high_level_summary: true
+  high_level_summary_in_walkthrough: true
+  collapse_walkthrough: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  poem: false
+  review_status: false
+  auto_review:
+    enabled: true
+    ignore_title_keywords:
+      - "WIP"
+    drafts: false
+    base_branches:
+      - main
+  finishing_touches:
+    docstrings:
+      enabled: true
+    unit_tests:
+      enabled: true
+
+chat:
+  auto_reply: true
+  art: false
+
+knowledge_base:
+  web_search:
+    enabled: true
