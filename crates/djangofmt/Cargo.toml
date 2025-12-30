@@ -39,6 +39,7 @@ insta-cmd = { workspace = true }
 rstest = { workspace = true }
 serial_test = { workspace = true }
 similar-asserts = { workspace = true }
+tracing-test = { workspace = true }
 
 [features]
 use-jemalloc = ["tikv-jemallocator"]
