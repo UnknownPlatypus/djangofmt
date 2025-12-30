@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use tracing_test::traced_test;
