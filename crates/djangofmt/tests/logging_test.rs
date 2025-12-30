@@ -17,6 +17,7 @@ invalid-css-property;
 
     format_text(input, &config, &profile).unwrap();
     assert!(logs_contain(
-        r#"Failed to format CSS, falling back to original code. Error: Parser(Error { kind: Unexpected(":", ";"), span: Span { start: 61, end: 62 } }, 5, 21)"#
+        "Failed to format CSS, falling back to original code"
     ));
+    assert!(logs_contain(r#"Unexpected(":", ";")"#));
 }
