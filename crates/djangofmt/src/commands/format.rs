@@ -187,10 +187,16 @@ pub fn format_text(
                     malva_config.layout.print_width = hints.print_width;
 
                     let formatted_css = malva::format_text(code, malva::Syntax::Css, &malva_config)
-                        // TODO: Don't skip errors and actually handle these cases.
-                        //       Currently we have errors when there is templating blocks inside style tags
-                        // .map_err(anyhow::Error::from)
-                        .map_or_else(|_| code.into(), Cow::from);
+                        .map_or_else(
+                            |error| {
+                                debug!(
+                                    "Failed to format CSS, falling back to original code. Error: {:?}",
+                                    error
+                                );
+                                code.into()
+                            },
+                            Cow::from,
+                        );
 
                     // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
                     // Tries to keep on formatting style attr on a single line like expected with
