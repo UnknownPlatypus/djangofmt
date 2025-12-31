@@ -5,7 +5,7 @@
 //!
 //! # Example
 //!
-//! ```ignore
+//! ```
 //! use djangofmt_lint::{check_ast, Settings};
 //! use markup_fmt::{Language, parser::Parser};
 //!
@@ -13,7 +13,7 @@
 //! let mut parser = Parser::new(source, Language::Jinja, vec![]);
 //! let ast = parser.parse_root().unwrap();
 //!
-//! let diagnostics = check_ast(source, &ast, &Settings::default());
+//! let diagnostics = check_ast(&ast, &Settings::default());
 //! assert_eq!(diagnostics.len(), 1);
 //! ```
 

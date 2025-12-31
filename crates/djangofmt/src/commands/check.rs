@@ -87,7 +87,7 @@ fn check_path(
     Ok(FileDiagnostics::new(source, diagnostics))
 }
 
-/// An error that can occur while formatting a set of files.
+/// An error that can occur while linting a set of files.
 #[derive(Debug, thiserror::Error, Diagnostic)]
 pub enum CheckCommandError {
     #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]

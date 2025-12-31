@@ -1,6 +1,5 @@
 [workspace]
 members = ["crates/*"]
-default-members = ["crates/djangofmt"]
 resolver = "3"
 
 [workspace.package]
