@@ -1,0 +1,22 @@
+[package]
+name = "djangofmt_lint"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+markup_fmt = { workspace = true }
+miette = { workspace = true }
+rustc-hash = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+strum = { workspace = true, features = ["derive"] }
+strum_macros = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
