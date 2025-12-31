@@ -77,8 +77,14 @@ fn check_path(
             &FormatError::<markup_fmt::SyntaxError>::Syntax(err),
         ))
     })?;
+
     let settings = Settings::default();
-    Ok(check_ast(&source, &ast, &settings))
+    let diagnostics = check_ast(&ast, &settings);
+
+    if diagnostics.is_empty() {
+        return Ok(FileDiagnostics::empty());
+    }
+    Ok(FileDiagnostics::new(source, diagnostics))
 }
 
 /// An error that can occur while formatting a set of files.
