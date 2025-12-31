@@ -51,7 +51,6 @@ strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = { version = "0.27.2" }
 
 # Dev dependencies
-gag = { version = "=1.0.0" }
 insta = { version = "=1.45.1", features = ["yaml", "glob"] }
 insta-cmd = { version = "=0.6.0" }
 rstest = { version = "=0.26.1" }
