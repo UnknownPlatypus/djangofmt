@@ -45,10 +45,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         .into_iter()
         .filter(|fd| !fd.is_empty())
         .collect();
-    let total_diagnostics: usize = file_diagnostics
-        .iter()
-        .map(djangofmt_lint::FileDiagnostics::len)
-        .sum();
+    let total_diagnostics: usize = file_diagnostics.iter().map(FileDiagnostics::len).sum();
 
     if total_diagnostics == 0 {
         return Ok(ExitStatus::Success);
@@ -81,8 +78,7 @@ fn check_path(
         ))
     })?;
     let settings = Settings::default();
-    let diagnostics = check_ast(&source, &ast, &settings);
-    Ok(FileDiagnostics::new(source, diagnostics))
+    Ok(check_ast(&source, &ast, &settings))
 }
 
 /// An error that can occur while formatting a set of files.
