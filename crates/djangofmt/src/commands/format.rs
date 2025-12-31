@@ -8,12 +8,11 @@ use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use crate::ExitStatus;
-use crate::args::{FormatCommand, GlobalConfigArgs, Profile};
+use crate::args::{FormatCommand, Profile};
 use crate::error::Result;
-use crate::logging::LogLevel;
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -129,7 +128,7 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
     }
 }
 
-pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<ExitStatus> {
+pub fn format(args: FormatCommand) -> Result<ExitStatus> {
     let config = FormatterConfig::new(args.line_length, args.indent_width, args.custom_blocks);
 
     let start = Instant::now();
@@ -147,20 +146,18 @@ pub fn format(args: FormatCommand, global_options: &GlobalConfigArgs) -> Result<
 
     // Report on any parsing errors.
     errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let error_count = errors.len();
+    let nb_errors = errors.len();
     for error in errors {
         error!("{:?}", miette::Report::new(*error));
     }
-    if error_count > 0 {
-        error!("Couldn't format {} files!", error_count);
+    if nb_errors > 0 {
+        error!("Couldn't format {nb_errors} files!");
     }
 
     // Report on the formatting changes.
-    if global_options.log_level() >= LogLevel::Default {
-        write_summary(results.as_ref())?;
-    }
+    write_summary(results.as_ref());
 
-    if error_count == 0 {
+    if nb_errors == 0 {
         Ok(ExitStatus::Success)
     } else {
         Ok(ExitStatus::Failure)
@@ -365,7 +362,7 @@ enum FormatResult {
 }
 
 /// Write a summary of the formatting results to stdout.
-fn write_summary(results: &[FormatResult]) -> Result<()> {
+fn write_summary(results: &[FormatResult]) {
     let mut counts = HashMap::new();
     for val in results {
         *counts.entry(val).or_insert(0) += 1;
@@ -393,10 +390,8 @@ fn write_summary(results: &[FormatResult]) -> Result<()> {
     .collect();
 
     if !parts.is_empty() {
-        writeln!(io::stdout().lock(), "{} !", parts.join(", "))?;
+        info!("{} !", parts.join(", "));
     }
-
-    Ok(())
 }
 
 #[cfg(test)]
@@ -406,7 +401,7 @@ mod tests {
 
     use rstest::rstest;
     use serial_test::serial;
-
+    use tracing_test::traced_test;
     #[test]
     fn format_command_error_read_display() {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
@@ -443,29 +438,22 @@ mod tests {
         let err = FormatCommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
     }
-
+    #[traced_test]
     #[rstest]
     #[case(vec![], "")]
-    #[case(vec![FormatResult::Formatted], "1 file reformatted !\n")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files reformatted !\n")]
-    #[case(vec![FormatResult::Unchanged], "1 file left unchanged !\n")]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged], "2 files left unchanged !\n")]
-    #[case(vec![FormatResult::Skipped], "1 file skipped !\n")]
-    #[case(vec![FormatResult::Skipped, FormatResult::Skipped], "2 files skipped !\n")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file reformatted, 1 file left unchanged !\n"
-    )]
-    #[case(vec![FormatResult::Formatted, FormatResult::Formatted, FormatResult::Unchanged], "2 files reformatted, 1 file left unchanged !\n"
-    )]
-    #[case(vec![FormatResult::Formatted, FormatResult::Skipped], "1 file reformatted, 1 file skipped !\n"
-    )]
-    #[case(vec![FormatResult::Formatted, FormatResult::Skipped, FormatResult::Skipped], "1 file reformatted, 2 files skipped !\n"
-    )]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Skipped], "1 file left unchanged, 1 file skipped !\n"
-    )]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged, FormatResult::Skipped], "2 files left unchanged, 1 file skipped !\n"
-    )]
-    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged, FormatResult::Skipped], "1 file reformatted, 1 file left unchanged, 1 file skipped !\n"
-    )]
+    #[case(vec![FormatResult::Formatted], "1 file reformatted !")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files reformatted !")]
+    #[case(vec![FormatResult::Unchanged], "1 file left unchanged !")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged], "2 files left unchanged !")]
+    #[case(vec![FormatResult::Skipped], "1 file skipped !")]
+    #[case(vec![FormatResult::Skipped, FormatResult::Skipped], "2 files skipped !")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file reformatted, 1 file left unchanged !")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Formatted, FormatResult::Unchanged], "2 files reformatted, 1 file left unchanged !")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Skipped], "1 file reformatted, 1 file skipped !")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Skipped, FormatResult::Skipped], "1 file reformatted, 2 files skipped !")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Skipped], "1 file left unchanged, 1 file skipped !")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged, FormatResult::Skipped], "2 files left unchanged, 1 file skipped !")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged, FormatResult::Skipped], "1 file reformatted, 1 file left unchanged, 1 file skipped !")]
     #[case(vec![
         FormatResult::Formatted,
         FormatResult::Formatted,
@@ -473,24 +461,21 @@ mod tests {
         FormatResult::Skipped,
         FormatResult::Skipped,
         FormatResult::Skipped,
-    ], "2 files reformatted, 1 file left unchanged, 3 files skipped !\n")]
+    ], "2 files reformatted, 1 file left unchanged, 3 files skipped !")]
     #[serial]
     fn test_write_summary(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
-        use gag::BufferRedirect;
-        use std::io::Read;
+        write_summary(&results);
 
-        let output = {
-            // Capture stdout in a scope to ensure it's dropped before assertion
-            let mut buf = BufferRedirect::stdout().unwrap();
-            write_summary(&results).unwrap();
-            let mut output = String::new();
-            buf.read_to_string(&mut output).unwrap();
-            output
-        };
-
-        assert!(
-            output.contains(expected),
-            "Expected output to end with {expected:?}, but got {output:?}"
-        );
+        if expected.is_empty() {
+            logs_assert(|lines: &[&str]| {
+                if lines.is_empty() {
+                    Ok(())
+                } else {
+                    Err("Expected no logs, but found some".into())
+                }
+            });
+        } else {
+            assert!(logs_contain(expected));
+        }
     }
 }
