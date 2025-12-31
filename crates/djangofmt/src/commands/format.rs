@@ -1,4 +1,4 @@
-use miette::{Diagnostic, NamedSource, SourceSpan};
+use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
@@ -310,9 +310,9 @@ impl ParseError {
                         column,
                     } => (
                         format!("expected close tag for opening tag <{tag_name}>",),
-                        line_col_to_offset(&source, *line, *column),
+                        SourceOffset::from_location(&source, *line, *column),
                     ),
-                    _ => (syntax_err.kind.to_string(), syntax_err.pos),
+                    _ => (syntax_err.kind.to_string(), syntax_err.pos.into()),
                 }
             }
             markup_fmt::FormatError::External(errors) => {
@@ -321,7 +321,7 @@ impl ParseError {
                     .map(|e| format!("{e:?}"))
                     .collect::<Vec<_>>()
                     .join(", ");
-                (format!("external formatter error: {msg}"), 0)
+                (format!("external formatter error: {msg}"), 0.into())
             }
         };
         let name = path
@@ -331,24 +331,9 @@ impl ParseError {
             path,
             message,
             src: NamedSource::new(name, source),
-            span: SourceSpan::from(offset),
+            span: offset.into(),
         }
     }
-}
-
-/// Convert 1-indexed line and column to a byte offset in the source.
-fn line_col_to_offset(source: &str, line: usize, column: usize) -> usize {
-    let mut offset = 0;
-    for (i, src_line) in source.lines().enumerate() {
-        if i + 1 == line {
-            // Found the line, add column offset (1-indexed)
-            return offset + column.saturating_sub(1);
-        }
-        // +1 for the newline character
-        offset += src_line.len() + 1;
-    }
-    // Fallback to end of file
-    source.len()
 }
 
 /// The result of an individual formatting operation.
