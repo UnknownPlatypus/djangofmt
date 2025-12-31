@@ -57,7 +57,11 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     }
 
     info!("Found {total_diagnostics} issues :(");
-    Ok(ExitStatus::Failure)
+    Ok(if error_count > 0 {
+        ExitStatus::Failure
+    } else {
+        ExitStatus::Success
+    })
 }
 
 /// Check the file at the given [`Path`] for linting issues.
