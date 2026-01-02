@@ -1,0 +1,20 @@
+<!-- Valid methods - no errors expected -->
+<form method="get"></form>
+<form method="post"></form>
+<form method="dialog"></form>
+<form method="GET"></form>
+<form method="POST"></form>
+
+<!-- Invalid methods - errors expected -->
+<form method="put"></form>
+<form method="delete"></form>
+<form method="patch"></form>
+
+<!-- Interpolation - no errors expected (dynamic value) -->
+<form method="{{ method }}"></form>
+<form method="{% if x %}post{% else %}get{% endif %}"></form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form method="invalid"></form>
+{% endif %}

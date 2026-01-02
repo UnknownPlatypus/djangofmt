@@ -176,3 +176,8 @@ sort_commits = "newest"
 
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
+
+[dependency-groups]
+dev = [
+  "maturin[patchelf]>=1.10.2",
+]
