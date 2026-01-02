@@ -18,7 +18,7 @@ use tracing::{debug, error, info};
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let start = Instant::now();
-    let (file_diagnostics, mut errors): (Vec<_>, Vec<_>) = args
+    let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
         .map(|path| check_path(path, &args.profile))
@@ -31,9 +31,9 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     debug!("Checked {} files in {:.2?}", args.files.len(), duration);
 
     // Report on any parsing errors.
-    errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let error_count = errors.len();
-    for error in errors {
+    parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
+    let error_count = parse_errors.len();
+    for error in parse_errors {
         error!("{:?}", miette::Report::new(*error));
     }
     if error_count > 0 {
@@ -47,7 +47,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         .collect();
     let total_diagnostics: usize = file_diagnostics.iter().map(FileDiagnostics::len).sum();
 
-    if total_diagnostics == 0 {
+    if total_diagnostics == 0 && error_count == 0 {
         return Ok(ExitStatus::Success);
     }
 
@@ -57,11 +57,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     }
 
     info!("Found {total_diagnostics} issues :(");
-    Ok(if error_count > 0 {
-        ExitStatus::Failure
-    } else {
-        ExitStatus::Success
-    })
+    Ok(ExitStatus::Failure)
 }
 
 /// Check the file at the given [`Path`] for linting issues.

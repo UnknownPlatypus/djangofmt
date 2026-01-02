@@ -132,7 +132,7 @@ pub fn format(args: FormatCommand) -> Result<ExitStatus> {
     let config = FormatterConfig::new(args.line_length, args.indent_width, args.custom_blocks);
 
     let start = Instant::now();
-    let (results, mut errors): (Vec<_>, Vec<_>) = args
+    let (results, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
         .map(|entry| format_path(entry, &config, &args.profile))
@@ -145,9 +145,9 @@ pub fn format(args: FormatCommand) -> Result<ExitStatus> {
     debug!("Formatted {} files in {:.2?}", args.files.len(), duration);
 
     // Report on any parsing errors.
-    errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let nb_errors = errors.len();
-    for error in errors {
+    parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
+    let nb_errors = parse_errors.len();
+    for error in parse_errors {
         error!("{:?}", miette::Report::new(*error));
     }
     if nb_errors > 0 {
