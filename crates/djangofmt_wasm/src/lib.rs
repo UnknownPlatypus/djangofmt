@@ -1,11 +1,11 @@
-use wasm_bindgen::prelude::*;
-
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme};
 use serde::Serialize;
+use tsify::Tsify;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn format(
@@ -25,7 +25,8 @@ pub fn format(
         .map_err(into_error)
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Tsify)]
+#[tsify(into_wasm_abi)]
 struct LintResult {
     error_count: usize,
     output: String,
