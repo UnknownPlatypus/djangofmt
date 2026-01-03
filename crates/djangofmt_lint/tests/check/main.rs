@@ -23,6 +23,23 @@ fn check_snapshot() {
     });
 }
 
+/// Run the checker on the given template input and return a rendered diagnostics report.
+///
+/// If no diagnostics are produced, an empty string is returned.
+///
+/// # Returns
+///
+/// A string containing formatted diagnostics for the input; an empty string if there are no diagnostics.
+///
+/// # Examples
+///
+/// ```
+/// use std::path::Path;
+///
+/// let input = "{{ invalid jinja".to_string();
+/// let out = run_check_test(Path::new("templates/example.html"), input);
+/// // `out` is either an empty string or contains a human-readable diagnostics report.
+/// ```
 fn run_check_test(_path: &Path, input: String) -> String {
     let mut parser = Parser::new(&input, Language::Jinja, vec![]);
     let ast = parser.parse_root().unwrap();
@@ -35,6 +52,21 @@ fn run_check_test(_path: &Path, input: String) -> String {
     render_diagnostics(&FileDiagnostics::new(input, file_diagnostics))
 }
 
+/// Render a FileDiagnostics value into a human-readable report string.
+///
+/// This uses a GraphicalReportHandler with the `unicode_nocolor` theme to format
+/// the diagnostics into a single String suitable for snapshots or CLI output.
+///
+/// # Examples
+///
+/// ```no_run
+/// # use djangofmt_lint::FileDiagnostics;
+/// # // Construct or obtain `diagnostics` from your lint run.
+/// # let diagnostics: FileDiagnostics = Default::default();
+/// let report = render_diagnostics(&diagnostics);
+/// // `report` contains the formatted diagnostics report (may be empty).
+/// println!("{}", report);
+/// ```
 fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {
     let mut output = String::new();
     GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())

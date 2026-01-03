@@ -7,6 +7,16 @@ import { savePermalinkToClipboard } from "./permalink";
 const { outputEditor } = createEditors();
 window.monaco = monaco;
 
+/**
+ * Format source code and update the UI with the result and duration.
+ *
+ * Formats `source` using the provided `width`, `indent`, and `mode`, writes the formatted text into the global `outputEditor`, and updates the DOM element with id "format-duration" with the time taken. On error, sets the output editor content to `Error: <error>`.
+ *
+ * @param source - The source code to format
+ * @param width - Maximum line width used by the formatter
+ * @param indent - Number of spaces per indentation level
+ * @param mode - Formatting mode (case-insensitive) passed to the formatter
+ */
 function formatCode(source: string, width: number, indent: number, mode: string) {
   const footer = document.getElementById("format-duration") as HTMLDivElement;
 
@@ -23,6 +33,15 @@ function formatCode(source: string, width: number, indent: number, mode: string)
 
 const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
+/**
+ * Run the linter on the given source and render its output into the page.
+ *
+ * The function writes the linter's formatted output (converted from ANSI to HTML)
+ * into the element with id "lint-output".
+ *
+ * @param source - The source code to lint
+ * @returns The number of lint errors found; returns `1` if linting fails due to an internal error
+ */
 function lintCode(source: string): number {
   try {
     const result = lint(source) as LintResult;
