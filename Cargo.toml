@@ -36,10 +36,10 @@ miette = { version = "7.6.0", features = ["fancy"] }
 thiserror = { version = "2.0.17" }
 
 # WASM
-wasm-bindgen = { version = "0.2" }
-
 # Benchmarking
 divan = { package = "codspeed-divan-compat", version = "*" }
+tsify = { version = "0.5.6" }
+wasm-bindgen = { version = "0.2" }
 
 # Perf
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.
