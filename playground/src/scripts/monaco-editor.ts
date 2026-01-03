@@ -14,7 +14,7 @@ const defaultTemplate = `\
 
 {% block content %}
 <div class="badly-formatted"><h1>Welcome {{ user.username }}</h1>
-  </div>
+  </div><form method=""></form>
 {% endblock %}
 `;
 const initialTemplate = parsePermalinkCode() ?? defaultTemplate;
