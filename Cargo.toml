@@ -20,8 +20,9 @@ markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.
 clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 rayon = { version = "1.11.0" }
-serde = { version = "1.0.217", features = ["derive"] }
-serde_json = { version = "1.0.145" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde-wasm-bindgen = { version = "0.6.5" }
+serde_json = { version = "1.0.148" }
 
 # Logging
 colored = { version = "3.0.0" }
