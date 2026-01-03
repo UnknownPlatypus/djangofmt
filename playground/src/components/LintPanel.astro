@@ -1,0 +1,63 @@
+---
+---
+<div id="lint-resize-handle" class="h-1.5 cursor-ns-resize bg-base-300 hover:bg-primary transition-colors"></div>
+<details
+    id="lint-panel"
+    class="collapse collapse-arrow flex-shrink-0 bg-base-200 border-t border-base-300"
+>
+    <summary class="collapse-title min-h-0 h-10 py-2 px-4 flex items-center text-xs font-bold uppercase tracking-wider">
+        <svg
+            class="size-4 mr-2"
+            data-show="$lintErrorCount === 0"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        ><path class="text-success" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <svg
+            class="size-4 mr-2"
+            data-show="$lintErrorCount > 0"
+            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        ><path class="text-warning" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+        <span data-text="$lintErrorCount === 0 ? 'No Issues' : 'Lint Issues'" data-class:text-success="$lintErrorCount === 0" data-class:text-warning="$lintErrorCount > 0">Lint Issues</span>
+        <span
+            class="opacity-60 ml-1"
+            data-show="$lintErrorCount > 0"
+            data-text="`(${$lintErrorCount} error${$lintErrorCount === 1 ? '' : 's'})`"
+        ></span>
+    </summary>
+    <div id="lint-content" class="overflow-auto font-mono text-sm bg-base-300">
+        <pre id="lint-output" class="whitespace-pre-wrap p-4 text-base-content"></pre>
+    </div>
+</details>
+
+<script>
+    const panel = document.getElementById('lint-panel') as HTMLDetailsElement;
+    const content = document.getElementById('lint-content') as HTMLDivElement;
+    const handle = document.getElementById('lint-resize-handle') as HTMLDivElement;
+
+    function getContainerHeight() {
+        return panel?.parentElement?.clientHeight || 400;
+    }
+
+    let startY = 0;
+    let startHeight = 0;
+
+    handle.addEventListener('mousedown', (e: MouseEvent) => {
+        e.preventDefault();
+        startY = e.clientY;
+        startHeight = content.offsetHeight;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e: MouseEvent) {
+        const delta = startY - e.clientY;
+        const containerHeight = getContainerHeight();
+        const newHeight = Math.max(80, Math.min(containerHeight * 0.9, startHeight + delta));
+        content.style.height = `${newHeight}px`;
+        content.dataset.resized = 'true';
+    }
+
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+</script>

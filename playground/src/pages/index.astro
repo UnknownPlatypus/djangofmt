@@ -26,7 +26,6 @@ import '../styles/global.css';
             width: Number(new URLSearchParams(window.location.search).get('width') || '120'),
             indent: Number(new URLSearchParams(window.location.search).get('indent') || '4'),
             lintErrorCount: 0,
-            lintPanelOpen: false,
         }"
         data-effect="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode); $lintErrorCount = lintCode(monacoInput.editor.getValue())"
     >
