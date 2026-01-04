@@ -36,8 +36,9 @@ fn run_check_test(_path: &Path, input: String) -> String {
 }
 
 fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {
-    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
     let mut output = String::new();
-    handler.render_report(&mut output, diagnostics).unwrap();
+    GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
+        .render_report(&mut output, diagnostics)
+        .unwrap();
     output
 }

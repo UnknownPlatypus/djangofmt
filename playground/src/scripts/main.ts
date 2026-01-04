@@ -1,14 +1,14 @@
-import init, { format } from "../../pkg/djangofmt_wasm.js";
+import AnsiToHtml from "ansi-to-html";
+import init, { format, lint, type LintResult } from "../../pkg/djangofmt_wasm.js";
 import { writeClipboardText } from "./clipboard";
 import { createEditors, monaco } from "./monaco-editor";
 import { savePermalinkToClipboard } from "./permalink";
 
-// Initialize Monaco editors
 const { outputEditor } = createEditors();
 window.monaco = monaco;
 
 function formatCode(source: string, width: number, indent: number, mode: string) {
-  const footer = document.querySelector("#format-duration") as HTMLDivElement;
+  const footer = document.getElementById("format-duration") as HTMLDivElement;
 
   try {
     const start = performance.now();
@@ -21,10 +21,26 @@ function formatCode(source: string, width: number, indent: number, mode: string)
   }
 }
 
+const ansiConverter = new AnsiToHtml({ escapeXML: true });
+
+function lintCode(source: string): number {
+  try {
+    const result = lint(source) as LintResult;
+    const lintOutput = document.getElementById("lint-output") as HTMLPreElement;
+    lintOutput.innerHTML = result.output
+      ? ansiConverter.toHtml(result.output)
+      : "<span class=\"text-success\">✓ No lint issues found.</span>";
+    return result.error_count;
+  } catch (e) {
+    return 1;
+  }
+}
+
 declare global {
   interface Window {
     monaco: typeof monaco;
     formatCode: typeof formatCode;
+    lintCode: typeof lintCode;
     writeClipboardText: typeof writeClipboardText;
     savePermalinkToClipboard: typeof savePermalinkToClipboard;
   }
@@ -33,11 +49,12 @@ declare global {
 // Initialize WASM & expose some functions globally for Datastar expressions
 init().then(() => {
   window.formatCode = formatCode;
+  window.lintCode = lintCode;
   window.savePermalinkToClipboard = savePermalinkToClipboard;
   window.writeClipboardText = writeClipboardText;
 
   import(
     // @ts-expect-error
-    "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.6/bundles/datastar.js"
+    "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"
   );
 });
