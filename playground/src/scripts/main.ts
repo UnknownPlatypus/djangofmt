@@ -24,20 +24,23 @@ function formatCode(source: string, width: number, indent: number, mode: string)
 const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
 function lintCode(source: string): number {
+  const lintOutput = document.getElementById("lint-output") as HTMLPreElement;
   try {
     const result = lint(source) as LintResult;
-    const lintOutput = document.getElementById("lint-output") as HTMLPreElement;
     lintOutput.innerHTML = result.output
       ? ansiConverter.toHtml(result.output)
       : "<span class=\"text-success\">✓ No lint issues found.</span>";
     return result.error_count;
   } catch (e) {
+    lintOutput.textContent = `Error: ${e}`;
+    console.error("Lint error:", e);
     return 1;
   }
 }
 
 declare global {
   interface Window {
+    MonacoEnvironment?: monaco.Environment;
     monaco: typeof monaco;
     formatCode: typeof formatCode;
     lintCode: typeof lintCode;
