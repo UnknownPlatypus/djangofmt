@@ -27,13 +27,13 @@ import '../styles/global.css';
             indent: Number(new URLSearchParams(window.location.search).get('indent') || '4'),
             lintErrorCount: 0,
         }"
-        data-effect="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode); $lintErrorCount = lintCode(monacoInput.editor.getValue())"
+        data-effect="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode); $lintErrorCount = lintCode(monacoInput.editor.getValue(), $mode)"
     >
         <Navbar />
 
         <main
             class="relative flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden"
-            data-on:input__debounce.10ms="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode); $lintErrorCount = lintCode(monacoInput.editor.getValue())"
+            data-on:input__debounce.10ms="formatCode(monacoInput.editor.getValue(), $width, $indent, $mode); $lintErrorCount = lintCode(monacoInput.editor.getValue(), $mode)"
         >
             <div class="flex-1 flex flex-col min-w-0 h-1/2 md:h-full">
                 <EditorPanel id="monacoInput">

@@ -23,10 +23,10 @@ function formatCode(source: string, width: number, indent: number, mode: string)
 
 const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
-function lintCode(source: string): number {
+function lintCode(source: string, mode: string): number {
   const lintOutput = document.getElementById("lint-output") as HTMLPreElement;
   try {
-    const result = lint(source) as LintResult;
+    const result = lint(source, mode) as LintResult;
     lintOutput.innerHTML = result.output
       ? ansiConverter.toHtml(result.output)
       : "<span class=\"text-success\">✓ No lint issues found.</span>";

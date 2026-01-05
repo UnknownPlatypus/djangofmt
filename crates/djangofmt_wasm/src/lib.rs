@@ -14,10 +14,7 @@ pub fn format(
     indent_width: usize,
     profile: &str,
 ) -> Result<String, JsError> {
-    let profile = match profile {
-        "jinja" => Profile::Jinja,
-        _ => Profile::Django,
-    };
+    let profile = get_profile(profile);
     let config = FormatterConfig::new(line_length, indent_width, None);
 
     format_text(source, &config, &profile)
@@ -40,12 +37,14 @@ impl LintResult {
     }
 }
 #[wasm_bindgen]
-pub fn lint(source: &str) -> Result<JsValue, JsError> {
-    lint_inner(source).and_then(|result| serde_wasm_bindgen::to_value(&result).map_err(into_error))
+pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
+    lint_inner(source, profile)
+        .and_then(|result| serde_wasm_bindgen::to_value(&result).map_err(into_error))
 }
 
-fn lint_inner(source: &str) -> Result<LintResult, JsError> {
-    let mut parser = Parser::new(source, markup_fmt::Language::Jinja, vec![]);
+fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
+    let profile = get_profile(profile);
+    let mut parser = Parser::new(source, markup_fmt::Language::from(&profile), vec![]);
     let ast = match parser.parse_root() {
         Ok(ast) => ast,
         Err(e) => {
@@ -85,4 +84,11 @@ fn lint_inner(source: &str) -> Result<LintResult, JsError> {
 
 pub(crate) fn into_error<E: std::fmt::Display>(err: E) -> JsError {
     JsError::new(&err.to_string())
+}
+
+fn get_profile(profile: &str) -> Profile {
+    match profile {
+        "jinja" => Profile::Jinja,
+        _ => Profile::Django,
+    }
 }
