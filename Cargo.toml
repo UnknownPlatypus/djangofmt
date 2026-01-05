@@ -50,10 +50,10 @@ strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = { version = "0.27.2" }
 
 # Dev dependencies
-insta = { version = "=1.45.1", features = ["yaml", "glob"] }
+insta = { version = "=1.46.0", features = ["yaml", "glob"] }
 insta-cmd = { version = "=0.6.0" }
 rstest = { version = "=0.26.1" }
-serial_test = { version = "=3.2.0" }
+serial_test = { version = "=3.3.1" }
 similar-asserts = { version = "=1.7.0" }
 tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
 
