@@ -13,7 +13,7 @@ use tracing::{debug, error, info};
 use crate::ExitStatus;
 use crate::args::FormatCommand;
 use crate::error::Result;
-use crate::options::Profile;
+use crate::options::{DjangoFmtOptions, Profile, load_options};
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -33,6 +33,25 @@ impl FormatterConfig {
         Self {
             markup: build_markup_options(print_width, indent_width, custom_blocks),
             malva: build_malva_config(print_width, indent_width),
+        }
+    }
+}
+
+impl Default for FormatterConfig {
+    fn default() -> Self {
+        Self::from(DjangoFmtOptions::default())
+    }
+}
+
+impl From<DjangoFmtOptions> for FormatterConfig {
+    fn from(options: DjangoFmtOptions) -> Self {
+        Self {
+            markup: build_markup_options(
+                options.line_length,
+                options.indent_width,
+                Some(options.custom_blocks),
+            ),
+            malva: build_malva_config(options.line_length, options.indent_width),
         }
     }
 }
@@ -130,13 +149,25 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
 }
 
 pub fn format(args: FormatCommand) -> Result<ExitStatus> {
-    let config = FormatterConfig::new(args.line_length, args.indent_width, args.custom_blocks);
+    let current_dir = std::env::current_dir()?;
+    let options = load_options(&current_dir);
+    let config: FormatterConfig = match options {
+        Ok(ref options) => FormatterConfig::new(
+            args.line_length.unwrap_or(options.line_length),
+            args.indent_width.unwrap_or(options.indent_width),
+            args.custom_blocks,
+        ),
+        Err(_) => FormatterConfig::default(),
+    };
+    let profile = args
+        .profile
+        .unwrap_or_else(|| options.unwrap_or_default().profile);
 
     let start = Instant::now();
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, &args.profile))
+        .map(|entry| format_path(entry, &config, &profile))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
