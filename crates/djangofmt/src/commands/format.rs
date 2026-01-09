@@ -380,7 +380,6 @@ fn write_summary(results: &[FormatResult]) {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

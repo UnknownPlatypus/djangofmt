@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 #[path = "../../../djangofmt/tests/common.rs"]
 mod common;
 
@@ -25,10 +24,9 @@ fn check_snapshot() {
 
 fn run_check_test(_path: &Path, input: String) -> String {
     let mut parser = Parser::new(&input, Language::Jinja, vec![]);
-    let ast = parser.parse_root().unwrap();
+    let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::default();
     let file_diagnostics = check_ast(&ast, &settings);
-
     if file_diagnostics.is_empty() {
         return String::new();
     }
@@ -38,6 +36,8 @@ fn run_check_test(_path: &Path, input: String) -> String {
 fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {
     let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
     let mut output = String::new();
-    handler.render_report(&mut output, diagnostics).unwrap();
+    handler
+        .render_report(&mut output, diagnostics)
+        .expect("Failed to render diagnostics");
     output
 }

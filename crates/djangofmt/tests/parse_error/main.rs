@@ -1,4 +1,4 @@
-#![allow(clippy::unwrap_used, clippy::result_large_err)]
+#![allow(clippy::result_large_err)]
 #[path = "../common.rs"]
 mod common;
 
@@ -57,6 +57,8 @@ fn format_str(
 fn render_miette_error(error: &dyn miette::Diagnostic) -> String {
     let mut output = String::new();
     let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
-    handler.render_report(&mut output, error).unwrap();
+    handler
+        .render_report(&mut output, error)
+        .expect("Failed to render report");
     output
 }
