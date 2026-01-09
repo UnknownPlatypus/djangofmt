@@ -1,4 +1,4 @@
-#![allow(clippy::missing_panics_doc, clippy::unwrap_used)]
+#![allow(clippy::missing_panics_doc)]
 use std::path::Path;
 
 use insta::Settings;

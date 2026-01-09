@@ -1,4 +1,4 @@
-#![allow(clippy::unwrap_used, clippy::result_large_err)]
+#![allow(clippy::result_large_err)]
 #[path = "../common.rs"]
 mod common;
 

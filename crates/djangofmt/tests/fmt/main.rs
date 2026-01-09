@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 #[path = "../common.rs"]
 mod common;
 

@@ -1,4 +1,3 @@
-#![allow(clippy::unwrap_used)]
 #[path = "../../../djangofmt/tests/common.rs"]
 mod common;
 
