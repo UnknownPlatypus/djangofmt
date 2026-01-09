@@ -57,6 +57,8 @@ fn format_str(
 fn render_miette_error(error: &dyn miette::Diagnostic) -> String {
     let mut output = String::new();
     let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
-    handler.render_report(&mut output, error).unwrap();
+    handler
+        .render_report(&mut output, error)
+        .expect("Failed to render report");
     output
 }
