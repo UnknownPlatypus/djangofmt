@@ -7,8 +7,8 @@ use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::{fs, path};
 
-use djangofmt::args::Profile;
 use djangofmt::commands::format::{ParseError, build_markup_options};
+use djangofmt::options::Profile;
 use insta::{assert_snapshot, glob};
 use markup_fmt::config::FormatOptions;
 use markup_fmt::{Language, format_text};

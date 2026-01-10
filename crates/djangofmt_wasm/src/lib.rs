@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 
-use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::options::Profile;
 
 #[wasm_bindgen]
 pub fn format(

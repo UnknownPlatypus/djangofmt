@@ -9,9 +9,9 @@ use std::path::{Path, PathBuf};
 use std::{fs, io};
 
 use crate::ExitStatus;
-use crate::args::Profile;
 use crate::commands::format::ParseError;
 use crate::error::Result;
+use crate::options::Profile;
 use std::time::Instant;
 use tracing::{debug, error, info};
 

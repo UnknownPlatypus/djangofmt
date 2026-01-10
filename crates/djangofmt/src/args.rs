@@ -1,9 +1,8 @@
 use crate::logging::LogLevel;
+use crate::options::Profile;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
 use std::path::PathBuf;
-
-use markup_fmt::Language;
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands
@@ -54,13 +53,13 @@ pub struct FormatCommand {
     pub files: Vec<PathBuf>,
     /// Set the line-length.
     #[arg(long, default_value = "120")]
-    pub line_length: usize,
+    pub line_length: Option<usize>,
     /// Set the indent width.
     #[arg(long, default_value = "4")]
-    pub indent_width: usize,
+    pub indent_width: Option<usize>,
     /// Template language profile to use
     #[arg(long, value_enum, default_value = "django")]
-    pub profile: Profile,
+    pub profile: Option<Profile>,
     /// Comma-separated list of custom block name to enable
     #[arg(
         long,
@@ -69,21 +68,6 @@ pub struct FormatCommand {
         value_name = "BLOCK_NAMES",
     )]
     pub custom_blocks: Option<Vec<String>>,
-}
-
-#[derive(Clone, Debug, clap::ValueEnum)]
-pub enum Profile {
-    Django,
-    Jinja,
-}
-
-impl From<&Profile> for Language {
-    fn from(profile: &Profile) -> Self {
-        match profile {
-            Profile::Django => Self::Django,
-            Profile::Jinja => Self::Jinja,
-        }
-    }
 }
 
 #[derive(Debug, clap::Subcommand)]
