@@ -15,6 +15,7 @@ const { id } = Astro.props;
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Scroll to Top"
+                aria-label="Scroll to Top"
                 data-on:click=`
                   ${id}.editor.revealLine(1);
                   ${id}.editor.setPosition({lineNumber: 1, column: 1});
@@ -26,6 +27,7 @@ const { id } = Astro.props;
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Scroll to Bottom"
+                aria-label="Scroll to Bottom"
                 data-on:click=`
                   ${id}.editor.revealLine(${id}.editor.getModel().getLineCount());
                   ${id}.editor.setPosition({lineNumber: ${id}.editor.getModel().getLineCount(), column: 1});
