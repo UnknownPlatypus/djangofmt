@@ -89,4 +89,8 @@ repos:
     rev: v0.51.1.0
     hooks:
       - id: dprint
-        exclude: ".pre-commit-config.yaml"
+        exclude: |
+          (?x)^(
+              .pre-commit-config.yaml|
+              crates/.*
+          )$

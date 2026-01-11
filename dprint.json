@@ -9,11 +9,24 @@
   "typescript": {
     "preferSingleLine": "true"
   },
+  "markup": {
+    "printWidth": 120,
+    "indentWidth": 4,
+    "formatComments": false,
+    "html.void.selfClosing": false,
+    "svg.selfClosing": true,
+    "mathml.selfClosing": true,
+    "html.normal.selfClosing": false,
+    "preferAttrsSingleLine": false,
+    "styleIndent": true,
+    "scriptIndent": true
+  },
   "excludes": [],
   "plugins": [
     "https://plugins.dprint.dev/markdown-0.20.0.wasm",
     "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.5.1.wasm",
     "https://plugins.dprint.dev/typescript-0.95.13.wasm",
-    "https://plugins.dprint.dev/json-0.21.0.wasm"
+    "https://plugins.dprint.dev/json-0.21.0.wasm",
+    "https://plugins.dprint.dev/g-plane/markup_fmt-v0.25.3.wasm"
   ]
 }
