@@ -92,7 +92,12 @@ jobs:
           printf "\n### \`pr\` + \`rustywind\` stability\n" >> ecosystem-result-format-stable
           uv run ecosystem-check format ./pr_djangofmt rustywind --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result-format-stable
 
-          cat ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
+          if [ "$(stat -c%s "ecosystem-result-format-stable")" -gt 1024000 ]; then
+            echo -e "\n\n> [!CAUTION]\n> **Summary Truncated:** The original output was $(du -h ecosystem-result-format-stable | cut -f1), which exceeds GitHub's 1024k limit." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          head -c 1000k ecosystem-result-format-stable >> "$GITHUB_STEP_SUMMARY"
+
           cat ecosystem-result-format-stable >> ecosystem-result
 
       - name: Generate comment content
