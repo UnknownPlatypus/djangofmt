@@ -1,4 +1,5 @@
 ---
+import BugIcon from "./icons/BugIcon.astro";
 import DarkTheme from "./icons/DarkTheme.astro";
 import IconShare from "./icons/IconShare.astro";
 import LightTheme from "./icons/LightTheme.astro";
@@ -30,8 +31,15 @@ import PlusMinusInput from "./PlusMinusInput.astro";
     <div class="flex items-center gap-2">
         <button
             class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
+            data-tip="Report an issue on Github"
+            data-on:click="openGithubIssue($inputCode, $mode, $width, $indent, monacoOutput.editor.getValue())"
+        >
+            <BugIcon />
+        </button>
+        <button
+            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
             data-tip="Copy permalink"
-            data-on:click="savePermalinkToClipboard(monacoInput.editor.getValue(), $mode, $width, $indent)"
+            data-on:click="savePermalinkToClipboard($inputCode, $mode, $width, $indent)"
         >
             <IconShare />
         </button>
