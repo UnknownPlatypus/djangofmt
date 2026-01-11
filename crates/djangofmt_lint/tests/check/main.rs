@@ -7,7 +7,8 @@ use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
-use std::{fs, path::Path};
+use std::fs;
+use std::path::Path;
 
 #[test]
 fn check_snapshot() {
@@ -22,6 +23,7 @@ fn check_snapshot() {
     });
 }
 
+const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 fn run_check_test(path: &Path, input: String) -> String {
     let mut parser = Parser::new(&input, Language::Jinja, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
@@ -30,8 +32,10 @@ fn run_check_test(path: &Path, input: String) -> String {
     if file_diagnostics.is_empty() {
         return String::new();
     }
+
+    let display_path = path.strip_prefix(MANIFEST_DIR).unwrap_or(path);
     render_diagnostics(&FileDiagnostics::new(
-        NamedSource::new(path.to_string_lossy(), input),
+        NamedSource::new(display_path.to_string_lossy(), input),
         file_diagnostics,
     ))
 }

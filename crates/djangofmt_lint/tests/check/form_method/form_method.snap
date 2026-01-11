@@ -5,7 +5,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 Error: 
   × Invalid value 'put' for attribute 'method'.
-    ╭─[9:15]
+    ╭─[tests/check/form_method/form_method.html:9:15]
   8 │ <!-- Invalid methods - errors expected -->
   9 │ <form method="put"></form>
     ·               ─┬─
@@ -16,7 +16,7 @@ Error:
 
 Error: 
   × Invalid value 'delete' for attribute 'method'.
-    ╭─[10:15]
+    ╭─[tests/check/form_method/form_method.html:10:15]
   9 │ <form method="put"></form>
  10 │ <form method="delete"></form>
     ·               ───┬──
@@ -27,7 +27,7 @@ Error:
 
 Error: 
   × Invalid value 'patch' for attribute 'method'.
-    ╭─[11:15]
+    ╭─[tests/check/form_method/form_method.html:11:15]
  10 │ <form method="delete"></form>
  11 │ <form method="patch"></form>
     ·               ──┬──
@@ -38,7 +38,7 @@ Error:
 
 Error: 
   × Invalid value 'invalid' for attribute 'method'.
-    ╭─[19:19]
+    ╭─[tests/check/form_method/form_method.html:19:19]
  18 │ {% if show_form %}
  19 │     <form method="invalid"></form>
     ·                   ───┬───
