@@ -6,6 +6,7 @@ ci:
     - cargo-clippy
     - cargo-fmt
     - renovate-config-validator
+    - tombi-format
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -13,10 +14,8 @@ repos:
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
-      - id: check-json
       - id: check-merge-conflict
       - id: check-symlinks
-      - id: check-toml
       - id: end-of-file-fixer
       - id: trailing-whitespace
         exclude: \.snap$
@@ -43,6 +42,10 @@ repos:
     rev: 2a30809d16bc7a60d9b97353c797f42b510d3368 # frozen: v3.12.0-2
     hooks:
       - id: shfmt
+  - repo: https://github.com/tombi-toml/tombi-pre-commit
+    rev: 85439ee9dc3bae4867e8db7a0fdb3b7e5e8299b7  # frozen: v0.6.47
+    hooks:
+      - id: tombi-format
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
     rev: 33ae92ed9b1a4392c8ac5fdef46887640d866e1e  # frozen: 0.5.0
     hooks:
