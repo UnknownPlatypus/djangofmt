@@ -12,20 +12,14 @@ Why these technologies?
 I really enjoy DaisyUI & datastar—they are awesome pieces of software.
 They rely on the browser as much as possible and provide a declarative API, which is great for achieving a lot with little code.
 
-The whole playground is ~500 LoC.
+The whole playground is ~700 LoC.
 
 # Development
-
-To install dependencies:
-
-```bash
-npm ci
-```
 
 To run dev server:
 
 ```bash
-npm run dev
+just playground-dev
 ```
 
 To build:

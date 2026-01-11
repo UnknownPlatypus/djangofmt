@@ -274,6 +274,10 @@ Summary
 </code></pre>
 </details>
 
+## Contributing
+
+Contributions are welcome! Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to get started.
+
 ## Shell Completions
 
 You can generate shell completions for your preferred

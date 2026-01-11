@@ -7,33 +7,19 @@ Documentation about how to run various performance benchmark for `djangofmt` ver
 - `djade`: Only format django template syntax - HTML is not formatted
 - `prettier`: Does not support Django and only format HTML
 
-## Setup
-
-First `cd ./python/benchmarks` and then run this to build `djangofmt` & install other tools needed to benchmark:
-
-```bash
-cargo build --release &&
-uv sync --project . -p 3.11 &&
-npm i
-```
-
-Then activate the python env
-
-```shell
-. .venv/bin/activate
-```
-
 ## Running Benchmarks
 
 Simply run this command, providing a directory containing django templates.
+You can change the print width with the `LINE_LENGTH` env variable (default: 120)
 
 ```bash
-./run_formatter.sh ~/templates
+just bench-py ~/templates
 ```
 
-A setup step will discover every html files inside and the run the various tools on it.
-This will cause destructive operations, be sure to target a safe directory (tracked with git or temporary)
-You can change the print width with the `LINE_LENGTH` env variable (default: 120)
+A setup step will discover every html files inside and then run the various tools on it.
+
+> [!IMPORTANT]
+> This will cause destructive operations, be sure to target a safe directory (tracked with git or temporary)
 
 ## Color Palette for charts
 
