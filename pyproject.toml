@@ -33,6 +33,7 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 
 [dependency-groups]
 dev = [
+  "djangofmt-benchmarks",
   "maturin[patchelf]>=1.10.2",
 ]
 
@@ -181,3 +182,11 @@ strict = true
 
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
+
+[tool.uv.workspace]
+members = [
+  "python/benchmarks",
+]
+
+[tool.uv.sources]
+djangofmt-benchmarks = { workspace = true }

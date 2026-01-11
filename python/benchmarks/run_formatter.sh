@@ -26,7 +26,7 @@ hyperfine --ignore-failure \
 	"$DJANGOFMT_CMD" \
 	--prepare "$DJADE_CMD || true" \
 	"$DJADE_CMD" \
-	--prepare "$DJHTML_CMD" \
+	--prepare "$DJHTML_CMD || true" \
 	"$DJHTML_CMD" \
 	--prepare "$DJLINT_CMD || true" \
 	"$DJLINT_CMD" \

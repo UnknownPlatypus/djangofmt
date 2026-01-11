@@ -21,6 +21,7 @@ playground-build:
 
 # Run playground dev server (builds WASM first)
 playground-dev: playground-build
+    npm ci --prefix playground
     npm run dev --prefix playground
 
 # Setup python benchmarks
@@ -37,3 +38,17 @@ bench-py dir: setup-bench-py
 # Run rust micro-benchmarks
 bench-rs:
     cargo bench -p djangofmt_benchmark
+
+# Run ecosystem checks with custom baseline and comparison executables
+ecosystem-check baseline comparison *args:
+    cargo build
+    uv run ecosystem-check format {{baseline}} {{comparison}} --cache-dir /tmp/repos {{args}}
+
+# Run ecosystem checks comparing debug build to system djangofmt
+ecosystem-check-dev:
+    cargo build
+    uv run ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir /tmp/repos
+
+# Clean ecosystem check git repos cache
+ecosystem-check-clean-cache:
+    rm -rf /tmp/repos
