@@ -39,7 +39,7 @@ jobs:
           files_yaml: |
             code:
               - python/**
-              - src/**
+              - crates/**
               - .github/workflows/ci.yml
               - Cargo.toml
 

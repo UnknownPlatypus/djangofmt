@@ -2,7 +2,7 @@ use crate::commands::format::path_display;
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
-use miette::Diagnostic;
+use miette::{Diagnostic, NamedSource};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::path::{Path, PathBuf};
@@ -13,7 +13,7 @@ use crate::args::Profile;
 use crate::commands::format::ParseError;
 use crate::error::Result;
 use std::time::Instant;
-use tracing::{debug, error, info};
+use tracing::{debug, error};
 
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
@@ -56,7 +56,6 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         error!("{:?}", miette::Report::new(file_diag));
     }
 
-    info!("Found {total_diagnostics} issues :(");
     Ok(ExitStatus::Failure)
 }
 
@@ -84,7 +83,10 @@ fn check_path(
     if diagnostics.is_empty() {
         return Ok(FileDiagnostics::empty());
     }
-    Ok(FileDiagnostics::new(source, diagnostics))
+    Ok(FileDiagnostics::new(
+        NamedSource::new(path.to_string_lossy(), source),
+        diagnostics,
+    ))
 }
 
 /// An error that can occur while linting a set of files.

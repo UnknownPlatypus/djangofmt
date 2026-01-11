@@ -2,7 +2,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
-use miette::{GraphicalReportHandler, GraphicalTheme};
+use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
 use serde::Serialize;
 use tsify::Tsify;
 use wasm_bindgen::prelude::*;
@@ -62,7 +62,8 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         return Ok(result);
     }
 
-    let file_diagnostics = FileDiagnostics::new(source.to_string(), diagnostics);
+    let file_diagnostics =
+        FileDiagnostics::new(NamedSource::new("", source.to_string()), diagnostics);
     let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode());
     let mut output = String::new();
     handler

@@ -41,6 +41,7 @@ pub fn run(
     }: Args,
 ) -> error::Result<ExitStatus> {
     setup_tracing(global_options.log_level());
+    setup_miette()?;
 
     match command {
         Some(args::Commands::Check(ref check_args)) => commands::check::check(check_args),
@@ -50,4 +51,15 @@ pub fn run(
         }
         None => commands::format::format(fmt),
     }
+}
+
+fn setup_miette() -> error::Result<()> {
+    miette::set_hook(Box::new(|_| {
+        Box::new(
+            miette::MietteHandlerOpts::new()
+                .show_related_errors_as_nested()
+                .build(),
+        )
+    }))?;
+    Ok(())
 }

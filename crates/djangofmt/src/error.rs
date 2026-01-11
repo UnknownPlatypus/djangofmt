@@ -11,6 +11,10 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
+    #[diagnostic(code(djangofmt::miette_error))]
+    Miette(#[from] miette::InstallError),
+
+    #[error(transparent)]
     #[diagnostic(code(djangofmt::serde_json_error))]
     SerdeJson(#[from] serde_json::Error),
 }
