@@ -1,20 +1,16 @@
-[build-system]
-requires = ["maturin>=1,<2"]
-build-backend = "maturin"
-
 [project]
 name = "djangofmt"
 version = "0.2.4"
 description = "A fast, HTML aware, Django template formatter, written in Rust."
 readme = "README.md"
-keywords = [
-  "Django",
-]
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
 authors = [
   { name = "Thibaut Decombe", email = "thibaut.decombe@gmail.com" },
 ]
-requires-python = ">=3.8"
-license = { file = "LICENSE" }
+keywords = [
+  "Django",
+]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Framework :: Django",
@@ -31,20 +27,18 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Rust",
 ]
+
 [project.urls]
 Repository = "https://github.com/UnknownPlatypus/djangofmt"
 
-[tool.mypy]
-strict = true
-
-# https://www.maturin.rs/config.html#maturin-options
-[tool.maturin]
-bindings = "bin"
-manifest-path = "crates/djangofmt/Cargo.toml"
-strip = true
-include = [
-  "rust-toolchain.toml",
+[dependency-groups]
+dev = [
+  "maturin[patchelf]>=1.10.2",
 ]
+
+[build-system]
+requires = ["maturin>=1,<2"]
+build-backend = "maturin"
 
 # git-cliff ~ configuration file
 # https://git-cliff.org/docs/configuration
@@ -112,13 +106,12 @@ body = """
 """
 # A Tera template to be rendered as the changelog's footer.
 # See https://keats.github.io/tera/docs/#introduction
-
 # Remove leading and trailing whitespaces from the changelog's body.
 trim = true
 # An array of regex based postprocessors to modify the changelog.
 postprocessors = [
   # Replace the placeholder `<REPO>` with a URL.
-  { pattern = '<REPO>', replace = "https://github.com/UnknownPlatypus/djangofmt" }, # replace repository URL
+  { pattern = "<REPO>", replace = "https://github.com/UnknownPlatypus/djangofmt" },  # replace repository URL
 ]
 
 [tool.git-cliff.git]
@@ -135,7 +128,7 @@ commit_preprocessors = [
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))" },
   # Check spelling of the commit message using https://github.com/crate-ci/typos.
   # If the spelling is incorrect, it will be fixed automatically.
-  { pattern = '.*', replace_command = 'typos --write-changes -' },
+  { pattern = ".*", replace_command = "typos --write-changes -" },
 ]
 # An array of regex based parsers for extracting data from the commit message.
 # Assigns commits to groups.
@@ -174,10 +167,17 @@ topo_order = false
 # Allowed values: newest, oldest
 sort_commits = "newest"
 
+# https://www.maturin.rs/config.html#maturin-options
+[tool.maturin]
+bindings = "bin"
+include = [
+  "rust-toolchain.toml",
+]
+manifest-path = "crates/djangofmt/Cargo.toml"
+strip = true
+
+[tool.mypy]
+strict = true
+
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
-
-[dependency-groups]
-dev = [
-  "maturin[patchelf]>=1.10.2",
-]

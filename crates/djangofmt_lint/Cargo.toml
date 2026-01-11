@@ -2,12 +2,9 @@
 name = "djangofmt_lint"
 version.workspace = true
 edition.workspace = true
-license.workspace = true
-repository.workspace = true
 rust-version.workspace = true
-
-[lints]
-workspace = true
+repository.workspace = true
+license.workspace = true
 
 [dependencies]
 markup_fmt = { workspace = true }
@@ -20,3 +17,6 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
+
+[lints]
+workspace = true

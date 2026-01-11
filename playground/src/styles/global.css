@@ -1,10 +1,10 @@
-@import "tailwindcss";
-@plugin "daisyui";
-@plugin "daisyui/theme" {
-    name: "light";
+@import 'tailwindcss';
+@plugin 'daisyui';
+@plugin 'daisyui/theme' {
+    name: 'light';
     default: true;
     prefersdark: false;
-    color-scheme: "light";
+    color-scheme: 'light';
     --color-primary: oklch(35% 0.12 155);
     --color-primary-content: oklch(98% 0.02 155);
     --color-secondary: oklch(65% 0.18 150);
@@ -35,11 +35,11 @@
     --noise: 0;
 }
 
-@plugin "daisyui/theme" {
-    name: "dark";
+@plugin 'daisyui/theme' {
+    name: 'dark';
     default: false;
     prefersdark: true;
-    color-scheme: "dark";
+    color-scheme: 'dark';
     --color-primary: oklch(50% 0.14 155);
     --color-primary-content: oklch(15% 0.05 155);
     --color-secondary: oklch(60% 0.12 160);
@@ -72,23 +72,20 @@
     --noise: 0;
 }
 
-
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button,
 input[type='number'] {
     -webkit-appearance: none;
-    margin: 0;
     -moz-appearance: textfield !important;
+    margin: 0;
 }
 .monaco-editor {
     --vscode-editor-background: var(--color-base-300) !important;
     --vscode-editorGutter-background: var(--color-base-300) !important;
     --vscode-editor-foreground: var(--color-base-content) !important;
     --vscode-editorGutter-foreground: var(--color-base-content) !important;
-
     --vscode-editorWidget-background: var(--color-base-200) !important;
     --vscode-editorWidget-foreground: var(--color-base-content) !important;
-
     --vscode-input-foreground: var(--color-base-content) !important;
     --vscode-input-background: var(--color-base-100) !important;
 }

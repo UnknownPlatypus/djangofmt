@@ -1,6 +1,14 @@
 [workspace]
 members = ["cargo:."]
 
+# We do this override because cargo-dist assume the min GLIBC supported version is 2.31 otherwise.
+# https://opensource.axo.dev/cargo-dist/book/reference/config.html#min-glibc-version
+[workspace.metadata.dist.min-glibc-version]
+# Override glibc version for specific target triplets.
+aarch64-unknown-linux-gnu = "2.28"
+# Override all remaining glibc versions.
+"*" = "2.17"
+
 # Config for 'dist'
 [dist]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
@@ -50,21 +58,16 @@ local-artifacts-jobs = ["./release-build-binaries"]
 # Publish jobs to run in CI
 publish-jobs = ["./release-publish-pypi"]
 # Post-announce jobs to run in CI
-post-announce-jobs = ["./release-notify-pre-commit-mirror", "./publish-playground"]
+post-announce-jobs = [
+  "./release-notify-pre-commit-mirror",
+  "./publish-playground",
+]
 # Whether to install an updater program
 install-updater = false
 # Path that installers should place binaries in
 install-path = ["$XDG_BIN_HOME/", "$XDG_DATA_HOME/../bin", "~/.local/bin"]
 
 [dist.github-action-commits]
-"actions/checkout" = "11bd71901bbe5b1630ceea73d27597364c9af683" # v4.2.2
-"actions/upload-artifact" = "ea165f8d65b6e75b540449e92b4886f43607fa02" # v4.6.2
-"actions/download-artifact" = "d3f86a106a0bac45b974a628896c90dbdf5c8093" # v4.3.0
-
-# We do this override because cargo-dist assume the min GLIBC supported version is 2.31 otherwise.
-# https://opensource.axo.dev/cargo-dist/book/reference/config.html#min-glibc-version
-[workspace.metadata.dist.min-glibc-version]
-# Override glibc version for specific target triplets.
-aarch64-unknown-linux-gnu = "2.28"
-# Override all remaining glibc versions.
-"*" = "2.17"
+"actions/checkout" = "11bd71901bbe5b1630ceea73d27597364c9af683"  # v4.2.2
+"actions/upload-artifact" = "ea165f8d65b6e75b540449e92b4886f43607fa02"  # v4.6.2
+"actions/download-artifact" = "d3f86a106a0bac45b974a628896c90dbdf5c8093"  # v4.3.0
