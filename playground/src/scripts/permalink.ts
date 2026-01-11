@@ -31,17 +31,21 @@ function parsePermalinkCode(): string | null {
 }
 
 function openGithubIssue(source: string, mode: string, width: number, indent: number, formatted: string) {
-  const diff = createPatch("template.j2", source, formatted, "", "", { context: 3 });
+  const fullDiff = createPatch("template", source, formatted, "", "", { context: 3 });
+  // Strip header lines and @@ hunk markers, keep only +/- lines and context
+  const diff = fullDiff.split("\n").slice(4).filter((line) => !line.startsWith("@@")).join("\n").trim();
   const link = createPermalink(source, mode, width, indent);
-  const body = `<!--
-Describe what is not working.
--->
+  const body = `### Description
+
+<!-- Describe what is not working. -->
+
+### Playground diff
 
 \`\`\`diff
 ${diff}
 \`\`\`
 
-See [playground](${link})`;
+[Playground link](${link})`;
 
   const url = new URL("https://github.com/unknownplatypus/djangofmt/issues/new");
   url.searchParams.set("body", body);
