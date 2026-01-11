@@ -27,11 +27,11 @@ const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
 function lintCode(source: string, mode: string): { text: string; errorCount: number } {
   try {
-    const result = lint(source, mode) as LintResult;
+    const result = lint(source, mode.toLowerCase()) as LintResult;
     const text = result.output ? ansiConverter.toHtml(result.output) : "✓ No lint issues found.";
     return { text, errorCount: result.error_count };
   } catch (e) {
-    return { text: `Error: ${e}`, errorCount: 1 };
+    return { text: ansiConverter.toHtml(`Error: ${e}`), errorCount: 1 };
   }
 }
 

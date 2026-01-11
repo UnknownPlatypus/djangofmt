@@ -39,6 +39,7 @@ const { id } = Astro.props;
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Copy"
+                aria-label="Copy"
                 data-on:click=`writeClipboardText(${id}.editor.getValue())`
             >
                 <IconCopy />

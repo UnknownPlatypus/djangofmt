@@ -8,8 +8,8 @@ import LintWarning from "./icons/LintWarning.astro";
         class="collapse collapse-arrow shrink-0 bg-base-200 border-t border-base-300 peer"
     >
         <summary class="collapse-title py-3 px-4 flex items-center text-xs font-bold uppercase tracking-wider">
-            <LintOk data-show="$lintErrorCount === 0"/>
-            <LintWarning data-show="$lintErrorCount > 0"/>
+            <LintOk data-class:hidden="$lintErrorCount > 0"/>
+            <LintWarning data-class:hidden="$lintErrorCount === 0"/>
             <span data-text="$lintErrorCount === 0 ? 'No Issues' : 'Lint Issues'"
                   data-class:text-success="$lintErrorCount === 0" data-class:text-warning="$lintErrorCount > 0"></span>
             <span

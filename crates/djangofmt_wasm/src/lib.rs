@@ -6,7 +6,7 @@ use miette::{GraphicalReportHandler, GraphicalTheme};
 use serde::Serialize;
 use tsify::Tsify;
 use wasm_bindgen::prelude::*;
-
+use web_sys::console;
 #[wasm_bindgen]
 pub fn format(
     source: &str,
@@ -69,8 +69,12 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         .render_report(&mut output, &file_diagnostics)
         .map_err(into_error)?;
 
-    // Remove the `× Found x lint error(s)` header that is redundant
+    // Remove the 2 lines `× Found x lint error(s)` header that is redundant
     // with error_count in the playground.
+    // Expected format:
+    //   Line 1: Empty or error icon
+    //   Line 2: "× Found N lint error(s)" message
+    //   Line 3+: Actual diagnostic content
     let skip_pos = output
         .char_indices()
         .filter(|(_, c)| *c == '\n')
@@ -89,6 +93,12 @@ pub(crate) fn into_error<E: std::fmt::Display>(err: E) -> JsError {
 fn get_profile(profile: &str) -> Profile {
     match profile {
         "jinja" => Profile::Jinja,
-        _ => Profile::Django,
+        "django" => Profile::Django,
+        _ => {
+            console::log_1(
+                &format!("Invalid profile: '{profile}'. Falling back to 'Django'").into(),
+            );
+            Profile::Django
+        }
     }
 }
