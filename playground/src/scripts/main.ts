@@ -4,37 +4,34 @@ import { writeClipboardText } from "./clipboard";
 import { createEditors, monaco } from "./monaco-editor";
 import { savePermalinkToClipboard } from "./permalink";
 
-const { outputEditor } = createEditors();
 window.monaco = monaco;
+createEditors();
 
-function formatCode(source: string, width: number, indent: number, mode: string) {
-  const footer = document.getElementById("format-duration") as HTMLDivElement;
-
+function formatCode(
+  source: string,
+  width: number,
+  indent: number,
+  mode: string,
+): { formatted: string; duration: number } {
   try {
     const start = performance.now();
     const formatted = format(source, width, indent, mode.toLowerCase());
     const duration = performance.now() - start;
-    outputEditor.setValue(formatted);
-    footer.textContent = `Formatted in ${duration.toFixed(1)}ms!`;
+    return { formatted, duration };
   } catch (e) {
-    outputEditor.setValue(`Error: ${e}`);
+    return { formatted: `Error: ${e}`, duration: 0 };
   }
 }
 
 const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
-function lintCode(source: string, mode: string): number {
-  const lintOutput = document.getElementById("lint-output") as HTMLPreElement;
+function lintCode(source: string, mode: string): { text: string; errorCount: number } {
   try {
     const result = lint(source, mode) as LintResult;
-    lintOutput.innerHTML = result.output
-      ? ansiConverter.toHtml(result.output)
-      : "<span class=\"text-success\">✓ No lint issues found.</span>";
-    return result.error_count;
+    const text = result.output ? ansiConverter.toHtml(result.output) : "✓ No lint issues found.";
+    return { text, errorCount: result.error_count };
   } catch (e) {
-    lintOutput.textContent = `Error: ${e}`;
-    console.error("Lint error:", e);
-    return 1;
+    return { text: `Error: ${e}`, errorCount: 1 };
   }
 }
 

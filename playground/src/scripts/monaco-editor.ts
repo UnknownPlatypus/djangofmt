@@ -43,7 +43,10 @@ function createEditors() {
   const inputContainer = document.getElementById("monacoInput") as HTMLElement;
   const inputEditor = monaco.editor.create(inputContainer, { value: initialTemplate, ...monacoOptions });
   inputEditor.onDidChangeModelContent(() => {
-    inputContainer.dispatchEvent(new Event("input", { bubbles: true }));
+    // Monaco editor does not trigger proper events so we create one here
+    inputContainer.dispatchEvent(
+      new CustomEvent("monaco-change", { detail: { value: inputEditor.getValue() }, bubbles: true }),
+    );
   });
   (inputContainer as any).editor = inputEditor;
 
