@@ -33,10 +33,6 @@ You can run the benchmarks locally using `just`.
 To run the Python-based comparative benchmarks:
 
 ```shell
-# First, setup the benchmark environment
-just setup-bench-py
-
-# Then run the benchmarks on a directory of templates
 just bench-py <path/to/templates>
 ```
 
@@ -49,4 +45,9 @@ just bench-rs
 ```
 
 You can also run the ecosystem check locally (it will run in CI anyway).
+
+```shell
+just ecosystem-check-dev
+```
+
 See the [README](./python/ecosystem-check/README.md).

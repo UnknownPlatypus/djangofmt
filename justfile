@@ -16,11 +16,11 @@ pre-mr-check:
     cargo test --all-targets --all-features
 
 # Build playground WASM package
-playground-build:
+playground-wasm-build:
     wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
 
 # Run playground dev server (builds WASM first)
-playground-dev: playground-build
+playground-dev: playground-wasm-build
     npm ci --prefix playground
     npm run dev --prefix playground
 
