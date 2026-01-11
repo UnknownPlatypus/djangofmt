@@ -6,7 +6,7 @@ use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
 use markup_fmt::parser::Parser;
-use miette::{GraphicalReportHandler, GraphicalTheme};
+use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
 use std::{fs, path::Path};
 
 #[test]
@@ -22,7 +22,7 @@ fn check_snapshot() {
     });
 }
 
-fn run_check_test(_path: &Path, input: String) -> String {
+fn run_check_test(path: &Path, input: String) -> String {
     let mut parser = Parser::new(&input, Language::Jinja, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::default();
@@ -30,7 +30,10 @@ fn run_check_test(_path: &Path, input: String) -> String {
     if file_diagnostics.is_empty() {
         return String::new();
     }
-    render_diagnostics(&FileDiagnostics::new(input, file_diagnostics))
+    render_diagnostics(&FileDiagnostics::new(
+        NamedSource::new(path.to_string_lossy(), input),
+        file_diagnostics,
+    ))
 }
 
 fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {

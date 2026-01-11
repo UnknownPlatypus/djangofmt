@@ -28,7 +28,7 @@ pub use registry::{Rule, RuleCategory};
 pub use settings::Settings;
 
 use markup_fmt::ast::Root;
-use miette::{Diagnostic, SourceSpan};
+use miette::{Diagnostic, NamedSource, SourceSpan};
 
 /// A single lint diagnostic without source code.
 ///
@@ -59,7 +59,7 @@ pub struct LintDiagnostic {
 pub struct FileDiagnostics {
     /// The source code of the file.
     #[source_code]
-    pub source_code: String,
+    pub source_code: NamedSource<String>,
     /// All diagnostics found in this file.
     #[related]
     pub related: Vec<LintDiagnostic>,
@@ -68,7 +68,7 @@ pub struct FileDiagnostics {
 impl FileDiagnostics {
     /// Create a new `FileDiagnostics` from source code and diagnostics.
     #[must_use]
-    pub const fn new(source_code: String, diagnostics: Vec<LintDiagnostic>) -> Self {
+    pub const fn new(source_code: NamedSource<String>, diagnostics: Vec<LintDiagnostic>) -> Self {
         Self {
             source_code,
             related: diagnostics,
@@ -77,9 +77,9 @@ impl FileDiagnostics {
 
     /// Create a new empty `FileDiagnostics`.
     #[must_use]
-    pub const fn empty() -> Self {
+    pub fn empty() -> Self {
         Self {
-            source_code: String::new(),
+            source_code: NamedSource::new("", String::with_capacity(0)),
             related: Vec::new(),
         }
     }
