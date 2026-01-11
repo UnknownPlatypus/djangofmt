@@ -17,6 +17,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "ansi-to-html": "^0.7.2",
     "astro": "^5.16.5",
+    "diff": "^8.0.2",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.55.0",
     "tailwindcss": "^4.1.17"

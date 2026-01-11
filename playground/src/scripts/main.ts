@@ -2,7 +2,7 @@ import AnsiToHtml from "ansi-to-html";
 import init, { format, lint, type LintResult } from "../../pkg/djangofmt_wasm.js";
 import { writeClipboardText } from "./clipboard";
 import { createEditors, monaco } from "./monaco-editor";
-import { savePermalinkToClipboard } from "./permalink";
+import { openGithubIssue, savePermalinkToClipboard } from "./permalink";
 
 window.monaco = monaco;
 createEditors();
@@ -43,6 +43,7 @@ declare global {
     lintCode: typeof lintCode;
     writeClipboardText: typeof writeClipboardText;
     savePermalinkToClipboard: typeof savePermalinkToClipboard;
+    openGithubIssue: typeof openGithubIssue;
   }
 }
 
@@ -52,6 +53,7 @@ init().then(() => {
   window.lintCode = lintCode;
   window.savePermalinkToClipboard = savePermalinkToClipboard;
   window.writeClipboardText = writeClipboardText;
+  window.openGithubIssue = openGithubIssue;
 
   import(
     // @ts-expect-error
