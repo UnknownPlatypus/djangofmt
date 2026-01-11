@@ -5,9 +5,9 @@ import LintWarning from "./icons/LintWarning.astro";
 <div id="lint-resize-handle" class="h-1.5 cursor-ns-resize bg-base-300 hover:bg-primary transition-colors"></div>
 <details
     id="lint-panel"
-    class="collapse collapse-arrow flex-shrink-0 bg-base-200 border-t border-base-300"
+    class="collapse collapse-arrow shrink-0 bg-base-200 border-t border-base-300"
 >
-    <summary class="collapse-title min-h-0 h-10 py-2 px-4 flex items-center text-xs font-bold uppercase tracking-wider">
+    <summary class="collapse-title py-3 px-4 flex items-center text-xs font-bold uppercase tracking-wider">
         <LintOk data-show="$lintErrorCount === 0"/>
         <LintWarning data-show="$lintErrorCount > 0"/>
         <span data-text="$lintErrorCount === 0 ? 'No Issues' : 'Lint Issues'"
@@ -18,19 +18,14 @@ import LintWarning from "./icons/LintWarning.astro";
             data-text="`(${$lintErrorCount} error${$lintErrorCount === 1 ? '' : 's'})`"
         ></span>
     </summary>
-    <div id="lintContent" class="overflow-auto font-mono text-sm bg-base-300">
+    <div id="lint-content" class="collapse-content font-mono text-sm bg-base-300 overflow-auto" style="height: 50dvh">
         <pre id="lintOutput" class="whitespace-pre-wrap p-4 text-base-content"></pre>
     </div>
 </details>
 
 <script>
-    const panel = document.getElementById('lint-panel') as HTMLDetailsElement;
     const content = document.getElementById('lint-content') as HTMLDivElement;
     const handle = document.getElementById('lint-resize-handle') as HTMLDivElement;
-
-    function getContainerHeight() {
-        return panel?.parentElement?.clientHeight || 400;
-    }
 
     let startY = 0;
     let startHeight = 0;
@@ -45,10 +40,7 @@ import LintWarning from "./icons/LintWarning.astro";
 
     function onMouseMove(e: MouseEvent) {
         const delta = startY - e.clientY;
-        const containerHeight = getContainerHeight();
-        const newHeight = Math.max(80, Math.min(containerHeight * 0.9, startHeight + delta));
-        content.style.height = `${newHeight}px`;
-        content.dataset.resized = 'true';
+        content.style.height = `${startHeight + delta}px`;
     }
 
     function onMouseUp() {
