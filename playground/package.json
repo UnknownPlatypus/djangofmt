@@ -9,7 +9,6 @@
     "preview": "astro preview"
   },
   "devDependencies": {
-    "@types/diff": "^5.2.1",
     "daisyui": "5.5.14",
     "typescript": "5.9.3",
     "vite": "7.3.0"
@@ -18,7 +17,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "ansi-to-html": "^0.7.2",
     "astro": "^5.16.5",
-    "diff": "^5.2.0",
+    "diff": "^8.0.2",
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.55.0",
     "tailwindcss": "^4.1.17"
