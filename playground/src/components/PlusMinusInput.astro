@@ -3,8 +3,8 @@ import IconMinus from "./icons/IconMinus.astro";
 import IconPlus from "./icons/IconPlus.astro";
 
 interface Props {
-    signalName: string;
-    title: string;
+  signalName: string;
+  title: string;
 }
 
 const { signalName, title } = Astro.props;
@@ -14,13 +14,11 @@ const { signalName, title } = Astro.props;
     <legend class="fieldset-legend text-xs font-bold text-base-content/90">
         {title}
     </legend>
-    <label
-        class="join rounded-field input input-sm w-24 text-base-content/70 px-0 gap-0"
-    >
+    <label class="join rounded-field input input-sm w-24 text-base-content/70 px-0 gap-0">
         <button
             class="join-item text-xl cursor-pointer px-2 h-full disabled:bg-base-content/10 disabled:border-0"
-            data-on:click=`if ($${signalName} > 1) $${signalName}--`
-            data-attr:disabled=`$${signalName} == 1`
+            data-on:click={`if ($${signalName} > 1) $${signalName}--`}
+            data-attr:disabled={`$${signalName} == 1`}
         >
             <IconMinus />
         </button>
@@ -34,7 +32,7 @@ const { signalName, title } = Astro.props;
         >
         <button
             class="join-item text-xl cursor-pointer px-2 h-full disabled:bg-base-content/10 disabled:border-0"
-            data-on:click=`$${signalName}++`
+            data-on:click={`$${signalName}++`}
         >
             <IconPlus />
         </button>
