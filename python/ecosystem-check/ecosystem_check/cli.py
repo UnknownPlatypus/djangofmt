@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import contextlib
 import logging
 import os
 import shutil
@@ -57,30 +58,47 @@ def entrypoint() -> None:
         else nullcontext(args.cache_dir)
     )
     with cache_context as cache:
-        loop = asyncio.get_event_loop()
-        main_task = asyncio.ensure_future(
-            main(
-                command=Command(args.command),
+        asyncio.run(
+            _run_main(
+                args=args,
                 baseline_executable=baseline_executable,
                 comparison_executable=comparison_executable,
-                targets=DEFAULT_TARGETS,
-                output_format=OutputFormat(args.output_format),
-                project_dir=Path(cache),
-                raise_on_failure=args.pdb,
-                format_comparison=(
-                    FormatComparison(args.format_comparison)
-                    if args.command == Command.format
-                    else None
-                ),
+                cache=cache,
             )
         )
-        # https://stackoverflow.com/a/58840987/3549270
-        for signal in [SIGINT, SIGTERM]:
+
+
+async def _run_main(
+    *,
+    args: argparse.Namespace,
+    baseline_executable: Path,
+    comparison_executable: Path,
+    cache: str | Path,
+) -> None:
+    main_task = asyncio.create_task(
+        main(
+            command=Command(args.command),
+            baseline_executable=baseline_executable,
+            comparison_executable=comparison_executable,
+            targets=DEFAULT_TARGETS,
+            output_format=OutputFormat(args.output_format),
+            project_dir=Path(cache),
+            raise_on_failure=args.pdb,
+            format_comparison=(
+                FormatComparison(args.format_comparison)
+                if args.command == Command.format
+                else None
+            ),
+        )
+    )
+
+    # https://stackoverflow.com/a/58840987/3549270
+    loop = asyncio.get_running_loop()
+    for signal in [SIGINT, SIGTERM]:
+        with contextlib.suppress(NotImplementedError):
             loop.add_signal_handler(signal, main_task.cancel)
-        try:
-            loop.run_until_complete(main_task)
-        finally:
-            loop.close()
+
+    await main_task
 
 
 def parse_args() -> argparse.Namespace:
