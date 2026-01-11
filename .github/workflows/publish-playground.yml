@@ -14,6 +14,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+  # Run on PRs changing playground files (build only, no deploy)
+  pull_request:
+    paths:
+      - "playground/**"
+
 # Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions: {}
 
@@ -25,9 +30,8 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # Only use github-pages environment when not a PR
+    environment: ${{ github.event_name != 'pull_request' && 'github-pages' || '' }}
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -53,11 +57,14 @@ jobs:
         run: npm run build
         working-directory: playground
       - name: Setup Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           path: "playground/dist"
       - name: Deploy to GitHub Pages
+        if: github.event_name != 'pull_request'
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

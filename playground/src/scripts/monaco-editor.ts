@@ -3,10 +3,8 @@ import "monaco-editor/min/vs/editor/editor.main.css";
 import "monaco-editor/esm/vs/editor/editor.all.js";
 import "monaco-editor/esm/vs/basic-languages/html/html.contribution";
 import "monaco-editor/esm/vs/language/html/monaco.contribution";
-// @ts-expect-error - Vite worker import
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
-// @ts-expect-error - Vite worker import
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
+import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
 import { parsePermalinkCode } from "./permalink";
 
 const defaultTemplate = `\
@@ -14,14 +12,14 @@ const defaultTemplate = `\
 
 {% block content %}
 <div class="badly-formatted"><h1>Welcome {{ user.username }}</h1>
-  </div>
+  </div><form method=""></form>
 {% endblock %}
 `;
 const initialTemplate = parsePermalinkCode() ?? defaultTemplate;
 
 // Setup monaco code editors
 self.MonacoEnvironment = {
-  getWorker(_, label) {
+  getWorker(_: any, label: String) {
     if (label === "html") {
       return new htmlWorker();
     }
@@ -45,7 +43,10 @@ function createEditors() {
   const inputContainer = document.getElementById("monacoInput") as HTMLElement;
   const inputEditor = monaco.editor.create(inputContainer, { value: initialTemplate, ...monacoOptions });
   inputEditor.onDidChangeModelContent(() => {
-    inputContainer.dispatchEvent(new Event("input", { bubbles: true }));
+    // Monaco editor does not trigger proper events so we create one here
+    inputContainer.dispatchEvent(
+      new CustomEvent("monaco-change", { detail: { value: inputEditor.getValue() }, bubbles: true }),
+    );
   });
   (inputContainer as any).editor = inputEditor;
 

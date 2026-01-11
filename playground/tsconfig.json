@@ -1,5 +1,17 @@
 {
   "extends": "astro/tsconfigs/strictest",
+  "compilerOptions": {
+    "types": [
+      "vite/client"
+    ],
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "monaco-editor/esm/vs/editor/editor.api": [
+        "node_modules/monaco-editor/esm/vs/editor/editor.api"
+      ]
+    }
+  },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"]
 }

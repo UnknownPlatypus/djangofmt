@@ -1,0 +1,56 @@
+---
+import LintOk from "./icons/LintOk.astro";
+import LintWarning from "./icons/LintWarning.astro";
+---
+<div class="flex flex-col-reverse">
+    <details
+        id="lint-panel"
+        class="collapse collapse-arrow shrink-0 bg-base-200 border-t border-base-300 peer"
+    >
+        <summary class="collapse-title py-3 px-4 flex items-center text-xs font-bold uppercase tracking-wider">
+            <LintOk data-class:hidden="$lintErrorCount > 0"/>
+            <LintWarning data-class:hidden="$lintErrorCount === 0"/>
+            <span data-text="$lintErrorCount === 0 ? 'No Issues' : 'Lint Issues'"
+                  data-class:text-success="$lintErrorCount === 0" data-class:text-warning="$lintErrorCount > 0"></span>
+            <span
+                class="opacity-60 ml-1"
+                data-show="$lintErrorCount > 0"
+                data-text="`(${$lintErrorCount} error${$lintErrorCount === 1 ? '' : 's'})`"
+            ></span>
+        </summary>
+        <div id="lint-content" class="collapse-content font-mono text-sm bg-base-300 overflow-auto" style="height: 50dvh">
+            <pre id="lintOutput" class="whitespace-pre-wrap p-4 text-base-content"></pre>
+        </div>
+    </details>
+    <div
+        id="lint-resize-handle"
+        class="h-1.5 cursor-ns-resize rounded-t-sm bg-transparent hover:bg-primary transition-colors peer-open:block hidden overflow-hidden"
+    ></div>
+</div>
+
+
+<script>
+    const content = document.getElementById('lint-content') as HTMLDivElement;
+    const handle = document.getElementById('lint-resize-handle') as HTMLDivElement;
+
+    let startY = 0;
+    let startHeight = 0;
+
+    handle.addEventListener('mousedown', (e: MouseEvent) => {
+        e.preventDefault();
+        startY = e.clientY;
+        startHeight = content.offsetHeight;
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    });
+
+    function onMouseMove(e: MouseEvent) {
+        const delta = startY - e.clientY;
+        content.style.height = `${startHeight + delta}px`;
+    }
+
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+    }
+</script>

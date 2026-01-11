@@ -8,13 +8,14 @@ interface Props {
 
 const { id } = Astro.props;
 ---
-<div class="flex-1 flex flex-col min-w-0 h-1/2 md:h-full bg-base-100/50 border-r border-base-300">
+<div class="flex-1 flex flex-col min-w-0 min-h-0 bg-base-100/50 border-r border-base-300">
     <div class="h-8 bg-base-200/50 border-b border-base-300 flex items-center pl-4 pr-2 justify-between">
         <slot />
         <div class="flex">
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Scroll to Top"
+                aria-label="Scroll to Top"
                 data-on:click=`
                   ${id}.editor.revealLine(1);
                   ${id}.editor.setPosition({lineNumber: 1, column: 1});
@@ -26,6 +27,7 @@ const { id } = Astro.props;
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Scroll to Bottom"
+                aria-label="Scroll to Bottom"
                 data-on:click=`
                   ${id}.editor.revealLine(${id}.editor.getModel().getLineCount());
                   ${id}.editor.setPosition({lineNumber: ${id}.editor.getModel().getLineCount(), column: 1});
@@ -37,6 +39,7 @@ const { id } = Astro.props;
             <button
                 class="btn btn-xs btn-ghost text-base-content/50 tooltip tooltip-top"
                 data-tip="Copy"
+                aria-label="Copy"
                 data-on:click=`writeClipboardText(${id}.editor.getValue())`
             >
                 <IconCopy />
