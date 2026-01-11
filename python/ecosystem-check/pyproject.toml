@@ -1,15 +1,20 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "ecosystem-check"
 version = "0.0.0"
 requires-python = ">=3.11"
-dependencies = ["unidiff==0.7.5", "tomli_w==1.2.0", "tomli==2.3.0", "djade==1.7.0"]
+dependencies = [
+  "djade==1.7.0",
+  "tomli==2.3.0",
+  "tomli_w==1.2.0",
+  "unidiff==0.7.5",
+]
 
 [project.scripts]
 ecosystem-check = "ecosystem_check.cli:entrypoint"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 unsafe-fixes = true
@@ -17,18 +22,18 @@ fix = true
 
 [tool.ruff.lint]
 select = [
-  "E", # pycodestyle (error)
-  "F", # pyflakes
-  "B", # bugbear
+  "E",  # pycodestyle (error)
+  "F",  # pyflakes
+  "B",  # bugbear
   "B9",
-  "C4", # flake8-comprehensions
-  "SIM", # flake8-simplify
-  "I", # isort
-  "UP", # pyupgrade
-  "PIE", # flake8-pie
-  "PGH", # pygrep-hooks
-  "PYI", # flake8-pyi
-  "RUF", # Ruff specific
+  "C4",  # flake8-comprehensions
+  "SIM",  # flake8-simplify
+  "I",  # isort
+  "UP",  # pyupgrade
+  "PIE",  # flake8-pie
+  "PGH",  # pygrep-hooks
+  "PYI",  # flake8-pyi
+  "RUF",  # Ruff specific
 ]
 ignore = ["E501"]
 preview = true

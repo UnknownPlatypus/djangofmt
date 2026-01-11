@@ -3,20 +3,20 @@ name = "djangofmt_benchmark"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
-license.workspace = true
-publish = false
-repository.workspace = true
 rust-version.workspace = true
 description = "djangofmt Micro-benchmarks"
+repository.workspace = true
+license.workspace = true
+publish = false
 
 [lib]
 bench = false
-test = false
 doctest = false
+test = false
 
 [[bench]]
-name = "formatter"
 harness = false
+name = "formatter"
 
 [dependencies]
 djangofmt = { path = "../djangofmt" }

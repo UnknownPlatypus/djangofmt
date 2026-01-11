@@ -1,76 +1,59 @@
 [workspace]
-members = ["crates/*"]
 resolver = "3"
+members = ["crates/*"]
 
 [workspace.package]
 version = "0.2.4"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
-license = "MIT"
-repository = "https://github.com/UnknownPlatypus/djangofmt"
 rust-version = "1.89"
+repository = "https://github.com/UnknownPlatypus/djangofmt"
+license = "MIT"
 
 [workspace.dependencies]
-# Formatting
-malva = { version = "0.15.1", features = ["config_serde"] }
-markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.1" }
-
-# CLI
 clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
-rayon = { version = "1.11.0" }
-serde = { version = "1.0.228", features = ["derive"] }
-serde-wasm-bindgen = { version = "0.6.5" }
-serde_json = { version = "1.0.148" }
-
-# Logging
 colored = { version = "3.0.0" }
+divan = { package = "codspeed-divan-compat", version = "*" }
+insta = { version = "=1.46.0", features = ["glob", "yaml"] }
+insta-cmd = { version = "=0.6.0" }
+malva = { version = "0.15.1", features = ["config_serde"] }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.0.1" }
+miette = { version = "7.6.0", features = ["fancy"] }
+rayon = { version = "1.11.0" }
+rstest = { version = "=0.26.1" }
+rustc-hash = { version = "2.1.1" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.148" }
+serde-wasm-bindgen = { version = "0.6.5" }
+serial_test = { version = "=3.3.1" }
+similar-asserts = { version = "=1.7.0" }
+strum = { version = "0.27.2", features = ["derive"] }
+strum_macros = { version = "0.27.2" }
+thiserror = { version = "2.0.17" }
+# This has to be kept in sync with src/main.rs where the allocator for the program is set.
+tikv-jemallocator = { version = "0.6.1" }
 tracing = { version = "0.1.44" }
 # Pin to avoid https://github.com/tokio-rs/tracing/issues/3369
 tracing-subscriber = { version = "=0.3.19" }
+tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
 tracing-tree = { version = "0.4.1" }
-
-# Error reporting
-miette = { version = "7.6.0", features = ["fancy"] }
-thiserror = { version = "2.0.17" }
-
-# WASM
 tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.106" }
 web-sys = { version = "0.3.83", features = ["console"] }
 
-# Benchmarking
-divan = { package = "codspeed-divan-compat", version = "*" }
-
-# Perf
-# This has to be kept in sync with src/main.rs where the allocator for the program is set.
-rustc-hash = { version = "2.1.1" }
-tikv-jemallocator = { version = "0.6.1" }
-
-# Misc
-strum = { version = "0.27.2", features = ["derive"] }
-strum_macros = { version = "0.27.2" }
-
-# Dev dependencies
-insta = { version = "=1.46.0", features = ["yaml", "glob"] }
-insta-cmd = { version = "=0.6.0" }
-rstest = { version = "=0.26.1" }
-serial_test = { version = "=3.3.1" }
-similar-asserts = { version = "=1.7.0" }
-tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
+[workspace.lints.clippy]
+missing_errors_doc = "allow"
+nursery = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+unwrap_used = "deny"
 
 [profile.release]
+strip = true
 # See python/benchmark_cargo_profiles.py
 lto = "thin"
-strip = true
 
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"
-
-[workspace.lints.clippy]
-pedantic = { level = "deny", priority = -1 }
-nursery = { level = "deny", priority = -1 }
-unwrap_used = "deny"
-missing_errors_doc = "allow"

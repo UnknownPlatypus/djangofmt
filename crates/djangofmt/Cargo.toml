@@ -3,35 +3,29 @@ name = "djangofmt"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
-exclude = ["/tests"]
-license.workspace = true
-publish = true
-repository.workspace = true
 rust-version.workspace = true
 description = "A fast, HTML aware, Django template formatter, written in Rust."
+repository.workspace = true
+license.workspace = true
+exclude = ["/tests"]
+publish = true
 
 [dependencies]
+clap = { workspace = true }
+clap_complete_command = { workspace = true }
+# Logging
+colored = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 malva = { workspace = true }
 markup_fmt = { workspace = true }
-
-clap = { workspace = true }
-clap_complete_command = { workspace = true }
+# Error reporting
+miette = { workspace = true }
 rayon = { workspace = true }
 serde_json = { workspace = true }
-
-# Logging
-colored = { workspace = true }
+thiserror = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-tree = { workspace = true }
-
-# Error reporting
-miette = { workspace = true }
-thiserror = { workspace = true }
-
-[target.'cfg(all(not(target_os = "macos"), not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
-tikv-jemallocator = { workspace = true, optional = true }
 
 [dev-dependencies]
 insta = { workspace = true }
@@ -41,9 +35,12 @@ serial_test = { workspace = true }
 similar-asserts = { workspace = true }
 tracing-test = { workspace = true }
 
+[target.'cfg(all(not(target_os = "macos"), not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
+tikv-jemallocator = { workspace = true, optional = true }
+
 [features]
-use-jemalloc = ["tikv-jemallocator"]
 default = ["use-jemalloc"]
+use-jemalloc = ["tikv-jemallocator"]
 
 [lints]
 workspace = true
