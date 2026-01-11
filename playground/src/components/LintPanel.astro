@@ -18,8 +18,8 @@ import LintWarning from "./icons/LintWarning.astro";
             data-text="`(${$lintErrorCount} error${$lintErrorCount === 1 ? '' : 's'})`"
         ></span>
     </summary>
-    <div id="lint-content" class="overflow-auto font-mono text-sm bg-base-300">
-        <pre id="lint-output" class="whitespace-pre-wrap p-4 text-base-content"></pre>
+    <div id="lintContent" class="overflow-auto font-mono text-sm bg-base-300">
+        <pre id="lintOutput" class="whitespace-pre-wrap p-4 text-base-content"></pre>
     </div>
 </details>
 
@@ -40,7 +40,7 @@ import LintWarning from "./icons/LintWarning.astro";
         startY = e.clientY;
         startHeight = content.offsetHeight;
         document.addEventListener('mousemove', onMouseMove);
-        handle.addEventListener('mouseup', onMouseUp);
+        document.addEventListener('mouseup', onMouseUp);
     });
 
     function onMouseMove(e: MouseEvent) {
