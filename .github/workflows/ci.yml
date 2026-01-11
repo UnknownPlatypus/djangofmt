@@ -96,7 +96,7 @@ jobs:
             echo -e "\n\n> [!CAUTION]\n> **Summary Truncated:** The original output was $(du -h ecosystem-result-format-stable | cut -f1), which exceeds GitHub's 1024k limit." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          head -c 1000k ecosystem-result-format-stable > "$GITHUB_STEP_SUMMARY"
+          head -c 1000k ecosystem-result-format-stable >> "$GITHUB_STEP_SUMMARY"
 
           cat ecosystem-result-format-stable >> ecosystem-result
 
