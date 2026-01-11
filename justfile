@@ -28,7 +28,7 @@ playground-dev: playground-wasm-build
 setup-bench-py:
     cargo build --release
     uv sync --project ./python/benchmarks -p 3.11
-    npm install --prefix ./python/benchmarks
+    npm ci --prefix ./python/benchmarks
 
 # Run python benchmarks on a directory of templates
 [working-directory: 'python/benchmarks']
