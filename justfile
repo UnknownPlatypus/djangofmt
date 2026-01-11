@@ -30,8 +30,9 @@ setup-bench-py:
     npm install --prefix ./python/benchmarks
 
 # Run python benchmarks on a directory of templates
-bench-py dir:
-    ./python/benchmarks/run_formatter.sh {{dir}}
+[working-directory: 'python/benchmarks']
+bench-py dir: setup-bench-py
+    uv run ./run_formatter.sh {{dir}}
 
 # Run rust micro-benchmarks
 bench-rs:
