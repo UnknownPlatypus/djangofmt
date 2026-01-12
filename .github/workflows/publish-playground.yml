@@ -20,7 +20,7 @@ on:
       - "playground/**"
 
 # Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
-permissions: {}
+permissions: { id-token: write }
 
 # Allow one concurrent deployment
 concurrency:
