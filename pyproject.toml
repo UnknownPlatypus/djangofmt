@@ -33,6 +33,8 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 
 [dependency-groups]
 dev = [
+  "djangofmt-benchmarks",
+  "djangofmt-ecosystem-check",
   "maturin[patchelf]>=1.10.2",
 ]
 
@@ -181,3 +183,13 @@ strict = true
 
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
+
+[tool.uv.workspace]
+members = [
+  "python/benchmarks",
+  "python/ecosystem-check",
+]
+
+[tool.uv.sources]
+djangofmt-benchmarks = { workspace = true }
+djangofmt-ecosystem-check = { workspace = true }

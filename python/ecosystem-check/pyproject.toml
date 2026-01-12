@@ -1,5 +1,5 @@
 [project]
-name = "ecosystem-check"
+name = "djangofmt-ecosystem-check"
 version = "0.0.0"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,10 +11,6 @@ dependencies = [
 
 [project.scripts]
 ecosystem-check = "ecosystem_check.cli:entrypoint"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
 [tool.ruff]
 unsafe-fixes = true

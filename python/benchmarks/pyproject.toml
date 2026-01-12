@@ -1,5 +1,5 @@
 [project]
-name = "scripts"
+name = "djangofmt-benchmarks"
 version = "0.0.1"
 description = "Benchmark scripts for djangofmt against similar tools"
 requires-python = ">=3.11"
