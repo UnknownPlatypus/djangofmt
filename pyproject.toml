@@ -1,6 +1,6 @@
 [project]
 name = "djangofmt"
-version = "0.2.4"
+version = "0.2.5"
 description = "A fast, HTML aware, Django template formatter, written in Rust."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -137,11 +137,14 @@ commit_preprocessors = [
 # Optionally sets the commit's scope and can decide to exclude commits from further processing.
 commit_parsers = [
   { message = "^feat", group = "<!-- 0 -->⛰️ Features" },
+  { message = "^fit", group = "<!-- 0 -->⛰️ Features" },
   { message = "^fix\\(deps\\)", skip = true },
   { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
   { message = "^doc", group = "<!-- 3 -->📚 Documentation" },
   { message = "^perf", group = "<!-- 4 -->⚡ Performance" },
+  { message = "^pref", group = "<!-- 4 -->⚡ Performance" },
   { message = "^refactor\\(clippy\\)", skip = true },
+  { message = "^refactor\\(perf\\)", group = "<!-- 4 -->⚡ Performance" },
   { message = "^refactor", group = "<!-- 2 -->🚜 Refactor" },
   { message = "^style", group = "<!-- 5 -->🎨 Styling" },
   { message = "^test", group = "<!-- 6 -->🧪 Testing" },

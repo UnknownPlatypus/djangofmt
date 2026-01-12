@@ -1,6 +1,45 @@
 # Changelog
 
-## [0.2.4](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.3..0.2.4) - 2025-12-15
+## [0.2.5](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.4..v0.2.5) - 2026-01-12
+
+### ⛰️ Features
+
+- *(debug)* Add debug logs on external formatter failures ([#143](https://github.com/UnknownPlatypus/djangofmt/issues/143)) - ([a5dda3b](https://github.com/UnknownPlatypus/djangofmt/commit/a5dda3bf4d11c94d0da4f667835d03074fb43cc2))
+- *(format)* Don't format django multiline comment tags (`{% comment %}...{% endcomment %}`) ([#162](https://github.com/UnknownPlatypus/djangofmt/issues/162)) - ([6a6ca10](https://github.com/UnknownPlatypus/djangofmt/commit/6a6ca106c3009fa85d7555b7f019f6c6de500620))
+- *(lint)* Show source file name in lint diagnostics ([#159](https://github.com/UnknownPlatypus/djangofmt/issues/159)) - ([6ee8c96](https://github.com/UnknownPlatypus/djangofmt/commit/6ee8c963af1bdefad0c6509f4f672be371e397aa))
+- *(lint)* Add building blocks for linting ([#144](https://github.com/UnknownPlatypus/djangofmt/issues/144)) - ([08a12a0](https://github.com/UnknownPlatypus/djangofmt/commit/08a12a05fb4037a8569b7ee10dfc49672058e682))
+- *(playground)* Add a "Open issue on Github" button in the playground ([#163](https://github.com/UnknownPlatypus/djangofmt/issues/163)) - ([ae247b3](https://github.com/UnknownPlatypus/djangofmt/commit/ae247b36c92434aa643c48515b017262312378a8))
+- *(playground)* Add a new collapsible panel to display linting errors ([#148](https://github.com/UnknownPlatypus/djangofmt/issues/148)) - ([067e4a0](https://github.com/UnknownPlatypus/djangofmt/commit/067e4a090d5a801cb31483461a90ed485797b4af))
+
+### 🐛 Bug Fixes
+
+- *(format)* Fixes handling of deprecated django `{% trans %}` tag ([#154](https://github.com/UnknownPlatypus/djangofmt/issues/154)) - ([8a7a64f](https://github.com/UnknownPlatypus/djangofmt/commit/8a7a64f041c7eecf4c04c84f3942a97e94ca578f))
+
+### 🚜 Refactor
+
+- *(format)* Remove `line_col_to_offset` and use miette `SourceOffset::from_location` for error reporting ([#145](https://github.com/UnknownPlatypus/djangofmt/issues/145)) - ([f8acc95](https://github.com/UnknownPlatypus/djangofmt/commit/f8acc953b8d34dd382c7e86b54f013b9fb5130e8))
+
+### ⚡ Performance
+
+- *(allocator)* Use jemalloc on linux ([#128](https://github.com/UnknownPlatypus/djangofmt/issues/128)) - ([4e92927](https://github.com/UnknownPlatypus/djangofmt/commit/4e92927ac3f3de5b2629ddcda446bd3b7462357f))
+- *(codspeed)* Setup Codspeed CI benchmarks ([#125](https://github.com/UnknownPlatypus/djangofmt/issues/125)) - ([0ea2b39](https://github.com/UnknownPlatypus/djangofmt/commit/0ea2b399dfd19c31b1d82c06c7cf10186f39456b))
+- *(perf)* Update the `lto` and `codegen-units` benchmark script ([#126](https://github.com/UnknownPlatypus/djangofmt/issues/126)) - ([ccd7edge](https://github.com/UnknownPlatypus/djangofmt/commit/ccd7edea4eaa3e30b2a1017b833d498b34b95c34))
+
+### 🧪 Testing
+
+- *(binary-size)* Add cargo-bloat ([#136](https://github.com/UnknownPlatypus/djangofmt/issues/136)) - ([2855cb2](https://github.com/UnknownPlatypus/djangofmt/commit/2855cb24535d75daa40d224e307f14f7729f41d5))
+- *(ci)* Skip codspeed in CI if no rust code changes ([#158](https://github.com/UnknownPlatypus/djangofmt/issues/158)) - ([8bf4432](https://github.com/UnknownPlatypus/djangofmt/commit/8bf4432cef316027a50324ce8dae9c54d480a459))
+- *(ci)* Cancel outdated ci jobs - ([18595c3](https://github.com/UnknownPlatypus/djangofmt/commit/18595c32391b441601fdd13d668f8fb32325b68a))
+- *(clippy)* Improve clippy configuration ([#156](https://github.com/UnknownPlatypus/djangofmt/issues/156)) - ([2de17b3](https://github.com/UnknownPlatypus/djangofmt/commit/2de17b3e70d3ec630e2f11cf28c3c5a86c949eaf))
+- *(pre-commit)* Switch to a managed `dprint` pre-commit integration ([#138](https://github.com/UnknownPlatypus/djangofmt/issues/138)) - ([1ccfba0](https://github.com/UnknownPlatypus/djangofmt/commit/1ccfba0f23dd5069aeb9ca3eb2709a82edf2a966))
+- *(pre-commit)* Simplify dprint discovery in pre-commit ([#137](https://github.com/UnknownPlatypus/djangofmt/issues/137)) - ([f4eb28c](https://github.com/UnknownPlatypus/djangofmt/commit/f4eb28c2ed38ac3a55f1aeb111749da32176b4ea))
+- *(review)* Add coderrabit ([#141](https://github.com/UnknownPlatypus/djangofmt/issues/141)) - ([bac6128](https://github.com/UnknownPlatypus/djangofmt/commit/bac6128b6f38dc2ac77dee8e8b727ab5b30b5f84))
+
+## New Contributors ❤️
+
+- @Mouarius made their first contribution in [#156](https://github.com/UnknownPlatypus/djangofmt/pull/156)
+
+## [0.2.4](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.3..v0.2.4) - 2025-12-15
 
 ### ⛰️ Features
 
@@ -21,12 +60,6 @@
 
 - *(rust)* Bump rust version to 1.89 ([#110](https://github.com/UnknownPlatypus/djangofmt/issues/110)) - ([dcf68aa](https://github.com/UnknownPlatypus/djangofmt/commit/dcf68aa2b68ff01dc8e959d32b7b31fff6173cfe))
 - Update release script - ([815fd8c](https://github.com/UnknownPlatypus/djangofmt/commit/815fd8c6470dfc19656b74412b72bf6f7a58e2bf))
-
-## New Contributors ❤️
-
-- @UnknownPlatypus made their first contribution in [#124](https://github.com/UnknownPlatypus/djangofmt/pull/124)
-- @renovate[bot] made their first contribution in [#119](https://github.com/UnknownPlatypus/djangofmt/pull/119)
-- @pre-commit-ci[bot] made their first contribution in [#109](https://github.com/UnknownPlatypus/djangofmt/pull/109)
 
 ## [0.2.3](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.2..v0.2.3) - 2025-11-30
 
