@@ -23,7 +23,9 @@ miette = { workspace = true }
 rayon = { workspace = true }
 serde.workspace = true
 serde_json = { workspace = true }
+tempfile = "3.24.0"
 thiserror = { workspace = true }
+toml = "0.9.11"
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-tree = { workspace = true }

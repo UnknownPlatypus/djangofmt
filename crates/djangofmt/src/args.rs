@@ -48,7 +48,7 @@ pub struct Args {
     pub command: Option<Commands>,
 }
 
-#[derive(Clone, Debug, clap::Parser, Deserialize)]
+#[derive(Clone, Debug, clap::Parser, Deserialize, PartialEq, Eq)]
 pub struct FormatCommandOptions {
     /// Set the line-length.
     #[arg(long, default_value = "120")]
@@ -69,6 +69,17 @@ pub struct FormatCommandOptions {
     pub custom_blocks: Option<Vec<String>>,
 }
 
+impl Default for FormatCommandOptions {
+    fn default() -> Self {
+        Self {
+            line_length: 120,
+            indent_width: 4,
+            profile: Profile::default(),
+            custom_blocks: vec![].into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, clap::Parser, Deserialize)]
 pub struct FormatCommand {
     /// List of files to format.
@@ -79,8 +90,9 @@ pub struct FormatCommand {
     pub options: FormatCommandOptions,
 }
 
-#[derive(Clone, Debug, clap::ValueEnum, Deserialize)]
+#[derive(Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
 pub enum Profile {
+    #[default]
     Django,
     Jinja,
 }
