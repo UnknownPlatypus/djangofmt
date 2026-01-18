@@ -1,6 +1,7 @@
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
+use serde::Deserialize;
 use std::path::PathBuf;
 
 use markup_fmt::Language;
@@ -47,11 +48,8 @@ pub struct Args {
     pub command: Option<Commands>,
 }
 
-#[derive(Clone, Debug, clap::Parser)]
-pub struct FormatCommand {
-    /// List of files to format.
-    #[arg(required = true)]
-    pub files: Vec<PathBuf>,
+#[derive(Clone, Debug, clap::Parser, Deserialize)]
+pub struct FormatCommandOptions {
     /// Set the line-length.
     #[arg(long, default_value = "120")]
     pub line_length: usize,
@@ -71,7 +69,17 @@ pub struct FormatCommand {
     pub custom_blocks: Option<Vec<String>>,
 }
 
-#[derive(Clone, Debug, clap::ValueEnum)]
+#[derive(Clone, Debug, clap::Parser, Deserialize)]
+pub struct FormatCommand {
+    /// List of files to format.
+    #[arg(required = true)]
+    pub files: Vec<PathBuf>,
+
+    #[command(flatten)]
+    pub options: FormatCommandOptions,
+}
+
+#[derive(Clone, Debug, clap::ValueEnum, Deserialize)]
 pub enum Profile {
     Django,
     Jinja,

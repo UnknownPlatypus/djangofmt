@@ -129,13 +129,17 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
 }
 
 pub fn format(args: FormatCommand) -> Result<ExitStatus> {
-    let config = FormatterConfig::new(args.line_length, args.indent_width, args.custom_blocks);
+    let config = FormatterConfig::new(
+        args.options.line_length,
+        args.options.indent_width,
+        args.options.custom_blocks,
+    );
 
     let start = Instant::now();
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, &args.profile))
+        .map(|entry| format_path(entry, &config, &args.options.profile))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
