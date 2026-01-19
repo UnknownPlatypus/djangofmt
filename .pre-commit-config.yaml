@@ -101,4 +101,3 @@ repos:
     hooks:
       - id: uv-lock
       - id: uv-sync
-        additional_dependencies: [keyring]
