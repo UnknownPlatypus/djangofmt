@@ -7,6 +7,8 @@ ci:
     - cargo-fmt
     - renovate-config-validator
     - tombi-format
+    - uv-lock
+    - uv-sync
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -94,3 +96,9 @@ repos:
           "--allow-staged",
           "--allow-dirty",
         ]
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 571189337017c8bdbf22a0977b9e44d33b5e5ae9  # frozen: 0.9.5
+    hooks:
+      - id: uv-lock
+      - id: uv-sync
+        additional_dependencies: [keyring]
