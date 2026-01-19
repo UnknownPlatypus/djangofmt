@@ -5,6 +5,7 @@ use markup_fmt::parser::Parser;
 use miette::{Diagnostic, NamedSource};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
@@ -106,7 +107,7 @@ impl CheckCommandError {
         }
     }
 }
-#[derive(Clone, Debug, clap::Parser)]
+#[derive(Clone, Debug, clap::Parser, Deserialize)]
 pub struct CheckCommand {
     /// List of files to check.
     #[arg(required = true)]

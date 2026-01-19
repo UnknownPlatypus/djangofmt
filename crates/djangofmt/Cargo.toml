@@ -12,6 +12,7 @@ publish = true
 
 [dependencies]
 clap = { workspace = true }
+clap-serde-derive = "0.2.1"
 clap_complete_command = { workspace = true }
 # Logging
 colored = { workspace = true }

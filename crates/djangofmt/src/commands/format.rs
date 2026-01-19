@@ -1,20 +1,23 @@
+use clap_serde_derive::ClapSerde;
 use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use std::{env, io};
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
-use crate::args::{FormatCommand, Profile};
+use crate::args::{FormatCommand, FormatCommandOptions, Profile};
 use crate::error::Result;
+use crate::pyproject::load_options;
 
 /// Pre-built configuration for all formatters.
+#[derive(Debug)]
 pub struct FormatterConfig {
     /// Config for main HTML/Jinja formatter
     pub markup: markup_fmt::config::FormatOptions,
@@ -33,6 +36,16 @@ impl FormatterConfig {
             markup: build_markup_options(print_width, indent_width, custom_blocks),
             malva: build_malva_config(print_width, indent_width),
         }
+    }
+}
+
+impl From<&FormatCommandOptions> for FormatterConfig {
+    fn from(options: &FormatCommandOptions) -> Self {
+        Self::new(
+            options.line_length.unwrap_or_default(),
+            options.indent_width.unwrap_or_default(),
+            options.custom_blocks.clone(),
+        )
     }
 }
 
@@ -129,17 +142,20 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
 }
 
 pub fn format(args: FormatCommand) -> Result<ExitStatus> {
-    let config = FormatterConfig::new(
-        args.options.line_length,
-        args.options.indent_width,
-        args.options.custom_blocks,
+    let config_options = env::current_dir().map_or_else(
+        |_| FormatCommandOptions::default(),
+        load_options,
     );
+    let mut args = args;
+    let options = config_options.merge(&mut args.options);
+    let formatter_config = FormatterConfig::from(&options);
+    let profile = options.profile.unwrap_or_default();
 
     let start = Instant::now();
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, &args.options.profile))
+        .map(|entry| format_path(entry, &formatter_config, &profile))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),

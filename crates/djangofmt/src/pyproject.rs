@@ -6,12 +6,12 @@ use std::{
 
 use crate::args::FormatCommandOptions;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct PyProject {
     tool: Option<Tool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 struct Tool {
     #[serde(default)]
     djangofmt: Option<FormatCommandOptions>,
@@ -95,10 +95,30 @@ mod tests {
         assert_eq!(
             result,
             FormatCommandOptions {
-                line_length: 200,
-                indent_width: 4,
+                line_length: Some(200),
+                indent_width: Some(4),
                 custom_blocks: Some(vec!["foo".to_string(), "bar".to_string()]),
-                profile: Profile::Django
+                profile: Some(Profile::Django)
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_options_from_incomplete_pyproject_toml() {
+        let temp_dir = tempdir().unwrap();
+        let pyproject_path = temp_dir.path().join("pyproject.toml");
+        let pyproject_content = r"
+            [tool.djangofmt]
+            line_length=200
+            ";
+
+        fs::write(&pyproject_path, pyproject_content).unwrap();
+        let result = load_options(&pyproject_path);
+        assert_eq!(
+            result,
+            FormatCommandOptions {
+                line_length: Some(200),
+                ..Default::default()
             }
         );
     }
@@ -107,6 +127,17 @@ mod tests {
     fn test_load_options_returns_default_when_no_pyproject_toml() {
         let temp_dir = tempdir().unwrap();
         let result = load_options(temp_dir.path());
+        assert_eq!(result, FormatCommandOptions::default());
+    }
+
+    #[test]
+    fn test_load_options_returns_default_when_empty_pyproject_toml() {
+        let temp_dir = tempdir().unwrap();
+        let pyproject_path = temp_dir.path().join("pyproject.toml");
+        let pyproject_content = r"";
+        fs::write(&pyproject_path, pyproject_content).unwrap();
+        let result = load_options(&pyproject_path);
+        println!("{result:?}");
         assert_eq!(result, FormatCommandOptions::default());
     }
 }
