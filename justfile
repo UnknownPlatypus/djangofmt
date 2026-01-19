@@ -26,7 +26,7 @@ playground-dev: playground-wasm-build
 
 # Setup python benchmarks
 setup-bench-py:
-    cargo build --release
+    cargo build --release -p djangofmt
     uv sync --project ./python/benchmarks -p 3.11
     npm ci --prefix ./python/benchmarks
 
@@ -41,12 +41,12 @@ bench-rs:
 
 # Run ecosystem checks with custom baseline and comparison executables
 ecosystem-check baseline comparison *args:
-    cargo build
+    cargo build -p djangofmt
     uv run ecosystem-check format {{baseline}} {{comparison}} --cache-dir /tmp/repos {{args}}
 
 # Run ecosystem checks comparing debug build to system djangofmt
 ecosystem-check-dev:
-    cargo build
+    cargo build -p djangofmt
     uv run ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir /tmp/repos
 
 # Clean ecosystem check git repos cache
