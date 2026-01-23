@@ -198,6 +198,19 @@ Djangofmt doesn't accept and will produce parsing errors for any syntax that cou
 
 This is generally discouraged and should be avoided because it's an easy way to create invalid HTML.
 
+You can almost always write it another way that is much more readable. For example:
+
+```diff
+-<div {{ attr_name }}{% if not boolean_attr %}="{{ attr_value }}"{% endif %}></div>
++<div
++    {% if boolean_attr %}
++        {{ attr_name }}
++    {% else %}
++        {{ attr_name }}="{{ attr_value }}"
++    {% endif %}
++></div>
+```
+
 See upstream tracking issue: https://github.com/g-plane/markup_fmt/issues/97
 
 ## `.svg` files support
