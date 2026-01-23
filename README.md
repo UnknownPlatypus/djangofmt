@@ -144,6 +144,18 @@ This makes it possible to accommodate the 2 following use cases:
 
 See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for the rationale.
 
+### Disabling formatting
+
+To disable formatting for an entire file, add `<!-- djangofmt:ignore -->` at the very top of the file.
+
+To disable formatting for a specific node, prefix it with the same comment:
+
+```html
+<!-- djangofmt:ignore -->
+<div   class="keep-this-unformatted"   >Content</div>
+<div class="this-will-be-formatted">Content</div>
+```
+
 ## Known limitations
 
 ### `style` attributes formatting
