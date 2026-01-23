@@ -1,0 +1,48 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in djangofmt
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what is not working.
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: input
+    id: playground-link
+    attributes:
+      label: Playground link
+      description: Link to the playground reproducing the issue (if applicable).
+      placeholder: https://unknownplatypus.github.io/djangofmt/?...
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+      description: What you expected the formatted output to look like.
+      placeholder: |
+        {% block content %}
+            {{ variable }}
+        {% endblock %}
+      render: django
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: djangofmt version
+      description: The version of djangofmt you're using (run `djangofmt --version`).
+      placeholder: "0.2.5"
+    validations:
+      required: true
