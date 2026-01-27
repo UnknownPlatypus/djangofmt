@@ -1,13 +1,16 @@
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
+use clap_serde_derive::ClapSerde;
+pub use clap_serde_derive::ClapSerde as ClapSerdeTrait;
+use serde::Deserialize;
 use std::path::PathBuf;
 
 use markup_fmt::Language;
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands
-#[derive(Debug, Default, Clone, clap::Args)]
+#[derive(Debug, Default, Clone, clap::Args, Deserialize)]
 pub struct GlobalConfigArgs {
     #[clap(flatten)]
     log_level_args: LogLevelArgs,
@@ -47,20 +50,17 @@ pub struct Args {
     pub command: Option<Commands>,
 }
 
-#[derive(Clone, Debug, clap::Parser)]
-pub struct FormatCommand {
-    /// List of files to format.
-    #[arg(required = true)]
-    pub files: Vec<PathBuf>,
+#[derive(ClapSerde, Clone, Debug, PartialEq, Eq, Deserialize, clap::Parser)]
+pub struct FormatCommandOptions {
     /// Set the line-length.
-    #[arg(long, default_value = "120")]
-    pub line_length: usize,
+    #[arg(long)]
+    pub line_length: Option<usize>,
     /// Set the indent width.
-    #[arg(long, default_value = "4")]
-    pub indent_width: usize,
+    #[arg(long)]
+    pub indent_width: Option<usize>,
     /// Template language profile to use
-    #[arg(long, value_enum, default_value = "django")]
-    pub profile: Profile,
+    #[arg(long, value_enum)]
+    pub profile: Option<Profile>,
     /// Comma-separated list of custom block name to enable
     #[arg(
         long,
@@ -71,8 +71,39 @@ pub struct FormatCommand {
     pub custom_blocks: Option<Vec<String>>,
 }
 
-#[derive(Clone, Debug, clap::ValueEnum)]
+#[derive(clap::Parser, Deserialize, Default)]
+pub struct FormatCommand {
+    /// List of files to format.
+    #[arg(required = true)]
+    pub files: Vec<PathBuf>,
+
+    /// Configuration options
+    #[command(flatten)]
+    pub options: <FormatCommandOptions as ClapSerde>::Opt,
+}
+impl std::fmt::Debug for ClapSerdeOptionalFormatCommandOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ClapSerdeOptionalFormatCommandOptions")
+            .field("line_length", &self.line_length)
+            .field("indent_width", &self.indent_width)
+            .field("profile", &self.profile)
+            .field("custom_blocks", &self.custom_blocks)
+            .finish()
+    }
+}
+
+impl std::fmt::Debug for FormatCommand {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FormatCommand")
+            .field("files", &self.files)
+            .field("options", &"<FormatCommandOptionsOpt>")
+            .finish()
+    }
+}
+
+#[derive(Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
 pub enum Profile {
+    #[default]
     Django,
     Jinja,
 }
@@ -101,7 +132,7 @@ pub enum Commands {
 }
 
 #[allow(clippy::module_name_repetitions)]
-#[derive(Debug, Default, Clone, clap::Args)]
+#[derive(Debug, Default, Clone, clap::Args, Deserialize)]
 pub struct LogLevelArgs {
     /// Enable verbose logging.
     #[arg(
