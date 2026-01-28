@@ -27,7 +27,6 @@ rustc-hash = { version = "2.1.1" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.148" }
 serde-wasm-bindgen = { version = "0.6.5" }
-serial_test = { version = "=3.3.1" }
 similar-asserts = { version = "=1.7.0" }
 strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = { version = "0.27.2" }

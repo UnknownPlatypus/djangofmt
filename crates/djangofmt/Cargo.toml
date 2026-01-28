@@ -31,7 +31,6 @@ tracing-tree = { workspace = true }
 insta = { workspace = true }
 insta-cmd = { workspace = true }
 rstest = { workspace = true }
-serial_test = { workspace = true }
 similar-asserts = { workspace = true }
 tracing-test = { workspace = true }
 
