@@ -31,4 +31,4 @@ knowledge_base:
 
 issue_enrichment:
   auto_enrich:
-    enabled: true
+    enabled: false
