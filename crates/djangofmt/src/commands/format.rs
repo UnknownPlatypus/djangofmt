@@ -155,7 +155,10 @@ pub fn format(args: FormatCommand) -> Result<ExitStatus> {
     }
 
     // Report on the formatting changes.
-    write_summary(results.as_ref());
+    let summary = build_summary(results.as_ref());
+    if !summary.is_empty() {
+        info!("{} !", summary);
+    }
 
     if nb_errors == 0 {
         Ok(ExitStatus::Success)
@@ -347,7 +350,7 @@ enum FormatResult {
 }
 
 /// Write a summary of the formatting results to stdout.
-fn write_summary(results: &[FormatResult]) {
+fn build_summary(results: &[FormatResult]) -> String {
     let mut counts = HashMap::new();
     for val in results {
         *counts.entry(val).or_insert(0) += 1;
@@ -374,9 +377,7 @@ fn write_summary(results: &[FormatResult]) {
     })
     .collect();
 
-    if !parts.is_empty() {
-        info!("{} !", parts.join(", "));
-    }
+    parts.join(", ")
 }
 
 #[cfg(test)]
@@ -384,8 +385,6 @@ mod tests {
     use super::*;
 
     use rstest::rstest;
-    use serial_test::serial;
-    use tracing_test::traced_test;
     #[test]
     fn format_command_error_read_display() {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
@@ -422,22 +421,22 @@ mod tests {
         let err = FormatCommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
     }
-    #[traced_test]
+
     #[rstest]
     #[case(vec![], "")]
-    #[case(vec![FormatResult::Formatted], "1 file reformatted !")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files reformatted !")]
-    #[case(vec![FormatResult::Unchanged], "1 file left unchanged !")]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged], "2 files left unchanged !")]
-    #[case(vec![FormatResult::Skipped], "1 file skipped !")]
-    #[case(vec![FormatResult::Skipped, FormatResult::Skipped], "2 files skipped !")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file reformatted, 1 file left unchanged !")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Formatted, FormatResult::Unchanged], "2 files reformatted, 1 file left unchanged !")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Skipped], "1 file reformatted, 1 file skipped !")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Skipped, FormatResult::Skipped], "1 file reformatted, 2 files skipped !")]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Skipped], "1 file left unchanged, 1 file skipped !")]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged, FormatResult::Skipped], "2 files left unchanged, 1 file skipped !")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged, FormatResult::Skipped], "1 file reformatted, 1 file left unchanged, 1 file skipped !")]
+    #[case(vec![FormatResult::Formatted], "1 file reformatted")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files reformatted")]
+    #[case(vec![FormatResult::Unchanged], "1 file left unchanged")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged], "2 files left unchanged")]
+    #[case(vec![FormatResult::Skipped], "1 file skipped")]
+    #[case(vec![FormatResult::Skipped, FormatResult::Skipped], "2 files skipped")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file reformatted, 1 file left unchanged")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Formatted, FormatResult::Unchanged], "2 files reformatted, 1 file left unchanged")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Skipped], "1 file reformatted, 1 file skipped")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Skipped, FormatResult::Skipped], "1 file reformatted, 2 files skipped")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Skipped], "1 file left unchanged, 1 file skipped")]
+    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged, FormatResult::Skipped], "2 files left unchanged, 1 file skipped")]
+    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged, FormatResult::Skipped], "1 file reformatted, 1 file left unchanged, 1 file skipped")]
     #[case(vec![
         FormatResult::Formatted,
         FormatResult::Formatted,
@@ -445,21 +444,8 @@ mod tests {
         FormatResult::Skipped,
         FormatResult::Skipped,
         FormatResult::Skipped,
-    ], "2 files reformatted, 1 file left unchanged, 3 files skipped !")]
-    #[serial]
+    ], "2 files reformatted, 1 file left unchanged, 3 files skipped")]
     fn test_write_summary(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
-        write_summary(&results);
-
-        if expected.is_empty() {
-            logs_assert(|lines: &[&str]| {
-                if lines.is_empty() {
-                    Ok(())
-                } else {
-                    Err("Expected no logs, but found some".into())
-                }
-            });
-        } else {
-            assert!(logs_contain(expected));
-        }
+        assert_eq!(build_summary(&results), expected);
     }
 }
