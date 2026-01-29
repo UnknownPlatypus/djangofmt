@@ -81,11 +81,11 @@ benchmark-git-repo repo_path:
     # This allows 'git checkout .' to work between hyperfine runs
     git init -q
     git add .
-    git commit -m "initial" -q
+    git -c user.email="benchmark@local" -c user.name="benchmark" commit -m "initial" -q
 
     # 4. Generate the file list for xargs
-    find . -type f -name "*.html" > "$FILES_LIST"
-    FILE_COUNT=$(wc -l < "$FILES_LIST")
+    find . -type f -name "*.html" -print0 > "$FILES_LIST"
+    FILE_COUNT=$(tr -cd '\0' < "$FILES_LIST" | wc -c)
 
     if [ "$FILE_COUNT" -eq 0 ]; then
         echo "Error: No HTML files found in $REPO_DIR"
@@ -95,10 +95,8 @@ benchmark-git-repo repo_path:
     echo "Found $FILE_COUNT HTML files to benchmark"
 
     # 5. Setup commands
-    XARGS_FILES="cat $FILES_LIST | xargs"
-    DEV_CMD="$XARGS_FILES $DJANGOFMT_DEV --profile django --line-length 120"
-    SYS_CMD="$XARGS_FILES djangofmt --profile django --line-length 120"
-
+    DEV_CMD="xargs -0 \"$DJANGOFMT_DEV\" --profile django --line-length 120 < \"$FILES_LIST\""
+    SYS_CMD="xargs -0 djangofmt --profile django --line-length 120 < \"$FILES_LIST\""
     # Get versions
     DEV_VERSION=$("$DJANGOFMT_DEV" --version | cut -d" " -f2)
     SYS_VERSION=$(djangofmt --version 2>/dev/null | cut -d" " -f2 || echo "not found")
