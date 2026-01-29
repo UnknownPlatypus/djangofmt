@@ -52,3 +52,63 @@ ecosystem-check-dev:
 # Clean ecosystem check git repos cache
 ecosystem-check-clean-cache:
     rm -rf /tmp/repos
+
+# Benchmark dev vs system djangofmt on HTML files
+benchmark-git-repo repo_path:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    REPO_DIR=$(realpath "{{repo_path}}")
+    ROOT_DIR=$(pwd)
+    TEMP_DIR="/tmp/benchmark-djangofmt-$(date +%Y-%m-%dT%H:%M:%S%Z)"
+    DJANGOFMT_DEV="$ROOT_DIR/target/release/djangofmt"
+    FILES_LIST="$TEMP_DIR/files.txt"
+
+    # 1. Build release version
+    echo "Building release version of djangofmt..."
+    cargo build -p djangofmt --release
+
+    # 2. Create clean environment & selectively copy HTML
+    echo "Creating lean benchmark environment at $TEMP_DIR..."
+    mkdir -p "$TEMP_DIR"
+
+    # Use rsync to mirror ONLY the directory structure and .html files
+    rsync -am --include='*.html' --include='*/' --exclude='*' "$REPO_DIR/" "$TEMP_DIR/"
+
+    cd "$TEMP_DIR"
+
+    # 3. Initialize a fresh git repo for the benchmark reset logic
+    # This allows 'git checkout .' to work between hyperfine runs
+    git init -q
+    git add .
+    git commit -m "initial" -q
+
+    # 4. Generate the file list for xargs
+    find . -type f -name "*.html" > "$FILES_LIST"
+    FILE_COUNT=$(wc -l < "$FILES_LIST")
+
+    if [ "$FILE_COUNT" -eq 0 ]; then
+        echo "Error: No HTML files found in $REPO_DIR"
+        exit 1
+    fi
+
+    echo "Found $FILE_COUNT HTML files to benchmark"
+
+    # 5. Setup commands
+    XARGS_FILES="cat $FILES_LIST | xargs"
+    DEV_CMD="$XARGS_FILES $DJANGOFMT_DEV --profile django --line-length 120"
+    SYS_CMD="$XARGS_FILES djangofmt --profile django --line-length 120"
+
+    # Get versions
+    DEV_VERSION=$("$DJANGOFMT_DEV" --version | cut -d" " -f2)
+    SYS_VERSION=$(djangofmt --version 2>/dev/null | cut -d" " -f2 || echo "not found")
+
+    echo "Benchmarking dev ($DEV_VERSION) vs system ($SYS_VERSION)"
+
+    # 6. Run benchmark
+    # We reset files to unformatted state before every single run
+    hyperfine --ignore-failure \
+        --warmup 1 \
+        --prepare "git checkout . -q" \
+        "$DEV_CMD" \
+        "$SYS_CMD"
