@@ -43,7 +43,7 @@ jobs:
       - name: Build the benchmark target(s)
         run: cargo codspeed build -p djangofmt_benchmark --profile release
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@ac0b0207a067aeb38de75cda57d2662345cac92a # v4.10.0
+        uses: CodSpeedHQ/action@208425962c215de49ed713e18c4b9bde9bda5c52 # v4.10.2
         with:
           mode: simulation
           run: cargo codspeed run -p djangofmt_benchmark
