@@ -19,7 +19,7 @@ divan = { package = "codspeed-divan-compat", version = "*" }
 insta = { version = "=1.46.3", features = ["glob", "yaml"] }
 insta-cmd = { version = "=0.6.0" }
 malva = { version = "0.15.1", features = ["config_serde"] }
-markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "6d436adfd0d285ef14abe6d89cac143aa0177bb5" }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "a00a7e4da502b92dc2d19f6d15f1c4bdfeccdfed" }
 miette = { version = "7.6.0", features = ["fancy"] }
 rayon = { version = "1.11.0" }
 rstest = { version = "=0.26.1" }
