@@ -52,14 +52,14 @@
     {
       // Disable automatic updates for markup_fmt, updates are handled manually
       matchManagers: ["cargo"],
-      matchPackageNames: ["markup_fmt"],
+      matchDepNames: ["markup_fmt"],
       enabled: false,
       description: "Disable updates for markup_fmt due to known issue"
     },
     {
       // Pin tracing-subscriber to avoid https://github.com/tokio-rs/tracing/issues/3369
       matchManagers: ["cargo"],
-      matchPackageNames: ["tracing-subscriber"],
+      matchDepNames: ["tracing-subscriber"],
       enabled: false,
       description: "Disable updates for tracing-subscriber due to known issue",
     }
