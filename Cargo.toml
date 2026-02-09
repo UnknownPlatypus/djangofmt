@@ -16,7 +16,7 @@ clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 colored = { version = "3.0.0" }
 divan = { package = "codspeed-divan-compat", version = "*" }
-insta = { version = "=1.46.2", features = ["glob", "yaml"] }
+insta = { version = "=1.46.3", features = ["glob", "yaml"] }
 insta-cmd = { version = "=0.6.0" }
 malva = { version = "0.15.1", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "47a629f797cb336669d049bb4c932adc9ee456b4" }
