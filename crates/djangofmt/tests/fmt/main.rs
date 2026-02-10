@@ -24,12 +24,12 @@ fn run_format_test(path: &Path, input: &str) -> String {
     let config = FormatterConfig::new(120, 4, None);
     let profile = Profile::Django;
 
-    let output = format_text(input, &config, &profile)
+    let output = format_text(input, &config, profile)
         .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))
         .expect("Failed to format text in test")
         .unwrap_or_else(|| input.to_string());
     // Stability test: format the output again and ensure it's the same
-    let regression_format = format_text(&output, &config, &profile)
+    let regression_format = format_text(&output, &config, profile)
         .map_err(|err| {
             format!(
                 "syntax error in stability test '{}': {:?}",

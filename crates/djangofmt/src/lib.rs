@@ -5,7 +5,9 @@ use std::process::ExitCode;
 pub mod args;
 pub mod commands;
 pub mod error;
+pub mod line_width;
 mod logging;
+pub mod pyproject;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {
@@ -49,7 +51,7 @@ pub fn run(
             shell.generate(&mut Args::command(), &mut std::io::stdout());
             Ok(ExitStatus::Success)
         }
-        None => commands::format::format(fmt),
+        None => commands::format::format(&fmt),
     }
 }
 

@@ -5,9 +5,10 @@ import IconPlus from "./icons/IconPlus.astro";
 interface Props {
   signalName: string;
   title: string;
+  max: number;
 }
 
-const { signalName, title } = Astro.props;
+const { signalName, title, max } = Astro.props;
 ---
 
 <fieldset class="fieldset">
@@ -26,13 +27,15 @@ const { signalName, title } = Astro.props;
             type="number"
             class="join-item text-center font-mono w-full"
             min="1"
-            max="10000"
-            title="Must be between 1 and 10000"
+            max={max}
+            title={`Must be between 1 and ${max}`}
             data-bind={signalName}
+            data-on:input={`if ($${signalName} < 1) $${signalName} = 1; else if ($${signalName} > ${max}) $${signalName} = ${max}`}
         >
         <button
             class="join-item text-xl cursor-pointer px-2 h-full disabled:bg-base-content/10 disabled:border-0"
-            data-on:click={`$${signalName}++`}
+            data-on:click={`if ($${signalName} < ${max}) $${signalName}++`}
+            data-attr:disabled={`$${signalName} == ${max}`}
         >
             <IconPlus />
         </button>

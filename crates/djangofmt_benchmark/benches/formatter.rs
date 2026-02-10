@@ -22,7 +22,7 @@ fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
         format_text(
             divan::black_box(template.code),
             divan::black_box(&config),
-            divan::black_box(&template.profile),
+            divan::black_box(template.profile),
         )
         .expect("Formatting to succeed")
     });

@@ -17,7 +17,7 @@ pub fn format(
     let profile = get_profile(profile);
     let config = FormatterConfig::new(line_length, indent_width, None);
 
-    format_text(source, &config, &profile)
+    format_text(source, &config, profile)
         .map(|opt| opt.unwrap_or_else(|| source.to_string()))
         .map_err(into_error)
 }
@@ -44,7 +44,7 @@ pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
 
 fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let profile = get_profile(profile);
-    let mut parser = Parser::new(source, markup_fmt::Language::from(&profile), vec![]);
+    let mut parser = Parser::new(source, markup_fmt::Language::from(profile), vec![]);
     let ast = match parser.parse_root() {
         Ok(ast) => ast,
         Err(e) => {
