@@ -1,6 +1,8 @@
+use crate::line_width::{IndentWidth, LineLength};
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
+use serde::Deserialize;
 use std::path::PathBuf;
 
 use markup_fmt::Language;
@@ -52,15 +54,15 @@ pub struct FormatCommand {
     /// List of files to format.
     #[arg(required = true)]
     pub files: Vec<PathBuf>,
-    /// Set the line-length.
-    #[arg(long, default_value = "120")]
-    pub line_length: usize,
-    /// Set the indent width.
-    #[arg(long, default_value = "4")]
-    pub indent_width: usize,
-    /// Template language profile to use
-    #[arg(long, value_enum, default_value = "django")]
-    pub profile: Profile,
+    /// Set the line-length [default: 120]
+    #[arg(long)]
+    pub line_length: Option<LineLength>,
+    /// Set the indent width [default: 4]
+    #[arg(long)]
+    pub indent_width: Option<IndentWidth>,
+    /// Template language profile to use [default: django]
+    #[arg(long, value_enum)]
+    pub profile: Option<Profile>,
     /// Comma-separated list of custom block name to enable
     #[arg(
         long,
@@ -71,14 +73,15 @@ pub struct FormatCommand {
     pub custom_blocks: Option<Vec<String>>,
 }
 
-#[derive(Clone, Debug, clap::ValueEnum)]
+#[derive(Copy, Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
 pub enum Profile {
+    #[default]
     Django,
     Jinja,
 }
 
-impl From<&Profile> for Language {
-    fn from(profile: &Profile) -> Self {
+impl From<Profile> for Language {
+    fn from(profile: Profile) -> Self {
         match profile {
             Profile::Django => Self::Django,
             Profile::Jinja => Self::Jinja,
@@ -190,6 +193,34 @@ mod tests {
         djangofmt 0.2.5
 
         ----- stderr -----
+        "###);
+    }
+
+    #[test]
+    fn test_cli_invalid_line_length() {
+        assert_cmd_snapshot!(cli().args(["--line-length", "321", "test.html"]), @r###"
+        success: false
+        exit_code: 2
+        ----- stdout -----
+
+        ----- stderr -----
+        error: invalid value '321' for '--line-length <LINE_LENGTH>': line-length must be between 1 and 320 (got 321)
+
+        For more information, try '--help'.
+        "###);
+    }
+
+    #[test]
+    fn test_cli_invalid_indent_width() {
+        assert_cmd_snapshot!(cli().args(["--indent-width", "17", "test.html"]), @r###"
+        success: false
+        exit_code: 2
+        ----- stdout -----
+
+        ----- stderr -----
+        error: invalid value '17' for '--indent-width <INDENT_WIDTH>': indent-width must be between 1 and 16 (got 17)
+
+        For more information, try '--help'.
         "###);
     }
 }

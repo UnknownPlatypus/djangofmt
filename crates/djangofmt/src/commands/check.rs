@@ -21,7 +21,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
-        .map(|path| check_path(path, &args.profile))
+        .map(|path| check_path(path, args.profile))
         .partition_map(|result| match result {
             Ok(diags) => Left(diags),
             Err(err) => Right(err),
@@ -63,7 +63,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
 #[tracing::instrument(level = "debug", skip_all, fields(path = %path.display()))]
 fn check_path(
     path: &Path,
-    profile: &Profile,
+    profile: Profile,
 ) -> std::result::Result<FileDiagnostics, Box<CheckCommandError>> {
     let source = fs::read_to_string(path)
         .map_err(|err| CheckCommandError::Read(Some(path.to_path_buf()), err))?;

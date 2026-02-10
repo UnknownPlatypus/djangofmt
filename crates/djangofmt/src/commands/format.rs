@@ -4,15 +4,16 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use std::{env, io};
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
 use crate::error::Result;
+use crate::pyproject::{PyprojectSettings, load_options};
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -33,6 +34,27 @@ impl FormatterConfig {
             markup: build_markup_options(print_width, indent_width, custom_blocks),
             malva: build_malva_config(print_width, indent_width),
         }
+    }
+
+    /// Build a [`FormatterConfig`] by merging CLI arguments with pyproject.toml settings.
+    ///
+    /// CLI arguments take precedence over pyproject settings, which take precedence over defaults.
+    #[must_use]
+    pub fn from_args(args: &FormatCommand, pyproject: &PyprojectSettings) -> Self {
+        let line_length = args
+            .line_length
+            .or(pyproject.line_length)
+            .unwrap_or_default();
+        let indent_width = args
+            .indent_width
+            .or(pyproject.indent_width)
+            .unwrap_or_default();
+        let custom_blocks = args
+            .custom_blocks
+            .clone()
+            .or_else(|| pyproject.custom_blocks.clone());
+
+        Self::new(line_length.value(), indent_width.value(), custom_blocks)
     }
 }
 
@@ -128,14 +150,17 @@ fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config:
     }
 }
 
-pub fn format(args: FormatCommand) -> Result<ExitStatus> {
-    let config = FormatterConfig::new(args.line_length, args.indent_width, args.custom_blocks);
+pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
+    let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
+
+    let profile = args.profile.or(pyproject.profile).unwrap_or_default();
+    let config = FormatterConfig::from_args(args, &pyproject);
 
     let start = Instant::now();
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = args
         .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, &args.profile))
+        .map(|entry| format_path(entry, &config, profile))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
@@ -171,7 +196,7 @@ pub fn format(args: FormatCommand) -> Result<ExitStatus> {
 pub fn format_text(
     source: &str,
     config: &FormatterConfig,
-    profile: &Profile,
+    profile: Profile,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError<crate::error::Error>> {
     if source.starts_with(DJANGOFMT_IGNORE_COMMENT) {
         return Ok(None);
@@ -224,7 +249,7 @@ pub fn format_text(
 fn format_path(
     path: &Path,
     config: &FormatterConfig,
-    profile: &Profile,
+    profile: Profile,
 ) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;

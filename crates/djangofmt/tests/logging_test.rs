@@ -15,7 +15,7 @@ invalid-css-property;
     let config = FormatterConfig::new(120, 4, None);
     let profile = Profile::Django;
 
-    format_text(input, &config, &profile).unwrap();
+    format_text(input, &config, profile).unwrap();
     assert!(logs_contain(
         "Failed to format CSS, falling back to original code"
     ));

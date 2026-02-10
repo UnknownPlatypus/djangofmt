@@ -32,7 +32,7 @@ fn run_parse_error_test(path: &path::Path, input: &str) -> String {
     // Use just the filename for display to avoid absolute paths in snapshots
     let display_path = path.file_name().map(Path::new).map(Path::to_path_buf);
 
-    match format_str(input, display_path, &options, &Profile::Django) {
+    match format_str(input, display_path, &options, Profile::Django) {
         Ok(_) => format!(
             "Expected parse error for '{}' but formatting succeeded",
             path.file_name().unwrap_or_default().to_string_lossy()
@@ -45,7 +45,7 @@ fn format_str(
     input: &str,
     name: Option<PathBuf>,
     format_options: &FormatOptions,
-    profile: &Profile,
+    profile: Profile,
 ) -> Result<String, ParseError> {
     let format_result = format_text(input, Language::from(profile), format_options, |code, _| {
         Ok::<_, ()>(Cow::from(code))

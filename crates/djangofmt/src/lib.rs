@@ -51,7 +51,7 @@ pub fn run(
             shell.generate(&mut Args::command(), &mut std::io::stdout());
             Ok(ExitStatus::Success)
         }
-        None => commands::format::format(fmt),
+        None => commands::format::format(&fmt),
     }
 }
 
