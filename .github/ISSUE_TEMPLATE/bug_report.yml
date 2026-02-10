@@ -43,6 +43,6 @@ body:
     attributes:
       label: djangofmt version
       description: The version of djangofmt you're using (run `djangofmt --version`).
-      placeholder: "0.2.5"
+      placeholder: "0.2.6"
     validations:
       required: true

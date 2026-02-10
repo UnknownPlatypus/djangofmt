@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.6](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.5..v0.2.6) - 2026-02-10
+
+### ⛰️ Features
+
+- *(config)* Implement loading options from a `pyproject.toml` file ([#186](https://github.com/UnknownPlatypus/djangofmt/issues/186)) - ([5df4a98](https://github.com/UnknownPlatypus/djangofmt/commit/5df4a989fe69114f6149a86a795de3ac684d2512))
+
+### 🐛 Bug Fixes
+
+- *(format)* Always swap wrapping quotes if attribute contains one ([#180](https://github.com/UnknownPlatypus/djangofmt/issues/180)) - ([0fd9ed3](https://github.com/UnknownPlatypus/djangofmt/commit/0fd9ed3e4a74939caba33eb9c7adac61c950b79e))
+- *(format)* Fix formatting of `{% for %}`/`{% empty %}` blocks ([#178](https://github.com/UnknownPlatypus/djangofmt/issues/178)) - ([98f8ef7](https://github.com/UnknownPlatypus/djangofmt/commit/98f8ef7b0db7552b22bcfcc2eac6165ee5a4905b))
+
+### 📚 Documentation
+
+- *(format)* Documents workarounds for unsupported formatting ([#174](https://github.com/UnknownPlatypus/djangofmt/issues/174)) - ([15b1f32](https://github.com/UnknownPlatypus/djangofmt/commit/15b1f324df68e15b34e774ed3f023378f2de10f0))
+- *(github)* Add Github issue template ([#173](https://github.com/UnknownPlatypus/djangofmt/issues/173)) - ([5821c07](https://github.com/UnknownPlatypus/djangofmt/commit/5821c0725d140382334ad2a48dfdbc439d7a1fbf))
+- *(ignore)* Document ignore comment ([#172](https://github.com/UnknownPlatypus/djangofmt/issues/172)) - ([50a2fdd](https://github.com/UnknownPlatypus/djangofmt/commit/50a2fddb336570bf14173f90dd282fffd23adeef))
+
+### 🧪 Testing
+
+- *(ci)* Only build djangofmt in ci, not other workspace crates ([#170](https://github.com/UnknownPlatypus/djangofmt/issues/170)) - ([7bbbfc8](https://github.com/UnknownPlatypus/djangofmt/commit/7bbbfc8f66a3d5f018a55355366c6d72ea8db5b9))
+
 ## [0.2.5](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.4..v0.2.5) - 2026-01-12
 
 ### ⛰️ Features
