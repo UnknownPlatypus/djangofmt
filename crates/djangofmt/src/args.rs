@@ -74,6 +74,7 @@ pub struct FormatCommand {
 }
 
 #[derive(Copy, Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
 pub enum Profile {
     #[default]
     Django,

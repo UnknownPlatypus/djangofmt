@@ -3,7 +3,7 @@ use std::{
     fs,
     path::{Path, PathBuf},
 };
-use tracing::warn;
+use tracing::{debug, warn};
 
 use crate::args::Profile;
 use crate::line_width::{IndentWidth, LineLength};
@@ -54,10 +54,23 @@ fn find_pyproject_toml<P: AsRef<Path>>(start_path: P) -> Option<PathBuf> {
 /// Loads user configured options from the nearest `pyproject.toml` file from the given path
 pub fn load_options<P: AsRef<Path>>(start_path: P) -> PyprojectSettings {
     let Some(pyproject_path) = find_pyproject_toml(start_path.as_ref()) else {
+        debug!(
+            "No pyproject.toml found starting search from: {}",
+            start_path.as_ref().display()
+        );
         return PyprojectSettings::default();
     };
-    let Ok(content) = fs::read_to_string(&pyproject_path) else {
-        return PyprojectSettings::default();
+    debug!(
+        "Loading options from pyproject.toml at: {}",
+        pyproject_path.display()
+    );
+
+    let content = match fs::read_to_string(&pyproject_path) {
+        Ok(c) => c,
+        Err(err) => {
+            warn!("Failed to read {}: {}", pyproject_path.display(), err);
+            return PyprojectSettings::default();
+        }
     };
     load_options_from_pyproject_toml(&content)
 }
@@ -65,6 +78,7 @@ pub fn load_options<P: AsRef<Path>>(start_path: P) -> PyprojectSettings {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
     use tempfile::tempdir;
 
     #[test]
@@ -86,7 +100,7 @@ mod tests {
         let parent_dir = tempdir().unwrap();
         let pyproject_path = parent_dir.path().join("pyproject.toml");
         fs::write(&pyproject_path, "").unwrap();
-        fs::create_dir(parent_dir.path().join("child_dir")).ok();
+        fs::create_dir(parent_dir.path().join("child_dir")).unwrap();
         let child_dir = parent_dir.path().join("child_dir");
         assert_eq!(find_pyproject_toml(child_dir), Some(pyproject_path));
     }
@@ -100,7 +114,7 @@ mod tests {
             line_length=200
             indent_width=4
             custom_blocks=['foo', 'bar']
-            profile='Django'
+            profile='django'
             ";
 
         fs::write(&pyproject_path, pyproject_content).unwrap();
@@ -147,60 +161,18 @@ mod tests {
     fn test_load_options_returns_default_when_empty_pyproject_toml() {
         let temp_dir = tempdir().unwrap();
         let pyproject_path = temp_dir.path().join("pyproject.toml");
-        let pyproject_content = r"";
-        fs::write(&pyproject_path, pyproject_content).unwrap();
+        fs::write(&pyproject_path, "").unwrap();
         let result = load_options(&pyproject_path);
         assert_eq!(result, PyprojectSettings::default());
     }
 
-    #[test]
-    fn test_load_options_returns_default_on_unknown_field() {
-        let content = r"
-            [tool.djangofmt]
-            unknown_option = 100
-        ";
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
-    }
-
-    #[test]
-    fn test_load_options_returns_default_on_invalid_line_length() {
-        let content = r"
-            [tool.djangofmt]
-            line_length = 0
-        ";
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
-
-        let content = r"
-            [tool.djangofmt]
-            line_length = 321
-        ";
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
-    }
-
-    #[test]
-    fn test_load_options_returns_default_on_invalid_indent_width() {
-        let content = r"
-            [tool.djangofmt]
-            indent_width = 0
-        ";
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
-
-        let content = r"
-            [tool.djangofmt]
-            indent_width = 17
-        ";
+    #[rstest]
+    #[case("[tool.djangofmt]\nunknown_option = 100")]
+    #[case("[tool.djangofmt]\nline_length = 0")]
+    #[case("[tool.djangofmt]\nline_length = 321")]
+    #[case("[tool.djangofmt]\nindent_width = 0")]
+    #[case("[tool.djangofmt]\nindent_width = 17")]
+    fn test_load_options_returns_default_on_invalid_toml(#[case] content: &str) {
         assert_eq!(
             load_options_from_pyproject_toml(content),
             PyprojectSettings::default()

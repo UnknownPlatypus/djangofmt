@@ -30,6 +30,7 @@ const { signalName, title, max } = Astro.props;
             max={max}
             title={`Must be between 1 and ${max}`}
             data-bind={signalName}
+            data-on:input={`if ($${signalName} < 1) $${signalName} = 1; else if ($${signalName} > ${max}) $${signalName} = ${max}`}
         >
         <button
             class="join-item text-xl cursor-pointer px-2 h-full disabled:bg-base-content/10 disabled:border-0"
