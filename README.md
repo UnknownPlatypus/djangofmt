@@ -70,6 +70,8 @@ Arguments:
 Options:
       --line-length <LINE_LENGTH>
           Set the line-length [default: 120]
+      --indent-width <INDENT_WIDTH>
+          Set the indent width [default: 4]
       --profile <PROFILE>
           Template language profile to use [default: django] [possible values: django, jinja]
       --custom-blocks <BLOCK_NAMES>
@@ -93,6 +95,23 @@ git ls-files -z -- '*.html' | xargs -0r djangofmt
 ```shell
 git ls-files -- '*.html' | %{djangofmt $_}
 ```
+
+## Configuration
+
+Djangofmt can also be configured via a `[tool.djangofmt]` section in your `pyproject.toml`:
+
+```toml
+[tool.djangofmt]
+line_length = 120
+indent_width = 4
+profile = "django"
+custom_blocks = ["stage", "flatblock"]
+```
+
+Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
+The first `pyproject.toml` found is used. If no file is found or the file doesn't contain a `[tool.djangofmt]` section, defaults are used.
+
+Command-line arguments always take precedence over `pyproject.toml` settings.
 
 ## Controlling the formatting
 
