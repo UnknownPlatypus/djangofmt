@@ -12,35 +12,37 @@ repository = "https://github.com/UnknownPlatypus/djangofmt"
 license = "MIT"
 
 [workspace.dependencies]
-clap = { version = "4.5.53", features = ["derive", "wrap_help"] }
+clap = { version = "4.5.57", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
-colored = { version = "3.0.0" }
+colored = { version = "3.1.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
-insta = { version = "=1.46.3", features = ["glob", "yaml"] }
-insta-cmd = { version = "=0.6.0" }
-malva = { version = "0.15.1", features = ["config_serde"] }
+insta = { version = "1.46.3", features = ["glob", "yaml"] }
+insta-cmd = { version = "0.6.0" }
+malva = { version = "0.15.2", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "v0.25.3.0" }
 miette = { version = "7.6.0", features = ["fancy"] }
 rayon = { version = "1.11.0" }
 rstest = { version = "=0.26.1" }
 rustc-hash = { version = "2.1.1" }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1.0.148" }
+serde_json = { version = "1.0.149" }
 serde-wasm-bindgen = { version = "0.6.5" }
-similar-asserts = { version = "=1.7.0" }
+similar-asserts = { version = "1.7.0" }
 strum = { version = "0.27.2", features = ["derive"] }
 strum_macros = { version = "0.27.2" }
-thiserror = { version = "2.0.17" }
+tempfile = { version = "3.25.0" }
+thiserror = { version = "2.0.18" }
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.
 tikv-jemallocator = { version = "0.6.1" }
+toml = { version = "0.9.12" }
 tracing = { version = "0.1.44" }
 # Pin to avoid https://github.com/tokio-rs/tracing/issues/3369
 tracing-subscriber = { version = "=0.3.19" }
-tracing-test = { version = "0.2.5", features = ["no-env-filter"] }
+tracing-test = { version = "0.2.6", features = ["no-env-filter"] }
 tracing-tree = { version = "0.4.1" }
 tsify = { version = "0.5.6" }
-wasm-bindgen = { version = "0.2.106" }
-web-sys = { version = "0.3.83", features = ["console"] }
+wasm-bindgen = { version = "0.2.108" }
+web-sys = { version = "0.3.85", features = ["console"] }
 
 [workspace.lints.clippy]
 missing_errors_doc = "allow"
