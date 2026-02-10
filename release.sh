@@ -23,7 +23,7 @@ cargo build
 # update the changelog
 git cliff --tag "$1" -o
 git add -A && pre-commit run || true
-git add -A && pre-commit run && git commit -m "chore(release): prepare for $1"
+git add -A && pre-commit run
 
 # generate a changelog for the tag message
 export GIT_CLIFF_TEMPLATE="\
@@ -34,7 +34,16 @@ export GIT_CLIFF_TEMPLATE="\
 	{% endfor %}
 	{% endfor %}"
 changelog=$(git cliff --unreleased --strip all)
-# create an annotated tag
+
+# prompt before this
+echo -n "Ready to commit and tag release $1? [y/N] "
+read -r response
+if [[ ! "$response" =~ ^[yY]([eE][sS])?$ ]]; then
+	echo "Release cancelled."
+	exit 1
+fi
+
+git commit -m "chore(release): prepare for $1"
 git tag -a "$1" -m "Release $1" -m "$changelog"
 git tag -v "$1"
 echo "Done!"
