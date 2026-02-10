@@ -5,7 +5,9 @@ use std::process::ExitCode;
 pub mod args;
 pub mod commands;
 pub mod error;
+pub mod line_width;
 mod logging;
+pub mod pyproject;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {
