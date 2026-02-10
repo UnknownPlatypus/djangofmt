@@ -39,7 +39,7 @@ targets = [
   "x86_64-pc-windows-msvc",
   "i686-unknown-linux-gnu",
   "i686-unknown-linux-musl",
-  "i686-pc-windows-msvc",
+  "i686-pc-windows-msvc"
 ]
 # Whether to auto-include files like READMEs, LICENSEEs, and CHANGELOGs (default true)
 auto-includes = false
@@ -57,10 +57,12 @@ build-local-artifacts = false
 local-artifacts-jobs = ["./release-build-binaries"]
 # Publish jobs to run in CI
 publish-jobs = ["./release-publish-pypi"]
+# Custom permissions for GitHub Jobs
+github-custom-job-permissions = { "publish-playground" = { pages = "write", id-token = "write" } }
 # Post-announce jobs to run in CI
 post-announce-jobs = [
   "./release-notify-pre-commit-mirror",
-  "./publish-playground",
+  "./publish-playground"
 ]
 # Whether to install an updater program
 install-updater = false
@@ -68,6 +70,6 @@ install-updater = false
 install-path = ["$XDG_BIN_HOME/", "$XDG_DATA_HOME/../bin", "~/.local/bin"]
 
 [dist.github-action-commits]
-"actions/checkout" = "11bd71901bbe5b1630ceea73d27597364c9af683"  # v4.2.2
-"actions/upload-artifact" = "ea165f8d65b6e75b540449e92b4886f43607fa02"  # v4.6.2
-"actions/download-artifact" = "d3f86a106a0bac45b974a628896c90dbdf5c8093"  # v4.3.0
+"actions/checkout" = "de0fac2e4500dabe0009e67214ff5f5447ce83dd"  # v6.0.2
+"actions/upload-artifact" = "b7c566a772e6b6bfb58ed0dc250532a479d7789f"  # v6.0.0
+"actions/download-artifact" = "37930b1c2abaa49bbe596cd826c3c89aef350131"  # v7.0.0
