@@ -1,5 +1,6 @@
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::line_width::{IndentWidth, LineLength};
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
@@ -15,6 +16,10 @@ pub fn format(
     profile: &str,
 ) -> Result<String, JsError> {
     let profile = get_profile(profile);
+    #[allow(clippy::cast_possible_truncation)]
+    let line_length = LineLength::try_from(line_length as u16).unwrap_or_default();
+    #[allow(clippy::cast_possible_truncation)]
+    let indent_width = IndentWidth::try_from(indent_width as u8).unwrap_or_default();
     let config = FormatterConfig::new(line_length, indent_width, None);
 
     format_text(source, &config, profile)

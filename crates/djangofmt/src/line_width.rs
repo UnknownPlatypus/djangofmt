@@ -11,8 +11,8 @@ impl LineLength {
     const MAX: u16 = 320;
 
     #[must_use]
-    pub const fn value(self) -> usize {
-        self.0.get() as usize
+    pub const fn value(self) -> u16 {
+        self.0.get()
     }
 }
 
@@ -69,8 +69,8 @@ impl IndentWidth {
     const MAX: u8 = 16;
 
     #[must_use]
-    pub const fn value(self) -> usize {
-        self.0.get() as usize
+    pub const fn value(self) -> u8 {
+        self.0.get()
     }
 }
 

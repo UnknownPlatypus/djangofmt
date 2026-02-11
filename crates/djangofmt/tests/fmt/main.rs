@@ -4,6 +4,7 @@ mod common;
 use common::build_settings;
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::line_width::{IndentWidth, LineLength};
 use insta::{assert_snapshot, glob};
 use std::{fs, path::Path};
 
@@ -21,7 +22,7 @@ fn fmt_snapshot() {
 }
 
 fn run_format_test(path: &Path, input: &str) -> String {
-    let config = FormatterConfig::new(120, 4, None);
+    let config = FormatterConfig::new(LineLength::default(), IndentWidth::default(), None);
     let profile = Profile::Django;
 
     let output = format_text(input, &config, profile)

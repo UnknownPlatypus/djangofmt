@@ -1,5 +1,6 @@
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::line_width::{IndentWidth, LineLength};
 use tracing_test::traced_test;
 
 #[test]
@@ -12,7 +13,7 @@ font-size: 1em;
 invalid-css-property;
 }
 </style>";
-    let config = FormatterConfig::new(120, 4, None);
+    let config = FormatterConfig::new(LineLength::default(), IndentWidth::default(), None);
     let profile = Profile::Django;
 
     format_text(input, &config, profile).unwrap();
