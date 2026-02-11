@@ -32,12 +32,8 @@ impl FormatterConfig {
         custom_blocks: Option<Vec<String>>,
     ) -> Self {
         Self {
-            markup: build_markup_options(
-                print_width.value().into(),
-                indent_width.value().into(),
-                custom_blocks,
-            ),
-            malva: build_malva_config(print_width.value().into(), indent_width.value().into()),
+            markup: build_markup_options(print_width.value(), indent_width.value(), custom_blocks),
+            malva: build_malva_config(print_width.value(), indent_width.value()),
         }
     }
 
@@ -69,14 +65,14 @@ const DJANGOFMT_IGNORE_COMMENT: &str = "<!-- djangofmt:ignore -->";
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
 pub fn build_markup_options(
-    print_width: usize,
-    indent_width: usize,
+    print_width: u16,
+    indent_width: u8,
     custom_blocks: Option<Vec<String>>,
 ) -> markup_fmt::config::FormatOptions {
     markup_fmt::config::FormatOptions {
         layout: markup_fmt::config::LayoutOptions {
-            print_width,
-            indent_width,
+            print_width: print_width.into(),
+            indent_width: indent_width.into(),
             ..markup_fmt::config::LayoutOptions::default()
         },
         language: markup_fmt::config::LanguageOptions {
@@ -131,11 +127,11 @@ pub fn build_markup_options(
 }
 
 /// Build default `malva` options for CSS/SCSS/SASS/LESS formatting.
-fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config::FormatOptions {
+fn build_malva_config(print_width: u16, indent_width: u8) -> malva::config::FormatOptions {
     malva::config::FormatOptions {
         layout: malva::config::LayoutOptions {
-            print_width,
-            indent_width,
+            print_width: print_width.into(),
+            indent_width: indent_width.into(),
             ..malva::config::LayoutOptions::default()
         },
         language: malva::config::LanguageOptions {
