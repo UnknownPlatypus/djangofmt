@@ -22,6 +22,8 @@ pub struct FormatterConfig {
     pub markup: markup_fmt::config::FormatOptions,
     /// Config for CSS/SCSS formatter
     pub malva: malva::config::FormatOptions,
+    /// Config for JSON formatter
+    pub json: dprint_plugin_json::configuration::Configuration,
 }
 
 impl FormatterConfig {
@@ -34,6 +36,7 @@ impl FormatterConfig {
         Self {
             markup: build_markup_options(print_width, indent_width, custom_blocks),
             malva: build_malva_config(print_width, indent_width),
+            json: build_json_config(print_width, indent_width),
         }
     }
 
@@ -154,6 +157,21 @@ fn build_malva_config(
     }
 }
 
+fn build_json_config(
+    print_width: usize,
+    indent_width: usize,
+) -> dprint_plugin_json::configuration::Configuration {
+    // FIXME: We know that print_width and indent_width are both u16 and u8, but arguments of the
+    // method are kept as usize. Keeping a usize here and clamping it with `as` is a bit clunky
+    // and could lead to weird behaviours if the values happen to be bigger than a u32 or u8.
+    // A better solution would be to use LineLength and PrintWidth types directly here.
+    #[allow(clippy::cast_possible_truncation)]
+    dprint_plugin_json::configuration::ConfigurationBuilder::new()
+        .line_width(print_width as u32)
+        .indent_width(indent_width as u8)
+        .build()
+}
+
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
 
@@ -211,6 +229,20 @@ pub fn format_text(
         &config.markup,
         |code, hints| {
             match hints.ext {
+                "json" | "jsonc" => {
+                    let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
+                    match dprint_plugin_json::format_text(&fake_filename, code, &config.json) {
+                        Ok(Some(formatted)) => Ok(Cow::from(formatted)),
+                        Ok(None) => Ok(code.into()),
+                        Err(error) => {
+                            debug!(
+                                "Failed to format JSON, falling back to original code. Error: {:?}",
+                                error
+                            );
+                            Ok(code.into())
+                        }
+                    }
+                }
                 "css" | "scss" | "sass" | "less" => {
                     let mut malva_config = config.malva.clone();
                     malva_config.layout.print_width = hints.print_width;
