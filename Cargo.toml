@@ -16,6 +16,7 @@ clap = { version = "4.5.57", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 colored = { version = "3.1.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
+dprint-plugin-json = { version = "0.21.1" }
 insta = { version = "1.46.3", features = ["glob", "yaml"] }
 insta-cmd = { version = "0.6.0" }
 malva = { version = "0.15.2", features = ["config_serde"] }
