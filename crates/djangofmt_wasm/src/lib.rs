@@ -11,15 +11,13 @@ use web_sys::console;
 #[wasm_bindgen]
 pub fn format(
     source: &str,
-    line_length: usize,
-    indent_width: usize,
+    line_length: u16,
+    indent_width: u8,
     profile: &str,
 ) -> Result<String, JsError> {
     let profile = get_profile(profile);
-    #[allow(clippy::cast_possible_truncation)]
-    let line_length = LineLength::try_from(line_length as u16).unwrap_or_default();
-    #[allow(clippy::cast_possible_truncation)]
-    let indent_width = IndentWidth::try_from(indent_width as u8).unwrap_or_default();
+    let line_length = LineLength::try_from(line_length).unwrap_or_default();
+    let indent_width = IndentWidth::try_from(indent_width).unwrap_or_default();
     let config = FormatterConfig::new(line_length, indent_width, None);
 
     format_text(source, &config, profile)
