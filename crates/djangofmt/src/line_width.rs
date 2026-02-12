@@ -36,6 +36,12 @@ impl TryFrom<u16> for LineLength {
     }
 }
 
+impl From<LineLength> for usize {
+    fn from(value: LineLength) -> Self {
+        value.0.get() as Self
+    }
+}
+
 impl FromStr for LineLength {
     type Err = String;
 
@@ -91,6 +97,12 @@ impl TryFrom<u8> for IndentWidth {
                 Self::MAX
             )),
         }
+    }
+}
+
+impl From<IndentWidth> for usize {
+    fn from(value: IndentWidth) -> Self {
+        value.0.get() as Self
     }
 }
 
