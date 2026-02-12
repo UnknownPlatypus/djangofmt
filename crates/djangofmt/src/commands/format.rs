@@ -231,7 +231,9 @@ pub fn format_text(
             match hints.ext {
                 "json" | "jsonc" => {
                     let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
-                    match dprint_plugin_json::format_text(&fake_filename, code, &config.json) {
+                    let mut json_config = config.json.clone();
+                    json_config.line_width = u32::try_from(hints.print_width).unwrap_or_default();
+                    match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
                         Ok(Some(formatted)) => Ok(Cow::from(formatted)),
                         Ok(None) => Ok(code.into()),
                         Err(error) => {
