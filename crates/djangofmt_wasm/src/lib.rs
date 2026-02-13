@@ -1,5 +1,6 @@
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
+use djangofmt::line_width::{IndentWidth, LineLength};
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
@@ -10,11 +11,13 @@ use web_sys::console;
 #[wasm_bindgen]
 pub fn format(
     source: &str,
-    line_length: usize,
-    indent_width: usize,
+    line_length: u16,
+    indent_width: u8,
     profile: &str,
 ) -> Result<String, JsError> {
     let profile = get_profile(profile);
+    let line_length = LineLength::try_from(line_length).unwrap_or_default();
+    let indent_width = IndentWidth::try_from(indent_width).unwrap_or_default();
     let config = FormatterConfig::new(line_length, indent_width, None);
 
     format_text(source, &config, profile)

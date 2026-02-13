@@ -13,6 +13,7 @@ use tracing::{debug, error, info};
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
 use crate::error::Result;
+use crate::line_width::{IndentWidth, LineLength};
 use crate::pyproject::{PyprojectSettings, load_options};
 
 /// Pre-built configuration for all formatters.
@@ -26,8 +27,8 @@ pub struct FormatterConfig {
 impl FormatterConfig {
     #[must_use]
     pub fn new(
-        print_width: usize,
-        indent_width: usize,
+        print_width: LineLength,
+        indent_width: IndentWidth,
         custom_blocks: Option<Vec<String>>,
     ) -> Self {
         Self {
@@ -54,7 +55,7 @@ impl FormatterConfig {
             .clone()
             .or_else(|| pyproject.custom_blocks.clone());
 
-        Self::new(line_length.value(), indent_width.value(), custom_blocks)
+        Self::new(line_length, indent_width, custom_blocks)
     }
 }
 
@@ -64,14 +65,14 @@ const DJANGOFMT_IGNORE_COMMENT: &str = "<!-- djangofmt:ignore -->";
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
 pub fn build_markup_options(
-    print_width: usize,
-    indent_width: usize,
+    print_width: LineLength,
+    indent_width: IndentWidth,
     custom_blocks: Option<Vec<String>>,
 ) -> markup_fmt::config::FormatOptions {
     markup_fmt::config::FormatOptions {
         layout: markup_fmt::config::LayoutOptions {
-            print_width,
-            indent_width,
+            print_width: print_width.into(),
+            indent_width: indent_width.into(),
             ..markup_fmt::config::LayoutOptions::default()
         },
         language: markup_fmt::config::LanguageOptions {
@@ -126,11 +127,14 @@ pub fn build_markup_options(
 }
 
 /// Build default `malva` options for CSS/SCSS/SASS/LESS formatting.
-fn build_malva_config(print_width: usize, indent_width: usize) -> malva::config::FormatOptions {
+fn build_malva_config(
+    print_width: LineLength,
+    indent_width: IndentWidth,
+) -> malva::config::FormatOptions {
     malva::config::FormatOptions {
         layout: malva::config::LayoutOptions {
-            print_width,
-            indent_width,
+            print_width: print_width.into(),
+            indent_width: indent_width.into(),
             ..malva::config::LayoutOptions::default()
         },
         language: malva::config::LanguageOptions {

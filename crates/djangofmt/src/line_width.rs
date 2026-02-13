@@ -11,8 +11,8 @@ impl LineLength {
     const MAX: u16 = 320;
 
     #[must_use]
-    pub const fn value(self) -> usize {
-        self.0.get() as usize
+    pub const fn value(self) -> u16 {
+        self.0.get()
     }
 }
 
@@ -33,6 +33,12 @@ impl TryFrom<u16> for LineLength {
                 Self::MAX
             )),
         }
+    }
+}
+
+impl From<LineLength> for usize {
+    fn from(value: LineLength) -> Self {
+        value.0.get() as Self
     }
 }
 
@@ -69,8 +75,8 @@ impl IndentWidth {
     const MAX: u8 = 16;
 
     #[must_use]
-    pub const fn value(self) -> usize {
-        self.0.get() as usize
+    pub const fn value(self) -> u8 {
+        self.0.get()
     }
 }
 
@@ -91,6 +97,12 @@ impl TryFrom<u8> for IndentWidth {
                 Self::MAX
             )),
         }
+    }
+}
+
+impl From<IndentWidth> for usize {
+    fn from(value: IndentWidth) -> Self {
+        value.0.get() as Self
     }
 }
 
