@@ -158,17 +158,12 @@ fn build_malva_config(
 }
 
 fn build_json_config(
-    print_width: usize,
-    indent_width: usize,
+    print_width: LineLength,
+    indent_width: IndentWidth,
 ) -> dprint_plugin_json::configuration::Configuration {
-    // FIXME: We know that print_width and indent_width are both u16 and u8, but arguments of the
-    // method are kept as usize. Keeping a usize here and clamping it with `as` is a bit clunky
-    // and could lead to weird behaviours if the values happen to be bigger than a u32 or u8.
-    // A better solution would be to use LineLength and PrintWidth types directly here.
-    #[allow(clippy::cast_possible_truncation)]
     dprint_plugin_json::configuration::ConfigurationBuilder::new()
-        .line_width(print_width as u32)
-        .indent_width(indent_width as u8)
+        .line_width(print_width.value().into())
+        .indent_width(indent_width.value())
         .build()
 }
 
