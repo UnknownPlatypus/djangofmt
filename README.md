@@ -96,6 +96,15 @@ git ls-files -z -- '*.html' | xargs -0r djangofmt
 git ls-files -- '*.html' | %{djangofmt $_}
 ```
 
+### Not using pre-commit?
+
+djangofmt intentionally does not provide a built-in check functionality because CI is too late for a code formatter. We strongly recommend using pre-commit or any IDE "format on save" integration. That being said, you can emulate check capability by chaining with a git diff command like so:
+
+```bash
+git ls-files -z -- '*.html' | xargs -0r djangofmt
+git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
+```
+
 ## Configuration
 
 Djangofmt can also be configured via a `[tool.djangofmt]` section in your `pyproject.toml`:
