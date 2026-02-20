@@ -7,7 +7,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use std::{env, io, u32};
+use std::{env, io};
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
