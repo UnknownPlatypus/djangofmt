@@ -58,15 +58,6 @@ By default, the configuration uses pre-commit’s [`files` option](https://pre-c
 all text files in directories named `templates`. If your templates are stored elsewhere, you can override this behavior
 by specifying the desired files in the hook configuration within your `.pre-commit-config.yaml` file.
 
-### Not using pre-commit?
-
-djangofmt does not have a check functionality. The best way to achieve the same in CI is with the following commands, which first format the code and then check whether anything changed against git.
-
-```bash
-git ls-files -z -- '*.html' | xargs -0r djangofmt
-git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
-```
-
 ## Usage
 
 ```shell
@@ -103,6 +94,15 @@ git ls-files -z -- '*.html' | xargs -0r djangofmt
 
 ```shell
 git ls-files -- '*.html' | %{djangofmt $_}
+```
+
+### Not using pre-commit?
+
+djangofmt intentionally does not provide a built-in check functionality because CI is too late for a code formatter. We strongly recommend using pre-commit or any IDE "format on save" integration. That being said, you can emulate check capability by chaining with a git diff command like so:
+
+```bash
+git ls-files -z -- '*.html' | xargs -0r djangofmt
+git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
 ```
 
 ## Configuration
