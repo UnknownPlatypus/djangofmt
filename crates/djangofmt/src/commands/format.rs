@@ -229,7 +229,7 @@ pub fn format_text(
                     let mut json_config = config.json.clone();
                     json_config.line_width = u32::try_from(hints.print_width).unwrap_or_default();
                     match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
-                        Ok(Some(formatted)) => Ok(Cow::from(formatted)),
+                        Ok(Some(formatted)) => Ok(formatted.into()),
                         Ok(None) => Ok(code.into()),
                         Err(error) => {
                             debug!(
