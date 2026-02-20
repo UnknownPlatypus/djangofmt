@@ -7,7 +7,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use std::{env, io};
+use std::{env, io, u32};
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
@@ -227,7 +227,7 @@ pub fn format_text(
                 "json" | "jsonc" => {
                     let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
                     let mut json_config = config.json.clone();
-                    json_config.line_width = u32::try_from(hints.print_width).unwrap_or_default();
+                    json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
                     match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
                         Ok(Some(formatted)) => Ok(formatted.into()),
                         Ok(None) => Ok(code.into()),
