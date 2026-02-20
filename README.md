@@ -58,6 +58,15 @@ By default, the configuration uses pre-commit’s [`files` option](https://pre-c
 all text files in directories named `templates`. If your templates are stored elsewhere, you can override this behavior
 by specifying the desired files in the hook configuration within your `.pre-commit-config.yaml` file.
 
+### Not using pre-commit?
+
+djangofmt does not have a check functionality. The best way to achieve the same functionality is with the following commands. Which would first try to format the code, and then check whether anything was changed against git.
+
+```bash
+git ls-files -z -- '*.html' | xargs -0r djangofmt
+git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'use djangofmt' to fix." && exit 1)
+```
+
 ## Usage
 
 ```shell
