@@ -60,11 +60,11 @@ by specifying the desired files in the hook configuration within your `.pre-comm
 
 ### Not using pre-commit?
 
-djangofmt does not have a check functionality. The best way to achieve the same functionality is with the following commands. Which would first try to format the code, and then check whether anything was changed against git.
+djangofmt does not have a check functionality. The best way to achieve the same in CI is with the following commands, which first format the code and then check whether anything changed against git.
 
 ```bash
 git ls-files -z -- '*.html' | xargs -0r djangofmt
-git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'use djangofmt' to fix." && exit 1)
+git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
 ```
 
 ## Usage
