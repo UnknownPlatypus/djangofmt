@@ -22,6 +22,8 @@ pub struct FormatterConfig {
     pub markup: markup_fmt::config::FormatOptions,
     /// Config for CSS/SCSS formatter
     pub malva: malva::config::FormatOptions,
+    /// Config for JSON formatter
+    pub json: dprint_plugin_json::configuration::Configuration,
 }
 
 impl FormatterConfig {
@@ -34,6 +36,7 @@ impl FormatterConfig {
         Self {
             markup: build_markup_options(print_width, indent_width, custom_blocks),
             malva: build_malva_config(print_width, indent_width),
+            json: build_json_config(print_width, indent_width),
         }
     }
 
@@ -154,6 +157,16 @@ fn build_malva_config(
     }
 }
 
+fn build_json_config(
+    print_width: LineLength,
+    indent_width: IndentWidth,
+) -> dprint_plugin_json::configuration::Configuration {
+    dprint_plugin_json::configuration::ConfigurationBuilder::new()
+        .line_width(print_width.value().into())
+        .indent_width(indent_width.value())
+        .build()
+}
+
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
 
@@ -211,6 +224,22 @@ pub fn format_text(
         &config.markup,
         |code, hints| {
             match hints.ext {
+                "json" | "jsonc" => {
+                    let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
+                    let mut json_config = config.json.clone();
+                    json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+                    match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
+                        Ok(Some(formatted)) => Ok(formatted.into()),
+                        Ok(None) => Ok(code.into()),
+                        Err(error) => {
+                            debug!(
+                                "Failed to format JSON, falling back to original code. Error: {:?}",
+                                error
+                            );
+                            Ok(code.into())
+                        }
+                    }
+                }
                 "css" | "scss" | "sass" | "less" => {
                     let mut malva_config = config.malva.clone();
                     malva_config.layout.print_width = hints.print_width;

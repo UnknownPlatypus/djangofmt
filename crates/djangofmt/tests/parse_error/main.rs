@@ -4,7 +4,6 @@ mod common;
 
 use common::build_settings;
 use djangofmt::line_width::{IndentWidth, LineLength};
-use std::borrow::Cow;
 use std::path::{Path, PathBuf};
 use std::{fs, path};
 
@@ -49,7 +48,7 @@ fn format_str(
     profile: Profile,
 ) -> Result<String, ParseError> {
     let format_result = format_text(input, Language::from(profile), format_options, |code, _| {
-        Ok::<_, ()>(Cow::from(code))
+        Ok::<_, ()>(code.into())
     });
 
     format_result.map_err(|err| ParseError::new(name, input.to_string(), &err))
