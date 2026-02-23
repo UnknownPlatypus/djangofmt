@@ -6,4 +6,4 @@ requires-python = ">=3.11"
 authors = [
   { name = "Thibaut Decombe", email = "thibaut.d@gmail.com" },
 ]
-dependencies = ["djade==1.7.0", "djhtml==3.0.10", "djlint==1.36.4"]
+dependencies = ["djade==1.8.0", "djhtml==3.0.10", "djlint==1.36.4"]
