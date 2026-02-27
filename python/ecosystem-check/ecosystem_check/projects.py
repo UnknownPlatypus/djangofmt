@@ -65,7 +65,6 @@ class FormatOptions(Serializable):
     profile: Profile = Profile.DJANGO
     custom_blocks: str = ""  # Comma-separated list of custom blocks
     exclude: tuple[str, ...] = field(default_factory=tuple)
-    djade_stability_exclude: tuple[str, ...] = field(default_factory=tuple)
 
     def to_args(self, executable_name: str) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:
@@ -82,8 +81,6 @@ class FormatOptions(Serializable):
         )
 
     def excluded_files(self, executable_name: str) -> tuple[str, ...]:
-        if Formatter.DJADE in executable_name:
-            return self.exclude + self.djade_stability_exclude
         return self.exclude
 
 
