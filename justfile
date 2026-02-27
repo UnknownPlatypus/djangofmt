@@ -1,14 +1,16 @@
 # List all commands
-default:
-    @just --list
+_default:
+    @just --list  --unsorted
 
 # Bootstrap your environment
+[group('dev')]
 bootstrap:
     uv tool install pre-commit
     pre-commit install
     uv sync
 
-# Pre-merge request check
+# Pre-merge request checks
+[group('dev')]
 pre-mr-check:
     SKIP=actionlint,renovate-config-validator pre-commit run -a
     maturin develop
@@ -16,15 +18,18 @@ pre-mr-check:
     cargo test --all-targets --all-features
 
 # Build playground WASM package
+[group('playground')]
 playground-wasm-build:
     wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
 
 # Run playground dev server (builds WASM first)
+[group('playground')]
 playground-dev: playground-wasm-build
     npm ci --prefix playground
     npm run dev --prefix playground
 
 # Setup python benchmarks
+[group('bench')]
 setup-bench-py:
     cargo build --release -p djangofmt
     uv sync --project ./python/benchmarks -p 3.11
@@ -32,28 +37,17 @@ setup-bench-py:
 
 # Run python benchmarks on a directory of templates
 [working-directory: 'python/benchmarks']
+[group('bench')]
 bench-py dir: setup-bench-py
     uv run ./run_formatter.sh {{dir}}
 
 # Run rust micro-benchmarks
+[group('bench')]
 bench-rs:
     cargo bench -p djangofmt_benchmark
 
-# Run ecosystem checks with custom baseline and comparison executables
-ecosystem-check baseline comparison *args:
-    cargo build -p djangofmt
-    uv run ecosystem-check format {{baseline}} {{comparison}} --cache-dir /tmp/repos {{args}}
-
-# Run ecosystem checks comparing debug build to system djangofmt
-ecosystem-check-dev:
-    cargo build -p djangofmt
-    uv run ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir /tmp/repos
-
-# Clean ecosystem check git repos cache
-ecosystem-check-clean-cache:
-    rm -rf /tmp/repos
-
 # Benchmark dev vs system djangofmt on HTML files
+[group('bench')]
 benchmark-git-repo repo_path:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -110,3 +104,26 @@ benchmark-git-repo repo_path:
         --prepare "git checkout . -q" \
         "$DEV_CMD" \
         "$SYS_CMD"
+
+# Run ecosystem checks with custom baseline and comparison executables
+[group('ecosystem-check')]
+ecosystem-check baseline comparison *args:
+    cargo build -p djangofmt
+    uv run ecosystem-check format {{baseline}} {{comparison}} --cache-dir /tmp/repos {{args}}
+
+# Run ecosystem checks comparing debug build to system djangofmt
+[group('ecosystem-check')]
+ecosystem-check-dev:
+    cargo build -p djangofmt
+    uv run ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir /tmp/repos
+
+# Run ecosystem checks comparing djangofmt debug build to djade
+[group('ecosystem-check')]
+[arg('external-formatter', pattern='djade|rustywind')]
+ecosystem-check-stability external-formatter:
+    cargo build -p djangofmt
+    uv run ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir /tmp/repos --format-comparison base-then-comp-converge
+# Clean ecosystem check git repos cache
+[group('ecosystem-check')]
+ecosystem-check-clean-cache:
+    rm -rf /tmp/repos
