@@ -218,10 +218,12 @@ async def format_then_format_converge(
     options: FormatOptions,
     cloned_repo: ClonedRepository,
 ) -> HistoriesForHunks:
-    """Run format_then_format twice, collecting every intermediary diffs"""
-    executables = [baseline_executable, comparison_executable] * 2
+    """Run format_then_format 3 times (6 passes), only reporting hunks that don't converge after pass 4."""
+    executables = [baseline_executable, comparison_executable] * 3
 
     hunk_details: set[HunkDetail] = set()
+    converged_two_passes: set[str] = set()  # Files that converged after pass 4
+
     for i, executable in enumerate(executables, start=1):
         await format(
             executable=executable.resolve(),
@@ -232,19 +234,37 @@ async def format_then_format_converge(
         commit = await cloned_repo.commit(
             message=f"Formatted with {executable.name} - #{i}"
         )
-        if i > 2:
+        if i <= 2:
             # Skip the 2 first runs that are just setting the baseline
-            diff = Diff(await cloned_repo.diff(f"{commit}^", commit))
-            if diff:
+            continue
+
+        diff = Diff(await cloned_repo.diff(f"{commit}^", commit))
+        if not diff:
+            # Great! We converged!
+            break
+
+        changed_files = {patch_file.path for patch_file in diff.patch_set}
+        if i <= 4:
+            # Track files that changed in passes 3-4
+            converged_two_passes.update(changed_files)
+        else:
+            # Passes 5-6: only track hunks for files still changing
+            for patch_file in diff.patch_set:
+                # Remove from converged_two_passes since it's still changing
+                converged_two_passes.discard(patch_file.path)
                 hunk_details.update(
                     HunkDetail(
                         path=patch_file.path,
                         start=hunk.source_start,
                         length=hunk.source_length,
                     )
-                    for patch_file in diff.patch_set
                     for hunk in patch_file
                 )
+
+    if converged_two_passes:
+        logger.info(
+            f"{len(converged_two_passes)} file(s) converged after 2 passes: {converged_two_passes}"
+        )
 
     if not hunk_details:
         return HistoriesForHunks()
