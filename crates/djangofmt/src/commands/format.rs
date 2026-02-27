@@ -370,6 +370,14 @@ impl ParseError {
                         format!("expected close tag for opening tag <{tag_name}>",),
                         SourceOffset::from_location(&source, *line, *column),
                     ),
+                    markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {
+                        tag_name,
+                        line,
+                        column,
+                    } => (
+                        format!("expected end of jinja block {{% {tag_name} %}}",),
+                        SourceOffset::from_location(&source, *line, *column),
+                    ),
                     _ => (syntax_err.kind.to_string(), syntax_err.pos.into()),
                 }
             }
