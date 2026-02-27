@@ -349,6 +349,8 @@ pub struct ParseError {
     src: NamedSource<String>,
     #[label("here")]
     span: SourceSpan,
+    #[help]
+    hint: Option<String>,
 }
 
 impl ParseError {
@@ -358,7 +360,7 @@ impl ParseError {
         source: String,
         err: &markup_fmt::FormatError<E>,
     ) -> Self {
-        let (message, offset) = match err {
+        let (message, hint, span) = match err {
             markup_fmt::FormatError::Syntax(syntax_err) => {
                 match &syntax_err.kind {
                     // Point to the opening tag instead of where the error was detected (which is always the end of the file)
@@ -368,17 +370,19 @@ impl ParseError {
                         column,
                     } => (
                         format!("expected close tag for opening tag <{tag_name}>",),
-                        SourceOffset::from_location(&source, *line, *column),
+                        None,
+                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column), tag_name.len()),
                     ),
                     markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {
                         tag_name,
                         line,
                         column,
                     } => (
-                        format!("expected end of jinja block {{% {tag_name} %}}",),
-                        SourceOffset::from_location(&source, *line, *column),
+                        format!("unclosed {{% {tag_name} %}} block."),
+                        Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
+                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), tag_name.len()),
                     ),
-                    _ => (syntax_err.kind.to_string(), syntax_err.pos.into()),
+                    _ => (syntax_err.kind.to_string(), None, syntax_err.pos.into()),
                 }
             }
             markup_fmt::FormatError::External(errors) => {
@@ -387,7 +391,7 @@ impl ParseError {
                     .map(|e| format!("{e:?}"))
                     .collect::<Vec<_>>()
                     .join(", ");
-                (format!("external formatter error: {msg}"), 0.into())
+                (format!("external formatter error: {msg}"), None, 0.into())
             }
         };
         let name = path
@@ -397,7 +401,8 @@ impl ParseError {
             path,
             message,
             src: NamedSource::new(name, source),
-            span: offset.into(),
+            span,
+            hint,
         }
     }
 }
