@@ -218,10 +218,12 @@ async def format_then_format_converge(
     options: FormatOptions,
     cloned_repo: ClonedRepository,
 ) -> HistoriesForHunks:
-    """Run format_then_format twice, collecting every intermediary diffs"""
-    executables = [baseline_executable, comparison_executable] * 2
+    """Run format_then_format 3 times (6 passes), only reporting hunks that don't converge after pass 4."""
+    executables = [baseline_executable, comparison_executable] * 3
 
     hunk_details: set[HunkDetail] = set()
+    need_two_passes_to_converge: set[str] = set()
+
     for i, executable in enumerate(executables, start=1):
         await format(
             executable=executable.resolve(),
@@ -232,19 +234,35 @@ async def format_then_format_converge(
         commit = await cloned_repo.commit(
             message=f"Formatted with {executable.name} - #{i}"
         )
-        if i > 2:
+        if i <= 2:
             # Skip the 2 first runs that are just setting the baseline
-            diff = Diff(await cloned_repo.diff(f"{commit}^", commit))
-            if diff:
+            continue
+
+        diff = Diff(await cloned_repo.diff(f"{commit}^", commit))
+        if not diff:
+            # Great! We converged!
+            break
+
+        changed_files = {patch_file.path for patch_file in diff.patch_set}
+        if i <= 4:
+            need_two_passes_to_converge.update(changed_files)
+        else:
+            for patch_file in diff.patch_set:
+                # Avoid reporting a warning + the full diff
+                need_two_passes_to_converge.discard(patch_file.path)
                 hunk_details.update(
                     HunkDetail(
                         path=patch_file.path,
                         start=hunk.source_start,
                         length=hunk.source_length,
                     )
-                    for patch_file in diff.patch_set
                     for hunk in patch_file
                 )
+
+    if need_two_passes_to_converge:
+        logger.info(
+            f"{len(need_two_passes_to_converge)} file(s) converged after 2 passes: {need_two_passes_to_converge}"
+        )
 
     if not hunk_details:
         return HistoriesForHunks()
