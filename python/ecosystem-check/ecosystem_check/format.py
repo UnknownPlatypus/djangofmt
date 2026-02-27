@@ -222,7 +222,7 @@ async def format_then_format_converge(
     executables = [baseline_executable, comparison_executable] * 3
 
     hunk_details: set[HunkDetail] = set()
-    converged_two_passes: set[str] = set()  # Files that converged after pass 4
+    need_two_passes_to_converge: set[str] = set()
 
     for i, executable in enumerate(executables, start=1):
         await format(
@@ -245,13 +245,11 @@ async def format_then_format_converge(
 
         changed_files = {patch_file.path for patch_file in diff.patch_set}
         if i <= 4:
-            # Track files that changed in passes 3-4
-            converged_two_passes.update(changed_files)
+            need_two_passes_to_converge.update(changed_files)
         else:
-            # Passes 5-6: only track hunks for files still changing
             for patch_file in diff.patch_set:
-                # Remove from converged_two_passes since it's still changing
-                converged_two_passes.discard(patch_file.path)
+                # Avoid reporting a warning + the full diff
+                need_two_passes_to_converge.discard(patch_file.path)
                 hunk_details.update(
                     HunkDetail(
                         path=patch_file.path,
@@ -261,9 +259,9 @@ async def format_then_format_converge(
                     for hunk in patch_file
                 )
 
-    if converged_two_passes:
+    if need_two_passes_to_converge:
         logger.info(
-            f"{len(converged_two_passes)} file(s) converged after 2 passes: {converged_two_passes}"
+            f"{len(need_two_passes_to_converge)} file(s) converged after 2 passes: {need_two_passes_to_converge}"
         )
 
     if not hunk_details:
