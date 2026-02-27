@@ -1,9 +1,11 @@
 ---
-source: tests/parse_error/main.rs
+source: crates/djangofmt/tests/parse_error/main.rs
 ---
   × expected close tag for opening tag <p>
-   ╭─[invalid_closing_tag_syntax.html:1:1]
- 1 │ <p>blabla: <p/>
-   · ▲
-   · ╰── here
+   ╭─[invalid_closing_tag_syntax.html:2:4]
+ 1 │ <html>
+ 2 │   <p>blabla: <p/>
+   ·    ┬
+   ·    ╰── here
+ 3 │ </html>
    ╰────

@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt/tests/parse_error/main.rs
+---
+  × unclosed {% with %} block.
+   ╭─[unclosed_jinja_with_block.html:1:4]
+ 1 │ {% with foo="bar" %}
+   ·    ──┬─
+   ·      ╰── here
+ 2 │   <div>
+   ╰────
+  help: Check for invalid HTML syntax inside the block that might prevent finding the end tag.
