@@ -49,7 +49,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build sdist"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           command: sdist
           args: --out dist
@@ -81,7 +81,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
       - name: "Build wheels"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.target }}
           manylinux: auto
@@ -150,7 +150,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build wheels"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.platform.target }}
           manylinux: auto
@@ -211,7 +211,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
       - name: "Build wheels"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.target }}
           manylinux: musllinux_1_2
@@ -270,7 +270,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build wheels"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.platform.target }}
           manylinux: musllinux_1_2
@@ -325,7 +325,7 @@ jobs:
           architecture: x64
 
       - name: "Build wheels - x86_64"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: x86_64
           args: --release --locked --out dist
@@ -364,7 +364,7 @@ jobs:
           architecture: arm64
 
       - name: "Build wheels"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: aarch64
           args: --release --locked --out dist
@@ -416,7 +416,7 @@ jobs:
           architecture: ${{ matrix.platform.arch }}
 
       - name: "Build wheels"
-        uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
+        uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.platform.target }}
           args: --release --locked --out dist
