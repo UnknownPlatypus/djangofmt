@@ -46,19 +46,19 @@ wheels = [
 
 [[package]]
 name = "djade"
-version = "1.8.0"
+version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f4/be/6bfee7af62d1775d470e2d2b42baa386f14b5e3bb434b4fcfa5aab7230b7/djade-1.8.0.tar.gz", hash = "sha256:a0f449a4d6d92da475a122ca2008598882e27c70c1b233f69d90fb0a37458c23", size = 39927, upload-time = "2026-02-22T00:41:32.965Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/2e/655cc12eefa761d54b9cb956b8650f83675fd144fda641b03d4172d2e0c2/djade-1.9.0.tar.gz", hash = "sha256:e07dcec03982af3f12e46e42661c83ba6835edbde3597e0385ecfe7385527721", size = 41968, upload-time = "2026-02-27T00:07:02.57Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/fc/00999e55a327692a3294798773daeb78959dfaacc2fae3c11fb3f7d68008/djade-1.8.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:4f5fcd2ff123d2c2429d372e7b5eb9ebce5dd7244322ba58061d774ecf1ddef4", size = 1165285, upload-time = "2026-02-22T00:41:17.018Z" },
-    { url = "https://files.pythonhosted.org/packages/9e/e9/a2f4762c60566d85dcf9e8115fec5f7c91cb5d34b22632430e73b91e171f/djade-1.8.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0044536977d41770dab6746d815f00a6ccfc1df542934c8ae36bbefab1616cc9", size = 1105140, upload-time = "2026-02-22T00:41:19.306Z" },
-    { url = "https://files.pythonhosted.org/packages/8f/74/2ddb5ff6abeaa7019a6f89d7ea1fd27172e6aeca0d8e6554aa84de7745e8/djade-1.8.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c7590f0b4a43fc9448570a6880f9f1c221022ddcb676f26b0e215d4b52409fb4", size = 1150481, upload-time = "2026-02-22T00:41:21.409Z" },
-    { url = "https://files.pythonhosted.org/packages/f7/32/9cbe9f7076a21b9331b9b064576c3c184c098dd90b7f1c996e16567e1b3f/djade-1.8.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:216c5d761092003c0983141e375f6f2353b048ddadbf00f27fd703369346bd7c", size = 1085145, upload-time = "2026-02-22T00:41:23.278Z" },
-    { url = "https://files.pythonhosted.org/packages/1b/75/cd076f2878de1a780d76638fd8e8deb00a4dd6a3232d6a015e36b793fe91/djade-1.8.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a8d2957ab2c01a867b6ed3cd16f69cab4e9e66677644024171b23beb4bdeb387", size = 1225786, upload-time = "2026-02-22T00:41:25.052Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/e0/25b841ee573db45996b423317815fa8fd81e91a9279588228343963efff6/djade-1.8.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:90e18e263d2752dc95b09c722e7498316815a07fd8a82c141e820ea4b20f2053", size = 1147857, upload-time = "2026-02-22T00:41:26.479Z" },
-    { url = "https://files.pythonhosted.org/packages/ae/e6/7a85b705c822bd33bd9c26aa4e8b0c91dfe596c564e4c4bfbecac3200261/djade-1.8.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:297b994a902a3a32563401bb654186ffa8268d610ea29fa213925aaa9e3a24fc", size = 1284706, upload-time = "2026-02-22T00:41:28.004Z" },
-    { url = "https://files.pythonhosted.org/packages/84/68/5f4064efa1537f44477fbc2693e083a6aec25e00550ffe224d3cc037ec56/djade-1.8.0-py3-none-win_amd64.whl", hash = "sha256:d61e2fbc3e7188db5a7adb487ffe1670417f4db5437850fa4a775b065c1a3cd7", size = 1107083, upload-time = "2026-02-22T00:41:29.528Z" },
-    { url = "https://files.pythonhosted.org/packages/9e/47/5e09766e8e32e18d5dc28a7e08fba5fbdac0979fe5a3b198e764e6c3b2a3/djade-1.8.0-py3-none-win_arm64.whl", hash = "sha256:467d7a446199c96291906fe4097110f712ef75d6cb64f3c51e04a2943a0c491e", size = 1036953, upload-time = "2026-02-22T00:41:31.294Z" },
+    { url = "https://files.pythonhosted.org/packages/75/1c/40f332f13fc63495677aca02a22a74e5dd596f85d762fd34dcad7177a878/djade-1.9.0-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:9523c5eebf67bdf4037cbaa3c79fbb453ee883c370e772f2dbb767c753971ac7", size = 1167298, upload-time = "2026-02-27T00:06:46.75Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/02/2098990d681265e84e8d0d2b4548279dcaae07195d217f71e799f4006025/djade-1.9.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:8da28ee6ac2e163283c1f19965f04cb4ca1e4e9fd9edc4c1f4cf183cab98384e", size = 1106315, upload-time = "2026-02-27T00:06:48.756Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/95/e6f43a63e9c6297e3117d5e8415c78c64f4403cace455641b6eb6590d7e5/djade-1.9.0-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:fbfc70ad912b54329363de7a5b62afd6bf4b92a49c12e2a155be1138cef01424", size = 1150821, upload-time = "2026-02-27T00:06:50.551Z" },
+    { url = "https://files.pythonhosted.org/packages/90/8d/cb656b034477b734adefa69c7ada69d17bde4a7bf5a69e797f53ac59ecc3/djade-1.9.0-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:d9d828aaa871c02655d0a6b2d9fd2a677cd4b16bd101015728dd5db418b8225b", size = 1085847, upload-time = "2026-02-27T00:06:52.372Z" },
+    { url = "https://files.pythonhosted.org/packages/01/9a/59396b03db75dd14f74402adb7348362863fde05313f643542dc24ae665e/djade-1.9.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9b90e709d21c3f953b52fc5a021b8ef69b0790f23aa308923992af1fc3c2353f", size = 1228570, upload-time = "2026-02-27T00:06:54.167Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/22/6713dd41f6c6615bf6f11f552286f2ff0e56e4eb0050f6223d1932b38678/djade-1.9.0-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:183b828ffcedb0122bcf0b5eaa008bb288c344a80946c3f372d583f3944c1394", size = 1147326, upload-time = "2026-02-27T00:06:55.864Z" },
+    { url = "https://files.pythonhosted.org/packages/fa/ea/190854396549d3741b70fd5f828ca0cfeee203e7a6219500cc9bc97bab76/djade-1.9.0-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:1981f77ef3c8b73860e492918ce235e46ab4e62a63c8101dd379e204c8a162de", size = 1287672, upload-time = "2026-02-27T00:06:57.421Z" },
+    { url = "https://files.pythonhosted.org/packages/70/dd/bbbf681b4918fd178bd6586b28146af55e8f0c833e6ce26f255fe4f0271a/djade-1.9.0-py3-none-win_amd64.whl", hash = "sha256:bb2b62e22971173dae63bb2d18b24fe85bf3470ca1aabf1b8320a578832d64a2", size = 1110197, upload-time = "2026-02-27T00:06:59.124Z" },
+    { url = "https://files.pythonhosted.org/packages/43/14/e39757938c1387c29b27e9362f3b567a8f6b24bd223137a11253b0c315e7/djade-1.9.0-py3-none-win_arm64.whl", hash = "sha256:b90633a53bb996e0fffd9bd26ed995a78b15f368aea77348e35e67151de4fd13", size = 1041427, upload-time = "2026-02-27T00:07:01.007Z" },
 ]
 
 [[package]]
@@ -94,7 +94,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "djade", specifier = "==1.8.0" },
+    { name = "djade", specifier = "==1.9.0" },
     { name = "djhtml", specifier = "==3.0.10" },
     { name = "djlint", specifier = "==1.36.4" },
 ]
@@ -112,7 +112,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "djade", specifier = "==1.8.0" },
+    { name = "djade", specifier = "==1.9.0" },
     { name = "tomli", specifier = "==2.4.0" },
     { name = "tomli-w", specifier = "==1.2.0" },
     { name = "unidiff", specifier = "==0.7.5" },
