@@ -129,3 +129,35 @@ impl std::fmt::Display for IndentWidth {
         self.0.fmt(f)
     }
 }
+
+/// Controls whether elements use self-closing syntax (e.g. `<br />` vs `<br>`).
+///
+/// We highly recommend never (the default) because the HTML spec recommends it and
+/// that there are numerous pitfalls with self-closing tags.
+/// See:
+///     - <https://jakearchibald.com/2023/against-self-closing-tags-in-html/>
+///     - <https://html.spec.whatwg.org/multipage/syntax.html#start-tags:~:text=On%20void,parser>
+///     - <https://developer.mozilla.org/en-US/docs/Glossary/Void_element>
+///     - <https://github.com/whatwg/html/issues/721>
+///     - <https://github.com/whatwg/html/issues/9491>
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, clap::ValueEnum)]
+#[serde(rename_all = "lowercase")]
+pub enum SelfClosing {
+    #[default]
+    /// Never use self-closing syntax
+    Never,
+    /// Always use self-closing syntax
+    Always,
+    /// Keep existing style as-is
+    Unchanged,
+}
+
+impl From<SelfClosing> for Option<bool> {
+    fn from(value: SelfClosing) -> Self {
+        match value {
+            SelfClosing::Unchanged => None,
+            SelfClosing::Always => Some(true),
+            SelfClosing::Never => Some(false),
+        }
+    }
+}

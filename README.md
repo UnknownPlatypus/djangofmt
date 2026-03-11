@@ -70,14 +70,29 @@ Arguments:
 Options:
       --line-length <LINE_LENGTH>
           Set the line-length [default: 120]
+
       --indent-width <INDENT_WIDTH>
           Set the indent width [default: 4]
+
       --profile <PROFILE>
-          Template language profile to use [default: django] [possible values: django, jinja]
+          Template language profile to use [default: django]
+
+          [possible values: django, jinja]
+
       --custom-blocks <BLOCK_NAMES>
           Comma-separated list of custom block name to enable
+
+      --html-void-self-closing <HTML_VOID_SELF_CLOSING>
+          Self-closing style for void HTML elements (e.g. <br /> vs <br>) [default: never]
+
+          Possible values:
+          - never:     Never use self-closing syntax
+          - always:    Always use self-closing syntax
+          - unchanged: Keep existing style as-is
+
   -h, --help
-          Print help
+          Print help (see a summary with '-h')
+
   -V, --version
           Print version
 ```
@@ -115,6 +130,7 @@ line_length = 120
 indent_width = 4
 profile = "django"
 custom_blocks = ["stage", "flatblock"]
+html_void_self_closing = "never"
 ```
 
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.

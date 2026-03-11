@@ -1,6 +1,6 @@
 use djangofmt::{
     commands::format::{FormatterConfig, format_text},
-    line_width::{IndentWidth, LineLength},
+    line_width::{IndentWidth, LineLength, SelfClosing},
 };
 use djangofmt_benchmark::{
     DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, DJANGO_TEMPLATE_SMALL,
@@ -19,7 +19,12 @@ fn main() {
   &JINJA_TEMPLATE_LARGE]
 )]
 fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
-    let config = FormatterConfig::new(LineLength::default(), IndentWidth::default(), None);
+    let config = FormatterConfig::new(
+        LineLength::default(),
+        IndentWidth::default(),
+        None,
+        SelfClosing::default(),
+    );
 
     bencher.bench(|| {
         format_text(

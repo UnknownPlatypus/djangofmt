@@ -13,7 +13,7 @@ use tracing::{debug, error, info};
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
 use crate::error::Result;
-use crate::line_width::{IndentWidth, LineLength};
+use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::{PyprojectSettings, load_options};
 
 /// Pre-built configuration for all formatters.
@@ -32,9 +32,15 @@ impl FormatterConfig {
         print_width: LineLength,
         indent_width: IndentWidth,
         custom_blocks: Option<Vec<String>>,
+        html_void_self_closing: SelfClosing,
     ) -> Self {
         Self {
-            markup: build_markup_options(print_width, indent_width, custom_blocks),
+            markup: build_markup_options(
+                print_width,
+                indent_width,
+                custom_blocks,
+                html_void_self_closing,
+            ),
             malva: build_malva_config(print_width, indent_width),
             json: build_json_config(print_width, indent_width),
         }
@@ -55,8 +61,17 @@ impl FormatterConfig {
             .unwrap_or_default();
         let custom_blocks =
             merge_custom_blocks(args.custom_blocks.clone(), pyproject.custom_blocks.clone());
+        let html_void_self_closing = args
+            .html_void_self_closing
+            .or(pyproject.html_void_self_closing)
+            .unwrap_or_default();
 
-        Self::new(line_length, indent_width, custom_blocks)
+        Self::new(
+            line_length,
+            indent_width,
+            custom_blocks,
+            html_void_self_closing,
+        )
     }
 }
 
@@ -83,6 +98,7 @@ pub fn build_markup_options(
     print_width: LineLength,
     indent_width: IndentWidth,
     custom_blocks: Option<Vec<String>>,
+    html_void_self_closing: SelfClosing,
 ) -> markup_fmt::config::FormatOptions {
     markup_fmt::config::FormatOptions {
         layout: markup_fmt::config::LayoutOptions {
@@ -92,10 +108,10 @@ pub fn build_markup_options(
         },
         language: markup_fmt::config::LanguageOptions {
             format_comments: false,
-            // HTML void elements should not be self-closing:
+            // HTML void elements should not be self-closing by default:
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             // <br/> -> <br>
-            html_void_self_closing: Some(false),
+            html_void_self_closing: html_void_self_closing.into(),
             // SVG elements should be self-closing:
             // <circle cx="50" cy="50" r="50"></circle> -> <circle cx="50" cy="50" r="50" />
             svg_self_closing: Some(true),

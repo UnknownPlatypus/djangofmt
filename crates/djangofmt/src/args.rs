@@ -1,4 +1,4 @@
-use crate::line_width::{IndentWidth, LineLength};
+use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
@@ -71,6 +71,9 @@ pub struct FormatCommand {
         value_name = "BLOCK_NAMES",
     )]
     pub custom_blocks: Option<Vec<String>>,
+    /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
+    #[arg(long, value_enum)]
+    pub html_void_self_closing: Option<SelfClosing>,
 }
 
 #[derive(Copy, Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
@@ -165,20 +168,36 @@ mod tests {
         Options:
               --line-length <LINE_LENGTH>
                   Set the line-length [default: 120]
+
               --indent-width <INDENT_WIDTH>
                   Set the indent width [default: 4]
+
               --profile <PROFILE>
-                  Template language profile to use [default: django] [possible values: django, jinja]
+                  Template language profile to use [default: django]
+                  
+                  [possible values: django, jinja]
+
               --custom-blocks <BLOCK_NAMES>
                   Comma-separated list of custom block name to enable
+
+              --html-void-self-closing <HTML_VOID_SELF_CLOSING>
+                  Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
+
+                  Possible values:
+                  - never:     Never use self-closing syntax
+                  - always:    Always use self-closing syntax
+                  - unchanged: Keep existing style as-is
+
           -h, --help
-                  Print help
+                  Print help (see a summary with '-h')
+
           -V, --version
                   Print version
 
         Log levels:
           -v, --verbose
                   Enable verbose logging
+
           -q, --quiet
                   Disable all logging
 
