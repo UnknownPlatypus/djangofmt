@@ -20,7 +20,7 @@ repos:
       - id: check-symlinks
       - id: end-of-file-fixer
       - id: trailing-whitespace
-        exclude: \.snap$
+        exclude: \.snap|^crates/djangofmt/src/args\.rs$
   - repo: https://github.com/asottile/pyupgrade
     rev: 75992aaa40730136014f34227e0135f63fc951b4  # frozen: v3.21.2
     hooks:

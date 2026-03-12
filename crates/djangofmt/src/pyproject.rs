@@ -6,7 +6,7 @@ use std::{
 use tracing::{debug, warn};
 
 use crate::args::Profile;
-use crate::line_width::{IndentWidth, LineLength};
+use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
 /// Serde-only struct for deserializing `[tool.djangofmt]` from `pyproject.toml`.
 #[derive(Debug, Default, Deserialize, PartialEq, Eq)]
@@ -16,6 +16,7 @@ pub struct PyprojectSettings {
     pub indent_width: Option<IndentWidth>,
     pub profile: Option<Profile>,
     pub custom_blocks: Option<Vec<String>>,
+    pub html_void_self_closing: Option<SelfClosing>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -115,6 +116,7 @@ mod tests {
             indent_width=4
             custom_blocks=['foo', 'bar']
             profile='django'
+            html_void_self_closing='always'
             ";
 
         fs::write(&pyproject_path, pyproject_content).unwrap();
@@ -125,7 +127,8 @@ mod tests {
                 line_length: Some(LineLength::try_from(200).unwrap()),
                 indent_width: Some(IndentWidth::try_from(4).unwrap()),
                 custom_blocks: Some(vec!["foo".to_string(), "bar".to_string()]),
-                profile: Some(Profile::Django)
+                profile: Some(Profile::Django),
+                html_void_self_closing: Some(SelfClosing::Always),
             }
         );
     }

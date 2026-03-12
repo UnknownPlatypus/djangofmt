@@ -1,6 +1,6 @@
 use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
-use djangofmt::line_width::{IndentWidth, LineLength};
+use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
@@ -18,7 +18,7 @@ pub fn format(
     let profile = get_profile(profile);
     let line_length = LineLength::try_from(line_length).unwrap_or_default();
     let indent_width = IndentWidth::try_from(indent_width).unwrap_or_default();
-    let config = FormatterConfig::new(line_length, indent_width, None);
+    let config = FormatterConfig::new(line_length, indent_width, None, SelfClosing::default());
 
     format_text(source, &config, profile)
         .map(|opt| opt.unwrap_or_else(|| source.to_string()))
