@@ -84,8 +84,8 @@ jobs:
         uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.target }}
-          manylinux: auto
-          args: --release --locked --out dist
+          manylinux: "2_17"
+          args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
         if: ${{ startsWith(matrix.target, 'x86_64') }}
         run: |
