@@ -124,23 +124,28 @@ jobs:
         platform:
           - target: aarch64-unknown-linux-gnu
             arch: aarch64
+            manylinux: "2_17"
             # see https://github.com/astral-sh/ruff/issues/3791
             # and https://github.com/gnzlbg/jemallocator/issues/170#issuecomment-1503228963
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: armv7-unknown-linux-gnueabihf
             arch: armv7
+            manylinux: "2_17"
           - target: s390x-unknown-linux-gnu
             arch: s390x
+            manylinux: "2_17"
           - target: powerpc64le-unknown-linux-gnu
             arch: ppc64le
+            manylinux: "2_17"
             # see https://github.com/astral-sh/ruff/issues/10073
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
-          - target: powerpc64-unknown-linux-gnu
-            arch: ppc64
-            # see https://github.com/astral-sh/ruff/issues/10073
+          - target: riscv64gc-unknown-linux-gnu
+            arch: riscv64
+            manylinux: "2_31"
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: arm-unknown-linux-musleabihf
             arch: arm
+            manylinux: auto
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -153,11 +158,15 @@ jobs:
         uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           target: ${{ matrix.platform.target }}
-          manylinux: auto
+          manylinux: ${{ matrix.platform.manylinux }}
           docker-options: ${{ matrix.platform.maturin_docker_options }}
-          args: --release --locked --out dist
+          args: --release --locked --out dist --compatibility pypi
+          before-script-linux: |
+            if command -v apt-get &> /dev/null; then
+              apt-get update && apt-get install -y libatomic1
+            fi
       - uses: uraimo/run-on-arch-action@d94c13912ea685de38fccc1109385b83fd79427d # v3.0.1
-        if: ${{ matrix.platform.arch != 'ppc64' && matrix.platform.arch != 'ppc64le' }}
+        if: ${{ matrix.platform.arch != 'ppc64le' && matrix.platform.arch != 'riscv64' }}
         name: "Test wheels"
         with:
           arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
