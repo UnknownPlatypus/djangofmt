@@ -2,7 +2,7 @@ use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -53,12 +53,24 @@ impl FormatterConfig {
             .indent_width
             .or(pyproject.indent_width)
             .unwrap_or_default();
-        let custom_blocks = args
-            .custom_blocks
-            .clone()
-            .or_else(|| pyproject.custom_blocks.clone());
+        let custom_blocks =
+            merge_custom_blocks(args.custom_blocks.clone(), pyproject.custom_blocks.clone());
 
         Self::new(line_length, indent_width, custom_blocks)
+    }
+}
+
+/// Merge custom blocks from CLI arguments and pyproject.toml settings, deduplicating entries.
+fn merge_custom_blocks(
+    cli: Option<Vec<String>>,
+    pyproject: Option<Vec<String>>,
+) -> Option<Vec<String>> {
+    let merged: HashSet<String> = cli.into_iter().chain(pyproject).flatten().collect();
+
+    if merged.is_empty() {
+        None
+    } else {
+        Some(merged.into_iter().collect())
     }
 }
 
@@ -491,6 +503,45 @@ mod tests {
         let io_err = io::Error::other("disk full");
         let err = FormatCommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
+    }
+
+    #[test]
+    fn merge_custom_blocks_both_none() {
+        assert_eq!(merge_custom_blocks(None, None), None);
+    }
+
+    #[test]
+    fn merge_custom_blocks_only_cli() {
+        let mut result = merge_custom_blocks(Some(vec!["foo".into(), "bar".into()]), None).unwrap();
+        result.sort();
+        assert_eq!(result, vec!["bar", "foo"]);
+    }
+
+    #[test]
+    fn merge_custom_blocks_only_pyproject() {
+        assert_eq!(
+            merge_custom_blocks(None, Some(vec!["baz".into()])),
+            Some(vec!["baz".to_string()])
+        );
+    }
+
+    #[test]
+    fn merge_custom_blocks_both_without_overlap() {
+        let mut result =
+            merge_custom_blocks(Some(vec!["foo".into()]), Some(vec!["bar".into()])).unwrap();
+        result.sort();
+        assert_eq!(result, vec!["bar", "foo"]);
+    }
+
+    #[test]
+    fn merge_custom_blocks_both_with_duplicates() {
+        let mut result = merge_custom_blocks(
+            Some(vec!["foo".into(), "bar".into()]),
+            Some(vec!["bar".into(), "baz".into()]),
+        )
+        .unwrap();
+        result.sort();
+        assert_eq!(result, vec!["bar", "baz", "foo"]);
     }
 
     #[rstest]
