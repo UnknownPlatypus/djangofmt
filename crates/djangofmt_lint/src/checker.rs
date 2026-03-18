@@ -107,6 +107,15 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::RedundantTypeAttr) {
             rules::style::redundant_type_attr::check(element, self);
         }
+        if self.is_rule_enabled(Rule::MissingImgAlt) {
+            rules::style::missing_attr::check_img_alt(element, self);
+        }
+        if self.is_rule_enabled(Rule::MissingHtmlLang) {
+            rules::style::missing_attr::check_html_lang(element, self);
+        }
+        if self.is_rule_enabled(Rule::MissingImgDimensions) {
+            rules::style::missing_attr::check_img_dimensions(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

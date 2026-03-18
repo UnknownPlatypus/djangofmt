@@ -1,0 +1,15 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 1 lint error(s)
+
+Error: 
+  × html tag should have a lang attribute.
+   ╭─[tests/check/missing_html_lang/missing_html_lang.html:6:2]
+ 5 │ <!-- Invalid -->
+ 6 │ <html>
+   ·  ──┬─
+   ·    ╰── here
+ 7 │ </html>
+   ╰────
+  help: Add lang="en" or the appropriate language code.

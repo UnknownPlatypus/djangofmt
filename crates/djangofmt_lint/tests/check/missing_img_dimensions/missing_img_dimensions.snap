@@ -1,0 +1,36 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 3 lint error(s)
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.html:5:2]
+ 4 │ <!-- Invalid - missing one or both -->
+ 5 │ <img src="photo.jpg" alt="Photo">
+   ·  ─┬─
+   ·   ╰── here
+ 6 │ <img src="photo.jpg" alt="Photo" height="100">
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.html:6:2]
+ 5 │ <img src="photo.jpg" alt="Photo">
+ 6 │ <img src="photo.jpg" alt="Photo" height="100">
+   ·  ─┬─
+   ·   ╰── here
+ 7 │ <img src="photo.jpg" alt="Photo" width="200">
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.html:7:2]
+ 6 │ <img src="photo.jpg" alt="Photo" height="100">
+ 7 │ <img src="photo.jpg" alt="Photo" width="200">
+   ·  ─┬─
+   ·   ╰── here
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.

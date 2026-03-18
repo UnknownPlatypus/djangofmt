@@ -135,4 +135,10 @@ define_rules! {
     (EmptyAttrValue, Style, rules::style::attr_value_style::EmptyAttrValue),
     /// Detects redundant default `type` attributes on `<script>` and `<style>` tags.
     (RedundantTypeAttr, Style, rules::style::redundant_type_attr::RedundantTypeAttr),
+    /// Detects `<img>` tags missing an `alt` attribute.
+    (MissingImgAlt, Style, rules::style::missing_attr::MissingImgAlt),
+    /// Detects `<html>` tags missing a `lang` attribute.
+    (MissingHtmlLang, Style, rules::style::missing_attr::MissingHtmlLang),
+    /// Detects `<img>` tags missing `height` or `width` attributes.
+    (MissingImgDimensions, Style, rules::style::missing_attr::MissingImgDimensions),
 }

@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 4 lint error(s)
+  × Found 5 lint error(s)
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.html:3:2]
+ 2 │ <div id="main" class="container"></div>
+ 3 │ <img alt="">
+   ·  ─┬─
+   ·   ╰── here
+ 4 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
 
 Error: 
   × Empty 'id' attribute can be removed.

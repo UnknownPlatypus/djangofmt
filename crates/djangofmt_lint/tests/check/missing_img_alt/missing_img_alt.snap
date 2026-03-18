@@ -1,0 +1,103 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 9 lint error(s)
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.html:2:2]
+ 1 │ <!-- Valid - has alt -->
+ 2 │ <img src="photo.jpg" alt="A photo">
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ <img src="photo.jpg" alt="">
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.html:3:2]
+ 2 │ <img src="photo.jpg" alt="A photo">
+ 3 │ <img src="photo.jpg" alt="">
+   ·  ─┬─
+   ·   ╰── here
+ 4 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have an alt attribute.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.html:6:2]
+ 5 │ <!-- Invalid - missing alt -->
+ 6 │ <img src="photo.jpg">
+   ·  ─┬─
+   ·   ╰── here
+ 7 │ <img src="photo.jpg" width="100" height="100">
+   ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.html:6:2]
+ 5 │ <!-- Invalid - missing alt -->
+ 6 │ <img src="photo.jpg">
+   ·  ─┬─
+   ·   ╰── here
+ 7 │ <img src="photo.jpg" width="100" height="100">
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have an alt attribute.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.html:7:2]
+ 6 │ <img src="photo.jpg">
+ 7 │ <img src="photo.jpg" width="100" height="100">
+   ·  ─┬─
+   ·   ╰── here
+ 8 │ 
+   ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have an alt attribute.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.html:10:2]
+  9 │ <!-- Dynamic attributes - skip (Jinja block attrs are not NativeAttribute) -->
+ 10 │ <img src="photo.jpg" {% if show_alt %}alt="Photo"{% endif %}>
+    ·  ─┬─
+    ·   ╰── here
+ 11 │ 
+    ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.html:10:2]
+  9 │ <!-- Dynamic attributes - skip (Jinja block attrs are not NativeAttribute) -->
+ 10 │ <img src="photo.jpg" {% if show_alt %}alt="Photo"{% endif %}>
+    ·  ─┬─
+    ·   ╰── here
+ 11 │ 
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have an alt attribute.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.html:14:6]
+ 13 │ {% if show_image %}
+ 14 │     <img src="photo.jpg">
+    ·      ─┬─
+    ·       ╰── here
+ 15 │ {% endif %}
+    ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.html:14:6]
+ 13 │ {% if show_image %}
+ 14 │     <img src="photo.jpg">
+    ·      ─┬─
+    ·       ╰── here
+ 15 │ {% endif %}
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.

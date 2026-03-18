@@ -1,0 +1,15 @@
+<!-- Valid - has alt -->
+<img src="photo.jpg" alt="A photo">
+<img src="photo.jpg" alt="">
+
+<!-- Invalid - missing alt -->
+<img src="photo.jpg">
+<img src="photo.jpg" width="100" height="100">
+
+<!-- Dynamic attributes - skip (Jinja block attrs are not NativeAttribute) -->
+<img src="photo.jpg" {% if show_alt %}alt="Photo"{% endif %}>
+
+<!-- Nested in Jinja block -->
+{% if show_image %}
+    <img src="photo.jpg">
+{% endif %}
