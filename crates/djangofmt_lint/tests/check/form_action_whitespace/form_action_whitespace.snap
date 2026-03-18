@@ -1,7 +1,29 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 2 lint error(s)
+  × Found 6 lint error(s)
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.html:2:2]
+ 1 │ <!-- Valid -->
+ 2 │ <form action="/submit/"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 3 │ <form action="{% url 'submit' %}"></form>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.html:3:2]
+ 2 │ <form action="/submit/"></form>
+ 3 │ <form action="{% url 'submit' %}"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Extra whitespace found in form action.
@@ -15,6 +37,17 @@ Error:
   help: Remove leading and trailing whitespace from the action URL.
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.html:6:2]
+ 5 │ <!-- Invalid -->
+ 6 │ <form action=" /submit/"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 7 │ <form action="/submit/ "></form>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Extra whitespace found in form action.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.html:7:15]
  6 │ <form action=" /submit/"></form>
@@ -23,3 +56,13 @@ Error:
    ·                   ╰── here
    ╰────
   help: Remove leading and trailing whitespace from the action URL.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.html:7:2]
+ 6 │ <form action=" /submit/"></form>
+ 7 │ <form action="/submit/ "></form>
+   ·  ──┬─
+   ·    ╰── here
+   ╰────
+  help: Remove the empty tag pair or add content.

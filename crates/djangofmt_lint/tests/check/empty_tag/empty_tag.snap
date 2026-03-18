@@ -1,0 +1,58 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 5 lint error(s)
+
+Error: 
+  × Avoid use of <br> tags.
+   ╭─[tests/check/empty_tag/empty_tag.html:5:2]
+ 4 │ <div>{% if x %}...{% endif %}</div>
+ 5 │ <br>
+   ·  ─┬
+   ·   ╰── here
+ 6 │ <hr>
+   ╰────
+  help: Use block-level elements or CSS margins instead.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/empty_tag/empty_tag.html:7:2]
+ 6 │ <hr>
+ 7 │ <img src="x.jpg" alt="x">
+   ·  ─┬─
+   ·   ╰── here
+ 8 │ <i class="fa fa-icon"></i>
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag/empty_tag.html:12:2]
+ 11 │ <!-- Invalid -->
+ 12 │ <div></div>
+    ·  ─┬─
+    ·   ╰── here
+ 13 │ <span></span>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <span> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag/empty_tag.html:13:2]
+ 12 │ <div></div>
+ 13 │ <span></span>
+    ·  ──┬─
+    ·    ╰── here
+ 14 │ <p></p>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <p> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag/empty_tag.html:14:2]
+ 13 │ <span></span>
+ 14 │ <p></p>
+    ·  ┬
+    ·  ╰── here
+    ╰────
+  help: Remove the empty tag pair or add content.

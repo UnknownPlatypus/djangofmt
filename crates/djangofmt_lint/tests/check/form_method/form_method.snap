@@ -1,7 +1,40 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 6 lint error(s)
+  × Found 17 lint error(s)
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_method/form_method.html:2:2]
+ 1 │ <!-- Valid methods - no errors expected -->
+ 2 │ <form method="get"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 3 │ <form method="post"></form>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_method/form_method.html:3:2]
+ 2 │ <form method="get"></form>
+ 3 │ <form method="post"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ <form method="dialog"></form>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_method/form_method.html:4:2]
+ 3 │ <form method="post"></form>
+ 4 │ <form method="dialog"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 5 │ <form method="GET"></form>
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Form method 'GET' should be lowercase.
@@ -15,6 +48,17 @@ Error:
   help: Use 'get' instead.
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_method/form_method.html:5:2]
+ 4 │ <form method="dialog"></form>
+ 5 │ <form method="GET"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 6 │ <form method="POST"></form>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Form method 'POST' should be lowercase.
    ╭─[tests/check/form_method/form_method.html:6:15]
  5 │ <form method="GET"></form>
@@ -24,6 +68,17 @@ Error:
  7 │ 
    ╰────
   help: Use 'post' instead.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_method/form_method.html:6:2]
+ 5 │ <form method="GET"></form>
+ 6 │ <form method="POST"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 7 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Invalid value 'put' for attribute 'method'.
@@ -37,6 +92,17 @@ Error:
   help: Use one of: get, post, dialog
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_method/form_method.html:9:2]
+  8 │ <!-- Invalid methods - errors expected -->
+  9 │ <form method="put"></form>
+    ·  ──┬─
+    ·    ╰── here
+ 10 │ <form method="delete"></form>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Invalid value 'delete' for attribute 'method'.
     ╭─[tests/check/form_method/form_method.html:10:15]
   9 │ <form method="put"></form>
@@ -46,6 +112,17 @@ Error:
  11 │ <form method="patch"></form>
     ╰────
   help: Use one of: get, post, dialog
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_method/form_method.html:10:2]
+  9 │ <form method="put"></form>
+ 10 │ <form method="delete"></form>
+    ·  ──┬─
+    ·    ╰── here
+ 11 │ <form method="patch"></form>
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Invalid value 'patch' for attribute 'method'.
@@ -59,6 +136,39 @@ Error:
   help: Use one of: get, post, dialog
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_method/form_method.html:11:2]
+ 10 │ <form method="delete"></form>
+ 11 │ <form method="patch"></form>
+    ·  ──┬─
+    ·    ╰── here
+ 12 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_method/form_method.html:14:2]
+ 13 │ <!-- Interpolation - no errors expected (dynamic value) -->
+ 14 │ <form method="{{ method }}"></form>
+    ·  ──┬─
+    ·    ╰── here
+ 15 │ <form method="{% if x %}post{% else %}get{% endif %}"></form>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_method/form_method.html:15:2]
+ 14 │ <form method="{{ method }}"></form>
+ 15 │ <form method="{% if x %}post{% else %}get{% endif %}"></form>
+    ·  ──┬─
+    ·    ╰── here
+ 16 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Invalid value 'invalid' for attribute 'method'.
     ╭─[tests/check/form_method/form_method.html:19:19]
  18 │ {% if show_form %}
@@ -68,3 +178,14 @@ Error:
  20 │ {% endif %}
     ╰────
   help: Use one of: get, post, dialog
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_method/form_method.html:19:6]
+ 18 │ {% if show_form %}
+ 19 │     <form method="invalid"></form>
+    ·      ──┬─
+    ·        ╰── here
+ 20 │ {% endif %}
+    ╰────
+  help: Remove the empty tag pair or add content.

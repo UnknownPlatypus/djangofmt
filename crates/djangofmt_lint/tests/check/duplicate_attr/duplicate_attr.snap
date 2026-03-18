@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 3 lint error(s)
+  × Found 6 lint error(s)
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.html:2:2]
+ 1 │ <!-- Valid -->
+ 2 │ <div class="foo" id="bar"></div>
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Duplicate attribute 'class'.
@@ -13,6 +24,17 @@ Error:
  6 │ <img src="a.jpg" alt="A" src="b.jpg">
    ╰────
   help: Remove the duplicate attribute.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.html:5:2]
+ 4 │ <!-- Invalid -->
+ 5 │ <div class="foo" class="bar"></div>
+   ·  ─┬─
+   ·   ╰── here
+ 6 │ <img src="a.jpg" alt="A" src="b.jpg">
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × img tag should have height and width attributes.
@@ -35,3 +57,13 @@ Error:
  7 │ 
    ╰────
   help: Remove the duplicate attribute.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.html:9:2]
+ 8 │ <!-- Jinja conditional attributes are fine (parsed as Attribute::JinjaBlock) -->
+ 9 │ <div {% if x %}class="a"{% else %}class="b"{% endif %}></div>
+   ·  ─┬─
+   ·   ╰── here
+   ╰────
+  help: Remove the empty tag pair or add content.

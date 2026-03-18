@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 4 lint error(s)
+  × Found 5 lint error(s)
 
 Error: 
   × Internal link should use {% url %} template tag.
@@ -45,3 +45,13 @@ Error:
    ·                              ╰── here
    ╰────
   help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Empty <script> tag pair found. Consider removing.
+   ╭─[tests/check/use_https/use_https.html:9:2]
+ 8 │ <link rel="stylesheet" href="http://cdn.example.com/style.css">
+ 9 │ <script src="http://cdn.example.com/script.js"></script>
+   ·  ───┬──
+   ·     ╰── here
+   ╰────
+  help: Remove the empty tag pair or add content.

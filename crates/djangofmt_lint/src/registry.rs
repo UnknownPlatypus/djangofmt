@@ -149,4 +149,8 @@ define_rules! {
     (DjangoStaticUrl, Suspicious, rules::suspicious::django_url::DjangoStaticUrl),
     /// Detects hardcoded internal URLs in `<a href>` that should use `{% url %}`.
     (DjangoUrlPattern, Suspicious, rules::suspicious::django_url::DjangoUrlPattern),
+    /// Flags use of `<br>` tags.
+    (AvoidBrTag, Style, rules::style::avoid_element::AvoidBrTag),
+    /// Flags empty tag pairs (non-void, non-self-closing elements with no children).
+    (EmptyTagPair, Suspicious, rules::suspicious::empty_tag::EmptyTagPair),
 }

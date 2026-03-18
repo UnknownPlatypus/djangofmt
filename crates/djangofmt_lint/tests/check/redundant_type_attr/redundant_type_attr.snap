@@ -1,7 +1,29 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 2 lint error(s)
+  × Found 5 lint error(s)
+
+Error: 
+  × Empty <script> tag pair found. Consider removing.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.html:2:2]
+ 1 │ <!-- Valid - no type or non-default type -->
+ 2 │ <script src="app.js"></script>
+   ·  ───┬──
+   ·     ╰── here
+ 3 │ <script type="module" src="app.js"></script>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <script> tag pair found. Consider removing.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.html:3:2]
+ 2 │ <script src="app.js"></script>
+ 3 │ <script type="module" src="app.js"></script>
+   ·  ───┬──
+   ·     ╰── here
+ 4 │ <script type="application/ld+json">{"@context": "..."}</script>
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Redundant type="text/javascript" on <script> tag.
@@ -13,6 +35,17 @@ Error:
  9 │ <style type="text/css">.foo { color: red; }</style>
    ╰────
   help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Empty <script> tag pair found. Consider removing.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.html:8:2]
+ 7 │ <!-- Invalid - redundant default type -->
+ 8 │ <script type="text/javascript" src="app.js"></script>
+   ·  ───┬──
+   ·     ╰── here
+ 9 │ <style type="text/css">.foo { color: red; }</style>
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Redundant type="text/css" on <style> tag.

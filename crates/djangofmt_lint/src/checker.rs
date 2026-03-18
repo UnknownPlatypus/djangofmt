@@ -128,6 +128,12 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::DjangoUrlPattern) {
             rules::suspicious::django_url::check_django_url_pattern(element, self);
         }
+        if self.is_rule_enabled(Rule::AvoidBrTag) {
+            rules::style::avoid_element::check_br(element, self);
+        }
+        if self.is_rule_enabled(Rule::EmptyTagPair) {
+            rules::suspicious::empty_tag::check(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

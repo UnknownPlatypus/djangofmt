@@ -9,7 +9,7 @@
 //! use djangofmt_lint::{check_ast, Settings};
 //! use markup_fmt::{Language, parser::Parser};
 //!
-//! let source = r#"<form method="put"></form>"#;
+//! let source = r#"<form method="put">Submit</form>"#;
 //! let mut parser = Parser::new(source, Language::Jinja, vec![]);
 //! let ast = parser.parse_root().unwrap();
 //!

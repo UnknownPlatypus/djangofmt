@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 5 lint error(s)
+  × Found 9 lint error(s)
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.html:2:2]
+ 1 │ <!-- Valid - attributes with values -->
+ 2 │ <div id="main" class="container"></div>
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ <img alt="">
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × img tag should have height and width attributes.
@@ -25,6 +36,17 @@ Error:
    ╰────
 
 Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.html:6:2]
+ 5 │ <!-- Invalid - empty id or class -->
+ 6 │ <div id=""></div>
+   ·  ─┬─
+   ·   ╰── here
+ 7 │ <div class=""></div>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Empty 'class' attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.html:7:13]
  6 │ <div id=""></div>
@@ -33,6 +55,17 @@ Error:
    ·             ╰── here
  8 │ <div id="" class=""></div>
    ╰────
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.html:7:2]
+ 6 │ <div id=""></div>
+ 7 │ <div class=""></div>
+   ·  ─┬─
+   ·   ╰── here
+ 8 │ <div id="" class=""></div>
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Empty 'id' attribute can be removed.
@@ -51,3 +84,13 @@ Error:
    ·                   ▲
    ·                   ╰── here
    ╰────
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.html:8:2]
+ 7 │ <div class=""></div>
+ 8 │ <div id="" class=""></div>
+   ·  ─┬─
+   ·   ╰── here
+   ╰────
+  help: Remove the empty tag pair or add content.
