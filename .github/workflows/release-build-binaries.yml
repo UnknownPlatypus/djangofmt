@@ -162,7 +162,7 @@ jobs:
           docker-options: ${{ matrix.platform.maturin_docker_options }}
           args: --release --locked --out dist --compatibility pypi
           before-script-linux: |
-            if command -v apt-get &> /dev/null; then
+            if [[ "${{ matrix.platform.target }}" == "riscv64gc-unknown-linux-gnu" ]] && command -v apt-get &> /dev/null; then
               apt-get update && apt-get install -y libatomic1
             fi
       - uses: uraimo/run-on-arch-action@d94c13912ea685de38fccc1109385b83fd79427d # v3.0.1
