@@ -123,4 +123,8 @@ define_rules {
 define_rules! {
     /// Validates attribute values against allowed values (e.g., `<form method>`).
     (InvalidAttrValue, Correctness, rules::correctness::invalid_attr_value::InvalidAttrValue),
+    /// Detects javascript: URLs in href attributes.
+    (JavascriptUrl, Suspicious, rules::suspicious::suspicious_url::JavascriptUrl),
+    /// Detects http:// URLs that should use https://.
+    (UseHttps, Suspicious, rules::suspicious::suspicious_url::UseHttps),
 }

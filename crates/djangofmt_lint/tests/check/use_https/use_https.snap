@@ -1,0 +1,36 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 3 lint error(s)
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.html:7:10]
+ 6 │ <!-- Invalid -->
+ 7 │ <a href="http://example.com">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 8 │ <link rel="stylesheet" href="http://cdn.example.com/style.css">
+   ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.html:8:30]
+ 7 │ <a href="http://example.com">Link</a>
+ 8 │ <link rel="stylesheet" href="http://cdn.example.com/style.css">
+   ·                              ────────────────┬───────────────
+   ·                                              ╰── here
+ 9 │ <script src="http://cdn.example.com/script.js"></script>
+   ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.html:9:14]
+ 8 │ <link rel="stylesheet" href="http://cdn.example.com/style.css">
+ 9 │ <script src="http://cdn.example.com/script.js"></script>
+   ·              ────────────────┬───────────────
+   ·                              ╰── here
+   ╰────
+  help: Replace 'http://' with 'https://'.

@@ -1,0 +1,8 @@
+<!-- Valid -->
+<a href="/page/">Link</a>
+<a href="{% url 'home' %}">Home</a>
+<button onclick="doStuff()">Click</button>
+
+<!-- Invalid -->
+<a href="javascript:void(0)">Link</a>
+<a href="javascript:alert('xss')">Link</a>

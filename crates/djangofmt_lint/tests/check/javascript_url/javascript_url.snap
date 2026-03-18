@@ -1,0 +1,25 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 2 lint error(s)
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.html:7:10]
+ 6 │ <!-- Invalid -->
+ 7 │ <a href="javascript:void(0)">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 8 │ <a href="javascript:alert('xss')">Link</a>
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.html:8:10]
+ 7 │ <a href="javascript:void(0)">Link</a>
+ 8 │ <a href="javascript:alert('xss')">Link</a>
+   ·          ───────────┬───────────
+   ·                     ╰── here
+   ╰────
+  help: Use an event handler and a real URL instead.
