@@ -72,6 +72,14 @@ impl<'a> Checker<'a> {
 
     /// Visit the root of the AST and run all lint rules.
     pub fn visit_root(&mut self, root: &Root<'_>) {
+        // Root-level document structure checks
+        if self.is_rule_enabled(Rule::MissingDoctype) {
+            rules::style::document_structure::check_doctype(root, self);
+        }
+        if self.is_rule_enabled(Rule::MissingTitle) {
+            rules::style::document_structure::check_title(root, self);
+        }
+
         for node in &root.children {
             self.visit_node(node);
         }

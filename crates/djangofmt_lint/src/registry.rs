@@ -153,4 +153,8 @@ define_rules! {
     (AvoidBrTag, Style, rules::style::avoid_element::AvoidBrTag),
     /// Flags empty tag pairs (non-void, non-self-closing elements with no children).
     (EmptyTagPair, Suspicious, rules::suspicious::empty_tag::EmptyTagPair),
+    /// Detects HTML documents missing a DOCTYPE declaration.
+    (MissingDoctype, Style, rules::style::document_structure::MissingDoctype),
+    /// Detects HTML documents with `<head>` but no `<title>`.
+    (MissingTitle, Style, rules::style::document_structure::MissingTitle),
 }

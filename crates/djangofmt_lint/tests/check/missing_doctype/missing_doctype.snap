@@ -1,0 +1,14 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 1 lint error(s)
+
+Error: 
+  × Missing DOCTYPE declaration.
+   ╭─[tests/check/missing_doctype/missing_doctype.html:1:1]
+ 1 │ <html lang="en">
+   · ▲
+   · ╰── here
+ 2 │ <head><title>Test</title></head>
+   ╰────
+  help: Add `<!DOCTYPE html>` before the `<html>` tag.
