@@ -28,7 +28,7 @@ fn run_check_test(path: &Path, input: String) -> String {
     let mut parser = Parser::new(&input, Language::Jinja, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::default();
-    let file_diagnostics = check_ast(&ast, &settings);
+    let file_diagnostics = check_ast(&ast, &settings, &input);
     if file_diagnostics.is_empty() {
         return String::new();
     }

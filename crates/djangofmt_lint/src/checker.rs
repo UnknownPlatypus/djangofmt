@@ -13,16 +13,31 @@ use crate::violation::Violation;
 /// Rules report diagnostics via [`Checker::report`].
 pub struct Checker<'a> {
     settings: &'a Settings,
+    source: &'a str,
     diagnostics: Vec<LintDiagnostic>,
 }
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub const fn new(settings: &'a Settings) -> Self {
+    pub const fn new(settings: &'a Settings, source: &'a str) -> Self {
         Self {
             settings,
+            source,
             diagnostics: Vec::new(),
         }
+    }
+
+    /// Compute the byte offset of a borrowed string slice within the source.
+    /// Both `slice` and `self.source` must point into the same allocation.
+    #[must_use]
+    pub fn offset_of(&self, slice: &str) -> usize {
+        let source_start = self.source.as_ptr() as usize;
+        let slice_start = slice.as_ptr() as usize;
+        debug_assert!(
+            slice_start >= source_start && slice_start <= source_start + self.source.len(),
+            "slice is not within source"
+        );
+        slice_start - source_start
     }
 
     /// Returns whether the given rule should be checked.
