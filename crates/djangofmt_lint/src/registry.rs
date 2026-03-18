@@ -127,4 +127,12 @@ define_rules! {
     (JavascriptUrl, Suspicious, rules::suspicious::suspicious_url::JavascriptUrl),
     /// Detects http:// URLs that should use https://.
     (UseHttps, Suspicious, rules::suspicious::suspicious_url::UseHttps),
+    /// Detects non-lowercase `method` attribute values on `<form>`.
+    (UppercaseFormMethod, Style, rules::style::attr_value_style::UppercaseFormMethod),
+    /// Detects leading/trailing whitespace in `<form action>` attribute values.
+    (FormActionWhitespace, Style, rules::style::attr_value_style::FormActionWhitespace),
+    /// Detects empty `id` or `class` attribute values.
+    (EmptyAttrValue, Style, rules::style::attr_value_style::EmptyAttrValue),
+    /// Detects redundant default `type` attributes on `<script>` and `<style>` tags.
+    (RedundantTypeAttr, Style, rules::style::redundant_type_attr::RedundantTypeAttr),
 }

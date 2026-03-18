@@ -1,0 +1,9 @@
+<!-- Valid - no type or non-default type -->
+<script src="app.js"></script>
+<script type="module" src="app.js"></script>
+<script type="application/ld+json">{"@context": "..."}</script>
+<style>.foo { color: red; }</style>
+
+<!-- Invalid - redundant default type -->
+<script type="text/javascript" src="app.js"></script>
+<style type="text/css">.foo { color: red; }</style>

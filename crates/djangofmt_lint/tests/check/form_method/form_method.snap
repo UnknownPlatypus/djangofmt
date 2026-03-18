@@ -1,7 +1,29 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 4 lint error(s)
+  × Found 6 lint error(s)
+
+Error: 
+  × Form method 'GET' should be lowercase.
+   ╭─[tests/check/form_method/form_method.html:5:15]
+ 4 │ <form method="dialog"></form>
+ 5 │ <form method="GET"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 6 │ <form method="POST"></form>
+   ╰────
+  help: Use 'get' instead.
+
+Error: 
+  × Form method 'POST' should be lowercase.
+   ╭─[tests/check/form_method/form_method.html:6:15]
+ 5 │ <form method="GET"></form>
+ 6 │ <form method="POST"></form>
+   ·               ──┬─
+   ·                 ╰── here
+ 7 │ 
+   ╰────
+  help: Use 'post' instead.
 
 Error: 
   × Invalid value 'put' for attribute 'method'.

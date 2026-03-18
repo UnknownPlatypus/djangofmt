@@ -1,0 +1,25 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 2 lint error(s)
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.html:8:15]
+ 7 │ <!-- Invalid - redundant default type -->
+ 8 │ <script type="text/javascript" src="app.js"></script>
+   ·               ───────┬───────
+   ·                      ╰── here
+ 9 │ <style type="text/css">.foo { color: red; }</style>
+   ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/css" on <style> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.html:9:14]
+ 8 │ <script type="text/javascript" src="app.js"></script>
+ 9 │ <style type="text/css">.foo { color: red; }</style>
+   ·              ────┬───
+   ·                  ╰── here
+   ╰────
+  help: The type attribute is unnecessary for the default script/style type.
