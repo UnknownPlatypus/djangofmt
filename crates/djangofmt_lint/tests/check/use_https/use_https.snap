@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 3 lint error(s)
+  × Found 4 lint error(s)
+
+Error: 
+  × Internal link should use {% url %} template tag.
+   ╭─[tests/check/use_https/use_https.html:3:10]
+ 2 │ <a href="https://example.com">Link</a>
+ 3 │ <a href="/relative">Link</a>
+   ·          ────┬────
+   ·              ╰── here
+ 4 │ <a href="{{ url }}">Link</a>
+   ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
   × Use HTTPS for external links.

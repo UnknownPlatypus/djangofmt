@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 2 lint error(s)
+  × Found 3 lint error(s)
+
+Error: 
+  × Internal link should use {% url %} template tag.
+   ╭─[tests/check/javascript_url/javascript_url.html:2:10]
+ 1 │ <!-- Valid -->
+ 2 │ <a href="/page/">Link</a>
+   ·          ───┬──
+   ·             ╰── here
+ 3 │ <a href="{% url 'home' %}">Home</a>
+   ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
   × Avoid 'javascript:' URLs.

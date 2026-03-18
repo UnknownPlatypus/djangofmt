@@ -1,0 +1,89 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 8 lint error(s)
+
+Error: 
+  × img tag should have an alt attribute.
+   ╭─[tests/check/django_static_url/django_static_url.html:3:2]
+ 2 │ <link href="{% static 'style.css' %}">
+ 3 │ <img src="{% static 'img/logo.png' %}">
+   ·  ─┬─
+   ·   ╰── here
+ 4 │ <img src="{{ STATIC_URL }}img/logo.png">
+   ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/django_static_url/django_static_url.html:3:2]
+ 2 │ <link href="{% static 'style.css' %}">
+ 3 │ <img src="{% static 'img/logo.png' %}">
+   ·  ─┬─
+   ·   ╰── here
+ 4 │ <img src="{{ STATIC_URL }}img/logo.png">
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × img tag should have an alt attribute.
+   ╭─[tests/check/django_static_url/django_static_url.html:4:2]
+ 3 │ <img src="{% static 'img/logo.png' %}">
+ 4 │ <img src="{{ STATIC_URL }}img/logo.png">
+   ·  ─┬─
+   ·   ╰── here
+ 5 │ 
+   ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/django_static_url/django_static_url.html:4:2]
+ 3 │ <img src="{% static 'img/logo.png' %}">
+ 4 │ <img src="{{ STATIC_URL }}img/logo.png">
+   ·  ─┬─
+   ·   ╰── here
+ 5 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+   ╭─[tests/check/django_static_url/django_static_url.html:7:13]
+ 6 │ <!-- Invalid -->
+ 7 │ <link href="/static/style.css">
+   ·             ────────┬────────
+   ·                     ╰── here
+ 8 │ <img src="/static/img/logo.png">
+   ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × img tag should have an alt attribute.
+   ╭─[tests/check/django_static_url/django_static_url.html:8:2]
+ 7 │ <link href="/static/style.css">
+ 8 │ <img src="/static/img/logo.png">
+   ·  ─┬─
+   ·   ╰── here
+   ╰────
+  help: Add alt="description" or alt="" for decorative images.
+
+Error: 
+  × img tag should have height and width attributes.
+   ╭─[tests/check/django_static_url/django_static_url.html:8:2]
+ 7 │ <link href="/static/style.css">
+ 8 │ <img src="/static/img/logo.png">
+   ·  ─┬─
+   ·   ╰── here
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+   ╭─[tests/check/django_static_url/django_static_url.html:8:11]
+ 7 │ <link href="/static/style.css">
+ 8 │ <img src="/static/img/logo.png">
+   ·           ──────────┬─────────
+   ·                     ╰── here
+   ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.

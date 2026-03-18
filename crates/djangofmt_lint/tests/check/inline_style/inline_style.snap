@@ -1,0 +1,36 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 3 lint error(s)
+
+Error: 
+  × Inline styles should be avoided.
+   ╭─[tests/check/inline_style/inline_style.html:5:6]
+ 4 │ <!-- Invalid -->
+ 5 │ <div style="color: red;"></div>
+   ·      ──┬──
+   ·        ╰── here
+ 6 │ <p style="margin: 0;"></p>
+   ╰────
+  help: Use a CSS class instead.
+
+Error: 
+  × Inline styles should be avoided.
+   ╭─[tests/check/inline_style/inline_style.html:6:4]
+ 5 │ <div style="color: red;"></div>
+ 6 │ <p style="margin: 0;"></p>
+   ·    ──┬──
+   ·      ╰── here
+ 7 │ <div style="{{ my_style }}"></div>
+   ╰────
+  help: Use a CSS class instead.
+
+Error: 
+  × Inline styles should be avoided.
+   ╭─[tests/check/inline_style/inline_style.html:7:6]
+ 6 │ <p style="margin: 0;"></p>
+ 7 │ <div style="{{ my_style }}"></div>
+   ·      ──┬──
+   ·        ╰── here
+   ╰────
+  help: Use a CSS class instead.

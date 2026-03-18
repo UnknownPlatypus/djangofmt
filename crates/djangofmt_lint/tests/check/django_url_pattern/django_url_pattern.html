@@ -1,0 +1,12 @@
+<!-- Valid -->
+<a href="{% url 'home' %}">Home</a>
+<a href="{{ url }}">Link</a>
+<a href="https://external.com">External</a>
+<a href="#anchor">Anchor</a>
+<a href="/static/file.css">Static</a>
+<a href="/media/file.jpg">Media</a>
+<a href="mailto:user@example.com">Email</a>
+
+<!-- Invalid -->
+<a href="/home/">Home</a>
+<a href="/accounts/login/">Login</a>

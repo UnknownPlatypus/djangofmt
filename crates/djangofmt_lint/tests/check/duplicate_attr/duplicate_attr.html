@@ -1,0 +1,9 @@
+<!-- Valid -->
+<div class="foo" id="bar"></div>
+
+<!-- Invalid -->
+<div class="foo" class="bar"></div>
+<img src="a.jpg" alt="A" src="b.jpg">
+
+<!-- Jinja conditional attributes are fine (parsed as Attribute::JinjaBlock) -->
+<div {% if x %}class="a"{% else %}class="b"{% endif %}></div>

@@ -141,4 +141,12 @@ define_rules! {
     (MissingHtmlLang, Style, rules::style::missing_attr::MissingHtmlLang),
     /// Detects `<img>` tags missing `height` or `width` attributes.
     (MissingImgDimensions, Style, rules::style::missing_attr::MissingImgDimensions),
+    /// Detects elements with inline `style` attributes.
+    (InlineStyle, Style, rules::style::forbidden_attr::InlineStyle),
+    /// Detects elements with duplicate native attribute names.
+    (DuplicateAttr, Suspicious, rules::suspicious::duplicate_attr::DuplicateAttr),
+    /// Detects hardcoded `/static/` URLs that should use `{% static %}`.
+    (DjangoStaticUrl, Suspicious, rules::suspicious::django_url::DjangoStaticUrl),
+    /// Detects hardcoded internal URLs in `<a href>` that should use `{% url %}`.
+    (DjangoUrlPattern, Suspicious, rules::suspicious::django_url::DjangoUrlPattern),
 }

@@ -116,6 +116,18 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::MissingImgDimensions) {
             rules::style::missing_attr::check_img_dimensions(element, self);
         }
+        if self.is_rule_enabled(Rule::InlineStyle) {
+            rules::style::forbidden_attr::check_inline_style(element, self);
+        }
+        if self.is_rule_enabled(Rule::DuplicateAttr) {
+            rules::suspicious::duplicate_attr::check_duplicate_attr(element, self);
+        }
+        if self.is_rule_enabled(Rule::DjangoStaticUrl) {
+            rules::suspicious::django_url::check_django_static_url(element, self);
+        }
+        if self.is_rule_enabled(Rule::DjangoUrlPattern) {
+            rules::suspicious::django_url::check_django_url_pattern(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

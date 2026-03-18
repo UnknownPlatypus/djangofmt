@@ -1,0 +1,36 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 3 lint error(s)
+
+Error: 
+  × Static URL should use {% static %} template tag.
+   ╭─[tests/check/django_url_pattern/django_url_pattern.html:6:10]
+ 5 │ <a href="#anchor">Anchor</a>
+ 6 │ <a href="/static/file.css">Static</a>
+   ·          ────────┬───────
+   ·                  ╰── here
+ 7 │ <a href="/media/file.jpg">Media</a>
+   ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.html:11:10]
+ 10 │ <!-- Invalid -->
+ 11 │ <a href="/home/">Home</a>
+    ·          ───┬──
+    ·             ╰── here
+ 12 │ <a href="/accounts/login/">Login</a>
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.html:12:10]
+ 11 │ <a href="/home/">Home</a>
+ 12 │ <a href="/accounts/login/">Login</a>
+    ·          ────────┬───────
+    ·                  ╰── here
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.

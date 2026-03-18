@@ -1,0 +1,8 @@
+<!-- Valid -->
+<link href="{% static 'style.css' %}">
+<img src="{% static 'img/logo.png' %}">
+<img src="{{ STATIC_URL }}img/logo.png">
+
+<!-- Invalid -->
+<link href="/static/style.css">
+<img src="/static/img/logo.png">
