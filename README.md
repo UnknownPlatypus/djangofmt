@@ -126,11 +126,11 @@ Djangofmt can also be configured via a `[tool.djangofmt]` section in your `pypro
 
 ```toml
 [tool.djangofmt]
-line_length = 120
-indent_width = 4
+line-length = 120
+indent-width = 4
 profile = "django"
-custom_blocks = ["stage", "flatblock"]
-html_void_self_closing = "never"
+custom-blocks = ["stage", "flatblock"]
+html-void-self-closing = "never"
 ```
 
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
