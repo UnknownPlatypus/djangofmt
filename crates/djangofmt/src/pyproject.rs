@@ -10,7 +10,7 @@ use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
 /// Serde-only struct for deserializing `[tool.djangofmt]` from `pyproject.toml`.
 #[derive(Debug, Default, Deserialize, PartialEq, Eq)]
-#[serde(deny_unknown_fields)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct PyprojectSettings {
     pub line_length: Option<LineLength>,
     pub indent_width: Option<IndentWidth>,
@@ -112,11 +112,11 @@ mod tests {
         let pyproject_path = temp_dir.path().join("pyproject.toml");
         let pyproject_content = r"
             [tool.djangofmt]
-            line_length=200
-            indent_width=4
-            custom_blocks=['foo', 'bar']
+            line-length=200
+            indent-width=4
+            custom-blocks=['foo', 'bar']
             profile='django'
-            html_void_self_closing='always'
+            html-void-self-closing='always'
             ";
 
         fs::write(&pyproject_path, pyproject_content).unwrap();
@@ -139,7 +139,7 @@ mod tests {
         let pyproject_path = temp_dir.path().join("pyproject.toml");
         let pyproject_content = r"
             [tool.djangofmt]
-            line_length=200
+            line-length=200
             ";
 
         fs::write(&pyproject_path, pyproject_content).unwrap();
@@ -170,11 +170,11 @@ mod tests {
     }
 
     #[rstest]
-    #[case("[tool.djangofmt]\nunknown_option = 100")]
-    #[case("[tool.djangofmt]\nline_length = 0")]
-    #[case("[tool.djangofmt]\nline_length = 321")]
-    #[case("[tool.djangofmt]\nindent_width = 0")]
-    #[case("[tool.djangofmt]\nindent_width = 17")]
+    #[case("[tool.djangofmt]\nunknown-option = 100")]
+    #[case("[tool.djangofmt]\nline-length = 0")]
+    #[case("[tool.djangofmt]\nline-length = 321")]
+    #[case("[tool.djangofmt]\nindent-width = 0")]
+    #[case("[tool.djangofmt]\nindent-width = 17")]
     fn test_load_options_returns_default_on_invalid_toml(#[case] content: &str) {
         assert_eq!(
             load_options_from_pyproject_toml(content),
