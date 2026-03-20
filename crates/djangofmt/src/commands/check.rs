@@ -78,7 +78,7 @@ fn check_path(
     })?;
 
     let settings = Settings::default();
-    let diagnostics = check_ast(&ast, &settings);
+    let diagnostics = check_ast(&source, &ast, &settings);
 
     if diagnostics.is_empty() {
         return Ok(FileDiagnostics::empty());

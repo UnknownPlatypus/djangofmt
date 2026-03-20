@@ -1,0 +1,15 @@
+<!-- Has alt attribute -->
+<img alt="A photo" />
+<img src="photo.jpg" alt="A photo" />
+<img src="photo.jpg" alt="A photo" height="12" width="12" />
+
+<!-- Empty alt is valid (decorative images) -->
+<img alt="" />
+
+<!-- Alt with interpolation -->
+<img alt="{{ description }}" />
+
+<!-- Nested in Jinja block -->
+{% if show_image %}
+    <img src="photo.jpg" alt="A photo" />
+{% endif %}

@@ -19,6 +19,9 @@ pub enum RuleCategory {
     Style,
     /// Code that is overly complex.
     Complexity,
+    /// Code that is not accessible.
+    /// See <https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML>
+    Accessibility,
     /// New rules that are not yet stable.
     Nursery,
 }
@@ -121,6 +124,6 @@ define_rules {
 // Example: InvalidAttrValue -> "invalid-attr-value"
 
 define_rules! {
-    /// Validates attribute values against allowed values (e.g., `<form method>`).
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
+    (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
 }

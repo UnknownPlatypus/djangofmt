@@ -12,17 +12,28 @@ use crate::violation::Violation;
 /// The `Checker` traverses the `markup_fmt` AST and runs lint rules at each node.
 /// Rules report diagnostics via [`Checker::report`].
 pub struct Checker<'a> {
+    source: &'a str,
     settings: &'a Settings,
     diagnostics: Vec<LintDiagnostic>,
 }
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub const fn new(settings: &'a Settings) -> Self {
+    pub const fn new(source: &'a str, settings: &'a Settings) -> Self {
         Self {
+            source,
             settings,
             diagnostics: Vec::new(),
         }
+    }
+
+    /// Compute the byte offset of a string slice within the source.
+    ///
+    /// This is used to convert AST `raw` slices into [`SourceSpan`] offsets.
+    /// Panics if `slice` is not a subslice of the source.
+    #[must_use]
+    pub fn source_offset(&self, slice: &str) -> usize {
+        slice.as_ptr() as usize - self.source.as_ptr() as usize
     }
 
     /// Returns whether the given rule should be checked.
@@ -64,15 +75,18 @@ impl<'a> Checker<'a> {
 
     fn visit_node(&mut self, node: &Node<'_>) {
         match &node.kind {
-            NodeKind::Element(element) => self.visit_element(element),
+            NodeKind::Element(element) => self.visit_element(node, element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             _ => {}
         }
     }
 
-    fn visit_element(&mut self, element: &Element<'_>) {
+    fn visit_element(&mut self, node: &Node<'_>, element: &Element<'_>) {
         if self.is_rule_enabled(Rule::InvalidAttrValue) {
             rules::correctness::invalid_attr_value::check(element, self);
+        }
+        if self.is_rule_enabled(Rule::MissingImgAlt) {
+            rules::accessibility::missing_img_alt::check(node, element, self);
         }
 
         for attr in &element.attrs {
