@@ -1,0 +1,17 @@
+<!-- No duplicate attributes -->
+<div id="main" class="container"></div>
+
+<!-- Similar but distinct attribute names -->
+<div data-class="a" class="b"></div>
+<svg width="16" stroke-width="2"></svg>
+<rect x="2" y="3" rx="1" />
+
+<!-- AlpineJS shorthand vs regular -->
+<img src="img.jpg" :src="isLoaded ? url : default" alt="test" height="10" width="10" />
+
+<!-- Same attribute name on different elements -->
+<a href="/one">One</a>
+<a href="/two">Two</a>
+
+<!-- Single attribute -->
+<div class="only-one"></div>

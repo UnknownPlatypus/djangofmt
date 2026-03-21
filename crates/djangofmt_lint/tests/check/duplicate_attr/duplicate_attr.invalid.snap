@@ -1,0 +1,70 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 6 lint error(s)
+
+Error: 
+  × Duplicate attribute 'class'.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:2:26]
+ 1 │ <!-- Duplicate class -->
+ 2 │ <div class="a" id="main" class="b"></div>
+   ·                          ──┬──
+   ·                            ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the duplicate attribute.
+
+Error: 
+  × Duplicate attribute 'data-class'.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:5:31]
+ 4 │ <!-- Duplicate data attribute -->
+ 5 │ <div data-class="a" id="main" data-class="b"></div>
+   ·                               ─────┬────
+   ·                                    ╰── here
+ 6 │ 
+   ╰────
+  help: Remove the duplicate attribute.
+
+Error: 
+  × Duplicate attribute '-width'.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:8:18]
+ 7 │ <!-- Duplicate with leading hyphen -->
+ 8 │ <svg -width="16" -width="2"></svg>
+   ·                  ───┬──
+   ·                     ╰── here
+ 9 │ 
+   ╰────
+  help: Remove the duplicate attribute.
+
+Error: 
+  × Duplicate attribute ':src'.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:11:21]
+ 10 │ <!-- Duplicate AlpineJS shorthand -->
+ 11 │ <img :src="img.jpg" :src="isLoaded ? url : default" alt="test" height="10" width="10" />
+    ·                     ──┬─
+    ·                       ╰── here
+ 12 │ 
+    ╰────
+  help: Remove the duplicate attribute.
+
+Error: 
+  × Duplicate attribute 'CLASS'.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:14:16]
+ 13 │ <!-- Case-insensitive duplicate -->
+ 14 │ <div class="a" CLASS="b"></div>
+    ·                ──┬──
+    ·                  ╰── here
+ 15 │ 
+    ╰────
+  help: Remove the duplicate attribute.
+
+Error: 
+  × Duplicate attribute 'class'.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:18:20]
+ 17 │ {% if show %}
+ 18 │     <div class="a" class="b"></div>
+    ·                    ──┬──
+    ·                      ╰── here
+ 19 │ {% endif %}
+    ╰────
+  help: Remove the duplicate attribute.

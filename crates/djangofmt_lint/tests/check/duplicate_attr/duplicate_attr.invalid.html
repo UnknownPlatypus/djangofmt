@@ -1,0 +1,19 @@
+<!-- Duplicate class -->
+<div class="a" id="main" class="b"></div>
+
+<!-- Duplicate data attribute -->
+<div data-class="a" id="main" data-class="b"></div>
+
+<!-- Duplicate with leading hyphen -->
+<svg -width="16" -width="2"></svg>
+
+<!-- Duplicate AlpineJS shorthand -->
+<img :src="img.jpg" :src="isLoaded ? url : default" alt="test" height="10" width="10" />
+
+<!-- Case-insensitive duplicate -->
+<div class="a" CLASS="b"></div>
+
+<!-- Nested in Jinja block -->
+{% if show %}
+    <div class="a" class="b"></div>
+{% endif %}

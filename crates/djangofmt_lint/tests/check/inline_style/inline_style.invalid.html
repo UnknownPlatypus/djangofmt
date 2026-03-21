@@ -1,0 +1,23 @@
+<!-- Basic inline style -->
+<div style="color: red;"></div>
+
+<!-- Style on various elements -->
+<p style="font-size: 14px;">Text</p>
+<span style="display: block;">Inline</span>
+
+<!-- Style with other attributes -->
+<div class="container" style="margin: 0;" id="main"></div>
+
+<!-- Multiline tag with style -->
+<div
+    class="foo"
+    style="color:green"
+></div>
+
+<!-- Case-insensitive attribute name -->
+<div STYLE="color: blue;"></div>
+
+<!-- Nested in Jinja block -->
+{% if show %}
+    <div style="display: none;"></div>
+{% endif %}

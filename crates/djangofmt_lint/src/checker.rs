@@ -112,6 +112,12 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::RedundantTypeAttr) {
             rules::style::redundant_type_attr::check(element, self);
         }
+        if self.is_rule_enabled(Rule::InlineStyle) {
+            rules::style::forbidden_attr::check_inline_style(element, self);
+        }
+        if self.is_rule_enabled(Rule::DuplicateAttr) {
+            rules::suspicious::duplicate_attr::check_duplicate_attr(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

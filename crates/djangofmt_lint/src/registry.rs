@@ -134,4 +134,6 @@ define_rules! {
     (FormActionWhitespace, rules::style::attr_value_style::FormActionWhitespace),
     (EmptyAttrValue, rules::style::attr_value_style::EmptyAttrValue),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
+    (InlineStyle, rules::style::forbidden_attr::InlineStyle),
+    (DuplicateAttr, rules::suspicious::duplicate_attr::DuplicateAttr),
 }
