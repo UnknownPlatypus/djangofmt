@@ -131,4 +131,5 @@ define_rules! {
     (UppercaseFormMethod, rules::style::attr_value_style::UppercaseFormMethod),
     (FormActionWhitespace, rules::style::attr_value_style::FormActionWhitespace),
     (EmptyAttrValue, rules::style::attr_value_style::EmptyAttrValue),
+    (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
 }

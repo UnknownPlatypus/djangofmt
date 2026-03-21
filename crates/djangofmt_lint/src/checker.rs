@@ -103,6 +103,9 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::EmptyAttrValue) {
             rules::style::attr_value_style::check_empty_attr_value(element, self);
         }
+        if self.is_rule_enabled(Rule::RedundantTypeAttr) {
+            rules::style::redundant_type_attr::check(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

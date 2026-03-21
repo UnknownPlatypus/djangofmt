@@ -1,0 +1,103 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 9 lint error(s)
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:2:15]
+ 1 │ <!-- Redundant type on script -->
+ 2 │ <script type="text/javascript" src="app.js"></script>
+   ·               ───────┬───────
+   ·                      ╰── here
+ 3 │ 
+   ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/css" on <style> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:5:14]
+ 4 │ <!-- Redundant type on style -->
+ 5 │ <style type="text/css">.foo { color: red; }</style>
+   ·              ────┬───
+   ·                  ╰── here
+ 6 │ 
+   ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/javascript" on <SCRIPT> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:8:15]
+ 7 │ <!-- Case-insensitive tag name -->
+ 8 │ <SCRIPT type="text/javascript"></SCRIPT>
+   ·               ───────┬───────
+   ·                      ╰── here
+ 9 │ <STYLE type="text/css"></STYLE>
+   ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/css" on <STYLE> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:9:14]
+  8 │ <SCRIPT type="text/javascript"></SCRIPT>
+  9 │ <STYLE type="text/css"></STYLE>
+    ·              ────┬───
+    ·                  ╰── here
+ 10 │ 
+    ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="Text/JavaScript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:12:15]
+ 11 │ <!-- Case-insensitive type value -->
+ 12 │ <script type="Text/JavaScript"></script>
+    ·               ───────┬───────
+    ·                      ╰── here
+ 13 │ <style type="Text/CSS"></style>
+    ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="Text/CSS" on <style> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:13:14]
+ 12 │ <script type="Text/JavaScript"></script>
+ 13 │ <style type="Text/CSS"></style>
+    ·              ────┬───
+    ·                  ╰── here
+ 14 │ 
+    ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:16:28]
+ 15 │ <!-- Type attribute with other attributes -->
+ 16 │ <script src="app.js" type="text/javascript" defer></script>
+    ·                            ───────┬───────
+    ·                                   ╰── here
+ 17 │ 
+    ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:21:11]
+ 20 │     src="app.js"
+ 21 │     type="text/javascript"
+    ·           ───────┬───────
+    ·                  ╰── here
+ 22 │ ></script>
+    ╰────
+  help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:26:19]
+ 25 │ {% if include_script %}
+ 26 │     <script type="text/javascript" src="app.js"></script>
+    ·                   ───────┬───────
+    ·                          ╰── here
+ 27 │ {% endif %}
+    ╰────
+  help: The type attribute is unnecessary for the default script/style type.

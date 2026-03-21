@@ -1,0 +1,27 @@
+<!-- Redundant type on script -->
+<script type="text/javascript" src="app.js"></script>
+
+<!-- Redundant type on style -->
+<style type="text/css">.foo { color: red; }</style>
+
+<!-- Case-insensitive tag name -->
+<SCRIPT type="text/javascript"></SCRIPT>
+<STYLE type="text/css"></STYLE>
+
+<!-- Case-insensitive type value -->
+<script type="Text/JavaScript"></script>
+<style type="Text/CSS"></style>
+
+<!-- Type attribute with other attributes -->
+<script src="app.js" type="text/javascript" defer></script>
+
+<!-- Multiline tag -->
+<script
+    src="app.js"
+    type="text/javascript"
+></script>
+
+<!-- Nested in Jinja block -->
+{% if include_script %}
+    <script type="text/javascript" src="app.js"></script>
+{% endif %}
