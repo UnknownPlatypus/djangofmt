@@ -1,0 +1,82 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 7 lint error(s)
+
+Error: 
+  × Img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:2:1]
+ 1 │ <!-- Missing both height and width -->
+ 2 │ <img alt="photo" src="photo.jpg">
+   · ────────────────┬────────────────
+   ·                 ╰── here
+ 3 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:5:1]
+ 4 │ <!-- Missing width only -->
+ 5 │ <img alt="photo" height="100">
+   · ───────────────┬──────────────
+   ·                ╰── here
+ 6 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:8:1]
+ 7 │ <!-- Missing height only -->
+ 8 │ <img alt="photo" width="200">
+   · ──────────────┬──────────────
+   ·               ╰── here
+ 9 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Img tag should have an alt attribute.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:11:1]
+ 10 │ <!-- Completely empty img (also missing alt) -->
+ 11 │ <img>
+    · ──┬──
+    ·   ╰── here
+ 12 │ 
+    ╰────
+
+Error: 
+  × Img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:11:1]
+ 10 │ <!-- Completely empty img (also missing alt) -->
+ 11 │ <img>
+    · ──┬──
+    ·   ╰── here
+ 12 │ 
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:14:1]
+ 13 │     <!-- Multiline without dimensions -->
+ 14 │ ╭─▶ <img
+ 15 │ │       src="photo.jpg"
+ 16 │ │       alt="photo"
+ 17 │ ├─▶ >
+    · ╰──── here
+ 18 │     
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
+  × Img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:21:5]
+ 20 │ {% if show_image %}
+ 21 │     <img alt="photo" src="photo.jpg">
+    ·     ────────────────┬────────────────
+    ·                     ╰── here
+ 22 │ {% endif %}
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.

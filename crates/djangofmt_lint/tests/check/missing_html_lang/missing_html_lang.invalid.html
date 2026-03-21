@@ -1,0 +1,17 @@
+<!-- Missing lang attribute -->
+<html>
+</html>
+
+<!-- Has other attributes but no lang -->
+<html class="no-js">
+</html>
+
+<!-- Case-insensitive tag name -->
+<HTML>
+</HTML>
+
+<!-- Nested in Jinja block -->
+{% if base_template %}
+    <html>
+    </html>
+{% endif %}

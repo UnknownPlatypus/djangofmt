@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 7 lint error(s)
+  × Found 12 lint error(s)
 
 Error: 
   × Img tag should have an alt attribute.
@@ -14,6 +14,17 @@ Error:
    ╰────
 
 Error: 
+  × Img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:2:1]
+ 1 │ <!-- No alt attribute -->
+ 2 │ <img />
+   · ───┬───
+   ·    ╰── here
+ 3 │ <img src="photo.jpg" />
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
   × Img tag should have an alt attribute.
    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:3:1]
  2 │ <img />
@@ -22,6 +33,17 @@ Error:
    ·            ╰── here
  4 │ <img height="12" width="12"/>
    ╰────
+
+Error: 
+  × Img tag should have height and width attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:3:1]
+ 2 │ <img />
+ 3 │ <img src="photo.jpg" />
+   · ───────────┬───────────
+   ·            ╰── here
+ 4 │ <img height="12" width="12"/>
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
 
 Error: 
   × Img tag should have an alt attribute.
@@ -57,6 +79,17 @@ Error:
     ╰────
 
 Error: 
+  × Img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:14:1]
+ 13 │ <!-- Self-closing without alt -->
+ 14 │ <img src="photo.jpg">
+    · ──────────┬──────────
+    ·           ╰── here
+ 15 │ 
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
   × Img tag should have an alt attribute.
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:17:1]
  16 │ <!-- Multiple attributes but no alt -->
@@ -67,6 +100,17 @@ Error:
     ╰────
 
 Error: 
+  × Img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:17:1]
+ 16 │ <!-- Multiple attributes but no alt -->
+ 17 │ <img src="photo.jpg" class="hero" id="main-image" loading="lazy" />
+    · ─────────────────────────────────┬─────────────────────────────────
+    ·                                  ╰── here
+ 18 │ 
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.
+
+Error: 
   × Img tag should have an alt attribute.
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:21:5]
  20 │ {% if show_image %}
@@ -75,3 +119,14 @@ Error:
     ·                ╰── here
  22 │ {% endif %}
     ╰────
+
+Error: 
+  × Img tag should have height and width attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:21:5]
+ 20 │ {% if show_image %}
+ 21 │     <img src="photo.jpg" />
+    ·     ───────────┬───────────
+    ·                ╰── here
+ 22 │ {% endif %}
+    ╰────
+  help: Add explicit height and width to avoid layout shifts.

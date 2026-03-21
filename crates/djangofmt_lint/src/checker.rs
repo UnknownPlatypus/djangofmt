@@ -88,6 +88,12 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::MissingImgAlt) {
             rules::accessibility::missing_img_alt::check(node, element, self);
         }
+        if self.is_rule_enabled(Rule::MissingHtmlLang) {
+            rules::accessibility::missing_html_lang::check(node, element, self);
+        }
+        if self.is_rule_enabled(Rule::MissingImgDimensions) {
+            rules::accessibility::missing_img_dimensions::check(node, element, self);
+        }
         if self.is_rule_enabled(Rule::JavascriptUrl) {
             rules::suspicious::suspicious_url::check_javascript_url(element, self);
         }

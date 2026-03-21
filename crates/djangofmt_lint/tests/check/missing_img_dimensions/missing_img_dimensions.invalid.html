@@ -1,0 +1,22 @@
+<!-- Missing both height and width -->
+<img alt="photo" src="photo.jpg">
+
+<!-- Missing width only -->
+<img alt="photo" height="100">
+
+<!-- Missing height only -->
+<img alt="photo" width="200">
+
+<!-- Completely empty img (also missing alt) -->
+<img>
+
+<!-- Multiline without dimensions -->
+<img
+    src="photo.jpg"
+    alt="photo"
+>
+
+<!-- Nested in Jinja block -->
+{% if show_image %}
+    <img alt="photo" src="photo.jpg">
+{% endif %}

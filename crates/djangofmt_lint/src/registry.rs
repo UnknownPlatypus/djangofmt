@@ -126,6 +126,8 @@ define_rules {
 define_rules! {
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
+    (MissingHtmlLang, rules::accessibility::missing_html_lang::MissingHtmlLang),
+    (MissingImgDimensions, rules::accessibility::missing_img_dimensions::MissingImgDimensions),
     (JavascriptUrl, rules::suspicious::suspicious_url::JavascriptUrl),
     (UseHttps, rules::suspicious::suspicious_url::UseHttps),
     (UppercaseFormMethod, rules::style::attr_value_style::UppercaseFormMethod),

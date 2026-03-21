@@ -1,19 +1,19 @@
 <!-- Has alt attribute -->
-<img alt="A photo" />
-<img src="photo.jpg" alt="A photo" />
+<img alt="A photo" height="12" width="12" />
+<img src="photo.jpg" alt="A photo" height="12" width="12" />
 <img src="photo.jpg" alt="A photo" height="12" width="12" />
 
 <!-- Empty alt is valid (decorative images per WCAG) -->
-<img alt="" />
-<img src="decorative.png" alt="" />
+<img alt="" height="12" width="12" />
+<img src="decorative.png" alt="" height="12" width="12" />
 
 <!-- Alt with interpolation -->
-<img alt="{{ description }}" />
-<img alt="{% if x %}photo{% else %}image{% endif %}" />
+<img alt="{{ description }}" height="12" width="12" />
+<img alt="{% if x %}photo{% else %}image{% endif %}" height="12" width="12" />
 
 <!-- Case-insensitive attribute matching -->
-<img ALT="A photo" />
-<img Alt="A photo" />
+<img ALT="A photo" height="12" width="12" />
+<img Alt="A photo" height="12" width="12" />
 
 <!-- Multiline tag with alt -->
 <img
@@ -25,7 +25,7 @@
 
 <!-- Nested in Jinja block -->
 {% if show_image %}
-    <img src="photo.jpg" alt="A photo" />
+    <img src="photo.jpg" alt="A photo" height="12" width="12" />
 {% endif %}
 
 <!-- Non-img tags without alt are fine -->

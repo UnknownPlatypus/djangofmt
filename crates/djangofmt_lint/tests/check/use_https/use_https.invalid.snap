@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 6 lint error(s)
+  × Found 7 lint error(s)
 
 Error: 
   × Use HTTPS for external links.
@@ -35,6 +35,17 @@ Error:
  7 │ <img src="http://example.com/photo.jpg" alt="Photo" />
    ╰────
   help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Img tag should have height and width attributes.
+   ╭─[tests/check/use_https/use_https.invalid.html:7:1]
+ 6 │ <script src="http://cdn.example.com/script.js"></script>
+ 7 │ <img src="http://example.com/photo.jpg" alt="Photo" />
+   · ───────────────────────────┬──────────────────────────
+   ·                            ╰── here
+ 8 │ 
+   ╰────
+  help: Add explicit height and width to avoid layout shifts.
 
 Error: 
   × Use HTTPS for external links.
