@@ -293,8 +293,7 @@ impl ignore::ParallelVisitor for FileVisitor<'_> {
 
 impl Drop for FileVisitor<'_> {
     fn drop(&mut self) {
-        let mut merged = self.global.files.lock().expect("walk visitor panicked");
-        let (files, error) = &mut *merged;
+        let (files, error) = &mut *self.global.files.lock().expect("walk visitor panicked");
 
         if files.is_empty() {
             *files = std::mem::take(&mut self.local_files);
