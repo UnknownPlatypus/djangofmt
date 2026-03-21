@@ -14,7 +14,7 @@
 use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
-use crate::registry::Rule;
+use crate::registry::{Rule, RuleCategory};
 use crate::violation::Violation;
 
 /// Violation for invalid HTML attribute values.
@@ -30,6 +30,7 @@ pub struct InvalidAttrValue {
 
 impl Violation for InvalidAttrValue {
     const RULE: Rule = Rule::InvalidAttrValue;
+    const CATEGORY: RuleCategory = RuleCategory::Correctness;
 
     fn message(&self) -> String {
         format!(

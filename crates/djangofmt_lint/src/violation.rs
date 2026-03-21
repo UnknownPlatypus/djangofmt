@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::registry::Rule;
+use crate::registry::{Rule, RuleCategory};
 
 /// A trait for lint violations.
 ///
@@ -13,6 +13,9 @@ use crate::registry::Rule;
 pub trait Violation: Debug {
     /// The rule for this violation (e.g., `Rule::InvalidAttrValue`).
     const RULE: Rule;
+
+    /// The category for this violation (e.g., `RuleCategory::Correctness`).
+    const CATEGORY: RuleCategory;
 
     /// The message to be displayed to the user.
     fn message(&self) -> String;
