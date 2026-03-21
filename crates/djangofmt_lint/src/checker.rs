@@ -94,6 +94,15 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::UseHttps) {
             rules::suspicious::suspicious_url::check_use_https(element, self);
         }
+        if self.is_rule_enabled(Rule::UppercaseFormMethod) {
+            rules::style::attr_value_style::check_uppercase_form_method(element, self);
+        }
+        if self.is_rule_enabled(Rule::FormActionWhitespace) {
+            rules::style::attr_value_style::check_form_action_whitespace(element, self);
+        }
+        if self.is_rule_enabled(Rule::EmptyAttrValue) {
+            rules::style::attr_value_style::check_empty_attr_value(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

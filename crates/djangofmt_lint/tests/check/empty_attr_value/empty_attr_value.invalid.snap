@@ -1,0 +1,104 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 10 lint error(s)
+
+Error: 
+  × Empty 'id' attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:10]
+ 1 │ <!-- Empty id -->
+ 2 │ <div id=""></div>
+   ·          ▲
+   ·          ╰── here
+ 3 │ 
+   ╰────
+
+Error: 
+  × Empty 'class' attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:5:13]
+ 4 │ <!-- Empty class -->
+ 5 │ <div class=""></div>
+   ·             ▲
+   ·             ╰── here
+ 6 │ 
+   ╰────
+
+Error: 
+  × Empty 'id' attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:10]
+ 7 │ <!-- Both empty id and class -->
+ 8 │ <div id="" class=""></div>
+   ·          ▲
+   ·          ╰── here
+ 9 │ 
+   ╰────
+
+Error: 
+  × Empty 'class' attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:19]
+ 7 │ <!-- Both empty id and class -->
+ 8 │ <div id="" class=""></div>
+   ·                   ▲
+   ·                   ╰── here
+ 9 │ 
+   ╰────
+
+Error: 
+  × Empty 'id' attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:11:10]
+ 10 │ <!-- Empty with single quotes -->
+ 11 │ <div id=''></div>
+    ·          ▲
+    ·          ╰── here
+ 12 │ 
+    ╰────
+
+Error: 
+  × Empty 'ID' attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:14:10]
+ 13 │ <!-- Case-insensitive attribute name -->
+ 14 │ <div ID=""></div>
+    ·          ▲
+    ·          ╰── here
+ 15 │ <div CLASS=""></div>
+    ╰────
+
+Error: 
+  × Empty 'CLASS' attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:15:13]
+ 14 │ <div ID=""></div>
+ 15 │ <div CLASS=""></div>
+    ·             ▲
+    ·             ╰── here
+ 16 │ 
+    ╰────
+
+Error: 
+  × Empty 'class' attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:18:14]
+ 17 │ <!-- Various elements -->
+ 18 │ <span class=""></span>
+    ·              ▲
+    ·              ╰── here
+ 19 │ <p id=""></p>
+    ╰────
+
+Error: 
+  × Empty 'id' attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:19:8]
+ 18 │ <span class=""></span>
+ 19 │ <p id=""></p>
+    ·        ▲
+    ·        ╰── here
+ 20 │ 
+    ╰────
+
+Error: 
+  × Empty 'id' attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:23:14]
+ 22 │ {% if show %}
+ 23 │     <div id="" class="container"></div>
+    ·              ▲
+    ·              ╰── here
+ 24 │ {% endif %}
+    ╰────

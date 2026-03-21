@@ -1,0 +1,8 @@
+<!-- Valid methods -->
+<form method="get"></form>
+<form method="post"></form>
+<form method="dialog"></form>
+
+<!-- Interpolation - dynamic values should be skipped -->
+<form method="{{ method }}"></form>
+<form method="{% if x %}post{% else %}get{% endif %}"></form>

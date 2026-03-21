@@ -128,4 +128,7 @@ define_rules! {
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
     (JavascriptUrl, rules::suspicious::suspicious_url::JavascriptUrl),
     (UseHttps, rules::suspicious::suspicious_url::UseHttps),
+    (UppercaseFormMethod, rules::style::attr_value_style::UppercaseFormMethod),
+    (FormActionWhitespace, rules::style::attr_value_style::FormActionWhitespace),
+    (EmptyAttrValue, rules::style::attr_value_style::EmptyAttrValue),
 }

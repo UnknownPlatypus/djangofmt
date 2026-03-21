@@ -1,0 +1,16 @@
+<!-- Leading whitespace -->
+<form action=" /submit/"></form>
+
+<!-- Trailing whitespace -->
+<form action="/submit/ "></form>
+
+<!-- Both leading and trailing whitespace -->
+<form action=" /submit/ "></form>
+
+<!-- Trailing whitespace with plain value -->
+<form action="asdf "></form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form action=" /submit/ "></form>
+{% endif %}

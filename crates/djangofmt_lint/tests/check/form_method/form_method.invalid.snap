@@ -1,48 +1,70 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 4 lint error(s)
+  × Found 6 lint error(s)
 
 Error: 
   × Invalid value 'put' for attribute 'method'.
-    ╭─[tests/check/form_method/form_method.invalid.html:9:15]
-  8 │ <!-- Invalid methods - errors expected -->
-  9 │ <form method="put"></form>
-    ·               ─┬─
-    ·                ╰── here
- 10 │ <form method="delete"></form>
-    ╰────
+   ╭─[tests/check/form_method/form_method.invalid.html:2:15]
+ 1 │ <!-- Invalid methods -->
+ 2 │ <form method="put"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 3 │ <form method="delete"></form>
+   ╰────
   help: Use one of: get, post, dialog
 
 Error: 
   × Invalid value 'delete' for attribute 'method'.
-    ╭─[tests/check/form_method/form_method.invalid.html:10:15]
-  9 │ <form method="put"></form>
- 10 │ <form method="delete"></form>
-    ·               ───┬──
-    ·                  ╰── here
- 11 │ <form method="patch"></form>
-    ╰────
+   ╭─[tests/check/form_method/form_method.invalid.html:3:15]
+ 2 │ <form method="put"></form>
+ 3 │ <form method="delete"></form>
+   ·               ───┬──
+   ·                  ╰── here
+ 4 │ <form method="patch"></form>
+   ╰────
   help: Use one of: get, post, dialog
 
 Error: 
   × Invalid value 'patch' for attribute 'method'.
-    ╭─[tests/check/form_method/form_method.invalid.html:11:15]
- 10 │ <form method="delete"></form>
- 11 │ <form method="patch"></form>
-    ·               ──┬──
-    ·                 ╰── here
- 12 │ 
-    ╰────
+   ╭─[tests/check/form_method/form_method.invalid.html:4:15]
+ 3 │ <form method="delete"></form>
+ 4 │ <form method="patch"></form>
+   ·               ──┬──
+   ·                 ╰── here
+ 5 │ 
+   ╰────
   help: Use one of: get, post, dialog
 
 Error: 
+  × Form method 'GET' should be lowercase.
+   ╭─[tests/check/form_method/form_method.invalid.html:7:15]
+ 6 │ <!-- Uppercase methods (valid values, but should be lowercase) -->
+ 7 │ <form method="GET"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 8 │ <form method="POST"></form>
+   ╰────
+  help: Use 'get' instead.
+
+Error: 
+  × Form method 'POST' should be lowercase.
+   ╭─[tests/check/form_method/form_method.invalid.html:8:15]
+ 7 │ <form method="GET"></form>
+ 8 │ <form method="POST"></form>
+   ·               ──┬─
+   ·                 ╰── here
+ 9 │ 
+   ╰────
+  help: Use 'post' instead.
+
+Error: 
   × Invalid value 'invalid' for attribute 'method'.
-    ╭─[tests/check/form_method/form_method.invalid.html:19:19]
- 18 │ {% if show_form %}
- 19 │     <form method="invalid"></form>
+    ╭─[tests/check/form_method/form_method.invalid.html:12:19]
+ 11 │ {% if show_form %}
+ 12 │     <form method="invalid"></form>
     ·                   ───┬───
     ·                      ╰── here
- 20 │ {% endif %}
+ 13 │ {% endif %}
     ╰────
   help: Use one of: get, post, dialog

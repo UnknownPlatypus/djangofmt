@@ -1,0 +1,81 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 7 lint error(s)
+
+Error: 
+  × Form method 'GET' should be lowercase.
+   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:2:15]
+ 1 │ <!-- Uppercase method -->
+ 2 │ <form method="GET"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 3 │ <form method="POST"></form>
+   ╰────
+  help: Use 'get' instead.
+
+Error: 
+  × Form method 'POST' should be lowercase.
+   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:3:15]
+ 2 │ <form method="GET"></form>
+ 3 │ <form method="POST"></form>
+   ·               ──┬─
+   ·                 ╰── here
+ 4 │ 
+   ╰────
+  help: Use 'post' instead.
+
+Error: 
+  × Form method 'Post' should be lowercase.
+   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:6:15]
+ 5 │ <!-- Mixed case -->
+ 6 │ <form method="Post"></form>
+   ·               ──┬─
+   ·                 ╰── here
+ 7 │ <form method="Get"></form>
+   ╰────
+  help: Use 'post' instead.
+
+Error: 
+  × Form method 'Get' should be lowercase.
+   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:7:15]
+ 6 │ <form method="Post"></form>
+ 7 │ <form method="Get"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 8 │ 
+   ╰────
+  help: Use 'get' instead.
+
+Error: 
+  × Form method 'POST' should be lowercase.
+    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:10:15]
+  9 │ <!-- Case-insensitive tag name -->
+ 10 │ <FORM method="POST"></FORM>
+    ·               ──┬─
+    ·                 ╰── here
+ 11 │ 
+    ╰────
+  help: Use 'post' instead.
+
+Error: 
+  × Form method 'POST' should be lowercase.
+    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:15:13]
+ 14 │     action="/submit/"
+ 15 │     method="POST"
+    ·             ──┬─
+    ·               ╰── here
+ 16 │ ></form>
+    ╰────
+  help: Use 'post' instead.
+
+Error: 
+  × Form method 'GET' should be lowercase.
+    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:20:19]
+ 19 │ {% if show_form %}
+ 20 │     <form method="GET"></form>
+    ·                   ─┬─
+    ·                    ╰── here
+ 21 │ {% endif %}
+    ╰────
+  help: Use 'get' instead.
