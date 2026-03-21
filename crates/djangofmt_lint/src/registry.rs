@@ -27,17 +27,17 @@ pub enum RuleCategory {
 ///
 /// # Format
 /// ```text
-/// (RuleName, category, ViolationStruct)
+/// (RuleName, ViolationStruct)
 /// ```
 ///
 /// # What this macro generates
 /// - `Rule` enum with human-friendly kebab-case names (e.g., `invalid-attr-value`)
-/// - `Rule::category()` method returning the functional category
+/// - `Rule::category()` method returning the functional category (from `Violation::CATEGORY`)
 /// - Compile-time verification that each violation implements `Violation` with matching `CODE`
 ///
 /// # Adding a new rule
 /// 1. Create the violation struct in `rules/` implementing `Violation`
-/// 2. Add entry here: `(RuleName, Category, ViolationStruct)`
+/// 2. Add entry here: `(RuleName, ViolationStruct)`
 /// 3. Wire up the check in the appropriate `visit_*` method in `checker.rs`
 ///
 /// The compiler will error if:
@@ -49,7 +49,7 @@ define_rules {
     (
         $(
             $(#[$meta:meta])*
-            ($rule:ident, $category:ident, $violation:path)
+            ($rule:ident, $violation:path)
         ),* $(,)?
     ) => {
         /// Unique identifier for every lint rule.
@@ -82,7 +82,7 @@ define_rules {
             #[must_use]
             pub const fn category(&self) -> RuleCategory {
                 match self {
-                    $( Rule::$rule => RuleCategory::$category, )*
+                    $( Rule::$rule => <$violation as Violation>::CATEGORY, )*
                 }
             }
         }
@@ -115,12 +115,12 @@ define_rules {
 // RULE DEFINITIONS
 // ============================================================================
 //
-// Format: (RuleName, Category, path::to::ViolationStruct)
+// Format: (RuleName, path::to::ViolationStruct)
 //
 // The rule name becomes a kebab-case string automatically via strum.
 // Example: InvalidAttrValue -> "invalid-attr-value"
 
 define_rules! {
     /// Validates attribute values against allowed values (e.g., `<form method>`).
-    (InvalidAttrValue, Correctness, rules::correctness::invalid_attr_value::InvalidAttrValue),
+    (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
 }
