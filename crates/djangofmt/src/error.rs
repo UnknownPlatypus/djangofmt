@@ -17,4 +17,8 @@ pub enum Error {
     #[error(transparent)]
     #[diagnostic(code(djangofmt::serde_json_error))]
     SerdeJson(#[from] serde_json::Error),
+
+    #[error("{0}")]
+    #[diagnostic(code(djangofmt::resolve_error))]
+    Resolve(String),
 }
