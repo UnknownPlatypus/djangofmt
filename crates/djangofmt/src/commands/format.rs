@@ -15,6 +15,7 @@ use crate::args::{FormatCommand, Profile};
 use crate::error::Result;
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::{PyprojectSettings, load_options};
+use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -197,13 +198,16 @@ fn build_json_config(
 
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
-
-    let profile = args.profile.or(pyproject.profile).unwrap_or_default();
+    let profile = args.profile.or(pyproject.profile);
     let config = FormatterConfig::from_args(args, &pyproject);
 
+    // Resolve files (handles directories, excludes, includes, gitignore)
+    let file_discovery_config = ResolvedDiscoveryConfig::new(&args.file_selection, &pyproject);
+    let resolved_files = resolve_files(&args.files, &file_discovery_config)?;
+
+    // Format files in parallel
     let start = Instant::now();
-    let (results, mut parse_errors): (Vec<_>, Vec<_>) = args
-        .files
+    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved_files
         .par_iter()
         .map(|entry| format_path(entry, &config, profile))
         .partition_map(|result| match result {
@@ -211,8 +215,11 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
             Err(err) => Right(err),
         });
 
-    let duration = start.elapsed();
-    debug!("Formatted {} files in {:.2?}", args.files.len(), duration);
+    debug!(
+        "Formatted {} files in {:.2?}",
+        resolved_files.len(),
+        start.elapsed()
+    );
 
     // Report on any parsing errors.
     parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
@@ -310,8 +317,11 @@ pub fn format_text(
 fn format_path(
     path: &Path,
     config: &FormatterConfig,
-    profile: Profile,
+    profile: Option<Profile>,
 ) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
+    let profile = profile
+        .or_else(|| Profile::from_path(path))
+        .unwrap_or_default();
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
 
