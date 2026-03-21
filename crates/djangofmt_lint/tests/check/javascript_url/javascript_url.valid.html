@@ -1,0 +1,23 @@
+<!-- Normal URLs -->
+<a href="/page/">Link</a>
+<a href="https://example.com">Link</a>
+<a href="{% url 'home' %}">Home</a>
+
+<!-- Event handler (correct pattern) -->
+<button onclick="doStuff()">Click</button>
+
+<!-- Anchor links -->
+<a href="#">Link</a>
+<a href="#section">Link</a>
+
+<!-- Interpolation in href -->
+<a href="{{ url }}">Link</a>
+<a href="{% if x %}/a{% else %}/b{% endif %}">Link</a>
+
+<!-- Non-href attributes with javascript: are fine -->
+<div data-value="javascript:void(0)"></div>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="/page/">Link</a>
+{% endif %}

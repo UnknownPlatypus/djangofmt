@@ -126,4 +126,6 @@ define_rules {
 define_rules! {
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
+    (JavascriptUrl, rules::suspicious::suspicious_url::JavascriptUrl),
+    (UseHttps, rules::suspicious::suspicious_url::UseHttps),
 }

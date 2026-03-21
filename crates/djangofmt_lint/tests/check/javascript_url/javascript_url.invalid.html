@@ -1,0 +1,16 @@
+<!-- javascript: in href -->
+<a href="javascript:void(0)">Link</a>
+<a href="javascript:alert('xss')">Link</a>
+<a href='javascript:abc()'>Link</a>
+
+<!-- Case-insensitive -->
+<a href="JavaScript:void(0)">Link</a>
+<a href="JAVASCRIPT:void(0)">Link</a>
+
+<!-- With whitespace before javascript: -->
+<a href="  javascript:void(0)">Link</a>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="javascript:doStuff()">Link</a>
+{% endif %}

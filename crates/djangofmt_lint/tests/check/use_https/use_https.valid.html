@@ -1,0 +1,26 @@
+<!-- HTTPS URLs -->
+<a href="https://example.com">Link</a>
+<link rel="stylesheet" href="https://cdn.example.com/style.css">
+<script src="https://cdn.example.com/script.js"></script>
+<img src="https://example.com/photo.jpg" alt="Photo" />
+
+<!-- Relative URLs -->
+<a href="/relative">Link</a>
+<a href="relative/path">Link</a>
+
+<!-- Anchors and special protocols -->
+<a href="#">Link</a>
+<a href="mailto:user@example.com">Email</a>
+<a href="tel:+1234567890">Call</a>
+
+<!-- Interpolation -->
+<a href="{{ url }}">Link</a>
+<script src="{% static 'script.js' %}"></script>
+
+<!-- Non-URL attributes with http:// are fine -->
+<div data-info="http://example.com"></div>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="https://example.com">Link</a>
+{% endif %}

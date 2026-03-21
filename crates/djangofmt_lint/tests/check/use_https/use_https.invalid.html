@@ -1,0 +1,15 @@
+<!-- http:// in href -->
+<a href="http://example.com">Link</a>
+
+<!-- http:// in src -->
+<link rel="stylesheet" href="http://cdn.example.com/style.css">
+<script src="http://cdn.example.com/script.js"></script>
+<img src="http://example.com/photo.jpg" alt="Photo" />
+
+<!-- http:// in action -->
+<form action="http://example.com/submit"></form>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="http://example.com">Link</a>
+{% endif %}

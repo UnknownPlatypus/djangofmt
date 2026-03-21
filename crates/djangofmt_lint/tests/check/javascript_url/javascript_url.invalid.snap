@@ -1,0 +1,81 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 7 lint error(s)
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:2:10]
+ 1 │ <!-- javascript: in href -->
+ 2 │ <a href="javascript:void(0)">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 3 │ <a href="javascript:alert('xss')">Link</a>
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:3:10]
+ 2 │ <a href="javascript:void(0)">Link</a>
+ 3 │ <a href="javascript:alert('xss')">Link</a>
+   ·          ───────────┬───────────
+   ·                     ╰── here
+ 4 │ <a href='javascript:abc()'>Link</a>
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:4:10]
+ 3 │ <a href="javascript:alert('xss')">Link</a>
+ 4 │ <a href='javascript:abc()'>Link</a>
+   ·          ────────┬───────
+   ·                  ╰── here
+ 5 │ 
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:7:10]
+ 6 │ <!-- Case-insensitive -->
+ 7 │ <a href="JavaScript:void(0)">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 8 │ <a href="JAVASCRIPT:void(0)">Link</a>
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:8:10]
+ 7 │ <a href="JavaScript:void(0)">Link</a>
+ 8 │ <a href="JAVASCRIPT:void(0)">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 9 │ 
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:11:10]
+ 10 │ <!-- With whitespace before javascript: -->
+ 11 │ <a href="  javascript:void(0)">Link</a>
+    ·          ──────────┬─────────
+    ·                    ╰── here
+ 12 │ 
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid 'javascript:' URLs.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:15:14]
+ 14 │ {% if show_link %}
+ 15 │     <a href="javascript:doStuff()">Link</a>
+    ·              ──────────┬─────────
+    ·                        ╰── here
+ 16 │ {% endif %}
+    ╰────
+  help: Use an event handler and a real URL instead.

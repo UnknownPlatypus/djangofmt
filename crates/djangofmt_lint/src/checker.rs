@@ -88,6 +88,12 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::MissingImgAlt) {
             rules::accessibility::missing_img_alt::check(node, element, self);
         }
+        if self.is_rule_enabled(Rule::JavascriptUrl) {
+            rules::suspicious::suspicious_url::check_javascript_url(element, self);
+        }
+        if self.is_rule_enabled(Rule::UseHttps) {
+            rules::suspicious::suspicious_url::check_use_https(element, self);
+        }
 
         for attr in &element.attrs {
             self.visit_attribute(attr);

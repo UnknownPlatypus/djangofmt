@@ -1,0 +1,70 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 6 lint error(s)
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.invalid.html:2:10]
+ 1 │ <!-- http:// in href -->
+ 2 │ <a href="http://example.com">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 3 │ 
+   ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.invalid.html:5:30]
+ 4 │ <!-- http:// in src -->
+ 5 │ <link rel="stylesheet" href="http://cdn.example.com/style.css">
+   ·                              ────────────────┬───────────────
+   ·                                              ╰── here
+ 6 │ <script src="http://cdn.example.com/script.js"></script>
+   ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.invalid.html:6:14]
+ 5 │ <link rel="stylesheet" href="http://cdn.example.com/style.css">
+ 6 │ <script src="http://cdn.example.com/script.js"></script>
+   ·              ────────────────┬───────────────
+   ·                              ╰── here
+ 7 │ <img src="http://example.com/photo.jpg" alt="Photo" />
+   ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+   ╭─[tests/check/use_https/use_https.invalid.html:7:11]
+ 6 │ <script src="http://cdn.example.com/script.js"></script>
+ 7 │ <img src="http://example.com/photo.jpg" alt="Photo" />
+   ·           ──────────────┬─────────────
+   ·                         ╰── here
+ 8 │ 
+   ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+    ╭─[tests/check/use_https/use_https.invalid.html:10:15]
+  9 │ <!-- http:// in action -->
+ 10 │ <form action="http://example.com/submit"></form>
+    ·               ────────────┬────────────
+    ·                           ╰── here
+ 11 │ 
+    ╰────
+  help: Replace 'http://' with 'https://'.
+
+Error: 
+  × Use HTTPS for external links.
+    ╭─[tests/check/use_https/use_https.invalid.html:14:14]
+ 13 │ {% if show_link %}
+ 14 │     <a href="http://example.com">Link</a>
+    ·              ─────────┬────────
+    ·                       ╰── here
+ 15 │ {% endif %}
+    ╰────
+  help: Replace 'http://' with 'https://'.
