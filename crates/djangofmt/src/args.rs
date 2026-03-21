@@ -70,11 +70,7 @@ pub struct FileSelectionArgs {
 
     /// Enforce exclusions, even for paths passed to djangofmt directly on the command-line.
     /// Use `--no-force-exclude` to disable.
-    #[arg(
-        long,
-        overrides_with("no_force_exclude"),
-        help_heading = "File selection"
-    )]
+    #[arg(long, overrides_with("no_force_exclude"))]
     pub force_exclude: bool,
     #[clap(long, overrides_with("force_exclude"), hide = true)]
     pub no_force_exclude: bool,

@@ -305,8 +305,6 @@ impl Drop for FileVisitor<'_> {
         if error.is_none() {
             *error = self.local_error.take();
         }
-
-        drop(merged);
     }
 }
 
