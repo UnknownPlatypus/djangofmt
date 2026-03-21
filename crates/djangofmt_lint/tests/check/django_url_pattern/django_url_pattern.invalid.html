@@ -1,0 +1,20 @@
+<!-- Hardcoded internal link -->
+<a href="/home/">Home</a>
+
+<!-- Hardcoded login path -->
+<a href="/accounts/login/">Login</a>
+
+<!-- Hardcoded path with query string -->
+<a href="/collections?handler=RemoveAgreement">Remove</a>
+
+<!-- Form with hardcoded action -->
+<form action="/collections"></form>
+
+<!-- Data URL attributes with internal paths -->
+<div data-url="/api/data"></div>
+<div data-src="/table/task/123/log"></div>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="/dashboard/">Dashboard</a>
+{% endif %}

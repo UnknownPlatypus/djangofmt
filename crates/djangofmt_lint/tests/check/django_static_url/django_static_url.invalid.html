@@ -1,0 +1,17 @@
+<!-- Hardcoded /static/ in href -->
+<link href="/static/style.css" rel="stylesheet">
+
+<!-- Hardcoded /static/ in src -->
+<img src="/static/img/logo.png" alt="Logo" height="50" width="50">
+<script src="/static/js/app.js"></script>
+
+<!-- Without leading slash -->
+<link href="static/style.css" rel="stylesheet">
+
+<!-- srcset attribute -->
+<source srcset="/static/img/photo.webp" type="image/webp">
+
+<!-- Nested in Jinja block -->
+{% if include_css %}
+    <link href="/static/extra.css" rel="stylesheet">
+{% endif %}

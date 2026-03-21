@@ -1,0 +1,18 @@
+<!-- Using {% static %} template tag -->
+<link href="{% static 'style.css' %}" rel="stylesheet">
+<img src="{% static 'img/logo.png' %}" alt="Logo" height="50" width="50">
+<script src="{% static 'js/app.js' %}"></script>
+
+<!-- Using {{ STATIC_URL }} variable -->
+<img src="{{ STATIC_URL }}img/logo.png" alt="Logo" height="50" width="50">
+
+<!-- External URLs -->
+<link href="https://cdn.example.com/style.css" rel="stylesheet">
+<script src="https://cdn.example.com/script.js"></script>
+
+<!-- Non-static paths -->
+<a href="{% url 'home' %}">Home</a>
+<img src="/media/photo.jpg" alt="Photo" height="100" width="100">
+
+<!-- Interpolation -->
+<link href="{{ css_url }}" rel="stylesheet">

@@ -1,0 +1,70 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 6 lint error(s)
+
+Error: 
+  × Static URL should use {% static %} template tag.
+   ╭─[tests/check/django_static_url/django_static_url.invalid.html:2:13]
+ 1 │ <!-- Hardcoded /static/ in href -->
+ 2 │ <link href="/static/style.css" rel="stylesheet">
+   ·             ────────┬────────
+   ·                     ╰── here
+ 3 │ 
+   ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+   ╭─[tests/check/django_static_url/django_static_url.invalid.html:5:11]
+ 4 │ <!-- Hardcoded /static/ in src -->
+ 5 │ <img src="/static/img/logo.png" alt="Logo" height="50" width="50">
+   ·           ──────────┬─────────
+   ·                     ╰── here
+ 6 │ <script src="/static/js/app.js"></script>
+   ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+   ╭─[tests/check/django_static_url/django_static_url.invalid.html:6:14]
+ 5 │ <img src="/static/img/logo.png" alt="Logo" height="50" width="50">
+ 6 │ <script src="/static/js/app.js"></script>
+   ·              ────────┬────────
+   ·                      ╰── here
+ 7 │ 
+   ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+    ╭─[tests/check/django_static_url/django_static_url.invalid.html:9:13]
+  8 │ <!-- Without leading slash -->
+  9 │ <link href="static/style.css" rel="stylesheet">
+    ·             ────────┬───────
+    ·                     ╰── here
+ 10 │ 
+    ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+    ╭─[tests/check/django_static_url/django_static_url.invalid.html:12:17]
+ 11 │ <!-- srcset attribute -->
+ 12 │ <source srcset="/static/img/photo.webp" type="image/webp">
+    ·                 ───────────┬──────────
+    ·                            ╰── here
+ 13 │ 
+    ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.
+
+Error: 
+  × Static URL should use {% static %} template tag.
+    ╭─[tests/check/django_static_url/django_static_url.invalid.html:16:17]
+ 15 │ {% if include_css %}
+ 16 │     <link href="/static/extra.css" rel="stylesheet">
+    ·                 ────────┬────────
+    ·                         ╰── here
+ 17 │ {% endif %}
+    ╰────
+  help: Use {% static 'path/to/file' %} instead of hardcoding '/static/...'.

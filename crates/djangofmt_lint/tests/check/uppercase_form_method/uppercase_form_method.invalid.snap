@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 7 lint error(s)
+  × Found 8 lint error(s)
 
 Error: 
   × Form method 'GET' should be lowercase.
@@ -68,6 +68,17 @@ Error:
  16 │ ></form>
     ╰────
   help: Use 'post' instead.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:14:13]
+ 13 │ <form
+ 14 │     action="/submit/"
+    ·             ────┬───
+    ·                 ╰── here
+ 15 │     method="POST"
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
   × Form method 'GET' should be lowercase.

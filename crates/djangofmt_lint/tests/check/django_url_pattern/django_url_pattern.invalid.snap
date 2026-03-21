@@ -1,0 +1,81 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 7 lint error(s)
+
+Error: 
+  × Internal link should use {% url %} template tag.
+   ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:2:10]
+ 1 │ <!-- Hardcoded internal link -->
+ 2 │ <a href="/home/">Home</a>
+   ·          ───┬──
+   ·             ╰── here
+ 3 │ 
+   ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+   ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:5:10]
+ 4 │ <!-- Hardcoded login path -->
+ 5 │ <a href="/accounts/login/">Login</a>
+   ·          ────────┬───────
+   ·                  ╰── here
+ 6 │ 
+   ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+   ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:8:10]
+ 7 │ <!-- Hardcoded path with query string -->
+ 8 │ <a href="/collections?handler=RemoveAgreement">Remove</a>
+   ·          ──────────────────┬─────────────────
+   ·                            ╰── here
+ 9 │ 
+   ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:11:15]
+ 10 │ <!-- Form with hardcoded action -->
+ 11 │ <form action="/collections"></form>
+    ·               ──────┬─────
+    ·                     ╰── here
+ 12 │ 
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:14:16]
+ 13 │ <!-- Data URL attributes with internal paths -->
+ 14 │ <div data-url="/api/data"></div>
+    ·                ────┬────
+    ·                    ╰── here
+ 15 │ <div data-src="/table/task/123/log"></div>
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:15:16]
+ 14 │ <div data-url="/api/data"></div>
+ 15 │ <div data-src="/table/task/123/log"></div>
+    ·                ─────────┬─────────
+    ·                         ╰── here
+ 16 │ 
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Internal link should use {% url %} template tag.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:19:14]
+ 18 │ {% if show_link %}
+ 19 │     <a href="/dashboard/">Dashboard</a>
+    ·              ─────┬─────
+    ·                   ╰── here
+ 20 │ {% endif %}
+    ╰────
+  help: Use {% url 'view_name' %} instead of hardcoding internal paths.

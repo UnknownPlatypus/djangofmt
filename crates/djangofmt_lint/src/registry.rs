@@ -136,4 +136,6 @@ define_rules! {
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
     (InlineStyle, rules::style::forbidden_attr::InlineStyle),
     (DuplicateAttr, rules::suspicious::duplicate_attr::DuplicateAttr),
+    (DjangoStaticUrl, rules::suspicious::django_url::DjangoStaticUrl),
+    (DjangoUrlPattern, rules::suspicious::django_url::DjangoUrlPattern),
 }

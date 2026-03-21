@@ -1,5 +1,5 @@
 <!-- Normal URLs -->
-<a href="/page/">Link</a>
+<a href="{% url 'page' %}">Link</a>
 <a href="https://example.com">Link</a>
 <a href="{% url 'home' %}">Home</a>
 
@@ -19,5 +19,5 @@
 
 <!-- Nested in Jinja block -->
 {% if show_link %}
-    <a href="/page/">Link</a>
+    <a href="{% url 'page' %}">Link</a>
 {% endif %}

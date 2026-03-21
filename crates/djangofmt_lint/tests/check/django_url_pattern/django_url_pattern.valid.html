@@ -1,0 +1,28 @@
+<!-- Using {% url %} template tag -->
+<a href="{% url 'home' %}">Home</a>
+
+<!-- Interpolation -->
+<a href="{{ url }}">Link</a>
+
+<!-- External URLs -->
+<a href="https://external.com">External</a>
+
+<!-- Anchors and fragments -->
+<a href="#">Link</a>
+<a href="#section">Section</a>
+
+<!-- Protocol links -->
+<a href="mailto:user@example.com">Email</a>
+<a href="tel:+1234567890">Phone</a>
+<a href="data:,Hello">Data</a>
+<a href="sms:?body=Hello">SMS</a>
+
+<!-- Static and media paths (handled by D004) -->
+<a href="/static/file.css">Static</a>
+<a href="/media/file.jpg">Media</a>
+
+<!-- Form with {% url %} -->
+<form action="{% url 'submit' %}"></form>
+
+<!-- data-action is not a URL attribute -->
+<div data-action="highlight"></div>
