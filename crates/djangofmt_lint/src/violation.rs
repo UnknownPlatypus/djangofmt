@@ -10,6 +10,8 @@ use crate::registry::{Rule, RuleCategory};
 /// The `RULE` constant ties the violation to the registry, enabling:
 /// - `checker.report(violation, span)` without passing the rule explicitly
 /// - Compile-time verification that every violation has a registered rule
+///
+/// The `CATEGORY` constant declares the functional grouping (e.g., Correctness, Style).
 pub trait Violation: Debug {
     /// The rule for this violation (e.g., `Rule::InvalidAttrValue`).
     const RULE: Rule;
