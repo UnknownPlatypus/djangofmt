@@ -3,6 +3,19 @@
 <img src="photo.jpg" />
 <img height="12" width="12"/>
 
+<!-- Multiline tag without alt -->
+<img
+    src="photo.jpg"
+    height="12"
+    width="12"
+/>
+
+<!-- Self-closing without alt -->
+<img src="photo.jpg">
+
+<!-- Multiple attributes but no alt -->
+<img src="photo.jpg" class="hero" id="main-image" loading="lazy" />
+
 <!-- Nested in Jinja block -->
 {% if show_image %}
     <img src="photo.jpg" />

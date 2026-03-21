@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 4 lint error(s)
+  × Found 7 lint error(s)
 
 Error: 
   × Img tag should have an alt attribute.
@@ -35,10 +35,43 @@ Error:
 
 Error: 
   × Img tag should have an alt attribute.
-   ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:8:5]
- 7 │ {% if show_image %}
- 8 │     <img src="photo.jpg" />
-   ·     ───────────┬───────────
-   ·                ╰── here
- 9 │ {% endif %}
-   ╰────
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:7:1]
+  6 │     <!-- Multiline tag without alt -->
+  7 │ ╭─▶ <img
+  8 │ │       src="photo.jpg"
+  9 │ │       height="12"
+ 10 │ │       width="12"
+ 11 │ ├─▶ />
+    · ╰──── here
+ 12 │     
+    ╰────
+
+Error: 
+  × Img tag should have an alt attribute.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:14:1]
+ 13 │ <!-- Self-closing without alt -->
+ 14 │ <img src="photo.jpg">
+    · ──────────┬──────────
+    ·           ╰── here
+ 15 │ 
+    ╰────
+
+Error: 
+  × Img tag should have an alt attribute.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:17:1]
+ 16 │ <!-- Multiple attributes but no alt -->
+ 17 │ <img src="photo.jpg" class="hero" id="main-image" loading="lazy" />
+    · ─────────────────────────────────┬─────────────────────────────────
+    ·                                  ╰── here
+ 18 │ 
+    ╰────
+
+Error: 
+  × Img tag should have an alt attribute.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:21:5]
+ 20 │ {% if show_image %}
+ 21 │     <img src="photo.jpg" />
+    ·     ───────────┬───────────
+    ·                ╰── here
+ 22 │ {% endif %}
+    ╰────
