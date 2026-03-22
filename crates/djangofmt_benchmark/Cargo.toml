@@ -18,11 +18,21 @@ test = false
 harness = false
 name = "formatter"
 
+[[bench]]
+harness = false
+name = "linter"
+
+[[bench]]
+harness = false
+name = "parser"
+
 [dependencies]
 djangofmt = { path = "../djangofmt" }
 
 [dev-dependencies]
 divan = { workspace = true }
+djangofmt_lint = { path = "../djangofmt_lint" }
+markup_fmt = { workspace = true }
 
 [lints]
 workspace = true

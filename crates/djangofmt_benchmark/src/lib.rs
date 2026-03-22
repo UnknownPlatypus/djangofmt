@@ -23,6 +23,22 @@ pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile = TestFile {
     profile: Profile::Django,
 };
 
+pub static DJANGO_TEMPLATE_TAG_DENSE: TestFile = TestFile {
+    name: "tag_dense/change_form.html",
+    code: include_str!("../resources/django/change_form.html"),
+    profile: Profile::Django,
+};
+pub static DJANGO_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
+    name: "form_heavy/login.html",
+    code: include_str!("../resources/wagtail/login.html"),
+    profile: Profile::Django,
+};
+pub static DJANGO_TEMPLATE_ATTR_DENSE: TestFile = TestFile {
+    name: "attr_dense/slim_header.html",
+    code: include_str!("../resources/wagtail/slim_header.html"),
+    profile: Profile::Django,
+};
+
 pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
     name: "jinja_large/comparison_table_integrated.html",
     code: include_str!("../resources/zulip/comparison_table_integrated.html"),

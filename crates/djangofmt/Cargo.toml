@@ -10,6 +10,9 @@ license.workspace = true
 exclude = ["/tests"]
 publish = true
 
+[lib]
+doctest = false
+
 [dependencies]
 clap = { workspace = true }
 clap_complete_command = { workspace = true }
