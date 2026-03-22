@@ -127,7 +127,7 @@ def resolve_executable(executable: str) -> Path:
     # Try to find it on PATH
     resolved = shutil.which(executable)
     if resolved:
-        logger.info("Resolved executable %s to %s", executable, resolved)
+        logger.debug("Resolved executable %s to %s", executable, resolved)
         return Path(resolved)
 
     logger.error("Could not find executable: %s", executable)

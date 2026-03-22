@@ -38,7 +38,6 @@ def check_template(code: str, *, executable: Path, timeout: int = 30) -> BugKind
 
         if result.returncode == 0:
             formatted = tmp_path.read_text()
-            tmp_path.write_text(formatted)
 
             try:
                 result2 = subprocess.run(

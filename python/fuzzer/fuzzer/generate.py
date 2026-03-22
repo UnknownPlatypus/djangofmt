@@ -269,6 +269,12 @@ class TemplateGenerator:
 
     # --- Django template tags ---
 
+    # Simple block types: (open_tag_template, close_tag)
+    SIMPLE_BLOCKS: ClassVar[dict[str, tuple[str, str]]] = {
+        "comment": ("{% comment %}", "{% endcomment %}"),
+        "spaceless": ("{% spaceless %}", "{% endspaceless %}"),
+    }
+
     def _django_block_node(self, depth: int) -> list[str]:
         block_types = ["if", "for", "block", "with", "comment", "spaceless"]
         if self.profile == "jinja":
@@ -281,13 +287,15 @@ class TemplateGenerator:
         for _ in range(self.rng.randint(0, 4)):
             children_lines.extend(self._node(depth + 1))
 
+        if block_type in self.SIMPLE_BLOCKS:
+            open_tag, close_tag = self.SIMPLE_BLOCKS[block_type]
+            return self._simple_block(indent, children_lines, open_tag, close_tag)
+
         dispatch: dict[str, Callable[[str, list[str]], list[str]]] = {
             "if": self._if_block,
             "for": self._for_block,
             "block": self._block_block,
             "with": self._with_block,
-            "comment": self._comment_block,
-            "spaceless": self._spaceless_block,
             "macro": self._macro_block,
             "raw": self._raw_block,
         }
@@ -331,7 +339,6 @@ class TemplateGenerator:
         )
 
         if self.rng.random() < 0.2:
-            # Insert empty clause before endfor
             lines.insert(-1, f"{indent}{{% empty %}}")
             lines.insert(-1, f"{indent}  <p>No items found.</p>")
 
@@ -352,14 +359,6 @@ class TemplateGenerator:
             children,
             f"{{% with {alias}={var}.{attr} %}}",
             "{% endwith %}",
-        )
-
-    def _comment_block(self, indent: str, children: list[str]) -> list[str]:
-        return self._simple_block(indent, children, "{% comment %}", "{% endcomment %}")
-
-    def _spaceless_block(self, indent: str, children: list[str]) -> list[str]:
-        return self._simple_block(
-            indent, children, "{% spaceless %}", "{% endspaceless %}"
         )
 
     def _macro_block(self, indent: str, children: list[str]) -> list[str]:

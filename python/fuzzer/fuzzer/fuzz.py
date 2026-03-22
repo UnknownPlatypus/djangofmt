@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
 from fuzzer import logger
@@ -25,7 +26,6 @@ def fuzz_seed(
     only_new_bugs: bool = False,
     profile: str = "django",
 ) -> FuzzResult | None:
-    """Run the fuzzer for a single seed. Returns a FuzzResult if a bug is found."""
     generator = TemplateGenerator(seed, profile=profile)
     code = generator.generate()
 
@@ -52,43 +52,29 @@ def run_fuzz(
     profile: str = "django",
     workers: int = 1,
 ) -> list[FuzzResult]:
-    """Run the fuzzer across multiple seeds, returning all bugs found."""
-    kwargs = {
-        "test_executable": test_executable,
-        "baseline_executable": baseline_executable,
-        "only_new_bugs": only_new_bugs,
-        "profile": profile,
-    }
+    fuzz = partial(
+        fuzz_seed,
+        test_executable=test_executable,
+        baseline_executable=baseline_executable,
+        only_new_bugs=only_new_bugs,
+        profile=profile,
+    )
 
+    bugs: list[FuzzResult] = []
     if workers <= 1 or len(seeds) <= 10:
-        return _run_sequential(seeds, **kwargs)
+        for seed in seeds:
+            logger.debug("Fuzzing seed %d", seed)
+            result = fuzz(seed)
+            if result is not None:
+                bugs.append(result)
+                logger.info("Bug found at seed %d: %s", result.seed, result.bug_kind)
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            for result in executor.map(fuzz, seeds):
+                if result is not None:
+                    bugs.append(result)
+                    logger.info(
+                        "Bug found at seed %d: %s", result.seed, result.bug_kind
+                    )
 
-    return _run_parallel(seeds, workers=workers, **kwargs)
-
-
-def _collect_result(result: FuzzResult | None, bugs: list[FuzzResult]) -> None:
-    if result is not None:
-        bugs.append(result)
-        logger.info("Bug found at seed %d: %s", result.seed, result.bug_kind)
-
-
-def _run_sequential(seeds: list[int], **kwargs: object) -> list[FuzzResult]:
-    bugs: list[FuzzResult] = []
-    for seed in seeds:
-        logger.debug("Fuzzing seed %d", seed)
-        _collect_result(fuzz_seed(seed, **kwargs), bugs)  # type: ignore[arg-type]
-    return bugs
-
-
-def _run_parallel(
-    seeds: list[int], *, workers: int, **kwargs: object
-) -> list[FuzzResult]:
-    bugs: list[FuzzResult] = []
-    with ProcessPoolExecutor(max_workers=workers) as executor:
-        futures = {
-            executor.submit(fuzz_seed, seed, **kwargs): seed  # type: ignore[arg-type]
-            for seed in seeds
-        }
-        for future in futures:
-            _collect_result(future.result(), bugs)
     return bugs

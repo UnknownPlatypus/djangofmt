@@ -1,0 +1,55 @@
+name: Weekly fuzz
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Sunday at midnight
+    - cron: "0 0 * * 0"
+  pull_request:
+    paths:
+      - ".github/workflows/weekly-fuzz.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  CARGO_TERM_COLOR: always
+  RUSTUP_MAX_RETRIES: 10
+  FORCE_COLOR: 1
+
+jobs:
+  fuzz:
+    name: Fuzz
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Don't run the cron job on forks:
+    if: ${{ github.repository == 'UnknownPlatypus/djangofmt' || github.event_name != 'schedule' }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+        with:
+          version: "0.9.13"
+      - name: "Install Rust toolchain"
+        run: rustup show
+      - uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+      - name: Build djangofmt
+        run: cargo build --locked
+      - name: Fuzz
+        run: |
+          # shellcheck disable=SC2046
+          (
+            uv run \
+            --project=./python/fuzzer \
+            --locked \
+            fuzz \
+            --test-executable=target/debug/djangofmt \
+            $(shuf -i 0-9999999999999999999 -n 1000)
+          )
