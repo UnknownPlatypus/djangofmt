@@ -35,6 +35,7 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 dev = [
   "djangofmt-benchmarks",
   "djangofmt-ecosystem-check",
+  "djangofmt-fuzzer",
   "maturin[patchelf]>=1.10.2, !=1.12.5, !=1.12.6",  # Avoid regression from https://github.com/PyO3/maturin/issues/3056
 ]
 
@@ -191,8 +192,10 @@ extend-ignore-re = ["60ba20f"]
 members = [
   "python/benchmarks",
   "python/ecosystem-check",
+  "python/fuzzer",
 ]
 
 [tool.uv.sources]
 djangofmt-benchmarks = { workspace = true }
 djangofmt-ecosystem-check = { workspace = true }
+djangofmt-fuzzer = { workspace = true }

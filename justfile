@@ -132,3 +132,15 @@ ecosystem-check-stability external-formatter:
 [group('ecosystem-check')]
 ecosystem-check-clean-cache:
     rm -rf {{ecosystem_cache_dir}}
+
+# Run fuzz testing with auto-build
+[group('fuzz')]
+fuzz *args:
+    cargo build -p djangofmt
+    uv run fuzz 0-100000 --test-executable target/debug/djangofmt {{args}}
+
+# Run differential fuzz testing (debug build vs system djangofmt)
+[group('fuzz')]
+fuzz-diff *args:
+    cargo build -p djangofmt
+    uv run fuzz 0-100000 --test-executable target/debug/djangofmt --baseline-executable djangofmt --only-new-bugs {{args}}

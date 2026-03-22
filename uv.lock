@@ -4,9 +4,10 @@ requires-python = ">=3.11"
 
 [manifest]
 members = [
-  "djangofmt",
-  "djangofmt-benchmarks",
-  "djangofmt-ecosystem-check",
+    "djangofmt",
+    "djangofmt-benchmarks",
+    "djangofmt-ecosystem-check",
+    "djangofmt-fuzzer",
 ]
 
 [[package]]
@@ -68,17 +69,19 @@ source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [
-  { name = "djangofmt-benchmarks" },
-  { name = "djangofmt-ecosystem-check" },
-  { name = "maturin", extra = ["patchelf"] },
+    { name = "djangofmt-benchmarks" },
+    { name = "djangofmt-ecosystem-check" },
+    { name = "djangofmt-fuzzer" },
+    { name = "maturin", extra = ["patchelf"] },
 ]
 
 [package.metadata]
 [package.metadata.requires-dev]
 dev = [
-  { name = "djangofmt-benchmarks", editable = "python/benchmarks" },
-  { name = "djangofmt-ecosystem-check", editable = "python/ecosystem-check" },
-  { name = "maturin", extras = ["patchelf"], specifier = ">=1.10.2,!=1.12.5,!=1.12.6" },
+    { name = "djangofmt-benchmarks", editable = "python/benchmarks" },
+    { name = "djangofmt-ecosystem-check", editable = "python/ecosystem-check" },
+    { name = "djangofmt-fuzzer", editable = "python/fuzzer" },
+    { name = "maturin", extras = ["patchelf"], specifier = ">=1.10.2,!=1.12.5,!=1.12.6" },
 ]
 
 [[package]]
@@ -116,6 +119,11 @@ requires-dist = [
   { name = "tomli-w", specifier = "==1.2.0" },
   { name = "unidiff", specifier = "==0.7.5" },
 ]
+
+[[package]]
+name = "djangofmt-fuzzer"
+version = "0.0.0"
+source = { editable = "python/fuzzer" }
 
 [[package]]
 name = "djhtml"

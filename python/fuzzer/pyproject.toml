@@ -1,0 +1,33 @@
+[project]
+name = "djangofmt-fuzzer"
+version = "0.0.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+fuzz = "fuzzer.cli:entrypoint"
+
+[tool.ruff]
+unsafe-fixes = true
+fix = true
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle (error)
+  "F",  # pyflakes
+  "B",  # bugbear
+  "B9",
+  "C4",  # flake8-comprehensions
+  "SIM",  # flake8-simplify
+  "I",  # isort
+  "UP",  # pyupgrade
+  "PIE",  # flake8-pie
+  "PGH",  # pygrep-hooks
+  "PYI",  # flake8-pyi
+  "RUF",  # Ruff specific
+]
+ignore = ["E501"]
+preview = true
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
