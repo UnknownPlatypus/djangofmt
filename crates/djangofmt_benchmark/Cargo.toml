@@ -28,11 +28,11 @@ name = "parser"
 
 [dependencies]
 djangofmt = { path = "../djangofmt" }
-djangofmt_lint = { path = "../djangofmt_lint" }
-markup_fmt = { workspace = true }
 
 [dev-dependencies]
 divan = { workspace = true }
+djangofmt_lint = { path = "../djangofmt_lint" }
+markup_fmt = { workspace = true }
 
 [lints]
 workspace = true
