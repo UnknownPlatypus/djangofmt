@@ -47,9 +47,8 @@ def entrypoint() -> None:
     if bugs:
         logger.info("Found %d bug(s):", len(bugs))
         for bug in bugs:
-            logger.info("  Seed %d: %s", bug.seed, bug.bug_kind)
             path = write_failure(bug.seed, bug.code)
-            logger.info("  Wrote minimized failure to %s", path)
+            logger.info("  Seed %d: %s -> %s", bug.seed, bug.bug_kind, path)
         sys.exit(1)
     else:
         logger.info("No bugs found.")
@@ -57,7 +56,6 @@ def entrypoint() -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Fuzz test djangofmt with randomly generated Django templates."
     )
@@ -122,7 +120,6 @@ def parse_seeds(seed_args: list[str]) -> list[int]:
 
 
 def resolve_executable(executable: str) -> Path:
-    """Resolve an executable path, checking if it exists."""
     path = Path(executable)
     if path.exists():
         return path.resolve()

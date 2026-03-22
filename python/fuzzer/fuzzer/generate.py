@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import random
 import string
+from collections.abc import Callable
 from typing import ClassVar
 
 
@@ -107,6 +108,14 @@ class TemplateGenerator:
         "last",
         "add",
     ]
+    FILTERS_WITH_ARGS: ClassVar[set[str]] = {
+        "default",
+        "truncatewords",
+        "date",
+        "join",
+        "yesno",
+        "add",
+    }
     FILTER_ARGS: ClassVar[list[str]] = [
         "'fallback'",
         "'10'",
@@ -165,56 +174,55 @@ class TemplateGenerator:
         self.max_depth = max_depth
 
     def generate(self) -> str:
-        """Generate a random Django template string."""
         lines: list[str] = []
 
-        # Optionally start with an extends tag
         if self.rng.random() < 0.15:
             lines.append(self._extends_tag())
             lines.append("")
 
-        # Optionally add load tags
         if self.rng.random() < 0.3:
-            num_loads = self.rng.randint(1, 3)
-            for _ in range(num_loads):
+            for _ in range(self.rng.randint(1, 3)):
                 lines.append(self._load_tag())
             lines.append("")
 
-        # Generate body content
-        num_nodes = self.rng.randint(1, 10)
-        for _ in range(num_nodes):
+        for _ in range(self.rng.randint(1, 10)):
             lines.extend(self._node(depth=0))
 
         return "\n".join(lines)
 
     def _node(self, depth: int) -> list[str]:
-        """Generate a random template node (HTML, tag, variable, comment, etc.)."""
         if depth >= self.max_depth:
             return [self._leaf_node()]
 
-        # Weighted random selection of node types
-        block_generators = [self._html_element_node, self._django_block_node]
-        leaf_generators = [
-            self._variable_line,
-            self._comment_line,
-            self._plain_text_line,
-            self._standalone_tag_line,
-            self._void_element_line,
-            self._mixed_content_line,
+        # (weight, generator) tuples -- block generators return list[str],
+        # leaf generators return str (wrapped in a list below)
+        block_choices: list[tuple[int, Callable[[int], list[str]]]] = [
+            (30, self._html_element_node),
+            (20, self._django_block_node),
         ]
-        all_weights = [30, 20, 15, 5, 10, 10, 5, 5]
+        leaf_choices: list[tuple[int, Callable[[], str]]] = [
+            (15, self._variable_expr),
+            (5, self._comment),
+            (10, self._random_text),
+            (10, self._standalone_tag),
+            (5, self._void_element),
+            (5, self._mixed_content),
+        ]
+
+        all_weights = [w for w, _ in block_choices] + [w for w, _ in leaf_choices]
         idx = self.rng.choices(range(len(all_weights)), weights=all_weights, k=1)[0]
 
-        if idx < len(block_generators):
-            return block_generators[idx](depth)
-        return [leaf_generators[idx - len(block_generators)]()]
+        if idx < len(block_choices):
+            return block_choices[idx][1](depth)
+        leaf_idx = idx - len(block_choices)
+        return [leaf_choices[leaf_idx][1]()]
 
     def _leaf_node(self) -> str:
         choice = self.rng.randint(0, 3)
         if choice == 0:
             return self._variable_expr()
         if choice == 1:
-            return self._plain_text()
+            return self._random_text()
         if choice == 2:
             return self._standalone_tag()
         return self._comment()
@@ -227,12 +235,10 @@ class TemplateGenerator:
         indent = "  " * depth
 
         children_lines: list[str] = []
-        num_children = self.rng.randint(0, 4)
-        for _ in range(num_children):
+        for _ in range(self.rng.randint(0, 4)):
             children_lines.extend(self._node(depth + 1))
 
         if not children_lines:
-            # Sometimes emit empty element
             return [f"{indent}<{tag}{attrs}></{tag}>"]
 
         lines = [f"{indent}<{tag}{attrs}>"]
@@ -241,7 +247,7 @@ class TemplateGenerator:
         lines.append(f"{indent}</{tag}>")
         return lines
 
-    def _void_element_line(self) -> str:
+    def _void_element(self) -> str:
         tag = self.rng.choice(self.VOID_ELEMENTS)
         attrs = self._html_attrs()
         if self.rng.random() < 0.3:
@@ -256,11 +262,9 @@ class TemplateGenerator:
         chosen = self.rng.sample(self.ATTRIBUTES, min(num_attrs, len(self.ATTRIBUTES)))
         for attr in chosen:
             if self.rng.random() < 0.2:
-                # Attribute with template variable value
                 attrs.append(f'{attr}="{self._variable_expr()}"')
             else:
-                val = self._random_word()
-                attrs.append(f'{attr}="{val}"')
+                attrs.append(f'{attr}="{self._random_word()}"')
         return " " + " ".join(attrs)
 
     # --- Django template tags ---
@@ -274,27 +278,29 @@ class TemplateGenerator:
         indent = "  " * depth
 
         children_lines: list[str] = []
-        num_children = self.rng.randint(0, 4)
-        for _ in range(num_children):
+        for _ in range(self.rng.randint(0, 4)):
             children_lines.extend(self._node(depth + 1))
 
-        if block_type == "if":
-            return self._if_block(indent, children_lines)
-        if block_type == "for":
-            return self._for_block(indent, children_lines)
-        if block_type == "block":
-            return self._block_block(indent, children_lines)
-        if block_type == "with":
-            return self._with_block(indent, children_lines)
-        if block_type == "comment":
-            return self._comment_block(indent, children_lines)
-        if block_type == "spaceless":
-            return self._spaceless_block(indent, children_lines)
-        if block_type == "macro":
-            return self._macro_block(indent, children_lines)
-        if block_type == "raw":
-            return self._raw_block(indent, children_lines)
-        return children_lines  # pragma: no cover
+        dispatch: dict[str, Callable[[str, list[str]], list[str]]] = {
+            "if": self._if_block,
+            "for": self._for_block,
+            "block": self._block_block,
+            "with": self._with_block,
+            "comment": self._comment_block,
+            "spaceless": self._spaceless_block,
+            "macro": self._macro_block,
+            "raw": self._raw_block,
+        }
+        return dispatch[block_type](indent, children_lines)
+
+    def _simple_block(
+        self, indent: str, children: list[str], open_tag: str, close_tag: str
+    ) -> list[str]:
+        lines = [f"{indent}{open_tag}"]
+        for c in children:
+            lines.append(f"{indent}  {c}")
+        lines.append(f"{indent}{close_tag}")
+        return lines
 
     def _if_block(self, indent: str, children: list[str]) -> list[str]:
         cond = self._condition()
@@ -302,7 +308,6 @@ class TemplateGenerator:
         for c in children:
             lines.append(f"{indent}  {c}")
 
-        # Optionally add elif/else
         if self.rng.random() < 0.3:
             lines.append(f"{indent}{{% elif {self._condition()} %}}")
             lines.append(f"{indent}  {self._leaf_node()}")
@@ -318,100 +323,75 @@ class TemplateGenerator:
             ["item", "obj", "x", "entry", "element", "row", "child"]
         )
         iterable = self.rng.choice(self.VARIABLE_NAMES)
-        lines = [f"{indent}{{% for {loop_var} in {iterable} %}}"]
-        for c in children:
-            lines.append(f"{indent}  {c}")
+        lines = self._simple_block(
+            indent,
+            children,
+            f"{{% for {loop_var} in {iterable} %}}",
+            "{% endfor %}",
+        )
 
         if self.rng.random() < 0.2:
-            lines.append(f"{indent}{{% empty %}}")
-            lines.append(f"{indent}  <p>No items found.</p>")
+            # Insert empty clause before endfor
+            lines.insert(-1, f"{indent}{{% empty %}}")
+            lines.insert(-1, f"{indent}  <p>No items found.</p>")
 
-        lines.append(f"{indent}{{% endfor %}}")
         return lines
 
     def _block_block(self, indent: str, children: list[str]) -> list[str]:
         name = self.rng.choice(self.BLOCK_NAMES)
-        lines = [f"{indent}{{% block {name} %}}"]
-        for c in children:
-            lines.append(f"{indent}  {c}")
-        lines.append(f"{indent}{{% endblock %}}")
-        return lines
+        return self._simple_block(
+            indent, children, f"{{% block {name} %}}", "{% endblock %}"
+        )
 
     def _with_block(self, indent: str, children: list[str]) -> list[str]:
         var = self.rng.choice(self.VARIABLE_NAMES)
         alias = self._random_word()
-        lines = [
-            f"{indent}{{% with {alias}={var}.{self.rng.choice(self.VARIABLE_ATTRS)} %}}"
-        ]
-        for c in children:
-            lines.append(f"{indent}  {c}")
-        lines.append(f"{indent}{{% endwith %}}")
-        return lines
+        attr = self.rng.choice(self.VARIABLE_ATTRS)
+        return self._simple_block(
+            indent,
+            children,
+            f"{{% with {alias}={var}.{attr} %}}",
+            "{% endwith %}",
+        )
 
     def _comment_block(self, indent: str, children: list[str]) -> list[str]:
-        lines = [f"{indent}{{% comment %}}"]
-        for c in children:
-            lines.append(f"{indent}  {c}")
-        lines.append(f"{indent}{{% endcomment %}}")
-        return lines
+        return self._simple_block(indent, children, "{% comment %}", "{% endcomment %}")
 
     def _spaceless_block(self, indent: str, children: list[str]) -> list[str]:
-        lines = [f"{indent}{{% spaceless %}}"]
-        for c in children:
-            lines.append(f"{indent}  {c}")
-        lines.append(f"{indent}{{% endspaceless %}}")
-        return lines
+        return self._simple_block(
+            indent, children, "{% spaceless %}", "{% endspaceless %}"
+        )
 
     def _macro_block(self, indent: str, children: list[str]) -> list[str]:
         name = self._random_word()
         args = ", ".join(self._random_word() for _ in range(self.rng.randint(0, 3)))
-        lines = [f"{indent}{{% macro {name}({args}) %}}"]
-        for c in children:
-            lines.append(f"{indent}  {c}")
-        lines.append(f"{indent}{{% endmacro %}}")
-        return lines
+        return self._simple_block(
+            indent, children, f"{{% macro {name}({args}) %}}", "{% endmacro %}"
+        )
 
     def _raw_block(self, indent: str, children: list[str]) -> list[str]:
-        lines = [f"{indent}{{% raw %}}"]
-        lines.append(f"{indent}  {{{{ this_should_not_be_parsed }}}}")
-        for c in children:
-            lines.append(f"{indent}  {c}")
-        lines.append(f"{indent}{{% endraw %}}")
-        return lines
+        extended = [*children, "{{ this_should_not_be_parsed }}"]
+        return self._simple_block(indent, extended, "{% raw %}", "{% endraw %}")
 
     # --- Template variables ---
 
     def _variable_expr(self) -> str:
         var = self.rng.choice(self.VARIABLE_NAMES)
-        # Optionally add attribute access
         if self.rng.random() < 0.5:
             var += "." + self.rng.choice(self.VARIABLE_ATTRS)
-        # Optionally add filters
-        num_filters = 0
-        if self.rng.random() < 0.4:
-            num_filters = self.rng.randint(1, 3)
-        for _ in range(num_filters):
-            f = self.rng.choice(self.FILTER_NAMES)
-            if self.rng.random() < 0.3 and f in (
-                "default",
-                "truncatewords",
-                "date",
-                "join",
-                "yesno",
-                "add",
-            ):
-                arg = self.rng.choice(self.FILTER_ARGS)
-                var += f"|{f}:{arg}"
-            else:
-                var += f"|{f}"
 
-        # Whitespace control for jinja
+        if self.rng.random() < 0.4:
+            for _ in range(self.rng.randint(1, 3)):
+                f = self.rng.choice(self.FILTER_NAMES)
+                if self.rng.random() < 0.3 and f in self.FILTERS_WITH_ARGS:
+                    arg = self.rng.choice(self.FILTER_ARGS)
+                    var += f"|{f}:{arg}"
+                else:
+                    var += f"|{f}"
+
         if self.profile == "jinja" and self.rng.random() < 0.2:
             return f"{{{{- {var} -}}}}"
         return f"{{{{ {var} }}}}"
-
-    def _variable_line(self) -> str:
-        return self._variable_expr()
 
     # --- Comments ---
 
@@ -419,9 +399,6 @@ class TemplateGenerator:
         if self.rng.random() < 0.7:
             return f"{{# {self._random_text()} #}}"
         return f"<!-- {self._random_text()} -->"
-
-    def _comment_line(self) -> str:
-        return self._comment()
 
     # --- Standalone tags ---
 
@@ -442,11 +419,7 @@ class TemplateGenerator:
             return f'{{% trans "{self._random_text()}" %}}'
         if tag_type == "load":
             return self._load_tag()
-        # static
         return f"{{% static 'css/{self._random_word()}.css' %}}"
-
-    def _standalone_tag_line(self) -> str:
-        return self._standalone_tag()
 
     def _extends_tag(self) -> str:
         return f"{{% extends {self.rng.choice(self.TEMPLATE_NAMES)} %}}"
@@ -454,19 +427,11 @@ class TemplateGenerator:
     def _load_tag(self) -> str:
         return f"{{% load {self.rng.choice(self.TAG_NAMES)} %}}"
 
-    # --- Plain text / mixed content ---
+    # --- Mixed content ---
 
-    def _plain_text(self) -> str:
-        return self._random_text()
-
-    def _plain_text_line(self) -> str:
-        return self._plain_text()
-
-    def _mixed_content_line(self) -> str:
-        """Generate a line mixing text, variables, and small HTML."""
+    def _mixed_content(self) -> str:
         parts: list[str] = []
-        num_parts = self.rng.randint(2, 5)
-        for _ in range(num_parts):
+        for _ in range(self.rng.randint(2, 5)):
             choice = self.rng.randint(0, 3)
             if choice == 0:
                 parts.append(self._random_text())
