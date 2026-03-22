@@ -1,79 +1,46 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 15 lint error(s)
+  × Found 8 lint error(s)
 
 Error: 
   × Form method 'GET' should be lowercase.
    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:2:15]
  1 │ <!-- Uppercase method -->
- 2 │ <form method="GET"></form>
+ 2 │ <form method="GET">Submit</form>
    ·               ─┬─
    ·                ╰── here
- 3 │ <form method="POST"></form>
+ 3 │ <form method="POST">Submit</form>
    ╰────
   help: Use 'get' instead.
 
 Error: 
-  × Empty <form> tag pair found. Consider removing.
-   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:2:2]
- 1 │ <!-- Uppercase method -->
- 2 │ <form method="GET"></form>
-   ·  ──┬─
-   ·    ╰── here
- 3 │ <form method="POST"></form>
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Form method 'POST' should be lowercase.
    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:3:15]
- 2 │ <form method="GET"></form>
- 3 │ <form method="POST"></form>
+ 2 │ <form method="GET">Submit</form>
+ 3 │ <form method="POST">Submit</form>
    ·               ──┬─
    ·                 ╰── here
  4 │ 
    ╰────
   help: Use 'post' instead.
-
-Error: 
-  × Empty <form> tag pair found. Consider removing.
-   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:3:2]
- 2 │ <form method="GET"></form>
- 3 │ <form method="POST"></form>
-   ·  ──┬─
-   ·    ╰── here
- 4 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
 
 Error: 
   × Form method 'Post' should be lowercase.
    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:6:15]
  5 │ <!-- Mixed case -->
- 6 │ <form method="Post"></form>
+ 6 │ <form method="Post">Submit</form>
    ·               ──┬─
    ·                 ╰── here
- 7 │ <form method="Get"></form>
+ 7 │ <form method="Get">Submit</form>
    ╰────
   help: Use 'post' instead.
 
 Error: 
-  × Empty <form> tag pair found. Consider removing.
-   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:6:2]
- 5 │ <!-- Mixed case -->
- 6 │ <form method="Post"></form>
-   ·  ──┬─
-   ·    ╰── here
- 7 │ <form method="Get"></form>
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Form method 'Get' should be lowercase.
    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:7:15]
- 6 │ <form method="Post"></form>
- 7 │ <form method="Get"></form>
+ 6 │ <form method="Post">Submit</form>
+ 7 │ <form method="Get">Submit</form>
    ·               ─┬─
    ·                ╰── here
  8 │ 
@@ -81,37 +48,15 @@ Error:
   help: Use 'get' instead.
 
 Error: 
-  × Empty <form> tag pair found. Consider removing.
-   ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:7:2]
- 6 │ <form method="Post"></form>
- 7 │ <form method="Get"></form>
-   ·  ──┬─
-   ·    ╰── here
- 8 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Form method 'POST' should be lowercase.
     ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:10:15]
   9 │ <!-- Case-insensitive tag name -->
- 10 │ <FORM method="POST"></FORM>
+ 10 │ <FORM method="POST">Submit</FORM>
     ·               ──┬─
     ·                 ╰── here
  11 │ 
     ╰────
   help: Use 'post' instead.
-
-Error: 
-  × Empty <FORM> tag pair found. Consider removing.
-    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:10:2]
-  9 │ <!-- Case-insensitive tag name -->
- 10 │ <FORM method="POST"></FORM>
-    ·  ──┬─
-    ·    ╰── here
- 11 │ 
-    ╰────
-  help: Remove the empty tag pair or add content.
 
 Error: 
   × Form method 'POST' should be lowercase.
@@ -120,7 +65,7 @@ Error:
  15 │     method="POST"
     ·             ──┬─
     ·               ╰── here
- 16 │ ></form>
+ 16 │ >Submit</form>
     ╰────
   help: Use 'post' instead.
 
@@ -136,34 +81,12 @@ Error:
   help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
-  × Empty <form> tag pair found. Consider removing.
-    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:13:2]
- 12 │ <!-- Multiline form with uppercase method -->
- 13 │ <form
-    ·  ──┬─
-    ·    ╰── here
- 14 │     action="/submit/"
-    ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Form method 'GET' should be lowercase.
     ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:20:19]
  19 │ {% if show_form %}
- 20 │     <form method="GET"></form>
+ 20 │     <form method="GET">Submit</form>
     ·                   ─┬─
     ·                    ╰── here
  21 │ {% endif %}
     ╰────
   help: Use 'get' instead.
-
-Error: 
-  × Empty <form> tag pair found. Consider removing.
-    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:20:6]
- 19 │ {% if show_form %}
- 20 │     <form method="GET"></form>
-    ·      ──┬─
-    ·        ╰── here
- 21 │ {% endif %}
-    ╰────
-  help: Remove the empty tag pair or add content.

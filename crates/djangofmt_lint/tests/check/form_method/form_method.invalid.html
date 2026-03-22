@@ -1,13 +1,13 @@
 <!-- Invalid methods -->
-<form method="put"></form>
-<form method="delete"></form>
-<form method="patch"></form>
+<form method="put">Submit</form>
+<form method="delete">Submit</form>
+<form method="patch">Submit</form>
 
 <!-- Uppercase methods (valid values, but should be lowercase) -->
-<form method="GET"></form>
-<form method="POST"></form>
+<form method="GET">Submit</form>
+<form method="POST">Submit</form>
 
 <!-- Nested in Jinja block -->
 {% if show_form %}
-    <form method="invalid"></form>
+    <form method="invalid">Submit</form>
 {% endif %}

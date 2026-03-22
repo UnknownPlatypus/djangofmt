@@ -1,13 +1,13 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 11 lint error(s)
+  × Found 6 lint error(s)
 
 Error: 
   × Duplicate attribute 'class'.
    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:2:26]
  1 │ <!-- Duplicate class -->
- 2 │ <div class="a" id="main" class="b"></div>
+ 2 │ <div class="a" id="main" class="b">Content</div>
    ·                          ──┬──
    ·                            ╰── here
  3 │ 
@@ -15,21 +15,10 @@ Error:
   help: Remove the duplicate attribute.
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:2:2]
- 1 │ <!-- Duplicate class -->
- 2 │ <div class="a" id="main" class="b"></div>
-   ·  ─┬─
-   ·   ╰── here
- 3 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Duplicate attribute 'data-class'.
    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:5:31]
  4 │ <!-- Duplicate data attribute -->
- 5 │ <div data-class="a" id="main" data-class="b"></div>
+ 5 │ <div data-class="a" id="main" data-class="b">Content</div>
    ·                               ─────┬────
    ·                                    ╰── here
  6 │ 
@@ -37,37 +26,15 @@ Error:
   help: Remove the duplicate attribute.
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:5:2]
- 4 │ <!-- Duplicate data attribute -->
- 5 │ <div data-class="a" id="main" data-class="b"></div>
-   ·  ─┬─
-   ·   ╰── here
- 6 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Duplicate attribute '-width'.
    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:8:18]
  7 │ <!-- Duplicate with leading hyphen -->
- 8 │ <svg -width="16" -width="2"></svg>
+ 8 │ <svg -width="16" -width="2"><path d="M0 0" /></svg>
    ·                  ───┬──
    ·                     ╰── here
  9 │ 
    ╰────
   help: Remove the duplicate attribute.
-
-Error: 
-  × Empty <svg> tag pair found. Consider removing.
-   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:8:2]
- 7 │ <!-- Duplicate with leading hyphen -->
- 8 │ <svg -width="16" -width="2"></svg>
-   ·  ─┬─
-   ·   ╰── here
- 9 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
 
 Error: 
   × Duplicate attribute ':src'.
@@ -84,7 +51,7 @@ Error:
   × Duplicate attribute 'CLASS'.
     ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:14:16]
  13 │ <!-- Case-insensitive duplicate -->
- 14 │ <div class="a" CLASS="b"></div>
+ 14 │ <div class="a" CLASS="b">Content</div>
     ·                ──┬──
     ·                  ╰── here
  15 │ 
@@ -92,34 +59,12 @@ Error:
   help: Remove the duplicate attribute.
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:14:2]
- 13 │ <!-- Case-insensitive duplicate -->
- 14 │ <div class="a" CLASS="b"></div>
-    ·  ─┬─
-    ·   ╰── here
- 15 │ 
-    ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Duplicate attribute 'class'.
     ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:18:20]
  17 │ {% if show %}
- 18 │     <div class="a" class="b"></div>
+ 18 │     <div class="a" class="b">Content</div>
     ·                    ──┬──
     ·                      ╰── here
  19 │ {% endif %}
     ╰────
   help: Remove the duplicate attribute.
-
-Error: 
-  × Empty <div> tag pair found. Consider removing.
-    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:18:6]
- 17 │ {% if show %}
- 18 │     <div class="a" class="b"></div>
-    ·      ─┬─
-    ·       ╰── here
- 19 │ {% endif %}
-    ╰────
-  help: Remove the empty tag pair or add content.

@@ -14,6 +14,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::contains_interpolation;
 use crate::violation::Violation;
 
 /// Violation for non-lowercase `method` attribute on `<form>`.
@@ -74,12 +75,6 @@ impl Violation for EmptyAttrValue {
     fn message(&self) -> String {
         format!("Empty '{}' attribute can be removed.", self.attr)
     }
-}
-
-/// Returns true if the value contains Jinja/Django interpolation markers.
-#[inline]
-fn contains_interpolation(value: &str) -> bool {
-    value.contains("{{") || value.contains("{%")
 }
 
 /// Check `<form method="...">` for non-lowercase values.

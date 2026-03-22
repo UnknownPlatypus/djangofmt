@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 8 lint error(s)
+  × Found 7 lint error(s)
 
 Error: 
   × Use HTTPS for external links.
@@ -62,23 +62,12 @@ Error:
   × Use HTTPS for external links.
     ╭─[tests/check/use_https/use_https.invalid.html:10:15]
   9 │ <!-- http:// in action -->
- 10 │ <form action="http://example.com/submit"></form>
+ 10 │ <form action="http://example.com/submit">Submit</form>
     ·               ────────────┬────────────
     ·                           ╰── here
  11 │ 
     ╰────
   help: Replace 'http://' with 'https://'.
-
-Error: 
-  × Empty <form> tag pair found. Consider removing.
-    ╭─[tests/check/use_https/use_https.invalid.html:10:2]
-  9 │ <!-- http:// in action -->
- 10 │ <form action="http://example.com/submit"></form>
-    ·  ──┬─
-    ·    ╰── here
- 11 │ 
-    ╰────
-  help: Remove the empty tag pair or add content.
 
 Error: 
   × Use HTTPS for external links.

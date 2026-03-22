@@ -1,55 +1,33 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 18 lint error(s)
+  × Found 10 lint error(s)
 
 Error: 
   × Empty 'id' attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:10]
  1 │ <!-- Empty id -->
- 2 │ <div id=""></div>
+ 2 │ <div id="">Content</div>
    ·          ▲
    ·          ╰── here
  3 │ 
    ╰────
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:2]
- 1 │ <!-- Empty id -->
- 2 │ <div id=""></div>
-   ·  ─┬─
-   ·   ╰── here
- 3 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Empty 'class' attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:5:13]
  4 │ <!-- Empty class -->
- 5 │ <div class=""></div>
+ 5 │ <div class="">Content</div>
    ·             ▲
    ·             ╰── here
  6 │ 
    ╰────
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:5:2]
- 4 │ <!-- Empty class -->
- 5 │ <div class=""></div>
-   ·  ─┬─
-   ·   ╰── here
- 6 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Empty 'id' attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:10]
  7 │ <!-- Both empty id and class -->
- 8 │ <div id="" class=""></div>
+ 8 │ <div id="" class="">Content</div>
    ·          ▲
    ·          ╰── here
  9 │ 
@@ -59,134 +37,68 @@ Error:
   × Empty 'class' attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:19]
  7 │ <!-- Both empty id and class -->
- 8 │ <div id="" class=""></div>
+ 8 │ <div id="" class="">Content</div>
    ·                   ▲
    ·                   ╰── here
  9 │ 
    ╰────
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:2]
- 7 │ <!-- Both empty id and class -->
- 8 │ <div id="" class=""></div>
-   ·  ─┬─
-   ·   ╰── here
- 9 │ 
-   ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Empty 'id' attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:11:10]
  10 │ <!-- Empty with single quotes -->
- 11 │ <div id=''></div>
+ 11 │ <div id=''>Content</div>
     ·          ▲
     ·          ╰── here
  12 │ 
     ╰────
-
-Error: 
-  × Empty <div> tag pair found. Consider removing.
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:11:2]
- 10 │ <!-- Empty with single quotes -->
- 11 │ <div id=''></div>
-    ·  ─┬─
-    ·   ╰── here
- 12 │ 
-    ╰────
-  help: Remove the empty tag pair or add content.
 
 Error: 
   × Empty 'ID' attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:14:10]
  13 │ <!-- Case-insensitive attribute name -->
- 14 │ <div ID=""></div>
+ 14 │ <div ID="">Content</div>
     ·          ▲
     ·          ╰── here
- 15 │ <div CLASS=""></div>
+ 15 │ <div CLASS="">Content</div>
     ╰────
-
-Error: 
-  × Empty <div> tag pair found. Consider removing.
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:14:2]
- 13 │ <!-- Case-insensitive attribute name -->
- 14 │ <div ID=""></div>
-    ·  ─┬─
-    ·   ╰── here
- 15 │ <div CLASS=""></div>
-    ╰────
-  help: Remove the empty tag pair or add content.
 
 Error: 
   × Empty 'CLASS' attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:15:13]
- 14 │ <div ID=""></div>
- 15 │ <div CLASS=""></div>
+ 14 │ <div ID="">Content</div>
+ 15 │ <div CLASS="">Content</div>
     ·             ▲
     ·             ╰── here
  16 │ 
     ╰────
 
 Error: 
-  × Empty <div> tag pair found. Consider removing.
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:15:2]
- 14 │ <div ID=""></div>
- 15 │ <div CLASS=""></div>
-    ·  ─┬─
-    ·   ╰── here
- 16 │ 
-    ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Empty 'class' attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:18:14]
  17 │ <!-- Various elements -->
- 18 │ <span class=""></span>
+ 18 │ <span class="">Content</span>
     ·              ▲
     ·              ╰── here
- 19 │ <p id=""></p>
+ 19 │ <p id="">Content</p>
     ╰────
 
 Error: 
   × Empty 'id' attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:19:8]
- 18 │ <span class=""></span>
- 19 │ <p id=""></p>
+ 18 │ <span class="">Content</span>
+ 19 │ <p id="">Content</p>
     ·        ▲
     ·        ╰── here
  20 │ 
     ╰────
 
 Error: 
-  × Empty <p> tag pair found. Consider removing.
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:19:2]
- 18 │ <span class=""></span>
- 19 │ <p id=""></p>
-    ·  ┬
-    ·  ╰── here
- 20 │ 
-    ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
   × Empty 'id' attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:23:14]
  22 │ {% if show %}
- 23 │     <div id="" class="container"></div>
+ 23 │     <div id="" class="container">Content</div>
     ·              ▲
     ·              ╰── here
  24 │ {% endif %}
     ╰────
-
-Error: 
-  × Empty <div> tag pair found. Consider removing.
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:23:6]
- 22 │ {% if show %}
- 23 │     <div id="" class="container"></div>
-    ·      ─┬─
-    ·       ╰── here
- 24 │ {% endif %}
-    ╰────
-  help: Remove the empty tag pair or add content.

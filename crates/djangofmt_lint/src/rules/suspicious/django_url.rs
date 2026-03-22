@@ -15,6 +15,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::contains_interpolation;
 use crate::violation::Violation;
 
 /// Violation for hardcoded static URLs that should use `{% static %}`.
@@ -49,12 +50,6 @@ impl Violation for DjangoUrlPattern {
     fn help(&self) -> Option<String> {
         Some("Use {% url 'view_name' %} instead of hardcoding internal paths.".to_string())
     }
-}
-
-/// Returns true if the value contains Jinja/Django interpolation markers.
-#[inline]
-fn contains_interpolation(value: &str) -> bool {
-    value.contains("{{") || value.contains("{%")
 }
 
 /// Check `<link>`, `<img>`, `<script>`, `<source>` elements for hardcoded static paths.

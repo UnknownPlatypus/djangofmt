@@ -1,19 +1,19 @@
 <!-- Duplicate class -->
-<div class="a" id="main" class="b"></div>
+<div class="a" id="main" class="b">Content</div>
 
 <!-- Duplicate data attribute -->
-<div data-class="a" id="main" data-class="b"></div>
+<div data-class="a" id="main" data-class="b">Content</div>
 
 <!-- Duplicate with leading hyphen -->
-<svg -width="16" -width="2"></svg>
+<svg -width="16" -width="2"><path d="M0 0" /></svg>
 
 <!-- Duplicate AlpineJS shorthand -->
 <img :src="img.jpg" :src="isLoaded ? url : default" alt="test" height="10" width="10" />
 
 <!-- Case-insensitive duplicate -->
-<div class="a" CLASS="b"></div>
+<div class="a" CLASS="b">Content</div>
 
 <!-- Nested in Jinja block -->
 {% if show %}
-    <div class="a" class="b"></div>
+    <div class="a" class="b">Content</div>
 {% endif %}
