@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 9 lint error(s)
+  × Found 13 lint error(s)
 
 Error: 
   × Redundant type="text/javascript" on <script> tag.
@@ -37,6 +37,17 @@ Error:
   help: The type attribute is unnecessary for the default script/style type.
 
 Error: 
+  × Empty <SCRIPT> tag pair found. Consider removing.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:8:2]
+ 7 │ <!-- Case-insensitive tag name -->
+ 8 │ <SCRIPT type="text/javascript"></SCRIPT>
+   ·  ───┬──
+   ·     ╰── here
+ 9 │ <STYLE type="text/css"></STYLE>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Redundant type="text/css" on <STYLE> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:9:14]
   8 │ <SCRIPT type="text/javascript"></SCRIPT>
@@ -46,6 +57,17 @@ Error:
  10 │ 
     ╰────
   help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Empty <STYLE> tag pair found. Consider removing.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:9:2]
+  8 │ <SCRIPT type="text/javascript"></SCRIPT>
+  9 │ <STYLE type="text/css"></STYLE>
+    ·  ──┬──
+    ·    ╰── here
+ 10 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Redundant type="Text/JavaScript" on <script> tag.
@@ -59,6 +81,17 @@ Error:
   help: The type attribute is unnecessary for the default script/style type.
 
 Error: 
+  × Empty <script> tag pair found. Consider removing.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:12:2]
+ 11 │ <!-- Case-insensitive type value -->
+ 12 │ <script type="Text/JavaScript"></script>
+    ·  ───┬──
+    ·     ╰── here
+ 13 │ <style type="Text/CSS"></style>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Redundant type="Text/CSS" on <style> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:13:14]
  12 │ <script type="Text/JavaScript"></script>
@@ -68,6 +101,17 @@ Error:
  14 │ 
     ╰────
   help: The type attribute is unnecessary for the default script/style type.
+
+Error: 
+  × Empty <style> tag pair found. Consider removing.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:13:2]
+ 12 │ <script type="Text/JavaScript"></script>
+ 13 │ <style type="Text/CSS"></style>
+    ·  ──┬──
+    ·    ╰── here
+ 14 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Redundant type="text/javascript" on <script> tag.

@@ -1,0 +1,16 @@
+<!-- Empty tag pairs -->
+<div></div>
+<span></span>
+<p></p>
+<section></section>
+<a href="{% url 'home' %}"></a>
+
+<!-- i/span without class are flagged -->
+<i></i>
+<span id="test"></span>
+
+<!-- Case-insensitive -->
+<DIV></DIV>
+
+<!-- Nested empty -->
+<ul><li><div></div></li></ul>

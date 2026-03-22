@@ -1,0 +1,102 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 9 lint error(s)
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:2:2]
+ 1 │ <!-- Empty tag pairs -->
+ 2 │ <div></div>
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ <span></span>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <span> tag pair found. Consider removing.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:3:2]
+ 2 │ <div></div>
+ 3 │ <span></span>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ <p></p>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <p> tag pair found. Consider removing.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:4:2]
+ 3 │ <span></span>
+ 4 │ <p></p>
+   ·  ┬
+   ·  ╰── here
+ 5 │ <section></section>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <section> tag pair found. Consider removing.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:5:2]
+ 4 │ <p></p>
+ 5 │ <section></section>
+   ·  ───┬───
+   ·     ╰── here
+ 6 │ <a href="{% url 'home' %}"></a>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <a> tag pair found. Consider removing.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:6:2]
+ 5 │ <section></section>
+ 6 │ <a href="{% url 'home' %}"></a>
+   ·  ┬
+   ·  ╰── here
+ 7 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <i> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:9:2]
+  8 │ <!-- i/span without class are flagged -->
+  9 │ <i></i>
+    ·  ┬
+    ·  ╰── here
+ 10 │ <span id="test"></span>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <span> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:10:2]
+  9 │ <i></i>
+ 10 │ <span id="test"></span>
+    ·  ──┬─
+    ·    ╰── here
+ 11 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <DIV> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:13:2]
+ 12 │ <!-- Case-insensitive -->
+ 13 │ <DIV></DIV>
+    ·  ─┬─
+    ·   ╰── here
+ 14 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:16:10]
+ 15 │ <!-- Nested empty -->
+ 16 │ <ul><li><div></div></li></ul>
+    ·          ─┬─
+    ·           ╰── here
+    ╰────
+  help: Remove the empty tag pair or add content.

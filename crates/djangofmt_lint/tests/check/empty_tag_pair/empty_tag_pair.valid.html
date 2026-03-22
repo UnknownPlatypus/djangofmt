@@ -1,0 +1,30 @@
+<!-- Void elements are not flagged -->
+<hr>
+<img src="https://example.com/photo.jpg" alt="Photo" height="100" width="100">
+
+<!-- Self-closing elements -->
+<input type="text" />
+
+<!-- Elements with content -->
+<div>Content</div>
+<p>Paragraph text</p>
+<span>Some text</span>
+
+<!-- Excluded tags: td, li, th, dt, dd are allowed empty -->
+<table><tr><td></td></tr></table>
+<ul><li></li></ul>
+<table><tr><th></th></tr></table>
+<dl><dt></dt><dd></dd></dl>
+
+<!-- Icon pattern: i/span with class are allowed empty -->
+<i class="fa fa-icon"></i>
+<span class="icon-check"></span>
+
+<!-- Template content -->
+<div>{{ content }}</div>
+<div>{% if show %}text{% endif %}</div>
+
+<!-- Nested in Jinja block -->
+{% if show %}
+    <section>Content</section>
+{% endif %}

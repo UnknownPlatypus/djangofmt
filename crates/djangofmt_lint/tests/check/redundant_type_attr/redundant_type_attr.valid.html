@@ -6,7 +6,7 @@
 <script type="module" src="app.js"></script>
 <script type="application/ld+json">{"@context": "..."}</script>
 <script type="importmap">{"imports": {}}</script>
-<script type="text/kendo-ui-template"></script>
+<script type="text/kendo-ui-template">template content</script>
 <style type="text/less">.foo { color: red; }</style>
 
 <!-- Non-script/style tags with type attribute -->
@@ -14,5 +14,5 @@
 <button type="submit">Submit</button>
 
 <!-- Interpolation - dynamic values should be skipped -->
-<script type="{{ script_type }}"></script>
-<style type="{% if x %}text/css{% endif %}"></style>
+<script type="{{ script_type }}">content</script>
+<style type="{% if x %}text/css{% endif %}">.foo {}</style>

@@ -1,27 +1,27 @@
 <!-- Attributes with values -->
-<div id="main" class="container"></div>
+<div id="main" class="container">Content</div>
 
 <!-- Empty alt is valid (accessibility pattern) -->
 <img alt="" height="100" width="100">
 
 <!-- Hyphenated attribute names should not match -->
-<div data-id=""></div>
-<div x-id-y=""></div>
-<div id-y=""></div>
-<div x-id=""></div>
-<div data-class=""></div>
-<div class-name=""></div>
+<div data-id="">Content</div>
+<div x-id-y="">Content</div>
+<div id-y="">Content</div>
+<div x-id="">Content</div>
+<div data-class="">Content</div>
+<div class-name="">Content</div>
 
 <!-- Non-id/class empty attributes -->
-<div title=""></div>
+<div title="">Content</div>
 <input value="">
 
 <!-- Interpolation in id/class -->
-<div id="{{ dynamic_id }}"></div>
-<div class="{% if x %}active{% endif %}"></div>
+<div id="{{ dynamic_id }}">Content</div>
+<div class="{% if x %}active{% endif %}">Content</div>
 
 <!-- Attribute value containing "id" as a substring in another attr -->
 <input type="number" name="account_id" placeholder="enter ID here">
 
 <!-- Class inside template tag (not a real attribute) -->
-<asdf {% class="" %}></asdf>
+<asdf {% class="" %}>Content</asdf>

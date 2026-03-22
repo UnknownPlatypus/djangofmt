@@ -138,4 +138,8 @@ define_rules! {
     (DuplicateAttr, rules::suspicious::duplicate_attr::DuplicateAttr),
     (DjangoStaticUrl, rules::suspicious::django_url::DjangoStaticUrl),
     (DjangoUrlPattern, rules::suspicious::django_url::DjangoUrlPattern),
+    (EmptyTagPair, rules::suspicious::empty_tag::EmptyTagPair),
+    (AvoidBrTag, rules::style::avoid_element::AvoidBrTag),
+    (MissingDoctype, rules::style::document_structure::MissingDoctype),
+    (MissingTitle, rules::style::document_structure::MissingTitle),
 }

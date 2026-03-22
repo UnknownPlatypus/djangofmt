@@ -1,0 +1,47 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 4 lint error(s)
+
+Error: 
+  × Avoid use of <br> tags.
+   ╭─[tests/check/avoid_br_tag/avoid_br_tag.invalid.html:2:13]
+ 1 │ <!-- br tags should be avoided -->
+ 2 │ <p>Line one<br>Line two</p>
+   ·             ─┬
+   ·              ╰── here
+ 3 │ <p>Line one<br />Line two</p>
+   ╰────
+  help: Use block-level elements or CSS margins instead.
+
+Error: 
+  × Avoid use of <br> tags.
+   ╭─[tests/check/avoid_br_tag/avoid_br_tag.invalid.html:3:13]
+ 2 │ <p>Line one<br>Line two</p>
+ 3 │ <p>Line one<br />Line two</p>
+   ·             ─┬
+   ·              ╰── here
+ 4 │ <p>Line one<br/>Line two</p>
+   ╰────
+  help: Use block-level elements or CSS margins instead.
+
+Error: 
+  × Avoid use of <br> tags.
+   ╭─[tests/check/avoid_br_tag/avoid_br_tag.invalid.html:4:13]
+ 3 │ <p>Line one<br />Line two</p>
+ 4 │ <p>Line one<br/>Line two</p>
+   ·             ─┬
+   ·              ╰── here
+ 5 │ 
+   ╰────
+  help: Use block-level elements or CSS margins instead.
+
+Error: 
+  × Avoid use of <br> tags.
+   ╭─[tests/check/avoid_br_tag/avoid_br_tag.invalid.html:7:13]
+ 6 │ <!-- Case-insensitive -->
+ 7 │ <p>Line one<BR>Line two</p>
+   ·             ─┬
+   ·              ╰── here
+   ╰────
+  help: Use block-level elements or CSS margins instead.

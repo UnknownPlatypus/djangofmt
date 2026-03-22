@@ -1,0 +1,37 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 3 lint error(s)
+
+Error: 
+  × Missing <title> tag inside <head>.
+   ╭─[tests/check/missing_title/missing_title.invalid.html:3:2]
+ 2 │ <html lang="en">
+ 3 │ <head></head>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ <body></body>
+   ╰────
+  help: Add a `<title>` element inside `<head>`.
+
+Error: 
+  × Empty <head> tag pair found. Consider removing.
+   ╭─[tests/check/missing_title/missing_title.invalid.html:3:2]
+ 2 │ <html lang="en">
+ 3 │ <head></head>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ <body></body>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty <body> tag pair found. Consider removing.
+   ╭─[tests/check/missing_title/missing_title.invalid.html:4:2]
+ 3 │ <head></head>
+ 4 │ <body></body>
+   ·  ──┬─
+   ·    ╰── here
+ 5 │ </html>
+   ╰────
+  help: Remove the empty tag pair or add content.

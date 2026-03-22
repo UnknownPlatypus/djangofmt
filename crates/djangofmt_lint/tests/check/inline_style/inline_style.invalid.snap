@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 7 lint error(s)
+  × Found 12 lint error(s)
 
 Error: 
   × Inline styles should be avoided.
@@ -13,6 +13,17 @@ Error:
  3 │ 
    ╰────
   help: Use a CSS class instead.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+   ╭─[tests/check/inline_style/inline_style.invalid.html:2:2]
+ 1 │ <!-- Basic inline style -->
+ 2 │ <div style="color: red;"></div>
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Inline styles should be avoided.
@@ -48,6 +59,17 @@ Error:
   help: Use a CSS class instead.
 
 Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/inline_style/inline_style.invalid.html:9:2]
+  8 │ <!-- Style with other attributes -->
+  9 │ <div class="container" style="margin: 0;" id="main"></div>
+    ·  ─┬─
+    ·   ╰── here
+ 10 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Inline styles should be avoided.
     ╭─[tests/check/inline_style/inline_style.invalid.html:14:5]
  13 │     class="foo"
@@ -57,6 +79,17 @@ Error:
  15 │ ></div>
     ╰────
   help: Use a CSS class instead.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/inline_style/inline_style.invalid.html:12:2]
+ 11 │ <!-- Multiline tag with style -->
+ 12 │ <div
+    ·  ─┬─
+    ·   ╰── here
+ 13 │     class="foo"
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Inline styles should be avoided.
@@ -70,6 +103,17 @@ Error:
   help: Use a CSS class instead.
 
 Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/inline_style/inline_style.invalid.html:18:2]
+ 17 │ <!-- Case-insensitive attribute name -->
+ 18 │ <div STYLE="color: blue;"></div>
+    ·  ─┬─
+    ·   ╰── here
+ 19 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Inline styles should be avoided.
     ╭─[tests/check/inline_style/inline_style.invalid.html:22:10]
  21 │ {% if show %}
@@ -79,3 +123,14 @@ Error:
  23 │ {% endif %}
     ╰────
   help: Use a CSS class instead.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/inline_style/inline_style.invalid.html:22:6]
+ 21 │ {% if show %}
+ 22 │     <div style="display: none;"></div>
+    ·      ─┬─
+    ·       ╰── here
+ 23 │ {% endif %}
+    ╰────
+  help: Remove the empty tag pair or add content.

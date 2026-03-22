@@ -1,0 +1,25 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 2 lint error(s)
+
+Error: 
+  × Missing DOCTYPE declaration.
+   ╭─[tests/check/missing_doctype/missing_doctype.invalid.html:1:1]
+ 1 │ <html lang="en">
+   · ▲
+   · ╰── here
+ 2 │ <head><title>Page</title></head>
+   ╰────
+  help: Add `<!DOCTYPE html>` before the `<html>` tag.
+
+Error: 
+  × Empty <body> tag pair found. Consider removing.
+   ╭─[tests/check/missing_doctype/missing_doctype.invalid.html:3:2]
+ 2 │ <head><title>Page</title></head>
+ 3 │ <body></body>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ </html>
+   ╰────
+  help: Remove the empty tag pair or add content.

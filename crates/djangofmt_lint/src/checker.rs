@@ -68,6 +68,13 @@ impl<'a> Checker<'a> {
 
     /// Visit the root of the AST and run all lint rules.
     pub fn visit_root(&mut self, root: &Root<'_>) {
+        if self.is_rule_enabled(Rule::MissingDoctype) {
+            rules::style::document_structure::check_doctype(root, self);
+        }
+        if self.is_rule_enabled(Rule::MissingTitle) {
+            rules::style::document_structure::check_title(root, self);
+        }
+
         for node in &root.children {
             self.visit_node(node);
         }
@@ -123,6 +130,12 @@ impl<'a> Checker<'a> {
         }
         if self.is_rule_enabled(Rule::DjangoUrlPattern) {
             rules::suspicious::django_url::check_django_url_pattern(element, self);
+        }
+        if self.is_rule_enabled(Rule::EmptyTagPair) {
+            rules::suspicious::empty_tag::check(element, self);
+        }
+        if self.is_rule_enabled(Rule::AvoidBrTag) {
+            rules::style::avoid_element::check_br(element, self);
         }
 
         for attr in &element.attrs {

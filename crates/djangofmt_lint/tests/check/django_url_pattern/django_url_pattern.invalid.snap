@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 7 lint error(s)
+  × Found 10 lint error(s)
 
 Error: 
   × Internal link should use {% url %} template tag.
@@ -48,6 +48,17 @@ Error:
   help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:11:2]
+ 10 │ <!-- Form with hardcoded action -->
+ 11 │ <form action="/collections"></form>
+    ·  ──┬─
+    ·    ╰── here
+ 12 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Internal link should use {% url %} template tag.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:14:16]
  13 │ <!-- Data URL attributes with internal paths -->
@@ -59,6 +70,17 @@ Error:
   help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:14:2]
+ 13 │ <!-- Data URL attributes with internal paths -->
+ 14 │ <div data-url="/api/data"></div>
+    ·  ─┬─
+    ·   ╰── here
+ 15 │ <div data-src="/table/task/123/log"></div>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Internal link should use {% url %} template tag.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:15:16]
  14 │ <div data-url="/api/data"></div>
@@ -68,6 +90,17 @@ Error:
  16 │ 
     ╰────
   help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Empty <div> tag pair found. Consider removing.
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:15:2]
+ 14 │ <div data-url="/api/data"></div>
+ 15 │ <div data-src="/table/task/123/log"></div>
+    ·  ─┬─
+    ·   ╰── here
+ 16 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Internal link should use {% url %} template tag.

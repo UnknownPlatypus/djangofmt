@@ -1,21 +1,21 @@
 <!-- Lowercase methods are valid -->
-<form method="get"></form>
-<form method="post"></form>
-<form method="dialog"></form>
+<form method="get">Submit</form>
+<form method="post">Submit</form>
+<form method="dialog">Submit</form>
 
 <!-- Non-form tags are not checked -->
 <a method="POST">Link</a>
-<div method="GET"></div>
+<div method="GET">Content</div>
 
 <!-- Interpolation - dynamic values should be skipped -->
-<form method="{{ method }}"></form>
-<form method="{% if x %}post{% else %}get{% endif %}"></form>
+<form method="{{ method }}">Submit</form>
+<form method="{% if x %}post{% else %}get{% endif %}">Submit</form>
 
 <!-- No method attribute -->
-<form action="{% url 'submit' %}"></form>
+<form action="{% url 'submit' %}">Submit</form>
 
 <!-- Multiline with lowercase method -->
 <form
     action="{% url 'submit' %}"
     method="post"
-></form>
+>Submit</form>

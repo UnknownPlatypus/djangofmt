@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 7 lint error(s)
+  × Found 12 lint error(s)
 
 Error: 
   × Extra whitespace found in form action.
@@ -15,6 +15,17 @@ Error:
   help: Remove leading and trailing whitespace from the action URL.
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:2:2]
+ 1 │ <!-- Leading whitespace -->
+ 2 │ <form action=" /submit/"></form>
+   ·  ──┬─
+   ·    ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Extra whitespace found in form action.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:5:15]
  4 │ <!-- Trailing whitespace -->
@@ -35,6 +46,17 @@ Error:
  6 │ 
    ╰────
   help: Use {% url 'view_name' %} instead of hardcoding internal paths.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:5:2]
+ 4 │ <!-- Trailing whitespace -->
+ 5 │ <form action="/submit/ "></form>
+   ·  ──┬─
+   ·    ╰── here
+ 6 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Extra whitespace found in form action.
@@ -48,6 +70,17 @@ Error:
   help: Remove leading and trailing whitespace from the action URL.
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+   ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:8:2]
+ 7 │ <!-- Both leading and trailing whitespace -->
+ 8 │ <form action=" /submit/ "></form>
+   ·  ──┬─
+   ·    ╰── here
+ 9 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Extra whitespace found in form action.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:11:15]
  10 │ <!-- Trailing whitespace with plain value -->
@@ -70,6 +103,17 @@ Error:
   help: Use {% url 'view_name' %} instead of hardcoding internal paths.
 
 Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:11:2]
+ 10 │ <!-- Trailing whitespace with plain value -->
+ 11 │ <form action="asdf "></form>
+    ·  ──┬─
+    ·    ╰── here
+ 12 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Extra whitespace found in form action.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:15:19]
  14 │ {% if show_form %}
@@ -79,3 +123,14 @@ Error:
  16 │ {% endif %}
     ╰────
   help: Remove leading and trailing whitespace from the action URL.
+
+Error: 
+  × Empty <form> tag pair found. Consider removing.
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:15:6]
+ 14 │ {% if show_form %}
+ 15 │     <form action=" /submit/ "></form>
+    ·      ──┬─
+    ·        ╰── here
+ 16 │ {% endif %}
+    ╰────
+  help: Remove the empty tag pair or add content.

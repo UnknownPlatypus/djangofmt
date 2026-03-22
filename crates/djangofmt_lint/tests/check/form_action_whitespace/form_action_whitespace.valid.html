@@ -1,10 +1,10 @@
 <!-- Clean action values -->
-<form action="{% url 'submit' %}"></form>
-<form action="#"></form>
+<form action="{% url 'submit' %}">Submit</form>
+<form action="#">Submit</form>
 
 <!-- Template tag without extra whitespace -->
-<form action="{% url 'foo:bar' %}"></form>
-<form action="{% url 'foo:bar' %} {{ asdf }}"></form>
+<form action="{% url 'foo:bar' %}">Submit</form>
+<form action="{% url 'foo:bar' %} {{ asdf }}">Submit</form>
 
 <!-- data-action is not checked (only action attribute) -->
 <form action="#"
@@ -12,13 +12,13 @@
     data-action="
         submit:my-custom-element#handleFormSubmit
         click:my-custom-element#handleClick
-    ">
+    ">Submit
 </form>
 
 <!-- Interpolation - dynamic values should be skipped -->
-<form action="{{ action_url }}"></form>
-<form action=" {% url 'foo:bar' %} "></form>
-<form action="{% url 'foo:bar' %} "></form>
+<form action="{{ action_url }}">Submit</form>
+<form action=" {% url 'foo:bar' %} ">Submit</form>
+<form action="{% url 'foo:bar' %} ">Submit</form>
 
 <!-- No action attribute -->
-<form method="post"></form>
+<form method="post">Submit</form>

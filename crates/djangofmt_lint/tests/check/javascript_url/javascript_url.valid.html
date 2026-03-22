@@ -15,7 +15,7 @@
 <a href="{% if x %}/a{% else %}/b{% endif %}">Link</a>
 
 <!-- Non-href attributes with javascript: are fine -->
-<div data-value="javascript:void(0)"></div>
+<div data-value="javascript:void(0)">Content</div>
 
 <!-- Nested in Jinja block -->
 {% if show_link %}
