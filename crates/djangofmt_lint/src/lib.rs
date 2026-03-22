@@ -80,7 +80,7 @@ impl FileDiagnostics {
     pub fn empty() -> Self {
         Self {
             source_code: NamedSource::new("", String::with_capacity(0)),
-            related: Vec::new(),
+            related: vec![],
         }
     }
 

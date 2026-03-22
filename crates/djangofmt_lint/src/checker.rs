@@ -21,7 +21,7 @@ impl<'a> Checker<'a> {
     pub const fn new(settings: &'a Settings) -> Self {
         Self {
             settings,
-            diagnostics: Vec::new(),
+            diagnostics: vec![],
         }
     }
 

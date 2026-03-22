@@ -49,9 +49,36 @@ pub struct Args {
     pub command: Option<Commands>,
 }
 
+/// CLI arguments for File selection behavior.
+#[derive(Clone, Debug, Default, clap::Args)]
+#[command(next_help_heading = "File selection")]
+#[expect(clippy::struct_excessive_bools)]
+pub struct FileSelectionArgs {
+    /// List of file path patterns to exclude. If provided, replaces the default excludes.
+    #[arg(long, value_delimiter = ',', value_name = "FILE_PATTERN")]
+    pub exclude: Option<Vec<String>>,
+    /// List of file path patterns to add to the excluded paths.
+    #[arg(long, value_delimiter = ',', value_name = "FILE_PATTERN")]
+    pub extend_exclude: Option<Vec<String>>,
+
+    /// Respect `.gitignore` files when discovering files. Use `--no-respect-gitignore` to disable.
+    #[arg(long, overrides_with("no_respect_gitignore"))]
+    pub respect_gitignore: bool,
+    /// Do not respect .gitignore files when discovering files.
+    #[arg(long, overrides_with("respect_gitignore"), hide = true)]
+    pub no_respect_gitignore: bool,
+
+    /// Enforce exclusions, even for paths passed to djangofmt directly on the command-line.
+    /// Use `--no-force-exclude` to disable.
+    #[arg(long, overrides_with("no_force_exclude"))]
+    pub force_exclude: bool,
+    #[clap(long, overrides_with("force_exclude"), hide = true)]
+    pub no_force_exclude: bool,
+}
+
 #[derive(Clone, Debug, clap::Parser)]
 pub struct FormatCommand {
-    /// List of files to format.
+    /// List of files or directories to format.
     #[arg(required = true)]
     pub files: Vec<PathBuf>,
     /// Set the line-length [default: 120]
@@ -74,6 +101,8 @@ pub struct FormatCommand {
     /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
+    #[clap(flatten)]
+    pub file_selection: FileSelectionArgs,
 }
 
 #[derive(Copy, Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
@@ -82,6 +111,23 @@ pub enum Profile {
     #[default]
     Django,
     Jinja,
+}
+
+impl Profile {
+    /// Infer the profile from a file's extension.
+    ///
+    /// - `.html` → `Django`
+    /// - `.jinja`, `.jinja2`, `.j2` → `Jinja`
+    ///
+    /// Returns `None` for unrecognised extensions.
+    #[must_use]
+    pub fn from_path(path: &std::path::Path) -> Option<Self> {
+        match path.extension()?.to_str()? {
+            "html" => Some(Self::Django),
+            "jinja" | "jinja2" | "j2" => Some(Self::Jinja),
+            _ => None,
+        }
+    }
 }
 
 impl From<Profile> for Language {
@@ -153,7 +199,7 @@ mod tests {
 
     #[test]
     fn test_cli_help() {
-        assert_cmd_snapshot!(cli().arg("--help"), @r###"
+        assert_cmd_snapshot!(cli().arg("--help"), @r#"
         success: true
         exit_code: 0
         ----- stdout -----
@@ -163,7 +209,7 @@ mod tests {
 
         Arguments:
           <FILES>...
-                  List of files to format
+                  List of files or directories to format
 
         Options:
               --line-length <LINE_LENGTH>
@@ -194,6 +240,20 @@ mod tests {
           -V, --version
                   Print version
 
+        File selection:
+              --exclude <FILE_PATTERN>
+                  List of file path patterns to exclude. If provided, replaces the default excludes
+
+              --extend-exclude <FILE_PATTERN>
+                  List of file path patterns to add to the excluded paths
+
+              --respect-gitignore
+                  Respect `.gitignore` files when discovering files. Use `--no-respect-gitignore` to disable
+
+              --force-exclude
+                  Enforce exclusions, even for paths passed to djangofmt directly on the command-line. Use
+                  `--no-force-exclude` to disable
+
         Log levels:
           -v, --verbose
                   Enable verbose logging
@@ -202,7 +262,7 @@ mod tests {
                   Disable all logging
 
         ----- stderr -----
-        "###);
+        "#);
     }
     #[test]
     fn test_cli_version() {

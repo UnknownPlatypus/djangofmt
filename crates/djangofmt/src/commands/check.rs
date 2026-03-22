@@ -6,29 +6,37 @@ use miette::{Diagnostic, NamedSource};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::path::{Path, PathBuf};
-use std::{fs, io};
+use std::{env, fs, io};
 
 use crate::ExitStatus;
 use crate::args::Profile;
 use crate::commands::format::ParseError;
 use crate::error::Result;
+use crate::pyproject::{PyprojectSettings, load_options};
 use std::time::Instant;
 use tracing::{debug, error};
 
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
+    let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
+    let profile = args.profile.or(pyproject.profile);
+
+    // Resolve files (handles directories, excludes, includes, gitignore)
+    let discovery_config =
+        crate::resolver::ResolvedDiscoveryConfig::new(&args.file_selection, &pyproject);
+    let resolved_files = crate::resolver::resolve_files(&args.files, &discovery_config)?;
+
     let start = Instant::now();
-    let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = args
-        .files
+    let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = resolved_files
         .par_iter()
-        .map(|path| check_path(path, args.profile))
+        .map(|path| check_path(path, profile))
         .partition_map(|result| match result {
             Ok(diags) => Left(diags),
             Err(err) => Right(err),
         });
 
     let duration = start.elapsed();
-    debug!("Checked {} files in {:.2?}", args.files.len(), duration);
+    debug!("Checked {} files in {:.2?}", resolved_files.len(), duration);
 
     // Report on any parsing errors.
     parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
@@ -63,8 +71,11 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
 #[tracing::instrument(level = "debug", skip_all, fields(path = %path.display()))]
 fn check_path(
     path: &Path,
-    profile: Profile,
+    profile: Option<Profile>,
 ) -> std::result::Result<FileDiagnostics, Box<CheckCommandError>> {
+    let profile = profile
+        .or_else(|| Profile::from_path(path))
+        .unwrap_or_default();
     let source = fs::read_to_string(path)
         .map_err(|err| CheckCommandError::Read(Some(path.to_path_buf()), err))?;
 
@@ -108,10 +119,12 @@ impl CheckCommandError {
 }
 #[derive(Clone, Debug, clap::Parser)]
 pub struct CheckCommand {
-    /// List of files to check.
+    /// List of files or directories to check.
     #[arg(required = true)]
     pub files: Vec<PathBuf>,
-    /// Template language profile to use
-    #[arg(long, value_enum, default_value = "django")]
-    pub profile: Profile,
+    /// Template language profile to use [default: django]
+    #[arg(long, value_enum)]
+    pub profile: Option<Profile>,
+    #[clap(flatten)]
+    pub file_selection: crate::args::FileSelectionArgs,
 }

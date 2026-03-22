@@ -17,6 +17,12 @@ pub struct PyprojectSettings {
     pub profile: Option<Profile>,
     pub custom_blocks: Option<Vec<String>>,
     pub html_void_self_closing: Option<SelfClosing>,
+    pub exclude: Option<Vec<String>>,
+    pub extend_exclude: Option<Vec<String>>,
+    pub include: Option<Vec<String>>,
+    pub extend_include: Option<Vec<String>>,
+    pub respect_gitignore: Option<bool>,
+    pub force_exclude: Option<bool>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -129,6 +135,7 @@ mod tests {
                 custom_blocks: Some(vec!["foo".to_string(), "bar".to_string()]),
                 profile: Some(Profile::Django),
                 html_void_self_closing: Some(SelfClosing::Always),
+                ..Default::default()
             }
         );
     }
@@ -179,6 +186,70 @@ mod tests {
         assert_eq!(
             load_options_from_pyproject_toml(content),
             PyprojectSettings::default()
+        );
+    }
+
+    #[test]
+    fn test_load_options_with_file_selection_fields() {
+        let content = r#"
+        [tool.djangofmt]
+        line-length = 120
+        exclude = [".git", ".venv"]
+        extend-exclude = ["vendor"]
+        include = ["*.html"]
+        extend-include = ["*.djhtml"]
+        respect-gitignore = false
+    "#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                line_length: Some(LineLength::try_from(120).unwrap()),
+                exclude: Some(vec![".git".to_string(), ".venv".to_string()]),
+                extend_exclude: Some(vec!["vendor".to_string()]),
+                include: Some(vec!["*.html".to_string()]),
+                extend_include: Some(vec!["*.djhtml".to_string()]),
+                respect_gitignore: Some(false),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_options_with_only_new_fields_defaults_rest() {
+        let content = r#"
+        [tool.djangofmt]
+        extend-exclude = ["build"]
+    "#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                extend_exclude: Some(vec!["build".to_string()]),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_options_existing_fields_still_work() {
+        let content = r#"
+        [tool.djangofmt]
+        line-length = 80
+        indent-width = 2
+        profile = "jinja"
+        custom-blocks = ["cache"]
+    "#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                line_length: Some(LineLength::try_from(80).unwrap()),
+                indent_width: Some(IndentWidth::try_from(2).unwrap()),
+                profile: Some(Profile::Jinja),
+                custom_blocks: Some(vec!["cache".to_string()]),
+                ..Default::default()
+            }
         );
     }
 }
