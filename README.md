@@ -65,7 +65,7 @@ Usage: djangofmt [OPTIONS] <FILES>...
 
 Arguments:
   <FILES>...
-          List of files to format
+          List of files or directories to format
 
 Options:
       --line-length <LINE_LENGTH>
@@ -97,18 +97,25 @@ Options:
           Print version
 ```
 
-Djangofmt does not have any ability to recurse through directories.
-Use the pre-commit integration, globbing, or another technique to apply it to many files.
-For example, [git ls-files | xargs](https://adamj.eu/tech/2022/03/09/how-to-run-a-command-on-many-files-in-your-git-repository/):
+When given a directory, djangofmt recurses into it and formats all `*.html`, `*.jinja`, `*.jinja2`, and `*.j2` files it finds.
+It also respects `.gitignore` files.
+
+For example, to format all templates in the current directory:
 
 ```shell
-git ls-files -z -- '*.html' | xargs -0r djangofmt
+djangofmt .
 ```
 
-…or PowerShell’s [`ForEach-Object`](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/foreach-object):
+Or a specific subdirectory:
 
 ```shell
-git ls-files -- '*.html' | %{djangofmt $_}
+djangofmt src/templates
+```
+
+You can also pass individual files directly:
+
+```shell
+djangofmt templates/base.html templates/home.html
 ```
 
 ### Not using pre-commit?
@@ -116,8 +123,8 @@ git ls-files -- '*.html' | %{djangofmt $_}
 djangofmt intentionally does not provide a built-in check functionality because CI is too late for a code formatter. We strongly recommend using pre-commit or any IDE "format on save" integration. That being said, you can emulate check capability by chaining with a git diff command like so:
 
 ```bash
-git ls-files -z -- '*.html' | xargs -0r djangofmt
-git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
+djangofmt .
+git diff --exit-code -- ‘*.html’ || (echo "HTML templates are not formatted. Run ‘djangofmt’ to fix." && exit 1)
 ```
 
 ## Configuration
