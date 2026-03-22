@@ -109,24 +109,36 @@ benchmark-git-repo repo_path:
         "$SYS_CMD"
 
 
-# Run ecosystem checks with custom baseline and comparison executables
+# Run format ecosystem checks with custom baseline and comparison executables
 [group('ecosystem-check')]
 ecosystem-check baseline comparison *args:
     cargo build -p djangofmt
     uv run ecosystem-check format {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
 
-# Run ecosystem checks comparing debug build to system djangofmt
+# Run format ecosystem checks comparing debug build to system djangofmt
 [group('ecosystem-check')]
 ecosystem-check-dev:
     cargo build -p djangofmt
     uv run ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
 
-# Run ecosystem checks comparing djangofmt debug build to 'djade' or 'rustywind'
+# Run format ecosystem checks comparing djangofmt debug build to 'djade' or 'rustywind'
 [group('ecosystem-check')]
 [arg('external-formatter', pattern='djade|rustywind')]
 ecosystem-check-stability external-formatter:
     cargo build -p djangofmt
     uv run ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}} --format-comparison base-then-comp-converge
+
+# Run check (lint) ecosystem checks with custom baseline and comparison executables
+[group('ecosystem-check')]
+ecosystem-check-lint baseline comparison *args:
+    cargo build -p djangofmt
+    uv run ecosystem-check check {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+
+# Run check (lint) ecosystem checks comparing debug build to system djangofmt
+[group('ecosystem-check')]
+ecosystem-check-lint-dev:
+    cargo build -p djangofmt
+    uv run ecosystem-check check djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
 
 # Clean ecosystem check git repos cache
 [group('ecosystem-check')]

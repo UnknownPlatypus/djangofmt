@@ -27,6 +27,7 @@ class Project(Serializable):
 
 class Command(StrEnum):
     format = "format"  # type: ignore[assignment]
+    check = "check"
 
 
 class GitDomain(StrEnum):

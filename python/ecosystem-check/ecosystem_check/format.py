@@ -54,10 +54,16 @@ def markdown_format_result(result: Result) -> str:
     Render a `djangofmt` ecosystem check result as markdown.
     """
     error_count = len(result.errored)
-    projects_with_changes = sum(bool(comp.diff) for _, comp in result.completed)
-    total_lines_added = sum(comp.diff.lines_added for _, comp in result.completed)
-    total_lines_removed = sum(comp.diff.lines_removed for _, comp in result.completed)
-    total_files_modified = sum(comp.diff.modified_files for _, comp in result.completed)
+    # Format results only contain Diff or HistoriesForHunks
+    diffs: list[Diff | HistoriesForHunks] = [
+        comp.diff
+        for _, comp in result.completed
+        if isinstance(comp.diff, (Diff, HistoriesForHunks))
+    ]
+    projects_with_changes = sum(bool(d) for d in diffs)
+    total_lines_added = sum(d.lines_added for d in diffs)
+    total_lines_removed = sum(d.lines_removed for d in diffs)
+    total_files_modified = sum(d.modified_files for d in diffs)
 
     if total_lines_removed == 0 and total_lines_added == 0 and error_count == 0:
         return "\u2705 ecosystem check detected no format changes."
@@ -94,16 +100,17 @@ def markdown_format_result(result: Result) -> str:
 
     # Then per-project changes
     for project, comparison in result.completed:
-        if not comparison.diff:
+        diff = comparison.diff
+        if not diff or not isinstance(diff, (Diff, HistoriesForHunks)):
             continue  # Skip empty diffs
 
-        files = comparison.diff.modified_files
-        title = f"+{comparison.diff.lines_added} -{comparison.diff.lines_removed} lines across {files} file{add_s(files)}"
+        files = diff.modified_files
+        title = f"+{diff.lines_added} -{diff.lines_removed} lines across {files} file{add_s(files)}"
 
         lines.extend(
             markdown_project_section(
                 title=title,
-                content=comparison.diff.format_markdown(repo=comparison.repo),
+                content=diff.format_markdown(repo=comparison.repo),
                 options=project.format_options,
                 project=project,
             )
