@@ -338,7 +338,7 @@ fn format_path(
     };
 
     // Checked if something changed and write to file if necessary
-    if formatted.len() == unformatted.len() && formatted == unformatted {
+    if formatted == unformatted {
         Ok(FormatResult::Unchanged)
     } else {
         let mut writer = File::create(path)
