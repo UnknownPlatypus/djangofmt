@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::{env, fs, io};
 
 use crate::ExitStatus;
-use crate::args::Profile;
+use crate::args::{CheckCommand, Profile};
 use crate::commands::format::ParseError;
 use crate::error::Result;
 use crate::pyproject::{PyprojectSettings, load_options};
@@ -116,15 +116,4 @@ impl CheckCommandError {
             Self::Read(path, _) => path.as_deref(),
         }
     }
-}
-#[derive(Clone, Debug, clap::Parser)]
-pub struct CheckCommand {
-    /// List of files or directories to check.
-    #[arg(required = true)]
-    pub files: Vec<PathBuf>,
-    /// Template language profile to use [default: django]
-    #[arg(long, value_enum)]
-    pub profile: Option<Profile>,
-    #[clap(flatten)]
-    pub file_selection: crate::args::FileSelectionArgs,
 }
