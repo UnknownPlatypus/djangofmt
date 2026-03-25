@@ -1,4 +1,3 @@
-use crate::commands::format::path_display;
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
@@ -10,8 +9,7 @@ use std::{env, fs, io};
 
 use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
-use crate::commands::format::ParseError;
-use crate::error::Result;
+use crate::error::{ParseError, Result, path_display};
 use crate::pyproject::{PyprojectSettings, load_options};
 use std::time::Instant;
 use tracing::{debug, error};
