@@ -17,8 +17,7 @@ pub enum LogLevel {
 }
 
 impl LogLevel {
-    #[allow(clippy::trivially_copy_pass_by_ref)]
-    const fn level_filter(&self) -> LevelFilter {
+    const fn level_filter(self) -> LevelFilter {
         match self {
             Self::Default => LevelFilter::INFO,
             Self::Verbose => LevelFilter::DEBUG,
