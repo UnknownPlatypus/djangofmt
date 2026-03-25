@@ -102,9 +102,7 @@ impl ParseError {
                 (format!("external formatter error: {msg}"), None, 0.into())
             }
         };
-        let name = path
-            .as_ref()
-            .map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string());
+        let name = path_display(path.as_ref());
         Self {
             path,
             message,
