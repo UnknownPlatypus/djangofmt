@@ -2,7 +2,6 @@ use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
-use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -81,12 +80,14 @@ fn merge_custom_blocks(
     cli: Option<Vec<String>>,
     pyproject: Option<Vec<String>>,
 ) -> Option<Vec<String>> {
-    let merged: HashSet<String> = cli.into_iter().chain(pyproject).flatten().collect();
+    let mut merged: Vec<String> = cli.into_iter().chain(pyproject).flatten().collect();
 
     if merged.is_empty() {
         None
     } else {
-        Some(merged.into_iter().collect())
+        merged.sort_unstable();
+        merged.dedup();
+        Some(merged)
     }
 }
 
