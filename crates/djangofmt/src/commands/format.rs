@@ -88,8 +88,13 @@ fn merge_custom_blocks(
     }
 }
 
-const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = "djangofmt:ignore";
-const DJANGOFMT_IGNORE_COMMENT: &str = "<!-- djangofmt:ignore -->";
+macro_rules! ignore_directive {
+    () => {
+        "djangofmt:ignore"
+    };
+}
+const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
+const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
