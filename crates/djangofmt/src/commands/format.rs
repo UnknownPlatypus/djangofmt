@@ -2,7 +2,7 @@ use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -459,16 +459,15 @@ pub enum FormatResult {
 }
 
 /// Write a summary of the formatting results to stdout.
-#[must_use]
-pub fn build_summary(results: &[FormatResult]) -> String {
-    let mut counts = HashMap::new();
-    for val in results {
-        *counts.entry(val).or_insert(0) += 1;
+fn build_summary(results: &[FormatResult]) -> String {
+    let (mut changed, mut unchanged, mut skipped) = (0usize, 0usize, 0usize);
+    for result in results {
+        match result {
+            FormatResult::Formatted => changed += 1,
+            FormatResult::Unchanged => unchanged += 1,
+            FormatResult::Skipped => skipped += 1,
+        }
     }
-
-    let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
-    let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
-    let skipped = counts.get(&FormatResult::Skipped).copied().unwrap_or(0);
 
     let parts: Vec<String> = [
         (changed, "reformatted"),
