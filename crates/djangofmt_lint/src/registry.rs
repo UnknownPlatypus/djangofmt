@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumIter, EnumString};
+use strum::{EnumIter, EnumString};
 
 use crate::rules;
 use crate::violation::Violation;
@@ -64,7 +64,7 @@ define_rules {
             Hash,
             EnumIter,
             EnumString,
-            strum_macros::Display,
+            strum::Display,
             Serialize,
             Deserialize
         )]
