@@ -4,25 +4,20 @@ use markup_fmt::parser::Parser;
 use miette::NamedSource;
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use std::fs;
 use std::path::Path;
-use std::{env, fs};
+use std::time::Instant;
+use tracing::{debug, error};
 
 use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
-use crate::pyproject::{PyprojectSettings, load_options};
-use std::time::Instant;
-use tracing::{debug, error};
 
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
-    let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
-    let profile = args.profile.or(pyproject.profile);
-
-    // Resolve files (handles directories, excludes, includes, gitignore)
-    let discovery_config =
-        crate::resolver::ResolvedDiscoveryConfig::new(&args.file_selection, &pyproject);
-    let resolved_files = crate::resolver::resolve_files(&args.files, &discovery_config)?;
+    let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
+    let profile = resolved.profile;
+    let resolved_files = resolved.files;
 
     let start = Instant::now();
     let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = resolved_files

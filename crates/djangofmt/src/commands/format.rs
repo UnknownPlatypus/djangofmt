@@ -1,7 +1,6 @@
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
-use std::env;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -12,8 +11,7 @@ use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
-use crate::pyproject::{PyprojectSettings, load_options};
-use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
+use crate::pyproject::PyprojectSettings;
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -197,13 +195,10 @@ fn build_json_config(
 }
 
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
-    let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
-    let profile = args.profile.or(pyproject.profile);
-    let config = FormatterConfig::from_args(args, &pyproject);
-
-    // Resolve files (handles directories, excludes, includes, gitignore)
-    let file_discovery_config = ResolvedDiscoveryConfig::new(&args.file_selection, &pyproject);
-    let resolved_files = resolve_files(&args.files, &file_discovery_config)?;
+    let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
+    let config = FormatterConfig::from_args(args, &resolved.pyproject);
+    let profile = resolved.profile;
+    let resolved_files = resolved.files;
 
     // Format files in parallel
     let start = Instant::now();
