@@ -1,7 +1,6 @@
 use std::process::ExitCode;
 
 use clap::Parser;
-use colored::Colorize;
 
 use djangofmt::args::Args;
 use djangofmt::{ExitStatus, run};
@@ -34,8 +33,8 @@ pub fn main() -> ExitCode {
             #[allow(clippy::print_stderr)]
             {
                 // Unhandled error from djangofmt.
-                eprintln!("{}", "djangofmt failed".red().bold());
-                eprintln!("  {} {err}", "Error:".bold());
+                eprintln!("djangofmt failed");
+                eprintln!("  Error: {err}");
             }
             ExitStatus::Error.into()
         }
