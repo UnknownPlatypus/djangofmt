@@ -409,7 +409,6 @@ dependencies = [
  "rayon",
  "rstest",
  "serde",
- "serde_json",
  "similar-asserts",
  "tempfile",
  "thiserror",

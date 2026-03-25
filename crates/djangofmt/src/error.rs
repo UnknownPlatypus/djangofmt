@@ -14,10 +14,6 @@ pub enum Error {
     #[diagnostic(code(djangofmt::miette_error))]
     Miette(#[from] miette::InstallError),
 
-    #[error(transparent)]
-    #[diagnostic(code(djangofmt::serde_json_error))]
-    SerdeJson(#[from] serde_json::Error),
-
     #[error("{0}")]
     #[diagnostic(code(djangofmt::resolve_error))]
     Resolve(String),
