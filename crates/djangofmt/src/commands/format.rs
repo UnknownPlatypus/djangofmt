@@ -1,17 +1,16 @@
-use miette::Diagnostic;
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
+use std::env;
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use std::{env, io};
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
-use crate::error::{ParseError, Result, path_display};
+use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::{PyprojectSettings, load_options};
 use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
@@ -319,15 +318,15 @@ fn format_path(
     path: &Path,
     config: &FormatterConfig,
     profile: Option<Profile>,
-) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
+) -> std::result::Result<FormatResult, Box<CommandError>> {
     let profile = profile
         .or_else(|| Profile::from_path(path))
         .unwrap_or_default();
     let unformatted = std::fs::read_to_string(path)
-        .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
+        .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
     let formatted = format_text(&unformatted, config, profile).map_err(|err| {
-        FormatCommandError::Parse(ParseError::new(
+        CommandError::Parse(ParseError::new(
             Some(path.to_path_buf()),
             unformatted.clone(),
             &err,
@@ -342,35 +341,14 @@ fn format_path(
     if formatted == unformatted {
         Ok(FormatResult::Unchanged)
     } else {
-        let mut writer = File::create(path)
-            .map_err(|err| FormatCommandError::Write(Some(path.to_path_buf()), err))?;
+        let mut writer =
+            File::create(path).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
 
         writer
             .write_all(formatted.as_bytes())
-            .map_err(|err| FormatCommandError::Write(Some(path.to_path_buf()), err))?;
+            .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
 
         Ok(FormatResult::Formatted)
-    }
-}
-
-/// An error that can occur while formatting a set of files.
-#[derive(Debug, thiserror::Error, Diagnostic)]
-pub enum FormatCommandError {
-    #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Read(Option<PathBuf>, io::Error),
-    #[error("{}", .0.message)]
-    #[diagnostic(transparent)]
-    Parse(ParseError),
-    #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Write(Option<PathBuf>, io::Error),
-}
-
-impl FormatCommandError {
-    fn path(&self) -> Option<&Path> {
-        match self {
-            Self::Parse(err) => err.path.as_deref(),
-            Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
-        }
     }
 }
 
@@ -421,12 +399,13 @@ fn build_summary(results: &[FormatResult]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io;
 
     use rstest::rstest;
     #[test]
     fn format_command_error_read_display() {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
-        let err = FormatCommandError::Read(Some(PathBuf::from("/path/to/file.html")), io_err);
+        let err = CommandError::Read(Some(PathBuf::from("/path/to/file.html")), io_err);
         assert_eq!(
             err.to_string(),
             "Failed to read /path/to/file.html: file not found"
@@ -436,7 +415,7 @@ mod tests {
     #[test]
     fn format_command_error_read_display_unknown_path() {
         let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
-        let err = FormatCommandError::Read(None, io_err);
+        let err = CommandError::Read(None, io_err);
         assert_eq!(
             err.to_string(),
             "Failed to read <unknown>: permission denied"
@@ -446,7 +425,7 @@ mod tests {
     #[test]
     fn format_command_error_write_display() {
         let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
-        let err = FormatCommandError::Write(Some(PathBuf::from("/path/to/output.html")), io_err);
+        let err = CommandError::Write(Some(PathBuf::from("/path/to/output.html")), io_err);
         assert_eq!(
             err.to_string(),
             "Failed to write /path/to/output.html: permission denied"
@@ -456,7 +435,7 @@ mod tests {
     #[test]
     fn format_command_error_write_display_unknown_path() {
         let io_err = io::Error::other("disk full");
-        let err = FormatCommandError::Write(None, io_err);
+        let err = CommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
     }
 

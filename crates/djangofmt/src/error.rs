@@ -1,5 +1,6 @@
 use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
-use std::path::PathBuf;
+use std::io;
+use std::path::{Path, PathBuf};
 use thiserror::Error;
 
 pub type Result<T> = core::result::Result<T, Error>;
@@ -36,6 +37,28 @@ pub struct ParseError {
     span: SourceSpan,
     #[help]
     hint: Option<String>,
+}
+
+/// An error that can occur while processing a file in a command (format or check).
+#[derive(Debug, Error, Diagnostic)]
+pub enum CommandError {
+    #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
+    Read(Option<PathBuf>, io::Error),
+    #[error("{}", .0.message)]
+    #[diagnostic(transparent)]
+    Parse(ParseError),
+    #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
+    Write(Option<PathBuf>, io::Error),
+}
+
+impl CommandError {
+    #[must_use]
+    pub fn path(&self) -> Option<&Path> {
+        match self {
+            Self::Parse(err) => err.path.as_deref(),
+            Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
+        }
+    }
 }
 
 impl ParseError {

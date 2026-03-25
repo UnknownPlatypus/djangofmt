@@ -1,15 +1,15 @@
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
-use miette::{Diagnostic, NamedSource};
+use miette::NamedSource;
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
-use std::path::{Path, PathBuf};
-use std::{env, fs, io};
+use std::path::Path;
+use std::{env, fs};
 
 use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
-use crate::error::{ParseError, Result, path_display};
+use crate::error::{CommandError, ParseError, Result};
 use crate::pyproject::{PyprojectSettings, load_options};
 use std::time::Instant;
 use tracing::{debug, error};
@@ -70,16 +70,16 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
 fn check_path(
     path: &Path,
     profile: Option<Profile>,
-) -> std::result::Result<FileDiagnostics, Box<CheckCommandError>> {
+) -> std::result::Result<FileDiagnostics, Box<CommandError>> {
     let profile = profile
         .or_else(|| Profile::from_path(path))
         .unwrap_or_default();
     let source = fs::read_to_string(path)
-        .map_err(|err| CheckCommandError::Read(Some(path.to_path_buf()), err))?;
+        .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
     let mut parser = Parser::new(&source, profile.into(), vec![]);
     let ast = parser.parse_root().map_err(|err| {
-        CheckCommandError::Parse(ParseError::new(
+        CommandError::Parse(ParseError::new(
             Some(path.to_path_buf()),
             source.clone(),
             &FormatError::<markup_fmt::SyntaxError>::Syntax(err),
@@ -96,22 +96,4 @@ fn check_path(
         NamedSource::new(path.to_string_lossy(), source),
         diagnostics,
     ))
-}
-
-/// An error that can occur while linting a set of files.
-#[derive(Debug, thiserror::Error, Diagnostic)]
-pub enum CheckCommandError {
-    #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Read(Option<PathBuf>, io::Error),
-    #[error("{}", .0.message)]
-    #[diagnostic(transparent)]
-    Parse(ParseError),
-}
-impl CheckCommandError {
-    fn path(&self) -> Option<&Path> {
-        match self {
-            Self::Parse(err) => err.path.as_deref(),
-            Self::Read(path, _) => path.as_deref(),
-        }
-    }
 }
