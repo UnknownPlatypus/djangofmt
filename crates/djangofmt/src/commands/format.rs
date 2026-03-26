@@ -447,7 +447,7 @@ impl ParseError {
 
 /// The result of an individual formatting operation.
 #[derive(Eq, PartialEq, Hash, Debug)]
-enum FormatResult {
+pub enum FormatResult {
     /// The file was formatted.
     Formatted,
 
@@ -459,7 +459,8 @@ enum FormatResult {
 }
 
 /// Write a summary of the formatting results to stdout.
-fn build_summary(results: &[FormatResult]) -> String {
+#[must_use]
+pub fn build_summary(results: &[FormatResult]) -> String {
     let mut counts = HashMap::new();
     for val in results {
         *counts.entry(val).or_insert(0) += 1;

@@ -26,6 +26,10 @@ name = "linter"
 harness = false
 name = "parser"
 
+[[bench]]
+harness = false
+name = "summary"
+
 [dependencies]
 djangofmt = { path = "../djangofmt" }
 
