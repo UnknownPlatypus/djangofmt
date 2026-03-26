@@ -324,13 +324,16 @@ fn format_path(
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
-    let formatted = format_text(&unformatted, config, profile).map_err(|err| {
-        CommandError::Parse(ParseError::new(
-            Some(path.to_path_buf()),
-            unformatted.clone(),
-            &err,
-        ))
-    })?;
+    let formatted = match format_text(&unformatted, config, profile) {
+        Ok(f) => f,
+        Err(err) => {
+            return Err(Box::new(CommandError::Parse(ParseError::new(
+                Some(path.to_path_buf()),
+                unformatted,
+                &err,
+            ))));
+        }
+    };
 
     let Some(formatted) = formatted else {
         return Ok(FormatResult::Skipped);
@@ -352,7 +355,7 @@ fn format_path(
 }
 
 /// The result of an individual formatting operation.
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum FormatResult {
     /// The file was formatted.
     Formatted,

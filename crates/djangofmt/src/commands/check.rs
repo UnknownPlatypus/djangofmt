@@ -17,11 +17,13 @@ use crate::error::{CommandError, ParseError, Result};
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
 
+    let settings = Settings::default();
+
     let start = Instant::now();
     let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|path| check_path(path, resolved.profile))
+        .map(|path| check_path(path, resolved.profile, &settings))
         .partition_map(|result| match result {
             Ok(diags) => Left(diags),
             Err(err) => Right(err),
@@ -64,6 +66,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
 fn check_path(
     path: &Path,
     profile: Option<Profile>,
+    settings: &Settings,
 ) -> std::result::Result<FileDiagnostics, Box<CommandError>> {
     let profile = profile
         .or_else(|| Profile::from_path(path))
@@ -80,8 +83,7 @@ fn check_path(
         ))
     })?;
 
-    let settings = Settings::default();
-    let diagnostics = check_ast(&ast, &settings);
+    let diagnostics = check_ast(&ast, settings);
 
     if diagnostics.is_empty() {
         return Ok(FileDiagnostics::empty());
