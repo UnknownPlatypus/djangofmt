@@ -365,7 +365,8 @@ pub enum FormatResult {
 }
 
 /// Write a summary of the formatting results to stdout.
-fn build_summary(results: &[FormatResult]) -> String {
+#[must_use]
+pub fn build_summary(results: &[FormatResult]) -> String {
     let (mut changed, mut unchanged, mut skipped) = (0usize, 0usize, 0usize);
     for result in results {
         match result {
