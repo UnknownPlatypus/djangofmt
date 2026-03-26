@@ -14,7 +14,6 @@ license = "MIT"
 [workspace.dependencies]
 clap = { version = "4.5.57", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
-colored = { version = "3.1.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
 dprint-plugin-json = { version = "0.21.1" }
 ignore = { version = "0.4.25" }
@@ -27,11 +26,9 @@ rayon = { version = "1.11.0" }
 rstest = { version = "=0.26.1" }
 rustc-hash = { version = "2.1.1" }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = { version = "1.0.149" }
 serde-wasm-bindgen = { version = "0.6.5" }
 similar-asserts = { version = "1.7.0" }
 strum = { version = "0.28.0", features = ["derive"] }
-strum_macros = { version = "0.28.0" }
 tempfile = { version = "3.25.0" }
 thiserror = { version = "2.0.18" }
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.

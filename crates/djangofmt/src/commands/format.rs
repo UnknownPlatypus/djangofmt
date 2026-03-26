@@ -1,21 +1,17 @@
-use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
-use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use std::{env, io};
 use tracing::{debug, error, info};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
-use crate::error::Result;
+use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
-use crate::pyproject::{PyprojectSettings, load_options};
-use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
+use crate::pyproject::PyprojectSettings;
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -81,17 +77,24 @@ fn merge_custom_blocks(
     cli: Option<Vec<String>>,
     pyproject: Option<Vec<String>>,
 ) -> Option<Vec<String>> {
-    let merged: HashSet<String> = cli.into_iter().chain(pyproject).flatten().collect();
+    let mut merged: Vec<String> = cli.into_iter().chain(pyproject).flatten().collect();
 
     if merged.is_empty() {
         None
     } else {
-        Some(merged.into_iter().collect())
+        merged.sort_unstable();
+        merged.dedup();
+        Some(merged)
     }
 }
 
-const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = "djangofmt:ignore";
-const DJANGOFMT_IGNORE_COMMENT: &str = "<!-- djangofmt:ignore -->";
+macro_rules! ignore_directive {
+    () => {
+        "djangofmt:ignore"
+    };
+}
+const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
+const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
@@ -197,19 +200,15 @@ fn build_json_config(
 }
 
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
-    let pyproject = env::current_dir().map_or_else(|_| PyprojectSettings::default(), load_options);
-    let profile = args.profile.or(pyproject.profile);
-    let config = FormatterConfig::from_args(args, &pyproject);
-
-    // Resolve files (handles directories, excludes, includes, gitignore)
-    let file_discovery_config = ResolvedDiscoveryConfig::new(&args.file_selection, &pyproject);
-    let resolved_files = resolve_files(&args.files, &file_discovery_config)?;
+    let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
+    let config = FormatterConfig::from_args(args, &resolved.pyproject);
 
     // Format files in parallel
     let start = Instant::now();
-    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved_files
+    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
+        .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, profile))
+        .map(|entry| format_path(entry, &config, resolved.profile))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
@@ -217,7 +216,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     debug!(
         "Formatted {} files in {:.2?}",
-        resolved_files.len(),
+        resolved.files.len(),
         start.elapsed()
     );
 
@@ -318,15 +317,15 @@ fn format_path(
     path: &Path,
     config: &FormatterConfig,
     profile: Option<Profile>,
-) -> std::result::Result<FormatResult, Box<FormatCommandError>> {
+) -> std::result::Result<FormatResult, Box<CommandError>> {
     let profile = profile
         .or_else(|| Profile::from_path(path))
         .unwrap_or_default();
     let unformatted = std::fs::read_to_string(path)
-        .map_err(|err| FormatCommandError::Read(Some(path.to_path_buf()), err))?;
+        .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
     let formatted = format_text(&unformatted, config, profile).map_err(|err| {
-        FormatCommandError::Parse(ParseError::new(
+        CommandError::Parse(ParseError::new(
             Some(path.to_path_buf()),
             unformatted.clone(),
             &err,
@@ -338,110 +337,17 @@ fn format_path(
     };
 
     // Checked if something changed and write to file if necessary
-    if formatted.len() == unformatted.len() && formatted == unformatted {
+    if formatted == unformatted {
         Ok(FormatResult::Unchanged)
     } else {
-        let mut writer = File::create(path)
-            .map_err(|err| FormatCommandError::Write(Some(path.to_path_buf()), err))?;
+        let mut writer =
+            File::create(path).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
 
         writer
             .write_all(formatted.as_bytes())
-            .map_err(|err| FormatCommandError::Write(Some(path.to_path_buf()), err))?;
+            .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
 
         Ok(FormatResult::Formatted)
-    }
-}
-
-/// An error that can occur while formatting a set of files.
-#[derive(Debug, thiserror::Error, Diagnostic)]
-pub enum FormatCommandError {
-    #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Read(Option<PathBuf>, io::Error),
-    #[error("{}", .0.message)]
-    #[diagnostic(transparent)]
-    Parse(ParseError),
-    #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Write(Option<PathBuf>, io::Error),
-}
-
-#[must_use]
-pub fn path_display(path: Option<&PathBuf>) -> String {
-    path.map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string())
-}
-
-impl FormatCommandError {
-    fn path(&self) -> Option<&Path> {
-        match self {
-            Self::Parse(err) => err.path.as_deref(),
-            Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
-        }
-    }
-}
-
-#[derive(Debug, Diagnostic, thiserror::Error)]
-#[error("{message}")]
-pub struct ParseError {
-    pub path: Option<PathBuf>,
-    pub message: String,
-    #[source_code]
-    src: NamedSource<String>,
-    #[label("here")]
-    span: SourceSpan,
-    #[help]
-    hint: Option<String>,
-}
-
-impl ParseError {
-    #[must_use]
-    pub fn new<E: std::fmt::Debug>(
-        path: Option<PathBuf>,
-        source: String,
-        err: &markup_fmt::FormatError<E>,
-    ) -> Self {
-        let (message, hint, span) = match err {
-            markup_fmt::FormatError::Syntax(syntax_err) => {
-                match &syntax_err.kind {
-                    // Point to the opening tag instead of where the error was detected (which is always the end of the file)
-                    markup_fmt::SyntaxErrorKind::ExpectCloseTag {
-                        tag_name,
-                        line,
-                        column,
-                    } => (
-                        format!("expected close tag for opening tag <{tag_name}>",),
-                        None,
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column), tag_name.len()),
-                    ),
-                    markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {
-                        tag_name,
-                        line,
-                        column,
-                    } => (
-                        format!("unclosed {{% {tag_name} %}} block."),
-                        Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), tag_name.len()),
-                    ),
-                    _ => (syntax_err.kind.to_string(), None, syntax_err.pos.into()),
-                }
-            }
-            markup_fmt::FormatError::External(errors) => {
-                let msg = errors
-                    .iter()
-                    .map(|e| format!("{e:?}"))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                (format!("external formatter error: {msg}"), None, 0.into())
-            }
-        };
-        let name = path
-            .as_ref()
-            .map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string());
-        Self {
-            path,
-            message,
-            src: NamedSource::new(name, source),
-            span,
-            hint,
-        }
     }
 }
 
@@ -461,14 +367,14 @@ pub enum FormatResult {
 /// Write a summary of the formatting results to stdout.
 #[must_use]
 pub fn build_summary(results: &[FormatResult]) -> String {
-    let mut counts = HashMap::new();
-    for val in results {
-        *counts.entry(val).or_insert(0) += 1;
+    let (mut changed, mut unchanged, mut skipped) = (0usize, 0usize, 0usize);
+    for result in results {
+        match result {
+            FormatResult::Formatted => changed += 1,
+            FormatResult::Unchanged => unchanged += 1,
+            FormatResult::Skipped => skipped += 1,
+        }
     }
-
-    let changed = counts.get(&FormatResult::Formatted).copied().unwrap_or(0);
-    let unchanged = counts.get(&FormatResult::Unchanged).copied().unwrap_or(0);
-    let skipped = counts.get(&FormatResult::Skipped).copied().unwrap_or(0);
 
     let parts: Vec<String> = [
         (changed, "reformatted"),
@@ -493,12 +399,13 @@ pub fn build_summary(results: &[FormatResult]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io;
 
     use rstest::rstest;
     #[test]
     fn format_command_error_read_display() {
         let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
-        let err = FormatCommandError::Read(Some(PathBuf::from("/path/to/file.html")), io_err);
+        let err = CommandError::Read(Some(PathBuf::from("/path/to/file.html")), io_err);
         assert_eq!(
             err.to_string(),
             "Failed to read /path/to/file.html: file not found"
@@ -508,7 +415,7 @@ mod tests {
     #[test]
     fn format_command_error_read_display_unknown_path() {
         let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
-        let err = FormatCommandError::Read(None, io_err);
+        let err = CommandError::Read(None, io_err);
         assert_eq!(
             err.to_string(),
             "Failed to read <unknown>: permission denied"
@@ -518,7 +425,7 @@ mod tests {
     #[test]
     fn format_command_error_write_display() {
         let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
-        let err = FormatCommandError::Write(Some(PathBuf::from("/path/to/output.html")), io_err);
+        let err = CommandError::Write(Some(PathBuf::from("/path/to/output.html")), io_err);
         assert_eq!(
             err.to_string(),
             "Failed to write /path/to/output.html: permission denied"
@@ -528,7 +435,7 @@ mod tests {
     #[test]
     fn format_command_error_write_display_unknown_path() {
         let io_err = io::Error::other("disk full");
-        let err = FormatCommandError::Write(None, io_err);
+        let err = CommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
     }
 

@@ -16,8 +16,6 @@ doctest = false
 [dependencies]
 clap = { workspace = true }
 clap_complete_command = { workspace = true }
-# Logging
-colored = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 dprint-plugin-json = { workspace = true }
 ignore = { workspace = true }
@@ -27,7 +25,6 @@ markup_fmt = { workspace = true }
 miette = { workspace = true }
 rayon = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 thiserror = { workspace = true }
 toml = { workspace = true }
 tracing = { workspace = true }

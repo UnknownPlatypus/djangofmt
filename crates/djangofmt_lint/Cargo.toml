@@ -15,7 +15,6 @@ miette = { workspace = true }
 rustc-hash = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
-strum_macros = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]

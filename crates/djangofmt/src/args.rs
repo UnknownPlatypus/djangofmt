@@ -143,7 +143,7 @@ impl From<Profile> for Language {
 pub enum Commands {
     /// Check files for lint errors
     #[clap(hide = true)]
-    Check(crate::commands::check::CheckCommand),
+    Check(CheckCommand),
     /// Generate shell completions
     #[clap(hide = true)]
     Completions {
@@ -151,6 +151,18 @@ pub enum Commands {
         #[arg(value_enum)]
         shell: clap_complete_command::Shell,
     },
+}
+
+#[derive(Clone, Debug, clap::Parser)]
+pub struct CheckCommand {
+    /// List of files or directories to check.
+    #[arg(required = true)]
+    pub files: Vec<PathBuf>,
+    /// Template language profile to use [default: django]
+    #[arg(long, value_enum)]
+    pub profile: Option<Profile>,
+    #[clap(flatten)]
+    pub file_selection: FileSelectionArgs,
 }
 
 #[allow(clippy::module_name_repetitions)]
