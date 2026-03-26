@@ -16,20 +16,19 @@ use crate::error::{CommandError, ParseError, Result};
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
-    let profile = resolved.profile;
-    let resolved_files = resolved.files;
 
     let start = Instant::now();
-    let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = resolved_files
+    let (file_diagnostics, mut parse_errors): (Vec<_>, Vec<_>) = resolved
+        .files
         .par_iter()
-        .map(|path| check_path(path, profile))
+        .map(|path| check_path(path, resolved.profile))
         .partition_map(|result| match result {
             Ok(diags) => Left(diags),
             Err(err) => Right(err),
         });
 
     let duration = start.elapsed();
-    debug!("Checked {} files in {:.2?}", resolved_files.len(), duration);
+    debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
     // Report on any parsing errors.
     parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));

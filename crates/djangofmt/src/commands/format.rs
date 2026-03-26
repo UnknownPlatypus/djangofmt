@@ -202,14 +202,13 @@ fn build_json_config(
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
     let config = FormatterConfig::from_args(args, &resolved.pyproject);
-    let profile = resolved.profile;
-    let resolved_files = resolved.files;
 
     // Format files in parallel
     let start = Instant::now();
-    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved_files
+    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
+        .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, profile))
+        .map(|entry| format_path(entry, &config, resolved.profile))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
@@ -217,7 +216,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     debug!(
         "Formatted {} files in {:.2?}",
-        resolved_files.len(),
+        resolved.files.len(),
         start.elapsed()
     );
 

@@ -43,12 +43,12 @@ pub struct ParseError {
 #[derive(Debug, Error, Diagnostic)]
 pub enum CommandError {
     #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Read(Option<PathBuf>, io::Error),
-    #[error("{}", .0.message)]
+    Read(Option<PathBuf>, #[source] io::Error),
+    #[error(transparent)]
     #[diagnostic(transparent)]
     Parse(ParseError),
     #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
-    Write(Option<PathBuf>, io::Error),
+    Write(Option<PathBuf>, #[source] io::Error),
 }
 
 impl CommandError {
