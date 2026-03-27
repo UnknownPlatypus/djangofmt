@@ -124,7 +124,7 @@ async def compare_check(
 ) -> Comparison:
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=cloned_repo.path)
-    ) - set(options.exclude)
+    ) - set(options.excluded_files(baseline_executable.name))
 
     baseline_output = await check(
         executable=baseline_executable.resolve(),
@@ -156,7 +156,12 @@ async def check(
     files: set[str],
 ) -> str:
     """Run `djangofmt check` against the specified path and return diagnostic output."""
-    args = ["check"] + options.to_args(executable.name)
+    # Early return if no files to check
+    if not files:
+        logger.debug(f"No files to check for {repo_fullname}")
+        return ""
+
+    args = ["check", *options.to_args(executable.name)]
     logger.debug(
         f"Checking {repo_fullname} with cmd {executable!r} ({len(files)} files)"
     )
