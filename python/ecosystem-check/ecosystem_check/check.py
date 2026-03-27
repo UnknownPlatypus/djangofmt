@@ -156,7 +156,7 @@ async def check(
     files: set[str],
 ) -> str:
     """Run `djangofmt check` against the specified path and return diagnostic output."""
-    args = ["check", "--profile", options.profile]
+    args = ["check"] + options.to_args(executable.name)
     logger.debug(
         f"Checking {repo_fullname} with cmd {executable!r} ({len(files)} files)"
     )

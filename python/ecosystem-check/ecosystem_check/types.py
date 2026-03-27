@@ -136,7 +136,7 @@ class CheckDiff(Serializable):
         )
 
     def __bool__(self) -> bool:
-        return self.baseline_output != self.comparison_output
+        return bool(self._diff_lines)
 
     @property
     def diagnostics_added(self) -> int:
