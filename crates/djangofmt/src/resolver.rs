@@ -686,6 +686,52 @@ mod tests {
         assert!(!names.contains(&"excluded.html".to_string()));
     }
 
+    #[test]
+    fn test_resolve_files_force_exclude_filters_explicit_files() {
+        let dir = tempdir().unwrap();
+        create_file(dir.path(), "a.html");
+        create_file(dir.path(), "b.html");
+
+        let cli = FileSelectionArgs {
+            force_exclude: true,
+            exclude: Some(vec!["b.html".to_string()]),
+            ..Default::default()
+        };
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject());
+        let files = resolve_files(
+            &[dir.path().join("a.html"), dir.path().join("b.html")],
+            &config,
+        )
+        .unwrap();
+
+        let names: Vec<String> = files
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
+            .collect();
+        assert!(names.contains(&"a.html".to_string()));
+        assert!(!names.contains(&"b.html".to_string()));
+    }
+
+    #[test]
+    fn test_resolve_files_no_force_exclude_keeps_explicit_files() {
+        let dir = tempdir().unwrap();
+        create_file(dir.path(), "a.html");
+        create_file(dir.path(), "b.html");
+
+        let cli = FileSelectionArgs {
+            exclude: Some(vec!["b.html".to_string()]),
+            ..Default::default()
+        };
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject());
+        let files = resolve_files(
+            &[dir.path().join("a.html"), dir.path().join("b.html")],
+            &config,
+        )
+        .unwrap();
+
+        assert_eq!(files.len(), 2);
+    }
+
     #[cfg(unix)]
     #[test]
     fn test_resolve_files_follows_symlinks() {

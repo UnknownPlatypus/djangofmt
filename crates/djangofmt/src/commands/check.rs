@@ -75,13 +75,16 @@ fn check_path(
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
     let mut parser = Parser::new(&source, profile.into(), vec![]);
-    let ast = parser.parse_root().map_err(|err| {
-        CommandError::Parse(ParseError::new(
-            Some(path.to_path_buf()),
-            source.clone(),
-            &FormatError::<markup_fmt::SyntaxError>::Syntax(err),
-        ))
-    })?;
+    let ast = match parser.parse_root() {
+        Ok(ast) => ast,
+        Err(err) => {
+            return Err(Box::new(CommandError::Parse(ParseError::new(
+                Some(path.to_path_buf()),
+                source,
+                &FormatError::<markup_fmt::SyntaxError>::Syntax(err),
+            ))));
+        }
+    };
 
     let diagnostics = check_ast(&ast, settings);
 
