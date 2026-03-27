@@ -310,7 +310,16 @@ async def format(
         stderr=PIPE,
         cwd=path,
     )
-    result, err = await proc.communicate()
+    try:
+        result, err = await asyncio.wait_for(proc.communicate(), timeout=300)
+    except TimeoutError:
+        proc.terminate()
+        try:
+            await asyncio.wait_for(proc.wait(), timeout=5)
+        except TimeoutError:
+            proc.kill()
+            await proc.wait()
+        raise ToolError(f"Subprocess timed out after 300 seconds for {repo_fullname}")
     end = time.perf_counter()
 
     logger.debug(

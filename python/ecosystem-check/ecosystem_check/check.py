@@ -4,6 +4,7 @@ Execution, comparison, and summary of `djangofmt check` ecosystem checks.
 
 from __future__ import annotations
 
+import asyncio
 import glob
 import time
 from asyncio import create_subprocess_exec
@@ -45,7 +46,7 @@ def markdown_check_result(result: Result) -> str:
     Render a `djangofmt check` ecosystem check result as markdown.
     """
     error_count = len(result.errored)
-    projects_with_changes = sum(bool(comp.diff) for _, comp in result.completed)
+    projects_with_changes = sum(1 for _, comp in result.completed if isinstance(comp.diff, CheckDiff) and comp.diff)
     total_added = sum(
         comp.diff.diagnostics_added
         for _, comp in result.completed
@@ -177,7 +178,16 @@ async def check(
         stderr=PIPE,
         cwd=path,
     )
-    _, err = await proc.communicate()
+    try:
+        _, err = await asyncio.wait_for(proc.communicate(), timeout=300)
+    except TimeoutError:
+        proc.terminate()
+        try:
+            await asyncio.wait_for(proc.wait(), timeout=5)
+        except TimeoutError:
+            proc.kill()
+            await proc.wait()
+        raise ToolError(f"Subprocess timed out after 300 seconds for {repo_fullname}")
     end = time.perf_counter()
 
     logger.debug(
