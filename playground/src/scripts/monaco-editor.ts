@@ -1,8 +1,8 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/min/vs/editor/editor.main.css";
 import "monaco-editor/esm/vs/editor/editor.all.js";
-import "monaco-editor/esm/vs/basic-languages/html/html.contribution";
-import "monaco-editor/esm/vs/language/html/monaco.contribution";
+import "monaco-editor/esm/vs/basic-languages/html/html.contribution.js";
+import "monaco-editor/esm/vs/language/html/monaco.contribution.js";
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
 import { parsePermalinkCode } from "./permalink";
