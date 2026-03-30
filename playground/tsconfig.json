@@ -5,10 +5,9 @@
       "vite/client"
     ],
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
       "monaco-editor/esm/vs/editor/editor.api": [
-        "node_modules/monaco-editor/esm/vs/editor/editor.api"
+        "./node_modules/monaco-editor/esm/vs/editor/editor.api"
       ]
     }
   },
