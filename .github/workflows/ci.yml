@@ -168,7 +168,7 @@ jobs:
       - run: cargo shear
 
   test:
-    name: "cargo test"
+    name: "cargo test + coverage"
     runs-on: ubuntu-24.04
     needs: changed_files
     if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
@@ -178,5 +178,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - run: cargo build
-      - run: cargo test
+      - uses: taiki-e/install-action@ad25acb6b9413207b3174a4202c12aa9133691c6 # v2.69.13
+        with:
+          tool: cargo-llvm-cov
+      - run: cargo llvm-cov --workspace --all-targets --all-features --fail-under-lines 85

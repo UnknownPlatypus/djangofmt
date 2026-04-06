@@ -11,6 +11,8 @@ bootstrap:
     uv tool install pre-commit
     pre-commit install
     uv sync
+    rustup component add llvm-tools-preview
+    cargo install cargo-llvm-cov --locked
 
 # Pre-merge request checks
 [group('dev')]
@@ -18,7 +20,7 @@ pre-mr-check:
     SKIP=actionlint,renovate-config-validator pre-commit run -a
     maturin develop
     cargo clippy --all-targets --all-features
-    cargo test --all-targets --all-features
+    cargo test --workspace --all-targets --all-features
 
 # Build playground WASM package
 [group('playground')]
@@ -43,6 +45,16 @@ setup-bench-py:
 [group('bench')]
 bench-py dir: setup-bench-py
     uv run ./run_formatter.sh {{dir}}
+
+# Generate HTML coverage report and open in browser
+[group('dev')]
+coverage:
+    cargo llvm-cov --workspace --html --open
+
+# Generate LCOV coverage report
+[group('dev')]
+coverage-lcov:
+    cargo llvm-cov --workspace --lcov --output-path lcov.info
 
 # Run rust micro-benchmarks
 [group('bench')]
