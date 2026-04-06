@@ -481,6 +481,65 @@ mod tests {
         assert_eq!(result, vec!["bar", "baz", "foo"]);
     }
 
+    #[test]
+    fn formatter_config_from_args_defaults() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings::default();
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert_eq!(config.markup.layout.print_width, 120);
+        assert_eq!(config.markup.layout.indent_width, 4);
+    }
+
+    #[test]
+    fn formatter_config_from_args_cli_overrides_pyproject() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: Some(LineLength::try_from(80u16).unwrap()),
+            indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: Some(SelfClosing::Always),
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings {
+            line_length: Some(LineLength::try_from(200u16).unwrap()),
+            indent_width: Some(IndentWidth::try_from(8u8).unwrap()),
+            html_void_self_closing: Some(SelfClosing::Never),
+            ..Default::default()
+        };
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert_eq!(config.markup.layout.print_width, 80);
+        assert_eq!(config.markup.layout.indent_width, 2);
+        assert_eq!(config.markup.language.html_void_self_closing, Some(true));
+    }
+
+    #[test]
+    fn formatter_config_from_args_falls_back_to_pyproject() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings {
+            line_length: Some(LineLength::try_from(200u16).unwrap()),
+            ..Default::default()
+        };
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert_eq!(config.markup.layout.print_width, 200);
+    }
+
     #[rstest]
     #[case(vec![], "")]
     #[case(vec![FormatResult::Formatted], "1 file reformatted")]

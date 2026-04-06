@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 4 lint error(s)
+  × Found 5 lint error(s)
 
 Error: 
   × Invalid value 'put' for attribute 'method'.
@@ -44,5 +44,16 @@ Error:
     ·                   ───┬───
     ·                      ╰── here
  20 │ {% endif %}
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'patch' for attribute 'method'.
+    ╭─[tests/check/form_method/form_method.html:33:19]
+ 32 │ <div>
+ 33 │     <form method="patch"></form>
+    ·                   ──┬──
+    ·                     ╰── here
+ 34 │ </div>
     ╰────
   help: Use one of: get, post, dialog
