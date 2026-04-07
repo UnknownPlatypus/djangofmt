@@ -18,3 +18,20 @@
 {% if show_form %}
     <form method="invalid"></form>
 {% endif %}
+
+<!-- Non-form element with method attr - should not trigger -->
+<div method="put"></div>
+
+<!-- Form with non-method attr - should not trigger -->
+<form action="/submit"></form>
+
+<!-- Form with method attr but no value - should not trigger -->
+<form method></form>
+
+<!-- Nested elements: inner form inside outer div -->
+<div>
+    <form method="patch"></form>
+</div>
+
+<!-- Jinja block as attribute -->
+<form {% if show %}method="delete"{% endif %}></form>
