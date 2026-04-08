@@ -27,6 +27,7 @@ class Project(Serializable):
 
 class Command(StrEnum):
     format = "format"  # type: ignore[assignment]
+    check = "check"
 
 
 class GitDomain(StrEnum):
@@ -66,10 +67,12 @@ class FormatOptions(Serializable):
     custom_blocks: str = ""  # Comma-separated list of custom blocks
     exclude: tuple[str, ...] = field(default_factory=tuple)
 
-    def to_args(self, executable_name: str) -> list[str]:
+    def to_args(
+        self, executable_name: str, *, include_custom_blocks: bool = True
+    ) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:
             args = ["--profile", self.profile]
-            if self.custom_blocks:
+            if include_custom_blocks and self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))
             return args
         elif executable_name == Formatter.DJADE:

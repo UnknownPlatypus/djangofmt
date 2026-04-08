@@ -9,6 +9,11 @@ from pathlib import Path
 from typing import Any, TypeVar
 
 from ecosystem_check import logger
+from ecosystem_check.check import (
+    can_check_project,
+    compare_check,
+    markdown_check_result,
+)
 from ecosystem_check.format import (
     FormatComparison,
     can_format_project,
@@ -47,11 +52,21 @@ async def main(
     logger.debug("Using checkout_dir directory %s", project_dir)
     if format_comparison:
         logger.debug("Using format comparison type %s", format_comparison.value)
-    targets = [
-        target
-        for target in targets
-        if can_format_project(baseline_executable, comparison_executable, target)
-    ]
+    match command:
+        case Command.format:
+            targets = [
+                target
+                for target in targets
+                if can_format_project(
+                    baseline_executable, comparison_executable, target
+                )
+            ]
+        case Command.check:
+            targets = [
+                target
+                for target in targets
+                if can_check_project(baseline_executable, comparison_executable, target)
+            ]
     logger.debug("Checking %s targets", len(targets))
 
     # Limit parallelism to avoid high memory consumption
@@ -97,6 +112,8 @@ async def main(
             match command:
                 case Command.format:
                     print(markdown_format_result(result))
+                case Command.check:
+                    print(markdown_check_result(result))
                 case _:
                     raise ValueError(f"Unknown target command {command}")
         case _:
@@ -117,28 +134,29 @@ async def clone_and_compare(
     assert ":" not in target.repo.owner
     assert ":" not in target.repo.name
 
-    match command:
-        case Command.format:
-            assert format_comparison is not None
-            compare, options, kwargs = (
-                compare_format,
-                target.format_options,
-                {"format_comparison": format_comparison},
-            )
-        case _:
-            raise ValueError(f"Unknown target command {command}")
-
     checkout_dir = project_dir.joinpath(f"{target.repo.owner}:{target.repo.name}")
     cloned_repo = await target.repo.clone(checkout_dir)
 
     try:
-        return await compare(
-            baseline_executable,
-            comparison_executable,
-            options,
-            cloned_repo,
-            **kwargs,
-        )
+        match command:
+            case Command.format:
+                assert format_comparison is not None
+                return await compare_format(
+                    baseline_executable,
+                    comparison_executable,
+                    target.format_options,
+                    cloned_repo,
+                    format_comparison=format_comparison,
+                )
+            case Command.check:
+                return await compare_check(
+                    baseline_executable,
+                    comparison_executable,
+                    target.format_options,
+                    cloned_repo,
+                )
+            case _:
+                raise ValueError(f"Unknown target command {command}")
     except ExceptionGroup as e:
         raise e.exceptions[0] from e
 
