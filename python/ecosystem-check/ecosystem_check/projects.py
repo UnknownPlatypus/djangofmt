@@ -22,7 +22,7 @@ class Project(Serializable):
     """
 
     repo: Repository
-    format_options: CliOptions = field(default_factory=lambda: CliOptions())
+    cli_options: CliOptions = field(default_factory=lambda: CliOptions())
 
 
 class Command(enum.StrEnum):

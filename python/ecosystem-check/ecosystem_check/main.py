@@ -139,7 +139,7 @@ async def clone_and_compare(
                 return await compare_format(
                     baseline_executable,
                     comparison_executable,
-                    target.format_options,
+                    target.cli_options,
                     cloned_repo,
                     format_comparison=format_comparison,
                 )
@@ -147,7 +147,7 @@ async def clone_and_compare(
                 return await compare_check(
                     baseline_executable,
                     comparison_executable,
-                    target.format_options,
+                    target.cli_options,
                     cloned_repo,
                 )
             case _:

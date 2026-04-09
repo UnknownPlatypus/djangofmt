@@ -44,7 +44,7 @@ def can_format_project(
     """Skip project if one of the executables is djade and the profile is jinja."""
     return not any(
         executable.name == Formatter.DJADE
-        and target.format_options.profile == Profile.JINJA
+        and target.cli_options.profile == Profile.JINJA
         for executable in [baseline_executable, comparison_executable]
     )
 
@@ -111,7 +111,7 @@ def markdown_format_result(result: Result) -> str:
             markdown_project_section(
                 title=title,
                 content=diff.format_markdown(repo=comparison.repo),
-                options=project.format_options,
+                options=project.cli_options,
                 project=project,
             )
         )
@@ -121,7 +121,7 @@ def markdown_format_result(result: Result) -> str:
             markdown_project_section(
                 title="error",
                 content=f"```\n{str(error).strip()}\n```",
-                options=project.format_options,
+                options=project.cli_options,
                 project=project,
             )
         )

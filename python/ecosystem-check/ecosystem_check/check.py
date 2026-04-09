@@ -91,7 +91,7 @@ def markdown_check_result(result: Result) -> str:
             markdown_project_section(
                 title=title,
                 content=comparison.diff.format_markdown(),
-                options=project.format_options,
+                options=project.cli_options,
                 project=project,
             )
         )
@@ -101,7 +101,7 @@ def markdown_check_result(result: Result) -> str:
             markdown_project_section(
                 title="error",
                 content=f"```\n{str(error).strip()}\n```",
-                options=project.format_options,
+                options=project.cli_options,
                 project=project,
             )
         )
