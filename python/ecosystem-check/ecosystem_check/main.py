@@ -10,7 +10,6 @@ from typing import Any, TypeVar
 
 from ecosystem_check import logger
 from ecosystem_check.check import (
-    can_check_project,
     compare_check,
     markdown_check_result,
 )
@@ -53,7 +52,7 @@ async def main(
     if format_comparison:
         logger.debug("Using format comparison type %s", format_comparison.value)
     match command:
-        case Command.format:
+        case Command.FORMAT:
             targets = [
                 target
                 for target in targets
@@ -61,12 +60,8 @@ async def main(
                     baseline_executable, comparison_executable, target
                 )
             ]
-        case Command.check:
-            targets = [
-                target
-                for target in targets
-                if can_check_project(baseline_executable, comparison_executable, target)
-            ]
+        case Command.CHECK:
+            pass
     logger.debug("Checking %s targets", len(targets))
 
     # Limit parallelism to avoid high memory consumption
@@ -110,9 +105,9 @@ async def main(
             print(json.dumps(result, indent=4, cls=JSONEncoder))
         case OutputFormat.MARKDOWN:
             match command:
-                case Command.format:
+                case Command.FORMAT:
                     print(markdown_format_result(result))
-                case Command.check:
+                case Command.CHECK:
                     print(markdown_check_result(result))
                 case _:
                     raise ValueError(f"Unknown target command {command}")
@@ -139,7 +134,7 @@ async def clone_and_compare(
 
     try:
         match command:
-            case Command.format:
+            case Command.FORMAT:
                 assert format_comparison is not None
                 return await compare_format(
                     baseline_executable,
@@ -148,7 +143,7 @@ async def clone_and_compare(
                     cloned_repo,
                     format_comparison=format_comparison,
                 )
-            case Command.check:
+            case Command.CHECK:
                 return await compare_check(
                     baseline_executable,
                     comparison_executable,

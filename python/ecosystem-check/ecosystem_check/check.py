@@ -4,7 +4,6 @@ Execution, comparison, and summary of `djangofmt check` ecosystem checks.
 
 from __future__ import annotations
 
-import asyncio
 import glob
 import time
 from asyncio import create_subprocess_exec
@@ -15,7 +14,7 @@ from typing import TYPE_CHECKING
 from ecosystem_check import logger
 from ecosystem_check.format import add_s
 from ecosystem_check.markdown import markdown_project_section
-from ecosystem_check.projects import Formatter
+from ecosystem_check.projects import Command
 from ecosystem_check.types import (
     CheckDiff,
     Comparison,
@@ -25,19 +24,8 @@ from ecosystem_check.types import (
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
+        CliOptions,
         ClonedRepository,
-        FormatOptions,
-        Project,
-    )
-
-
-def can_check_project(
-    baseline_executable: Path, comparison_executable: Path, target: Project
-) -> bool:
-    """Only djangofmt supports the check command."""
-    return all(
-        Formatter.DJANGOFMT in executable.name
-        for executable in [baseline_executable, comparison_executable]
     )
 
 
@@ -124,7 +112,7 @@ def markdown_check_result(result: Result) -> str:
 async def compare_check(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> Comparison:
     baseline_output = await check(
@@ -151,11 +139,11 @@ async def check(
     executable: Path,
     path: Path,
     repo_fullname: str,
-    options: FormatOptions,
+    options: CliOptions,
 ) -> str:
     """Run `djangofmt check` against the specified path and return diagnostic output."""
     # The check CLI does not support --custom-blocks
-    args = ["check", *options.to_args(executable.name, include_custom_blocks=False)]
+    args = ["check", *options.to_args(executable.name, command=Command.CHECK)]
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
     ) - set(options.excluded_files(executable.name))
@@ -179,18 +167,7 @@ async def check(
         stderr=PIPE,
         cwd=path,
     )
-    try:
-        _, err = await asyncio.wait_for(proc.communicate(), timeout=300)
-    except TimeoutError:
-        proc.terminate()
-        try:
-            await asyncio.wait_for(proc.wait(), timeout=5)
-        except TimeoutError:
-            proc.kill()
-            await proc.wait()
-        raise ToolError(
-            f"Subprocess timed out after 300 seconds for {repo_fullname}"
-        ) from None
+    _, err = await proc.communicate()
     end = time.perf_counter()
 
     logger.debug(

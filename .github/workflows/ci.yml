@@ -98,20 +98,12 @@ jobs:
             echo -e "\n\n> [!CAUTION]\n> **Summary Truncated:** The original output was $(du -h ecosystem-result-format-stable | cut -f1), which exceeds GitHub's 1024k limit." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+          printf "\n---\n\n### \`pr\` vs \`main\` check diff\n" >> ecosystem-result-check
+          uv run ecosystem-check check ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result-format-stable
+
           head -c 1000k ecosystem-result-format-stable >> "$GITHUB_STEP_SUMMARY"
 
           cat ecosystem-result-format-stable >> ecosystem-result
-
-      - name: Run `djangofmt check` ecosystem check
-        run: |
-          set -eo pipefail
-
-          printf "\n---\n\n### \`pr\` vs \`main\` check diff\n" >> ecosystem-result-check
-          uv run ecosystem-check check ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result-check
-
-          head -c 1000k ecosystem-result-check >> "$GITHUB_STEP_SUMMARY"
-
-          cat ecosystem-result-check >> ecosystem-result
 
       - name: Generate comment content
         id: generate-comment

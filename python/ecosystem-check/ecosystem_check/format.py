@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from ecosystem_check import logger
 from ecosystem_check.markdown import markdown_project_section
-from ecosystem_check.projects import Formatter, Profile
+from ecosystem_check.projects import Command, Formatter, Profile
 from ecosystem_check.types import (
     Comparison,
     Diff,
@@ -28,8 +28,8 @@ from ecosystem_check.types import (
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
+        CliOptions,
         ClonedRepository,
-        FormatOptions,
         Project,
     )
 
@@ -132,7 +132,7 @@ def markdown_format_result(result: Result) -> str:
 async def compare_format(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
     format_comparison: FormatComparison,
 ) -> Comparison:
@@ -158,7 +158,7 @@ async def compare_format(
 async def format_and_format(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> Diff:
     # Run format without diff to get the baseline
@@ -191,7 +191,7 @@ async def format_and_format(
 async def format_then_format(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> Diff:
     # Run format to get the baseline
@@ -222,7 +222,7 @@ async def format_then_format(
 async def format_then_format_converge(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> HistoriesForHunks:
     """Run format_then_format 3 times (6 passes), only reporting hunks that don't converge after pass 4."""
@@ -288,10 +288,10 @@ async def format(
     executable: Path,
     path: Path,
     repo_fullname: str,
-    options: FormatOptions,
+    options: CliOptions,
 ) -> Sequence[str]:
     """Run the given djangofmt binary against the specified path."""
-    args = options.to_args(executable_name=executable.name)
+    args = options.to_args(executable_name=executable.name, command=Command.FORMAT)
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
     ) - set(options.excluded_files(executable.name))
@@ -310,18 +310,7 @@ async def format(
         stderr=PIPE,
         cwd=path,
     )
-    try:
-        result, err = await asyncio.wait_for(proc.communicate(), timeout=300)
-    except TimeoutError:
-        proc.terminate()
-        try:
-            await asyncio.wait_for(proc.wait(), timeout=5)
-        except TimeoutError:
-            proc.kill()
-            await proc.wait()
-        raise ToolError(
-            f"Subprocess timed out after 300 seconds for {repo_fullname}"
-        ) from None
+    result, err = await proc.communicate()
     end = time.perf_counter()
 
     logger.debug(

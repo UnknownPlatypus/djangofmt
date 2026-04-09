@@ -4,9 +4,9 @@ Abstractions and utilities for working with projects to run ecosystem checks on.
 
 from __future__ import annotations
 
+import enum
 from asyncio import create_subprocess_exec
 from dataclasses import dataclass, field
-from enum import StrEnum
 from pathlib import Path
 from subprocess import DEVNULL, PIPE
 from typing import Self
@@ -22,15 +22,15 @@ class Project(Serializable):
     """
 
     repo: Repository
-    format_options: FormatOptions = field(default_factory=lambda: FormatOptions())
+    format_options: CliOptions = field(default_factory=lambda: CliOptions())
 
 
-class Command(StrEnum):
-    format = "format"  # type: ignore[assignment]
-    check = "check"
+class Command(enum.StrEnum):
+    FORMAT = enum.auto()
+    CHECK = enum.auto()
 
 
-class GitDomain(StrEnum):
+class GitDomain(enum.StrEnum):
     GITHUB = "github.com"
     CODEBERG = "codeberg.org"
 
@@ -42,7 +42,7 @@ class GitDomain(StrEnum):
         }[self]
 
 
-class Formatter(StrEnum):
+class Formatter(enum.StrEnum):
     """A tool name expected to do formatting work on files"""
 
     DJANGOFMT = "djangofmt"
@@ -50,7 +50,7 @@ class Formatter(StrEnum):
     RUSTYWIND = "rustywind"
 
 
-class Profile(StrEnum):
+class Profile(enum.StrEnum):
     """A tool name expected to do formatting work on files"""
 
     DJANGO = "django"
@@ -58,21 +58,19 @@ class Profile(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
-class FormatOptions(Serializable):
+class CliOptions(Serializable):
     """
-    Format ecosystem check options.
+    Option to pass to the cli.
     """
 
     profile: Profile = Profile.DJANGO
     custom_blocks: str = ""  # Comma-separated list of custom blocks
     exclude: tuple[str, ...] = field(default_factory=tuple)
 
-    def to_args(
-        self, executable_name: str, *, include_custom_blocks: bool = True
-    ) -> list[str]:
+    def to_args(self, executable_name: str, *, command: Command) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:
             args = ["--profile", self.profile]
-            if include_custom_blocks and self.custom_blocks:
+            if command is Command.FORMAT and self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))
             return args
         elif executable_name == Formatter.DJADE:

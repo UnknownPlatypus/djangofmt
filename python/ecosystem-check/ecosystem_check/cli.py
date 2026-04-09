@@ -86,7 +86,7 @@ async def _run_main(
             raise_on_failure=args.pdb,
             format_comparison=(
                 FormatComparison(args.format_comparison)
-                if args.command == Command.format
+                if args.command == Command.FORMAT
                 else None
             ),
         )
