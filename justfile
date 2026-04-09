@@ -18,7 +18,7 @@ bootstrap:
 [group('dev')]
 pre-mr-check:
     SKIP=actionlint,renovate-config-validator pre-commit run -a
-    maturin develop
+    uv run maturin develop
     cargo clippy --all-targets --all-features
     cargo test --workspace --all-targets --all-features
 
