@@ -82,25 +82,26 @@ jobs:
           uv venv --python 3.12
           uv pip install ./python/ecosystem-check
 
-          printf "### \`pr\` vs \`main\` diff\n" >> ecosystem-result-format-stable
-          uv run ecosystem-check format ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result-format-stable
+          printf "### \`pr\` vs \`main\` format diff\n" >> ecosystem-result
+          uv run ecosystem-check format ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result
 
-          printf "\n### \`pr\` stability\n" >> ecosystem-result-format-stable
-          uv run ecosystem-check format ./pr_djangofmt ./pr_djangofmt --cache-dir ./checkouts --format-comparison base-then-comp | tee -a ecosystem-result-format-stable
+          printf "\n### \`pr\` format stability\n" >> ecosystem-result
+          uv run ecosystem-check format ./pr_djangofmt ./pr_djangofmt --cache-dir ./checkouts --format-comparison base-then-comp | tee -a ecosystem-result
 
-          printf "\n### \`pr\` + \`rustywind\` stability\n" >> ecosystem-result-format-stable
-          uv run ecosystem-check format rustywind ./pr_djangofmt  --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result-format-stable
+          printf "\n### \`pr\` + \`rustywind\` format stability\n" >> ecosystem-result
+          uv run ecosystem-check format rustywind ./pr_djangofmt  --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result
 
-          printf "\n### \`pr\` + \`djade\` stability\n" >> ecosystem-result-format-stable
-          uv run ecosystem-check format djade ./pr_djangofmt --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result-format-stable
+          printf "\n### \`pr\` + \`djade\` format stability\n" >> ecosystem-result
+          uv run ecosystem-check format djade ./pr_djangofmt --cache-dir ./checkouts --format-comparison base-then-comp-converge | tee -a ecosystem-result
 
-          if [ "$(stat -c%s "ecosystem-result-format-stable")" -gt 1024000 ]; then
-            echo -e "\n\n> [!CAUTION]\n> **Summary Truncated:** The original output was $(du -h ecosystem-result-format-stable | cut -f1), which exceeds GitHub's 1024k limit." >> "$GITHUB_STEP_SUMMARY"
+          printf "\n---\n\n### \`pr\` vs \`main\` check diff\n" >> ecosystem-result
+          uv run ecosystem-check check ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result
+
+          if [ "$(stat -c%s "ecosystem-result")" -gt 1024000 ]; then
+            echo -e "\n\n> [!CAUTION]\n> **Summary Truncated:** The original output was $(du -h ecosystem-result | cut -f1), which exceeds GitHub's 1024k limit." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          head -c 1000k ecosystem-result-format-stable >> "$GITHUB_STEP_SUMMARY"
-
-          cat ecosystem-result-format-stable >> ecosystem-result
+          head -c 1000k ecosystem-result >> "$GITHUB_STEP_SUMMARY"
 
       - name: Generate comment content
         id: generate-comment

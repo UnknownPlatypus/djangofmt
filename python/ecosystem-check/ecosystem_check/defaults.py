@@ -5,7 +5,7 @@ Default projects for ecosystem checks
 from __future__ import annotations
 
 from ecosystem_check.projects import (
-    FormatOptions,
+    CliOptions,
     GitDomain,
     Profile,
     Project,
@@ -16,7 +16,7 @@ DEFAULT_TARGETS = [
     # Jinja templates
     Project(
         repo=Repository(owner="zulip", name="zulip", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             profile=Profile.JINJA,
         ),
     ),
@@ -26,7 +26,7 @@ DEFAULT_TARGETS = [
             name="cookiecutter-django",
             ref="main",
         ),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # Conditionals using raw tags, similar to https://github.com/g-plane/markup_fmt/issues/97
                 "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/elements/button.html",
@@ -41,7 +41,7 @@ DEFAULT_TARGETS = [
     # Django templates
     Project(
         repo=Repository(owner="django", name="django", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "django/contrib/admin/templates/admin/edit_inline/stacked.html",
@@ -66,7 +66,7 @@ DEFAULT_TARGETS = [
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
     Project(
         repo=Repository(owner="saleor", name="saleor", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # TODO: Fails to parse <a href={% url "api" %}  target="_blank">
                 "templates/home/index.html",
@@ -77,7 +77,7 @@ DEFAULT_TARGETS = [
         repo=Repository(
             owner="django-commons", name="django-debug-toolbar", ref="main"
         ),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "debug_toolbar/templates/debug_toolbar/includes/panel_button.html",
@@ -87,7 +87,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 "tests/_site/templates/oscar/layout.html",  # Actual invalid html
                 "src/oscar/templates/oscar/dashboard/partners/partner_manage.html",  # Missing closing div
@@ -103,7 +103,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="django-cms", name="django-cms", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # Invalid <span>{% trans "Copy" %}<span>
                 "cms/templates/admin/cms/page/tree/base.html",  # Weird </form> tag placement
@@ -116,7 +116,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="wagtail", name="wagtail", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "wagtail/admin/templates/wagtailadmin/shared/icon.html",
@@ -126,7 +126,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="pennersr", name="django-allauth", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             custom_blocks="slot,element",
             exclude=(
                 "examples/regular-django/example/templates/allauth/elements/form.html",
@@ -140,7 +140,7 @@ DEFAULT_TARGETS = [
         repo=Repository(
             owner="silentsokolov", name="django-admin-rangefilter", ref="master"
         ),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # Django comments https://github.com/UnknownPlatypus/djangofmt/issues/8
                 "rangefilter/templates/rangefilter/date_range_quick_select_list_filter.html",
@@ -156,7 +156,7 @@ DEFAULT_TARGETS = [
         repo=Repository(
             owner="django-import-export", name="django-import-export", ref="main"
         ),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 # https://github.com/g-plane/markup_fmt/pull/98
                 "import_export/templates/admin/import_export/export.html",
@@ -165,7 +165,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="unfoldadmin", name="django-unfold", ref="main"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 "src/unfold/contrib/simple_history/templates/simple_history/object_history_list.html",  # Broken close tag
                 "src/unfold/templates/admin/auth/user/add_form.html",  # Broken close tag
@@ -197,7 +197,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="getsentry", name="sentry", ref="master"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 "src/sentry/templates/sentry/debug/error-page-embed.html",  # Broken close tag
                 "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
@@ -212,7 +212,7 @@ DEFAULT_TARGETS = [
     ),
     Project(
         repo=Repository(owner="makeplane", name="plane", ref="preview"),
-        format_options=FormatOptions(
+        cli_options=CliOptions(
             exclude=(
                 "apiserver/templates/emails/test_email.html",  # Invalid </br> tag
             )

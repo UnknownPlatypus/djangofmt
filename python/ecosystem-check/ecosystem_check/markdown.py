@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from unidiff import PatchSet
 
 if TYPE_CHECKING:
-    from ecosystem_check.projects import ClonedRepository, FormatOptions, Project
+    from ecosystem_check.projects import CliOptions, ClonedRepository, Project
 
 
 def format_patchset(
@@ -51,7 +51,7 @@ def format_patchset(
 
 
 def markdown_project_section(
-    title: str, content: str | list[str], options: FormatOptions, project: Project
+    title: str, content: str | list[str], options: CliOptions, project: Project
 ) -> list[str]:
     return markdown_details(
         summary=f'<a href="{project.repo.url}">{project.repo.fullname}</a> ({title})',

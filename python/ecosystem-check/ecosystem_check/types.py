@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import difflib
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, is_dataclass
 from functools import cached_property
@@ -114,6 +115,75 @@ class HistoriesForHunks(list[Diff]):
         )
 
 
+class CheckDiff(Serializable):
+    """Difference in check (lint) diagnostics between baseline and comparison."""
+
+    def __init__(self, baseline_output: str, comparison_output: str) -> None:
+        self.baseline_output = baseline_output
+        self.comparison_output = comparison_output
+
+        # Split into sorted lines for comparison (diagnostic output order is not guaranteed)
+        baseline_lines = sorted(baseline_output.splitlines(keepends=True))
+        comparison_lines = sorted(comparison_output.splitlines(keepends=True))
+
+        self._diff_lines = list(
+            difflib.unified_diff(
+                baseline_lines,
+                comparison_lines,
+                fromfile="baseline",
+                tofile="comparison",
+            )
+        )
+
+    def __bool__(self) -> bool:
+        return bool(self._diff_lines)
+
+    @property
+    def diagnostics_added(self) -> int:
+        return sum(
+            1
+            for line in self._diff_lines
+            if line.startswith("+") and not line.startswith("+++")
+        )
+
+    @property
+    def diagnostics_removed(self) -> int:
+        return sum(
+            1
+            for line in self._diff_lines
+            if line.startswith("-") and not line.startswith("---")
+        )
+
+    def jsonable(self) -> Any:
+        return {
+            "baseline": self.baseline_output,
+            "comparison": self.comparison_output,
+        }
+
+    def format_markdown(self) -> str:
+        # Use raw (unsorted) output for display — sorted lines are only for
+        # __bool__ and diagnostics_added/removed counting.
+        lines: list[str] = []
+        if self.comparison_output and not self.baseline_output:
+            lines.append("**New diagnostics:**")
+            lines.append(f"```\n{self.comparison_output.strip()}\n```")
+        elif self.baseline_output and not self.comparison_output:
+            lines.append("**Removed diagnostics:**")
+            lines.append(f"```\n{self.baseline_output.strip()}\n```")
+        else:
+            # For two-sided diffs, diff the raw lines for readability.
+            raw_diff = difflib.unified_diff(
+                self.baseline_output.splitlines(keepends=True),
+                self.comparison_output.splitlines(keepends=True),
+                fromfile="baseline",
+                tofile="comparison",
+            )
+            lines.append("```diff")
+            lines.extend(line.rstrip("\n") for line in raw_diff)
+            lines.append("```")
+        return "\n".join(lines)
+
+
 @dataclass(frozen=True, slots=True)
 class HunkDetail:
     """The minimal details of a patch hunk that makes it unique."""
@@ -139,7 +209,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diff: Diff | HistoriesForHunks
+    diff: Diff | HistoriesForHunks | CheckDiff
     repo: ClonedRepository
 
 

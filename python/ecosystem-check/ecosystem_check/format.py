@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 from ecosystem_check import logger
 from ecosystem_check.markdown import markdown_project_section
-from ecosystem_check.projects import Formatter, Profile
+from ecosystem_check.projects import Command, Formatter, Profile
 from ecosystem_check.types import (
     Comparison,
     Diff,
@@ -28,8 +28,8 @@ from ecosystem_check.types import (
 
 if TYPE_CHECKING:
     from ecosystem_check.projects import (
+        CliOptions,
         ClonedRepository,
-        FormatOptions,
         Project,
     )
 
@@ -44,7 +44,7 @@ def can_format_project(
     """Skip project if one of the executables is djade and the profile is jinja."""
     return not any(
         executable.name == Formatter.DJADE
-        and target.format_options.profile == Profile.JINJA
+        and target.cli_options.profile == Profile.JINJA
         for executable in [baseline_executable, comparison_executable]
     )
 
@@ -54,10 +54,16 @@ def markdown_format_result(result: Result) -> str:
     Render a `djangofmt` ecosystem check result as markdown.
     """
     error_count = len(result.errored)
-    projects_with_changes = sum(bool(comp.diff) for _, comp in result.completed)
-    total_lines_added = sum(comp.diff.lines_added for _, comp in result.completed)
-    total_lines_removed = sum(comp.diff.lines_removed for _, comp in result.completed)
-    total_files_modified = sum(comp.diff.modified_files for _, comp in result.completed)
+    # Format results only contain Diff or HistoriesForHunks
+    diffs: list[Diff | HistoriesForHunks] = [
+        comp.diff
+        for _, comp in result.completed
+        if isinstance(comp.diff, (Diff, HistoriesForHunks))
+    ]
+    projects_with_changes = sum(bool(d) for d in diffs)
+    total_lines_added = sum(d.lines_added for d in diffs)
+    total_lines_removed = sum(d.lines_removed for d in diffs)
+    total_files_modified = sum(d.modified_files for d in diffs)
 
     if total_lines_removed == 0 and total_lines_added == 0 and error_count == 0:
         return "\u2705 ecosystem check detected no format changes."
@@ -94,17 +100,18 @@ def markdown_format_result(result: Result) -> str:
 
     # Then per-project changes
     for project, comparison in result.completed:
-        if not comparison.diff:
+        diff = comparison.diff
+        if not diff or not isinstance(diff, (Diff, HistoriesForHunks)):
             continue  # Skip empty diffs
 
-        files = comparison.diff.modified_files
-        title = f"+{comparison.diff.lines_added} -{comparison.diff.lines_removed} lines across {files} file{add_s(files)}"
+        files = diff.modified_files
+        title = f"+{diff.lines_added} -{diff.lines_removed} lines across {files} file{add_s(files)}"
 
         lines.extend(
             markdown_project_section(
                 title=title,
-                content=comparison.diff.format_markdown(repo=comparison.repo),
-                options=project.format_options,
+                content=diff.format_markdown(repo=comparison.repo),
+                options=project.cli_options,
                 project=project,
             )
         )
@@ -114,7 +121,7 @@ def markdown_format_result(result: Result) -> str:
             markdown_project_section(
                 title="error",
                 content=f"```\n{str(error).strip()}\n```",
-                options=project.format_options,
+                options=project.cli_options,
                 project=project,
             )
         )
@@ -125,7 +132,7 @@ def markdown_format_result(result: Result) -> str:
 async def compare_format(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
     format_comparison: FormatComparison,
 ) -> Comparison:
@@ -151,7 +158,7 @@ async def compare_format(
 async def format_and_format(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> Diff:
     # Run format without diff to get the baseline
@@ -184,7 +191,7 @@ async def format_and_format(
 async def format_then_format(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> Diff:
     # Run format to get the baseline
@@ -215,7 +222,7 @@ async def format_then_format(
 async def format_then_format_converge(
     baseline_executable: Path,
     comparison_executable: Path,
-    options: FormatOptions,
+    options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> HistoriesForHunks:
     """Run format_then_format 3 times (6 passes), only reporting hunks that don't converge after pass 4."""
@@ -281,10 +288,10 @@ async def format(
     executable: Path,
     path: Path,
     repo_fullname: str,
-    options: FormatOptions,
+    options: CliOptions,
 ) -> Sequence[str]:
     """Run the given djangofmt binary against the specified path."""
-    args = options.to_args(executable_name=executable.name)
+    args = options.to_args(executable_name=executable.name, command=Command.FORMAT)
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
     ) - set(options.excluded_files(executable.name))

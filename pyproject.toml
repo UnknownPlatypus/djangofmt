@@ -35,7 +35,7 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 dev = [
   "djangofmt-benchmarks",
   "djangofmt-ecosystem-check",
-  "maturin[patchelf]>=1.10.2, !=1.12.5, !=1.12.6",  # Avoid regression from https://github.com/PyO3/maturin/issues/3056
+  "maturin[patchelf]",
 ]
 
 [build-system]
