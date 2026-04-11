@@ -30,10 +30,23 @@ impl<'a> Checker<'a> {
     /// Compute the byte offset of a string slice within the source.
     ///
     /// This is used to convert AST `raw` slices into [`SourceSpan`] offsets.
-    /// Panics if `slice` is not a subslice of the source.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `slice` is not fully contained within `self.source`.
     #[must_use]
     pub fn source_offset(&self, slice: &str) -> usize {
-        slice.as_ptr() as usize - self.source.as_ptr() as usize
+        let src_start = self.source.as_ptr() as usize;
+        let src_end = src_start + self.source.len();
+        let slice_start = slice.as_ptr() as usize;
+        let slice_end = slice_start + slice.len();
+
+        assert!(
+            slice_start >= src_start && slice_end <= src_end,
+            "slice must be a subslice of self.source"
+        );
+
+        slice_start - src_start
     }
 
     /// Returns whether the given rule should be checked.
