@@ -15,6 +15,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::contains_interpolation;
 use crate::violation::Violation;
 
 /// Violation for invalid HTML attribute values.
@@ -46,12 +47,6 @@ impl Violation for InvalidAttrValue {
             Some(format!("Use one of: {}", self.allowed.join(", ")))
         }
     }
-}
-
-/// Returns true if the value contains Jinja/Django interpolation markers.
-#[inline]
-fn contains_interpolation(value: &str) -> bool {
-    value.contains("{{") || value.contains("{%")
 }
 
 /// Check an element's attributes for invalid enum values.

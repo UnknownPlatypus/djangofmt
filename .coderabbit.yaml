@@ -9,6 +9,9 @@ reviews:
   sequence_diagrams: false
   poem: false
   review_status: false
+  tools:
+    htmlhint:
+      enabled: false
   auto_review:
     enabled: true
     ignore_title_keywords:

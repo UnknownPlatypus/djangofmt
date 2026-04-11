@@ -1,0 +1,17 @@
+<!-- Invalid methods -->
+<form method="put">Submit</form>
+<form method="delete">Submit</form>
+<form method="patch">Submit</form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form method="invalid">Submit</form>
+{% endif %}
+
+<!-- Nested elements: inner form inside outer div -->
+<div>
+    <form method="patch">Submit</form>
+</div>
+
+<!-- Jinja block as attribute -->
+<form {% if show %}method="delete"{% endif %}>Submit</form>
