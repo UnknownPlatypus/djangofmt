@@ -32,6 +32,10 @@ fn check_templates(bencher: divan::Bencher, template: &'static TestFile) {
                 vec![],
             );
             let ast = parser.parse_root().expect("Parsing to succeed");
-            check_ast(divan::black_box(&ast), divan::black_box(&settings))
+            check_ast(
+                divan::black_box(template.code),
+                divan::black_box(&ast),
+                divan::black_box(&settings),
+            )
         });
 }

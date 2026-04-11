@@ -31,7 +31,7 @@ fn check_valid() {
             let mut parser = Parser::new(&input, Language::Jinja, vec![]);
             let ast = parser.parse_root().expect("Failed to parse AST in test");
             let settings = Settings::default();
-            let diagnostics = check_ast(&ast, &settings);
+            let diagnostics = check_ast(&input, &ast, &settings);
             assert!(
                 diagnostics.is_empty(),
                 "Expected no diagnostics for {}, but found {}:\n{}",
@@ -49,7 +49,7 @@ fn run_check_test(path: &Path, input: String) -> String {
     let mut parser = Parser::new(&input, Language::Jinja, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::default();
-    let file_diagnostics = check_ast(&ast, &settings);
+    let file_diagnostics = check_ast(&input, &ast, &settings);
     if file_diagnostics.is_empty() {
         return String::new();
     }

@@ -13,7 +13,7 @@
 //! let mut parser = Parser::new(source, Language::Jinja, vec![]);
 //! let ast = parser.parse_root().unwrap();
 //!
-//! let diagnostics = check_ast(&ast, &Settings::default());
+//! let diagnostics = check_ast(source, &ast, &Settings::default());
 //! assert_eq!(diagnostics.len(), 1);
 //! ```
 
@@ -101,8 +101,8 @@ impl FileDiagnostics {
 ///
 /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
 #[must_use]
-pub fn check_ast(ast: &Root<'_>, settings: &Settings) -> Vec<LintDiagnostic> {
-    let mut checker = Checker::new(settings);
+pub fn check_ast(source: &str, ast: &Root<'_>, settings: &Settings) -> Vec<LintDiagnostic> {
+    let mut checker = Checker::new(source, settings);
     checker.visit_root(ast);
     checker.into_diagnostics()
 }
