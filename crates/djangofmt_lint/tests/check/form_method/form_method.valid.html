@@ -1,0 +1,19 @@
+<!-- Valid methods -->
+<form method="get">Submit</form>
+<form method="post">Submit</form>
+<form method="dialog">Submit</form>
+<form method="GET">Submit</form>
+<form method="POST">Submit</form>
+
+<!-- Interpolation - dynamic values should be skipped -->
+<form method="{{ method }}">Submit</form>
+<form method="{% if x %}post{% else %}get{% endif %}">Submit</form>
+
+<!-- Non-form element with method attr - should not trigger -->
+<div method="put"></div>
+
+<!-- Form with non-method attr - should not trigger -->
+<form action="/submit">Submit</form>
+
+<!-- Form with method attr but no value - should not trigger -->
+<form method>Submit</form>
