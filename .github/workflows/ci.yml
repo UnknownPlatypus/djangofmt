@@ -179,7 +179,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: taiki-e/install-action@ad25acb6b9413207b3174a4202c12aa9133691c6 # v2.69.13
+      - uses: taiki-e/install-action@704f92c11daa75bff5b4e01fcb083350c16c47b9 # v2.69.13
         with:
           tool: cargo-llvm-cov
       - run: cargo llvm-cov --workspace --all-targets --all-features --fail-under-lines 85
