@@ -24,7 +24,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           persist-credentials: false
-      - uses: cargo-bins/cargo-binstall@0b24824336e2b3800b0f89d9e08b2c08bfa3dcdd # v1.17.9
+      - uses: cargo-bins/cargo-binstall@f8ce4d55b131f4a1e373b8747ca6b6a54133ae5a # v1.18.0
       - run: cargo binstall --no-confirm cargo-bloat
       - name: Run
         env:
