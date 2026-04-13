@@ -11,7 +11,7 @@
   "devDependencies": {
     "daisyui": "5.5.19",
     "typescript": "6.0.2",
-    "vite": "8.0.7"
+    "vite": "8.0.8"
   },
   "overrides": {
     "dompurify": "^3.3.3"

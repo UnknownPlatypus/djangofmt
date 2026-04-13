@@ -126,7 +126,7 @@ jobs:
           fi
 
       - name: Upload ecosystem result
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ecosystem-result
           path: full-comment.txt
@@ -136,7 +136,7 @@ jobs:
           echo ${{ github.event.number }} > pr-number
 
       - name: Upload pr-number
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pr-number
           path: pr-number
@@ -164,7 +164,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: cargo-bins/cargo-binstall@0b24824336e2b3800b0f89d9e08b2c08bfa3dcdd # v1.17.9
+      - uses: cargo-bins/cargo-binstall@f8ce4d55b131f4a1e373b8747ca6b6a54133ae5a # v1.18.0
       - run: cargo binstall --no-confirm cargo-shear
       - run: cargo shear
 
@@ -179,7 +179,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: taiki-e/install-action@704f92c11daa75bff5b4e01fcb083350c16c47b9 # v2.69.13
+      - uses: taiki-e/install-action@921a4027af787cda265c4f334a0f7f89b21d72e9 # v2.75.8
         with:
           tool: cargo-llvm-cov
       - run: cargo llvm-cov --workspace --all-targets --all-features --fail-under-lines 85
