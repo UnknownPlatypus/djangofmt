@@ -121,6 +121,6 @@ define_rules {
 // Example: InvalidAttrValue -> "invalid-attr-value"
 
 define_rules! {
-    /// Validates attribute values against allowed values (e.g., `<form method>`).
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
+    (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
 }

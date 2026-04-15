@@ -1,0 +1,114 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 10 lint error(s)
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:2:15]
+ 1 │ <!-- Redundant type on script -->
+ 2 │ <script type="text/javascript" src="app.js"></script>
+   ·               ───────┬───────
+   ·                      ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
+
+Error: 
+  × Redundant type="text/css" on <style> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:5:14]
+ 4 │ <!-- Redundant type on style -->
+ 5 │ <style type="text/css">.foo { color: red; }</style>
+   ·              ────┬───
+   ·                  ╰── here
+ 6 │ 
+   ╰────
+  help: Remove the `type` attribute. `<style>` defaults to `type="text/css"`.
+
+Error: 
+  × Redundant type="text/javascript" on <SCRIPT> tag.
+   ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:8:15]
+ 7 │ <!-- Case-insensitive tag name -->
+ 8 │ <SCRIPT type="text/javascript"></SCRIPT>
+   ·               ───────┬───────
+   ·                      ╰── here
+ 9 │ <STYLE type="text/css"></STYLE>
+   ╰────
+  help: Remove the `type` attribute. `<SCRIPT>` defaults to `type="text/javascript"`.
+
+Error: 
+  × Redundant type="text/css" on <STYLE> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:9:14]
+  8 │ <SCRIPT type="text/javascript"></SCRIPT>
+  9 │ <STYLE type="text/css"></STYLE>
+    ·              ────┬───
+    ·                  ╰── here
+ 10 │ 
+    ╰────
+  help: Remove the `type` attribute. `<STYLE>` defaults to `type="text/css"`.
+
+Error: 
+  × Redundant type="Text/JavaScript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:12:15]
+ 11 │ <!-- Case-insensitive type value -->
+ 12 │ <script type="Text/JavaScript"></script>
+    ·               ───────┬───────
+    ·                      ╰── here
+ 13 │ <style type="Text/CSS"></style>
+    ╰────
+  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
+
+Error: 
+  × Redundant type="Text/CSS" on <style> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:13:14]
+ 12 │ <script type="Text/JavaScript"></script>
+ 13 │ <style type="Text/CSS"></style>
+    ·              ────┬───
+    ·                  ╰── here
+ 14 │ 
+    ╰────
+  help: Remove the `type` attribute. `<style>` defaults to `type="text/css"`.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:16:28]
+ 15 │ <!-- Type attribute with other attributes -->
+ 16 │ <script src="app.js" type="text/javascript" defer></script>
+    ·                            ───────┬───────
+    ·                                   ╰── here
+ 17 │ 
+    ╰────
+  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:21:11]
+ 20 │     src="app.js"
+ 21 │     type="text/javascript"
+    ·           ───────┬───────
+    ·                  ╰── here
+ 22 │ ></script>
+    ╰────
+  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:25:15]
+ 24 │ <!-- Single-quoted attribute -->
+ 25 │ <script type='text/javascript'></script>
+    ·               ───────┬───────
+    ·                      ╰── here
+ 26 │ 
+    ╰────
+  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
+
+Error: 
+  × Redundant type="text/javascript" on <script> tag.
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:29:19]
+ 28 │ {% if include_script %}
+ 29 │     <script type="text/javascript" src="app.js"></script>
+    ·                   ───────┬───────
+    ·                          ╰── here
+ 30 │ {% endif %}
+    ╰────
+  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
