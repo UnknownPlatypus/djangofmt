@@ -1,5 +1,56 @@
 # Changelog
 
+## [0.2.7](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.6..v0.2.7) - 2026-04-16
+
+### ⛰️ Features
+
+- *(ci)* Build pipeline improvements ([#225](https://github.com/UnknownPlatypus/djangofmt/issues/225)) - ([3e3b009](https://github.com/UnknownPlatypus/djangofmt/commit/3e3b009f89ed039c376409d13aca3fd1faeba879))
+- *(config)* Use kebab-case for pyproject.toml settings ([#227](https://github.com/UnknownPlatypus/djangofmt/issues/227)) - ([f26e834](https://github.com/UnknownPlatypus/djangofmt/commit/f26e834b9402f5b90d804ab98b17170645747c18))
+- *(format)* Add recursive file discovery -- enable `djangofmt .` to format the current folder ([#229](https://github.com/UnknownPlatypus/djangofmt/issues/229)) - ([385f60a](https://github.com/UnknownPlatypus/djangofmt/commit/385f60a68328a97888e9419ecc2372f47c3becff))
+- *(format)* Add flag to allow self closing void elements ([#219](https://github.com/UnknownPlatypus/djangofmt/issues/219)) - ([d0d85b0](https://github.com/UnknownPlatypus/djangofmt/commit/d0d85b0c12637812eb3e65dc6c28ecc1c6b7397a))
+- *(format)* Improve error message for cut off html ([#207](https://github.com/UnknownPlatypus/djangofmt/issues/207)) - ([decbaec](https://github.com/UnknownPlatypus/djangofmt/commit/decbaec5460a0a0c0ca47e79b361c8b5e2ebf5e8))
+- *(format)* Add JSON external formatter ([#188](https://github.com/UnknownPlatypus/djangofmt/issues/188)) - ([07e770b](https://github.com/UnknownPlatypus/djangofmt/commit/07e770ba4fd37c9e60a52fd49e524cf6267eca4e))
+
+### 🐛 Bug Fixes
+
+- *(format)* Fixes extra indent for {% plural %} inside blocktranslate ([#208](https://github.com/UnknownPlatypus/djangofmt/issues/208)) - ([c7de06d](https://github.com/UnknownPlatypus/djangofmt/commit/c7de06d0f536bc7b99da9760f5e46747f958fd65))
+- *(format)* Fix formatting issues for nested template blocks in html opening tag ([#205](https://github.com/UnknownPlatypus/djangofmt/issues/205)) - ([378bc36](https://github.com/UnknownPlatypus/djangofmt/commit/378bc360e18b96f29ae9079aca34c3c98a2a4e04))
+
+### 🚜 Refactor
+
+- *(format)* Reuse `LineLength` and `PrintWidth` newtypes to remove hardcoded default values ([#189](https://github.com/UnknownPlatypus/djangofmt/issues/189)) - ([13e89b5](https://github.com/UnknownPlatypus/djangofmt/commit/13e89b5cd0a8db911ae1d05ae6c0afc272f65498))
+- *(misc)* Avoid clone on check error path, add force_exclude tests ([#239](https://github.com/UnknownPlatypus/djangofmt/issues/239)) - ([abc267d](https://github.com/UnknownPlatypus/djangofmt/commit/abc267d1c52ad49c0d47a114b601f259b3d78765))
+- *(misc)* Hoist Settings::default(), remove dead Hash derive, avoid clone on error path ([#237](https://github.com/UnknownPlatypus/djangofmt/issues/237)) - ([2923267](https://github.com/UnknownPlatypus/djangofmt/commit/292326797545a0c47325cb1a77201d6f243a2aaf))
+- *(misc)* Minor code quality improvement and simplifications ([#235](https://github.com/UnknownPlatypus/djangofmt/issues/235)) - ([1c1c856](https://github.com/UnknownPlatypus/djangofmt/commit/1c1c856033c2dc5bad4daca8e7042589015e999c))
+- *(rules)* Declare lint rule category on the Violation ([#230](https://github.com/UnknownPlatypus/djangofmt/issues/230)) - ([6dd81ab](https://github.com/UnknownPlatypus/djangofmt/commit/6dd81ab0c19ef8d11c7d5e507efdf13652fc5dfc))
+
+### 📚 Documentation
+
+- *(ai)* Add AI policy to CONTRIBUTING.md ([#228](https://github.com/UnknownPlatypus/djangofmt/issues/228)) - ([479c575](https://github.com/UnknownPlatypus/djangofmt/commit/479c575646d742641a7ed550059e7d860f649df3))
+- *(check)* Document check mode workaround ([#200](https://github.com/UnknownPlatypus/djangofmt/issues/200)) - ([8be5ca6](https://github.com/UnknownPlatypus/djangofmt/commit/8be5ca6025402da808f6ac8de335575854b37ee4))
+
+### ⚡ Performance
+
+- *(bench)* Bench linter and parser ([#232](https://github.com/UnknownPlatypus/djangofmt/issues/232)) - ([d1644eb](https://github.com/UnknownPlatypus/djangofmt/commit/d1644eb60b87f95363e7badf95ccb2d6862adf09))
+- *(summary)* Add micro bench build summary ([#236](https://github.com/UnknownPlatypus/djangofmt/issues/236)) - ([6ba6a80](https://github.com/UnknownPlatypus/djangofmt/commit/6ba6a80e7cd7bdba7209d171f843316603f1fb85))
+
+### 🧪 Testing
+
+- *(ci)* Add `djangofmt check` to ecosystem check ([#253](https://github.com/UnknownPlatypus/djangofmt/issues/253)) - ([e9ac547](https://github.com/UnknownPlatypus/djangofmt/commit/e9ac5473fba7b27a5000574f60cb653d69940c24))
+- *(ci)* Add code coverage with cargo-llvm-cov and 85% CI threshold ([#240](https://github.com/UnknownPlatypus/djangofmt/issues/240)) - ([78a97a6](https://github.com/UnknownPlatypus/djangofmt/commit/78a97a6a73fde7d8c49dd03e1366ddd5864878b3))
+- *(ci)* Re-enable djade ecosystem check (+ tidy up justfile) ([#206](https://github.com/UnknownPlatypus/djangofmt/issues/206)) - ([461db3b](https://github.com/UnknownPlatypus/djangofmt/commit/461db3b9e64d9052eb30af5662d558ae9e1aeae3))
+- *(ci)* Remove docker-run-action ([#195](https://github.com/UnknownPlatypus/djangofmt/issues/195)) - ([c1c080b](https://github.com/UnknownPlatypus/djangofmt/commit/c1c080b1ac45f6120c63e8d7d8aa351fa5ad0f75))
+- *(ecosystem-check)* Allows pr comment on forks ([#196](https://github.com/UnknownPlatypus/djangofmt/issues/196)) - ([54b204d](https://github.com/UnknownPlatypus/djangofmt/commit/54b204d9a080cb2e7095adab6d87fbe9b212889d))
+- *(lint)* Cleanup lint test structure ([#254](https://github.com/UnknownPlatypus/djangofmt/issues/254)) - ([5bf935e](https://github.com/UnknownPlatypus/djangofmt/commit/5bf935e549e2a21594e7af58658245a96d1b635d))
+
+### ⚙️ Miscellaneous Tasks
+
+- *(playground)* Upgrade all node dependencies to latest ([#252](https://github.com/UnknownPlatypus/djangofmt/issues/252)) - ([da82da2](https://github.com/UnknownPlatypus/djangofmt/commit/da82da25939d4903847c883b5159b6e77146956f))
+
+## New Contributors ❤️
+
+- @jonathan-s made their first contribution in [#200](https://github.com/UnknownPlatypus/djangofmt/pull/200)
+
 ## [0.2.6](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.5..v0.2.6) - 2026-02-10
 
 ### ⛰️ Features
@@ -44,7 +95,7 @@
 
 - *(allocator)* Use jemalloc on linux ([#128](https://github.com/UnknownPlatypus/djangofmt/issues/128)) - ([4e92927](https://github.com/UnknownPlatypus/djangofmt/commit/4e92927ac3f3de5b2629ddcda446bd3b7462357f))
 - *(codspeed)* Setup Codspeed CI benchmarks ([#125](https://github.com/UnknownPlatypus/djangofmt/issues/125)) - ([0ea2b39](https://github.com/UnknownPlatypus/djangofmt/commit/0ea2b399dfd19c31b1d82c06c7cf10186f39456b))
-- *(perf)* Update the `lto` and `codegen-units` benchmark script ([#126](https://github.com/UnknownPlatypus/djangofmt/issues/126)) - ([ccd7edge](https://github.com/UnknownPlatypus/djangofmt/commit/ccd7edea4eaa3e30b2a1017b833d498b34b95c34))
+- *(perf)* Update the `lto` and `codegen-units` benchmark script ([#126](https://github.com/UnknownPlatypus/djangofmt/issues/126)) - ([ccd7ede](https://github.com/UnknownPlatypus/djangofmt/commit/ccd7edea4eaa3e30b2a1017b833d498b34b95c34))
 
 ### 🧪 Testing
 

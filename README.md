@@ -13,7 +13,7 @@ A fast, HTML aware, Django template formatter, written in Rust.
   <picture align="center">
     <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3b09a8a2-b5cb-4f1b-a0bc-5f4e3ca169db">
     <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
-    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
+    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95" style="max-width: 75%;">
   </picture>
 </p>
 
@@ -47,7 +47,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.6
+  rev: v0.2.7
   hooks:
     - id: djangofmt
 ```
@@ -61,64 +61,15 @@ by specifying the desired files in the hook configuration within your `.pre-comm
 ## Usage
 
 ```shell
-Usage: djangofmt [OPTIONS] <FILES>...
-
-Arguments:
-  <FILES>...
-          List of files or directories to format
-
-Options:
-      --line-length <LINE_LENGTH>
-          Set the line-length [default: 120]
-
-      --indent-width <INDENT_WIDTH>
-          Set the indent width [default: 4]
-
-      --profile <PROFILE>
-          Template language profile to use [default: django]
-
-          [possible values: django, jinja]
-
-      --custom-blocks <BLOCK_NAMES>
-          Comma-separated list of custom block name to enable
-
-      --html-void-self-closing <HTML_VOID_SELF_CLOSING>
-          Self-closing style for void HTML elements (e.g. <br /> vs <br>) [default: never]
-
-          Possible values:
-          - never:     Never use self-closing syntax
-          - always:    Always use self-closing syntax
-          - unchanged: Keep existing style as-is
-
-  -h, --help
-          Print help (see a summary with '-h')
-
-  -V, --version
-          Print version
+djangofmt .                    # Format all files in the current directory (and any subdirectories).
+djangofmt src/templates        # Format all template files in `src/templates`
+djangofmt templates/base.html  # Format individual files
 ```
 
 When given a directory, djangofmt recurses into it and formats all `*.html`, `*.jinja`, `*.jinja2`, and `*.j2` files it finds.
 It also respects `.gitignore` files.
 
-For example, to format all templates in the current directory:
-
-```shell
-djangofmt .
-```
-
-Or a specific subdirectory:
-
-```shell
-djangofmt src/templates
-```
-
-You can also pass individual files directly:
-
-```shell
-djangofmt templates/base.html templates/home.html
-```
-
-### Not using pre-commit?
+### Looking for a check mode ?
 
 djangofmt intentionally does not provide a built-in check functionality because CI is too late for a code formatter. We strongly recommend using pre-commit or any IDE "format on save" integration. That being said, you can emulate check capability by chaining with a git diff command like so:
 
@@ -273,7 +224,7 @@ There is a dedicated pre-commit for these:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.6
+  rev: v0.2.7
   hooks:
     - id: djangofmt-svg
 ```

@@ -282,7 +282,7 @@ mod tests {
         success: true
         exit_code: 0
         ----- stdout -----
-        djangofmt 0.2.6
+        djangofmt 0.2.7
 
         ----- stderr -----
         "###);
