@@ -75,7 +75,7 @@ djangofmt intentionally does not provide a built-in check functionality because 
 
 ```bash
 djangofmt .
-git diff --exit-code -- ‘*.html’ || (echo "HTML templates are not formatted. Run ‘djangofmt’ to fix." && exit 1)
+git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
 ```
 
 ## Configuration
