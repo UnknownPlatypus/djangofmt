@@ -6,6 +6,9 @@
   labels: ["dependencies"],
   schedule: ["before 4am on Monday"],
   separateMajorMinor: false,
+  // Wait a week before proposing updates to mitigate supply chain attacks
+  // via compromised releases that get yanked shortly after publication.
+  minimumReleaseAge: "7 days",
   prHourlyLimit: 10,
   enabledManagers: ["github-actions","cargo", "pep621", "npm"],
   pinDigests: true, // Pin GitHub Actions to immutable SHAs.
