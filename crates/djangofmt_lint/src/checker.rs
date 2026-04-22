@@ -99,6 +99,10 @@ impl<'a> Checker<'a> {
             rules::correctness::invalid_attr_value::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::RedundantTypeAttr) {
+            rules::style::redundant_type_attr::check(element, self);
+        }
+
         for attr in &element.attrs {
             self.visit_attribute(attr);
         }
