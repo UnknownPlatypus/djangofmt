@@ -65,7 +65,17 @@
       matchDepNames: ["tracing-subscriber"],
       enabled: false,
       description: "Disable updates for tracing-subscriber due to known issue",
-    }
+    },
+    {
+      // @tailwindcss/vite 4.2.3+ broke build with vite 8 / rolldown
+      // (`Missing field tsconfigPaths on BindingViteResolvePluginConfig.resolveOptions`).
+      // The aliasOnly:false change from tailwindlabs/tailwindcss#19803 triggers
+      // an oxc resolve path that requires tsconfigPaths, which vite 8 doesn't pass.
+      matchManagers: ["npm"],
+      matchDepNames: ["@tailwindcss/vite", "tailwindcss"],
+      allowedVersions: "<=4.2.2",
+      description: "Pin tailwindcss to 4.2.2 due to vite 8 / rolldown incompatibility",
+    },
   ],
   vulnerabilityAlerts: {
     commitMessageSuffix: "",
