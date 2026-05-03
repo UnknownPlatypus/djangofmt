@@ -27,6 +27,7 @@ fn run_format_test(path: &Path, input: &str) -> String {
         IndentWidth::default(),
         None,
         SelfClosing::default(),
+        false,
     );
     let profile = Profile::Django;
 

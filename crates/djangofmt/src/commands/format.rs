@@ -30,6 +30,7 @@ impl FormatterConfig {
         indent_width: IndentWidth,
         custom_blocks: Option<Vec<String>>,
         html_void_self_closing: SelfClosing,
+        preserve_unquoted_attrs: bool,
     ) -> Self {
         Self {
             markup: build_markup_options(
@@ -37,6 +38,7 @@ impl FormatterConfig {
                 indent_width,
                 custom_blocks,
                 html_void_self_closing,
+                preserve_unquoted_attrs,
             ),
             malva: build_malva_config(print_width, indent_width),
             json: build_json_config(print_width, indent_width),
@@ -62,12 +64,15 @@ impl FormatterConfig {
             .html_void_self_closing
             .or(pyproject.html_void_self_closing)
             .unwrap_or_default();
+        let preserve_unquoted_attrs = args.preserve_unquoted_attrs
+            || pyproject.preserve_unquoted_attrs.unwrap_or(false);
 
         Self::new(
             line_length,
             indent_width,
             custom_blocks,
             html_void_self_closing,
+            preserve_unquoted_attrs,
         )
     }
 }
@@ -103,6 +108,7 @@ pub fn build_markup_options(
     indent_width: IndentWidth,
     custom_blocks: Option<Vec<String>>,
     html_void_self_closing: SelfClosing,
+    preserve_unquoted_attrs: bool,
 ) -> markup_fmt::config::FormatOptions {
     markup_fmt::config::FormatOptions {
         layout: markup_fmt::config::LayoutOptions {
@@ -141,6 +147,10 @@ pub fn build_markup_options(
             // {% stage %}...{% endstage %}
             // {% cache %}...{% endcache %}
             custom_blocks,
+            // Preserve unquoted HTML attribute values (e.g. prop=True).
+            // Useful for frameworks like Django Cotton that pass non-string
+            // types through unquoted attribute values.
+            preserve_unquoted_attrs,
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
             // <div>unformatted</div>
@@ -490,6 +500,7 @@ mod tests {
             profile: None,
             custom_blocks: None,
             html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings::default();
@@ -507,6 +518,7 @@ mod tests {
             profile: None,
             custom_blocks: None,
             html_void_self_closing: Some(SelfClosing::Always),
+            preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {
@@ -530,6 +542,7 @@ mod tests {
             profile: None,
             custom_blocks: None,
             html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {

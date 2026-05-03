@@ -17,6 +17,7 @@ pub struct PyprojectSettings {
     pub profile: Option<Profile>,
     pub custom_blocks: Option<Vec<String>>,
     pub html_void_self_closing: Option<SelfClosing>,
+    pub preserve_unquoted_attrs: Option<bool>,
     pub exclude: Option<Vec<String>>,
     pub extend_exclude: Option<Vec<String>>,
     pub include: Option<Vec<String>>,

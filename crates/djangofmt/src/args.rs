@@ -101,6 +101,11 @@ pub struct FormatCommand {
     /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
+    /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted).
+    /// Useful for frameworks like Django Cotton that use unquoted values for
+    /// non-string types (booleans, numbers, template variables).
+    #[arg(long)]
+    pub preserve_unquoted_attrs: bool,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
 }
@@ -211,7 +216,7 @@ mod tests {
 
     #[test]
     fn test_cli_help() {
-        assert_cmd_snapshot!(cli().arg("--help"), @r#"
+        assert_cmd_snapshot!(cli().arg("--help"), @"
         success: true
         exit_code: 0
         ----- stdout -----
@@ -246,6 +251,11 @@ mod tests {
                   - always:    Always use self-closing syntax
                   - unchanged: Keep existing style as-is
 
+              --preserve-unquoted-attrs
+                  Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted). Useful for
+                  frameworks like Django Cotton that use unquoted values for non-string types (booleans,
+                  numbers, template variables)
+
           -h, --help
                   Print help (see a summary with '-h')
 
@@ -274,7 +284,7 @@ mod tests {
                   Disable all logging
 
         ----- stderr -----
-        "#);
+        ");
     }
     #[test]
     fn test_cli_version() {
