@@ -1,0 +1,18 @@
+<c-features.candidate.contact-card
+  :candidate="candidate"
+  editable=True
+  action_url="{% url 'recruiting:edit' candidate_id=candidate.id %}"
+  target_id="candidate-contact-{{ candidate.id }}"
+/>
+
+<c-ui.button variant="primary" :disabled="False" count=42 />
+
+<c-layout.header.profile
+  user_id="{{ candidate.id }}"
+  name="{{ candidate.name }}"
+  :links="candidate.links"
+  links_editable=True
+  tags_editable=True
+  editable
+  name_editable
+/>

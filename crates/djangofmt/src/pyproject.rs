@@ -233,6 +233,22 @@ mod tests {
     }
 
     #[test]
+    fn test_load_preserve_unquoted_attrs() {
+        let content = r#"
+[tool.djangofmt]
+preserve-unquoted-attrs = true
+"#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                preserve_unquoted_attrs: Some(true),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
     fn test_load_options_existing_fields_still_work() {
         let content = r#"
         [tool.djangofmt]

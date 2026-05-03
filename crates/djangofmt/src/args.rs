@@ -101,9 +101,7 @@ pub struct FormatCommand {
     /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
-    /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted).
-    /// Useful for frameworks like Django Cotton that use unquoted values for
-    /// non-string types (booleans, numbers, template variables).
+    /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted)
     #[arg(long)]
     pub preserve_unquoted_attrs: bool,
     #[clap(flatten)]
@@ -252,9 +250,7 @@ mod tests {
                   - unchanged: Keep existing style as-is
 
               --preserve-unquoted-attrs
-                  Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted). Useful for
-                  frameworks like Django Cotton that use unquoted values for non-string types (booleans,
-                  numbers, template variables)
+                  Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted)
 
           -h, --help
                   Print help (see a summary with '-h')

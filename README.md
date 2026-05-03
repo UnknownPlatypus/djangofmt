@@ -89,6 +89,7 @@ indent-width = 4
 profile = "django"
 custom-blocks = ["stage", "flatblock"]
 html-void-self-closing = "never"
+preserve-unquoted-attrs = false
 ```
 
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
@@ -145,6 +146,19 @@ This makes it possible to accommodate the 2 following use cases:
 ```
 
 See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for the rationale.
+
+### Preserving unquoted attribute values
+
+By default, djangofmt quotes all attribute values (`prop=True` becomes `prop="True"`).
+Enable `preserve-unquoted-attrs` to keep them unquoted:
+
+```diff
+- <c-button editable="True" count="42" />
++ <c-button editable=True count=42 />
+```
+
+This is useful for frameworks like [Django Cotton](https://django-cotton.com/) that use unquoted
+attribute values to pass non-string types (booleans, numbers, template variables).
 
 ### Disabling formatting
 

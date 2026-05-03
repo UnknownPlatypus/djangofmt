@@ -12,8 +12,12 @@ use std::{fs, path::Path};
 fn fmt_snapshot() {
     let pattern = "**/*.html";
     glob!(pattern, |path| {
+        // Skip files covered by fmt_snapshot_preserve_unquoted
+        if path.components().any(|c| c.as_os_str() == "preserve_unquoted") {
+            return;
+        }
         let input = fs::read_to_string(path).unwrap();
-        let output = run_format_test(path, &input);
+        let output = run_format_test(path, &input, false);
         build_settings(path).bind(|| {
             let name = path.file_stem().unwrap().to_str().unwrap();
             assert_snapshot!(name, output);
@@ -21,13 +25,25 @@ fn fmt_snapshot() {
     });
 }
 
-fn run_format_test(path: &Path, input: &str) -> String {
+#[test]
+fn fmt_snapshot_preserve_unquoted() {
+    glob!("preserve_unquoted/**/*.html", |path| {
+        let input = fs::read_to_string(path).unwrap();
+        let output = run_format_test(path, &input, true);
+        build_settings(path).bind(|| {
+            let name = path.file_stem().unwrap().to_str().unwrap();
+            assert_snapshot!(name, output);
+        });
+    });
+}
+
+fn run_format_test(path: &Path, input: &str, preserve_unquoted_attrs: bool) -> String {
     let config = FormatterConfig::new(
         LineLength::default(),
         IndentWidth::default(),
         None,
         SelfClosing::default(),
-        false,
+        preserve_unquoted_attrs,
     );
     let profile = Profile::Django;
 

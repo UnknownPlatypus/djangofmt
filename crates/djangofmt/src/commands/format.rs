@@ -147,9 +147,8 @@ pub fn build_markup_options(
             // {% stage %}...{% endstage %}
             // {% cache %}...{% endcache %}
             custom_blocks,
-            // Preserve unquoted HTML attribute values (e.g. prop=True).
-            // Useful for frameworks like Django Cotton that pass non-string
-            // types through unquoted attribute values.
+            // Preserve unquoted HTML attribute values:
+            // <c-button editable=True /> -> stays as editable=True
             preserve_unquoted_attrs,
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
@@ -551,6 +550,43 @@ mod tests {
         };
         let config = FormatterConfig::from_args(&args, &pyproject);
         assert_eq!(config.markup.layout.print_width, 200);
+    }
+
+    #[test]
+    fn formatter_config_preserve_unquoted_attrs_from_cli() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            preserve_unquoted_attrs: true,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings::default();
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert!(config.markup.language.preserve_unquoted_attrs);
+    }
+
+    #[test]
+    fn formatter_config_preserve_unquoted_attrs_from_pyproject() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings {
+            preserve_unquoted_attrs: Some(true),
+            ..Default::default()
+        };
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert!(config.markup.language.preserve_unquoted_attrs);
     }
 
     #[rstest]
