@@ -18,7 +18,7 @@ pub fn format(
     let profile = get_profile(profile);
     let line_length = LineLength::try_from(line_length).unwrap_or_default();
     let indent_width = IndentWidth::try_from(indent_width).unwrap_or_default();
-    let config = FormatterConfig::new(line_length, indent_width, None, SelfClosing::default());
+    let config = FormatterConfig::new(line_length, indent_width, None, SelfClosing::default(), false);
 
     format_text(source, &config, profile)
         .map(|opt| opt.unwrap_or_else(|| source.to_string()))

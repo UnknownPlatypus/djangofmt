@@ -12,6 +12,7 @@ use crate::args::{FormatCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::PyprojectSettings;
+use crate::resolver::resolve_bool_arg;
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -30,6 +31,7 @@ impl FormatterConfig {
         indent_width: IndentWidth,
         custom_blocks: Option<Vec<String>>,
         html_void_self_closing: SelfClosing,
+        preserve_unquoted_attrs: bool,
     ) -> Self {
         Self {
             markup: build_markup_options(
@@ -37,6 +39,7 @@ impl FormatterConfig {
                 indent_width,
                 custom_blocks,
                 html_void_self_closing,
+                preserve_unquoted_attrs,
             ),
             malva: build_malva_config(print_width, indent_width),
             json: build_json_config(print_width, indent_width),
@@ -62,12 +65,17 @@ impl FormatterConfig {
             .html_void_self_closing
             .or(pyproject.html_void_self_closing)
             .unwrap_or_default();
+        let preserve_unquoted_attrs =
+            resolve_bool_arg(args.preserve_unquoted_attrs, args.no_preserve_unquoted_attrs)
+                .or(pyproject.preserve_unquoted_attrs)
+                .unwrap_or_default();
 
         Self::new(
             line_length,
             indent_width,
             custom_blocks,
             html_void_self_closing,
+            preserve_unquoted_attrs,
         )
     }
 }
@@ -103,6 +111,7 @@ pub fn build_markup_options(
     indent_width: IndentWidth,
     custom_blocks: Option<Vec<String>>,
     html_void_self_closing: SelfClosing,
+    preserve_unquoted_attrs: bool,
 ) -> markup_fmt::config::FormatOptions {
     markup_fmt::config::FormatOptions {
         layout: markup_fmt::config::LayoutOptions {
@@ -141,6 +150,9 @@ pub fn build_markup_options(
             // {% stage %}...{% endstage %}
             // {% cache %}...{% endcache %}
             custom_blocks,
+            // Preserve unquoted HTML attribute values:
+            // <c-button editable=True /> -> stays as editable=True
+            preserve_unquoted_attrs,
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
             // <div>unformatted</div>
@@ -490,6 +502,8 @@ mod tests {
             profile: None,
             custom_blocks: None,
             html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings::default();
@@ -507,6 +521,8 @@ mod tests {
             profile: None,
             custom_blocks: None,
             html_void_self_closing: Some(SelfClosing::Always),
+            preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {
@@ -530,6 +546,8 @@ mod tests {
             profile: None,
             custom_blocks: None,
             html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {
@@ -538,6 +556,45 @@ mod tests {
         };
         let config = FormatterConfig::from_args(&args, &pyproject);
         assert_eq!(config.markup.layout.print_width, 200);
+    }
+
+    #[test]
+    fn formatter_config_preserve_unquoted_attrs_from_cli() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            preserve_unquoted_attrs: true,
+            no_preserve_unquoted_attrs: false,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings::default();
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert!(config.markup.language.preserve_unquoted_attrs);
+    }
+
+    #[test]
+    fn formatter_config_preserve_unquoted_attrs_from_pyproject() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings {
+            preserve_unquoted_attrs: Some(true),
+            ..Default::default()
+        };
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert!(config.markup.language.preserve_unquoted_attrs);
     }
 
     #[rstest]

@@ -1,0 +1,5 @@
+[enabled]
+preserve-unquoted-attrs = true
+
+[disabled]
+preserve-unquoted-attrs = false

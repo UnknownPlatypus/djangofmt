@@ -34,6 +34,7 @@ fn run_parse_error_test(path: &path::Path, input: &str) -> String {
         IndentWidth::default(),
         None,
         SelfClosing::default(),
+        false,
     );
     // Use just the filename for display to avoid absolute paths in snapshots
     let display_path = path.file_name().map(Path::new).map(Path::to_path_buf);
