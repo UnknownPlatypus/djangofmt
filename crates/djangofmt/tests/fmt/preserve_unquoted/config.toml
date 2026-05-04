@@ -1,2 +1,5 @@
 [enabled]
-preserveUnquotedAttrs = true
+preserve-unquoted-attrs = true
+
+[disabled]
+preserve-unquoted-attrs = false
