@@ -12,6 +12,7 @@ use crate::args::{FormatCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::PyprojectSettings;
+use crate::resolver::resolve_bool_arg;
 
 /// Pre-built configuration for all formatters.
 pub struct FormatterConfig {
@@ -64,8 +65,10 @@ impl FormatterConfig {
             .html_void_self_closing
             .or(pyproject.html_void_self_closing)
             .unwrap_or_default();
-        let preserve_unquoted_attrs = args.preserve_unquoted_attrs
-            || pyproject.preserve_unquoted_attrs.unwrap_or(false);
+        let preserve_unquoted_attrs =
+            resolve_bool_arg(args.preserve_unquoted_attrs, args.no_preserve_unquoted_attrs)
+                .or(pyproject.preserve_unquoted_attrs)
+                .unwrap_or_default();
 
         Self::new(
             line_length,
@@ -500,6 +503,7 @@ mod tests {
             custom_blocks: None,
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings::default();
@@ -518,6 +522,7 @@ mod tests {
             custom_blocks: None,
             html_void_self_closing: Some(SelfClosing::Always),
             preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {
@@ -542,6 +547,7 @@ mod tests {
             custom_blocks: None,
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {
@@ -562,6 +568,7 @@ mod tests {
             custom_blocks: None,
             html_void_self_closing: None,
             preserve_unquoted_attrs: true,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings::default();
@@ -579,6 +586,7 @@ mod tests {
             custom_blocks: None,
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings {

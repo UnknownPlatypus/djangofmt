@@ -6,34 +6,44 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
 use insta::{assert_snapshot, glob};
-use std::{fs, path::Path};
+use serde::Deserialize;
+use std::{collections::HashMap, fs, path::Path};
 
-#[test]
-fn fmt_snapshot() {
-    let pattern = "**/*.html";
-    glob!(pattern, |path| {
-        // Skip files covered by fmt_snapshot_preserve_unquoted
-        if path.components().any(|c| c.as_os_str() == "preserve_unquoted") {
-            return;
-        }
-        let input = fs::read_to_string(path).unwrap();
-        let output = run_format_test(path, &input, false);
-        build_settings(path).bind(|| {
-            let name = path.file_stem().unwrap().to_str().unwrap();
-            assert_snapshot!(name, output);
-        });
-    });
+/// Test-only config struct matching the options exposed by djangofmt.
+#[derive(Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct TestFormatOptions {
+    #[serde(default)]
+    preserve_unquoted_attrs: bool,
 }
 
 #[test]
-fn fmt_snapshot_preserve_unquoted() {
-    glob!("preserve_unquoted/**/*.html", |path| {
+fn fmt_snapshot() {
+    glob!("**/*.html", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let output = run_format_test(path, &input, true);
-        build_settings(path).bind(|| {
-            let name = path.file_stem().unwrap().to_str().unwrap();
-            assert_snapshot!(name, output);
-        });
+
+        let options = fs::read_to_string(path.with_file_name("config.toml"))
+            .map(|config_file| {
+                toml::from_str::<HashMap<String, TestFormatOptions>>(&config_file).unwrap()
+            })
+            .ok();
+
+        if let Some(options) = options {
+            options.into_iter().for_each(|(option_name, options)| {
+                let output =
+                    run_format_test(path, &input, options.preserve_unquoted_attrs);
+                build_settings(path).bind(|| {
+                    let name = path.file_stem().unwrap().to_str().unwrap();
+                    assert_snapshot!(format!("{name}.{option_name}"), output);
+                });
+            })
+        } else {
+            let output = run_format_test(path, &input, false);
+            build_settings(path).bind(|| {
+                let name = path.file_stem().unwrap().to_str().unwrap();
+                assert_snapshot!(name, output);
+            });
+        }
     });
 }
 

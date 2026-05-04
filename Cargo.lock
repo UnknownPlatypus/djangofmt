@@ -813,8 +813,8 @@ dependencies = [
 
 [[package]]
 name = "markup_fmt"
-version = "0.26.0"
-source = "git+https://github.com/nickpetrovic/markup_fmt?rev=483155a#483155a4bf3f2676cec2bd4eb8d97a8acb757d99"
+version = "0.27.0"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=67a7c3c0f54432d06cc1ef04fe012977eb48c17d#67a7c3c0f54432d06cc1ef04fe012977eb48c17d"
 dependencies = [
  "aho-corasick",
  "css_dataset",

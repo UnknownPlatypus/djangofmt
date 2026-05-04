@@ -102,8 +102,10 @@ pub struct FormatCommand {
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
     /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted)
-    #[arg(long)]
+    #[arg(long, overrides_with("no_preserve_unquoted_attrs"))]
     pub preserve_unquoted_attrs: bool,
+    #[arg(long, overrides_with("preserve_unquoted_attrs"), hide = true)]
+    pub no_preserve_unquoted_attrs: bool,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
 }
@@ -214,7 +216,7 @@ mod tests {
 
     #[test]
     fn test_cli_help() {
-        assert_cmd_snapshot!(cli().arg("--help"), @"
+        assert_cmd_snapshot!(cli().arg("--help"), @r#"
         success: true
         exit_code: 0
         ----- stdout -----
@@ -280,7 +282,7 @@ mod tests {
                   Disable all logging
 
         ----- stderr -----
-        ");
+        "#);
     }
     #[test]
     fn test_cli_version() {
