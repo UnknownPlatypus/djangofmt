@@ -20,7 +20,7 @@ ignore = { version = "0.4.25" }
 insta = { version = "1.46.3", features = ["glob", "yaml"] }
 insta-cmd = { version = "0.6.0" }
 malva = { version = "0.15.2", features = ["config_serde"] }
-markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "d1bf5412aa630f9e9f1c908b86a425534c7fedfe" }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "8fdba327b76dd601fe8e7120a501db262b0c6030" }
 miette = { version = "7.6.0", features = ["fancy"] }
 rayon = { version = "1.11.0" }
 rstest = { version = "=0.26.1" }
