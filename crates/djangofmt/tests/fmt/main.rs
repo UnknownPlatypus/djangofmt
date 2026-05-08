@@ -20,14 +20,14 @@ fn fmt_snapshot() {
             .ok();
 
         if let Some(options) = options {
-            options.into_iter().for_each(|(option_name, pyproject)| {
+            for (option_name, pyproject) in options {
                 let config = build_config(&pyproject);
                 let output = run_format_test(path, &input, &config);
                 build_settings(path).bind(|| {
                     let name = path.file_stem().unwrap().to_str().unwrap();
                     assert_snapshot!(format!("{name}.{option_name}"), output);
                 });
-            })
+            }
         } else {
             let config = build_config(&PyprojectSettings::default());
             let output = run_format_test(path, &input, &config);

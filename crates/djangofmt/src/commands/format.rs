@@ -65,10 +65,12 @@ impl FormatterConfig {
             .html_void_self_closing
             .or(pyproject.html_void_self_closing)
             .unwrap_or_default();
-        let preserve_unquoted_attrs =
-            resolve_bool_arg(args.preserve_unquoted_attrs, args.no_preserve_unquoted_attrs)
-                .or(pyproject.preserve_unquoted_attrs)
-                .unwrap_or_default();
+        let preserve_unquoted_attrs = resolve_bool_arg(
+            args.preserve_unquoted_attrs,
+            args.no_preserve_unquoted_attrs,
+        )
+        .or(pyproject.preserve_unquoted_attrs)
+        .unwrap_or_default();
 
         Self::new(
             line_length,
@@ -595,6 +597,27 @@ mod tests {
         };
         let config = FormatterConfig::from_args(&args, &pyproject);
         assert!(config.markup.language.preserve_unquoted_attrs);
+    }
+
+    #[test]
+    fn formatter_config_no_preserve_unquoted_attrs_cli_overrides_pyproject() {
+        let args = FormatCommand {
+            files: vec![],
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: true,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let pyproject = PyprojectSettings {
+            preserve_unquoted_attrs: Some(true),
+            ..Default::default()
+        };
+        let config = FormatterConfig::from_args(&args, &pyproject);
+        assert!(!config.markup.language.preserve_unquoted_attrs);
     }
 
     #[rstest]

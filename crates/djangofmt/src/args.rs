@@ -101,9 +101,11 @@ pub struct FormatCommand {
     /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
-    /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted)
+    /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted).
+    /// Use `--no-preserve-unquoted-attrs` to disable.
     #[arg(long, overrides_with("no_preserve_unquoted_attrs"))]
     pub preserve_unquoted_attrs: bool,
+    /// Do not preserve unquoted HTML attribute values.
     #[arg(long, overrides_with("preserve_unquoted_attrs"), hide = true)]
     pub no_preserve_unquoted_attrs: bool,
     #[clap(flatten)]
@@ -252,7 +254,8 @@ mod tests {
                   - unchanged: Keep existing style as-is
 
               --preserve-unquoted-attrs
-                  Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted)
+                  Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted). Use
+                  `--no-preserve-unquoted-attrs` to disable
 
           -h, --help
                   Print help (see a summary with '-h')

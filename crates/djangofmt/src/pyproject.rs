@@ -234,10 +234,10 @@ mod tests {
 
     #[test]
     fn test_load_preserve_unquoted_attrs() {
-        let content = r#"
+        let content = r"
 [tool.djangofmt]
 preserve-unquoted-attrs = true
-"#;
+";
         let result = load_options_from_pyproject_toml(content);
         assert_eq!(
             result,
