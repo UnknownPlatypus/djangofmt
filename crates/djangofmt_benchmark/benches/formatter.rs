@@ -28,6 +28,7 @@ fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
         IndentWidth::default(),
         None,
         SelfClosing::default(),
+        false,
     );
 
     bencher

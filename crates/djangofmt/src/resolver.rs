@@ -38,7 +38,7 @@ pub const DEFAULT_EXCLUDE: &[&str] = &[
     "venv",
 ];
 
-fn resolve_bool_arg(yes: bool, no: bool) -> Option<bool> {
+pub(crate) fn resolve_bool_arg(yes: bool, no: bool) -> Option<bool> {
     match (yes, no) {
         (true, false) => Some(true),
         (false, true) => Some(false),

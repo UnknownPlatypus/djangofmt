@@ -1,0 +1,5 @@
+[preserve_unquoted_attrs_on]
+preserve-unquoted-attrs = true
+
+[preserve_unquoted_attrs_off]
+preserve-unquoted-attrs = false

@@ -18,6 +18,7 @@ invalid-css-property;
         IndentWidth::default(),
         None,
         SelfClosing::default(),
+        false,
     );
     let profile = Profile::Django;
 
