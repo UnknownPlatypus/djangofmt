@@ -44,6 +44,10 @@ jobs:
               - crates/**
               - .github/workflows/ci.yml
               - Cargo.toml
+              - Cargo.lock
+              - rust-toolchain.toml
+              - rustfmt.toml
+              - clippy.toml
 
   build-and-compare:
     name: "Ecosystem check"
