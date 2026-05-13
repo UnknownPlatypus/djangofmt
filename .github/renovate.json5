@@ -10,7 +10,7 @@
   // via compromised releases that get yanked shortly after publication.
   minimumReleaseAge: "7 days",
   prHourlyLimit: 10,
-  enabledManagers: ["github-actions","cargo", "pep621", "npm"],
+  enabledManagers: ["github-actions","cargo", "pep621", "npm", "custom.regex"],
   pinDigests: true, // Pin GitHub Actions to immutable SHAs.
   cargo: {
     // See https://docs.renovatebot.com/configuration-options/#rangestrategy
@@ -75,6 +75,47 @@
       matchDepNames: ["@tailwindcss/vite", "tailwindcss"],
       allowedVersions: "<=4.2.2",
       description: "Pin tailwindcss to 4.2.2 due to vite 8 / rolldown incompatibility",
+    },
+    {
+      commitMessageTopic: "MSRV",
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["msrv"],
+      // We have a rolling support policy for the MSRV
+      // 2 releases back * 6 weeks per release * 7 days per week + 1
+      minimumReleaseAge: "85 days",
+      internalChecksFilter: "strict",
+      groupName: "MSRV",
+    },
+    {
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["rust"],
+      commitMessageTopic: "Rust",
+    },
+  ],
+  customManagers: [
+    // Minimum supported Rust toolchain version
+    {
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)Cargo\\.toml?$/"],
+      matchStrings: [
+        'rust-version\\s*=\\s*"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)"',
+      ],
+      depNameTemplate: "msrv",
+      packageNameTemplate: "rust-lang/rust",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^(?<version>\\d+\\.\\d+(\\.\\d+)?)$",
+    },
+    // Rust toolchain version
+    {
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)rust-toolchain\\.toml?$/"],
+      matchStrings: [
+        'channel\\s*=\\s*"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)"',
+      ],
+      depNameTemplate: "rust",
+      packageNameTemplate: "rust-lang/rust",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^(?<version>\\d+\\.\\d+(\\.\\d+)?)$",
     },
   ],
   vulnerabilityAlerts: {
