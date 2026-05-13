@@ -28,10 +28,11 @@ playground-wasm-build:
     wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
 
 # Run playground dev server (builds WASM first)
+[working-directory: 'playground']
 [group('playground')]
 playground-dev: playground-wasm-build
-    npm ci --prefix playground
-    npm run dev --prefix playground
+    bun ci
+    bun run dev
 
 # Setup python benchmarks
 [group('bench')]
