@@ -187,6 +187,11 @@ strict = true
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
 
+[tool.uv]
+# Supply chain mitigation: ignore package versions released in the last week.
+# https://docs.astral.sh/uv/reference/settings/#exclude-newer
+exclude-newer = "1 week"
+
 [tool.uv.workspace]
 members = [
   "python/benchmarks",

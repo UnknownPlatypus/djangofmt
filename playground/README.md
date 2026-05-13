@@ -25,11 +25,11 @@ just playground-dev
 To build:
 
 ```bash
-npm run build
+bun run build
 ```
 
 To preview the build:
 
 ```bash
-npm run preview
+bun run preview
 ```

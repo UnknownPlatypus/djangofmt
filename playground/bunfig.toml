@@ -1,0 +1,6 @@
+telemetry = false  # https://bun.com/docs/runtime/bunfig#telemetry
+
+[install]
+linker = "isolated"  # https://bun.com/docs/pm/isolated-installs
+exact = true  # pin exact versions on `bun add`
+minimumReleaseAge = 604800  # 7 days
