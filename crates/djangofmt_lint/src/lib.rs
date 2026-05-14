@@ -21,6 +21,7 @@ mod checker;
 pub mod fix;
 pub mod lint_context;
 pub mod registry;
+pub mod rule_selector;
 pub mod rule_set;
 mod rules;
 pub mod settings;
@@ -34,8 +35,9 @@ pub use fix::apply::{
 pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
 pub use lint_context::{DiagnosticGuard, LintContext};
 pub use registry::{Rule, RuleCategory, RuleGroup};
+pub use rule_selector::{ParseError, RuleSelector, Specificity};
 pub use rule_set::RuleSet;
-pub use settings::Settings;
+pub use settings::{PreviewMode, RuleSelection, Settings};
 pub use violation::{Violation, ViolationMetadata};
 
 use markup_fmt::ast::Root;

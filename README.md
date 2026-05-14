@@ -129,6 +129,21 @@ Command-line arguments always take precedence over `pyproject.toml` settings.
 
 See [Controlling the formatting](https://unknownplatypus.github.io/djangofmt/docs/formatting/) for the behaviour of each option and how to opt into per-node overrides.
 
+Lint rule selection lives in a nested `[tool.djangofmt.lint]` subtable (mirroring `ruff`). The `check` subcommand is still preview; expect the surface to evolve.
+
+```toml
+[tool.djangofmt.lint]
+# Replaces the default rule set when provided (omit to keep "ALL").
+select = ["ALL"]
+# Disable specific rules or whole categories.
+ignore = ["invalid-attr-value"]
+# Extend, rather than replace, on top of the inherited set.
+extend-select = ["correctness"]
+extend-ignore = []
+# Opt into preview-stability rules.
+preview = false
+```
+
 ## Editor integration
 
 See the [editor integration guide](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/).

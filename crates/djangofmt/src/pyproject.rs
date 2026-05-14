@@ -1,3 +1,4 @@
+use djangofmt_lint::RuleSelector;
 use serde::Deserialize;
 use std::{
     fs,
@@ -27,6 +28,26 @@ pub struct PyprojectSettings {
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
+    /// Optional `[tool.djangofmt.lint]` subtable.
+    pub lint: Option<LintTomlSettings>,
+}
+
+/// Serde-only struct for deserializing `[tool.djangofmt.lint]` from
+/// `pyproject.toml`.
+///
+/// `select` is `Option<Vec<RuleSelector>>` (not `Vec<RuleSelector>`) so that
+/// a missing key (`None`) is distinguishable from an explicit empty list
+/// (`Some(vec![])`). This is load-bearing: at the resolver, `Some(select)`
+/// *replaces* the carried select set, whereas `None` extends only via
+/// `extend_select` / `extend_ignore` / `ignore`.
+#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct LintTomlSettings {
+    pub select: Option<Vec<RuleSelector>>,
+    pub ignore: Option<Vec<RuleSelector>>,
+    pub extend_select: Option<Vec<RuleSelector>>,
+    pub extend_ignore: Option<Vec<RuleSelector>>,
+    pub preview: Option<bool>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -297,6 +318,119 @@ show-fixes = true
                 custom_blocks: Some(vec!["cache".to_string()]),
                 ..Default::default()
             }
+        );
+    }
+
+    // ── [tool.djangofmt.lint] ──────────────────────────────────────────
+
+    #[test]
+    fn test_load_options_with_full_lint_table() {
+        use djangofmt_lint::{Rule, RuleCategory, RuleSelector};
+        let content = r#"
+        [tool.djangofmt.lint]
+        select = ["ALL"]
+        ignore = ["invalid-attr-value"]
+        extend-select = ["correctness"]
+        extend-ignore = ["correctness"]
+        preview = true
+    "#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                lint: Some(LintTomlSettings {
+                    select: Some(vec![RuleSelector::All]),
+                    ignore: Some(vec![RuleSelector::Rule(Rule::InvalidAttrValue)]),
+                    extend_select: Some(vec![RuleSelector::Category(RuleCategory::Correctness)]),
+                    extend_ignore: Some(vec![RuleSelector::Category(RuleCategory::Correctness)]),
+                    preview: Some(true),
+                }),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_options_with_partial_lint_table() {
+        use djangofmt_lint::{Rule, RuleSelector};
+        let content = r#"
+        [tool.djangofmt.lint]
+        ignore = ["invalid-attr-value"]
+    "#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                lint: Some(LintTomlSettings {
+                    ignore: Some(vec![RuleSelector::Rule(Rule::InvalidAttrValue)]),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_options_unknown_key_in_lint_table_returns_default() {
+        // `deny_unknown_fields` on `LintTomlSettings` should cause the whole
+        // pyproject load to fall back to default (matches existing behavior
+        // for other unknown-key cases).
+        let content = r#"
+        [tool.djangofmt.lint]
+        bogus = "value"
+    "#;
+        assert_eq!(
+            load_options_from_pyproject_toml(content),
+            PyprojectSettings::default()
+        );
+    }
+
+    #[test]
+    fn test_load_options_with_empty_select_list() {
+        // `select = []` must round-trip as `Some(vec![])` — distinct from
+        // `select` being missing entirely (which is `None`).
+        let content = r"
+        [tool.djangofmt.lint]
+        select = []
+    ";
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result.lint,
+            Some(LintTomlSettings {
+                select: Some(vec![]),
+                ..Default::default()
+            })
+        );
+    }
+
+    #[test]
+    fn test_load_options_with_missing_select_is_none() {
+        // No `select` key — `lint.select` must be `None`, not `Some(vec![])`.
+        let content = r"
+        [tool.djangofmt.lint]
+        preview = false
+    ";
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result.lint,
+            Some(LintTomlSettings {
+                select: None,
+                preview: Some(false),
+                ..Default::default()
+            })
+        );
+    }
+
+    #[test]
+    fn test_load_options_rejects_invalid_rule_selector_in_lint_table() {
+        let content = r#"
+        [tool.djangofmt.lint]
+        select = ["definitely-not-a-rule"]
+    "#;
+        // Falls back to default on parse failure (matches existing behavior).
+        assert_eq!(
+            load_options_from_pyproject_toml(content),
+            PyprojectSettings::default()
         );
     }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### ⛰️ Features
+
+- *(lint)* Add `select` / `ignore` rule-selection configuration with preview/stability gating
+
 ## [0.2.10](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.9..v0.2.10) - 2026-06-03
 
 ### ⛰️ Features

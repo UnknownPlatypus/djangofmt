@@ -37,8 +37,22 @@ impl RuleGroup {
 
 /// Functional categories for lint rules.
 ///
-/// Categories help users enable/disable groups of related rules.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter, EnumString, Serialize, Deserialize)]
+/// Categories help users enable/disable groups of related rules. Stability
+/// (`Stable`/`Preview`/`Deprecated`/`Removed`) is orthogonal and lives on
+/// [`RuleGroup`].
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    EnumIter,
+    EnumString,
+    strum::Display,
+    Serialize,
+    Deserialize,
+)]
 #[strum(serialize_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
 pub enum RuleCategory {

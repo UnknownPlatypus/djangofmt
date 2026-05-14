@@ -450,3 +450,249 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
     Couldn't check 1 files!
     "#);
 }
+
+// ── Rule selection (--select / --ignore / --preview) ───────────────
+
+/// Write the canonical `<form method="put">...` 5-violation fixture and
+/// return its path. Tests can run any selector combination against it.
+fn write_invalid_form_method_file(dir: &TempDir) -> std::path::PathBuf {
+    let file = dir.path().join("form_method.invalid.html");
+    std::fs::write(
+        &file,
+        r#"<!-- Invalid methods -->
+<form method="put">Submit</form>
+<form method="delete">Submit</form>
+<form method="patch">Submit</form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form method="invalid">Submit</form>
+{% endif %}
+
+<!-- Nested elements: inner form inside outer div -->
+<div>
+    <form method="patch">Submit</form>
+</div>
+"#,
+    )
+    .expect("Failed to write fixture file");
+    file
+}
+
+#[test]
+fn check_select_invalid_attr_value_reports_violations() {
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    let output = cli()
+        .arg("check")
+        .arg("--select=invalid-attr-value")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("Invalid value 'put' for attribute 'method'"),
+        "expected 'put' violation, got:\n{stderr}"
+    );
+    assert!(
+        stderr.contains("Invalid value 'delete' for attribute 'method'"),
+        "expected 'delete' violation, got:\n{stderr}"
+    );
+}
+
+#[test]
+fn check_ignore_invalid_attr_value_suppresses_violations() {
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    assert_cmd_snapshot!(
+        cli()
+            .arg("check")
+            .arg("--ignore=invalid-attr-value")
+            .arg(file.as_os_str()),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    "#);
+}
+
+#[test]
+fn check_select_correctness_category_reports_violations() {
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    let output = cli()
+        .arg("check")
+        .arg("--select=correctness")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid value 'put' for attribute 'method'"));
+}
+
+#[test]
+fn check_exact_select_beats_category_ignore() {
+    // --select=invalid-attr-value (rule level) beats --ignore=correctness
+    // (category level) by specificity.
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    let output = cli()
+        .arg("check")
+        .arg("--select=invalid-attr-value")
+        .arg("--ignore=correctness")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid value 'put' for attribute 'method'"));
+}
+
+#[test]
+fn check_select_all_ignore_specific_disables_rule() {
+    // --select=ALL with --ignore=invalid-attr-value: ignore at same Rule
+    // specificity wins last-in-order.
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    assert_cmd_snapshot!(
+        cli()
+            .arg("check")
+            .arg("--select=ALL")
+            .arg("--ignore=invalid-attr-value")
+            .arg(file.as_os_str()),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    "#);
+}
+
+#[test]
+fn check_unknown_selector_errors() {
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    let output = cli()
+        .arg("check")
+        .arg("--select=nope")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("nope"),
+        "expected error to mention 'nope', got:\n{stderr}"
+    );
+}
+
+#[test]
+fn check_preview_flag_does_not_error() {
+    // `--preview` enables preview rules; on a clean file it stays quiet.
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("test.html");
+    std::fs::write(&file, "<form method=\"post\"></form>\n").unwrap();
+    assert_cmd_snapshot!(
+        cli().arg("check").arg("--preview").arg(file.as_os_str()),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    "#);
+}
+
+// ── Rule selection via pyproject.toml ────────────────────────────────
+
+#[test]
+fn check_pyproject_ignore_suppresses_violations() {
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    std::fs::write(
+        dir.path().join("pyproject.toml"),
+        r#"
+[tool.djangofmt.lint]
+ignore = ["invalid-attr-value"]
+"#,
+    )
+    .unwrap();
+
+    let output = cli()
+        .current_dir(dir.path())
+        .arg("check")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "expected check to pass with pyproject ignore, got stdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr),
+    );
+}
+
+#[test]
+fn check_cli_select_all_replaces_pyproject_ignore() {
+    // pyproject: ignore = ["invalid-attr-value"] -> rule suppressed.
+    // CLI: --select=ALL -> the running set is rebuilt from CLI's selectors
+    // alone, dropping pyproject's ignore; rule is re-enabled.
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    std::fs::write(
+        dir.path().join("pyproject.toml"),
+        r#"
+[tool.djangofmt.lint]
+ignore = ["invalid-attr-value"]
+"#,
+    )
+    .expect("Failed to write pyproject.toml");
+
+    let output = cli()
+        .current_dir(dir.path())
+        .arg("check")
+        .arg("--select=ALL")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "expected check to fail");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid value 'put' for attribute 'method'"));
+}
+
+#[test]
+fn check_cli_select_replaces_pyproject_select() {
+    // pyproject: select = [] (nothing enabled)
+    // CLI: --select=ALL  -> replacement: invalid-attr-value re-enabled.
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    std::fs::write(
+        dir.path().join("pyproject.toml"),
+        r"
+[tool.djangofmt.lint]
+select = []
+",
+    )
+    .unwrap();
+
+    let output = cli()
+        .current_dir(dir.path())
+        .arg("check")
+        .arg("--select=ALL")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success(), "expected check to fail");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid value 'put' for attribute 'method'"));
+}

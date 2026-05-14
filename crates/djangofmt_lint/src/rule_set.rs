@@ -20,6 +20,13 @@ const SLICE_BITS: u16 = u64::BITS as u16;
 pub struct RuleSet([u64; RULESET_SIZE]);
 
 impl RuleSet {
+    /// An empty set.
+    #[must_use]
+    #[inline]
+    pub const fn empty() -> Self {
+        Self([0u64; RULESET_SIZE])
+    }
+
     /// A set containing only `rule`.
     #[must_use]
     #[inline]
@@ -38,6 +45,15 @@ impl RuleSet {
         self.0[index] |= 1u64 << shift;
     }
 
+    /// Remove `rule` from the set.
+    #[inline]
+    pub const fn remove(&mut self, rule: Rule) {
+        let rule = rule as u16;
+        let index = rule as usize / SLICE_BITS as usize;
+        let shift = rule % SLICE_BITS;
+        self.0[index] &= !(1u64 << shift);
+    }
+
     /// Whether `rule` is in the set.
     #[must_use]
     #[inline]
@@ -46,6 +62,20 @@ impl RuleSet {
         let index = rule as usize / SLICE_BITS as usize;
         let shift = rule % SLICE_BITS;
         self.0[index] & (1u64 << shift) != 0
+    }
+
+    /// Whether the set contains no rules.
+    #[must_use]
+    #[inline]
+    pub const fn is_empty(&self) -> bool {
+        let mut i = 0;
+        while i < RULESET_SIZE {
+            if self.0[i] != 0 {
+                return false;
+            }
+            i += 1;
+        }
+        true
     }
 
     /// Union `other` into this set in place.
@@ -76,6 +106,14 @@ impl FromIterator<Rule> for RuleSet {
             set.insert(rule);
         }
         set
+    }
+}
+
+impl Extend<Rule> for RuleSet {
+    fn extend<I: IntoIterator<Item = Rule>>(&mut self, iter: I) {
+        for rule in iter {
+            self.insert(rule);
+        }
     }
 }
 

@@ -3,7 +3,8 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Settings, check_ast, fix_ast,
+    Applicability, FileDiagnostics, LintDiagnostic, PreviewMode, RuleSelector, Settings, check_ast,
+    fix_ast,
 };
 
 use insta::{assert_snapshot, glob};
@@ -63,14 +64,14 @@ fn fix_snapshot() {
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
 
-        let safe = fix_ast(&input, &ast, &Settings::default(), Applicability::Safe);
+        let safe = fix_ast(&input, &ast, &test_settings(), Applicability::Safe);
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &Settings::default(), Applicability::Unsafe);
+        let unsafe_fixed = fix_ast(&input, &ast, &test_settings(), Applicability::Unsafe);
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
@@ -81,10 +82,16 @@ fn fix_snapshot() {
 
 const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
+/// Settings for fixture tests: every rule, including preview ones, so that a
+/// rule's fixtures are exercised regardless of its stability group.
+fn test_settings() -> Settings {
+    Settings::from_selectors(&[RuleSelector::All], &[], &[], &[], PreviewMode::Enabled)
+}
+
 fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
     let mut parser = Parser::new(input, Language::Django, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
-    let settings = Settings::default();
+    let settings = test_settings();
     check_ast(input, &ast, &settings)
 }
 

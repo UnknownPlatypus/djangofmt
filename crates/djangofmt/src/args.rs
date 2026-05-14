@@ -2,6 +2,7 @@ use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
+use djangofmt_lint::RuleSelector;
 use serde::Deserialize;
 use std::path::PathBuf;
 
@@ -191,6 +192,46 @@ pub struct CheckCommand {
     pub no_show_fixes: bool,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
+
+    /// Comma-separated list of rule codes or categories to enable (or `ALL`).
+    /// Replaces the default rule set when provided.
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "RULE_OR_CATEGORY",
+        help_heading = "Rule selection"
+    )]
+    pub select: Option<Vec<RuleSelector>>,
+    /// Comma-separated list of rule codes or categories to disable.
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "RULE_OR_CATEGORY",
+        help_heading = "Rule selection"
+    )]
+    pub ignore: Option<Vec<RuleSelector>>,
+    /// Like `--select`, but adds on top of the existing rule set instead of replacing it.
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "RULE_OR_CATEGORY",
+        help_heading = "Rule selection"
+    )]
+    pub extend_select: Option<Vec<RuleSelector>>,
+    /// Like `--ignore`, but adds on top of the existing ignore set instead of replacing it.
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_name = "RULE_OR_CATEGORY",
+        help_heading = "Rule selection"
+    )]
+    pub extend_ignore: Option<Vec<RuleSelector>>,
+    /// Enable preview-stability rules. Use `--no-preview` to disable.
+    #[arg(long, overrides_with("no_preview"), help_heading = "Rule selection")]
+    pub preview: bool,
+    /// Disable preview-stability rules.
+    #[arg(long, overrides_with("preview"), hide = true)]
+    pub no_preview: bool,
 }
 
 #[allow(clippy::module_name_repetitions)]
