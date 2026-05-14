@@ -19,13 +19,19 @@
 
 mod checker;
 pub mod registry;
+pub mod rule_group;
+pub mod rule_selector;
+pub mod rule_set;
 mod rules;
 pub mod settings;
 mod violation;
 
 pub use checker::Checker;
 pub use registry::{Rule, RuleCategory};
-pub use settings::Settings;
+pub use rule_group::RuleGroup;
+pub use rule_selector::{ParseError, RuleSelector, Specificity};
+pub use rule_set::RuleSet;
+pub use settings::{PreviewMode, RuleSelection, Settings};
 
 use markup_fmt::ast::Root;
 use miette::{Diagnostic, NamedSource, SourceSpan};

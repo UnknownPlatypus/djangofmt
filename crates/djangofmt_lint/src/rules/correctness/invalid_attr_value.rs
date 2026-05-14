@@ -15,6 +15,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rule_group::RuleGroup;
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::Violation;
 
@@ -32,6 +33,7 @@ pub struct InvalidAttrValue {
 impl Violation for InvalidAttrValue {
     const RULE: Rule = Rule::InvalidAttrValue;
     const CATEGORY: RuleCategory = RuleCategory::Correctness;
+    const GROUP: RuleGroup = RuleGroup::Stable;
 
     fn message(&self) -> String {
         format!(

@@ -97,6 +97,21 @@ The first `pyproject.toml` found is used. If no file is found or the file doesn'
 
 Command-line arguments always take precedence over `pyproject.toml` settings.
 
+Lint rule selection lives in a nested `[tool.djangofmt.lint]` subtable (mirroring `ruff`). The `check` subcommand is still preview; expect the surface to evolve.
+
+```toml
+[tool.djangofmt.lint]
+# Replaces the default rule set when provided (omit to keep "ALL").
+select = ["ALL"]
+# Disable specific rules or whole categories.
+ignore = ["invalid-attr-value"]
+# Extend, rather than replace, on top of the inherited set.
+extend-select = ["correctness"]
+extend-ignore = []
+# Opt into preview-stability rules.
+preview = false
+```
+
 ## Controlling the formatting
 
 DjangoFmt gives users control over formatting in cases where
