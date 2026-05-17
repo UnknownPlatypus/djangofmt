@@ -228,6 +228,23 @@ pub fn lint_fix(
     let mut applied_by_rule: FxHashMap<String, RuleFixSummary> = FxHashMap::default();
 
     loop {
+        if iterations >= MAX_FIX_ITERATIONS {
+            tracing::warn!(
+                "Fix iteration limit reached; remaining diagnostics may be fixable on a second run."
+            );
+            return Ok(FixerResult {
+                source: current.into_owned(),
+                // Diagnostics from the previous iteration are span-aligned to
+                // the pre-apply source, not to `current`; rather than return
+                // mismatched spans, drop them. A re-run will re-derive them.
+                remaining_diagnostics: Vec::new(),
+                applied_count: total_applied,
+                skipped_count: total_skipped,
+                iterations,
+                applied_by_rule,
+            });
+        }
+
         let mut parser = Parser::new(&current, profile, vec![]);
         let ast = match parser.parse_root() {
             Ok(ast) => {
@@ -270,20 +287,6 @@ pub fn lint_fix(
                 source: current.into_owned(),
                 remaining_diagnostics: diagnostics,
                 applied_count: total_applied,
-                skipped_count: total_skipped,
-                iterations,
-                applied_by_rule,
-            });
-        }
-
-        if iterations >= MAX_FIX_ITERATIONS {
-            tracing::warn!(
-                "Fix iteration limit reached; remaining diagnostics may be fixable on a second run."
-            );
-            return Ok(FixerResult {
-                source: result.output,
-                remaining_diagnostics: diagnostics,
-                applied_count: total_applied + result.applied_count,
                 skipped_count: total_skipped,
                 iterations,
                 applied_by_rule,

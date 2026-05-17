@@ -55,9 +55,9 @@ fn fix_snapshot() {
     glob!("**/*.invalid.html", |path| {
         let input = fs::read_to_string(path).unwrap();
         let mut parser = Parser::new(&input, Language::Django, vec![]);
-        let Ok(ast) = parser.parse_root() else {
-            return;
-        };
+        let ast = parser
+            .parse_root()
+            .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let result = fix_ast(&input, &ast, &Settings::default(), Applicability::Safe);
         if result.applied_count == 0 {
             return;

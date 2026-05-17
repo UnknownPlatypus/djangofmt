@@ -53,8 +53,10 @@ pub enum IsolationLevel {
 /// equivalent to ruff's `TextRange`).
 ///
 /// `content` uses [`Option<Box<str>>`] to distinguish pure deletion ([`None`])
-/// from replacement-with-empty-string ([`Some("")`]) and to keep the niche
-/// optimization (same size as `Box<str>`).
+/// from non-empty replacement ([`Some(...)`]) while preserving the niche
+/// optimization (same size as `Box<str>`). Empty replacement content is
+/// rejected by [`Edit::replacement`] and [`Edit::insertion`] via a
+/// `debug_assert!`; use [`Edit::deletion`] for the empty case.
 #[derive(Clone, Debug)]
 pub struct Edit {
     range: SourceSpan,
