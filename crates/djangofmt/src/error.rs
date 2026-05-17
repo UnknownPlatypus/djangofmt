@@ -3,6 +3,8 @@ use std::io;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
+use crate::fs::relativize_path;
+
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Error, Diagnostic)]
@@ -23,7 +25,7 @@ pub enum Error {
 
 #[must_use]
 pub fn path_display(path: Option<&PathBuf>) -> String {
-    path.map_or_else(|| "<unknown>".to_string(), |p| p.display().to_string())
+    path.map_or_else(|| "<unknown>".to_string(), relativize_path)
 }
 
 #[derive(Debug, Diagnostic, Error)]

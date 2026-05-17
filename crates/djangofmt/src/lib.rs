@@ -5,6 +5,7 @@ use std::process::ExitCode;
 pub mod args;
 pub mod commands;
 pub mod error;
+pub mod fs;
 pub mod line_width;
 mod logging;
 pub mod pyproject;

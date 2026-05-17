@@ -15,6 +15,7 @@ use tracing::{debug, error, info};
 use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
+use crate::fs::relativize_path;
 
 /// Per-file outcome of `check_path`.
 struct CheckResult {
@@ -148,7 +149,7 @@ fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
         if result.applied_count == 0 {
             continue;
         }
-        info!("- {}:", result.path.display());
+        info!("- {}:", relativize_path(&result.path));
         let mut entries: Vec<_> = result.fixes_by_rule.iter().collect();
         entries.sort_by(|a, b| a.0.cmp(b.0));
         for (rule, summary) in entries {
@@ -205,7 +206,7 @@ fn check_path(
                     FileDiagnostics::empty()
                 } else {
                     FileDiagnostics::new(
-                        NamedSource::new(path.to_string_lossy(), result.source),
+                        NamedSource::new(relativize_path(path), result.source),
                         result.remaining_diagnostics,
                     )
                 };
@@ -234,10 +235,7 @@ fn check_path(
     let file_diagnostics = if diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
-        FileDiagnostics::new(
-            NamedSource::new(path.to_string_lossy(), source),
-            diagnostics,
-        )
+        FileDiagnostics::new(NamedSource::new(relativize_path(path), source), diagnostics)
     };
 
     Ok(CheckResult {
