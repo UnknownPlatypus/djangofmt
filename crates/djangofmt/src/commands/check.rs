@@ -80,7 +80,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
             }
         }
     }
-    if args.unsafe_fixes {
+    if args.fix && args.unsafe_fixes {
         total_unsafe_fixable = 0;
     }
 
@@ -96,6 +96,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         total_safe_fixable,
         total_unsafe_fixable,
         args.fix,
+        args.unsafe_fixes,
         error_count,
     );
 
@@ -115,6 +116,7 @@ fn print_summary(
     safe_fixable: usize,
     unsafe_fixable: usize,
     apply_to_disk: bool,
+    unsafe_fixes_enabled: bool,
     parse_errors: usize,
 ) {
     if total == 0 && applied == 0 {
@@ -127,17 +129,34 @@ fn print_summary(
     if apply_to_disk {
         let found = applied + total;
         info!("Found {found} errors ({applied} fixed, {total} remaining).");
-    } else if safe_fixable > 0 {
-        let suffix = if unsafe_fixable > 0 {
-            format!(" ({unsafe_fixable} hidden fixes can be enabled with --unsafe-fixes)")
+        return;
+    }
+
+    // With `--unsafe-fixes` set (but no `--fix`), unsafe fixes count toward
+    // what `--fix` would apply; without it they are reported as hidden.
+    let fixable_with_fix = safe_fixable
+        + if unsafe_fixes_enabled {
+            unsafe_fixable
+        } else {
+            0
+        };
+    let hidden = if unsafe_fixes_enabled {
+        0
+    } else {
+        unsafe_fixable
+    };
+
+    if fixable_with_fix > 0 {
+        let suffix = if hidden > 0 {
+            format!(" ({hidden} hidden fixes can be enabled with --unsafe-fixes)")
         } else {
             String::new()
         };
-        info!("Found {total} errors. [*] {safe_fixable} fixable with the --fix option.{suffix}");
-    } else if unsafe_fixable > 0 {
         info!(
-            "Found {total} errors. ({unsafe_fixable} hidden fixes can be enabled with --unsafe-fixes)"
+            "Found {total} errors. [*] {fixable_with_fix} fixable with the --fix option.{suffix}"
         );
+    } else if hidden > 0 {
+        info!("Found {total} errors. ({hidden} hidden fixes can be enabled with --unsafe-fixes)");
     } else {
         info!("Found {total} errors.");
     }
@@ -244,4 +263,103 @@ fn check_path(
         applied_count: 0,
         fixes_by_rule: FxHashMap::default(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::print_summary;
+    use tracing_test::traced_test;
+
+    #[test]
+    #[traced_test]
+    fn summary_all_passed() {
+        print_summary(0, 0, 0, 0, false, false, 0);
+        assert!(logs_contain("All checks passed!"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_silent_when_only_parse_errors() {
+        print_summary(0, 0, 0, 0, false, false, 2);
+        assert!(!logs_contain("All checks passed!"));
+        assert!(!logs_contain("Found"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_apply_to_disk_reports_fixed_and_remaining() {
+        print_summary(2, 3, 0, 0, true, false, 0);
+        assert!(logs_contain("Found 5 errors (3 fixed, 2 remaining)."));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_apply_to_disk_ignores_fixable_counts() {
+        // Under `--fix`, fixable counts shouldn't leak into the message.
+        print_summary(2, 3, 4, 5, true, true, 0);
+        assert!(logs_contain("Found 5 errors (3 fixed, 2 remaining)."));
+        assert!(!logs_contain("fixable with"));
+        assert!(!logs_contain("hidden"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_check_only_safe_fixable() {
+        print_summary(7, 0, 2, 0, false, false, 0);
+        assert!(logs_contain(
+            "Found 7 errors. [*] 2 fixable with the --fix option."
+        ));
+        assert!(!logs_contain("hidden"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_check_only_safe_and_unsafe_hidden() {
+        print_summary(7, 0, 2, 3, false, false, 0);
+        assert!(logs_contain(
+            "Found 7 errors. [*] 2 fixable with the --fix option. \
+             (3 hidden fixes can be enabled with --unsafe-fixes)"
+        ));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_check_only_unsafe_hidden() {
+        print_summary(7, 0, 0, 3, false, false, 0);
+        assert!(logs_contain(
+            "Found 7 errors. (3 hidden fixes can be enabled with --unsafe-fixes)"
+        ));
+        assert!(!logs_contain("fixable with"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_check_with_unsafe_fixes_enabled_combines_counts() {
+        // `--unsafe-fixes` set, but no `--fix`: unsafe fixes are now reportable
+        // as fixable, not hidden.
+        print_summary(7, 0, 2, 3, false, true, 0);
+        assert!(logs_contain(
+            "Found 7 errors. [*] 5 fixable with the --fix option."
+        ));
+        assert!(!logs_contain("hidden"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_check_with_unsafe_fixes_enabled_only_unsafe() {
+        print_summary(7, 0, 0, 3, false, true, 0);
+        assert!(logs_contain(
+            "Found 7 errors. [*] 3 fixable with the --fix option."
+        ));
+        assert!(!logs_contain("hidden"));
+    }
+
+    #[test]
+    #[traced_test]
+    fn summary_check_no_fixes_available() {
+        print_summary(5, 0, 0, 0, false, false, 0);
+        assert!(logs_contain("Found 5 errors."));
+        assert!(!logs_contain("fixable with"));
+        assert!(!logs_contain("hidden"));
+    }
 }
