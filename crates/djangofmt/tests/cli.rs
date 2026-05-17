@@ -111,6 +111,7 @@ fn check_clean_file() {
     success: true
     exit_code: 0
     ----- stdout -----
+    All checks passed!
 
     ----- stderr -----
     "#);

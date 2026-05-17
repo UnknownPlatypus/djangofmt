@@ -397,6 +397,7 @@ dependencies = [
  "miette",
  "rayon",
  "rstest",
+ "rustc-hash",
  "serde",
  "similar-asserts",
  "tempfile",
