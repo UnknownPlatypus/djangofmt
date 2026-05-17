@@ -1,0 +1,78 @@
+<!-- Simple interpolation -->
+{% blocktranslate %}This string will have {{ value }} inside.{% endblocktranslate %}
+
+<!-- with clause -->
+{% blocktranslate with amount=article.price %}
+That will cost $ {{ amount }}.
+{% endblocktranslate %}
+
+<!-- multiple with -->
+{% blocktranslate with book_t=book|title author_t=author|title %}
+This is {{ book_t }} by {{ author_t }}
+{% endblocktranslate %}
+
+<!-- count + plural -->
+{% blocktranslate count counter=list|length %}
+There is {{ counter }} {{ name }} object.
+{% plural %}
+There are {{ counter }} {{ name }} objects.
+{% endblocktranslate %}
+
+<!-- with + count + plural -->
+{% blocktranslate with amount=article.price count years=i.length %}
+That will cost $ {{ amount }} per year.
+{% plural %}
+That will cost $ {{ amount }} per {{ years }} years.
+{% endblocktranslate %}
+
+<!-- asvar -->
+{% blocktranslate asvar the_title %}The title is {{ title }}.{% endblocktranslate %}
+
+<!-- context (with literal) -->
+{% blocktranslate with name=user.username context "greeting" %}Hi {{ name }}{% endblocktranslate %}
+
+<!-- Django test: context-only with literal -->
+{% blocktranslate context "month name" %}May{% endblocktranslate %}
+
+<!-- Django test: context with runtime variable -->
+{% blocktranslate context message_context %}May{% endblocktranslate %}
+
+<!-- Django test: count + context (count first, no `with`) -->
+{% blocktranslate count number=1 context "super search" %}
+{{ number }} super result
+{% plural %}
+{{ number }} super results
+{% endblocktranslate %}
+
+<!-- Legacy `count ... as` syntax -->
+{% blocktranslate count number as counter %}
+{{ counter }} result
+{% plural %}
+{{ counter }} results
+{% endblocktranslate %}
+
+<!-- Legacy `with ... as` + `and` (multi-binding) -->
+{% blocktranslate with anton as a and berta as b %}{{ a }} + {{ b }}{% endblocktranslate %}
+
+<!-- Legacy blocktrans -->
+{% blocktrans %}Some text{% endblocktrans %}
+
+<!-- Whitespace control -->
+{%- blocktranslate %}Some text{% endblocktranslate %}
+
+<!-- Nested in if block -->
+{% if show %}
+    {% blocktranslate %}Nested text{% endblocktranslate %}
+{% endif %}
+
+<!-- Article: HTML-wrapped multi-line content (leaks indentation) -->
+<p>{% blocktranslate %}
+  With leading and trailing whitespace.
+{% endblocktranslate %}</p>
+
+<!-- Article: nested HTML indentation -->
+<div>
+  <p>{% blocktranslate %}
+    Nested indentation problem.
+  {% endblocktranslate %}</p>
+</div>

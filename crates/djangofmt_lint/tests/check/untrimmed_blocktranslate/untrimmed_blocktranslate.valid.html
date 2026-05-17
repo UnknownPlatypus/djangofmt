@@ -1,0 +1,46 @@
+<!-- Already trimmed -->
+{% blocktranslate trimmed %}
+  First sentence.
+  Second paragraph.
+{% endblocktranslate %}
+
+<!-- Legacy blocktrans already trimmed -->
+{% blocktrans trimmed %}Some text{% endblocktrans %}
+
+<!-- trimmed with other args -->
+{% blocktranslate trimmed count counter=list|length %}
+There is {{ counter }} object.
+{% plural %}
+There are {{ counter }} objects.
+{% endblocktranslate %}
+
+<!-- trimmed positioned at the end (after count) -->
+{% blocktranslate count counter=list|length trimmed %}
+  There is {{ counter }} object.
+{% plural %}
+  There are {{ counter }} objects.
+{% endblocktranslate %}
+
+<!-- Django test: with + context + trimmed (trimmed last) -->
+{% blocktranslate with num_comments=5 context "comment count" trimmed %}
+  There are {{ num_comments }} comments.
+{% endblocktranslate %}
+
+<!-- Django test: context + count + trimmed (trimmed last) -->
+{% blocktranslate context "super search" count number=2 trimmed %}
+  {{ number }} super result
+{% plural %}
+  {{ number }} super results
+{% endblocktranslate %}
+
+<!-- Whitespace control on both ends + trimmed -->
+<p>{%- blocktranslate trimmed -%}
+  Whitespace stripped on both sides.
+{%- endblocktranslate -%}</p>
+
+<!-- Nested in HTML, with trimmed (article example) -->
+<div>
+  <p>{% blocktranslate trimmed %}
+    Still trimmed inside nested HTML.
+  {% endblocktranslate %}</p>
+</div>

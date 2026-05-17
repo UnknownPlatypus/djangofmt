@@ -109,6 +109,10 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_jinja_block(&mut self, block: &JinjaBlock<'_, Node<'_>>) {
+        if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
+            rules::correctness::untrimmed_blocktranslate::check(block, self);
+        }
+
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
