@@ -73,7 +73,7 @@ fn fix_snapshot() {
 const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
 fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
-    let mut parser = Parser::new(input, Language::Jinja, vec![]);
+    let mut parser = Parser::new(input, Language::Django, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::default();
     check_ast(input, &ast, &settings)
