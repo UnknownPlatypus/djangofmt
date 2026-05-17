@@ -39,6 +39,10 @@ uv add --dev djangofmt            # Or add djangofmt to your project.
 pipx install djangofmt
 ```
 
+## Editor integration
+
+See [`docs/editor-integration.md`](docs/editor-integration.md).
+
 ## As a pre-commit hook
 
 See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
