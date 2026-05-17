@@ -499,6 +499,7 @@ mod tests {
     fn formatter_config_from_args_defaults() {
         let args = FormatCommand {
             files: vec![],
+            stdin_filename: None,
             line_length: None,
             indent_width: None,
             profile: None,
@@ -518,6 +519,7 @@ mod tests {
     fn formatter_config_from_args_cli_overrides_pyproject() {
         let args = FormatCommand {
             files: vec![],
+            stdin_filename: None,
             line_length: Some(LineLength::try_from(80u16).unwrap()),
             indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
             profile: None,
@@ -543,6 +545,7 @@ mod tests {
     fn formatter_config_from_args_falls_back_to_pyproject() {
         let args = FormatCommand {
             files: vec![],
+            stdin_filename: None,
             line_length: None,
             indent_width: None,
             profile: None,
@@ -564,6 +567,7 @@ mod tests {
     fn formatter_config_preserve_unquoted_attrs_from_cli() {
         let args = FormatCommand {
             files: vec![],
+            stdin_filename: None,
             line_length: None,
             indent_width: None,
             profile: None,
@@ -582,6 +586,7 @@ mod tests {
     fn formatter_config_preserve_unquoted_attrs_from_pyproject() {
         let args = FormatCommand {
             files: vec![],
+            stdin_filename: None,
             line_length: None,
             indent_width: None,
             profile: None,
@@ -603,6 +608,7 @@ mod tests {
     fn formatter_config_no_preserve_unquoted_attrs_cli_overrides_pyproject() {
         let args = FormatCommand {
             files: vec![],
+            stdin_filename: None,
             line_length: None,
             indent_width: None,
             profile: None,

@@ -9,6 +9,7 @@ use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
 
 pub mod check;
 pub mod format;
+pub mod format_stdin;
 
 /// Shared preamble for all commands: loads pyproject settings, resolves profile, and discovers files.
 pub(crate) struct ResolvedCommand {

@@ -1,9 +1,27 @@
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
-use std::process::Command;
+use std::io::Write;
+use std::process::{Command, Output, Stdio};
 use tempfile::TempDir;
 
 fn cli() -> Command {
     Command::new(get_cargo_bin("djangofmt"))
+}
+
+/// Spawn the configured command, write `stdin` to it, and capture the output.
+fn run_with_stdin(mut cmd: Command, stdin: &str) -> Output {
+    cmd.stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    let mut child = cmd.spawn().expect("failed to spawn djangofmt");
+    child
+        .stdin
+        .take()
+        .expect("failed to capture stdin")
+        .write_all(stdin.as_bytes())
+        .expect("failed to write stdin");
+    child
+        .wait_with_output()
+        .expect("failed to wait for djangofmt")
 }
 
 // ── Format subcommand ────────────────────────────────────────────────
@@ -17,9 +35,9 @@ fn format_single_file() {
     success: true
     exit_code: 0
     ----- stdout -----
-    1 file reformatted !
 
     ----- stderr -----
+    1 file reformatted !
     "#);
     let content = std::fs::read_to_string(&file).unwrap();
     assert_eq!(content, "<div class=\"foo\"></div>\n");
@@ -34,9 +52,9 @@ fn format_already_formatted_file() {
     success: true
     exit_code: 0
     ----- stdout -----
-    1 file left unchanged !
 
     ----- stderr -----
+    1 file left unchanged !
     "#);
 }
 
@@ -50,9 +68,9 @@ fn format_file_with_ignore_directive() {
     success: true
     exit_code: 0
     ----- stdout -----
-    1 file skipped !
 
     ----- stderr -----
+    1 file skipped !
     "#);
     let content = std::fs::read_to_string(&file).unwrap();
     assert_eq!(content, original);
@@ -80,9 +98,9 @@ fn format_directory() {
     success: true
     exit_code: 0
     ----- stdout -----
-    2 files reformatted !
 
     ----- stderr -----
+    2 files reformatted !
     "#);
 }
 
@@ -95,6 +113,160 @@ fn format_quiet() {
     success: true
     exit_code: 0
     ----- stdout -----
+
+    ----- stderr -----
+    "#);
+}
+
+// ── Format from stdin ────────────────────────────────────────────────
+
+#[test]
+fn format_stdin_dash_sentinel() {
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_already_formatted() {
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("<div class=\"foo\"></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_with_filename_html() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "foo.html"])
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_with_filename_infers_jinja_profile() {
+    // `{% if x %}...{% endif %}` is valid in both profiles, so use the `raw` block
+    // which is jinja-specific: jinja preserves its inner content while django does not.
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "foo.jinja"])
+            .pass_stdin("{% if x %}hi{% endif %}\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {% if x %}hi{% endif %}
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_ignore_directive() {
+    let source = "<!-- djangofmt:ignore -->\n<div   class=\"foo\"  ></div>\n";
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin(source),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <!-- djangofmt:ignore -->
+    <div   class="foo"  ></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_parse_error_exits_2() {
+    let mut cmd = cli();
+    cmd.arg("-");
+    let output = run_with_stdin(cmd, "<div   class=\"foo\"  >");
+    assert!(!output.status.success());
+    assert_eq!(output.status.code(), Some(2));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("expected close tag for opening tag <div>"),
+        "stderr was: {stderr}"
+    );
+    assert!(String::from_utf8_lossy(&output.stdout).is_empty());
+}
+
+#[test]
+fn format_stdin_force_exclude_parrots_input() {
+    let source = "<div   class=\"foo\"  ></div>\n";
+    assert_cmd_snapshot!(
+        cli()
+            .args([
+                "--force-exclude",
+                "--extend-exclude",
+                "foo.html",
+                "--stdin-filename",
+                "foo.html",
+            ])
+            .pass_stdin(source),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div   class="foo"  ></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_extra_file_warns_but_uses_stdin() {
+    // When --stdin-filename is set, any other file path is ignored with a warning.
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "stream.html"])
+            .arg("on_disk.html")
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    Ignoring file on_disk.html in favor of standard input.
+    "#);
+}
+
+#[test]
+fn format_stdin_filename_alone_without_dash() {
+    // --stdin-filename should make `files` optional (mirrors ruff).
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "foo.html"])
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
 
     ----- stderr -----
     "#);
@@ -125,9 +297,9 @@ fn check_file_with_lint_error() {
     let output = cli().arg("check").arg(file.as_os_str()).output().unwrap();
     assert!(!output.status.success());
     assert_eq!(output.status.code(), Some(1));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("Invalid value 'put' for attribute 'method'"));
-    assert!(stdout.contains("Use one of: get, post, dialog"));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid value 'put' for attribute 'method'"));
+    assert!(stderr.contains("Use one of: get, post, dialog"));
 }
 
 #[test]

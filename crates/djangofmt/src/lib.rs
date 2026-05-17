@@ -1,7 +1,11 @@
+use std::path::{Path, PathBuf};
+use std::process::ExitCode;
+
+use clap::CommandFactory;
+use tracing::warn;
+
 use crate::args::Args;
 use crate::logging::setup_tracing;
-use clap::CommandFactory;
-use std::process::ExitCode;
 pub mod args;
 pub mod commands;
 pub mod error;
@@ -10,6 +14,7 @@ pub mod line_width;
 mod logging;
 pub mod pyproject;
 pub mod resolver;
+mod stdin;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {
@@ -53,8 +58,34 @@ pub fn run(
             shell.generate(&mut Args::command(), &mut std::io::stdout());
             Ok(ExitStatus::Success)
         }
-        None => commands::format::format(&fmt),
+        None => {
+            if is_stdin(&fmt.files, fmt.stdin_filename.as_deref()) {
+                commands::format_stdin::format_stdin(&fmt)
+            } else {
+                commands::format::format(&fmt)
+            }
+        }
     }
+}
+
+/// Returns true if the command should read from standard input.
+fn is_stdin(files: &[PathBuf], stdin_filename: Option<&Path>) -> bool {
+    // If the user provided a `--stdin-filename`, always read from standard input.
+    if stdin_filename.is_some() {
+        if let Some(file) = files.iter().find(|file| file.as_path() != Path::new("-")) {
+            warn!(
+                "Ignoring file {} in favor of standard input.",
+                file.display()
+            );
+        }
+        return true;
+    }
+
+    let [file] = files else {
+        return false;
+    };
+    // If the user provided exactly `-`, read from standard input.
+    file == Path::new("-")
 }
 
 fn setup_miette() -> error::Result<()> {

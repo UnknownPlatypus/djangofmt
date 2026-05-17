@@ -126,6 +126,17 @@ fn build_walk_filters(
     Ok((types, overrides))
 }
 
+/// Return `true` if the given filename should be force-excluded based on the resolved
+/// configuration. Returns `false` if `force_exclude` is disabled.
+pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> Result<bool, Error> {
+    if !config.force_exclude {
+        return Ok(false);
+    }
+    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let (_, overrides) = build_walk_filters(&cwd, config)?;
+    Ok(overrides.matched(filename, false).is_ignore())
+}
+
 /// Resolve a list of CLI paths (files and/or directories) into a flat,
 /// deduplicated, sorted list of files to process.
 pub fn resolve_files(

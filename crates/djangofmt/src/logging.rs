@@ -47,6 +47,7 @@ pub fn setup_tracing(level: LogLevel) {
         tracing_subscriber::registry()
             .with(
                 tracing_subscriber::fmt::layer()
+                    .with_writer(std::io::stderr)
                     .event_format(
                         format()
                             .compact()
