@@ -67,11 +67,16 @@ pub fn run(
     }
 }
 
+/// Sentinel file argument meaning "read from standard input".
+const STDIN_SENTINEL: &str = "-";
+
 /// Returns true if the command should read from standard input.
 fn is_stdin(files: &[PathBuf], stdin_filename: Option<&Path>) -> bool {
+    let stdin_sentinel = Path::new(STDIN_SENTINEL);
+
     // If the user provided a `--stdin-filename`, always read from standard input.
     if stdin_filename.is_some() {
-        if let Some(file) = files.iter().find(|file| file.as_path() != Path::new("-")) {
+        if let Some(file) = files.iter().find(|file| file.as_path() != stdin_sentinel) {
             warn!(
                 "Ignoring file {} in favor of standard input.",
                 file.display()
@@ -83,8 +88,7 @@ fn is_stdin(files: &[PathBuf], stdin_filename: Option<&Path>) -> bool {
     let [file] = files else {
         return false;
     };
-    // If the user provided exactly `-`, read from standard input.
-    file == Path::new("-")
+    file == stdin_sentinel
 }
 
 fn setup_miette() -> error::Result<()> {

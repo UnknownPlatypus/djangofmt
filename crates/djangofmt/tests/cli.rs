@@ -1,27 +1,20 @@
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
-use std::io::Write;
-use std::process::{Command, Output, Stdio};
+use std::process::Command;
 use tempfile::TempDir;
 
 fn cli() -> Command {
     Command::new(get_cargo_bin("djangofmt"))
 }
 
-/// Spawn the configured command, write `stdin` to it, and capture the output.
-fn run_with_stdin(mut cmd: Command, stdin: &str) -> Output {
-    cmd.stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
-    let mut child = cmd.spawn().expect("failed to spawn djangofmt");
-    child
-        .stdin
-        .take()
-        .expect("failed to capture stdin")
-        .write_all(stdin.as_bytes())
-        .expect("failed to write stdin");
-    child
-        .wait_with_output()
-        .expect("failed to wait for djangofmt")
+/// Like [`assert_cmd_snapshot!`] but redacts the leading directory of `test.html`
+/// occurrences (i.e. the per-run `TempDir` prefix in miette diagnostics).
+macro_rules! assert_cmd_snapshot_tmpdir {
+    ($cmd:expr, @$snapshot:literal $(,)?) => {
+        insta::with_settings!(
+            { filters => vec![(r"[^\s\[]+/test\.html", "[TMP]/test.html")] },
+            { assert_cmd_snapshot!($cmd, @$snapshot) }
+        )
+    };
 }
 
 // ── Format subcommand ────────────────────────────────────────────────
@@ -200,17 +193,21 @@ fn format_stdin_ignore_directive() {
 
 #[test]
 fn format_stdin_parse_error_exits_2() {
-    let mut cmd = cli();
-    cmd.arg("-");
-    let output = run_with_stdin(cmd, "<div   class=\"foo\"  >");
-    assert!(!output.status.success());
-    assert_eq!(output.status.code(), Some(2));
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        stderr.contains("expected close tag for opening tag <div>"),
-        "stderr was: {stderr}"
-    );
-    assert!(String::from_utf8_lossy(&output.stdout).is_empty());
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
+        @r#"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+      × expected close tag for opening tag <div>
+       ╭─[<unknown>:1:1]
+     1 │ <div   class="foo"  >
+       · ─┬─
+       ·  ╰── here
+       ╰────
+    "#);
 }
 
 #[test]
@@ -279,14 +276,14 @@ fn check_clean_file() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
     std::fs::write(&file, "<form method=\"post\"></form>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg("check").arg(file.as_os_str()), @r#"
+    assert_cmd_snapshot!(cli().arg("check").arg(file.as_os_str()), @r###"
     success: true
     exit_code: 0
     ----- stdout -----
-    All checks passed!
 
     ----- stderr -----
-    "#);
+    All checks passed!
+    "###);
 }
 
 #[test]
@@ -294,12 +291,23 @@ fn check_file_with_lint_error() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
     std::fs::write(&file, "<form method=\"put\"></form>\n").unwrap();
-    let output = cli().arg("check").arg(file.as_os_str()).output().unwrap();
-    assert!(!output.status.success());
-    assert_eq!(output.status.code(), Some(1));
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Invalid value 'put' for attribute 'method'"));
-    assert!(stderr.contains("Use one of: get, post, dialog"));
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(file.as_os_str()), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Found 1 lint error(s)
+      ╰─▶   × Invalid value 'put' for attribute 'method'.
+             ╭─[[TMP]/test.html:1:15]
+           1 │ <form method="put"></form>
+             ·               ─┬─
+             ·                ╰── here
+             ╰────
+            help: Use one of: get, post, dialog
+
+    Found 1 errors.
+    "#);
 }
 
 #[test]
@@ -321,44 +329,45 @@ fn check_fixable_file_without_fix() {
     let file = dir.path().join("test.html");
     let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
     std::fs::write(&file, original).unwrap();
-    let output = cli().arg("check").arg(file.as_os_str()).output().unwrap();
-    assert!(!output.status.success());
-    assert_eq!(output.status.code(), Some(1));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Found 1 errors. [*] 1 fixable with the --fix option."),
-        "summary missing or wrong, got:\n{stdout}"
-    );
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(file.as_os_str()), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Found 1 lint error(s)
+      ╰─▶   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
+            │ indentation into translation strings.
+             ╭─[[TMP]/test.html:1:3]
+           1 │ {% blocktranslate %}Hello{% endblocktranslate %}
+             ·   ────────┬───────
+             ·           ╰── here
+             ╰────
+            help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate
+                  trimmed %}...{% endblocktranslate %}`.
+
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    "#);
     // Ensure we didn't apply anything without --fix.
-    let after = std::fs::read_to_string(&file).unwrap();
-    assert_eq!(after, original);
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), original);
 }
 
 #[test]
 fn check_fixable_file_with_fix() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
-    let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
-    std::fs::write(&file, original).unwrap();
-    let output = cli()
-        .args(["check", "--fix"])
-        .arg(file.as_os_str())
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "expected success exit, got {output:?}"
-    );
-    assert_eq!(output.status.code(), Some(0));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Found 1 errors (1 fixed, 0 remaining)."),
-        "summary missing or wrong, got:\n{stdout}"
-    );
+    std::fs::write(&file, "{% blocktranslate %}Hello{% endblocktranslate %}\n").unwrap();
+    assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(file.as_os_str()), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    "#);
     // Ensure file was mutated.
-    let after = std::fs::read_to_string(&file).unwrap();
     assert_eq!(
-        after,
+        std::fs::read_to_string(&file).unwrap(),
         "{% blocktranslate trimmed %}Hello{% endblocktranslate %}\n"
     );
 }
@@ -367,28 +376,20 @@ fn check_fixable_file_with_fix() {
 fn check_fixable_file_with_show_fixes() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
-    let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
-    std::fs::write(&file, original).unwrap();
-    let output = cli()
-        .args(["check", "--fix", "--show-fixes"])
-        .arg(file.as_os_str())
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "expected success exit, got {output:?}"
-    );
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Found 1 errors (1 fixed, 0 remaining)."),
-        "summary missing or wrong, got:\n{stdout}"
-    );
-    assert!(stdout.contains("Fixed 1 errors:"), "got:\n{stdout}");
-    // Per-rule line must include rule code AND fix_title.
-    assert!(
-        stdout.contains("1 × untrimmed-blocktranslate (Add trimmed)"),
-        "per-rule line missing fix_title, got:\n{stdout}"
-    );
+    std::fs::write(&file, "{% blocktranslate %}Hello{% endblocktranslate %}\n").unwrap();
+    assert_cmd_snapshot_tmpdir!(
+        cli().args(["check", "--fix", "--show-fixes"]).arg(file.as_os_str()),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    Fixed 1 errors:
+    - [TMP]/test.html:
+        1 × untrimmed-blocktranslate (Add trimmed)
+    "#);
 }
 
 #[test]
@@ -396,29 +397,22 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
     std::fs::write(&file, "{% if x %}\n  unclosed\n").unwrap();
-    let output = cli()
-        .args(["check", "--fix"])
-        .arg(file.as_os_str())
-        .output()
-        .unwrap();
-    // Parse errors must surface even with --fix.
-    assert!(
-        !output.status.success(),
-        "expected failure exit, got {output:?}"
-    );
-    assert_eq!(output.status.code(), Some(1));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("unclosed {% if %} block"),
-        "expected parse error rendering, got:\n{stdout}"
-    );
-    assert!(
-        stdout.contains("Couldn't check 1 files!"),
-        "expected error count line, got:\n{stdout}"
-    );
-    // Must NOT claim success.
-    assert!(
-        !stdout.contains("All checks passed!"),
-        "must not claim success when parse errors occurred, got:\n{stdout}"
-    );
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(file.as_os_str()), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × unclosed {% if %} block.
+       ╭─[[TMP]/test.html:1:4]
+     1 │ {% if x %}
+       ·    ─┬
+       ·     ╰── here
+     2 │   unclosed
+       ╰────
+      help: Check for invalid HTML syntax inside the block that might prevent
+            finding the end tag.
+
+    Couldn't check 1 files!
+    "#);
 }

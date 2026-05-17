@@ -35,32 +35,31 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     match format_source_code(stdin_filename, &config, profile) {
         Ok(()) => Ok(ExitStatus::Success),
         Err(err) => {
-            error!("{:?}", miette::Report::new(*err));
+            error!("{:?}", miette::Report::new(err));
             Ok(ExitStatus::Error)
         }
     }
 }
 
-/// Format source code read from `stdin` and write the result to `stdout`.
 fn format_source_code(
     path: Option<&Path>,
     config: &FormatterConfig,
     profile: Profile,
-) -> std::result::Result<(), Box<CommandError>> {
+) -> std::result::Result<(), CommandError> {
     let mut source = String::new();
     stdin()
         .lock()
         .read_to_string(&mut source)
-        .map_err(|err| Box::new(CommandError::Read(path.map(Path::to_path_buf), err)))?;
+        .map_err(|err| CommandError::Read(path.map(Path::to_path_buf), err))?;
 
     let formatted = match format_text(&source, config, profile) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
+            return Err(CommandError::Parse(ParseError::new(
                 path.map(Path::to_path_buf),
                 source,
                 &err,
-            ))));
+            )));
         }
     };
 
@@ -68,6 +67,6 @@ fn format_source_code(
     stdout()
         .lock()
         .write_all(output.as_bytes())
-        .map_err(|err| Box::new(CommandError::Write(path.map(Path::to_path_buf), err)))?;
+        .map_err(|err| CommandError::Write(path.map(Path::to_path_buf), err))?;
     Ok(())
 }
