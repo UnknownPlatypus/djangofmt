@@ -50,7 +50,7 @@ impl Violation for InvalidAttrValue {
 }
 
 /// Check an element's attributes for invalid enum values.
-pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
+pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     // Pending implementation of djangofmt_html_spec.
     // Currently only checks for <form method="...">.
     if !element.tag_name.eq_ignore_ascii_case("form") {
@@ -75,7 +75,7 @@ pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
 
             let allowed = ["get", "post", "dialog"];
             if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
-                checker.report(
+                checker.report_diagnostic(
                     &InvalidAttrValue {
                         value: (*value_str).to_string(),
                         attribute: "method".to_string(),

@@ -3,28 +3,28 @@ use miette::SourceSpan;
 
 use crate::LintDiagnostic;
 use crate::Settings;
+use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
 use crate::violation::Violation;
 
 /// AST visitor that collects lint diagnostics.
-///
-/// The `Checker` traverses the `markup_fmt` AST and runs lint rules at each node.
-/// Rules report diagnostics via [`Checker::report`].
 pub struct Checker<'a> {
-    source: &'a str,
-    settings: &'a Settings,
-    diagnostics: Vec<LintDiagnostic>,
+    context: LintContext<'a>,
 }
 
 impl<'a> Checker<'a> {
     #[must_use]
     pub const fn new(source: &'a str, settings: &'a Settings) -> Self {
         Self {
-            source,
-            settings,
-            diagnostics: Vec::new(),
+            context: LintContext::new(source, settings),
         }
+    }
+
+    /// Borrow the underlying [`LintContext`].
+    #[must_use]
+    pub const fn context(&self) -> &LintContext<'a> {
+        &self.context
     }
 
     /// Compute the byte offset of a string slice within the source.
@@ -33,52 +33,44 @@ impl<'a> Checker<'a> {
     ///
     /// # Panics
     ///
-    /// Panics if `slice` is not fully contained within `self.source`.
+    /// Panics if `slice` is not fully contained within the source.
     #[must_use]
     pub fn source_offset(&self, slice: &str) -> usize {
-        let src_start = self.source.as_ptr() as usize;
-        let src_end = src_start + self.source.len();
-        let slice_start = slice.as_ptr() as usize;
-        let slice_end = slice_start + slice.len();
-
-        assert!(
-            slice_start >= src_start && slice_end <= src_end,
-            "slice must be a subslice of self.source"
-        );
-
-        slice_start - src_start
+        self.context.source_offset(slice)
     }
 
     /// Returns whether the given rule should be checked.
     #[must_use]
     #[inline]
     pub fn is_rule_enabled(&self, rule: Rule) -> bool {
-        self.settings.is_enabled(rule)
+        self.context.is_rule_enabled(rule)
     }
 
-    /// Report a lint diagnostic.
-    ///
-    /// The rule is inferred from the violation's `RULE` constant.
-    /// This ensures violations are always reported with the correct rule.
-    ///
-    /// Note: The caller should check `is_rule_enabled()` before calling the
-    /// rule's check function for performance reasons.
-    #[inline]
-    pub fn report<V: Violation>(&mut self, violation: &V, span: SourceSpan) {
-        self.diagnostics.push(LintDiagnostic {
-            code: V::RULE.to_string(),
-            message: violation.message(),
-            span,
-            help: violation.help(),
-            fix: None,
-            fix_title: None,
-        });
+    /// Report a diagnostic for a rule the caller has already gated on
+    /// [`Self::is_rule_enabled`]. Returns a guard whose Drop pushes the
+    /// diagnostic into the underlying context.
+    pub fn report_diagnostic<V: Violation>(
+        &self,
+        violation: &V,
+        span: SourceSpan,
+    ) -> DiagnosticGuard<'_, 'a> {
+        self.context.report_diagnostic(violation, span)
+    }
+
+    /// Report a diagnostic only if the rule is enabled. Returns `None`
+    /// otherwise.
+    pub fn report_diagnostic_if_enabled<V: Violation>(
+        &self,
+        violation: &V,
+        span: SourceSpan,
+    ) -> Option<DiagnosticGuard<'_, 'a>> {
+        self.context.report_diagnostic_if_enabled(violation, span)
     }
 
     /// Consume the checker and return all collected diagnostics.
     #[must_use]
     pub fn into_diagnostics(self) -> Vec<LintDiagnostic> {
-        self.diagnostics
+        self.context.into_diagnostics()
     }
 
     /// Visit the root of the AST and run all lint rules.
