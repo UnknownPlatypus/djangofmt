@@ -1,10 +1,8 @@
 use std::path::PathBuf;
 
-use tracing::debug;
-
 use crate::args::{FileSelectionArgs, Profile};
 use crate::error::Result;
-use crate::pyproject::{PyprojectSettings, load_options};
+use crate::pyproject::{PyprojectSettings, load_pyproject_from_cwd};
 use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
 
 pub mod check;
@@ -23,13 +21,7 @@ pub(crate) fn resolve_command(
     profile: Option<Profile>,
     file_selection: &FileSelectionArgs,
 ) -> Result<ResolvedCommand> {
-    let pyproject = std::env::current_dir().map_or_else(
-        |err| {
-            debug!("Failed to get current directory: {err}");
-            PyprojectSettings::default()
-        },
-        load_options,
-    );
+    let pyproject = load_pyproject_from_cwd();
     let profile = profile.or(pyproject.profile);
     let discovery_config = ResolvedDiscoveryConfig::new(file_selection, &pyproject);
     let resolved_files = resolve_files(files, &discovery_config)?;

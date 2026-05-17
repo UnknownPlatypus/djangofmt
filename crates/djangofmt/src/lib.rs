@@ -14,7 +14,6 @@ pub mod line_width;
 mod logging;
 pub mod pyproject;
 pub mod resolver;
-mod stdin;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {

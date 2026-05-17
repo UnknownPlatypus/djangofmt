@@ -1,44 +1,38 @@
-use std::io::{Write, stdout};
+use std::io::{Read, Write, stdin, stdout};
 use std::path::Path;
 
-use tracing::{debug, error};
+use tracing::error;
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
 use crate::commands::format::{FormatterConfig, format_text};
 use crate::error::{CommandError, ParseError, Result};
-use crate::pyproject::{PyprojectSettings, load_options};
+use crate::pyproject::load_pyproject_from_cwd;
 use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
-use crate::stdin::{parrot_stdin, read_from_stdin};
 
 /// Run the formatter over a single file, read from `stdin`.
 pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
-    let pyproject = std::env::current_dir().map_or_else(
-        |err| {
-            debug!("Failed to get current directory: {err}");
-            PyprojectSettings::default()
-        },
-        load_options,
-    );
+    let stdin_filename = cli.stdin_filename.as_deref();
+    let pyproject = load_pyproject_from_cwd();
     let discovery_config = ResolvedDiscoveryConfig::new(&cli.file_selection, &pyproject);
 
-    // If force-exclude is enabled and the (virtual) stdin filename matches an exclude
-    // pattern, parrot the input back to stdout unchanged.
-    if let Some(filename) = cli.stdin_filename.as_deref()
+    // If force-exclude matches the (virtual) stdin filename, parrot stdin to
+    // stdout unchanged so editors don't trip on excluded files.
+    if let Some(filename) = stdin_filename
         && is_force_excluded(filename, &discovery_config)?
     {
-        parrot_stdin()?;
+        std::io::copy(&mut stdin().lock(), &mut stdout().lock())?;
         return Ok(ExitStatus::Success);
     }
 
     let config = FormatterConfig::from_args(cli, &pyproject);
     let profile = cli
         .profile
-        .or_else(|| cli.stdin_filename.as_deref().and_then(Profile::from_path))
+        .or_else(|| stdin_filename.and_then(Profile::from_path))
         .or(pyproject.profile)
         .unwrap_or_default();
 
-    match format_source_code(cli.stdin_filename.as_deref(), &config, profile) {
+    match format_source_code(stdin_filename, &config, profile) {
         Ok(()) => Ok(ExitStatus::Success),
         Err(err) => {
             error!("{:?}", miette::Report::new(*err));
@@ -53,7 +47,10 @@ fn format_source_code(
     config: &FormatterConfig,
     profile: Profile,
 ) -> std::result::Result<(), Box<CommandError>> {
-    let source = read_from_stdin()
+    let mut source = String::new();
+    stdin()
+        .lock()
+        .read_to_string(&mut source)
         .map_err(|err| Box::new(CommandError::Read(path.map(Path::to_path_buf), err)))?;
 
     let formatted = match format_text(&source, config, profile) {
@@ -68,8 +65,8 @@ fn format_source_code(
     };
 
     let output = formatted.as_deref().unwrap_or(&source);
-    let mut writer = stdout().lock();
-    writer
+    stdout()
+        .lock()
         .write_all(output.as_bytes())
         .map_err(|err| Box::new(CommandError::Write(path.map(Path::to_path_buf), err)))?;
     Ok(())
