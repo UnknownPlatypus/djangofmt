@@ -24,6 +24,7 @@ markup_fmt = { workspace = true }
 # Error reporting
 miette = { workspace = true }
 rayon = { workspace = true }
+rustc-hash = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 toml = { workspace = true }

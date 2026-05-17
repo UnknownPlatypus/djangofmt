@@ -18,12 +18,20 @@
 //! ```
 
 mod checker;
+pub mod fix;
+pub mod lint_context;
 pub mod registry;
 mod rules;
 pub mod settings;
 mod violation;
 
 pub use checker::Checker;
+pub use fix::apply::{
+    AppliedFix, ApplyResult, FixerError, FixerResult, MAX_FIX_ITERATIONS, RuleFixSummary,
+    SourceMap, SourceMarker, apply_fixes, fix_ast, lint_fix,
+};
+pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
+pub use lint_context::{DiagnosticGuard, LintContext};
 pub use registry::{Rule, RuleCategory};
 pub use settings::Settings;
 
@@ -34,7 +42,7 @@ use miette::{Diagnostic, NamedSource, SourceSpan};
 ///
 /// Source code is added later via [`FileDiagnostics`] to avoid cloning
 /// the entire file content for each diagnostic.
-#[derive(Debug, Diagnostic, thiserror::Error)]
+#[derive(Debug, Clone, Diagnostic, thiserror::Error)]
 #[error("{message}")]
 pub struct LintDiagnostic {
     /// Rule code (e.g., "invalid-attr-value").
@@ -48,13 +56,22 @@ pub struct LintDiagnostic {
     /// Optional help text with suggestions.
     #[help]
     pub help: Option<String>,
+    /// Optional fix attached to the diagnostic.
+    ///
+    /// Stored on the diagnostic; applicability gating happens at apply time.
+    pub fix: Option<Fix>,
+    /// Optional short imperative summary of the fix.
+    ///
+    /// Stored separately from `help` so the renderer can mark it as fix-related
+    /// (and so a rule's `help()` and `fix_title()` don't fight for the same field).
+    pub fix_title: Option<String>,
 }
 
 /// A collection of lint diagnostics for a single file.
 ///
 /// This struct holds the source code once and references it for all diagnostics,
 /// avoiding the need to clone the source for each individual diagnostic.
-#[derive(Debug, Diagnostic, thiserror::Error)]
+#[derive(Debug, Clone, Diagnostic, thiserror::Error)]
 #[error("Found {} lint error(s)", self.related.len())]
 pub struct FileDiagnostics {
     /// The source code of the file.

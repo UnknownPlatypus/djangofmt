@@ -1,16 +1,3 @@
-//! invalid-attr-value: Invalid attribute value.
-//!
-//! Validates attribute values against the HTML specification.
-//! Currently only validates enum-type attributes (e.g., `<input type>`, `<button type>`).
-//!
-//! Also validates HTMX attributes (`hx-boost`, `hx-swap`, etc.) and Alpine.js attributes.
-//!
-//! ## Skipped cases
-//!
-//! - **Interpolation**: Values containing `{{` or `{%` are skipped (dynamic values)
-//! - **Unknown elements**: Web components and custom elements are skipped
-//! - **Unknown attributes**: Attributes not in the spec are skipped
-
 use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
@@ -18,10 +5,37 @@ use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::Violation;
 
-/// Violation for invalid HTML attribute values.
+/// ## What it does
+/// Checks for HTML attributes whose value is not in the set allowed by the
+/// HTML specification (and supported framework dialects such as HTMX or
+/// Alpine.js).
 ///
-/// Reports when an attribute has a value that doesn't match the allowed values
-/// for that attribute (e.g., `<form method="put">` is invalid).
+/// Currently only validates enum-type attributes (e.g., `<form method>`,
+/// `<input type>`, `<button type>`).
+///
+/// ## Why is this bad?
+/// Browsers silently ignore unknown values for enum attributes and fall back
+/// to a default, which usually does not match the author's intent. The
+/// resulting bug is easy to miss because the page still renders.
+///
+/// Values containing template interpolation (`{{ ... }}` or `{% ... %}`),
+/// unknown elements (web components, custom tags), and unknown attributes
+/// are skipped.
+///
+/// ## Example
+///
+/// ```html
+/// <form method="put"></form>
+/// ```
+///
+/// Use instead:
+///
+/// ```html
+/// <form method="post"></form>
+/// ```
+///
+/// ## References
+/// - [HTML Living Standard: `form.method`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
 #[derive(Debug, PartialEq, Eq)]
 pub struct InvalidAttrValue {
     pub value: String,
@@ -50,7 +64,7 @@ impl Violation for InvalidAttrValue {
 }
 
 /// Check an element's attributes for invalid enum values.
-pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
+pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     // Pending implementation of djangofmt_html_spec.
     // Currently only checks for <form method="...">.
     if !element.tag_name.eq_ignore_ascii_case("form") {
@@ -75,7 +89,7 @@ pub fn check(element: &Element<'_>, checker: &mut Checker<'_>) {
 
             let allowed = ["get", "post", "dialog"];
             if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
-                checker.report(
+                checker.report_diagnostic(
                     &InvalidAttrValue {
                         value: (*value_str).to_string(),
                         attribute: "method".to_string(),

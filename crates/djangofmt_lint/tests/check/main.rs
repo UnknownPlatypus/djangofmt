@@ -2,7 +2,9 @@
 mod common;
 
 use common::build_settings;
-use djangofmt_lint::{FileDiagnostics, LintDiagnostic, Settings, check_ast};
+use djangofmt_lint::{
+    Applicability, FileDiagnostics, LintDiagnostic, Settings, check_ast, fix_ast,
+};
 
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
@@ -11,6 +13,7 @@ use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
 use std::fs;
 use std::path::Path;
 
+/// Asserts every `*.valid.html` fixture produces zero diagnostics.
 #[test]
 fn check_valid() {
     glob!("**/*.valid.html", |path| {
@@ -28,6 +31,7 @@ fn check_valid() {
     });
 }
 
+/// Snapshots the rendered diagnostics produced for each `*.invalid.html` fixture.
 #[test]
 fn check_invalid() {
     glob!("**/*.invalid.html", |path| {
@@ -45,10 +49,31 @@ fn check_invalid() {
     });
 }
 
+/// Snapshots the post-fix source for each `*.invalid.html` fixture whose rule applies a safe fix.
+#[test]
+fn fix_snapshot() {
+    glob!("**/*.invalid.html", |path| {
+        let input = fs::read_to_string(path).unwrap();
+        let mut parser = Parser::new(&input, Language::Django, vec![]);
+        let ast = parser
+            .parse_root()
+            .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
+        let result = fix_ast(&input, &ast, &Settings::default(), Applicability::Safe);
+        if result.applied_count == 0 {
+            return;
+        }
+        build_settings(path).bind(|| {
+            let stem = path.file_stem().unwrap().to_str().unwrap();
+            let name = format!("{stem}.fixed");
+            assert_snapshot!(name, result.output);
+        });
+    });
+}
+
 const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
 fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
-    let mut parser = Parser::new(input, Language::Jinja, vec![]);
+    let mut parser = Parser::new(input, Language::Django, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::default();
     check_ast(input, &ast, &settings)

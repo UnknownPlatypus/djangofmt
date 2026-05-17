@@ -149,7 +149,6 @@ impl From<Profile> for Language {
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
     /// Check files for lint errors
-    #[clap(hide = true)]
     Check(CheckCommand),
     /// Generate shell completions
     #[clap(hide = true)]
@@ -168,6 +167,16 @@ pub struct CheckCommand {
     /// Template language profile to use [default: django]
     #[arg(long, value_enum)]
     pub profile: Option<Profile>,
+    /// Apply safe fixes automatically.
+    #[arg(long)]
+    pub fix: bool,
+    /// Include unsafe fixes when applying with --fix. Without --fix,
+    /// diagnostics from unsafe fixes are still reported as fixable.
+    #[arg(long)]
+    pub unsafe_fixes: bool,
+    /// List per-rule fix counts after applying.
+    #[arg(long)]
+    pub show_fixes: bool,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
 }
@@ -225,6 +234,13 @@ mod tests {
         A fast, HTML aware, Django template formatter, written in Rust.
 
         Usage: djangofmt [OPTIONS] <FILES>...
+               djangofmt [OPTIONS] [FILES]... <COMMAND>
+
+        Commands:
+          check
+                  Check files for lint errors
+          help
+                  Print this message or the help of the given subcommand(s)
 
         Arguments:
           <FILES>...

@@ -1,5 +1,6 @@
 use std::fmt::Debug;
 
+use crate::fix::FixAvailability;
 use crate::registry::{Rule, RuleCategory};
 
 /// A trait for lint violations.
@@ -12,6 +13,9 @@ use crate::registry::{Rule, RuleCategory};
 /// - Compile-time verification that every violation has a registered rule
 ///
 /// The `CATEGORY` constant declares the functional grouping (e.g., Correctness, Style).
+///
+/// The `FIX_AVAILABILITY` constant declares whether (and how often) the rule
+/// produces a fix. Default is [`FixAvailability::None`] for fixless rules.
 pub trait Violation: Debug {
     /// The rule for this violation (e.g., `Rule::InvalidAttrValue`).
     const RULE: Rule;
@@ -19,11 +23,21 @@ pub trait Violation: Debug {
     /// The category for this violation (e.g., `RuleCategory::Correctness`).
     const CATEGORY: RuleCategory;
 
+    /// Whether this rule produces a fix, and if so how often.
+    const FIX_AVAILABILITY: FixAvailability = FixAvailability::None;
+
     /// The message to be displayed to the user.
     fn message(&self) -> String;
 
     /// Optional help text with suggestions for fixing the issue.
     fn help(&self) -> Option<String> {
+        None
+    }
+
+    /// A short, imperative summary of what the fix does (e.g. `"Add trimmed"`).
+    ///
+    /// Set on the diagnostic by [`crate::LintContext::report_diagnostic`].
+    fn fix_title(&self) -> Option<String> {
         None
     }
 }
