@@ -12,6 +12,7 @@ repository = "https://github.com/UnknownPlatypus/djangofmt"
 license = "MIT"
 
 [workspace.dependencies]
+anyhow = { version = "1.0.100" }
 clap = { version = "4.5.57", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }

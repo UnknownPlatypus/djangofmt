@@ -70,6 +70,8 @@ impl<'a> Checker<'a> {
             message: violation.message(),
             span,
             help: violation.help(),
+            fix: None,
+            fix_title: None,
         });
     }
 

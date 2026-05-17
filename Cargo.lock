@@ -423,6 +423,7 @@ dependencies = [
 name = "djangofmt_lint"
 version = "0.2.7"
 dependencies = [
+ "anyhow",
  "insta",
  "markup_fmt",
  "miette",
@@ -430,6 +431,7 @@ dependencies = [
  "serde",
  "strum",
  "thiserror",
+ "tracing",
 ]
 
 [[package]]

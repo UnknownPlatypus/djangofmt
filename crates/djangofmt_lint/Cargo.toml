@@ -6,16 +6,15 @@ rust-version.workspace = true
 repository.workspace = true
 license.workspace = true
 
-[lib]
-test = false
-
 [dependencies]
+anyhow = { workspace = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
 rustc-hash = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
+tracing = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
