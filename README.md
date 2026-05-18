@@ -21,11 +21,7 @@ A fast, HTML aware, Django template formatter, written in Rust.
   <i>Formatting 100k+ lines of HTML across 1.7k+ files from scratch.</i>
 </p>
 
-- ⚡️ 70–160× faster than djhtml, djlint and prettier on the same workload — see [benchmarks](docs/benchmarks.md).
-- 🐍 Installable via `pip`, `uv` or `pipx`; no Node, no compiler required.
-- 🧩 Configured through `pyproject.toml`; no extra dotfile to maintain.
-- 📐 Supports Django and Jinja templates, plus `.svg` files.
-- 🛠️ First-class pre-commit hook and editor format-on-save integrations.
+Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) with some additions to support Django fully.
 
 ## Table of contents
 
@@ -145,10 +141,6 @@ Arguments:
       The shell to generate the completions for
       [possible values: bash, elvish, fish, nushell, powershell, zsh]
 ```
-
-## Acknowledgements
-
-Heavily relies on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) with some additions to support Django fully.
 
 ## Contributing
 
