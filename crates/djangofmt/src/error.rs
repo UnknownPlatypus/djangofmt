@@ -79,7 +79,7 @@ impl ParseError {
                         line,
                         column,
                     } => (
-                        format!("expected close tag for opening tag <{tag_name}>",),
+                        format!("expected close tag for opening tag <{tag_name}>"),
                         None,
                         SourceSpan::new(SourceOffset::from_location(&source, *line, *column), tag_name.len()),
                     ),

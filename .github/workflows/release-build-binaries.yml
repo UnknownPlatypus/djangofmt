@@ -51,6 +51,7 @@ jobs:
       - name: "Build sdist"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           command: sdist
           args: --out dist
       - name: "Test sdist"
@@ -83,6 +84,7 @@ jobs:
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: ${{ matrix.target }}
           manylinux: "2_17"
           args: --release --locked --out dist --compatibility pypi
@@ -157,6 +159,7 @@ jobs:
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: ${{ matrix.platform.target }}
           manylinux: ${{ matrix.platform.manylinux }}
           docker-options: ${{ matrix.platform.maturin_docker_options }}
@@ -222,6 +225,7 @@ jobs:
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: ${{ matrix.target }}
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
@@ -281,6 +285,7 @@ jobs:
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: ${{ matrix.platform.target }}
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
@@ -336,6 +341,7 @@ jobs:
       - name: "Build wheels - x86_64"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: x86_64
           args: --release --locked --out dist --compatibility pypi
       - name: "Upload wheels"
@@ -375,6 +381,7 @@ jobs:
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: aarch64
           args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
@@ -427,6 +434,7 @@ jobs:
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          maturin-version: v1.13.3
           target: ${{ matrix.platform.target }}
           args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
