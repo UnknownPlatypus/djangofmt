@@ -24,6 +24,9 @@ pub struct PyprojectSettings {
     pub extend_include: Option<Vec<String>>,
     pub respect_gitignore: Option<bool>,
     pub force_exclude: Option<bool>,
+    pub fix: Option<bool>,
+    pub unsafe_fixes: Option<bool>,
+    pub show_fixes: Option<bool>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -255,6 +258,26 @@ preserve-unquoted-attrs = true
             result,
             PyprojectSettings {
                 preserve_unquoted_attrs: Some(true),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_fix_flags() {
+        let content = r"
+[tool.djangofmt]
+fix = true
+unsafe-fixes = true
+show-fixes = true
+";
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                fix: Some(true),
+                unsafe_fixes: Some(true),
+                show_fixes: Some(true),
                 ..Default::default()
             }
         );

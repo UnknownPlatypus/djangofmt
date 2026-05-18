@@ -163,7 +163,8 @@ pub enum Commands {
     },
 }
 
-#[derive(Clone, Debug, clap::Parser)]
+#[derive(Clone, Debug, Default, clap::Parser)]
+#[expect(clippy::struct_excessive_bools)]
 pub struct CheckCommand {
     /// List of files or directories to check.
     #[arg(required = true)]
@@ -171,16 +172,23 @@ pub struct CheckCommand {
     /// Template language profile to use [default: django]
     #[arg(long, value_enum)]
     pub profile: Option<Profile>,
-    /// Apply safe fixes automatically.
-    #[arg(long)]
+    /// Apply safe fixes automatically. Use `--no-fix` to disable.
+    #[arg(long, overrides_with("no_fix"))]
     pub fix: bool,
+    #[arg(long, overrides_with("fix"), hide = true)]
+    pub no_fix: bool,
     /// Include unsafe fixes when applying with --fix. Without --fix,
     /// diagnostics from unsafe fixes are still reported as fixable.
-    #[arg(long)]
+    /// Use `--no-unsafe-fixes` to disable.
+    #[arg(long, overrides_with("no_unsafe_fixes"))]
     pub unsafe_fixes: bool,
-    /// List per-rule fix counts after applying.
-    #[arg(long)]
+    #[arg(long, overrides_with("unsafe_fixes"), hide = true)]
+    pub no_unsafe_fixes: bool,
+    /// List per-rule fix counts after applying. Use `--no-show-fixes` to disable.
+    #[arg(long, overrides_with("no_show_fixes"))]
     pub show_fixes: bool,
+    #[arg(long, overrides_with("show_fixes"), hide = true)]
+    pub no_show_fixes: bool,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
 }

@@ -16,6 +16,36 @@ use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
+use crate::pyproject::PyprojectSettings;
+use crate::resolver::resolve_bool_arg;
+
+/// Resolved fix-related configuration after merging CLI args with pyproject settings.
+#[derive(Debug, PartialEq, Eq)]
+pub struct CheckConfig {
+    pub fix: bool,
+    pub unsafe_fixes: bool,
+    pub show_fixes: bool,
+}
+
+impl CheckConfig {
+    /// Build a [`CheckConfig`] by merging CLI arguments with pyproject.toml settings.
+    ///
+    /// CLI arguments take precedence over pyproject settings, which take precedence over defaults.
+    #[must_use]
+    pub fn from_args(args: &CheckCommand, pyproject: &PyprojectSettings) -> Self {
+        Self {
+            fix: resolve_bool_arg(args.fix, args.no_fix)
+                .or(pyproject.fix)
+                .unwrap_or_default(),
+            unsafe_fixes: resolve_bool_arg(args.unsafe_fixes, args.no_unsafe_fixes)
+                .or(pyproject.unsafe_fixes)
+                .unwrap_or_default(),
+            show_fixes: resolve_bool_arg(args.show_fixes, args.no_show_fixes)
+                .or(pyproject.show_fixes)
+                .unwrap_or_default(),
+        }
+    }
+}
 
 /// Per-file outcome of `check_path`.
 struct CheckResult {
@@ -32,9 +62,10 @@ struct CheckResult {
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
+    let config = CheckConfig::from_args(args, &resolved.pyproject);
 
     let settings = Settings::default();
-    let threshold = if args.unsafe_fixes {
+    let threshold = if config.unsafe_fixes {
         Applicability::Unsafe
     } else {
         Applicability::Safe
@@ -44,7 +75,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|path| check_path(path, resolved.profile, &settings, args.fix, threshold))
+        .map(|path| check_path(path, resolved.profile, &settings, config.fix, threshold))
         .partition_map(|result| match result {
             Ok(r) => Left(r),
             Err(err) => Right(err),
@@ -80,7 +111,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
             }
         }
     }
-    if args.fix && args.unsafe_fixes {
+    if config.fix && config.unsafe_fixes {
         total_unsafe_fixable = 0;
     }
 
@@ -95,12 +126,12 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         total_applied,
         total_safe_fixable,
         total_unsafe_fixable,
-        args.fix,
-        args.unsafe_fixes,
+        config.fix,
+        config.unsafe_fixes,
         error_count,
     );
 
-    if args.show_fixes && total_applied > 0 {
+    if config.show_fixes && total_applied > 0 {
         print_show_fixes(&results, total_applied);
     }
 
@@ -267,8 +298,83 @@ fn check_path(
 
 #[cfg(test)]
 mod tests {
-    use super::print_summary;
+    use super::{CheckConfig, print_summary};
+    use crate::args::CheckCommand;
+    use crate::pyproject::PyprojectSettings;
     use tracing_test::traced_test;
+
+    #[test]
+    fn check_config_defaults_to_false() {
+        let config =
+            CheckConfig::from_args(&CheckCommand::default(), &PyprojectSettings::default());
+        assert_eq!(
+            config,
+            CheckConfig {
+                fix: false,
+                unsafe_fixes: false,
+                show_fixes: false,
+            }
+        );
+    }
+
+    #[test]
+    fn check_config_reads_pyproject_settings() {
+        let pyproject = PyprojectSettings {
+            fix: Some(true),
+            unsafe_fixes: Some(true),
+            show_fixes: Some(true),
+            ..Default::default()
+        };
+        let config = CheckConfig::from_args(&CheckCommand::default(), &pyproject);
+        assert_eq!(
+            config,
+            CheckConfig {
+                fix: true,
+                unsafe_fixes: true,
+                show_fixes: true,
+            }
+        );
+    }
+
+    #[test]
+    fn check_config_cli_yes_overrides_pyproject() {
+        let pyproject = PyprojectSettings {
+            fix: Some(false),
+            unsafe_fixes: Some(false),
+            show_fixes: Some(false),
+            ..Default::default()
+        };
+        let args = CheckCommand {
+            fix: true,
+            unsafe_fixes: true,
+            show_fixes: true,
+            ..Default::default()
+        };
+        let config = CheckConfig::from_args(&args, &pyproject);
+        assert!(config.fix);
+        assert!(config.unsafe_fixes);
+        assert!(config.show_fixes);
+    }
+
+    #[test]
+    fn check_config_cli_no_overrides_pyproject() {
+        let pyproject = PyprojectSettings {
+            fix: Some(true),
+            unsafe_fixes: Some(true),
+            show_fixes: Some(true),
+            ..Default::default()
+        };
+        let args = CheckCommand {
+            no_fix: true,
+            no_unsafe_fixes: true,
+            no_show_fixes: true,
+            ..Default::default()
+        };
+        let config = CheckConfig::from_args(&args, &pyproject);
+        assert!(!config.fix);
+        assert!(!config.unsafe_fixes);
+        assert!(!config.show_fixes);
+    }
 
     #[test]
     #[traced_test]
