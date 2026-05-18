@@ -152,6 +152,7 @@ impl From<Profile> for Language {
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
     /// Check files for lint errors
+    #[clap(hide = true)]
     Check(CheckCommand),
     /// Generate shell completions
     #[clap(hide = true)]
@@ -230,20 +231,13 @@ mod tests {
 
     #[test]
     fn test_cli_help() {
-        assert_cmd_snapshot!(cli().arg("--help"), @r#"
+        assert_cmd_snapshot!(cli().arg("--help"), @r###"
         success: true
         exit_code: 0
         ----- stdout -----
         A fast, HTML aware, Django template formatter, written in Rust.
 
         Usage: djangofmt [OPTIONS] [FILES]...
-               djangofmt [OPTIONS] [FILES]... <COMMAND>
-
-        Commands:
-          check
-                  Check files for lint errors
-          help
-                  Print this message or the help of the given subcommand(s)
 
         Arguments:
           [FILES]...
@@ -307,7 +301,7 @@ mod tests {
                   Disable all logging
 
         ----- stderr -----
-        "#);
+        "###);
     }
     #[test]
     fn test_cli_version() {
