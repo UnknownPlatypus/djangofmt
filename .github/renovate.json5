@@ -91,8 +91,24 @@
       matchDepNames: ["rust"],
       commitMessageTopic: "Rust",
     },
+    {
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["maturin"],
+      commitMessageTopic: "maturin",
+    },
   ],
   customManagers: [
+    // Maturin version used in maturin-action
+    {
+      customType: "regex",
+      managerFilePatterns: [
+        "/.github/workflows/release-build-binaries\\.yml$/",
+      ],
+      matchStrings: ["maturin-version: (?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "maturin",
+      packageNameTemplate: "PyO3/maturin",
+      datasourceTemplate: "github-releases",
+    },
     // Minimum supported Rust toolchain version
     {
       customType: "regex",
@@ -103,7 +119,6 @@
       depNameTemplate: "msrv",
       packageNameTemplate: "rust-lang/rust",
       datasourceTemplate: "github-releases",
-      extractVersionTemplate: "^(?<version>\\d+\\.\\d+(\\.\\d+)?)$",
     },
     // Rust toolchain version
     {
@@ -115,7 +130,6 @@
       depNameTemplate: "rust",
       packageNameTemplate: "rust-lang/rust",
       datasourceTemplate: "github-releases",
-      extractVersionTemplate: "^(?<version>\\d+\\.\\d+(\\.\\d+)?)$",
     },
   ],
   vulnerabilityAlerts: {
