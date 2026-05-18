@@ -126,7 +126,7 @@ See [Controlling the formatting](docs/formatting.md) for the behaviour of each o
 
 ## Editor integration
 
-See [`docs/editor-integration.md`](docs/editor-integration.md) for Helix and Zed configurations.
+See [`docs/editor-integration.md`](docs/editor-integration.md).
 
 ## Shell completions
 
