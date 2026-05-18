@@ -26,3 +26,7 @@ playground/**/*.js
 dist
 *.tgz
 .astro
+
+# LLM
+.claude
+.agents
