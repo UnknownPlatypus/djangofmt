@@ -79,8 +79,11 @@ pub struct FileSelectionArgs {
 #[derive(Clone, Debug, clap::Parser)]
 pub struct FormatCommand {
     /// List of files or directories to format.
-    #[arg(required = true)]
+    #[arg(required_unless_present = "stdin_filename")]
     pub files: Vec<PathBuf>,
+    /// The name of the file when passing it through stdin.
+    #[arg(long, value_name = "PATH")]
+    pub stdin_filename: Option<PathBuf>,
     /// Set the line-length [default: 120]
     #[arg(long)]
     pub line_length: Option<LineLength>,
@@ -233,7 +236,7 @@ mod tests {
         ----- stdout -----
         A fast, HTML aware, Django template formatter, written in Rust.
 
-        Usage: djangofmt [OPTIONS] <FILES>...
+        Usage: djangofmt [OPTIONS] [FILES]...
                djangofmt [OPTIONS] [FILES]... <COMMAND>
 
         Commands:
@@ -243,10 +246,13 @@ mod tests {
                   Print this message or the help of the given subcommand(s)
 
         Arguments:
-          <FILES>...
+          [FILES]...
                   List of files or directories to format
 
         Options:
+              --stdin-filename <PATH>
+                  The name of the file when passing it through stdin
+
               --line-length <LINE_LENGTH>
                   Set the line-length [default: 120]
 

@@ -18,7 +18,7 @@ clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
 dprint-plugin-json = { version = "0.21.1" }
 ignore = { version = "0.4.25" }
-insta = { version = "1.46.3", features = ["glob", "yaml"] }
+insta = { version = "1.46.3", features = ["filters", "glob", "yaml"] }
 insta-cmd = { version = "0.6.0" }
 malva = { version = "0.15.2", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "096b0c6a8cf35aae960fef4c2988fbdaae93f872" }

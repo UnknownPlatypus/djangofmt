@@ -95,13 +95,8 @@ impl ResolvedDiscoveryConfig {
     }
 }
 
-/// Build include types and exclude overrides from the resolved config.
-///
-/// Returns `(Types, Overrides)` ready to be plugged into a `WalkBuilder`.
-fn build_walk_filters(
-    root: &Path,
-    config: &ResolvedDiscoveryConfig,
-) -> Result<(ignore::types::Types, ignore::overrides::Override), Error> {
+/// Build the include `Types` matcher from the resolved config.
+fn build_types(config: &ResolvedDiscoveryConfig) -> Result<ignore::types::Types, Error> {
     let mut types_builder = TypesBuilder::new();
     for pattern in &config.include {
         types_builder
@@ -109,21 +104,46 @@ fn build_walk_filters(
             .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))?;
     }
     types_builder.select("djangofmt");
-    let types = types_builder
+    types_builder
         .build()
-        .map_err(|e| Error::Resolve(format!("Failed to build file types: {e}")))?;
+        .map_err(|e| Error::Resolve(format!("Failed to build file types: {e}")))
+}
 
+/// Build the exclude `Override` matcher from the resolved config.
+fn build_overrides(
+    root: &Path,
+    config: &ResolvedDiscoveryConfig,
+) -> Result<ignore::overrides::Override, Error> {
     let mut override_builder = OverrideBuilder::new(root);
     for pattern in &config.exclude {
         override_builder
             .add(&format!("!{pattern}"))
             .map_err(|e| Error::Resolve(format!("Invalid exclude pattern '{pattern}': {e}")))?;
     }
-    let overrides = override_builder
+    override_builder
         .build()
-        .map_err(|e| Error::Resolve(format!("Failed to build exclude overrides: {e}")))?;
+        .map_err(|e| Error::Resolve(format!("Failed to build exclude overrides: {e}")))
+}
 
-    Ok((types, overrides))
+/// Build include types and exclude overrides from the resolved config.
+///
+/// Returns `(Types, Overrides)` ready to be plugged into a `WalkBuilder`.
+fn build_walk_filters(
+    root: &Path,
+    config: &ResolvedDiscoveryConfig,
+) -> Result<(ignore::types::Types, ignore::overrides::Override), Error> {
+    Ok((build_types(config)?, build_overrides(root, config)?))
+}
+
+/// Return `true` if the given filename should be force-excluded based on the resolved
+/// configuration. Returns `false` if `force_exclude` is disabled.
+pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> Result<bool, Error> {
+    if !config.force_exclude {
+        return Ok(false);
+    }
+    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let overrides = build_overrides(&cwd, config)?;
+    Ok(overrides.matched(filename, false).is_ignore())
 }
 
 /// Resolve a list of CLI paths (files and/or directories) into a flat,

@@ -6,6 +6,17 @@ fn cli() -> Command {
     Command::new(get_cargo_bin("djangofmt"))
 }
 
+/// Like [`assert_cmd_snapshot!`] but redacts the leading directory of `test.html`
+/// occurrences (i.e. the per-run `TempDir` prefix in miette diagnostics).
+macro_rules! assert_cmd_snapshot_tmpdir {
+    ($cmd:expr, @$snapshot:literal $(,)?) => {
+        insta::with_settings!(
+            { filters => vec![(r"[^\s\[]+/test\.html", "[TMP]/test.html")] },
+            { assert_cmd_snapshot!($cmd, @$snapshot) }
+        )
+    };
+}
+
 // ── Format subcommand ────────────────────────────────────────────────
 
 #[test]
@@ -17,9 +28,9 @@ fn format_single_file() {
     success: true
     exit_code: 0
     ----- stdout -----
-    1 file reformatted !
 
     ----- stderr -----
+    1 file reformatted !
     "#);
     let content = std::fs::read_to_string(&file).unwrap();
     assert_eq!(content, "<div class=\"foo\"></div>\n");
@@ -34,9 +45,9 @@ fn format_already_formatted_file() {
     success: true
     exit_code: 0
     ----- stdout -----
-    1 file left unchanged !
 
     ----- stderr -----
+    1 file left unchanged !
     "#);
 }
 
@@ -50,9 +61,9 @@ fn format_file_with_ignore_directive() {
     success: true
     exit_code: 0
     ----- stdout -----
-    1 file skipped !
 
     ----- stderr -----
+    1 file skipped !
     "#);
     let content = std::fs::read_to_string(&file).unwrap();
     assert_eq!(content, original);
@@ -80,9 +91,9 @@ fn format_directory() {
     success: true
     exit_code: 0
     ----- stdout -----
-    2 files reformatted !
 
     ----- stderr -----
+    2 files reformatted !
     "#);
 }
 
@@ -100,6 +111,164 @@ fn format_quiet() {
     "#);
 }
 
+// ── Format from stdin ────────────────────────────────────────────────
+
+#[test]
+fn format_stdin_dash_sentinel() {
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_already_formatted() {
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("<div class=\"foo\"></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_with_filename_html() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "foo.html"])
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_with_filename_infers_jinja_profile() {
+    // Jinja whitespace-control modifiers (`{{- ... -}}`) are preserved under the jinja
+    // profile, but stripped under django — proving the profile was inferred from `.jinja`.
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "foo.jinja"])
+            .pass_stdin("{{- foo -}}\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {{- foo -}}
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_ignore_directive() {
+    let source = "<!-- djangofmt:ignore -->\n<div   class=\"foo\"  ></div>\n";
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin(source),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <!-- djangofmt:ignore -->
+    <div   class="foo"  ></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_parse_error_exits_2() {
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
+        @r#"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+      × expected close tag for opening tag <div>
+       ╭─[<unknown>:1:1]
+     1 │ <div   class="foo"  >
+       · ─┬─
+       ·  ╰── here
+       ╰────
+    "#);
+}
+
+#[test]
+fn format_stdin_force_exclude_parrots_input() {
+    let source = "<div   class=\"foo\"  ></div>\n";
+    assert_cmd_snapshot!(
+        cli()
+            .args([
+                "--force-exclude",
+                "--extend-exclude",
+                "foo.html",
+                "--stdin-filename",
+                "foo.html",
+            ])
+            .pass_stdin(source),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div   class="foo"  ></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_extra_file_warns_but_uses_stdin() {
+    // When --stdin-filename is set, any other file path is ignored with a warning.
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "stream.html"])
+            .arg("on_disk.html")
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    Ignoring file on_disk.html in favor of standard input.
+    "#);
+}
+
+#[test]
+fn format_stdin_filename_alone_without_dash() {
+    // --stdin-filename should make `files` optional (mirrors ruff).
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--stdin-filename", "foo.html"])
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <div class="foo"></div>
+
+    ----- stderr -----
+    "#);
+}
+
 // ── Check subcommand ─────────────────────────────────────────────────
 
 #[test]
@@ -107,14 +276,14 @@ fn check_clean_file() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
     std::fs::write(&file, "<form method=\"post\"></form>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg("check").arg(file.as_os_str()), @r#"
+    assert_cmd_snapshot!(cli().arg("check").arg(file.as_os_str()), @r###"
     success: true
     exit_code: 0
     ----- stdout -----
-    All checks passed!
 
     ----- stderr -----
-    "#);
+    All checks passed!
+    "###);
 }
 
 #[test]
@@ -122,12 +291,23 @@ fn check_file_with_lint_error() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
     std::fs::write(&file, "<form method=\"put\"></form>\n").unwrap();
-    let output = cli().arg("check").arg(file.as_os_str()).output().unwrap();
-    assert!(!output.status.success());
-    assert_eq!(output.status.code(), Some(1));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("Invalid value 'put' for attribute 'method'"));
-    assert!(stdout.contains("Use one of: get, post, dialog"));
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(file.as_os_str()), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Found 1 lint error(s)
+      ╰─▶   × Invalid value 'put' for attribute 'method'.
+             ╭─[[TMP]/test.html:1:15]
+           1 │ <form method="put"></form>
+             ·               ─┬─
+             ·                ╰── here
+             ╰────
+            help: Use one of: get, post, dialog
+
+    Found 1 errors.
+    "#);
 }
 
 #[test]
@@ -149,44 +329,45 @@ fn check_fixable_file_without_fix() {
     let file = dir.path().join("test.html");
     let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
     std::fs::write(&file, original).unwrap();
-    let output = cli().arg("check").arg(file.as_os_str()).output().unwrap();
-    assert!(!output.status.success());
-    assert_eq!(output.status.code(), Some(1));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Found 1 errors. [*] 1 fixable with the --fix option."),
-        "summary missing or wrong, got:\n{stdout}"
-    );
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(file.as_os_str()), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Found 1 lint error(s)
+      ╰─▶   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
+            │ indentation into translation strings.
+             ╭─[[TMP]/test.html:1:3]
+           1 │ {% blocktranslate %}Hello{% endblocktranslate %}
+             ·   ────────┬───────
+             ·           ╰── here
+             ╰────
+            help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate
+                  trimmed %}...{% endblocktranslate %}`.
+
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    "#);
     // Ensure we didn't apply anything without --fix.
-    let after = std::fs::read_to_string(&file).unwrap();
-    assert_eq!(after, original);
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), original);
 }
 
 #[test]
 fn check_fixable_file_with_fix() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
-    let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
-    std::fs::write(&file, original).unwrap();
-    let output = cli()
-        .args(["check", "--fix"])
-        .arg(file.as_os_str())
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "expected success exit, got {output:?}"
-    );
-    assert_eq!(output.status.code(), Some(0));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Found 1 errors (1 fixed, 0 remaining)."),
-        "summary missing or wrong, got:\n{stdout}"
-    );
+    std::fs::write(&file, "{% blocktranslate %}Hello{% endblocktranslate %}\n").unwrap();
+    assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(file.as_os_str()), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    "#);
     // Ensure file was mutated.
-    let after = std::fs::read_to_string(&file).unwrap();
     assert_eq!(
-        after,
+        std::fs::read_to_string(&file).unwrap(),
         "{% blocktranslate trimmed %}Hello{% endblocktranslate %}\n"
     );
 }
@@ -195,28 +376,20 @@ fn check_fixable_file_with_fix() {
 fn check_fixable_file_with_show_fixes() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
-    let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
-    std::fs::write(&file, original).unwrap();
-    let output = cli()
-        .args(["check", "--fix", "--show-fixes"])
-        .arg(file.as_os_str())
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "expected success exit, got {output:?}"
-    );
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("Found 1 errors (1 fixed, 0 remaining)."),
-        "summary missing or wrong, got:\n{stdout}"
-    );
-    assert!(stdout.contains("Fixed 1 errors:"), "got:\n{stdout}");
-    // Per-rule line must include rule code AND fix_title.
-    assert!(
-        stdout.contains("1 × untrimmed-blocktranslate (Add trimmed)"),
-        "per-rule line missing fix_title, got:\n{stdout}"
-    );
+    std::fs::write(&file, "{% blocktranslate %}Hello{% endblocktranslate %}\n").unwrap();
+    assert_cmd_snapshot_tmpdir!(
+        cli().args(["check", "--fix", "--show-fixes"]).arg(file.as_os_str()),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    Fixed 1 errors:
+    - [TMP]/test.html:
+        1 × untrimmed-blocktranslate (Add trimmed)
+    "#);
 }
 
 #[test]
@@ -224,29 +397,22 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("test.html");
     std::fs::write(&file, "{% if x %}\n  unclosed\n").unwrap();
-    let output = cli()
-        .args(["check", "--fix"])
-        .arg(file.as_os_str())
-        .output()
-        .unwrap();
-    // Parse errors must surface even with --fix.
-    assert!(
-        !output.status.success(),
-        "expected failure exit, got {output:?}"
-    );
-    assert_eq!(output.status.code(), Some(1));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(
-        stdout.contains("unclosed {% if %} block"),
-        "expected parse error rendering, got:\n{stdout}"
-    );
-    assert!(
-        stdout.contains("Couldn't check 1 files!"),
-        "expected error count line, got:\n{stdout}"
-    );
-    // Must NOT claim success.
-    assert!(
-        !stdout.contains("All checks passed!"),
-        "must not claim success when parse errors occurred, got:\n{stdout}"
-    );
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(file.as_os_str()), @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × unclosed {% if %} block.
+       ╭─[[TMP]/test.html:1:4]
+     1 │ {% if x %}
+       ·    ─┬
+       ·     ╰── here
+     2 │   unclosed
+       ╰────
+      help: Check for invalid HTML syntax inside the block that might prevent
+            finding the end tag.
+
+    Couldn't check 1 files!
+    "#);
 }

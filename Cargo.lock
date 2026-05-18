@@ -705,6 +705,7 @@ dependencies = [
  "console",
  "globset",
  "once_cell",
+ "regex",
  "serde",
  "similar 2.7.0",
  "tempfile",
