@@ -23,6 +23,19 @@ A fast, HTML aware, Django template formatter, written in Rust.
 
 Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) with some additions to support Django fully.
 
+## Table of contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Pre-commit hook](#pre-commit-hook)
+- [Configuration](#configuration)
+- [Editor integration](docs/editor-integration.md)
+- [Controlling the formatting](docs/formatting.md)
+- [Known limitations](docs/known-limitations.md)
+- [Benchmarks](docs/benchmarks.md)
+- [Shell completions](#shell-completions)
+- [Contributing](#contributing)
+
 ## Installation
 
 djangofmt is available on PyPI.
@@ -38,29 +51,6 @@ uv add --dev djangofmt            # Or add djangofmt to your project.
 # With pipx
 pipx install djangofmt
 ```
-
-## Editor integration
-
-See [`docs/editor-integration.md`](docs/editor-integration.md).
-
-## As a pre-commit hook
-
-See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions
-
-Sample `.pre-commit-config.yaml`:
-
-```yaml
-- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.8
-  hooks:
-    - id: djangofmt
-```
-
-The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
-
-By default, the configuration uses pre-commit’s [`files` option](https://pre-commit.com/#creating-new-hooks) to detect
-all text files in directories named `templates`. If your templates are stored elsewhere, you can override this behavior
-by specifying the desired files in the hook configuration within your `.pre-commit-config.yaml` file.
 
 ## Usage
 
@@ -82,6 +72,37 @@ djangofmt .
 git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
 ```
 
+## Pre-commit hook
+
+See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions.
+
+Sample `.pre-commit-config.yaml`:
+
+```yaml
+- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
+  rev: v0.2.8
+  hooks:
+    - id: djangofmt
+```
+
+The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
+
+By default, the configuration uses pre-commit's [`files` option](https://pre-commit.com/#creating-new-hooks) to detect
+all text files in directories named `templates`. If your templates are stored elsewhere, you can override this behavior
+by specifying the desired files in the hook configuration within your `.pre-commit-config.yaml` file.
+
+### `.svg` files support
+
+djangofmt can format svg files too. It will behave exactly the same way as if they were html files.
+There is a dedicated pre-commit hook for these:
+
+```yaml
+- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
+  rev: v0.2.8
+  hooks:
+    - id: djangofmt-svg
+```
+
 ## Configuration
 
 Djangofmt can also be configured via a `[tool.djangofmt]` section in your `pyproject.toml`:
@@ -101,229 +122,13 @@ The first `pyproject.toml` found is used. If no file is found or the file doesn'
 
 Command-line arguments always take precedence over `pyproject.toml` settings.
 
-## Controlling the formatting
+See [Controlling the formatting](docs/formatting.md) for the behaviour of each option and how to opt into per-node overrides.
 
-DjangoFmt gives users control over formatting in cases where
-static analysis struggles to determine the optimal approach.
+## Editor integration
 
-### Splitting an opening tag across multiple lines
+See [`docs/editor-integration.md`](docs/editor-integration.md).
 
-You can control this formatting by choosing whether to insert a newline before the first attribute:
-
-```diff
-# Unchanged
-<div class="flex" id="great" data-a>
-  This is nice!
-</div>
-
-# Wrap on multiple lines
-<div
--    class="flex" id="great" data-a>
-+    class="flex"
-+    id="great"
-+    data-a
-+>
-    This is nice!
-</div>
-```
-
-### Class attribute formatting
-
-The `class` attribute will be formatted as a space-separated sequence of strings,
-unless there are already newlines inside the attribute value.
-
-This makes it possible to accommodate the 2 following use cases:
-
-```html
-<div class="
-  mt-8 p-8
-  bg-indigo-600 hover:bg-indigo-700
-  border border-transparent
-  font-medium text-white
-">
-    Hello world
-</div>
-
-<div class="mt-8 p-8 bg-indigo-600 hover:bg-indigo-700 border border-transparent font-medium text-white">
-    Hello world
-</div>
-```
-
-See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for the rationale.
-
-### Preserving unquoted attribute values
-
-By default, djangofmt quotes all attribute values:
-
-```diff
-- <c-button editable=True count=42 />
-+ <c-button editable="True" count="42" />
-```
-
-Enable `preserve-unquoted-attrs` to suppress this transformation and keep them unquoted.
-This is useful for frameworks like [Django Cotton](https://django-cotton.com/) that use unquoted
-attribute values to pass non-string types (booleans, numbers, template variables).
-
-### Disabling formatting
-
-To disable formatting for an entire file, add `<!-- djangofmt:ignore -->` at the very top of the file.
-
-To disable formatting for a specific node, prefix it with the same comment:
-
-```html
-<!-- djangofmt:ignore -->
-<div   class="keep-this-unformatted"   >Content</div>
-<div class="this-will-be-formatted">Content</div>
-```
-
-## Known limitations
-
-### `style` attributes formatting
-
-The `style` attribute will be formatted using a CSS formatter ([Malva](https://github.com/g-plane/malva)),
-but the output will always be on a single line.
-
-**Before:**
-
-```html
-<div class="flex flex-col items-center absolute z-10"
-     style="top:60%;
-            transform:translate(0,-50%)">
-    Such a lovely day
-</div>
-```
-
-**After:**
-
-```html
-<div class="flex flex-col items-center absolute z-10"
-     style="top:60%; transform:translate(0,-50%)">
-    Such a lovely day
-</div>
-```
-
-### Conditional open/close tags
-
-Djangofmt doesn't accept and will produce parsing errors for any syntax that could cut off HTML in obvious ways, e.g.:
-
-```html
-{% if condition %}
-    <div class="container">
-{% endif %}
-    Some content
-{% if condition %}
-    </div>
-{% endif %}
-```
-
-This is generally discouraged and should be avoided because it's an easy way to create invalid HTML.
-
-You can almost always write it another way that is much more readable. For example:
-
-```diff
--<div {{ attr_name }}{% if not boolean_attr %}="{{ attr_value }}"{% endif %}></div>
-+<div
-+    {% if boolean_attr %}
-+        {{ attr_name }}
-+    {% else %}
-+        {{ attr_name }}="{{ attr_value }}"
-+    {% endif %}
-+></div>
-```
-
-See upstream tracking issue: https://github.com/g-plane/markup_fmt/issues/97
-
-## `.svg` files support
-
-Djangofmt can format svg files too.
-It will behave exactly the same way as if they were html files.
-
-There is a dedicated pre-commit for these:
-
-```yaml
-- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.8
-  hooks:
-    - id: djangofmt-svg
-```
-
-## Benchmarks
-
-Here are the results benchmarking `djangofmt` against similar tools on 100k lines of HTML across 1.7k files.
-
-<p align="center">
-  <picture align="center">
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3b09a8a2-b5cb-4f1b-a0bc-5f4e3ca169db">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
-    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
-  </picture>
-</p>
-
-<p align="center">
-  <i>Formatting 100k+ lines of HTML across 1.7k+ files from scratch.</i>
-</p>
-
-This is important to note that only `djlint` covers the same scope in terms of formatting capabilities.
-`djade` only alter django templating, `djhtml` only fix indentation and `prettier` only understand html (and **will** break templates)
-
-As always, these results should be taken with a grain of salt.
-Results on my machine will differ from yours, especially if you have many CPU cores because some tools take better advantage of parallelization than others.
-
-But at least it was fun to build thanks to the wonderful [hyperfine](https://github.com/sharkdp/hyperfine) tool.
-
-<details>
-  <summary>Benchmark details (2025-02-28)</summary>
-
-This was run on my AMD Ryzen 9 7950X (32) @ 5.881GHz.
-
-Tools versions:
-
-- djangofmt: v0.1.0
-- prettier: v3.5.2
-- djlint: v1.36.4
-- djade: v1.3.2
-- djhtml: v3.0.7
-
-<pre><code>Benchmark 1: cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --quiet
-  Time (mean ± σ):      19.8 ms ±   0.9 ms    [User: 179.6 ms, System: 73.7 ms]
-  Range (min … max):    18.3 ms …  23.3 ms    73 runs
-
-  Warning: Ignoring non-zero exit code.
-
-Benchmark 2: cat /tmp/test-files | xargs --max-procs=0 djade --target-version 5.1
-  Time (mean ± σ):      72.0 ms ±   1.0 ms    [User: 63.2 ms, System: 9.3 ms]
-  Range (min … max):    70.5 ms …  73.4 ms    18 runs
-
-Benchmark 3: cat /tmp/test-files | xargs --max-procs=0 djhtml
-  Time (mean ± σ):      1.401 s ±  0.026 s    [User: 1.322 s, System: 0.079 s]
-  Range (min … max):    1.373 s …  1.453 s    10 runs
-
-Benchmark 4: cat /tmp/test-files | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
-  Time (mean ± σ):      2.343 s ±  0.026 s    [User: 64.944 s, System: 1.176 s]
-  Range (min … max):    2.297 s …  2.377 s    10 runs
-
-  Warning: Ignoring non-zero exit code.
-
-Benchmark 5: cat /tmp/test-files | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
-  Time (mean ± σ):      3.226 s ±  0.062 s    [User: 4.481 s, System: 0.261 s]
-  Range (min … max):    3.092 s …  3.292 s    10 runs
-
-  Warning: Ignoring non-zero exit code.
-
-Summary
-  cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --quiet ran
-    3.63 ± 0.17 times faster than cat /tmp/test-files | xargs --max-procs=0 djade --target-version 5.1
-   70.71 ± 3.45 times faster than cat /tmp/test-files | xargs --max-procs=0 djhtml
-  118.28 ± 5.48 times faster than cat /tmp/test-files | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
-  162.80 ± 7.96 times faster than cat /tmp/test-files | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
-</code></pre>
-</details>
-
-## Contributing
-
-Contributions are welcome! Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to get started.
-
-## Shell Completions
+## Shell completions
 
 You can generate shell completions for your preferred
 shell using the `djangofmt completions` command.
@@ -336,3 +141,7 @@ Arguments:
       The shell to generate the completions for
       [possible values: bash, elvish, fish, nushell, powershell, zsh]
 ```
+
+## Contributing
+
+Contributions are welcome! Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to get started.
