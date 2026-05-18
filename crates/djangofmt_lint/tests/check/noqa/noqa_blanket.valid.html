@@ -1,0 +1,9 @@
+<!-- Blanket noqa suppresses every diagnostic on the line. -->
+<form method="put">Submit</form>{# noqa #}
+
+<!-- Case-insensitive `noqa` keyword. -->
+<form method="put">Submit</form>{# NOQA #}
+<form method="put">Submit</form>{# NoQa #}
+
+<!-- Leading text inside the comment is tolerated. -->
+<form method="put">Submit</form>{# justifying the legacy method here, noqa #}

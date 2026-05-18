@@ -1,0 +1,11 @@
+<!-- Specific code suppresses only that rule on the line. -->
+<form method="put">Submit</form>{# noqa: invalid-attr-value #}
+
+<!-- Whitespace tolerance: no space between colon and code. -->
+<form method="put">Submit</form>{# noqa:invalid-attr-value #}
+
+<!-- Multiple codes, comma-separated, suppress both diagnostics on the line. -->
+<form method="put">{% blocktranslate %}hi{% endblocktranslate %}</form>{# noqa: invalid-attr-value, untrimmed-blocktranslate #}
+
+<!-- Multiple codes, whitespace-separated. -->
+<form method="put">{% blocktranslate %}hi{% endblocktranslate %}</form>{# noqa: invalid-attr-value untrimmed-blocktranslate #}

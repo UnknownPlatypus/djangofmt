@@ -1,0 +1,12 @@
+<!-- noqa for an unrelated rule does NOT suppress the line. -->
+<form method="put">Submit</form>{# noqa: untrimmed-blocktranslate #}
+
+<!-- Empty / unrelated comments do not suppress either. -->
+<form method="put">Submit</form>{# just a comment #}
+
+<!-- Malformed payload (`noqa:` with no codes) emits a warning and is
+     discarded; the diagnostic remains. -->
+<form method="put">Submit</form>{# noqa: #}
+
+<!-- Substring-only match (no word boundary) does not trigger suppression. -->
+<form method="put">Submit</form>{# prenoqasuffix #}

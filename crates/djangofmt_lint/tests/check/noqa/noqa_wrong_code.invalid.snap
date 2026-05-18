@@ -1,0 +1,47 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 4 lint error(s)
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+   ╭─[tests/check/noqa/noqa_wrong_code.invalid.html:2:15]
+ 1 │ <!-- noqa for an unrelated rule does NOT suppress the line. -->
+ 2 │ <form method="put">Submit</form>{# noqa: untrimmed-blocktranslate #}
+   ·               ─┬─
+   ·                ╰── here
+ 3 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+   ╭─[tests/check/noqa/noqa_wrong_code.invalid.html:5:15]
+ 4 │ <!-- Empty / unrelated comments do not suppress either. -->
+ 5 │ <form method="put">Submit</form>{# just a comment #}
+   ·               ─┬─
+   ·                ╰── here
+ 6 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa_wrong_code.invalid.html:9:15]
+  8 │      discarded; the diagnostic remains. -->
+  9 │ <form method="put">Submit</form>{# noqa: #}
+    ·               ─┬─
+    ·                ╰── here
+ 10 │ 
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa_wrong_code.invalid.html:12:15]
+ 11 │ <!-- Substring-only match (no word boundary) does not trigger suppression. -->
+ 12 │ <form method="put">Submit</form>{# prenoqasuffix #}
+    ·               ─┬─
+    ·                ╰── here
+    ╰────
+  help: Use one of: get, post, dialog

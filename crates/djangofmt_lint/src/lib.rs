@@ -20,6 +20,7 @@
 mod checker;
 pub mod fix;
 pub mod lint_context;
+mod noqa;
 pub mod registry;
 mod rules;
 pub mod settings;
@@ -116,10 +117,14 @@ impl FileDiagnostics {
 
 /// Check the AST for lint errors.
 ///
-/// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
+/// Traverses the AST and runs all enabled lint rules, then applies
+/// `{# noqa #}` suppression as a post-pass — mirrors ruff's pipeline
+/// (`crates/ruff_linter/src/linter.rs`: rules emit → `check_noqa` filters).
 #[must_use]
 pub fn check_ast(source: &str, ast: &Root<'_>, settings: &Settings) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings);
     checker.visit_root(ast);
-    checker.into_diagnostics()
+    let mut diagnostics = checker.into_diagnostics();
+    noqa::check_noqa(&mut diagnostics, source, ast);
+    diagnostics
 }
