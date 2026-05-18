@@ -159,17 +159,17 @@ fn format_stdin_with_filename_html() {
 
 #[test]
 fn format_stdin_with_filename_infers_jinja_profile() {
-    // `{% if x %}...{% endif %}` is valid in both profiles, so use the `raw` block
-    // which is jinja-specific: jinja preserves its inner content while django does not.
+    // Jinja whitespace-control modifiers (`{{- ... -}}`) are preserved under the jinja
+    // profile, but stripped under django — proving the profile was inferred from `.jinja`.
     assert_cmd_snapshot!(
         cli()
             .args(["--stdin-filename", "foo.jinja"])
-            .pass_stdin("{% if x %}hi{% endif %}\n"),
+            .pass_stdin("{{- foo -}}\n"),
         @r#"
     success: true
     exit_code: 0
     ----- stdout -----
-    {% if x %}hi{% endif %}
+    {{- foo -}}
 
     ----- stderr -----
     "#);
