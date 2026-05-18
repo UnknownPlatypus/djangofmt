@@ -383,7 +383,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "clap",
  "clap_complete_command",
@@ -412,7 +412,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_benchmark"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "codspeed-divan-compat",
  "djangofmt",
@@ -422,7 +422,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_lint"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "anyhow",
  "insta",
@@ -437,7 +437,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_wasm"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "djangofmt",
  "djangofmt_lint",
