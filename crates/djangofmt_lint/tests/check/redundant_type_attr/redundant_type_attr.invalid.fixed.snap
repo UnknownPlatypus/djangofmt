@@ -1,0 +1,36 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Redundant type on script -->
+<script src="app.js"></script>
+
+<!-- Redundant type on style -->
+<style>.foo { color: red; }</style>
+
+<!-- Case-insensitive tag name -->
+<SCRIPT></SCRIPT>
+<STYLE></STYLE>
+
+<!-- Case-insensitive type value -->
+<script></script>
+<style></style>
+
+<!-- Case-insensitive attribute name -->
+<script></script>
+<style></style>
+
+<!-- Type attribute with other attributes -->
+<script src="app.js" defer></script>
+
+<!-- Multiline tag -->
+<script
+    src="app.js"
+></script>
+
+<!-- Single-quoted attribute -->
+<script></script>
+
+<!-- Nested in Jinja block -->
+{% if include_script %}
+    <script src="app.js"></script>
+{% endif %}

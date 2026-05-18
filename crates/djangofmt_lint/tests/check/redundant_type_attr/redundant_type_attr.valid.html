@@ -1,0 +1,22 @@
+<!-- No type attribute -->
+<script src="app.js"></script>
+<style>.foo { color: red; }</style>
+
+<!-- Non-default type values -->
+<script type="module" src="app.js"></script>
+<script type="application/ld+json">{"@context": "..."}</script>
+<script type="importmap">{"imports": {}}</script>
+<script type="text/kendo-ui-template"></script>
+<style type="text/less">.foo { color: red; }</style>
+
+<!-- Cross-type values: text/css is NOT the default for script, text/javascript is NOT the default for style -->
+<script type="text/css"></script>
+<style type="text/javascript"></style>
+
+<!-- Non-script/style tags with type attribute -->
+<input type="text">
+<button type="submit">Submit</button>
+
+<!-- Interpolation - dynamic values should be skipped -->
+<script type="{{ script_type }}"></script>
+<style type="{% if x %}text/css{% endif %}"></style>
