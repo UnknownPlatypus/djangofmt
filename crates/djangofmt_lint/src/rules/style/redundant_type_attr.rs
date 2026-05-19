@@ -98,15 +98,13 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
             continue;
         }
 
-        let Some(mut guard) = checker.report_diagnostic_if_enabled(
+        let mut guard = checker.report_diagnostic(
             &RedundantTypeAttr {
                 tag: tag.to_string(),
                 type_value: value_str.to_string(),
             },
             (*offset, value_str.len()).into(),
-        ) else {
-            continue;
-        };
+        );
 
         let name_start = checker.source_offset(name);
         let attr_end = *offset + value_str.len() + usize::from(quote.is_some());
