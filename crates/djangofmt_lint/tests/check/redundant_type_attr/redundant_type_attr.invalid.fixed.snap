@@ -30,6 +30,10 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- Single-quoted attribute -->
 <script></script>
 
+<!-- Unquoted attribute -->
+<script></script>
+<style></style>
+
 <!-- Nested in Jinja block -->
 {% if include_script %}
     <script src="app.js"></script>
