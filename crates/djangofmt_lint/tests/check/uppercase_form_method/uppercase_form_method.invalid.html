@@ -1,0 +1,26 @@
+<!-- Uppercase method -->
+<form method="POST"></form>
+<form method="GET"></form>
+
+<!-- Mixed case -->
+<form method="Post"></form>
+<form method="Get"></form>
+
+<!-- Case-insensitive tag name -->
+<forM method="Post"></forM>
+<FORM method="POST"></FORM>
+
+<!-- Single-quoted and unquoted values -->
+<form method='POST'></form>
+<form method=POST></form>
+
+<!-- Multiline form with uppercase method -->
+<form
+    action="/submit/"
+    method="POST"
+></form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form method="GET"></form>
+{% endif %}
