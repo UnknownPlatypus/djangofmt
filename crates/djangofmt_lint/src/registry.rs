@@ -253,4 +253,5 @@ define_rules! {
     (MissingHtmlLang, rules::accessibility::missing_html_lang::MissingHtmlLang),
     (MissingDoctype, rules::style::missing_doctype::MissingDoctype),
     (MissingTitle, rules::accessibility::missing_title::MissingTitle),
+    (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
 }

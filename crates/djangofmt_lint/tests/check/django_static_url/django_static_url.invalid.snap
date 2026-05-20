@@ -40,29 +40,29 @@ Error:
   × Hardcoded static path in `src`.
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:7:11]
  6 │ <!-- img/src -->
- 7 │ <img src="/static/img/logo.png">
+ 7 │ <img src="/static/img/logo.png" alt="" width="0" height="0">
    ·           ──────────┬─────────
    ·                     ╰── here
- 8 │ <img src='/static/img/logo.png'>
+ 8 │ <img src='/static/img/logo.png' alt="" width="0" height="0">
    ╰────
   help: Use `{% static 'path/to/file' %}` instead.
 
 Error: 
   × Hardcoded static path in `src`.
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:8:11]
- 7 │ <img src="/static/img/logo.png">
- 8 │ <img src='/static/img/logo.png'>
+ 7 │ <img src="/static/img/logo.png" alt="" width="0" height="0">
+ 8 │ <img src='/static/img/logo.png' alt="" width="0" height="0">
    ·           ──────────┬─────────
    ·                     ╰── here
- 9 │ <img src="static/img/logo.png">
+ 9 │ <img src="static/img/logo.png" alt="" width="0" height="0">
    ╰────
   help: Use `{% static 'path/to/file' %}` instead.
 
 Error: 
   × Hardcoded static path in `src`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:9:11]
-  8 │ <img src='/static/img/logo.png'>
-  9 │ <img src="static/img/logo.png">
+  8 │ <img src='/static/img/logo.png' alt="" width="0" height="0">
+  9 │ <img src="static/img/logo.png" alt="" width="0" height="0">
     ·           ─────────┬─────────
     ·                    ╰── here
  10 │ 
@@ -106,7 +106,7 @@ Error:
   × Hardcoded static path in `srcset`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:19:51]
  18 │ <!-- srcset: each candidate is scanned, even when the hardcoded path is not first -->
- 19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x">
+ 19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
     ·                                                   ───────────┬───────────
     ·                                                              ╰── here
  20 │ <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
@@ -116,7 +116,7 @@ Error:
 Error: 
   × Hardcoded static path in `srcset`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:20:17]
- 19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x">
+ 19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
  20 │ <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
     ·                 ──────────┬──────────
     ·                           ╰── here
@@ -127,7 +127,7 @@ Error:
 Error: 
   × Hardcoded static path in `srcset`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:20:45]
- 19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x">
+ 19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
  20 │ <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
     ·                                             ──────────┬──────────
     ·                                                       ╰── here
@@ -139,7 +139,7 @@ Error:
   × Hardcoded static path in `src`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:23:11]
  22 │ <!-- Case-insensitive tag name -->
- 23 │ <IMG src="/static/img/logo.png">
+ 23 │ <IMG src="/static/img/logo.png" alt="" width="0" height="0">
     ·           ──────────┬─────────
     ·                     ╰── here
  24 │ 
@@ -150,7 +150,7 @@ Error:
   × Hardcoded static path in `src`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:26:11]
  25 │ <!-- Case-insensitive attribute name -->
- 26 │ <img SRC="/static/img/logo.png">
+ 26 │ <img SRC="/static/img/logo.png" alt="" width="0" height="0">
     ·           ──────────┬─────────
     ·                     ╰── here
  27 │ 
@@ -161,7 +161,7 @@ Error:
   × Hardcoded static path in `src`.
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:30:15]
  29 │ {% if show_logo %}
- 30 │     <img src="/static/img/logo.png">
+ 30 │     <img src="/static/img/logo.png" alt="" width="0" height="0">
     ·               ──────────┬─────────
     ·                         ╰── here
  31 │ {% endif %}

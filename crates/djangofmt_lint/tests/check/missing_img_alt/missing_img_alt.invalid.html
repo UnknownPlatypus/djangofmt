@@ -1,0 +1,33 @@
+<!-- No attributes at all -->
+<img>
+
+<!-- Self-closing without alt -->
+<img src="photo.jpg" />
+
+<!-- Multiple attributes but no alt -->
+<img src="photo.jpg" class="hero" id="main-image" loading="lazy" />
+
+<!-- Case-insensitive tag name -->
+<IMG src="photo.jpg" />
+
+<!-- Multi-line opening tag with no alt -->
+<img
+    src="photo.jpg"
+    height="12"
+    width="12"
+/>
+
+<!-- Nested in a Jinja block -->
+{% if show_image %}
+    <img src="photo.jpg" />
+{% endif %}
+
+<!-- Inside a <picture> the <img> still needs alt -->
+<picture>
+    <source srcset="photo.avif" type="image/avif" />
+    <img src="photo.jpg" />
+</picture>
+
+<!-- `aria-hidden`/`role="presentation"` do not substitute for alt -->
+<img src="decorative.png" aria-hidden="true" />
+<img src="decorative.png" role="presentation" />

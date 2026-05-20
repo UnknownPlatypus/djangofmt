@@ -1,32 +1,32 @@
 <!-- Correct {% static %} usage -->
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/app.css' %}">
-<img src="{% static 'img/logo.png' %}">
+<img src="{% static 'img/logo.png' %}" alt="" width="0" height="0">
 <script src="{% static 'js/app.js' %}"></script>
 <source srcset="{% static 'img/picture.webp' %}">
 
 <!-- Interpolated values are dynamic -->
 <link rel="stylesheet" href="{{ asset_url }}">
-<img src="{{ static_url }}/img/logo.png">
-<img src="{% if x %}/static/a.png{% else %}/static/b.png{% endif %}">
+<img src="{{ static_url }}/img/logo.png" alt="" width="0" height="0">
+<img src="{% if x %}/static/a.png{% else %}/static/b.png{% endif %}" alt="" width="0" height="0">
 
 <!-- srcset: multi-candidate lists with no hardcoded static path -->
-<img srcset="https://cdn.example.com/a.png 1x, https://cdn.example.com/b.png 2x">
-<img srcset="{% static 'img/a.png' %} 1x, {% static 'img/b.png' %} 2x">
+<img srcset="https://cdn.example.com/a.png 1x, https://cdn.example.com/b.png 2x" alt="" width="0" height="0">
+<img srcset="{% static 'img/a.png' %} 1x, {% static 'img/b.png' %} 2x" alt="" width="0" height="0">
 
 <!-- External absolute URLs -->
 <link rel="stylesheet" href="https://cdn.example.com/static/app.css">
-<img src="https://example.com/static/logo.png">
+<img src="https://example.com/static/logo.png" alt="" width="0" height="0">
 <script src="//cdn.example.com/js/app.js"></script>
 
 <!-- Other absolute paths that look similar but are not under /static/ -->
-<img src="/staticpages/intro.png">
-<img src="/media/uploads/avatar.png">
+<img src="/staticpages/intro.png" alt="" width="0" height="0">
+<img src="/media/uploads/avatar.png" alt="" width="0" height="0">
 <link rel="icon" href="/favicon.ico">
 
 <!-- Path is case-sensitive: only lowercase `static/` is the documented prefix -->
-<img src="/Static/img/logo.png">
-<img src="/STATIC/img/logo.png">
+<img src="/Static/img/logo.png" alt="" width="0" height="0">
+<img src="/STATIC/img/logo.png" alt="" width="0" height="0">
 
 <!-- href without a value -->
 <link href>
