@@ -97,6 +97,10 @@ impl<'a> Checker<'a> {
             rules::style::redundant_type_attr::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::JavascriptUrl) {
+            rules::suspicious::javascript_url::check(element, self);
+        }
+
         for attr in &element.attrs {
             self.visit_attribute(attr);
         }

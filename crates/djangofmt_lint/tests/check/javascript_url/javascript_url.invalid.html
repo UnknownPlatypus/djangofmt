@@ -1,0 +1,32 @@
+<!-- a/href (djLint H019) -->
+<a href="javascript:void(0)">Link</a>
+<a href="javascript:alert('xss')">Link</a>
+<a href='javascript:abc()'>asdf</a>
+
+<!-- Jinja tag in link text must not mask the violation -->
+<a href="javascript:abc()">{% trans "def" %}</a>
+
+<!-- form/action (djLint H019) -->
+<form action='javascript:abc()'></form>
+
+<!-- a/data-url -->
+<a data-url="javascript:fetch()">Link</a>
+
+<!-- div/span/input scopes -->
+<div href="javascript:doStuff()">Link</div>
+<span href="javascript:doStuff()">Link</span>
+<input href="javascript:doStuff()">
+<div data-url="javascript:doStuff()">Link</div>
+<span data-url="javascript:doStuff()">Link</span>
+<input data-url="javascript:doStuff()">
+<!-- Case-insensitive -->
+<a href="JavaScript:void(0)">Link</a>
+<a href="JAVASCRIPT:void(0)">Link</a>
+
+<!-- Leading whitespace before scheme -->
+<a href="  javascript:void(0)">Link</a>
+
+<!-- Inside a Jinja block -->
+{% if show_link %}
+    <a href="javascript:doStuff()">Link</a>
+{% endif %}

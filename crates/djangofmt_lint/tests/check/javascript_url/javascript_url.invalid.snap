@@ -1,0 +1,180 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 16 lint error(s)
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:2:10]
+ 1 │ <!-- a/href (djLint H019) -->
+ 2 │ <a href="javascript:void(0)">Link</a>
+   ·          ─────────┬────────
+   ·                   ╰── here
+ 3 │ <a href="javascript:alert('xss')">Link</a>
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:3:10]
+ 2 │ <a href="javascript:void(0)">Link</a>
+ 3 │ <a href="javascript:alert('xss')">Link</a>
+   ·          ───────────┬───────────
+   ·                     ╰── here
+ 4 │ <a href='javascript:abc()'>asdf</a>
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:4:10]
+ 3 │ <a href="javascript:alert('xss')">Link</a>
+ 4 │ <a href='javascript:abc()'>asdf</a>
+   ·          ────────┬───────
+   ·                  ╰── here
+ 5 │ 
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+   ╭─[tests/check/javascript_url/javascript_url.invalid.html:7:10]
+ 6 │ <!-- Jinja tag in link text must not mask the violation -->
+ 7 │ <a href="javascript:abc()">{% trans "def" %}</a>
+   ·          ────────┬───────
+   ·                  ╰── here
+ 8 │ 
+   ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `action`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:10:15]
+  9 │ <!-- form/action (djLint H019) -->
+ 10 │ <form action='javascript:abc()'></form>
+    ·               ────────┬───────
+    ·                       ╰── here
+ 11 │ 
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `data-url`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:13:14]
+ 12 │ <!-- a/data-url -->
+ 13 │ <a data-url="javascript:fetch()">Link</a>
+    ·              ─────────┬────────
+    ·                       ╰── here
+ 14 │ 
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:16:12]
+ 15 │ <!-- div/span/input scopes -->
+ 16 │ <div href="javascript:doStuff()">Link</div>
+    ·            ──────────┬─────────
+    ·                      ╰── here
+ 17 │ <span href="javascript:doStuff()">Link</span>
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:17:13]
+ 16 │ <div href="javascript:doStuff()">Link</div>
+ 17 │ <span href="javascript:doStuff()">Link</span>
+    ·             ──────────┬─────────
+    ·                       ╰── here
+ 18 │ <input href="javascript:doStuff()">
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:18:14]
+ 17 │ <span href="javascript:doStuff()">Link</span>
+ 18 │ <input href="javascript:doStuff()">
+    ·              ──────────┬─────────
+    ·                        ╰── here
+ 19 │ <div data-url="javascript:doStuff()">Link</div>
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `data-url`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:19:16]
+ 18 │ <input href="javascript:doStuff()">
+ 19 │ <div data-url="javascript:doStuff()">Link</div>
+    ·                ──────────┬─────────
+    ·                          ╰── here
+ 20 │ <span data-url="javascript:doStuff()">Link</span>
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `data-url`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:20:17]
+ 19 │ <div data-url="javascript:doStuff()">Link</div>
+ 20 │ <span data-url="javascript:doStuff()">Link</span>
+    ·                 ──────────┬─────────
+    ·                           ╰── here
+ 21 │ <input data-url="javascript:doStuff()">
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `data-url`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:21:18]
+ 20 │ <span data-url="javascript:doStuff()">Link</span>
+ 21 │ <input data-url="javascript:doStuff()">
+    ·                  ──────────┬─────────
+    ·                            ╰── here
+ 22 │ <!-- Case-insensitive -->
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:23:10]
+ 22 │ <!-- Case-insensitive -->
+ 23 │ <a href="JavaScript:void(0)">Link</a>
+    ·          ─────────┬────────
+    ·                   ╰── here
+ 24 │ <a href="JAVASCRIPT:void(0)">Link</a>
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:24:10]
+ 23 │ <a href="JavaScript:void(0)">Link</a>
+ 24 │ <a href="JAVASCRIPT:void(0)">Link</a>
+    ·          ─────────┬────────
+    ·                   ╰── here
+ 25 │ 
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:27:10]
+ 26 │ <!-- Leading whitespace before scheme -->
+ 27 │ <a href="  javascript:void(0)">Link</a>
+    ·          ──────────┬─────────
+    ·                    ╰── here
+ 28 │ 
+    ╰────
+  help: Use an event handler and a real URL instead.
+
+Error: 
+  × Avoid `javascript:` URLs in `href`.
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:31:14]
+ 30 │ {% if show_link %}
+ 31 │     <a href="javascript:doStuff()">Link</a>
+    ·              ──────────┬─────────
+    ·                        ╰── here
+ 32 │ {% endif %}
+    ╰────
+  help: Use an event handler and a real URL instead.
