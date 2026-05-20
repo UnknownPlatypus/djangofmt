@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 9 lint error(s)
+  × Found 13 lint error(s)
+
+Error: 
+  × Empty `<head>` tag pair.
+   ╭─[tests/check/missing_title/missing_title.invalid.html:3:6]
+ 2 │ <html lang="en">
+ 3 │     <head>
+   ·      ──┬─
+   ·        ╰── here
+ 4 │     </head>
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Missing or empty `<title>` in `<head>`.
@@ -70,6 +81,17 @@ Error:
   help: Fill the existing `<title>` element with descriptive text.
 
 Error: 
+  × Empty `<title>` tag pair.
+    ╭─[tests/check/missing_title/missing_title.invalid.html:37:10]
+ 36 │     <head>
+ 37 │         <title></title>
+    ·          ──┬──
+    ·            ╰── here
+ 38 │     </head>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:43:6]
  42 │ <html lang="en">
@@ -79,6 +101,17 @@ Error:
  44 │         <title>   </title>
     ╰────
   help: Fill the existing `<title>` element with descriptive text.
+
+Error: 
+  × Empty `<title>` tag pair.
+    ╭─[tests/check/missing_title/missing_title.invalid.html:44:10]
+ 43 │     <head>
+ 44 │         <title>   </title>
+    ·          ──┬──
+    ·            ╰── here
+ 45 │     </head>
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × Missing or empty `<title>` in `<head>`.
@@ -101,3 +134,14 @@ Error:
  62 │         <meta charset="utf-8">
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
+
+Error: 
+  × Empty `<body>` tag pair.
+    ╭─[tests/check/missing_title/missing_title.invalid.html:66:6]
+ 65 │     </head>
+ 66 │     <body></body>
+    ·      ──┬─
+    ·        ╰── here
+ 67 │ </html>
+    ╰────
+  help: Remove the empty tag pair or add content.

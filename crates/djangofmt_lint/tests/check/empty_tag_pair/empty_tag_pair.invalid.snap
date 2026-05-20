@@ -1,0 +1,124 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 11 lint error(s)
+
+Error: 
+  × Empty `<div>` tag pair.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:2:2]
+ 1 │ <!-- Plain empty pair -->
+ 2 │ <div></div>
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<span>` tag pair.
+   ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:5:2]
+ 4 │ <!-- Whitespace-only content (newlines + indent) is still empty -->
+ 5 │ <span>
+   ·  ──┬─
+   ·    ╰── here
+ 6 │     </span>
+   ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<p>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:9:2]
+  8 │ <!-- Tab/space-only content -->
+  9 │ <p>   </p>
+    ·  ┬
+    ·  ╰── here
+ 10 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<DIV>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:12:2]
+ 11 │ <!-- Case-insensitive tag name -->
+ 12 │ <DIV></DIV>
+    ·  ─┬─
+    ·   ╰── here
+ 13 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<header>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:16:6]
+ 15 │ <article>
+ 16 │     <header></header>
+    ·      ───┬──
+    ·         ╰── here
+ 17 │     <p>Body</p>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<script>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:21:2]
+ 20 │ <!-- Raw-text elements with no attribute and no content -->
+ 21 │ <script></script>
+    ·  ───┬──
+    ·     ╰── here
+ 22 │ <style></style>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<style>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:22:2]
+ 21 │ <script></script>
+ 22 │ <style></style>
+    ·  ──┬──
+    ·    ╰── here
+ 23 │ <textarea></textarea>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<textarea>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:23:2]
+ 22 │ <style></style>
+ 23 │ <textarea></textarea>
+    ·  ────┬───
+    ·      ╰── here
+ 24 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<button>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:26:2]
+ 25 │ <!-- Form controls without an accessible name -->
+ 26 │ <button></button>
+    ·  ───┬──
+    ·     ╰── here
+ 27 │ 
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<section>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:29:2]
+ 28 │ <!-- Generic containers without identifying attributes -->
+ 29 │ <section></section>
+    ·  ───┬───
+    ·     ╰── here
+ 30 │ <aside></aside>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
+  × Empty `<aside>` tag pair.
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:30:2]
+ 29 │ <section></section>
+ 30 │ <aside></aside>
+    ·  ──┬──
+    ·    ╰── here
+    ╰────
+  help: Remove the empty tag pair or add content.

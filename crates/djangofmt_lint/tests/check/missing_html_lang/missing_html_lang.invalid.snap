@@ -1,7 +1,18 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 6 lint error(s)
+  × Found 9 lint error(s)
+
+Error: 
+  × Empty `<html>` tag pair.
+   ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:3:2]
+ 2 │ <!-- No attributes at all -->
+ 3 │ <html>
+   ·  ──┬─
+   ·    ╰── here
+ 4 │ </html>
+   ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × `<html>` tag should declare a `lang` attribute.
@@ -26,6 +37,17 @@ Error:
   help: Add `lang="en"` (or the appropriate language code).
 
 Error: 
+  × Empty `<HTML>` tag pair.
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:11:2]
+ 10 │ <!-- Case-insensitive tag name -->
+ 11 │ <HTML>
+    ·  ──┬─
+    ·    ╰── here
+ 12 │ </HTML>
+    ╰────
+  help: Remove the empty tag pair or add content.
+
+Error: 
   × `<html>` tag should declare a `lang` attribute.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:11:2]
  10 │ <!-- Case-insensitive tag name -->
@@ -35,6 +57,17 @@ Error:
  12 │ </HTML>
     ╰────
   help: Add `lang="en"` (or the appropriate language code).
+
+Error: 
+  × Empty `<html>` tag pair.
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:16:6]
+ 15 │ {% if base_template %}
+ 16 │     <html>
+    ·      ──┬─
+    ·        ╰── here
+ 17 │     </html>
+    ╰────
+  help: Remove the empty tag pair or add content.
 
 Error: 
   × `<html>` tag should declare a `lang` attribute.

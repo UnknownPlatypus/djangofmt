@@ -1,0 +1,30 @@
+<!-- Plain empty pair -->
+<div></div>
+
+<!-- Whitespace-only content (newlines + indent) is still empty -->
+<span>
+    </span>
+
+<!-- Tab/space-only content -->
+<p>	  </p>
+
+<!-- Case-insensitive tag name -->
+<DIV></DIV>
+
+<!-- Nested empty pair inside a populated parent -->
+<article>
+    <header></header>
+    <p>Body</p>
+</article>
+
+<!-- Raw-text elements with no attribute and no content -->
+<script></script>
+<style></style>
+<textarea></textarea>
+
+<!-- Form controls without an accessible name -->
+<button></button>
+
+<!-- Generic containers without identifying attributes -->
+<section></section>
+<aside></aside>
