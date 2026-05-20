@@ -109,6 +109,10 @@ impl<'a> Checker<'a> {
             rules::style::uppercase_form_method::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::FormActionWhitespace) {
+            rules::style::form_action_whitespace::check(element, self);
+        }
+
         if self.is_rule_enabled(Rule::MissingHtmlLang) {
             rules::accessibility::missing_html_lang::check(element, self);
         }
