@@ -73,7 +73,7 @@ Error:
   × Duplicate attribute `:src`.
     ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:17:21]
  16 │ <!-- Alpine-style duplicate (same prefix on both, real duplicate) -->
- 17 │ <img :src="img.jpg" :src="isLoaded ? url : defaultValue" />
+ 17 │ <img :src="img.jpg" :src="isLoaded ? url : defaultValue" height="100" width="100" />
     ·                     ──┬─
     ·                       ╰── here
  18 │ 
