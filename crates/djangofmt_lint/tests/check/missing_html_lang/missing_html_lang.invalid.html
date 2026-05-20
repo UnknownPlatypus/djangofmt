@@ -1,0 +1,27 @@
+<!-- No attributes at all -->
+<html>
+</html>
+
+<!-- Has other attributes but no lang -->
+<html class="no-js" dir="ltr">
+</html>
+
+<!-- Case-insensitive tag name -->
+<HTML>
+</HTML>
+
+<!-- Nested in a Jinja block -->
+{% if base_template %}
+    <html>
+    </html>
+{% endif %}
+
+<!-- Multi-line opening tag with no lang -->
+<html
+    xmlns="http://www.w3.org/1999/xhtml"
+    class="no-js">
+</html>
+
+<!-- XHTML `xml:lang` alone: HTML5 ignores it; screen readers need `lang` -->
+<html xml:lang="en">
+</html>
