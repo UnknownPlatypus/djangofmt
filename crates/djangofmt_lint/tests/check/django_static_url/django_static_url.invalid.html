@@ -1,0 +1,31 @@
+<!-- link/href -->
+<link rel="stylesheet" href="/static/css/app.css">
+<link rel="stylesheet" href='/static/css/app.css'>
+<link rel="stylesheet" href="static/css/app.css">
+
+<!-- img/src -->
+<img src="/static/img/logo.png">
+<img src='/static/img/logo.png'>
+<img src="static/img/logo.png">
+
+<!-- script/src -->
+<script src="/static/js/app.js"></script>
+
+<!-- source/src and source/srcset -->
+<source src="/static/audio/clip.mp3">
+<source srcset="/static/img/picture.webp">
+
+<!-- srcset: each candidate is scanned, even when the hardcoded path is not first -->
+<img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x">
+<source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
+
+<!-- Case-insensitive tag name -->
+<IMG src="/static/img/logo.png">
+
+<!-- Case-insensitive attribute name -->
+<img SRC="/static/img/logo.png">
+
+<!-- Inside a Jinja block -->
+{% if show_logo %}
+    <img src="/static/img/logo.png">
+{% endif %}
