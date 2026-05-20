@@ -1,0 +1,41 @@
+<!-- Non-empty values are fine -->
+<div id="main"></div>
+<div class="container"></div>
+
+<!-- Attribute with no value at all is a separate concern; this rule only flags
+     attributes with an explicit empty string value. -->
+<div id></div>
+<div class></div>
+
+<!-- Interpolated values are dynamic and skipped -->
+<div id="{{ pk }}"></div>
+<div class="{% if active %}active{% endif %}"></div>
+
+<!-- Regression: djLint #711 — `data-id=""` is not an `id` attribute -->
+<div data-id=""></div>
+
+<!-- Regression: djLint #281 — attribute names containing "id" must not match -->
+<div data-controller="ctl" data-ctl-record-id-value=""></div>
+
+<!-- Regression: djLint #98 — `id` appearing as the value of another attribute -->
+<th data-field="id" style="display: none">ID</th>
+
+<!-- Regression: djLint #1075 — `id` substring inside another attribute's name or value -->
+<input type="number" name="account_id" placeholder="enter account ID here" />
+
+<!-- Regression: djLint #829 — the word "class" inside text/attribute content -->
+<meta name="description" content="Simple app to rate a class, a session, etc." />
+
+<!-- Regression: djLint #89 — `id` token inside a template expression -->
+<a href="{% url 'foo:bar' id %}">link</a>
+
+<!-- djLint test parity: `id`/`class` as a prefix or suffix of another attribute name -->
+<div x-id-y></div>
+<div id-y></div>
+<div x-id></div>
+<div x-id-y=""></div>
+<div id-y=""></div>
+<div x-id=""></div>
+
+<!-- Form action with an empty value is a legitimate empty attribute and not our concern -->
+<form action=""></form>
