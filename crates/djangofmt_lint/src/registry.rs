@@ -246,6 +246,7 @@ define_rules! {
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
     (DuplicateAttr, rules::suspicious::duplicate_attr::DuplicateAttr),
+    (UseHttps, rules::suspicious::use_https::UseHttps),
     (UppercaseFormMethod, rules::style::uppercase_form_method::UppercaseFormMethod),
     (FormActionWhitespace, rules::style::form_action_whitespace::FormActionWhitespace),
     (MissingHtmlLang, rules::accessibility::missing_html_lang::MissingHtmlLang),

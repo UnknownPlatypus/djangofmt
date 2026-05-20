@@ -14,13 +14,23 @@ bootstrap:
     rustup component add llvm-tools-preview
     cargo install cargo-llvm-cov --locked
 
+# Run clippy on all targets and features
+[group('dev')]
+lint:
+    cargo clippy --all-targets --all-features
+
+# Run the full test suite, accepting snapshot updates automatically.
+[group('dev')]
+test update="always":
+    INSTA_UPDATE={{update}} cargo test --workspace --all-targets --all-features
+
 # Pre-merge request checks
 [group('dev')]
 pre-mr-check:
     SKIP=actionlint,renovate-config-validator pre-commit run -a
     uv run maturin develop
-    cargo clippy --all-targets --all-features
-    cargo test --workspace --all-targets --all-features
+    just lint
+    just test no
     just docs-build
 
 # Regenerate the per-rule documentation under docs/rules/ and docs/rules.md

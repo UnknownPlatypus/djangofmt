@@ -1,0 +1,62 @@
+<!-- HTTPS URLs -->
+<a href="https://example.com">Link</a>
+<img src="https://example.com/logo.png">
+<form action="https://example.com/submit"></form>
+<script src="https://cdn.example.com/lib.js"></script>
+<link href="https://cdn.example.com/style.css" rel="stylesheet">
+
+<!-- Relative and root-relative URLs -->
+<a href="/page/">Link</a>
+<a href="page.html">Link</a>
+<img src="/static/logo.png">
+
+<!-- Protocol-relative URLs (caller defers to surrounding page scheme) -->
+<img src="//cdn.example.com/logo.png">
+<a href="//example.com">Link</a>
+
+<!-- Other schemes -->
+<a href="mailto:user@example.com">Email</a>
+<a href="tel:+15550100">Call</a>
+<a href="data:text/plain,hello">Data</a>
+<a href="ftp://example.com">FTP</a>
+<a href="#section">Anchor</a>
+
+<!-- No false positive when `http://` appears mid-value rather than as the scheme -->
+<a href="/redirect?to=http://example.com">Link</a>
+<meta name="description" content="See http://example.com for details">
+
+<!-- Interpolation without a literal `http://` prefix is not flagged -->
+<a href="{{ url }}">Link</a>
+<a href="{% url 'home' %}">Home</a>
+<a href="{% if x %}http://a{% else %}http://b{% endif %}">Link</a>
+<form action="{% url 'submit' %}"></form>
+
+<!-- Interpolated scheme — caller controls the protocol, so we cannot prove it is `http://` -->
+<a href="{{ scheme }}://example.com">Link</a>
+
+<!-- Attributes outside the URL attribute set -->
+<a data-href="http://example.com">Link</a>
+<div title="http://example.com">Hover</div>
+<input value="http://example.com">
+<meta http-equiv="refresh" content="0; url=http://example.com">
+
+<!-- href without value -->
+<a href>Link</a>
+
+<!-- Empty value -->
+<a href="">Link</a>
+
+<!-- Leading non-ASCII whitespace (U+00A0) is not stripped: value does not start with http:// -->
+<a href=" http://example.com">Link</a>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="https://example.com">Link</a>
+{% endif %}
+
+<!-- Loopback / localhost: http is fine here and https usually breaks local dev -->
+<a href="http://localhost:3000/admin">Admin</a>
+<script src="http://localhost:5173/@vite/client"></script>
+<img src="http://127.0.0.1:8080/preview.png">
+<a href="http://[::1]:8000/">IPv6 loopback</a>
+<a href="http://app.localhost/">.localhost TLD</a>
