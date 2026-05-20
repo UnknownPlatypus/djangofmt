@@ -3,7 +3,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata};
 
 /// ## What it does
 /// Checks for HTML attributes whose value is not in the set allowed by the
@@ -36,7 +36,7 @@ use crate::violation::Violation;
 ///
 /// ## References
 /// - [HTML Living Standard: `form.method`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 pub struct InvalidAttrValue {
     pub value: String,
     pub attribute: &'static str,

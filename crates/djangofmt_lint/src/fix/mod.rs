@@ -25,6 +25,28 @@ pub enum FixAvailability {
     None,
 }
 
+impl FixAvailability {
+    /// Short capitalized label suitable for a docs table cell.
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Always => "Always",
+            Self::Sometimes => "Sometimes",
+            Self::None => "None",
+        }
+    }
+}
+
+impl std::fmt::Display for FixAvailability {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Always => write!(f, "Fix is always available."),
+            Self::Sometimes => write!(f, "Fix is sometimes available."),
+            Self::None => write!(f, "Fix is not available."),
+        }
+    }
+}
+
 /// Three-tier safety classification for fixes, ordered ascending so `>=`
 /// reads as a "minimum required" applicability check.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

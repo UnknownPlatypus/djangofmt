@@ -4,7 +4,7 @@ use markup_fmt::parser::parse_jinja_tag_name;
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata};
 
 /// ## What it does
 /// Checks for `{% blocktranslate %}` / `{% blocktrans %}` blocks that omit
@@ -34,7 +34,7 @@ use crate::violation::Violation;
 ///
 /// ## References
 /// - [Django documentation: `blocktranslate`](https://docs.djangoproject.com/en/stable/topics/i18n/translation/#std-templatetag-blocktranslate)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 pub struct UntrimmedBlocktranslate;
 
 impl Violation for UntrimmedBlocktranslate {

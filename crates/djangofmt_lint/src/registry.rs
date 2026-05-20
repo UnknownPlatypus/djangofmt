@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use strum::{EnumIter, EnumString};
 
+use crate::fix::FixAvailability;
 use crate::rules;
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata};
 
 /// Functional categories for lint rules.
 ///
@@ -23,6 +24,21 @@ pub enum RuleCategory {
     Accessibility,
     /// New rules that are not yet stable.
     Nursery,
+}
+
+impl RuleCategory {
+    /// Capitalized label for the docs table.
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Correctness => "Correctness",
+            Self::Suspicious => "Suspicious",
+            Self::Style => "Style",
+            Self::Complexity => "Complexity",
+            Self::Accessibility => "Accessibility",
+            Self::Nursery => "Nursery",
+        }
+    }
 }
 
 /// The single source of truth for all lint rules.
@@ -85,6 +101,41 @@ define_rules {
             pub const fn category(&self) -> RuleCategory {
                 match self {
                     $( Rule::$rule => <$violation as Violation>::CATEGORY, )*
+                }
+            }
+
+            /// Returns the rule's fix availability.
+            #[must_use]
+            pub const fn fix_availability(&self) -> FixAvailability {
+                match self {
+                    $( Rule::$rule => <$violation as Violation>::FIX_AVAILABILITY, )*
+                }
+            }
+
+            /// Returns the rule's documentation.
+            /// Captured from the violation struct's `///` doc comment by `#[derive(ViolationMetadata)]`.
+            #[must_use]
+            pub fn explanation(&self) -> &'static str {
+                match self {
+                    $( Rule::$rule => <$violation as ViolationMetadata>::explain(), )*
+                }
+            }
+
+            /// Returns the source file of the violation struct as produced by `file!()` at the `#[derive(ViolationMetadata)]` site.
+            /// Normally a workspace-root-relative path like `crates/djangofmt_lint/src/...`,
+            /// but the exact form depends on build flags such as `--remap-path-prefix`.
+            #[must_use]
+            pub fn source_file(&self) -> &'static str {
+                match self {
+                    $( Rule::$rule => <$violation as ViolationMetadata>::file(), )*
+                }
+            }
+
+            /// Returns the source line of the violation struct definition.
+            #[must_use]
+            pub fn source_line(&self) -> u32 {
+                match self {
+                    $( Rule::$rule => <$violation as ViolationMetadata>::line(), )*
                 }
             }
         }
