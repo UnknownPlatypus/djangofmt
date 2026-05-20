@@ -1,0 +1,29 @@
+<!-- Lowercase methods are valid -->
+<form method="get"></form>
+<form method="post"></form>
+<form method="dialog"></form>
+<forM method="post"></forM>
+
+<!-- Non-form tags are not checked -->
+<a method="POST">Link</a>
+<div method="GET"></div>
+
+<!-- Interpolation - dynamic values should be skipped -->
+<form method="{{ method }}"></form>
+<form method="{% if x %}POST{% else %}GET{% endif %}"></form>
+
+<!-- No value -->
+<form method></form>
+
+<!-- Single-quoted and unquoted lowercase values -->
+<form method='post'></form>
+<form method=post></form>
+
+<!-- No method attribute -->
+<form action="/submit/"></form>
+
+<!-- Multiline with lowercase method -->
+<form
+    action="/submit/"
+    method="post"
+></form>

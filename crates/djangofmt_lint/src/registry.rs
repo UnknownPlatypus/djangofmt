@@ -125,4 +125,5 @@ define_rules! {
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
+    (UppercaseFormMethod, rules::style::uppercase_form_method::UppercaseFormMethod),
 }

@@ -101,6 +101,10 @@ impl<'a> Checker<'a> {
             rules::suspicious::javascript_url::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::UppercaseFormMethod) {
+            rules::style::uppercase_form_method::check(element, self);
+        }
+
         for attr in &element.attrs {
             self.visit_attribute(attr);
         }

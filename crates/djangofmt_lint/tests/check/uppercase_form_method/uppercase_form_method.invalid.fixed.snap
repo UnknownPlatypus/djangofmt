@@ -1,0 +1,29 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Uppercase method -->
+<form method="post"></form>
+<form method="get"></form>
+
+<!-- Mixed case -->
+<form method="post"></form>
+<form method="get"></form>
+
+<!-- Case-insensitive tag name -->
+<forM method="post"></forM>
+<FORM method="post"></FORM>
+
+<!-- Single-quoted and unquoted values -->
+<form method='post'></form>
+<form method=post></form>
+
+<!-- Multiline form with uppercase method -->
+<form
+    action="/submit/"
+    method="post"
+></form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form method="get"></form>
+{% endif %}
