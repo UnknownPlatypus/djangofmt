@@ -39,8 +39,8 @@ use crate::violation::Violation;
 #[derive(Debug, PartialEq, Eq)]
 pub struct InvalidAttrValue {
     pub value: String,
-    pub attribute: String,
-    pub allowed: Vec<String>,
+    pub attribute: &'static str,
+    pub allowed: &'static [&'static str],
 }
 
 impl Violation for InvalidAttrValue {
@@ -87,13 +87,13 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
                 continue;
             }
 
-            let allowed = ["get", "post", "dialog"];
+            let allowed: &[&str] = &["get", "post", "dialog"];
             if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
                 checker.report_diagnostic(
                     &InvalidAttrValue {
                         value: (*value_str).to_string(),
-                        attribute: "method".to_string(),
-                        allowed: allowed.iter().map(|s| (*s).to_string()).collect(),
+                        attribute: "method",
+                        allowed,
                     },
                     (*offset, value_str.len()).into(),
                 );
