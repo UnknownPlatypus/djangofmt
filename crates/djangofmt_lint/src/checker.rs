@@ -141,6 +141,10 @@ impl<'a> Checker<'a> {
             rules::accessibility::missing_img_alt::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::MissingImgDimensions) {
+            rules::accessibility::missing_img_dimensions::check(element, self);
+        }
+
         for attr in &element.attrs {
             self.visit_attribute(attr);
         }

@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 9 lint error(s)
+  × Found 17 lint error(s)
 
 Error: 
   × `<img>` tag should declare an `alt` attribute.
@@ -15,6 +15,17 @@ Error:
   help: Add `alt=""` for decorative images, or a short description otherwise.
 
 Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:2:2]
+ 1 │ <!-- No attributes at all -->
+ 2 │ <img>
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ 
+   ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
   × `<img>` tag should declare an `alt` attribute.
    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:5:2]
  4 │ <!-- Self-closing without alt -->
@@ -24,6 +35,17 @@ Error:
  6 │ 
    ╰────
   help: Add `alt=""` for decorative images, or a short description otherwise.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:5:2]
+ 4 │ <!-- Self-closing without alt -->
+ 5 │ <img src="photo.jpg" />
+   ·  ─┬─
+   ·   ╰── here
+ 6 │ 
+   ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
 
 Error: 
   × `<img>` tag should declare an `alt` attribute.
@@ -37,6 +59,17 @@ Error:
   help: Add `alt=""` for decorative images, or a short description otherwise.
 
 Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+   ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:8:2]
+ 7 │ <!-- Multiple attributes but no alt -->
+ 8 │ <img src="photo.jpg" class="hero" id="main-image" loading="lazy" />
+   ·  ─┬─
+   ·   ╰── here
+ 9 │ 
+   ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
   × `<img>` tag should declare an `alt` attribute.
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:11:2]
  10 │ <!-- Case-insensitive tag name -->
@@ -46,6 +79,17 @@ Error:
  12 │ 
     ╰────
   help: Add `alt=""` for decorative images, or a short description otherwise.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:11:2]
+ 10 │ <!-- Case-insensitive tag name -->
+ 11 │ <IMG src="photo.jpg" />
+    ·  ─┬─
+    ·   ╰── here
+ 12 │ 
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
 
 Error: 
   × `<img>` tag should declare an `alt` attribute.
@@ -70,6 +114,17 @@ Error:
   help: Add `alt=""` for decorative images, or a short description otherwise.
 
 Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:22:6]
+ 21 │ {% if show_image %}
+ 22 │     <img src="photo.jpg" />
+    ·      ─┬─
+    ·       ╰── here
+ 23 │ {% endif %}
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
   × `<img>` tag should declare an `alt` attribute.
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:28:6]
  27 │     <source srcset="photo.avif" type="image/avif" />
@@ -79,6 +134,17 @@ Error:
  29 │ </picture>
     ╰────
   help: Add `alt=""` for decorative images, or a short description otherwise.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:28:6]
+ 27 │     <source srcset="photo.avif" type="image/avif" />
+ 28 │     <img src="photo.jpg" />
+    ·      ─┬─
+    ·       ╰── here
+ 29 │ </picture>
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
 
 Error: 
   × `<img>` tag should declare an `alt` attribute.
@@ -92,6 +158,17 @@ Error:
   help: Add `alt=""` for decorative images, or a short description otherwise.
 
 Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:32:2]
+ 31 │ <!-- `aria-hidden`/`role="presentation"` do not substitute for alt -->
+ 32 │ <img src="decorative.png" aria-hidden="true" />
+    ·  ─┬─
+    ·   ╰── here
+ 33 │ <img src="decorative.png" role="presentation" />
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
   × `<img>` tag should declare an `alt` attribute.
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:33:2]
  32 │ <img src="decorative.png" aria-hidden="true" />
@@ -100,3 +177,13 @@ Error:
     ·   ╰── here
     ╰────
   help: Add `alt=""` for decorative images, or a short description otherwise.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:33:2]
+ 32 │ <img src="decorative.png" aria-hidden="true" />
+ 33 │ <img src="decorative.png" role="presentation" />
+    ·  ─┬─
+    ·   ╰── here
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.

@@ -1,0 +1,37 @@
+<!-- Missing both `height` and `width` -->
+<img src="photo.jpg" alt="photo">
+
+<!-- Missing `width` only -->
+<img src="photo.jpg" alt="photo" height="100">
+
+<!-- Missing `height` only -->
+<img src="photo.jpg" alt="photo" width="200">
+
+<!-- Completely empty `<img>` -->
+<img>
+
+<!-- Case-insensitive tag name -->
+<IMG src="photo.jpg" alt="photo">
+
+<!-- Multi-line opening tag with no dimensions -->
+<img
+    src="photo.jpg"
+    alt="photo"
+>
+
+<!-- Nested in a Jinja block -->
+{% if show_image %}
+    <img src="photo.jpg" alt="photo">
+{% endif %}
+
+<!-- Inline `style` is not a substitute: browsers don't reserve space until the stylesheet loads -->
+<img src="photo.jpg" alt="photo" style="width: 100px; height: 100px">
+
+<!-- SVG referenced via `<img>` — same dimensions are required -->
+<img src="logo.svg" alt="logo">
+
+<!-- `<img>` inside `<picture>`: the dimensions belong on the `<img>` fallback -->
+<picture>
+    <source srcset="photo.avif" type="image/avif">
+    <img src="photo.jpg" alt="photo">
+</picture>

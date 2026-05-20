@@ -1,0 +1,125 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 11 lint error(s)
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:2:2]
+ 1 │ <!-- Missing both `height` and `width` -->
+ 2 │ <img src="photo.jpg" alt="photo">
+   ·  ─┬─
+   ·   ╰── here
+ 3 │ 
+   ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:5:2]
+ 4 │ <!-- Missing `width` only -->
+ 5 │ <img src="photo.jpg" alt="photo" height="100">
+   ·  ─┬─
+   ·   ╰── here
+ 6 │ 
+   ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+   ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:8:2]
+ 7 │ <!-- Missing `height` only -->
+ 8 │ <img src="photo.jpg" alt="photo" width="200">
+   ·  ─┬─
+   ·   ╰── here
+ 9 │ 
+   ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare an `alt` attribute.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:11:2]
+ 10 │ <!-- Completely empty `<img>` -->
+ 11 │ <img>
+    ·  ─┬─
+    ·   ╰── here
+ 12 │ 
+    ╰────
+  help: Add `alt=""` for decorative images, or a short description otherwise.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:11:2]
+ 10 │ <!-- Completely empty `<img>` -->
+ 11 │ <img>
+    ·  ─┬─
+    ·   ╰── here
+ 12 │ 
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:14:2]
+ 13 │ <!-- Case-insensitive tag name -->
+ 14 │ <IMG src="photo.jpg" alt="photo">
+    ·  ─┬─
+    ·   ╰── here
+ 15 │ 
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:17:2]
+ 16 │ <!-- Multi-line opening tag with no dimensions -->
+ 17 │ <img
+    ·  ─┬─
+    ·   ╰── here
+ 18 │     src="photo.jpg"
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:24:6]
+ 23 │ {% if show_image %}
+ 24 │     <img src="photo.jpg" alt="photo">
+    ·      ─┬─
+    ·       ╰── here
+ 25 │ {% endif %}
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:28:2]
+ 27 │ <!-- Inline `style` is not a substitute: browsers don't reserve space until the stylesheet loads -->
+ 28 │ <img src="photo.jpg" alt="photo" style="width: 100px; height: 100px">
+    ·  ─┬─
+    ·   ╰── here
+ 29 │ 
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:31:2]
+ 30 │ <!-- SVG referenced via `<img>` — same dimensions are required -->
+ 31 │ <img src="logo.svg" alt="logo">
+    ·  ─┬─
+    ·   ╰── here
+ 32 │ 
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
+
+Error: 
+  × `<img>` tag should declare both `height` and `width` attributes.
+    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:36:6]
+ 35 │     <source srcset="photo.avif" type="image/avif">
+ 36 │     <img src="photo.jpg" alt="photo">
+    ·      ─┬─
+    ·       ╰── here
+ 37 │ </picture>
+    ╰────
+  help: Add explicit `height` and `width` to avoid layout shifts as the image loads.

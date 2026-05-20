@@ -1,25 +1,25 @@
 <!-- Plain `alt` attribute -->
-<img src="photo.jpg" alt="A photo of the team" />
+<img src="photo.jpg" alt="A photo of the team" width="0" height="0" />
 
 <!-- Empty `alt` marks the image as decorative (WCAG H67) -->
 <img src="decorative.png" alt="" width="0" height="0" />
 
 <!-- Whitespace-only `alt` (spacer image convention) -->
-<img src="spacer.gif" alt=" " />
+<img src="spacer.gif" alt=" " width="0" height="0" />
 
 <!-- Case-insensitive attribute name -->
-<img src="photo.jpg" ALT="A photo" />
-<img src="photo.jpg" Alt="A photo" />
+<img src="photo.jpg" ALT="A photo" width="0" height="0" />
+<img src="photo.jpg" Alt="A photo" width="0" height="0" />
 
 <!-- Interpolated `alt` value -->
-<img src="photo.jpg" alt="{{ description }}" />
-<img src="photo.jpg" alt="{% if x %}photo{% else %}image{% endif %}" />
+<img src="photo.jpg" alt="{{ description }}" width="0" height="0" />
+<img src="photo.jpg" alt="{% if x %}photo{% else %}image{% endif %}" width="0" height="0" />
 
 <!-- `alt` declared inside a Jinja conditional -->
 <img src="photo.jpg" {% if decorative %}alt="" width="0" height="0"{% else %}alt="{{ description }}"{% endif %} />
 
 <!-- Boolean `alt` (no value) is equivalent to `alt="" width="0" height="0"` per HTML spec -->
-<img src="photo.jpg" alt />
+<img src="photo.jpg" alt width="0" height="0" />
 
 <!-- Multi-line opening tag with `alt` -->
 <img
@@ -32,7 +32,7 @@
 <!-- `alt` inside <picture> -->
 <picture>
     <source srcset="photo.avif" type="image/avif" />
-    <img src="photo.jpg" alt="A photo of the team" />
+    <img src="photo.jpg" alt="A photo of the team" width="0" height="0" />
 </picture>
 
 <!-- Non-img tags are not checked: `<input type="image">`, `<area>`, `<object>` are out of scope -->

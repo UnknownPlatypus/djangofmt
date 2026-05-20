@@ -1,0 +1,39 @@
+<!-- Both `height` and `width` present -->
+<img src="photo.jpg" alt="photo" height="100" width="200">
+
+<!-- Case-insensitive attribute names -->
+<img src="photo.jpg" alt="photo" HEIGHT="100" WIDTH="200">
+
+<!-- Alongside other attributes -->
+<img src="photo.jpg" alt="photo" height="100" width="200" loading="lazy">
+
+<!-- Interpolated dimension values -->
+<img src="photo.jpg" alt="photo" height="{{ h }}" width="{{ w }}">
+
+<!-- Boolean attributes (no value) -->
+<img src="photo.jpg" alt="photo" height width>
+
+<!-- Empty values: the rule only checks for presence; other rules cover empty values -->
+<img src="photo.jpg" alt="photo" height="" width="">
+
+<!-- Multi-line opening tag -->
+<img
+    src="photo.jpg"
+    alt="photo"
+    height="100"
+    width="200"
+>
+
+<!-- Non-`<img>` tags are not checked -->
+<div height="100"></div>
+<canvas></canvas>
+
+<!-- `<source>` inside `<picture>` is not an `<img>` -->
+<picture>
+    <source srcset="photo.avif" type="image/avif">
+    <img src="photo.jpg" alt="photo" height="100" width="200">
+</picture>
+
+<!-- `height` and `width` declared inside a Jinja conditional -->
+<img src="photo.jpg" alt="photo"
+    {% if portrait %}height="200" width="100"{% else %}height="100" width="200"{% endif %}>
