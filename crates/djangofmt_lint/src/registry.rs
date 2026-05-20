@@ -125,6 +125,7 @@ define_rules {
 define_rules! {
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
+    (EmptyAttrValue, rules::style::empty_attr_value::EmptyAttrValue<'static>),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
     (UppercaseFormMethod, rules::style::uppercase_form_method::UppercaseFormMethod),
