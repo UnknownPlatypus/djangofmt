@@ -19,6 +19,8 @@ pub enum RuleCategory {
     Style,
     /// Code that is overly complex.
     Complexity,
+    /// Code that creates accessibility (a11y) barriers.
+    Accessibility,
     /// New rules that are not yet stable.
     Nursery,
 }
@@ -126,4 +128,5 @@ define_rules! {
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
     (UppercaseFormMethod, rules::style::uppercase_form_method::UppercaseFormMethod),
+    (MissingHtmlLang, rules::accessibility::missing_html_lang::MissingHtmlLang),
 }

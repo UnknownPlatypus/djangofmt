@@ -1,0 +1,70 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 6 lint error(s)
+
+Error: 
+  × `<html>` tag should declare a `lang` attribute.
+   ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:2:2]
+ 1 │ <!-- No attributes at all -->
+ 2 │ <html>
+   ·  ──┬─
+   ·    ╰── here
+ 3 │ </html>
+   ╰────
+  help: Add `lang="en"` (or the appropriate language code).
+
+Error: 
+  × `<html>` tag should declare a `lang` attribute.
+   ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:6:2]
+ 5 │ <!-- Has other attributes but no lang -->
+ 6 │ <html class="no-js" dir="ltr">
+   ·  ──┬─
+   ·    ╰── here
+ 7 │ </html>
+   ╰────
+  help: Add `lang="en"` (or the appropriate language code).
+
+Error: 
+  × `<html>` tag should declare a `lang` attribute.
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:10:2]
+  9 │ <!-- Case-insensitive tag name -->
+ 10 │ <HTML>
+    ·  ──┬─
+    ·    ╰── here
+ 11 │ </HTML>
+    ╰────
+  help: Add `lang="en"` (or the appropriate language code).
+
+Error: 
+  × `<html>` tag should declare a `lang` attribute.
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:15:6]
+ 14 │ {% if base_template %}
+ 15 │     <html>
+    ·      ──┬─
+    ·        ╰── here
+ 16 │     </html>
+    ╰────
+  help: Add `lang="en"` (or the appropriate language code).
+
+Error: 
+  × `<html>` tag should declare a `lang` attribute.
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:20:2]
+ 19 │ <!-- Multi-line opening tag with no lang -->
+ 20 │ <html
+    ·  ──┬─
+    ·    ╰── here
+ 21 │     xmlns="http://www.w3.org/1999/xhtml"
+    ╰────
+  help: Add `lang="en"` (or the appropriate language code).
+
+Error: 
+  × `<html>` tag should declare a `lang` attribute.
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:26:2]
+ 25 │ <!-- XHTML `xml:lang` alone: HTML5 ignores it; screen readers need `lang` -->
+ 26 │ <html xml:lang="en">
+    ·  ──┬─
+    ·    ╰── here
+ 27 │ </html>
+    ╰────
+  help: Add `lang="en"` (or the appropriate language code).

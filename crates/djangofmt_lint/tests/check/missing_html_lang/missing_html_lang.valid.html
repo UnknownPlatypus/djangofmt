@@ -1,0 +1,37 @@
+<!-- Plain `lang` attribute -->
+<html lang="en">
+</html>
+
+<!-- Case-insensitive attribute name -->
+<html LANG="en">
+</html>
+
+<!-- `lang` alongside other attributes -->
+<html lang="fr" class="no-js">
+</html>
+
+<!-- Interpolated `lang` value -->
+<html lang="{{ language }}">
+</html>
+
+<!-- Non-html tags are not checked -->
+<div></div>
+<body></body>
+
+<!-- `lang` declared inside a Jinja conditional -->
+<html {% if rtl %}lang="ar"{% else %}lang="en"{% endif %}>
+</html>
+
+<!-- XHTML dual-attribute form: `lang` is what matters -->
+<html lang="en" xml:lang="en">
+</html>
+
+<!-- Multi-line opening tag -->
+<html
+    lang="en"
+    class="no-js">
+</html>
+
+<!-- Boolean `lang` (no value) -->
+<html lang>
+</html>
