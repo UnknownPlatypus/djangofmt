@@ -1,0 +1,44 @@
+<!-- Normal URLs -->
+<a href="/page/">Link</a>
+<a href="https://example.com">Link</a>
+<a href="{% url 'home' %}">Home</a>
+
+<!-- Anchor links (regression: djLint #48 — `href="#"` must NOT be flagged;
+     some tab/widget libraries use it as a sentinel) -->
+<a href="#">Link</a>
+<a href="#section">Link</a>
+<a href="#tab1">Tab 1</a>
+
+<!-- Event handlers (correct pattern) -->
+<button onclick="doStuff()">Click</button>
+<a href="/page/" onclick="doStuff()">Link</a>
+
+<!-- Other schemes are not flagged -->
+<a href="mailto:user@example.com">Email</a>
+<a href="tel:+15550100">Call</a>
+<a href="data:text/plain,hello">Data</a>
+
+<!-- Interpolation in href is skipped -->
+<a href="{{ url }}">Link</a>
+<a href="{% if x %}/a{% else %}/b{% endif %}">Link</a>
+<a href="javascript:{{ payload }}">Link</a>
+
+<!-- Forms with safe actions -->
+<form action="/submit/"></form>
+<form action="{% url 'submit' %}"></form>
+
+<!-- Tags out of scope: same attribute name but not in djLint's scope -->
+<button href="javascript:void(0)">Click</button>
+<area href="javascript:void(0)">
+
+<!-- Attributes out of scope on a/div/span/input -->
+<div data-value="javascript:void(0)"></div>
+<input value="javascript:void(0)">
+
+<!-- href without value -->
+<a href>Link</a>
+
+<!-- Nested in Jinja block -->
+{% if show_link %}
+    <a href="/page/">Link</a>
+{% endif %}

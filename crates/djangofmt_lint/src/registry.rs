@@ -124,4 +124,5 @@ define_rules! {
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
+    (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
 }
