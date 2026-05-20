@@ -36,12 +36,12 @@ use crate::violation::Violation;
 /// - [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html#type_Attributes)
 /// - [HTML spec: the script element](https://html.spec.whatwg.org/multipage/scripting.html#the-script-element)
 #[derive(Debug, PartialEq, Eq)]
-pub struct RedundantTypeAttr<'a> {
-    pub tag: &'a str,
-    pub type_value: &'a str,
+pub struct RedundantTypeAttr {
+    pub tag: String,
+    pub type_value: String,
 }
 
-impl Violation for RedundantTypeAttr<'_> {
+impl Violation for RedundantTypeAttr {
     const RULE: Rule = Rule::RedundantTypeAttr;
     const CATEGORY: RuleCategory = RuleCategory::Style;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
@@ -100,8 +100,8 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
 
         let mut guard = checker.report_diagnostic(
             &RedundantTypeAttr {
-                tag,
-                type_value: value_str,
+                tag: tag.to_string(),
+                type_value: (*value_str).to_string(),
             },
             (*offset, value_str.len()).into(),
         );
