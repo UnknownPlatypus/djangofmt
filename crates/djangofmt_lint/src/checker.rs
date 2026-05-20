@@ -75,6 +75,10 @@ impl<'a> Checker<'a> {
 
     /// Visit the root of the AST and run all lint rules.
     pub fn visit_root(&mut self, root: &Root<'_>) {
+        if self.is_rule_enabled(Rule::MissingDoctype) {
+            rules::style::missing_doctype::check(root, self);
+        }
+
         for node in &root.children {
             self.visit_node(node);
         }

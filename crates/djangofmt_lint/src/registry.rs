@@ -249,4 +249,5 @@ define_rules! {
     (UppercaseFormMethod, rules::style::uppercase_form_method::UppercaseFormMethod),
     (FormActionWhitespace, rules::style::form_action_whitespace::FormActionWhitespace),
     (MissingHtmlLang, rules::accessibility::missing_html_lang::MissingHtmlLang),
+    (MissingDoctype, rules::style::missing_doctype::MissingDoctype),
 }

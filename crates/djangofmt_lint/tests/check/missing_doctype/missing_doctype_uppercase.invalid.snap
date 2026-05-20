@@ -1,0 +1,15 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 1 lint error(s)
+
+Error: 
+  × Missing `<!DOCTYPE html>` declaration.
+   ╭─[tests/check/missing_doctype/missing_doctype_uppercase.invalid.html:2:2]
+ 1 │ <!-- Case-insensitive tag name: `<HTML>` is still flagged. -->
+ 2 │ <HTML lang="en">
+   ·  ──┬─
+   ·    ╰── here
+ 3 │     <head><title>Page</title></head>
+   ╰────
+  help: Add `<!DOCTYPE html>` before the `<html>` tag.
