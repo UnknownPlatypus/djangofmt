@@ -34,6 +34,7 @@ pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
 pub use lint_context::{DiagnosticGuard, LintContext};
 pub use registry::{Rule, RuleCategory};
 pub use settings::Settings;
+pub use violation::{Violation, ViolationMetadata};
 
 use markup_fmt::ast::Root;
 use miette::{Diagnostic, NamedSource, SourceSpan};

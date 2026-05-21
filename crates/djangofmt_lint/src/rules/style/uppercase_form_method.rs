@@ -4,7 +4,7 @@ use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata};
 
 /// ## What it does
 /// Checks for non-lowercase `method` attribute values on `<form>` elements.
@@ -33,7 +33,7 @@ use crate::violation::Violation;
 ///
 /// ## References
 /// - [HTML spec: form submission method](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 pub struct UppercaseFormMethod<'a> {
     pub value: &'a str,
 }

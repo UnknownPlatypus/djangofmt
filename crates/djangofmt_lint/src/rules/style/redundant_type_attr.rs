@@ -4,7 +4,7 @@ use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata};
 
 /// ## What it does
 /// Checks for redundant `type` attributes on `<script>` and `<style>` tags.
@@ -35,7 +35,7 @@ use crate::violation::Violation;
 /// ## References
 /// - [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html#type_Attributes)
 /// - [HTML spec: the script element](https://html.spec.whatwg.org/multipage/scripting.html#the-script-element)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 pub struct RedundantTypeAttr {
     pub tag: String,
     pub type_value: String,

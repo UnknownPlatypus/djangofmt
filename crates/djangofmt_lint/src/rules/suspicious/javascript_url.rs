@@ -3,7 +3,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata};
 
 /// ## What it does
 /// Checks for `javascript:` URLs in HTML elements.
@@ -32,7 +32,7 @@ use crate::violation::Violation;
 ///
 /// ## References
 /// - [MDN: `javascript:` URLs](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/javascript)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 pub struct JavascriptUrl {
     pub attribute: &'static str,
 }

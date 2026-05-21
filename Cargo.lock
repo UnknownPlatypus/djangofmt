@@ -421,10 +421,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "djangofmt_dev"
+version = "0.2.8"
+dependencies = [
+ "anyhow",
+ "clap",
+ "djangofmt",
+ "djangofmt_lint",
+ "strum",
+]
+
+[[package]]
 name = "djangofmt_lint"
 version = "0.2.8"
 dependencies = [
  "anyhow",
+ "djangofmt_macros",
  "insta",
  "markup_fmt",
  "miette",
@@ -433,6 +445,15 @@ dependencies = [
  "strum",
  "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "djangofmt_macros"
+version = "0.2.8"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
 ]
 
 [[package]]

@@ -21,6 +21,13 @@ pre-mr-check:
     uv run maturin develop
     cargo clippy --all-targets --all-features
     cargo test --workspace --all-targets --all-features
+    just docs-generate
+
+# Regenerate the per-rule documentation under docs/rules/ and docs/rules.md
+[group('dev')]
+docs-generate:
+    cargo run -p djangofmt_dev -- generate-all
+    pre-commit run dprint -a || true
 
 # Build playground WASM package
 [group('playground')]

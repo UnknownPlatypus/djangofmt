@@ -1,7 +1,25 @@
 use std::fmt::Debug;
 
+pub use djangofmt_macros::ViolationMetadata;
+
 use crate::fix::FixAvailability;
 use crate::registry::{Rule, RuleCategory};
+
+/// Static, derive-supplied metadata for a lint violation.
+///
+/// Implemented automatically by `#[derive(ViolationMetadata)]`, which captures the struct's `///` doc comment as the rule's explanation
+/// and records the source file and line of the struct definition.
+/// Powers the per-rule documentation generator under `djangofmt_dev`.
+pub trait ViolationMetadata {
+    /// The rendered rule documentation, taken verbatim from the violation struct's doc comment.
+    fn explain() -> &'static str;
+
+    /// The source file path of the violation struct, as produced by `file!()`.
+    fn file() -> &'static str;
+
+    /// The source line of the violation struct definition.
+    fn line() -> u32;
+}
 
 /// A trait for lint violations.
 ///
