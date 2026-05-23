@@ -50,6 +50,10 @@ pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
 /// (one of `stable_since`, `preview_since`, `deprecated_since`,
 /// `removed_since`) into a `RuleGroup::Variant { since: "…" }` expression.
 ///
+/// Errors if more than one lifecycle key is present so a typo like
+/// `(stable_since = "…", preview_since = "…")` can't silently pick whichever
+/// key the parser visited last.
+///
 /// Ruff equivalent: `ruff_macros::violation_metadata::get_rule_status`.
 fn collect_rule_group(attrs: &[Attribute]) -> syn::Result<Option<TokenStream>> {
     let mut group = None;
@@ -58,49 +62,54 @@ fn collect_rule_group(attrs: &[Attribute]) -> syn::Result<Option<TokenStream>> {
             continue;
         }
         attr.parse_nested_meta(|meta| {
-            if meta.path.is_ident("stable_since") {
+            let variant = if meta.path.is_ident("stable_since") {
                 let lit = parse_version(&meta)?;
-                group = Some(quote! { RuleGroup::Stable { since: #lit } });
-                Ok(())
+                quote! { RuleGroup::Stable { since: #lit } }
             } else if meta.path.is_ident("preview_since") {
                 let lit = parse_version(&meta)?;
-                group = Some(quote! { RuleGroup::Preview { since: #lit } });
-                Ok(())
+                quote! { RuleGroup::Preview { since: #lit } }
             } else if meta.path.is_ident("deprecated_since") {
                 let lit = parse_version(&meta)?;
-                group = Some(quote! { RuleGroup::Deprecated { since: #lit } });
-                Ok(())
+                quote! { RuleGroup::Deprecated { since: #lit } }
             } else if meta.path.is_ident("removed_since") {
                 let lit = parse_version(&meta)?;
-                group = Some(quote! { RuleGroup::Removed { since: #lit } });
-                Ok(())
+                quote! { RuleGroup::Removed { since: #lit } }
             } else {
-                Err(meta.error("unknown `violation_metadata` option"))
+                return Err(meta.error("unknown `violation_metadata` option"));
+            };
+            if group.is_some() {
+                return Err(meta.error(
+                    "duplicate lifecycle key; expected exactly one of \
+                     `stable_since`, `preview_since`, `deprecated_since`, `removed_since`",
+                ));
             }
+            group = Some(variant);
+            Ok(())
         })?;
     }
     Ok(group)
 }
 
+/// Accept a dotted numeric version (e.g. `"0.2.5"`) or the
+/// `NEXT_DJANGOFMT_VERSION` placeholder, which release tooling rewrites at
+/// tag time. Reject everything else — in particular a leading `v` prefix or
+/// stray letters that would later trip the docs URL builder.
 fn parse_version(meta: &ParseNestedMeta) -> syn::Result<LitStr> {
-    // Accept a semver string (e.g. "0.2.5") or the `NEXT_DJANGOFMT_VERSION`
-    // placeholder, which a release tool may substitute. Loose validation —
-    // we only check that the literal is non-empty and made of digits, dots,
-    // or the placeholder so we catch obvious typos.
     let lit: LitStr = meta.value()?.parse()?;
     let value = lit.value();
     let is_placeholder = value == "NEXT_DJANGOFMT_VERSION";
-    let is_semver = !value.is_empty()
-        && value
-            .chars()
-            .all(|c| c.is_ascii_digit() || c == '.' || c.is_ascii_alphabetic())
-        && value.chars().any(|c| c.is_ascii_digit());
-    if is_placeholder || is_semver {
+    let is_numeric_semver = !value.is_empty()
+        && value.chars().all(|c| c.is_ascii_digit() || c == '.')
+        && value.chars().next().is_some_and(|c| c.is_ascii_digit())
+        && !value.contains("..");
+    if is_placeholder || is_numeric_semver {
         Ok(lit)
     } else {
         Err(Error::new_spanned(
             &lit,
-            format!("unrecognized version `{value}`"),
+            format!(
+                "unrecognized version `{value}` (expected `MAJOR.MINOR.PATCH` or `NEXT_DJANGOFMT_VERSION`)"
+            ),
         ))
     }
 }
