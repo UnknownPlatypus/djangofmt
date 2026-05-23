@@ -34,7 +34,7 @@ fn render(rule: Rule) -> String {
     let _ = writeln!(
         &mut output,
         "<small>\n\
-         <a href=\"{REPO_URL}/issues?q=sort%3Aupdated-desc%20is%3Aissue%20'{name}'\" \
+         <a href=\"{REPO_URL}/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22{name}%22\" \
          target=\"_blank\">Related issues</a> ·\n\
          <a href=\"{REPO_URL}/blob/{REPO_BRANCH}/{file}#L{line}\" \
          target=\"_blank\">View source</a>\n\

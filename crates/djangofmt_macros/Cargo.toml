@@ -10,7 +10,6 @@ publish = false
 [lib]
 doctest = false
 proc-macro = true
-test = false
 
 [dependencies]
 proc-macro2 = { workspace = true }

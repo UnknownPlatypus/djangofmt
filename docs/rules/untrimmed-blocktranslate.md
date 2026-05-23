@@ -3,7 +3,7 @@
 # untrimmed-blocktranslate
 
 <small>
-<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20'untrimmed-blocktranslate'" target="_blank">Related issues</a> ·
+<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22untrimmed-blocktranslate%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/correctness/untrimmed_blocktranslate.rs#L37" target="_blank">View source</a>
 </small>
 

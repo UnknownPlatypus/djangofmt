@@ -3,7 +3,7 @@
 # redundant-type-attr
 
 <small>
-<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20'redundant-type-attr'" target="_blank">Related issues</a> ·
+<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22redundant-type-attr%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/style/redundant_type_attr.rs#L38" target="_blank">View source</a>
 </small>
 

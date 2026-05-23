@@ -3,7 +3,7 @@
 # javascript-url
 
 <small>
-<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20'javascript-url'" target="_blank">Related issues</a> ·
+<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22javascript-url%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/suspicious/javascript_url.rs#L35" target="_blank">View source</a>
 </small>
 

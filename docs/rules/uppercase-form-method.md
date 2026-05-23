@@ -3,7 +3,7 @@
 # uppercase-form-method
 
 <small>
-<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20'uppercase-form-method'" target="_blank">Related issues</a> ·
+<a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22uppercase-form-method%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/style/uppercase_form_method.rs#L36" target="_blank">View source</a>
 </small>
 

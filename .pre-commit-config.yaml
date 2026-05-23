@@ -83,7 +83,9 @@ repos:
         exclude: |
           (?x)^(
               .pre-commit-config.yaml|
-              crates/.*
+              crates/.*|
+              docs/rules\.md|
+              docs/rules/.*
           )$
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
     rev: 33ae92ed9b1a4392c8ac5fdef46887640d866e1e  # frozen: 0.5.0
