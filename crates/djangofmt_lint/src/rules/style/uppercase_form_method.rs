@@ -34,6 +34,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## References
 /// - [HTML spec: form submission method](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
+#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct UppercaseFormMethod<'a> {
     pub value: &'a str,
 }

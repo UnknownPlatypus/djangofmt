@@ -32,7 +32,7 @@ pub use fix::apply::{
 };
 pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
 pub use lint_context::{DiagnosticGuard, LintContext};
-pub use registry::{Rule, RuleCategory};
+pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use settings::Settings;
 pub use violation::{Violation, ViolationMetadata};
 

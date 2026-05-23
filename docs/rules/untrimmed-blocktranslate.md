@@ -3,6 +3,7 @@
 # untrimmed-blocktranslate
 
 <small>
+Added in <a href="https://github.com/UnknownPlatypus/djangofmt/releases/tag/v0.2.8">0.2.8</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22untrimmed-blocktranslate%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/correctness/untrimmed_blocktranslate.rs#L37" target="_blank">View source</a>
 </small>

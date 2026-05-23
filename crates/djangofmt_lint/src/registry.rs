@@ -5,6 +5,37 @@ use crate::fix::FixAvailability;
 use crate::rules;
 use crate::violation::{Violation, ViolationMetadata};
 
+/// Lifecycle status for a lint rule, supplied via
+/// `#[violation_metadata(stable_since = "…")]` (or `preview_since` /
+/// `deprecated_since` / `removed_since`).
+///
+/// Mirrors ruff's `RuleGroup`. Powers the status badge in the generated docs
+/// and gates whether a rule runs by default.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RuleGroup {
+    /// Stable since the given djangofmt version.
+    Stable { since: &'static str },
+    /// Unstable since the given djangofmt version; requires preview mode.
+    Preview { since: &'static str },
+    /// Deprecated since the given djangofmt version; warns on selection.
+    Deprecated { since: &'static str },
+    /// Removed in the given djangofmt version; docs kept for history.
+    Removed { since: &'static str },
+}
+
+impl RuleGroup {
+    /// The version at which this lifecycle status was set.
+    #[must_use]
+    pub const fn since(self) -> &'static str {
+        match self {
+            Self::Stable { since }
+            | Self::Preview { since }
+            | Self::Deprecated { since }
+            | Self::Removed { since } => since,
+        }
+    }
+}
+
 /// Functional categories for lint rules.
 ///
 /// Categories help users enable/disable groups of related rules.
@@ -129,6 +160,32 @@ define_rules {
                 match self {
                     $( Rule::$rule => <$violation as Violation>::message_formats(), )*
                 }
+            }
+
+            /// Returns the rule's lifecycle status (stable / preview / deprecated / removed).
+            #[must_use]
+            pub fn group(&self) -> RuleGroup {
+                match self {
+                    $( Rule::$rule => <$violation as ViolationMetadata>::group(), )*
+                }
+            }
+
+            /// Whether the rule is in preview.
+            #[must_use]
+            pub fn is_preview(&self) -> bool {
+                matches!(self.group(), RuleGroup::Preview { .. })
+            }
+
+            /// Whether the rule has been deprecated.
+            #[must_use]
+            pub fn is_deprecated(&self) -> bool {
+                matches!(self.group(), RuleGroup::Deprecated { .. })
+            }
+
+            /// Whether the rule has been removed.
+            #[must_use]
+            pub fn is_removed(&self) -> bool {
+                matches!(self.group(), RuleGroup::Removed { .. })
             }
 
             /// Returns the source file of the violation struct as produced by `file!()` at the `#[derive(ViolationMetadata)]` site.

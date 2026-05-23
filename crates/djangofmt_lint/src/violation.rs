@@ -3,7 +3,7 @@ use std::fmt::Debug;
 pub use djangofmt_macros::{ViolationMetadata, derive_message_formats};
 
 use crate::fix::FixAvailability;
-use crate::registry::{Rule, RuleCategory};
+use crate::registry::{Rule, RuleCategory, RuleGroup};
 
 /// Static, derive-supplied metadata for a lint violation.
 ///
@@ -16,6 +16,11 @@ pub trait ViolationMetadata {
     /// Returns `None` when the violation has no doc comment, so the docs
     /// generator can skip undocumented rules instead of writing an empty file.
     fn explain() -> Option<&'static str>;
+
+    /// The rule's lifecycle status, supplied via
+    /// `#[violation_metadata(stable_since = "…")]` (or `preview_since` /
+    /// `deprecated_since` / `removed_since`).
+    fn group() -> RuleGroup;
 
     /// The source file path of the violation struct, as produced by `file!()`.
     fn file() -> &'static str;

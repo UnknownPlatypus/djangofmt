@@ -37,6 +37,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## References
 /// - [HTML Living Standard: `form.method`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
+#[violation_metadata(stable_since = "0.2.5")]
 pub struct InvalidAttrValue {
     pub value: String,
     pub attribute: &'static str,

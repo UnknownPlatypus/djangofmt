@@ -3,6 +3,7 @@
 # invalid-attr-value
 
 <small>
+Added in <a href="https://github.com/UnknownPlatypus/djangofmt/releases/tag/v0.2.5">0.2.5</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22invalid-attr-value%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/correctness/invalid_attr_value.rs#L39" target="_blank">View source</a>
 </small>

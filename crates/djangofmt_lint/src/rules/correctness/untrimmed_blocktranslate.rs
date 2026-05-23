@@ -35,6 +35,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## References
 /// - [Django documentation: `blocktranslate`](https://docs.djangoproject.com/en/stable/topics/i18n/translation/#std-templatetag-blocktranslate)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
+#[violation_metadata(stable_since = "0.2.8")]
 pub struct UntrimmedBlocktranslate;
 
 impl Violation for UntrimmedBlocktranslate {

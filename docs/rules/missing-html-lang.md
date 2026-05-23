@@ -3,6 +3,7 @@
 # missing-html-lang
 
 <small>
+Added in <a href="https://github.com/UnknownPlatypus/djangofmt/releases/tag/vNEXT_DJANGOFMT_VERSION">NEXT_DJANGOFMT_VERSION</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22missing-html-lang%22" target="_blank">Related issues</a> ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/accessibility/missing_html_lang.rs#L33" target="_blank">View source</a>
 </small>
