@@ -8,7 +8,6 @@
 </small>
 
 ## What it does
-
 Checks for HTML attributes whose value is not in the set allowed by the
 HTML specification (and supported framework dialects such as HTMX or
 Alpine.js).
@@ -17,7 +16,6 @@ Currently only validates enum-type attributes (e.g., `<form method>`,
 `<input type>`, `<button type>`).
 
 ## Why is this bad?
-
 Browsers silently ignore unknown values for enum attributes and fall back
 to a default, which usually does not match the author's intent. The
 resulting bug is easy to miss because the page still renders.
@@ -39,5 +37,4 @@ Use instead:
 ```
 
 ## References
-
 - [HTML Living Standard: `form.method`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)

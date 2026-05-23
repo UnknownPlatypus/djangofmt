@@ -112,10 +112,11 @@ define_rules {
                 }
             }
 
-            /// Returns the rule's documentation.
-            /// Captured from the violation struct's `///` doc comment by `#[derive(ViolationMetadata)]`.
+            /// Returns the rule's documentation, or [`None`] when the violation
+            /// struct has no `///` doc comment.
+            /// Captured by `#[derive(ViolationMetadata)]`.
             #[must_use]
-            pub fn explanation(&self) -> &'static str {
+            pub fn explanation(&self) -> Option<&'static str> {
                 match self {
                     $( Rule::$rule => <$violation as ViolationMetadata>::explain(), )*
                 }

@@ -200,6 +200,5 @@ jobs:
         with:
           persist-credentials: false
       - run: cargo run -p djangofmt_dev -- generate-all
-      - run: dprint fmt
       - name: Verify rule docs are up to date
         run: git diff --exit-code -- docs/

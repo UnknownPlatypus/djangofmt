@@ -27,7 +27,6 @@ pre-mr-check:
 [group('dev')]
 docs-generate:
     cargo run -p djangofmt_dev -- generate-all
-    pre-commit run dprint -a || true
 
 # Build playground WASM package
 [group('playground')]

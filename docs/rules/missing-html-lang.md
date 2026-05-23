@@ -8,11 +8,9 @@
 </small>
 
 ## What it does
-
 Checks for `<html>` tags that do not declare a `lang` attribute.
 
 ## Why is this bad?
-
 The `lang` attribute on `<html>` declares the primary language of the document. Screen readers
 use it to select the correct pronunciation rules, and search engines use it to index the page
 for the right audience.
@@ -21,20 +19,17 @@ A `lang` attribute wrapped in a Jinja conditional (e.g. `{% if %}lang="en"{% end
 treated as present, to avoid false positives on dynamic templates.
 
 ## Example
-
 ```html
 <html>
 </html>
 ```
 
 Use instead:
-
 ```html
 <html lang="en">
 </html>
 ```
 
 ## References
-
 - [MDN: HTML `lang` global attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang)
 - [WCAG 3.1.1: Language of Page](https://www.w3.org/WAI/WCAG21/Understanding/language-of-page.html)

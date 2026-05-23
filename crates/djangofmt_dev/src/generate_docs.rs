@@ -12,17 +12,22 @@ use crate::{REPO_BRANCH, REPO_URL, root_dir};
 
 pub fn main(args: &Args) -> Result<()> {
     for rule in Rule::iter() {
+        let Some(explanation) = rule.explanation() else {
+            // Skip rules with no doc comment: the generator would otherwise
+            // emit a near-empty Markdown file.
+            continue;
+        };
         let path = root_dir()
             .join("docs")
             .join("rules")
             .join(rule.to_string())
             .with_extension("md");
-        apply(args.mode, &path, &render(rule))?;
+        apply(args.mode, &path, &render(rule, explanation))?;
     }
     Ok(())
 }
 
-fn render(rule: Rule) -> String {
+fn render(rule: Rule, explanation: &str) -> String {
     let name = rule.to_string();
     let file = rule.source_file().replace('\\', "/");
     let line = rule.source_line();
@@ -47,7 +52,7 @@ fn render(rule: Rule) -> String {
         let _ = writeln!(&mut output);
     }
 
-    output.push_str(rule.explanation().trim());
+    output.push_str(explanation.trim());
     output.push('\n');
     output
 }

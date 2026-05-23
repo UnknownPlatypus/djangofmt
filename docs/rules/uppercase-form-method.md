@@ -10,11 +10,9 @@
 Fix is always available.
 
 ## What it does
-
 Checks for non-lowercase `method` attribute values on `<form>` elements.
 
 ## Why is this bad?
-
 HTML form `method` values are case-insensitive, but the HTML spec and
 conventional usage write them in lowercase (`get`, `post`, `dialog`).
 Uppercase or mixed-case values are stylistically inconsistent.
@@ -22,23 +20,19 @@ Uppercase or mixed-case values are stylistically inconsistent.
 Values containing template interpolation are skipped.
 
 ## Example
-
 ```html
 <form method="POST"></form>
 ```
 
 Use instead:
-
 ```html
 <form method="post"></form>
 ```
 
 ## Fix safety
-
 This rule's fix is marked as safe: the HTML spec defines form `method` as a
 case-insensitive enumerated attribute, so lowercasing preserves runtime
 semantics.
 
 ## References
-
 - [HTML spec: form submission method](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)

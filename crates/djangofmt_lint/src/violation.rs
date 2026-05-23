@@ -12,7 +12,10 @@ use crate::registry::{Rule, RuleCategory};
 /// Powers the per-rule documentation generator under `djangofmt_dev`.
 pub trait ViolationMetadata {
     /// The rendered rule documentation, taken verbatim from the violation struct's doc comment.
-    fn explain() -> &'static str;
+    ///
+    /// Returns `None` when the violation has no doc comment, so the docs
+    /// generator can skip undocumented rules instead of writing an empty file.
+    fn explain() -> Option<&'static str>;
 
     /// The source file path of the violation struct, as produced by `file!()`.
     fn file() -> &'static str;

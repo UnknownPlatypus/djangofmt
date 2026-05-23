@@ -7,11 +7,20 @@ pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let name = input.ident;
     let (impl_generics, ty_generics, where_clause) = &input.generics.split_for_impl();
 
+    // Mirror ruff: return `None` when the struct has no doc comment so the
+    // docs generator can skip undocumented rules instead of writing an
+    // empty Markdown file.
+    let explain_body = if docs.is_empty() {
+        quote! { None }
+    } else {
+        quote! { Some(#docs) }
+    };
+
     Ok(quote! {
         #[automatically_derived]
         impl #impl_generics crate::ViolationMetadata for #name #ty_generics #where_clause {
-            fn explain() -> &'static str {
-                #docs
+            fn explain() -> Option<&'static str> {
+                #explain_body
             }
 
             fn file() -> &'static str {
