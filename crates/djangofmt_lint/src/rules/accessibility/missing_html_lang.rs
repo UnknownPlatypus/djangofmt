@@ -2,7 +2,7 @@ use markup_fmt::ast::{Attribute, Element, JinjaBlock, JinjaTagOrChildren};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::violation::{Violation, ViolationMetadata};
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for `<html>` tags that do not declare a `lang` attribute.
@@ -37,6 +37,7 @@ impl Violation for MissingHtmlLang {
     const RULE: Rule = Rule::MissingHtmlLang;
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
+    #[derive_message_formats]
     fn message(&self) -> String {
         "`<html>` tag should declare a `lang` attribute.".to_string()
     }

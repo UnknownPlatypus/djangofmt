@@ -4,11 +4,11 @@
 
 djangofmt's built-in lint rules. Each rule has a stable kebab-case name; click through for the rule's documentation, examples, and source location.
 
-| Name | Category | Fix |
-| ---- | -------- | --- |
-| [invalid-attr-value](rules/invalid-attr-value.md) | Correctness | None |
-| [untrimmed-blocktranslate](rules/untrimmed-blocktranslate.md) | Correctness | Always |
-| [redundant-type-attr](rules/redundant-type-attr.md) | Style | Always |
-| [javascript-url](rules/javascript-url.md) | Suspicious | None |
-| [uppercase-form-method](rules/uppercase-form-method.md) | Style | Always |
-| [missing-html-lang](rules/missing-html-lang.md) | Accessibility | None |
+| Name | Message | Category | Fix |
+| ---- | ------- | -------- | --- |
+| [invalid-attr-value](rules/invalid-attr-value.md) | Invalid value '{}' for attribute '{}'. | Correctness | None |
+| [untrimmed-blocktranslate](rules/untrimmed-blocktranslate.md) | `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings. | Correctness | Always |
+| [redundant-type-attr](rules/redundant-type-attr.md) | Redundant type="{}" on <{}> tag. | Style | Always |
+| [javascript-url](rules/javascript-url.md) | Avoid `javascript:` URLs in `{}`. | Suspicious | None |
+| [uppercase-form-method](rules/uppercase-form-method.md) | Form method `{}` should be lowercase. | Style | Always |
+| [missing-html-lang](rules/missing-html-lang.md) | `<html>` tag should declare a `lang` attribute. | Accessibility | None |

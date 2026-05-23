@@ -3,7 +3,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
-use crate::violation::{Violation, ViolationMetadata};
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for `javascript:` URLs in HTML elements.
@@ -41,6 +41,7 @@ impl Violation for JavascriptUrl {
     const RULE: Rule = Rule::JavascriptUrl;
     const CATEGORY: RuleCategory = RuleCategory::Suspicious;
 
+    #[derive_message_formats]
     fn message(&self) -> String {
         format!("Avoid `javascript:` URLs in `{}`.", self.attribute)
     }

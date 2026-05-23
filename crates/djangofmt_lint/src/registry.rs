@@ -122,6 +122,15 @@ define_rules {
                 }
             }
 
+            /// Returns the rule's static message format strings.
+            /// Powers the Message column of the generated rules table.
+            #[must_use]
+            pub fn message_formats(&self) -> &'static [&'static str] {
+                match self {
+                    $( Rule::$rule => <$violation as Violation>::message_formats(), )*
+                }
+            }
+
             /// Returns the source file of the violation struct as produced by `file!()` at the `#[derive(ViolationMetadata)]` site.
             /// Normally a workspace-root-relative path like `crates/djangofmt_lint/src/...`,
             /// but the exact form depends on build flags such as `--remap-path-prefix`.

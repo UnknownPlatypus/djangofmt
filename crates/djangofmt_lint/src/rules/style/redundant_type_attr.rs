@@ -4,7 +4,7 @@ use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
-use crate::violation::{Violation, ViolationMetadata};
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for redundant `type` attributes on `<script>` and `<style>` tags.
@@ -46,6 +46,7 @@ impl Violation for RedundantTypeAttr {
     const CATEGORY: RuleCategory = RuleCategory::Style;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
+    #[derive_message_formats]
     fn message(&self) -> String {
         format!(
             "Redundant type=\"{}\" on <{}> tag.",

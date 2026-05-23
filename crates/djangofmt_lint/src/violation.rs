@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-pub use djangofmt_macros::ViolationMetadata;
+pub use djangofmt_macros::{ViolationMetadata, derive_message_formats};
 
 use crate::fix::FixAvailability;
 use crate::registry::{Rule, RuleCategory};
@@ -49,6 +49,13 @@ pub trait Violation: Debug {
 
     /// The message to be displayed to the user.
     fn message(&self) -> String;
+
+    /// The static format strings that [`message`](Self::message) could return.
+    ///
+    /// Supplied by the [`derive_message_formats`] attribute applied to the
+    /// `message` impl. Used by the docs generator to populate the Message
+    /// column of the rules table.
+    fn message_formats() -> &'static [&'static str];
 
     /// Optional help text with suggestions for fixing the issue.
     fn help(&self) -> Option<String> {
