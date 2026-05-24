@@ -29,7 +29,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## Fix safety
-/// This rule's fix is marked as safe: it inserts ` trimmed` immediately after
+/// This rule's fix is marked as safe: it inserts `trimmed` immediately after
 /// the tag name in the opening tag without altering the translatable content.
 ///
 /// ## References

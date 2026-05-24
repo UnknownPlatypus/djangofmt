@@ -98,10 +98,13 @@ fn parse_version(meta: &ParseNestedMeta) -> syn::Result<LitStr> {
     let lit: LitStr = meta.value()?.parse()?;
     let value = lit.value();
     let is_placeholder = value == "NEXT_DJANGOFMT_VERSION";
-    let is_numeric_semver = !value.is_empty()
-        && value.chars().all(|c| c.is_ascii_digit() || c == '.')
-        && value.chars().next().is_some_and(|c| c.is_ascii_digit())
-        && !value.contains("..");
+    let mut parts = value.split('.');
+    let is_numeric_semver = match (parts.next(), parts.next(), parts.next(), parts.next()) {
+        (Some(major), Some(minor), Some(patch), None) => [major, minor, patch]
+            .iter()
+            .all(|part| !part.is_empty() && part.chars().all(|c| c.is_ascii_digit())),
+        _ => false,
+    };
     if is_placeholder || is_numeric_semver {
         Ok(lit)
     } else {
