@@ -22,6 +22,31 @@ formatter = { command = "djangofmt", args = ["--stdin-filename", "%{buffer_name}
 auto-format = true
 ```
 
+## PyCharm
+
+### Via External Tool
+
+`djangofmt` can be installed as an External Tool in PyCharm. Open the Settings
+pane, then navigate to `Tools`, then `External Tools`. From there, add a new
+tool with one of the following configurations.
+
+#### Via `pre-commit` (recommended)
+
+Running `djangofmt` through `pre-commit` ensures the version and configuration
+used in the editor match the one enforced by your project's hooks.
+
+![Install djangofmt as an External Tool via pre-commit](assets/pycharm-external-tool-pre-commit.png)
+
+#### Via `djangofmt` directly
+
+Alternatively, invoke the `djangofmt` binary directly.
+
+![Install djangofmt as an External Tool directly](assets/pycharm-external-tool-direct.png)
+
+`djangofmt` should then appear as a runnable action:
+
+![djangofmt as a runnable action](assets/pycharm-runnable-action.png)
+
 ## Zed
 
 `~/.config/zed/settings.json`:
