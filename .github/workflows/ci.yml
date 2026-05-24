@@ -201,9 +201,6 @@ jobs:
           persist-credentials: false
       - run: cargo run -p djangofmt_dev -- generate-all
       - name: Verify rule docs are up to date
-        # `git diff --exit-code` ignores untracked files, so a newly added rule
-        # whose docs page was never committed would slip past CI. Treat it as
-        # part of the diff via `git add -N` (intent-to-add).
         run: |
           git add --intent-to-add docs/
-          git diff --exit-code -- docs/
+          git diff HEAD --exit-code -- docs/

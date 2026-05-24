@@ -254,7 +254,7 @@ fn format_stdin_extra_file_warns_but_uses_stdin() {
 
 #[test]
 fn format_stdin_filename_alone_without_dash() {
-    // --stdin-filename should make `files` optional (mirrors ruff).
+    // --stdin-filename should make `files` optional.
     assert_cmd_snapshot!(
         cli()
             .args(["--stdin-filename", "foo.html"])

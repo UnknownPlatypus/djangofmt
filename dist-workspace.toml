@@ -58,11 +58,11 @@ local-artifacts-jobs = ["./release-build-binaries"]
 # Publish jobs to run in CI
 publish-jobs = ["./release-publish-pypi"]
 # Custom permissions for GitHub Jobs
-github-custom-job-permissions = { "publish-playground" = { pages = "write", id-token = "write" } }
+github-custom-job-permissions = { "publish-playground-and-docs" = { pages = "write", id-token = "write" } }
 # Post-announce jobs to run in CI
 post-announce-jobs = [
   "./release-notify-pre-commit-mirror",
-  "./publish-playground"
+  "./publish-playground-and-docs"
 ]
 # Whether to install an updater program
 install-updater = false

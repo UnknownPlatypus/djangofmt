@@ -256,11 +256,11 @@ jobs:
       plan: ${{ needs.plan.outputs.val }}
     secrets: inherit
 
-  custom-publish-playground:
+  custom-publish-playground-and-docs:
     needs:
       - plan
       - announce
-    uses: ./.github/workflows/publish-playground.yml
+    uses: ./.github/workflows/publish-playground-and-docs.yml
     with:
       plan: ${{ needs.plan.outputs.val }}
     secrets: inherit

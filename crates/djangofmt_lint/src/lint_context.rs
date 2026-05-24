@@ -1,9 +1,8 @@
 //! [`LintContext`] and [`DiagnosticGuard`].
 //!
-//! The `LintContext` owns the diagnostic buffer and is shared by reference
-//! through the AST visitor. Reporting a diagnostic returns a guard that
-//! buffers a partial diagnostic; on Drop the guard pushes it into the
-//! context's buffer. Mirrors ruff's `LintContext` / `Checker` split.
+//! The `LintContext` owns the diagnostic buffer and is shared by reference through the AST visitor.
+//! Reporting a diagnostic returns a guard that buffers a partial diagnostic; on Drop the guard
+//! pushes it into the context's buffer.
 
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};

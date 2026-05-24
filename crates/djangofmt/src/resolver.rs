@@ -14,7 +14,6 @@ use crate::pyproject::PyprojectSettings;
 pub const DEFAULT_INCLUDE: &[&str] = &["*.html", "*.jinja", "*.jinja2", "*.j2"];
 
 /// Default directory/file patterns to exclude when discovering files.
-/// Mirrors ruff's defaults.
 pub const DEFAULT_EXCLUDE: &[&str] = &[
     ".bzr",
     ".direnv",

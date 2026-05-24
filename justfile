@@ -21,12 +21,23 @@ pre-mr-check:
     uv run maturin develop
     cargo clippy --all-targets --all-features
     cargo test --workspace --all-targets --all-features
-    just docs-generate
+    just docs-build
 
 # Regenerate the per-rule documentation under docs/rules/ and docs/rules.md
-[group('dev')]
+# (and sync README/CONTRIBUTING into docs/).
+[group('docs')]
 docs-generate:
     cargo run -p djangofmt_dev -- generate-all
+
+# Build the Zensical docs site into `site/` (regenerates docs first).
+[group('docs')]
+docs-build: docs-generate
+    uv run --group docs zensical build --clean --strict --config-file .mkdocs.yml
+
+# Serve the Zensical docs site with live-reload (regenerates docs first).
+[group('docs')]
+docs-serve: docs-generate
+    uv run --group docs zensical serve --config-file .mkdocs.yml
 
 # Build playground WASM package
 [group('playground')]

@@ -26,8 +26,6 @@ pub fn derive_violation_metadata(item: TokenStream) -> TokenStream {
 /// The returned slice contains every static format string the body could
 /// produce; the docs generator uses it to populate the Message column of
 /// the rules table.
-///
-/// Ruff equivalent: `ruff_macros::derive_message_formats`.
 #[proc_macro_attribute]
 pub fn derive_message_formats(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func = parse_macro_input!(item as ItemFn);

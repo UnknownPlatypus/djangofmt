@@ -205,8 +205,6 @@ pub enum FixerError {
 
 /// Run the lint-and-fix loop on `source`.
 ///
-/// Mirrors `ruff::linter::lint_fix`:
-///
 /// 1. Parse → lint → apply.
 /// 2. If anything was applied, re-parse and repeat up to
 ///    [`MAX_FIX_ITERATIONS`].

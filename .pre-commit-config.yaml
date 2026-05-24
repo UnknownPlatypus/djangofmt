@@ -36,7 +36,7 @@ repos:
     rev: a90d2a917d59472bef788897931c1a5a5d12870a  # frozen: v1
     hooks:
       - id: typos
-        exclude: "CHANGELOG.md"
+        exclude: "^(CHANGELOG\\.md|docs/changelog\\.md)$"
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # frozen: v2.1.0
     hooks:
@@ -85,7 +85,10 @@ repos:
               .pre-commit-config.yaml|
               crates/.*|
               docs/rules\.md|
-              docs/rules/.*
+              docs/rules/.*|
+              docs/index\.md|
+              docs/changelog\.md|
+              docs/contributing\.md
           )$
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
     rev: 33ae92ed9b1a4392c8ac5fdef46887640d866e1e  # frozen: 0.5.0
