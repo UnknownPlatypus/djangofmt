@@ -3,7 +3,8 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::violation::Violation;
+use crate::rules::helpers::reverse_consume_ws;
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for empty `id` or `class` attribute values on HTML elements.
@@ -12,10 +13,6 @@ use crate::violation::Violation;
 /// An `id=""` or `class=""` attribute has no effect: no selector matches the empty string and
 /// no element can be referenced by an empty `id`. Removing the attribute reduces noise without
 /// changing rendering or behaviour.
-///
-/// Only the `id` and `class` attributes are checked. Custom data attributes (`data-id`,
-/// `data-foo-id-value`, etc.) and other attributes that legitimately accept an empty string
-/// (such as `<form action="">`) are not flagged.
 ///
 /// ## Example
 /// ```html
@@ -30,7 +27,8 @@ use crate::violation::Violation;
 /// ## Fix safety
 /// This rule's fix is marked as safe: removing an empty `id` or `class` attribute preserves
 /// runtime semantics because no selector or document API can match an empty value.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
+#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct EmptyAttrValue<'a> {
     pub attr: &'a str,
 }
@@ -40,6 +38,7 @@ impl Violation for EmptyAttrValue<'_> {
     const CATEGORY: RuleCategory = RuleCategory::Style;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
+    #[derive_message_formats]
     fn message(&self) -> String {
         format!("Empty `{}` attribute can be removed.", self.attr)
     }
@@ -78,15 +77,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
 
         let name_start = checker.source_offset(name);
         let attr_end = *offset + value_str.len() + usize::from(quote.is_some());
-
-        // Absorb the whitespace separating this attribute from the previous
-        // token so removing the only attribute leaves `<div>` rather than
-        // `<div >`.
-        let source = checker.context().source().as_bytes();
-        let mut fix_start = name_start;
-        while fix_start > 0 && source[fix_start - 1].is_ascii_whitespace() {
-            fix_start -= 1;
-        }
+        let fix_start = reverse_consume_ws(checker.context().source().as_bytes(), name_start);
 
         guard.set_fix(Fix::safe_edit(Edit::deletion(
             (fix_start, attr_end - fix_start).into(),

@@ -2,8 +2,7 @@
 <div id="main"></div>
 <div class="container"></div>
 
-<!-- Attribute with no value at all is a separate concern; this rule only flags
-     attributes with an explicit empty string value. -->
+<!-- Attributes without a value are a separate concern -->
 <div id></div>
 <div class></div>
 
@@ -11,25 +10,11 @@
 <div id="{{ pk }}"></div>
 <div class="{% if active %}active{% endif %}"></div>
 
-<!-- Regression: djLint #711 — `data-id=""` is not an `id` attribute -->
+<!-- Custom data attributes are not flagged -->
 <div data-id=""></div>
-
-<!-- Regression: djLint #281 — attribute names containing "id" must not match -->
 <div data-controller="ctl" data-ctl-record-id-value=""></div>
 
-<!-- Regression: djLint #98 — `id` appearing as the value of another attribute -->
-<th data-field="id" style="display: none">ID</th>
-
-<!-- Regression: djLint #1075 — `id` substring inside another attribute's name or value -->
-<input type="number" name="account_id" placeholder="enter account ID here" />
-
-<!-- Regression: djLint #829 — the word "class" inside text/attribute content -->
-<meta name="description" content="Simple app to rate a class, a session, etc." />
-
-<!-- Regression: djLint #89 — `id` token inside a template expression -->
-<a href="{% url 'foo:bar' id %}">link</a>
-
-<!-- djLint test parity: `id`/`class` as a prefix or suffix of another attribute name -->
+<!-- `id`/`class` as a substring of another attribute name -->
 <div x-id-y></div>
 <div id-y></div>
 <div x-id></div>
@@ -37,5 +22,11 @@
 <div id-y=""></div>
 <div x-id=""></div>
 
-<!-- Form action with an empty value is a legitimate empty attribute and not our concern -->
+<!-- `id`/`class` appearing inside a value or text content -->
+<th data-field="id" style="display: none">ID</th>
+<input type="number" name="account_id" placeholder="enter account ID here" />
+<meta name="description" content="Simple app to rate a class, a session, etc." />
+<a href="{% url 'foo:bar' id %}">link</a>
+
+<!-- Other attributes that legitimately accept an empty value -->
 <form action=""></form>
