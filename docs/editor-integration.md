@@ -1,7 +1,7 @@
 # Editor integration
 
-`djangofmt` reads from `stdin` when invoked with `--stdin-filename <PATH>`. The
-profile (`django` / `jinja`) is inferred from the file extension.
+`djangofmt` reads from `stdin` when invoked with `--stdin-filename <PATH>`.
+The profile (`django` / `jinja`) is inferred from the file extension.
 
 ## Helix
 
@@ -24,28 +24,24 @@ auto-format = true
 
 ## PyCharm
 
-### Via External Tool
+### Via File Watcher
 
-`djangofmt` can be installed as an External Tool in PyCharm. Open the Settings
-pane, then navigate to `Tools`, then `External Tools`. From there, add a new
-tool with one of the following configurations.
+`djangofmt` can be installed as a File Watcher in PyCharm to run on every save.
+Open the Settings pane, then navigate to `Tools`, then `File Watchers`.
+From there, add a new watcher with one of the following configurations.
 
 #### Via `pre-commit` (recommended)
 
-Running `djangofmt` through `pre-commit` ensures the version and configuration
-used in the editor match the one enforced by your project's hooks.
+Running `djangofmt` through `pre-commit` ensures the version and configuration used in the editor match the one
+enforced by your project's hooks.
 
-![Install djangofmt as an External Tool via pre-commit](assets/pycharm-external-tool-pre-commit.png)
+![Install djangofmt as a File Watcher via pre-commit](https://github.com/user-attachments/assets/TODO)
 
 #### Via `djangofmt` directly
 
 Alternatively, invoke the `djangofmt` binary directly.
 
-![Install djangofmt as an External Tool directly](assets/pycharm-external-tool-direct.png)
-
-`djangofmt` should then appear as a runnable action:
-
-![djangofmt as a runnable action](assets/pycharm-runnable-action.png)
+![Install djangofmt as a File Watcher directly](https://github.com/user-attachments/assets/TODO)
 
 ## Zed
 
