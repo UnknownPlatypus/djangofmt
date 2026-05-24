@@ -1,7 +1,5 @@
 //! `#[derive_message_formats]` attribute macro.
 //!
-//! Ruff equivalent: `ruff_macros::derive_message_formats`.
-//!
 //! Applied to a `Violation::message` impl, this parses the last expression of
 //! the function body and extracts every static `format!("…")` / `"…".to_string()`
 //! literal it could return, then emits a sibling `message_formats()` method
@@ -50,9 +48,7 @@ fn parse_expr(expr: &Expr, strings: &mut TokenStream) -> Result<(), TokenStream>
                     expr.span() => compile_error!("expected `format!` to have an argument")
                 ));
             };
-            if !first_token.to_string().contains('{')
-                && (tokens.next().is_none() || tokens.next().is_none())
-            {
+            if !first_token.to_string().contains('{') && tokens.next().is_none() {
                 return Err(quote_spanned!(
                     expr.span() =>
                     compile_error!("prefer `String::to_string` over `format!` without arguments")

@@ -70,4 +70,4 @@ Summary
 
 ## Running the benchmarks yourself
 
-See [`python/benchmarks/README.md`](../python/benchmarks/README.md) for the hyperfine recipe and how to reproduce these numbers on your own templates.
+See [`python/benchmarks/README.md`](https://github.com/UnknownPlatypus/djangofmt/blob/main/python/benchmarks/README.md) for the hyperfine recipe and how to reproduce these numbers on your own templates.

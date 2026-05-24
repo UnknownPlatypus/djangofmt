@@ -9,8 +9,7 @@ use crate::violation::{Violation, ViolationMetadata};
 /// `#[violation_metadata(stable_since = "…")]` (or `preview_since` /
 /// `deprecated_since` / `removed_since`).
 ///
-/// Mirrors ruff's `RuleGroup`. Powers the status badge in the generated docs
-/// and gates whether a rule runs by default.
+/// Powers the status badge in the generated docs and gates whether a rule runs by default.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RuleGroup {
     /// Stable since the given djangofmt version.
@@ -188,7 +187,7 @@ define_rules {
                 matches!(self.group(), RuleGroup::Removed { .. })
             }
 
-            /// Returns the source file of the violation struct as produced by `file!()` at the `#[derive(ViolationMetadata)]` site.
+            /// Returns the source file of the violation struct as produced by `file!()` anchored at the struct ident's span.
             /// Normally a workspace-root-relative path like `crates/djangofmt_lint/src/...`,
             /// but the exact form depends on build flags such as `--remap-path-prefix`.
             #[must_use]

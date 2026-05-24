@@ -27,6 +27,9 @@ dist
 *.tgz
 .astro
 
+# Zensical build output
+site/
+
 # LLM
 .claude
 .agents

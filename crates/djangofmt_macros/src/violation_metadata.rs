@@ -1,10 +1,10 @@
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{quote, quote_spanned};
 use syn::meta::ParseNestedMeta;
 use syn::{Attribute, DeriveInput, Error, Lit, LitStr, Meta};
 
 pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
-    let docs = collect_docs(&input.attrs)?;
+    let docs = collect_docs(&input.attrs);
     let Some(group) = collect_rule_group(&input.attrs)? else {
         return Err(Error::new_spanned(
             &input,
@@ -15,14 +15,19 @@ pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let name = input.ident;
     let (impl_generics, ty_generics, where_clause) = &input.generics.split_for_impl();
 
-    // Mirror ruff: return `None` when the struct has no doc comment so the
-    // docs generator can skip undocumented rules instead of writing an
-    // empty Markdown file.
+    // return `None` when the struct has no doc comment so the docs generator can skip
+    // undocumented rules instead of writing an empty Markdown file.
     let explain_body = if docs.is_empty() {
         quote! { None }
     } else {
         quote! { Some(#docs) }
     };
+
+    // Anchor `file!()` / `line!()` at the struct ident's span so the compiler resolves them to
+    // the struct's source location instead of the `#[derive(ViolationMetadata)]` attribute line.
+    let span = name.span();
+    let file_expr = quote_spanned! { span => file!() };
+    let line_expr = quote_spanned! { span => line!() };
 
     Ok(quote! {
         #[automatically_derived]
@@ -36,25 +41,20 @@ pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
             }
 
             fn file() -> &'static str {
-                file!()
+                #file_expr
             }
 
             fn line() -> u32 {
-                line!()
+                #line_expr
             }
         }
     })
 }
 
-/// Parse the `#[violation_metadata(stable_since = "…")]` helper attribute
-/// (one of `stable_since`, `preview_since`, `deprecated_since`,
-/// `removed_since`) into a `RuleGroup::Variant { since: "…" }` expression.
+/// Parse the `#[violation_metadata(stable_since = "…")]` helper attribute into a `RuleGroup::Variant` expression.
 ///
 /// Errors if more than one lifecycle key is present so a typo like
-/// `(stable_since = "…", preview_since = "…")` can't silently pick whichever
-/// key the parser visited last.
-///
-/// Ruff equivalent: `ruff_macros::violation_metadata::get_rule_status`.
+/// `(stable_since = "…", preview_since = "…")` can't silently pick whichever key the parser visited last.
 fn collect_rule_group(attrs: &[Attribute]) -> syn::Result<Option<TokenStream>> {
     let mut group = None;
     for attr in attrs {
@@ -62,18 +62,14 @@ fn collect_rule_group(attrs: &[Attribute]) -> syn::Result<Option<TokenStream>> {
             continue;
         }
         attr.parse_nested_meta(|meta| {
-            let variant = if meta.path.is_ident("stable_since") {
-                let lit = parse_version(&meta)?;
-                quote! { RuleGroup::Stable { since: #lit } }
+            let constructor: fn(&LitStr) -> TokenStream = if meta.path.is_ident("stable_since") {
+                |lit| quote! { RuleGroup::Stable { since: #lit } }
             } else if meta.path.is_ident("preview_since") {
-                let lit = parse_version(&meta)?;
-                quote! { RuleGroup::Preview { since: #lit } }
+                |lit| quote! { RuleGroup::Preview { since: #lit } }
             } else if meta.path.is_ident("deprecated_since") {
-                let lit = parse_version(&meta)?;
-                quote! { RuleGroup::Deprecated { since: #lit } }
+                |lit| quote! { RuleGroup::Deprecated { since: #lit } }
             } else if meta.path.is_ident("removed_since") {
-                let lit = parse_version(&meta)?;
-                quote! { RuleGroup::Removed { since: #lit } }
+                |lit| quote! { RuleGroup::Removed { since: #lit } }
             } else {
                 return Err(meta.error("unknown `violation_metadata` option"));
             };
@@ -83,17 +79,17 @@ fn collect_rule_group(attrs: &[Attribute]) -> syn::Result<Option<TokenStream>> {
                      `stable_since`, `preview_since`, `deprecated_since`, `removed_since`",
                 ));
             }
-            group = Some(variant);
+            let lit = parse_version(&meta)?;
+            group = Some(constructor(&lit));
             Ok(())
         })?;
     }
     Ok(group)
 }
 
-/// Accept a dotted numeric version (e.g. `"0.2.5"`) or the
-/// `NEXT_DJANGOFMT_VERSION` placeholder, which release tooling rewrites at
-/// tag time. Reject everything else — in particular a leading `v` prefix or
-/// stray letters that would later trip the docs URL builder.
+/// Accept a dotted numeric version (e.g. `"0.2.5"`) or the `NEXT_DJANGOFMT_VERSION` placeholder,
+/// which release tooling rewrites at tag time. Reject everything else — in particular a leading
+/// `v` prefix or stray letters that would later trip the docs URL builder.
 fn parse_version(meta: &ParseNestedMeta) -> syn::Result<LitStr> {
     let lit: LitStr = meta.value()?.parse()?;
     let value = lit.value();
@@ -117,21 +113,21 @@ fn parse_version(meta: &ParseNestedMeta) -> syn::Result<LitStr> {
     }
 }
 
-fn collect_docs(attrs: &[Attribute]) -> syn::Result<String> {
+fn collect_docs(attrs: &[Attribute]) -> String {
     let mut out = String::new();
     for attr in attrs {
         if !attr.path().is_ident("doc") {
             continue;
         }
         let Some(lit) = doc_attr_lit(attr) else {
-            return Err(Error::new_spanned(attr, "unimplemented doc comment style"));
+            continue;
         };
         let value = lit.value();
         let line = value.strip_prefix(' ').unwrap_or(&value);
         out.push_str(line);
         out.push('\n');
     }
-    Ok(out)
+    out
 }
 
 fn doc_attr_lit(attr: &Attribute) -> Option<&LitStr> {

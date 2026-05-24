@@ -1,7 +1,6 @@
 //! Fix data model.
 //!
-//! Mirrors ruff's autofix model: a [`Fix`] is one or more non-overlapping
-//! [`Edit`]s tagged with an [`Applicability`] threshold and an [`IsolationLevel`].
+//! a [`Fix`] is one or more non-overlapping [`Edit`]s tagged with an [`Applicability`] threshold and an [`IsolationLevel`].
 //!
 //! Rules attach a [`Fix`] to a [`crate::LintDiagnostic`] via the diagnostic guard
 //! returned from [`crate::LintContext::report_diagnostic_if_enabled`]. The applier
@@ -71,8 +70,7 @@ pub enum IsolationLevel {
 
 /// A single text mutation.
 ///
-/// `range` is a [`miette::SourceSpan`] for codebase consistency (semantically
-/// equivalent to ruff's `TextRange`).
+/// `range` is a [`miette::SourceSpan`] for codebase consistency.
 ///
 /// `content` uses [`Option<Box<str>>`] to distinguish pure deletion ([`None`])
 /// from non-empty replacement ([`Some(...)`]) while preserving the niche

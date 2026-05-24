@@ -1,17 +1,13 @@
 //! Generate per-rule Markdown documentation under `docs/rules/`.
 
-use std::collections::BTreeSet;
 use std::fmt::Write as _;
-use std::fs;
-use std::path::PathBuf;
 
-use anyhow::{Context, Result};
-use djangofmt::fs::relativize_path;
+use anyhow::Result;
 use strum::IntoEnumIterator;
 
 use djangofmt_lint::{FixAvailability, Rule, RuleGroup};
 
-use crate::generate_all::{AUTOGEN_HEADER, Args, Mode, apply};
+use crate::generate_all::{AUTOGEN_HEADER, Args, apply};
 use crate::{REPO_BRANCH, REPO_URL, root_dir};
 
 /// Substituted with the next release version by release tooling. Until then
@@ -20,7 +16,6 @@ const NEXT_VERSION_PLACEHOLDER: &str = "NEXT_DJANGOFMT_VERSION";
 
 pub fn main(args: &Args) -> Result<()> {
     let dir = root_dir().join("docs").join("rules");
-    let mut expected: BTreeSet<PathBuf> = BTreeSet::new();
     for rule in Rule::iter() {
         let Some(explanation) = rule.explanation() else {
             // Skip rules with no doc comment: the generator would otherwise
@@ -29,24 +24,6 @@ pub fn main(args: &Args) -> Result<()> {
         };
         let path = dir.join(rule.to_string()).with_extension("md");
         apply(args.mode, &path, &render(rule, explanation))?;
-        expected.insert(path);
-    }
-    // Drop stale per-rule pages so removing or renaming a rule keeps
-    // `docs/rules/` in sync with the registry — otherwise the
-    // `git diff --exit-code` CI gate doesn't notice an orphan file because
-    // its content didn't change.
-    if matches!(args.mode, Mode::Write) && dir.is_dir() {
-        for entry in fs::read_dir(&dir)
-            .with_context(|| format!("failed to read {}", relativize_path(&dir)))?
-        {
-            let path = entry?.path();
-            if path.extension().and_then(|s| s.to_str()) == Some("md") && !expected.contains(&path)
-            {
-                fs::remove_file(&path)
-                    .with_context(|| format!("failed to remove {}", relativize_path(&path)))?;
-                eprintln!("Removed stale {}", relativize_path(&path));
-            }
-        }
     }
     Ok(())
 }
@@ -66,8 +43,10 @@ fn render(rule: Rule, explanation: &str) -> String {
     let name = rule.to_string();
     let file = rule.source_file().replace('\\', "/");
     let line = rule.source_line();
+    let category = rule.category().label().to_ascii_lowercase();
 
     let mut output = String::new();
+    let _ = writeln!(&mut output, "---\ntags:\n  - lint - {category}\n---\n");
     output.push_str(AUTOGEN_HEADER);
     let _ = writeln!(&mut output, "# {name}");
     let _ = writeln!(&mut output);

@@ -1,5 +1,7 @@
 # Djangofmt
 
+<!-- Begin section: Overview -->
+
 [![Pypi Version](https://img.shields.io/pypi/v/djangofmt.svg)](https://pypi.python.org/djangofmt)
 [![License](https://img.shields.io/pypi/l/djangofmt.svg)](https://github.com/UnknownPlatypus/djangofmt/blob/main/LICENSE)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/djangofmt.svg)](https://pypi.python.org/pypi/djangofmt)
@@ -8,6 +10,8 @@
 [![CodSpeed Badge](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/UnknownPlatypus/djangofmt?utm_source=badge)
 
 A fast, HTML aware, Django template formatter, written in Rust.
+
+📚 **Documentation:** https://unknownplatypus.github.io/djangofmt/docs/
 
 <p align="center">
   <picture align="center">
@@ -29,11 +33,11 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 - [Usage](#usage)
 - [Pre-commit hook](#pre-commit-hook)
 - [Configuration](#configuration)
-- [Editor integration](docs/editor-integration.md)
-- [Controlling the formatting](docs/formatting.md)
-- [Lint rules](docs/rules.md)
-- [Known limitations](docs/known-limitations.md)
-- [Benchmarks](docs/benchmarks.md)
+- [Editor integration](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)
+- [Controlling the formatting](https://unknownplatypus.github.io/djangofmt/docs/formatting/)
+- [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/)
+- [Known limitations](https://unknownplatypus.github.io/djangofmt/docs/known-limitations/)
+- [Benchmarks](https://unknownplatypus.github.io/djangofmt/docs/benchmarks/)
 - [Shell completions](#shell-completions)
 - [Contributing](#contributing)
 
@@ -123,11 +127,11 @@ The first `pyproject.toml` found is used. If no file is found or the file doesn'
 
 Command-line arguments always take precedence over `pyproject.toml` settings.
 
-See [Controlling the formatting](docs/formatting.md) for the behaviour of each option and how to opt into per-node overrides.
+See [Controlling the formatting](https://unknownplatypus.github.io/djangofmt/docs/formatting/) for the behaviour of each option and how to opt into per-node overrides.
 
 ## Editor integration
 
-See [`docs/editor-integration.md`](docs/editor-integration.md).
+See the [editor integration guide](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/).
 
 ## Shell completions
 
@@ -146,3 +150,5 @@ Arguments:
 ## Contributing
 
 Contributions are welcome! Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to get started.
+
+<!-- End section: Overview -->
