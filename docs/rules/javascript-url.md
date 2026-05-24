@@ -9,9 +9,11 @@ Added in NEXT_DJANGOFMT_VERSION ·
 </small>
 
 ## What it does
+
 Checks for `javascript:` URLs in HTML elements.
 
 ## Why is this bad?
+
 `javascript:` URLs execute arbitrary code when the element is activated.
 Any data interpolated into the URL becomes executable, which can allow cross-site scripting
 (XSS) attacks. The pattern also bypasses Content Security Policy `script-src` directives.
@@ -19,6 +21,7 @@ Use a real URL and attach behavior with an event handler instead.
 
 
 ## Example
+
 ```html
 <a href="javascript:alert('Hello, world!')">Click me</a>
 ```
@@ -34,4 +37,5 @@ Use instead:
 ```
 
 ## References
+
 - [MDN: `javascript:` URLs](https://developer.mozilla.org/en-US/docs/Web/URI/Reference/Schemes/javascript)

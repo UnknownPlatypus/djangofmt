@@ -56,12 +56,12 @@ bench-py dir: setup-bench-py
 # Generate HTML coverage report and open in browser
 [group('dev')]
 coverage:
-    cargo llvm-cov --workspace --html --open
+    cargo llvm-cov --workspace --exclude djangofmt_dev --html --open
 
 # Generate LCOV coverage report
 [group('dev')]
 coverage-lcov:
-    cargo llvm-cov --workspace --lcov --output-path lcov.info
+    cargo llvm-cov --workspace --exclude djangofmt_dev --lcov --output-path lcov.info
 
 # Run rust micro-benchmarks
 [group('bench')]

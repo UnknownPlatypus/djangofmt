@@ -11,9 +11,11 @@ Added in NEXT_DJANGOFMT_VERSION ·
 Fix is always available.
 
 ## What it does
+
 Checks for redundant `type` attributes on `<script>` and `<style>` tags.
 
 ## Why is this bad?
+
 Since HTML5, `<script>` defaults to `type="text/javascript"` and `<style>` defaults to
 `type="text/css"`. Specifying these default values is redundant and adds unnecessary noise.
 
@@ -21,6 +23,7 @@ Non-default types (e.g., `module`, `text/less`, `application/ld+json`) are exclu
 value comparison; values containing template interpolation are skipped explicitly.
 
 ## Example
+
 ```html
 <script type="text/javascript" src="app.js"></script>
 <style type="text/css">.foo { color: red; }</style>
@@ -33,9 +36,11 @@ Use instead:
 ```
 
 ## Fix safety
+
 This rule's fix is marked as safe: removing a `type` attribute whose value
 matches the HTML5 default for the tag preserves runtime semantics.
 
 ## References
+
 - [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html#type_Attributes)
 - [HTML spec: the script element](https://html.spec.whatwg.org/multipage/scripting.html#the-script-element)

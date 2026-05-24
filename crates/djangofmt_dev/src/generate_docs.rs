@@ -111,7 +111,31 @@ fn render(rule: Rule, explanation: &str) -> String {
         );
     }
 
-    output.push_str(explanation.trim());
+    output.push_str(ensure_blank_after_headings(explanation.trim()).trim_end());
     output.push('\n');
     output
+}
+
+/// Insert a blank line after any ATX heading (`#`, `##`, …) that is immediately
+/// followed by non-empty content, so the rendered Markdown matches the usual
+/// convention. Lines inside fenced code blocks are left alone.
+fn ensure_blank_after_headings(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut in_code_fence = false;
+    let mut lines = text.lines().peekable();
+    while let Some(line) = lines.next() {
+        out.push_str(line);
+        out.push('\n');
+        if line.trim_start().starts_with("```") {
+            in_code_fence = !in_code_fence;
+            continue;
+        }
+        if !in_code_fence
+            && line.starts_with('#')
+            && lines.peek().is_some_and(|next| !next.is_empty())
+        {
+            out.push('\n');
+        }
+    }
+    out
 }

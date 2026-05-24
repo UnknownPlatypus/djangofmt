@@ -11,10 +11,12 @@ Added in <a href="https://github.com/UnknownPlatypus/djangofmt/releases/tag/v0.2
 Fix is always available.
 
 ## What it does
+
 Checks for `{% blocktranslate %}` / `{% blocktrans %}` blocks that omit
 the `trimmed` option.
 
 ## Why is this bad?
+
 Without `trimmed`, indentation and whitespace inside the block become part
 of the translation string in `.po` files. Reformatting the template then
 reorders bytes inside translatable strings, producing noisy translation
@@ -33,8 +35,10 @@ Use instead:
 ```
 
 ## Fix safety
-This rule's fix is marked as safe: it inserts ` trimmed` immediately after
+
+This rule's fix is marked as safe: it inserts `trimmed` immediately after
 the tag name in the opening tag without altering the translatable content.
 
 ## References
+
 - [Django documentation: `blocktranslate`](https://docs.djangoproject.com/en/stable/topics/i18n/translation/#std-templatetag-blocktranslate)
