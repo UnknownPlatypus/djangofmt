@@ -1,0 +1,136 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 12 lint error(s)
+
+Error: 
+  × Empty `id` attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:10]
+ 1 │ <!-- Empty id -->
+ 2 │ <div id=""></div>
+   ·          ▲
+   ·          ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `class` attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:5:13]
+ 4 │ <!-- Empty class -->
+ 5 │ <div class=""></div>
+   ·             ▲
+   ·             ╰── here
+ 6 │ 
+   ╰────
+  help: Remove the empty `class` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+   ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:8]
+ 7 │ <!-- Both empty on the same element -->
+ 8 │ <p id="" class="help-block">copy</p>
+   ·        ▲
+   ·        ╰── here
+ 9 │ 
+   ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `ID` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:11:10]
+ 10 │ <!-- Case-insensitive attribute name -->
+ 11 │ <div ID=""></div>
+    ·          ▲
+    ·          ╰── here
+ 12 │ <div CLASS=""></div>
+    ╰────
+  help: Remove the empty `ID` attribute.
+
+Error: 
+  × Empty `CLASS` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:12:13]
+ 11 │ <div ID=""></div>
+ 12 │ <div CLASS=""></div>
+    ·             ▲
+    ·             ╰── here
+ 13 │ 
+    ╰────
+  help: Remove the empty `CLASS` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:15:10]
+ 14 │ <!-- Case-insensitive tag name -->
+ 15 │ <DIV id=""></DIV>
+    ·          ▲
+    ·          ╰── here
+ 16 │ 
+    ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:18:10]
+ 17 │ <!-- Single-quoted empty values -->
+ 18 │ <div id=''></div>
+    ·          ▲
+    ·          ╰── here
+ 19 │ <div class=''></div>
+    ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `class` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:19:13]
+ 18 │ <div id=''></div>
+ 19 │ <div class=''></div>
+    ·             ▲
+    ·             ╰── here
+ 20 │ 
+    ╰────
+  help: Remove the empty `class` attribute.
+
+Error: 
+  × Empty `class` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:24:12]
+ 23 │     role="banner"
+ 24 │     class=""
+    ·            ▲
+    ·            ╰── here
+ 25 │ ></div>
+    ╰────
+  help: Remove the empty `class` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:29:9]
+ 28 │ <div
+ 29 │     id=""
+    ·         ▲
+    ·         ╰── here
+ 30 │     role="banner"
+    ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:34:12]
+ 33 │ <!-- Self-closing void element -->
+ 34 │ <input id="" name="email" />
+    ·            ▲
+    ·            ╰── here
+ 35 │ 
+    ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:38:15]
+ 37 │ {% if show %}
+ 38 │     <span id=""></span>
+    ·               ▲
+    ·               ╰── here
+ 39 │ {% endif %}
+    ╰────
+  help: Remove the empty `id` attribute.

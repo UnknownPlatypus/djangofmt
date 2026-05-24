@@ -1,0 +1,40 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Empty id -->
+<div></div>
+
+<!-- Empty class -->
+<div></div>
+
+<!-- Both empty on the same element -->
+<p class="help-block">copy</p>
+
+<!-- Case-insensitive attribute name -->
+<div></div>
+<div></div>
+
+<!-- Case-insensitive tag name -->
+<DIV></DIV>
+
+<!-- Single-quoted empty values -->
+<div></div>
+<div></div>
+
+<!-- Multiline element with empty class -->
+<div
+    role="banner"
+></div>
+
+<!-- Multiline element with the empty attr in a non-terminal position -->
+<div
+    role="banner"
+></div>
+
+<!-- Self-closing void element -->
+<input name="email" />
+
+<!-- Nested in Jinja block -->
+{% if show %}
+    <span></span>
+{% endif %}

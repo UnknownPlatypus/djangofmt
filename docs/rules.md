@@ -8,6 +8,7 @@ djangofmt's built-in lint rules. Each rule has a stable kebab-case name; click t
 | ---- | ------- | -------- | --- |
 | [invalid-attr-value](rules/invalid-attr-value.md) | Invalid value '{}' for attribute '{}'. | Correctness | None |
 | [untrimmed-blocktranslate](rules/untrimmed-blocktranslate.md) | `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings. | Correctness | Always |
+| [empty-attr-value](rules/empty-attr-value.md) | Empty `{}` attribute can be removed. | Style | Always |
 | [redundant-type-attr](rules/redundant-type-attr.md) | Redundant type="{}" on <{}> tag. | Style | Always |
 | [javascript-url](rules/javascript-url.md) | Avoid `javascript:` URLs in `{}`. | Suspicious | None |
 | [uppercase-form-method](rules/uppercase-form-method.md) | Form method `{}` should be lowercase. | Style | Always |

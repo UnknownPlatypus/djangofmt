@@ -1,0 +1,39 @@
+<!-- Empty id -->
+<div id=""></div>
+
+<!-- Empty class -->
+<div class=""></div>
+
+<!-- Both empty on the same element -->
+<p id="" class="help-block">copy</p>
+
+<!-- Case-insensitive attribute name -->
+<div ID=""></div>
+<div CLASS=""></div>
+
+<!-- Case-insensitive tag name -->
+<DIV id=""></DIV>
+
+<!-- Single-quoted empty values -->
+<div id=''></div>
+<div class=''></div>
+
+<!-- Multiline element with empty class -->
+<div
+    role="banner"
+    class=""
+></div>
+
+<!-- Multiline element with the empty attr in a non-terminal position -->
+<div
+    id=""
+    role="banner"
+></div>
+
+<!-- Self-closing void element -->
+<input id="" name="email" />
+
+<!-- Nested in Jinja block -->
+{% if show %}
+    <span id=""></span>
+{% endif %}

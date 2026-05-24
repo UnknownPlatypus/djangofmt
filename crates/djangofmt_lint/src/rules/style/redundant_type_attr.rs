@@ -3,7 +3,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
+use crate::rules::helpers::{contains_interpolation, reverse_consume_ws};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -110,15 +110,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
 
         let name_start = checker.source_offset(name);
         let attr_end = *offset + value_str.len() + usize::from(quote.is_some());
-
-        // Absorb the whitespace separating this attribute from the previous
-        // token so removing the only attribute leaves `<script>` rather than
-        // `<script >`.
-        let source = checker.context().source().as_bytes();
-        let mut fix_start = name_start;
-        while fix_start > 0 && source[fix_start - 1].is_ascii_whitespace() {
-            fix_start -= 1;
-        }
+        let fix_start = reverse_consume_ws(checker.context().source().as_bytes(), name_start);
 
         guard.set_fix(Fix::safe_edit(Edit::deletion(
             (fix_start, attr_end - fix_start).into(),

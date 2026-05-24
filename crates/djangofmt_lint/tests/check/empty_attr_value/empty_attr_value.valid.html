@@ -1,0 +1,36 @@
+<!-- Non-empty values are fine -->
+<div id="main"></div>
+<div class="container"></div>
+
+<!-- Whitespace-only values are not empty -->
+<div id=" "></div>
+<div class=" "></div>
+
+<!-- Attributes without a value are a separate concern -->
+<div id></div>
+<div class></div>
+
+<!-- Interpolated values are dynamic and skipped -->
+<div id="{{ pk }}"></div>
+<div class="{% if active %}active{% endif %}"></div>
+
+<!-- Custom data attributes are not flagged -->
+<div data-id=""></div>
+<div data-controller="ctl" data-ctl-record-id-value=""></div>
+
+<!-- `id`/`class` as a substring of another attribute name -->
+<div x-id-y></div>
+<div id-y></div>
+<div x-id></div>
+<div x-id-y=""></div>
+<div id-y=""></div>
+<div x-id=""></div>
+
+<!-- `id`/`class` appearing inside a value or text content -->
+<th data-field="id" style="display: none">ID</th>
+<input type="number" name="account_id" placeholder="enter account ID here" />
+<meta name="description" content="Simple app to rate a class, a session, etc." />
+<a href="{% url 'foo:bar' id %}">link</a>
+
+<!-- Other attributes that legitimately accept an empty value -->
+<form action=""></form>
