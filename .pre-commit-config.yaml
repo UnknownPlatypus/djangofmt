@@ -38,7 +38,7 @@ repos:
       - id: typos
         exclude: "CHANGELOG.md"
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: fc0f09a29bb495f4a91f00266155d6282d52485d  # frozen: v1.20.2
+    rev: d2823d321df3af8f878f7ee3414dc94d037145b9  # frozen: v2.1.0
     hooks:
       - id: mypy
   - repo: https://github.com/scop/pre-commit-shfmt
@@ -51,7 +51,7 @@ repos:
       - id: tombi-format
         exclude: Cargo.lock
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: a4727cbbcd26d7098e96b9cb738169b59711ae51  # frozen: v1.24.1
+    rev: 9257c6050c0261b8c57e712f632dc4a8010109a9  # frozen: v1.25.2
     hooks:
       - id: zizmor
   - repo: https://github.com/rhysd/actionlint
