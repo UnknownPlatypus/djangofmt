@@ -188,4 +188,22 @@ jobs:
       - uses: taiki-e/install-action@711e1c3275189d76dcc4d34ddea63bf96ac49090 # v2.76.0
         with:
           tool: cargo-llvm-cov
-      - run: cargo llvm-cov --workspace --all-targets --all-features --fail-under-lines 85
+      - run: cargo llvm-cov --workspace --exclude djangofmt_dev --all-targets --all-features --fail-under-lines 85
+
+  docs_check:
+    name: "rule docs up to date"
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - run: cargo run -p djangofmt_dev -- generate-all
+      - name: Verify rule docs are up to date
+        # `git diff --exit-code` ignores untracked files, so a newly added rule
+        # whose docs page was never committed would slip past CI. Treat it as
+        # part of the diff via `git add -N` (intent-to-add).
+        run: |
+          git add --intent-to-add docs/
+          git diff --exit-code -- docs/

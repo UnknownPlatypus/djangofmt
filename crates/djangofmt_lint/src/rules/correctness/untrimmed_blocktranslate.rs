@@ -4,7 +4,7 @@ use markup_fmt::parser::parse_jinja_tag_name;
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for `{% blocktranslate %}` / `{% blocktrans %}` blocks that omit
@@ -29,12 +29,13 @@ use crate::violation::Violation;
 /// ```
 ///
 /// ## Fix safety
-/// This rule's fix is marked as safe: it inserts ` trimmed` immediately after
+/// This rule's fix is marked as safe: it inserts `trimmed` immediately after
 /// the tag name in the opening tag without altering the translatable content.
 ///
 /// ## References
 /// - [Django documentation: `blocktranslate`](https://docs.djangoproject.com/en/stable/topics/i18n/translation/#std-templatetag-blocktranslate)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
+#[violation_metadata(stable_since = "0.2.8")]
 pub struct UntrimmedBlocktranslate;
 
 impl Violation for UntrimmedBlocktranslate {
@@ -42,6 +43,7 @@ impl Violation for UntrimmedBlocktranslate {
     const CATEGORY: RuleCategory = RuleCategory::Correctness;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
+    #[derive_message_formats]
     fn message(&self) -> String {
         "`{% blocktranslate %}` should declare `trimmed` to avoid leaking \
          indentation into translation strings."

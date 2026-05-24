@@ -1,7 +1,33 @@
 use std::fmt::Debug;
 
+pub use djangofmt_macros::{ViolationMetadata, derive_message_formats};
+
 use crate::fix::FixAvailability;
-use crate::registry::{Rule, RuleCategory};
+use crate::registry::{Rule, RuleCategory, RuleGroup};
+
+/// Static, derive-supplied metadata for a lint violation.
+///
+/// Implemented automatically by `#[derive(ViolationMetadata)]`, which captures the struct's `///` doc comment as the rule's explanation
+/// and records the source file and line of the struct definition.
+/// Powers the per-rule documentation generator under `djangofmt_dev`.
+pub trait ViolationMetadata {
+    /// The rendered rule documentation, taken verbatim from the violation struct's doc comment.
+    ///
+    /// Returns `None` when the violation has no doc comment, so the docs
+    /// generator can skip undocumented rules instead of writing an empty file.
+    fn explain() -> Option<&'static str>;
+
+    /// The rule's lifecycle status, supplied via
+    /// `#[violation_metadata(stable_since = "…")]` (or `preview_since` /
+    /// `deprecated_since` / `removed_since`).
+    fn group() -> RuleGroup;
+
+    /// The source file path of the violation struct, as produced by `file!()`.
+    fn file() -> &'static str;
+
+    /// The source line of the violation struct definition.
+    fn line() -> u32;
+}
 
 /// A trait for lint violations.
 ///
@@ -28,6 +54,13 @@ pub trait Violation: Debug {
 
     /// The message to be displayed to the user.
     fn message(&self) -> String;
+
+    /// The static format strings that [`message`](Self::message) could return.
+    ///
+    /// Supplied by the [`derive_message_formats`] attribute applied to the
+    /// `message` impl. Used by the docs generator to populate the Message
+    /// column of the rules table.
+    fn message_formats() -> &'static [&'static str];
 
     /// Optional help text with suggestions for fixing the issue.
     fn help(&self) -> Option<String> {

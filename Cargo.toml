@@ -16,6 +16,7 @@ anyhow = { version = "1.0.100" }
 clap = { version = "4.5.57", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
+djangofmt_macros = { path = "crates/djangofmt_macros" }
 dprint-plugin-json = { version = "0.21.1" }
 ignore = { version = "0.4.25" }
 insta = { version = "1.46.3", features = ["filters", "glob", "yaml"] }
@@ -23,6 +24,8 @@ insta-cmd = { version = "0.6.0" }
 malva = { version = "0.15.2", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "096b0c6a8cf35aae960fef4c2988fbdaae93f872" }
 miette = { version = "7.6.0", features = ["fancy"] }
+proc-macro2 = { version = "1.0" }
+quote = { version = "1.0" }
 rayon = { version = "1.11.0" }
 rstest = { version = "=0.26.1" }
 rustc-hash = { version = "2.1.1" }
@@ -30,6 +33,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde-wasm-bindgen = { version = "0.6.5" }
 similar-asserts = { version = "2.0.0" }
 strum = { version = "0.28.0", features = ["derive"] }
+syn = { version = "2.0" }
 tempfile = { version = "3.25.0" }
 thiserror = { version = "2.0.18" }
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.

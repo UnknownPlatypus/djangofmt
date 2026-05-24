@@ -2,7 +2,7 @@ use markup_fmt::ast::{Attribute, Element, JinjaBlock, JinjaTagOrChildren};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::violation::Violation;
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for `<html>` tags that do not declare a `lang` attribute.
@@ -30,13 +30,15 @@ use crate::violation::Violation;
 /// ## References
 /// - [MDN: HTML `lang` global attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/lang)
 /// - [WCAG 3.1.1: Language of Page](https://www.w3.org/WAI/WCAG21/Understanding/language-of-page.html)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, ViolationMetadata)]
+#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct MissingHtmlLang;
 
 impl Violation for MissingHtmlLang {
     const RULE: Rule = Rule::MissingHtmlLang;
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
+    #[derive_message_formats]
     fn message(&self) -> String {
         "`<html>` tag should declare a `lang` attribute.".to_string()
     }

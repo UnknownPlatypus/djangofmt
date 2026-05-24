@@ -21,6 +21,12 @@ pre-mr-check:
     uv run maturin develop
     cargo clippy --all-targets --all-features
     cargo test --workspace --all-targets --all-features
+    just docs-generate
+
+# Regenerate the per-rule documentation under docs/rules/ and docs/rules.md
+[group('dev')]
+docs-generate:
+    cargo run -p djangofmt_dev -- generate-all
 
 # Build playground WASM package
 [group('playground')]
@@ -50,12 +56,12 @@ bench-py dir: setup-bench-py
 # Generate HTML coverage report and open in browser
 [group('dev')]
 coverage:
-    cargo llvm-cov --workspace --html --open
+    cargo llvm-cov --workspace --exclude djangofmt_dev --html --open
 
 # Generate LCOV coverage report
 [group('dev')]
 coverage-lcov:
-    cargo llvm-cov --workspace --lcov --output-path lcov.info
+    cargo llvm-cov --workspace --exclude djangofmt_dev --lcov --output-path lcov.info
 
 # Run rust micro-benchmarks
 [group('bench')]
