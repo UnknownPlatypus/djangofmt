@@ -35,13 +35,13 @@ From there, add a new watcher with one of the following configurations.
 Running `djangofmt` through `pre-commit` ensures the version and configuration used in the editor match the one
 enforced by your project's hooks.
 
-![Install djangofmt as a File Watcher via pre-commit](https://github.com/user-attachments/assets/TODO)
+![Install djangofmt as a File Watcher via pre-commit](https://github.com/user-attachments/assets/fba9bd0f-3056-4144-a792-c54615057afd)
 
 #### Via `djangofmt` directly
 
 Alternatively, invoke the `djangofmt` binary directly.
 
-![Install djangofmt as a File Watcher directly](https://github.com/user-attachments/assets/TODO)
+![Install djangofmt as a File Watcher directly](https://github.com/user-attachments/assets/4ca4f791-028e-46a3-92f5-f9e7c1a66db2)
 
 ## Zed
 
