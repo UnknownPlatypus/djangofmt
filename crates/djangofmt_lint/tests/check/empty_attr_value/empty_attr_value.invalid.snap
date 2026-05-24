@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 10 lint error(s)
+  × Found 12 lint error(s)
 
 Error: 
   × Empty `id` attribute can be removed.
@@ -104,11 +104,33 @@ Error:
 
 Error: 
   × Empty `id` attribute can be removed.
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:29:15]
- 28 │ {% if show %}
- 29 │     <span id=""></span>
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:29:9]
+ 28 │ <div
+ 29 │     id=""
+    ·         ▲
+    ·         ╰── here
+ 30 │     role="banner"
+    ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:34:12]
+ 33 │ <!-- Self-closing void element -->
+ 34 │ <input id="" name="email" />
+    ·            ▲
+    ·            ╰── here
+ 35 │ 
+    ╰────
+  help: Remove the empty `id` attribute.
+
+Error: 
+  × Empty `id` attribute can be removed.
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:38:15]
+ 37 │ {% if show %}
+ 38 │     <span id=""></span>
     ·               ▲
     ·               ╰── here
- 30 │ {% endif %}
+ 39 │ {% endif %}
     ╰────
   help: Remove the empty `id` attribute.

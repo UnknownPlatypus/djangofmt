@@ -5,7 +5,7 @@
 <small>
 Added in NEXT_DJANGOFMT_VERSION ·
 <a href="https://github.com/UnknownPlatypus/djangofmt/issues?q=sort%3Aupdated-desc%20is%3Aissue%20%22empty-attr-value%22" target="_blank">Related issues</a> ·
-<a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/style/empty_attr_value.rs#L30" target="_blank">View source</a>
+<a href="https://github.com/UnknownPlatypus/djangofmt/blob/main/crates/djangofmt_lint/src/rules/style/empty_attr_value.rs#L32" target="_blank">View source</a>
 </small>
 
 Fix is always available.
@@ -16,9 +16,9 @@ Checks for empty `id` or `class` attribute values on HTML elements.
 
 ## Why is this bad?
 
-An `id=""` or `class=""` attribute has no effect: no selector matches the empty string and
-no element can be referenced by an empty `id`. Removing the attribute reduces noise without
-changing rendering or behaviour.
+An `id=""` or `class=""` attribute is almost always unintentional: no CSS class selector
+matches an element with an empty `class`, and `document.getElementById("")` returns nothing.
+Removing the attribute reduces template noise.
 
 ## Example
 
@@ -33,5 +33,7 @@ Use instead:
 
 ## Fix safety
 
-This rule's fix is marked as safe: removing an empty `id` or `class` attribute preserves
-runtime semantics because no selector or document API can match an empty value.
+The fix is marked as safe. In practice, removing an empty `id`/`class` preserves rendering
+in every realistic template. The DOM technically distinguishes `<div id="">` from
+`<div>` (`hasAttribute("id")`, the attribute selector `[id=""]`), but author code relying
+on those forms is vanishingly rare.
