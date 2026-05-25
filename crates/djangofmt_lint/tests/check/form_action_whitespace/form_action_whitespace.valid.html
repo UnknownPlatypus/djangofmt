@@ -1,0 +1,42 @@
+<!-- No surrounding whitespace -->
+<form action="/submit/"></form>
+<form action=""></form>
+<form action="https://example.com/submit/"></form>
+
+<!-- Non-form tags are not checked -->
+<a action=" /foo/ ">Link</a>
+<div action=" bar ">div</div>
+
+<!-- Only the `action` attribute is checked -->
+<!-- Regression: djLint #743 — data-action with multiline value must not flag -->
+<form action="#"
+    method="get"
+    data-action="
+        submit:my-custom-element#handleFormSubmit
+        click:my-custom-element#handleClick
+        some-event:my-custom-element#handleSomething" >
+</form>
+
+<!-- Interpolated values are skipped (template tags may legitimately have surrounding padding) -->
+<!-- Regression: djLint #216 — multiline jinja interpolation in action must not flag -->
+<form method="post"
+      action="{%- if connection -%} {{ url_for('connection_bp.edit_connection', connection_id=connection.id) }} {%- else -%} {{ url_for('connection_bp.new_connection') }} {%- endif -%} ">
+</form>
+<form action=" {% url 'foo:bar' %} "></form>
+<form action="{{ submit_url }}"></form>
+<form action=" {{ url }} "></form>
+
+<!-- Non-ASCII whitespace (NBSP) is preserved: URL parser doesn't strip it either -->
+<form action=" /submit/ "></form>
+
+<!-- No value -->
+<form action></form>
+
+<!-- No action attribute -->
+<form method="post"></form>
+
+<!-- Multiline form, trimmed value -->
+<form
+    method="post"
+    action="/submit/"
+></form>

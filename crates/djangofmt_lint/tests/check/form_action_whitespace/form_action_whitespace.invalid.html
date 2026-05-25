@@ -1,0 +1,36 @@
+<!-- Leading whitespace -->
+<form action=" /submit/"></form>
+
+<!-- Trailing whitespace -->
+<form action="/submit/ "></form>
+
+<!-- Both -->
+<form action=" /submit/ "></form>
+
+<!-- Whitespace-only value -->
+<form action="   "></form>
+
+<!-- Tab and newline characters -->
+<form action="	/submit/
+"></form>
+
+<!-- Case-insensitive tag name -->
+<FORM action=" /submit/ "></FORM>
+<forM action="/submit/ "></forM>
+
+<!-- Case-insensitive attribute name -->
+<form Action=" /submit/ "></form>
+
+<!-- Single-quoted -->
+<form action=' /submit/ '></form>
+
+<!-- Multiline form -->
+<form
+    method="post"
+    action=" /submit/ "
+></form>
+
+<!-- Nested in Jinja block -->
+{% if show_form %}
+    <form action=" /submit/ "></form>
+{% endif %}
