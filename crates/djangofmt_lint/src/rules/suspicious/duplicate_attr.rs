@@ -13,9 +13,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// discard the rest, which usually does not match the author's intent.
 ///
 /// Attribute names are compared case-insensitively against an exact match — `width` and
-/// `stroke-width` are different attributes and do not collide. Attribute groups expressed via
-/// Jinja conditionals (`{% if %}...{% else %}...{% endif %}` directly inside the tag) are
-/// skipped, since their attributes are not unconditionally present on the element.
+/// `stroke-width` are different attributes and do not collide. Any attribute wrapped in a
+/// Jinja block (e.g. `{% if %}...{% endif %}`, `{% for %}...{% endfor %}`) is skipped, since
+/// the attribute is not unconditionally present on the element. Duplicates within a single
+/// block branch are likewise not flagged today.
 ///
 /// ## Example
 /// ```html
@@ -45,7 +46,10 @@ impl Violation for DuplicateAttr<'_> {
     }
 
     fn help(&self) -> Option<String> {
-        Some("Remove or rename the duplicate attribute.".to_string())
+        Some(format!(
+            "Remove the duplicate `{}` attribute, or merge its value into the first occurrence (browsers keep the first one).",
+            self.name
+        ))
     }
 }
 

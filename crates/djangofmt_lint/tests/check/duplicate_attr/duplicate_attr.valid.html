@@ -27,10 +27,12 @@
      (Django Cotton component props). -->
 <c-recipe-card url="{{ recipe.url }}" name="{{ recipe.name }}" thumbnail_url="{{ recipe.thumbnail_url }}" />
 
-<!-- Jinja conditional attribute blocks are skipped: their attributes are not
-     unconditionally present on the element, so we don't compare across branches. -->
+<!-- Jinja-wrapped attributes are skipped: they are not unconditionally present on
+     the element, so we don't compare across branches or against the outer attrs. -->
 <button {% if active %}class="on"{% else %}class="off"{% endif %} id="btn"></button>
 <button class="base" {% if active %}data-active="1"{% endif %}></button>
+<button class="base" {% if active %}class="extra"{% endif %}></button>
+<button class="base" {% for cls in classes %}class="{{ cls }}"{% endfor %}></button>
 
 <!-- Nested elements share no attribute scope -->
 <div class="outer"><span class="inner"></span></div>
