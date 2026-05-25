@@ -73,8 +73,10 @@ jobs:
           enable-cache: true
       - name: Regenerate rule docs and synced pages
         run: cargo run -p djangofmt_dev -- generate-all
+      - name: Sync docs dependencies
+        run: uv sync --group docs --no-install-project
       - name: Build docs site
-        run: uv run --group docs zensical build --clean --strict --config-file .mkdocs.yml
+        run: uv run --no-sync zensical build --clean --strict --config-file .mkdocs.yml
       - name: Stage combined Pages artifact
         if: github.event_name != 'pull_request'
         run: |

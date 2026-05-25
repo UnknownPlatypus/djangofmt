@@ -30,14 +30,17 @@ docs-generate:
     cargo run -p djangofmt_dev -- generate-all
 
 # Build the Zensical docs site into `site/` (regenerates docs first).
+# `--isolated` runs zensical in a throwaway venv, which skips the maturin
+# compile of the djangofmt wheel (the docs site doesn't need it) and leaves
+# the project's `.venv` untouched.
 [group('docs')]
 docs-build: docs-generate
-    uv run --group docs zensical build --clean --strict --config-file .mkdocs.yml
+    uv run --isolated --group docs zensical build --clean --strict --config-file .mkdocs.yml
 
 # Serve the Zensical docs site with live-reload (regenerates docs first).
 [group('docs')]
 docs-serve: docs-generate
-    uv run --group docs zensical serve --config-file .mkdocs.yml
+    uv run --isolated --group docs zensical serve --config-file .mkdocs.yml
 
 # Build playground WASM package
 [group('playground')]
