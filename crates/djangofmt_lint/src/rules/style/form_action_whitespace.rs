@@ -82,15 +82,14 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
             continue;
         }
 
-        let trimmed = value_str.trim();
+        let trimmed = value_str.trim_ascii();
         if trimmed.len() == value_str.len() {
             continue;
         }
 
-        let mut guard =
-            checker.report_diagnostic(&FormActionWhitespace, (*offset, value_str.len()).into());
-
         let span = (*offset, value_str.len()).into();
+        let mut guard = checker.report_diagnostic(&FormActionWhitespace, span);
+
         let edit = if trimmed.is_empty() {
             Edit::deletion(span)
         } else {
