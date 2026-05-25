@@ -8,15 +8,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// Checks for the same attribute name appearing more than once on an HTML element.
 ///
 /// ## Why is this bad?
-/// HTML defines attribute names as case-insensitive and an element may contain a given attribute
-/// at most once. When duplicates are present, browsers keep the first occurrence and silently
-/// discard the rest, which usually does not match the author's intent.
-///
-/// Attribute names are compared case-insensitively against an exact match — `width` and
-/// `stroke-width` are different attributes and do not collide. Any attribute wrapped in a
-/// Jinja block (e.g. `{% if %}...{% endif %}`, `{% for %}...{% endfor %}`) is skipped, since
-/// the attribute is not unconditionally present on the element. Duplicates within a single
-/// block branch are likewise not flagged today.
+/// HTML defines attribute names as case-insensitive and an element may contain a given attribute at most once.
+/// When duplicates are present, browsers keep the first occurrence and silently discard the rest,
+/// which usually does not match the author's intent.
 ///
 /// ## Example
 /// ```html

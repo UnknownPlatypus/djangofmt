@@ -4,6 +4,7 @@ This is to benchmark Djangofmt's performance against real-world code instead of 
 The following files are included:
 
 - [`zulip/templates/corporate/comparison_table_integrated.html`](https://github.com/zulip/zulip/blob/1e7c4f43891c449a28e53edbef9320cef6b25b6a/templates/corporate/comparison_table_integrated.html)
+- [`zulip/templates/corporate/billing/upgrade.html`](https://github.com/zulip/zulip/blob/1e7c4f43891c449a28e53edbef9320cef6b25b6a/templates/corporate/billing/upgrade.html)
 - [`plane/apps/api/templates/emails/invitations/project_invitation.html`](https://github.com/makeplane/plane/blob/22339b9786e98e12be803ca33eeaafe56fb5134a/apps/api/templates/emails/invitations/project_invitation.html)
 - [`django/tests/utils_tests/files/strip_tags1.html`](https://github.com/django/django/blob/922c4cf972e04b1ce7ecee592231106724dcfd09/tests/utils_tests/files/strip_tags1.html)
 - [`django/django/contrib/admin/templates/admin/404.html`](https://github.com/django/django/blob/922c4cf972e04b1ce7ecee592231106724dcfd09/django/contrib/admin/templates/admin/404.html)
