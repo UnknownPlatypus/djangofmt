@@ -32,7 +32,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## Fix safety
 /// This rule's fix is marked as safe: the URL parser strips leading and trailing ASCII
 /// whitespace from URL attribute values, so trimming the literal source preserves runtime
-/// semantics.
+/// semantics. Author code reading the raw attribute (e.g. `form.getAttribute("action")`,
+/// strict-equality dispatch, HTMX or web-component integrations that observe the literal
+/// string) would see the trimmed value, but relying on the surrounding whitespace is
+/// vanishingly rare.
 ///
 /// ## References
 /// - [URL Standard: basic URL parser](https://url.spec.whatwg.org/#concept-basic-url-parser)

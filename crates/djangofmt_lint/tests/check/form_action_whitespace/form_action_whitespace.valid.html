@@ -26,6 +26,9 @@
 <form action="{{ submit_url }}"></form>
 <form action=" {{ url }} "></form>
 
+<!-- Non-ASCII whitespace (NBSP) is preserved: URL parser doesn't strip it either -->
+<form action=" /submit/ "></form>
+
 <!-- No value -->
 <form action></form>
 

@@ -20,6 +20,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <FORM action="/submit/"></FORM>
 <forM action="/submit/"></forM>
 
+<!-- Case-insensitive attribute name -->
+<form Action="/submit/"></form>
+
 <!-- Single-quoted -->
 <form action='/submit/'></form>
 

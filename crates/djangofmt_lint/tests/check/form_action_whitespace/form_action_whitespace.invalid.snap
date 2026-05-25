@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 10 lint error(s)
+  × Found 11 lint error(s)
 
 Error: 
   × Extra whitespace found in form `action`.
@@ -84,8 +84,8 @@ Error:
 Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:22:15]
- 21 │ <!-- Single-quoted -->
- 22 │ <form action=' /submit/ '></form>
+ 21 │ <!-- Case-insensitive attribute name -->
+ 22 │ <form Action=" /submit/ "></form>
     ·               ─────┬────
     ·                    ╰── here
  23 │ 
@@ -94,22 +94,33 @@ Error:
 
 Error: 
   × Extra whitespace found in form `action`.
-    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:27:13]
- 26 │     method="post"
- 27 │     action=" /submit/ "
-    ·             ─────┬────
-    ·                  ╰── here
- 28 │ ></form>
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:25:15]
+ 24 │ <!-- Single-quoted -->
+ 25 │ <form action=' /submit/ '></form>
+    ·               ─────┬────
+    ·                    ╰── here
+ 26 │ 
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
 Error: 
   × Extra whitespace found in form `action`.
-    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:32:19]
- 31 │ {% if show_form %}
- 32 │     <form action=" /submit/ "></form>
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:30:13]
+ 29 │     method="post"
+ 30 │     action=" /submit/ "
+    ·             ─────┬────
+    ·                  ╰── here
+ 31 │ ></form>
+    ╰────
+  help: Remove leading and trailing whitespace from the `action` value.
+
+Error: 
+  × Extra whitespace found in form `action`.
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:35:19]
+ 34 │ {% if show_form %}
+ 35 │     <form action=" /submit/ "></form>
     ·                   ─────┬────
     ·                        ╰── here
- 33 │ {% endif %}
+ 36 │ {% endif %}
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
