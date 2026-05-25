@@ -84,6 +84,7 @@ repos:
           (?x)^(
               .pre-commit-config.yaml|
               crates/.*|
+              docs/\.overrides/.*|
               docs/rules\.md|
               docs/rules/.*|
               docs/index\.md|

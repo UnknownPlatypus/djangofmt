@@ -39,7 +39,7 @@ pub fn main(args: &Args) -> Result<()> {
 fn render_index(src: &str) -> String {
     let body = extract_section(src, "Overview")
         .expect("README.md is missing `<!-- Begin section: Overview -->` markers");
-    let body = strip_docs_banner(body);
+    let body = strip_docs_playground_banner(body);
     let body = rewrite_top_level_md_links(&body);
     let body = rewrite_gh_alerts(&body);
     let mut out = String::with_capacity(body.len() + 64);
@@ -73,14 +73,16 @@ fn extract_section<'a>(src: &'a str, name: &str) -> Option<&'a str> {
     Some(&src[start..stop])
 }
 
-/// Drop the README's "📚 Documentation" banner line — the docs site IS the
-/// documentation, so the link is redundant there. The surrounding blank line
-/// is collapsed so the rendered page doesn't grow an extra paragraph break.
-fn strip_docs_banner(src: &str) -> String {
+/// Drop the README's `**Docs** | **Playground**` banner line — the docs site
+/// IS the documentation, so the Docs self-link is redundant there, and the
+/// playground link is already exposed through the Material header. The
+/// surrounding blank line is collapsed so the rendered page doesn't grow an
+/// extra paragraph break.
+fn strip_docs_playground_banner(src: &str) -> String {
     let mut out = String::with_capacity(src.len());
     let mut lines = src.lines().peekable();
     while let Some(line) = lines.next() {
-        if line.starts_with("📚") {
+        if line.starts_with("[**Docs**]") {
             // Also consume one trailing blank line, if any.
             if lines.peek().is_some_and(|next| next.is_empty()) {
                 lines.next();
@@ -182,9 +184,9 @@ mod tests {
     }
 
     #[test]
-    fn strips_docs_banner_with_trailing_blank() {
-        let src = "intro\n\n📚 **Documentation:** https://example/\n\nrest\n";
-        assert_eq!(strip_docs_banner(src), "intro\n\nrest\n");
+    fn strips_docs_playground_banner_with_trailing_blank() {
+        let src = "intro\n\n[**Docs**](https://example/docs/) | [**Playground**](https://example/)\n\nrest\n";
+        assert_eq!(strip_docs_playground_banner(src), "intro\n\nrest\n");
     }
 
     #[test]

@@ -9,9 +9,9 @@
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/UnknownPlatypus/djangofmt/main.svg)](https://results.pre-commit.ci/latest/github/UnknownPlatypus/djangofmt/main)
 [![CodSpeed Badge](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/UnknownPlatypus/djangofmt?utm_source=badge)
 
-A fast, HTML aware, Django template formatter, written in Rust.
+[**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
 
-📚 **Documentation:** https://unknownplatypus.github.io/djangofmt/docs/
+A fast, HTML aware, Django template formatter, written in Rust.
 
 <p align="center">
   <picture align="center">

@@ -10,6 +10,7 @@ strict: true
 
 theme:
   name: material
+  custom_dir: docs/.overrides
   features:
     - navigation.sections
     - navigation.indexes
@@ -58,6 +59,10 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.emoji
+
+extra:
+  # Surfaced as a button in the top bar by overrides/partials/header.html.
+  playground_url: https://unknownplatypus.github.io/djangofmt/
 
 nav:
   - Home: index.md
