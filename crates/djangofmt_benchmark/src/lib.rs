@@ -44,6 +44,11 @@ pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
     code: include_str!("../resources/zulip/comparison_table_integrated.html"),
     profile: Profile::Jinja,
 };
+pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
+    name: "jinja_form_heavy/upgrade.html",
+    code: include_str!("../resources/zulip/upgrade.html"),
+    profile: Profile::Jinja,
+};
 #[derive(Clone)]
 pub struct TestFile {
     pub name: &'static str,

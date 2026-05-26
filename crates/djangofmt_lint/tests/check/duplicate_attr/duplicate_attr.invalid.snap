@@ -1,0 +1,91 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 8 lint error(s)
+
+Error: 
+  × Duplicate attribute `class`.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:2:25]
+ 1 │ <!-- Plain duplicate -->
+ 2 │ <br class="a" id="asdf" class="b" />
+   ·                         ──┬──
+   ·                           ╰── here
+ 3 │ 
+   ╰────
+  help: Remove the duplicate `class` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `data-class`.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:5:31]
+ 4 │ <!-- Duplicate on a hyphenated data-* attribute -->
+ 5 │ <div data-class="a" id="asdf" data-class="b"></div>
+   ·                               ─────┬────
+   ·                                    ╰── here
+ 6 │ 
+   ╰────
+  help: Remove the duplicate `data-class` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `-width`.
+   ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:8:18]
+ 7 │ <!-- Duplicate on an attribute with a leading hyphen -->
+ 8 │ <svg -width="16" -width="2"></svg>
+   ·                  ───┬──
+   ·                     ╰── here
+ 9 │ 
+   ╰────
+  help: Remove the duplicate `-width` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `NAME`.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:11:17]
+ 10 │ <!-- Case-insensitive: HTML attribute names are case-insensitive -->
+ 11 │ <input name="x" NAME="y">
+    ·                 ──┬─
+    ·                   ╰── here
+ 12 │ 
+    ╰────
+  help: Remove the duplicate `NAME` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `type`.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:14:20]
+ 13 │ <!-- Three occurrences report two diagnostics -->
+ 14 │ <input type="text" type="email" type="search">
+    ·                    ──┬─
+    ·                      ╰── here
+ 15 │ 
+    ╰────
+  help: Remove the duplicate `type` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `type`.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:14:33]
+ 13 │ <!-- Three occurrences report two diagnostics -->
+ 14 │ <input type="text" type="email" type="search">
+    ·                                 ──┬─
+    ·                                   ╰── here
+ 15 │ 
+    ╰────
+  help: Remove the duplicate `type` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `:src`.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:17:21]
+ 16 │ <!-- Alpine-style duplicate (same prefix on both, real duplicate) -->
+ 17 │ <img :src="img.jpg" :src="isLoaded ? url : defaultValue" />
+    ·                     ──┬─
+    ·                       ╰── here
+ 18 │ 
+    ╰────
+  help: Remove the duplicate `:src` attribute, or merge its value into the first occurrence (browsers keep the first one).
+
+Error: 
+  × Duplicate attribute `disabled`.
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:20:17]
+ 19 │ <!-- Boolean attributes still count -->
+ 20 │ <input disabled disabled>
+    ·                 ────┬───
+    ·                     ╰── here
+    ╰────
+  help: Remove the duplicate `disabled` attribute, or merge its value into the first occurrence (browsers keep the first one).

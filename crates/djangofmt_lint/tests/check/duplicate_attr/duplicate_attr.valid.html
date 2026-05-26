@@ -1,0 +1,43 @@
+<!-- No duplicates -->
+<br class="a" id="asdf" />
+<div data-class="a" id="asdf"></div>
+
+<!-- Different attribute names that share a substring must not collide. -->
+<svg width="16" stroke-width="2"></svg>
+<rect x="2" y="3" rx="1" />
+
+<!-- Different attribute names that look similar but aren't equal -->
+<div data-class="a" data=asdf class="b"></div>
+
+<!-- Back-to-back tags must not bleed into each other. -->
+<a href="#"></a><a href="#"></a>
+<a href=""></a><a href=""></a><a href=""></a>
+
+<!-- AlpineJS attributes with `:`/`x-bind:` prefix are distinct names from the
+     underlying HTML attribute. -->
+<img src="img.jpg" :src="isLoaded ? url : defaultValue" />
+<tbody class="bg-white" x-bind:class="open ? 'bg-gray-50' : ''"></tbody>
+
+<!-- `key=value` text inside an attribute value is not a separate attribute
+     (we walk the AST, not the raw source). -->
+<input class="foo" placeholder="class=bar" />
+<a hx-select="[id='{{ original.id }}']" hx-get="{% url 'edit' id=document.id %}">Edit</a>
+
+<!-- snake_case attribute names that share a prefix are distinct
+     (Django Cotton component props). -->
+<c-recipe-card url="{{ recipe.url }}" name="{{ recipe.name }}" thumbnail_url="{{ recipe.thumbnail_url }}" />
+
+<!-- Jinja-wrapped attributes are skipped: they are not unconditionally present on
+     the element, so we don't compare across branches or against the outer attrs. -->
+<button {% if active %}class="on"{% else %}class="off"{% endif %} id="btn"></button>
+<button class="base" {% if active %}data-active="1"{% endif %}></button>
+<button class="base" {% if active %}class="extra"{% endif %}></button>
+<button class="base" {% for cls in classes %}class="{{ cls }}"{% endfor %}></button>
+
+<!-- Nested elements share no attribute scope -->
+<div class="outer"><span class="inner"></span></div>
+
+<!-- Inside a Jinja block at element scope, each <a> is its own element -->
+{% for link in links %}
+    <a href="{{ link.url }}" class="link"></a>
+{% endfor %}
