@@ -1,0 +1,67 @@
+<!-- Empty <head> -->
+<html lang="en">
+    <head>
+    </head>
+</html>
+
+<!-- <head> with siblings but no <title> -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="/static/app.css">
+    </head>
+</html>
+
+<!-- Case-insensitive <head> tag name -->
+<HTML LANG="en">
+    <HEAD>
+        <META charset="utf-8">
+    </HEAD>
+</HTML>
+
+<!-- <head> without an enclosing <html> -->
+<head>
+    <meta charset="utf-8">
+</head>
+
+<!-- Nested in a Jinja block -->
+{% if base_template %}
+    <head>
+        <meta charset="utf-8">
+    </head>
+{% endif %}
+
+<!-- Empty <title> with no content -->
+<html lang="en">
+    <head>
+        <title></title>
+    </head>
+</html>
+
+<!-- Whitespace-only <title> -->
+<html lang="en">
+    <head>
+        <title>   </title>
+    </head>
+</html>
+
+<!-- <title> inside <svg> (in body) does not satisfy <head> -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <svg><title>Icon</title></svg>
+    </body>
+</html>
+
+<!-- AMP document missing a <title> -->
+<!doctype html>
+<html amp lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
+        <link rel="canonical" href="/article">
+    </head>
+    <body></body>
+</html>
