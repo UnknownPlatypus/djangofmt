@@ -125,6 +125,10 @@ impl<'a> Checker<'a> {
             rules::accessibility::missing_html_lang::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::MissingTitle) {
+            rules::accessibility::missing_title::check(element, self);
+        }
+
         for attr in &element.attrs {
             self.visit_attribute(attr);
         }

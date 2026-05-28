@@ -250,4 +250,5 @@ define_rules! {
     (FormActionWhitespace, rules::style::form_action_whitespace::FormActionWhitespace),
     (MissingHtmlLang, rules::accessibility::missing_html_lang::MissingHtmlLang),
     (MissingDoctype, rules::style::missing_doctype::MissingDoctype),
+    (MissingTitle, rules::accessibility::missing_title::MissingTitle),
 }

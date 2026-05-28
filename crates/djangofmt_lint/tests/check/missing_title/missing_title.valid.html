@@ -1,0 +1,82 @@
+<!-- <title> as direct child of <head> -->
+<html lang="en">
+    <head>
+        <title>My page</title>
+    </head>
+</html>
+
+<!-- Case-insensitive title tag name -->
+<html lang="en">
+    <head>
+        <TITLE>My page</TITLE>
+    </head>
+</html>
+
+<!-- <title> alongside other <head> children -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>My page</title>
+        <link rel="stylesheet" href="/static/app.css">
+    </head>
+</html>
+
+<!-- <title> with global attributes -->
+<html lang="en">
+    <head>
+        <title id="title-reload-with-htmx" data-foo="bar">stuff</title>
+    </head>
+</html>
+
+<!-- <title> declared inside a Jinja conditional -->
+<html lang="en">
+    <head>
+        {% if page.title %}<title>{{ page.title }}</title>{% else %}<title>Default</title>{% endif %}
+    </head>
+</html>
+
+<!-- <title> filled with a Jinja interpolation -->
+<html lang="en">
+    <head>
+        <title>{{ page_title }}</title>
+    </head>
+</html>
+
+<!-- <title> filled with a {% block %} extension hook -->
+<html lang="en">
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+    </head>
+</html>
+
+<!-- <title> wrapped in a {% block %} extension hook -->
+<html lang="en">
+    <head>
+        {% block head %}<title>Default</title>{% endblock %}
+    </head>
+</html>
+
+<!-- Documents without any <head> are not checked (fragment / partial template) -->
+<html lang="en">
+    <body>
+        <p>No head, no problem.</p>
+    </body>
+</html>
+
+<!-- Fragment template extending a base with only blocks -->
+{% extends "base.html" %}
+
+{% block content %}<p>Just a fragment.</p>{% endblock %}
+
+<!-- Tag names that look similar but are not <head> -->
+<div>
+    <header></header>
+</div>
+
+<!-- Multiple <title> tags: at least one non-empty satisfies the rule -->
+<html lang="en">
+    <head>
+        <title>Primary</title>
+        <title>Duplicate</title>
+    </head>
+</html>
