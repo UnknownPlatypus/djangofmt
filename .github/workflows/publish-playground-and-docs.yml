@@ -30,9 +30,11 @@ on:
 # Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions: { id-token: write, pages: write }
 
-# Allow one concurrent deployment
+# Scope the concurrency group per PR so simultaneous PR builds don't cancel each other.
+# `main` deploys (and workflow_dispatch / workflow_call runs) share a single `pages-deploy`
+# group, since GitHub Pages itself only accepts one deploy at a time.
 concurrency:
-  group: "pages"
+  group: pages-${{ github.event_name == 'pull_request' && github.head_ref || 'deploy' }}
   cancel-in-progress: true
 
 jobs:
