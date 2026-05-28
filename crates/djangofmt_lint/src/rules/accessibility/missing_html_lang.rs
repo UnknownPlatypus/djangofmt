@@ -1,7 +1,8 @@
-use markup_fmt::ast::{Attribute, Element, JinjaBlock, JinjaTagOrChildren};
+use markup_fmt::ast::Element;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::declares_native_attr;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -53,25 +54,14 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    if element.attrs.iter().any(attr_declares_lang) {
+    if element
+        .attrs
+        .iter()
+        .any(|attr| declares_native_attr(attr, "lang"))
+    {
         return;
     }
 
     let offset = checker.source_offset(element.tag_name);
     checker.report_diagnostic(&MissingHtmlLang, (offset, element.tag_name.len()).into());
-}
-
-fn attr_declares_lang(attr: &Attribute<'_>) -> bool {
-    match attr {
-        Attribute::Native(native) => native.name.eq_ignore_ascii_case("lang"),
-        Attribute::JinjaBlock(block) => jinja_block_declares_lang(block),
-        _ => false,
-    }
-}
-
-fn jinja_block_declares_lang(block: &JinjaBlock<'_, Attribute<'_>>) -> bool {
-    block.body.iter().any(|item| match item {
-        JinjaTagOrChildren::Children(children) => children.iter().any(attr_declares_lang),
-        JinjaTagOrChildren::Tag(_) => false,
-    })
 }
