@@ -36,7 +36,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [HTML spec: The DOCTYPE](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype)
 /// - [MDN: Doctype](https://developer.mozilla.org/en-US/docs/Glossary/Doctype)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.9")]
 pub struct MissingDoctype;
 
 impl Violation for MissingDoctype {

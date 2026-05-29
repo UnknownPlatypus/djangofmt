@@ -36,7 +36,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html#type_Attributes)
 /// - [HTML spec: the script element](https://html.spec.whatwg.org/multipage/scripting.html#the-script-element)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.9")]
 pub struct RedundantTypeAttr {
     pub tag: String,
     pub type_value: String,

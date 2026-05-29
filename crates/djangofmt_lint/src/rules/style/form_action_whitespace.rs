@@ -41,7 +41,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [URL Standard: basic URL parser](https://url.spec.whatwg.org/#concept-basic-url-parser)
 /// - [HTML spec: the form element](https://html.spec.whatwg.org/multipage/forms.html#the-form-element)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.9")]
 pub struct FormActionWhitespace;
 
 impl Violation for FormActionWhitespace {

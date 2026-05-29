@@ -1,10 +1,16 @@
 # Changelog
 
-## [0.2.9](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.8..v0.2.9) - 2026-05-24
+## [0.2.9](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.8..v0.2.9) - 2026-05-29
 
 ### ⛰️ Features
 
 - *(check)* Expose --fix, --unsafe-fixes, --show-fixes in pyproject config ([#290](https://github.com/UnknownPlatypus/djangofmt/issues/290)) - ([448f487](https://github.com/UnknownPlatypus/djangofmt/commit/448f487b01479666f2aee31356e6f111f3f80af0))
+- *(docs)* Publish Zensical-based documentation site ([#300](https://github.com/UnknownPlatypus/djangofmt/issues/300)) - ([5f29df3](https://github.com/UnknownPlatypus/djangofmt/commit/5f29df37dab0f641f0aaafc43608ab526b79a294))
+- *(lint)* Add `missing-doctype` lint rule ([#310](https://github.com/UnknownPlatypus/djangofmt/issues/310)) - ([e372374](https://github.com/UnknownPlatypus/djangofmt/commit/e3723748b443d8d00234872dce252265fb3d5212))
+- *(lint)* Add `missing-title` lint rule ([#309](https://github.com/UnknownPlatypus/djangofmt/issues/309)) - ([b243792](https://github.com/UnknownPlatypus/djangofmt/commit/b243792eb5320978668606c763add93648a258b5))
+- *(lint)* Add `duplicate-attr` lint rule ([#304](https://github.com/UnknownPlatypus/djangofmt/issues/304)) - ([ef732af](https://github.com/UnknownPlatypus/djangofmt/commit/ef732afa5cdec1fded8198a34c5928fe3e9876ef))
+- *(lint)* Add `form-action-whitespace` lint rule ([#303](https://github.com/UnknownPlatypus/djangofmt/issues/303)) - ([c2b3d53](https://github.com/UnknownPlatypus/djangofmt/commit/c2b3d53beb6fb2cc4ac511c9e2ed4be4eb3c84dd))
+- *(lint)* Add `empty-attr-value` lint rule ([#298](https://github.com/UnknownPlatypus/djangofmt/issues/298)) - ([559313c](https://github.com/UnknownPlatypus/djangofmt/commit/559313c473efc0f7e3f54748e8ea26ed40bf9a49))
 - *(lint)* Add `uppercase-form-method` lint rule ([#294](https://github.com/UnknownPlatypus/djangofmt/issues/294)) - ([4d37afe](https://github.com/UnknownPlatypus/djangofmt/commit/4d37afe760426e7866b7c9ee355c405fc19bd8e0))
 - *(lint)* Add `javascript-url` lint rule ([#293](https://github.com/UnknownPlatypus/djangofmt/issues/293)) - ([791e928](https://github.com/UnknownPlatypus/djangofmt/commit/791e9282c68ab39c7fda12b2fc6ee52e56f00958))
 - *(lint)* Add `redundant-type-attr` rule ([#260](https://github.com/UnknownPlatypus/djangofmt/issues/260)) - ([3d65c26](https://github.com/UnknownPlatypus/djangofmt/commit/3d65c267922eff9a2dfacd1d10d6100e5fe3a859))
@@ -16,7 +22,13 @@
 ### 📚 Documentation
 
 - *(lint)* Auto-generate lint rule docs from violation struct doc comments ([#297](https://github.com/UnknownPlatypus/djangofmt/issues/297)) - ([3670b71](https://github.com/UnknownPlatypus/djangofmt/commit/3670b7156eb102799aaa3332a08b0985925fa9ec))
+- *(pycharm)* Pycharm editor integration ([#301](https://github.com/UnknownPlatypus/djangofmt/issues/301)) - ([bbf6823](https://github.com/UnknownPlatypus/djangofmt/commit/bbf6823898d656c0169e81dfee6cde62488d37ab))
 - *(readme)* Extract some part of the README to dedicated doc page ([#291](https://github.com/UnknownPlatypus/djangofmt/issues/291)) - ([1ea7bae](https://github.com/UnknownPlatypus/djangofmt/commit/1ea7baea683778643547cde205d3244df0ab4654))
+
+### ⚙️ Miscellaneous Tasks
+
+- *(pre-commit)* Chore/pre commit autoupdate and zizmor ([#299](https://github.com/UnknownPlatypus/djangofmt/issues/299)) - ([2dd2c0e](https://github.com/UnknownPlatypus/djangofmt/commit/2dd2c0e0d47ea7566e05e5c1f8575a2f333873e8))
+- Scope pages concurrency per PR ([#315](https://github.com/UnknownPlatypus/djangofmt/issues/315)) - ([57ae947](https://github.com/UnknownPlatypus/djangofmt/commit/57ae9476617c9ac8614542ebfe587979208b9935))
 
 ## [0.2.8](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.7..v0.2.8) - 2026-05-18
 

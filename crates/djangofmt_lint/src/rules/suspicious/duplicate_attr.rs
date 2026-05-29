@@ -25,7 +25,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## References
 /// - [HTML spec: attributes](https://html.spec.whatwg.org/multipage/syntax.html#attributes-2)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.9")]
 pub struct DuplicateAttr<'a> {
     pub name: &'a str,
 }

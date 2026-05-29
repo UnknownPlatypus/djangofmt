@@ -30,7 +30,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// `<div>` (`hasAttribute("id")`, the attribute selector `[id=""]`), but author code relying
 /// on those forms is vanishingly rare.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.9")]
 pub struct EmptyAttrValue<'a> {
     pub attr: &'a str,
 }

@@ -4,6 +4,14 @@ use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum TitleViolation {
+    /// No `<title>` element is present anywhere inside `<head>`.
+    Absent,
+    /// A `<title>` element exists but has no visible or templated content.
+    Empty,
+}
+
 /// ## What it does
 /// Checks for `<head>` elements that do not contain a non-empty `<title>` child.
 ///
@@ -31,16 +39,8 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## References
 /// - [WCAG 2.4.2: Page Titled](https://www.w3.org/WAI/WCAG21/Understanding/page-titled.html)
 /// - [HTML spec: the title element](https://html.spec.whatwg.org/multipage/semantics.html#the-title-element)
-#[derive(Debug, PartialEq, Eq)]
-pub enum TitleViolation {
-    /// No `<title>` element is present anywhere inside `<head>`.
-    Absent,
-    /// A `<title>` element exists but has no visible or templated content.
-    Empty,
-}
-
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.9")]
 pub struct MissingTitle {
     pub kind: TitleViolation,
 }
