@@ -14,6 +14,10 @@ They rely on the browser as much as possible and provide a declarative API, whic
 
 The whole playground is ~700 LoC.
 
+## Prerequisites
+
+- [Deno](https://docs.deno.com/runtime/getting_started/installation/)
+
 # Development
 
 To run dev server:
@@ -25,11 +29,11 @@ just playground-dev
 To build:
 
 ```bash
-bun run build
+deno task build
 ```
 
 To preview the build:
 
 ```bash
-bun run preview
+deno task preview
 ```
