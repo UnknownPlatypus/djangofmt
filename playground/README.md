@@ -25,11 +25,11 @@ just playground-dev
 To build:
 
 ```bash
-bun run build
+deno task build
 ```
 
 To preview the build:
 
 ```bash
-bun run preview
+deno task preview
 ```

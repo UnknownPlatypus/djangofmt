@@ -1,0 +1,10 @@
+{
+  "nodeModulesDir": "auto",
+  "minimumDependencyAge": "P7D",
+  "tasks": {
+    "dev": "astro dev",
+    "build": "tsc && astro build --minify",
+    "preview": "astro preview"
+  },
+  "allowScripts": ["npm:esbuild@0.27.7", "npm:sharp@0.34.5"]
+}

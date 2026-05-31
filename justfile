@@ -51,8 +51,8 @@ playground-wasm-build:
 [working-directory: 'playground']
 [group('playground')]
 playground-dev: playground-wasm-build
-    bun ci
-    bun run dev
+    deno install
+    deno task dev
 
 # Setup python benchmarks
 [group('bench')]
