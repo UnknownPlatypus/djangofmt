@@ -9,28 +9,15 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 ///
 /// ## Why is this bad?
 /// A bare `<tag></tag>` pair renders nothing, so it is often leftover scaffolding or a typo.
+///
 /// The HTML specification recommends, "as a general rule," that such elements contain at least
 /// one node of palpable content. That is explicitly *not* a hard requirement — an element may
 /// be empty legitimately "when it is used as a placeholder which will later be filled in by a
-/// script, or when the element is part of a template" — so this rule is a heuristic and stays
-/// in preview.
-///
-/// To keep false positives low, an element is only reported when it has **no attributes**. An
-/// `id`, `class`, `data-*` hook, or any other attribute signals the empty element is
-/// intentional (a CSS/JS hook, a custom element, an external `<script src>`, ...).
-///
-/// Whitespace-only content (newlines, indentation) is treated as empty. Tags whose empty form
-/// is normal rather than suspicious are exempt: structural cells (`<td>`, `<th>`, `<li>`,
-/// `<dt>`, `<dd>`), form controls that start empty or are populated by a script (`<textarea>`,
-/// `<select>`, `<output>`, `<option>`), the script-rendered `<canvas>` surface, and the
-/// web-component default `<slot>`. `<pre>` is also exempt because whitespace is significant
-/// there, so a whitespace-only `<pre>` is not actually empty.
+/// script, or when the element is part of a template".
 ///
 /// ## Example
 /// ```html
-/// <div></div>
-/// <span>
-/// </span>
+/// <div>Welcome<span></span></div>
 /// ```
 ///
 /// Use instead:
@@ -68,8 +55,7 @@ impl Violation for EmptyTagPair {
 ///   state is their normal initial state (`<option></option>` is a common blank placeholder).
 /// - `canvas`: a script-rendered drawing surface whose children are fallback content only.
 /// - `slot`: the default slot of a web component.
-/// - `pre`: whitespace is significant, so a whitespace-only `<pre>` renders meaningful content
-///   and is not "empty".
+/// - `pre`:  a whitespace-only `<pre>` renders meaningful content and is not "empty".
 const EXCLUDED_TAGS: &[&str] = &[
     "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
 ];
@@ -81,9 +67,6 @@ fn is_excluded_tag(tag: &str) -> bool {
 }
 
 /// Returns `true` when `children` is either empty or contains only whitespace-only text nodes.
-///
-/// Any non-text child (nested element, Jinja block, interpolation, comment, ...) makes the
-/// element dynamically-populated and disqualifies it from the rule.
 fn has_only_whitespace(children: &[Node<'_>]) -> bool {
     children.iter().all(|child| match &child.kind {
         NodeKind::Text(text) => text.raw.chars().all(char::is_whitespace),
@@ -92,19 +75,12 @@ fn has_only_whitespace(children: &[Node<'_>]) -> bool {
 }
 
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if element.void_element || element.self_closing {
-        return;
-    }
-
-    if !element.attrs.is_empty() {
-        return;
-    }
-
-    if is_excluded_tag(element.tag_name) {
-        return;
-    }
-
-    if !has_only_whitespace(&element.children) {
+    if element.void_element
+        || element.self_closing
+        || !element.attrs.is_empty()
+        || is_excluded_tag(element.tag_name)
+        || !has_only_whitespace(&element.children)
+    {
         return;
     }
 
