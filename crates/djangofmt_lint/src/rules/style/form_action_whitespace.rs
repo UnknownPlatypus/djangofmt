@@ -1,5 +1,3 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
@@ -63,42 +61,26 @@ impl Violation for FormActionWhitespace {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("form") {
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// The dispatcher pre-filters to an `action` attribute on a `<form>` tag.
+pub fn check_attr(checker: &Checker<'_>, value_str: &str, offset: usize) {
+    if contains_interpolation(value_str) {
         return;
     }
 
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
-
-        if !name.eq_ignore_ascii_case("action") {
-            continue;
-        }
-
-        if contains_interpolation(value_str) {
-            continue;
-        }
-
-        let trimmed = value_str.trim_ascii();
-        if trimmed.len() == value_str.len() {
-            continue;
-        }
-
-        let span = (*offset, value_str.len()).into();
-        let mut guard = checker.report_diagnostic(&FormActionWhitespace, span);
-
-        let edit = if trimmed.is_empty() {
-            Edit::deletion(span)
-        } else {
-            Edit::replacement(trimmed.to_string(), span)
-        };
-        guard.set_fix(Fix::safe_edit(edit));
+    let trimmed = value_str.trim_ascii();
+    if trimmed.len() == value_str.len() {
+        return;
     }
+
+    let span = (offset, value_str.len()).into();
+    let mut guard = checker.report_diagnostic(&FormActionWhitespace, span);
+
+    let edit = if trimmed.is_empty() {
+        Edit::deletion(span)
+    } else {
+        Edit::replacement(trimmed.to_string(), span)
+    };
+    guard.set_fix(Fix::safe_edit(edit));
 }

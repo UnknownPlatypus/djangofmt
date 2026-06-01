@@ -1,7 +1,5 @@
 use std::net::IpAddr;
 
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
@@ -64,36 +62,28 @@ impl Violation for UseHttps {
 const HTTP_SCHEME: &str = "http://";
 const HTTPS_SCHEME: &str = "https://";
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
-
-        let Some(canonical) = canonical_url_attr(name) else {
-            continue;
-        };
-
-        // `srcset` is a comma-separated candidate list; every other attribute
-        // holds a single URL.
-        if canonical == "srcset" {
-            for (url, at) in srcset_candidates(value_str, *offset) {
-                report_http_scheme(url, at, canonical, checker);
-            }
-        } else {
-            report_http_scheme(value_str, *offset, canonical, checker);
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// `canonical` is the canonical URL-attribute name the dispatcher resolved via
+/// [`canonical_url_attr`]. `http://` is flagged on any tag, so there is no tag
+/// pre-filter.
+pub fn check_attr(checker: &Checker<'_>, canonical: &'static str, value_str: &str, offset: usize) {
+    // `srcset` is a comma-separated candidate list; every other attribute
+    // holds a single URL.
+    if canonical == "srcset" {
+        for (url, at) in srcset_candidates(value_str, offset) {
+            report_http_scheme(url, at, canonical, checker);
         }
+    } else {
+        report_http_scheme(value_str, offset, canonical, checker);
     }
 }
 
 /// The canonical name if `name` is a URL-bearing attribute, else `None`.
 /// Matching on length first rejects non-URL attributes (the common case) cheaply.
-fn canonical_url_attr(name: &str) -> Option<&'static str> {
+///
+/// Exposed for the centralized element dispatcher.
+pub fn canonical_url_attr(name: &str) -> Option<&'static str> {
     let candidates: &[&str] = match name.len() {
         3 => &["src", "url"],
         4 => &["href"],

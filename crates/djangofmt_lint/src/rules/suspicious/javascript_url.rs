@@ -1,5 +1,3 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
@@ -54,7 +52,12 @@ impl Violation for JavascriptUrl {
 
 const JS_SCHEME: &str = "javascript:";
 
-const fn url_attributes_for(tag_name: &str) -> &'static [&'static str] {
+/// The URL-bearing attribute names a `javascript:` URL is flagged in for the
+/// given tag, or `&[]` for any other tag.
+///
+/// Exposed for the centralized element dispatcher so it can pre-classify a tag
+/// once and dispatch matching attributes into [`check_attr`].
+pub const fn url_attributes_for(tag_name: &str) -> &'static [&'static str] {
     if tag_name.eq_ignore_ascii_case("form") {
         return &["action"];
     }
@@ -68,40 +71,24 @@ const fn url_attributes_for(tag_name: &str) -> &'static [&'static str] {
     &[]
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    let attr_names = url_attributes_for(element.tag_name);
-    if attr_names.is_empty() {
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// `canonical` is the canonical attribute name (from [`url_attributes_for`]) the
+/// dispatcher matched the attribute against.
+pub fn check_attr(checker: &Checker<'_>, canonical: &'static str, value_str: &str, offset: usize) {
+    if contains_interpolation(value_str) {
         return;
     }
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
-        let Some(canonical) = attr_names
-            .iter()
-            .find(|candidate| candidate.eq_ignore_ascii_case(name))
-        else {
-            continue;
-        };
-        if contains_interpolation(value_str) {
-            continue;
-        }
-        if value_str
-            .trim_start()
-            .get(..JS_SCHEME.len())
-            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(JS_SCHEME))
-        {
-            checker.report_diagnostic(
-                &JavascriptUrl {
-                    attribute: canonical,
-                },
-                (*offset, value_str.len()).into(),
-            );
-        }
+    if value_str
+        .trim_start()
+        .get(..JS_SCHEME.len())
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case(JS_SCHEME))
+    {
+        checker.report_diagnostic(
+            &JavascriptUrl {
+                attribute: canonical,
+            },
+            (offset, value_str.len()).into(),
+        );
     }
 }

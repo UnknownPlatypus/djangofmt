@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::{Attribute, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
@@ -47,28 +47,24 @@ impl Violation for DuplicateAttr<'_> {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    // Fast path: with fewer than 2 attributes there can be no duplicates.
-    if element.attrs.len() < 2 {
-        return;
-    }
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// `prior_attrs` is the slice of attributes that precede the current one
+/// (`element.attrs[..i]`); `name` is the current native attribute's name. Reports
+/// the current attribute as a duplicate when a prior native attribute shares its
+/// (case-insensitive) name, matching the original `element.attrs[..i]` scan so
+/// the first occurrence is kept and each later one flagged.
+pub fn check_attr(checker: &Checker<'_>, prior_attrs: &[Attribute<'_>], name: &str) {
+    let is_duplicate = prior_attrs.iter().any(|prior| {
+        matches!(
+            prior,
+            Attribute::Native(NativeAttribute { name: prior_name, .. })
+                if prior_name.eq_ignore_ascii_case(name)
+        )
+    });
 
-    for (i, attr) in element.attrs.iter().enumerate() {
-        let Attribute::Native(NativeAttribute { name, .. }) = attr else {
-            continue;
-        };
-
-        let is_duplicate = element.attrs[..i].iter().any(|prior| {
-            matches!(
-                prior,
-                Attribute::Native(NativeAttribute { name: prior_name, .. })
-                    if prior_name.eq_ignore_ascii_case(name)
-            )
-        });
-
-        if is_duplicate {
-            let offset = checker.source_offset(name);
-            checker.report_diagnostic(&DuplicateAttr { name }, (offset, name.len()).into());
-        }
+    if is_duplicate {
+        let offset = checker.source_offset(name);
+        checker.report_diagnostic(&DuplicateAttr { name }, (offset, name.len()).into());
     }
 }

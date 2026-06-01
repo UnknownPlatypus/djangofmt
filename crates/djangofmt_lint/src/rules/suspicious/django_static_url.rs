@@ -1,5 +1,3 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::{contains_interpolation, srcset_candidates};
@@ -50,9 +48,13 @@ impl Violation for DjangoStaticUrl {
     }
 }
 
-const URL_ATTRIBUTES: &[&str] = &["href", "src", "srcset"];
+pub const URL_ATTRIBUTES: &[&str] = &["href", "src", "srcset"];
 
-const fn is_asset_tag(tag_name: &str) -> bool {
+/// Whether `tag_name` is an element that can carry a static asset URL.
+///
+/// Exposed for the centralized element dispatcher so it can pre-classify a tag
+/// once before dispatching attributes into [`check_attr`].
+pub const fn is_asset_tag(tag_name: &str) -> bool {
     tag_name.eq_ignore_ascii_case("link")
         || tag_name.eq_ignore_ascii_case("img")
         || tag_name.eq_ignore_ascii_case("script")
@@ -69,38 +71,20 @@ fn starts_with_static_path(value: &str) -> bool {
     matches!(after.as_bytes().first(), Some(b'/'))
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    // Fast-path to skip processing tag that cannot have a static url.
-    if !is_asset_tag(element.tag_name) {
-        return;
-    }
-
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
-
-        let Some(canonical) = URL_ATTRIBUTES
-            .iter()
-            .find(|candidate| candidate.eq_ignore_ascii_case(name))
-        else {
-            continue;
-        };
-
-        // `srcset` is a comma-separated candidate list; every other attribute
-        // holds a single URL.
-        if *canonical == "srcset" {
-            for (url, at) in srcset_candidates(value_str, *offset) {
-                report_static_path(url, at, canonical, checker);
-            }
-        } else {
-            report_static_path(value_str, *offset, canonical, checker);
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// `canonical` is the canonical attribute name (from [`URL_ATTRIBUTES`]) the
+/// dispatcher matched the attribute against; the dispatcher only calls this for
+/// asset tags ([`is_asset_tag`]).
+pub fn check_attr(checker: &Checker<'_>, canonical: &'static str, value_str: &str, offset: usize) {
+    // `srcset` is a comma-separated candidate list; every other attribute
+    // holds a single URL.
+    if canonical == "srcset" {
+        for (url, at) in srcset_candidates(value_str, offset) {
+            report_static_path(url, at, canonical, checker);
         }
+    } else {
+        report_static_path(value_str, offset, canonical, checker);
     }
 }
 

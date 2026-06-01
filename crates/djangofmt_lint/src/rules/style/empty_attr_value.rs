@@ -1,5 +1,3 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
@@ -54,36 +52,32 @@ impl Violation for EmptyAttrValue<'_> {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            quote,
-        }) = attr
-        else {
-            continue;
-        };
-
-        if !name.eq_ignore_ascii_case("id") && !name.eq_ignore_ascii_case("class") {
-            continue;
-        }
-
-        if !value_str.is_empty() {
-            continue;
-        }
-
-        let mut guard = checker.report_diagnostic(
-            &EmptyAttrValue { attr: name },
-            (*offset, value_str.len()).into(),
-        );
-
-        guard.set_fix(delete_attr_fix(
-            checker.context(),
-            name,
-            value_str,
-            *offset,
-            quote.is_some(),
-        ));
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// `name`/`value_str`/`offset`/`quote` are the already-destructured fields of a
+/// [`markup_fmt::ast::NativeAttribute`]. The dispatcher pre-filters to `id`/`class`
+/// attribute names, so this only re-checks the emptiness condition.
+pub fn check_attr(
+    checker: &Checker<'_>,
+    name: &str,
+    value_str: &str,
+    offset: usize,
+    quote: Option<char>,
+) {
+    if !value_str.is_empty() {
+        return;
     }
+
+    let mut guard = checker.report_diagnostic(
+        &EmptyAttrValue { attr: name },
+        (offset, value_str.len()).into(),
+    );
+
+    guard.set_fix(delete_attr_fix(
+        checker.context(),
+        name,
+        value_str,
+        offset,
+        quote.is_some(),
+    ));
 }

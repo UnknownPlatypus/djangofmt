@@ -54,6 +54,14 @@ impl<'a> LintContext<'a> {
         self.settings.is_enabled(rule)
     }
 
+    /// Returns whether any rule in `rules` is enabled. Cheap cluster pre-filter
+    /// delegating to [`Settings::any_rule_enabled`].
+    #[must_use]
+    #[inline]
+    pub const fn any_rule_enabled(&self, rules: &[Rule]) -> bool {
+        self.settings.any_rule_enabled(rules)
+    }
+
     /// Compute the byte offset of `slice` within the source.
     ///
     /// # Panics

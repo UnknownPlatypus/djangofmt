@@ -2,7 +2,6 @@ use markup_fmt::ast::Element;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::declares_native_attr;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -45,16 +44,13 @@ impl Violation for MissingImgAlt {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("img") {
-        return;
-    }
-
-    if element
-        .attrs
-        .iter()
-        .any(|attr| declares_native_attr(attr, "alt"))
-    {
+/// Reports the violation when an `<img>` tag is missing an `alt` attribute.
+///
+/// Driven by the centralized element dispatcher, which classifies the tag and
+/// tracks `alt` presence (native or Jinja-declared) during its single attribute
+/// pass, passing the result as `has_alt`.
+pub fn report_if_missing(checker: &Checker<'_>, element: &Element<'_>, has_alt: bool) {
+    if has_alt {
         return;
     }
 

@@ -2,7 +2,6 @@ use markup_fmt::ast::Element;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::declares_native_attr;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -48,19 +47,19 @@ impl Violation for MissingImgDimensions {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("img") {
+/// Reports the violation when an `<img>` tag omits `height` or `width`.
+///
+/// Driven by the centralized element dispatcher, which classifies the tag and
+/// tracks `height`/`width` presence (native or Jinja-declared) during its single
+/// attribute pass.
+pub fn report_if_missing(
+    checker: &Checker<'_>,
+    element: &Element<'_>,
+    has_height: bool,
+    has_width: bool,
+) {
+    if has_height && has_width {
         return;
-    }
-
-    let mut has_height = false;
-    let mut has_width = false;
-    for attr in &element.attrs {
-        has_height = has_height || declares_native_attr(attr, "height");
-        has_width = has_width || declares_native_attr(attr, "width");
-        if has_height && has_width {
-            return;
-        }
     }
 
     let offset = checker.source_offset(element.tag_name);

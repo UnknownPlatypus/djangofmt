@@ -1,5 +1,3 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
@@ -65,43 +63,26 @@ impl Violation for InvalidAttrValue {
     }
 }
 
-/// Check an element's attributes for invalid enum values.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    // Pending implementation of djangofmt_html_spec.
-    // Currently only checks for <form method="...">.
-    if !element.tag_name.eq_ignore_ascii_case("form") {
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// Pending implementation of `djangofmt_html_spec`, this currently only validates
+/// `<form method="...">`. The dispatcher pre-filters to a `method` attribute on
+/// a `<form>` tag.
+pub fn check_method_attr(checker: &Checker<'_>, value_str: &str, offset: usize) {
+    // Skip interpolated values
+    if contains_interpolation(value_str) {
         return;
     }
 
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
-
-        if !name.eq_ignore_ascii_case("method") {
-            continue;
-        }
-
-        // Skip interpolated values
-        if contains_interpolation(value_str) {
-            continue;
-        }
-
-        let allowed: &[&str] = &["get", "post", "dialog"];
-        if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
-            checker.report_diagnostic(
-                &InvalidAttrValue {
-                    value: (*value_str).to_string(),
-                    attribute: "method",
-                    allowed,
-                },
-                (*offset, value_str.len()).into(),
-            );
-        }
+    let allowed: &[&str] = &["get", "post", "dialog"];
+    if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
+        checker.report_diagnostic(
+            &InvalidAttrValue {
+                value: value_str.to_string(),
+                attribute: "method",
+                allowed,
+            },
+            (offset, value_str.len()).into(),
+        );
     }
 }

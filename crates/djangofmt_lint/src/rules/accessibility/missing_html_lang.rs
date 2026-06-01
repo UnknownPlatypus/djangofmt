@@ -2,7 +2,6 @@ use markup_fmt::ast::Element;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::declares_native_attr;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -49,16 +48,13 @@ impl Violation for MissingHtmlLang {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("html") {
-        return;
-    }
-
-    if element
-        .attrs
-        .iter()
-        .any(|attr| declares_native_attr(attr, "lang"))
-    {
+/// Reports the violation when an `<html>` tag is missing a `lang` attribute.
+///
+/// Driven by the centralized element dispatcher, which classifies the tag and
+/// tracks `lang` presence (native or Jinja-declared) during its single attribute
+/// pass, passing the result as `has_lang`.
+pub fn report_if_missing(checker: &Checker<'_>, element: &Element<'_>, has_lang: bool) {
+    if has_lang {
         return;
     }
 

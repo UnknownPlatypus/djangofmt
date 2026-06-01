@@ -1,5 +1,3 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
-
 use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
@@ -69,53 +67,52 @@ impl Violation for RedundantTypeAttr {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    let tag = element.tag_name;
-
-    let default_type = if tag.eq_ignore_ascii_case("script") {
-        "text/javascript"
+/// The HTML5 default `type` value for `<script>` / `<style>`, or `None` for any
+/// other tag. The dispatcher only calls [`check_attr`] for these two tags.
+pub const fn default_type_for(tag: &str) -> Option<&'static str> {
+    if tag.eq_ignore_ascii_case("script") {
+        Some("text/javascript")
     } else if tag.eq_ignore_ascii_case("style") {
-        "text/css"
+        Some("text/css")
     } else {
-        return;
-    };
-
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            quote,
-        }) = attr
-        else {
-            continue;
-        };
-
-        if !name.eq_ignore_ascii_case("type") {
-            continue;
-        }
-
-        if contains_interpolation(value_str) {
-            continue;
-        }
-
-        if !value_str.eq_ignore_ascii_case(default_type) {
-            continue;
-        }
-
-        let mut guard = checker.report_diagnostic(
-            &RedundantTypeAttr {
-                tag: tag.to_string(),
-                type_value: (*value_str).to_string(),
-            },
-            (*offset, value_str.len()).into(),
-        );
-
-        guard.set_fix(delete_attr_fix(
-            checker.context(),
-            name,
-            value_str,
-            *offset,
-            quote.is_some(),
-        ));
+        None
     }
+}
+
+/// Per-attribute check driven by the centralized element dispatcher.
+///
+/// The dispatcher pre-filters to a `type` attribute on a `<script>`/`<style>`
+/// tag and supplies the matching `default_type` from [`default_type_for`].
+pub fn check_attr(
+    checker: &Checker<'_>,
+    tag: &str,
+    default_type: &str,
+    name: &str,
+    value_str: &str,
+    offset: usize,
+    quote: Option<char>,
+) {
+    if contains_interpolation(value_str) {
+        return;
+    }
+
+    if !value_str.eq_ignore_ascii_case(default_type) {
+        return;
+    }
+
+    let mut guard = checker.report_diagnostic(
+        &RedundantTypeAttr {
+            tag: tag.to_string(),
+            type_value: value_str.to_string(),
+        },
+        (offset, value_str.len()).into(),
+    );
+
+    guard.set_fix(delete_attr_fix(
+        checker.context(),
+        name,
+        value_str,
+        offset,
+        quote.is_some(),
+    ));
 }
