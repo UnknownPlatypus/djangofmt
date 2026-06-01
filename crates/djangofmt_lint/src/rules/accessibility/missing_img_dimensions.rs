@@ -48,11 +48,8 @@ impl Violation for MissingImgDimensions {
     }
 }
 
+/// The caller guarantees `element` is an `<img>`.
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("img") {
-        return;
-    }
-
     let mut has_height = false;
     let mut has_width = false;
     for attr in &element.attrs {
