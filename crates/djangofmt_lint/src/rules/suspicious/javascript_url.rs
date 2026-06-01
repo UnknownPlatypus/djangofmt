@@ -74,16 +74,18 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         return;
     }
     for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute { name, value, .. }) = attr else {
+        let Attribute::Native(NativeAttribute {
+            name,
+            value: Some((value_str, offset)),
+            ..
+        }) = attr
+        else {
             continue;
         };
         let Some(canonical) = attr_names
             .iter()
             .find(|candidate| candidate.eq_ignore_ascii_case(name))
         else {
-            continue;
-        };
-        let Some((value_str, offset)) = value else {
             continue;
         };
         if contains_interpolation(value_str) {
