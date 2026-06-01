@@ -1,0 +1,120 @@
+<!-- Canonical fix: use the {% url %} template tag -->
+<a href="{% url 'home' %}">Home</a>
+<a href="{% url 'profile' %}">Profile</a>
+<form action="{% url 'login' %}"></form>
+
+<!-- Interpolation in href/action is skipped -->
+<a href="{{ url }}">Link</a>
+<a href="{{ link_target }}">Link</a>
+<a href="{% if x %}/a{% else %}/b{% endif %}">Link</a>
+<form action="{{ form_action }}"></form>
+<div data-url="/items/{{ item.id }}/"></div>
+
+<!-- External URLs are not flagged (http:// is exercised by the use-https fixture instead) -->
+<a href="https://example.com">Link</a>
+<a href="https://example.com/path">Link</a>
+<form action="https://example.com/submit"></form>
+
+<!-- Fragment-only links are not flagged
+     (Regression: djLint #45 — `href="#"` and `#section` must not be flagged.) -->
+<a href="#">Link</a>
+<a href="#section">Section</a>
+<a href="#anchor">Anchor</a>
+<a href="#tab1">Tab 1</a>
+<form action="#"></form>
+<form action="#go"></form>
+
+<!-- Any value carrying a URL scheme is not flagged, not just a fixed allowlist
+     (`javascript:` URLs are covered by a separate rule, so they're not exercised here). -->
+<a href="mailto:user@example.com">Email</a>
+<a href="tel:+15550100">Call</a>
+<a href="data:text/plain,hello">Data</a>
+<!-- Regression: djLint #814 — `sms:` links must not be treated as internal. -->
+<a href="sms:+15550100">Text</a>
+<a href="ftp://files.example.com/manual.pdf">Manual</a>
+<a href="ws://example.com/socket">Socket</a>
+<a href="bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa">Donate</a>
+<a href="webcal://example.com/feed.ics">Calendar</a>
+<form action="ftp://upload.example.com/"></form>
+
+<!-- Protocol-relative URLs are not flagged -->
+<a href="//cdn.example.com/asset.js">CDN</a>
+
+<!-- Schemeless external hosts and file names are not internal routes: a relative value whose
+     first segment carries a dot is a hostname or a static asset, not a named URL pattern.
+     (Regression: false positive on `www.…`-style links found smoke-testing a real Django site.) -->
+<a href="www.hellowatt.fr/comparateur/">Compare</a>
+<a href="example.com/path">External</a>
+<a href="cdn.example.com/app.js">CDN script</a>
+<a href="logo.png">Logo</a>
+<a href="report.pdf">Report</a>
+
+<!-- Root-relative file paths are static assets (served via `{% static %}`), not named routes:
+     the exclusion keys off the file extension in the last path segment, not the leading slash.
+     (Regression: PR #314 review — `/favicon.ico`-style absolute assets must not be flagged.) -->
+<a href="/favicon.ico">Favicon</a>
+<a href="/downloads/report.pdf">Report</a>
+<div data-src="/assets/app.js"></div>
+<div data-url="/static/css/app.css"></div>
+<a href="assets/app.js">Relative asset</a>
+
+<!-- Relative paths (no leading slash, not a bare word) are not flagged -->
+<a href="../relative/">Up one</a>
+<a href="./sibling/">Sibling</a>
+
+<!-- Site root: `/` alone is the home link sentinel
+     (Regression: djLint #1601 — `href="/"` must not be flagged.) -->
+<a href="/">Home</a>
+
+<!-- An href with no value, or an explicit empty value, is not a hardcoded route -->
+<a href>Link</a>
+<a href="">Link</a>
+
+<!-- Attributes that merely END with `action`/`href`/`data-url`/`data-src` must not trigger;
+     only exact attribute matches count.
+     (Regression: djLint #248 — partial attribute name matching.) -->
+<div data-row-selection-action="highlight"></div>
+<div data-custom-href="ignored"></div>
+<form data-custom-action="ignored"></form>
+
+<!-- `data-action` (and other `data-*` attrs) on `<form>` must not be flagged;
+     only `action` itself is in scope for `<form>`.
+     (Regression: djLint #500 / #501.) -->
+<form action="{% url 'something' %}" data-action="xxx"></form>
+<div data-action="highlight"></div>
+
+<!-- A Django `{% url %}` call whose keyword argument happens to be named `action` must not be
+     misread as a literal `action="..."` attribute.
+     (Regression: djLint #755 / #1183.) -->
+<form method="post" action="{% url 'web:profile_action' action='token_revoke' %}"></form>
+<a href="#" hx-post="{% url 'foo' action='bar' %}">Link</a>
+
+<!-- Real-world false-positive guards (smoke testing a production Django project).
+     Framework-bound URL attributes (Alpine `x-bind:href`, Vue `:href`) are not the plain `href`
+     attribute: only an exact name match is in scope, so their bare-word expressions stay untouched. -->
+<a x-bind:href="solarPanelLayoutURL">Roof layout</a>
+<a :href="layoutUrl">Layout</a>
+
+<!-- Query-only links stay on the current route and resolve no named pattern. -->
+<a href="?page=2">Next page</a>
+<a href="?handler=RemoveAgreement&id=42">Remove</a>
+
+<!-- Analytics keyword arguments inside a `{% include %}` are template-tag kwargs, not an HTML
+     `action` attribute, and must not be read as a hardcoded route. -->
+{% include "form.html" with ga_action="heating_directory_filter" ga_location="sidebar" %}
+
+<!-- Tags out of scope: same attribute names but not in the rule's element list. -->
+<button href="/page/">Click</button>
+<area href="/page/">
+<link href="/page/">
+<link rel="canonical" href="/page/">
+<base href="/">
+
+<!-- Attributes out of scope on the in-scope elements. -->
+<input value="/page/">
+<a title="/page/">Link</a>
+
+<!-- Nested in Jinja block (templated href stays untouched) -->
+{% if show_link %}
+    <a href="{% url 'home' %}">Link</a>
+{% endif %}

@@ -1,5 +1,4 @@
 <!-- Normal URLs -->
-<a href="/page/">Link</a>
 <a href="https://example.com">Link</a>
 <a href="{% url 'home' %}">Home</a>
 
@@ -11,7 +10,7 @@
 
 <!-- Event handlers (correct pattern) -->
 <button onclick="doStuff()">Click</button>
-<a href="/page/" onclick="doStuff()">Link</a>
+<a href="{% url 'page' %}" onclick="doStuff()">Link</a>
 
 <!-- Other schemes are not flagged -->
 <a href="mailto:user@example.com">Email</a>
@@ -24,8 +23,8 @@
 <a href="javascript:{{ payload }}">Link</a>
 
 <!-- Forms with safe actions -->
-<form action="/submit/"></form>
 <form action="{% url 'submit' %}"></form>
+<form action="https://example.com/submit"></form>
 
 <!-- Tags out of scope: same attribute name but not in djLint's scope -->
 <button href="javascript:void(0)">Click</button>
@@ -40,5 +39,5 @@
 
 <!-- Nested in Jinja block -->
 {% if show_link %}
-    <a href="/page/">Link</a>
+    <a href="{% url 'page' %}">Link</a>
 {% endif %}

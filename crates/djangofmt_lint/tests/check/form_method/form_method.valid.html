@@ -11,7 +11,7 @@
 <div method="put"></div>
 
 <!-- Form with non-method attr - should not trigger -->
-<form action="/submit">Submit</form>
+<form action="{% url 'submit' %}">Submit</form>
 
 <!-- Form with method attr but no value - should not trigger -->
 <form method>Submit</form>

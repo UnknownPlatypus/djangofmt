@@ -20,10 +20,10 @@
 <form method=post></form>
 
 <!-- No method attribute -->
-<form action="/submit/"></form>
+<form action="{% url 'submit' %}"></form>
 
 <!-- Multiline with lowercase method -->
 <form
-    action="/submit/"
+    action="{% url 'submit' %}"
     method="post"
 ></form>
