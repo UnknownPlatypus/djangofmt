@@ -1,0 +1,102 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 9 lint error(s)
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+   ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:2:13]
+ 1 │ <!-- Utility classes in the wrong order -->
+ 2 │ <div class="p-4 flex m-4"></div>
+   ·             ──────┬─────
+   ·                   ╰── here
+ 3 │ 
+   ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+   ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:5:16]
+ 4 │ <!-- Variant utilities mixed in with their base utilities -->
+ 5 │ <button class="p-4 m-4 flex hover:p-1">Save</button>
+   ·                ───────────┬──────────
+   ·                           ╰── here
+ 6 │ 
+   ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+   ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:8:14]
+ 7 │ <!-- Display/layout utilities reordered -->
+ 8 │ <span class="flex-col inline flex">Label</span>
+   ·              ──────────┬─────────
+   ·                        ╰── here
+ 9 │ 
+   ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:11:13]
+ 10 │ <!-- Responsive variants regrouped by breakpoint -->
+ 11 │ <div class="sm:flex hidden md:grid lg:block"></div>
+    ·             ───────────────┬───────────────
+    ·                            ╰── here
+ 12 │ 
+    ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:14:13]
+ 13 │ <!-- Dark-mode variant ordering -->
+ 14 │ <div class="p-2 dark:bg-gray-800 bg-white"></div>
+    ·             ──────────────┬──────────────
+    ·                           ╰── here
+ 15 │ 
+    ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:17:11]
+ 16 │ <!-- Real-world Example -->
+ 17 │ <a class="text-white bg-blue-700 btn hover:bg-blue-900 mt-4">Sign up</a>
+    ·           ────────────────────────┬────────────────────────
+    ·                                   ╰── here
+ 18 │ <button class="text-white bg-purple-600 hover:bg-purple-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5">Submit</button>
+    ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:18:16]
+ 17 │ <a class="text-white bg-blue-700 btn hover:bg-blue-900 mt-4">Sign up</a>
+ 18 │ <button class="text-white bg-purple-600 hover:bg-purple-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5">Submit</button>
+    ·                ─────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────
+    ·                                                                             ╰── here
+ 19 │ 
+    ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:25:11]
+ 24 │ <!-- With prefix (v4) -->
+ 25 │ <a class="tw:text-white tw:bg-blue-700 btn tw:hover:bg-blue-900 tw:mt-4">Sign up</a>
+    ·           ──────────────────────────────┬──────────────────────────────
+    ·                                         ╰── here
+ 26 │ <button class="tw:text-white tw:bg-purple-600 tw:hover:bg-purple-800 tw:focus:ring-4 tw:focus:ring-primary-300 tw:font-medium tw:rounded-lg tw:text-sm tw:px-5 tw:py-2.5">Submit</button>
+    ╰────
+  help: Sort the classes into the canonical Tailwind order.
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:26:16]
+ 25 │ <a class="tw:text-white tw:bg-blue-700 btn tw:hover:bg-blue-900 tw:mt-4">Sign up</a>
+ 26 │ <button class="tw:text-white tw:bg-purple-600 tw:hover:bg-purple-800 tw:focus:ring-4 tw:focus:ring-primary-300 tw:font-medium tw:rounded-lg tw:text-sm tw:px-5 tw:py-2.5">Submit</button>
+    ·                ────────────────────────────────────────────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────
+    ·                                                                                            ╰── here
+    ╰────
+  help: Sort the classes into the canonical Tailwind order.
