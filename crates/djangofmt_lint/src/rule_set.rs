@@ -1,39 +1,26 @@
-//! Bitset-backed set of enabled lint rules.
-//!
-//! Mirrors Ruff's `rule_set.rs` design as closely as is reasonable: the set is
-//! backed by a `[u64; RULESET_SIZE]` array, membership is a branchless bit
-//! test, and the set is built once via `FromIterator<Rule>`.
-//!
-//! # Deliberate divergence from Ruff
-//! Ruff also has a `RuleTable { enabled, should_fix }` containing a second
-//! bitset gating per-rule autofix application.  djangofmt does NOT gate fixes
-//! per-rule (applicability is checked at apply time via `Applicability`), so
-//! `RuleTable` / a `should_fix` bitset are intentionally absent.
+//! Bitset of enabled lint rules: one bit per `Rule`, membership is a branchless
+//! bit test, built once via `FromIterator`.
 
 use strum::EnumCount as _;
 
 use crate::registry::Rule;
 
-/// Number of `u64` words needed to hold one bit per `Rule` variant.
-/// Computed from `Rule::COUNT` so it scales automatically as rules are added.
-/// Written as `(N + 63) / 64` rather than `N.div_ceil(64)` to stay const-safe
-/// on the MSRV (`div_ceil` is not yet const-stable).
+/// `u64` words needed for one bit per `Rule`, derived from `Rule::COUNT` so it
+/// scales as rules are added. Manual `(N + 63) / 64` stays const on the MSRV.
 #[allow(clippy::manual_div_ceil)]
 const RULESET_SIZE: usize = (Rule::COUNT + 63) / 64;
 
-/// Number of bits in each backing word.
+/// Bits per backing word.
 #[allow(clippy::cast_possible_truncation)] // u64::BITS is 64, fits in u16
 const SLICE_BITS: u16 = u64::BITS as u16;
 
-/// A compact bitset storing the set of enabled lint rules.
-///
-/// Each rule occupies exactly one bit.  Membership testing is a single
-/// array-index + shift, with no hashing.
+/// A compact bitset of enabled lint rules: one bit per rule, tested with an
+/// array index + shift.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct RuleSet([u64; RULESET_SIZE]);
 
 impl RuleSet {
-    /// Return a `RuleSet` with a single rule set.
+    /// A set containing only `rule`.
     #[must_use]
     #[inline]
     pub const fn from_rule(rule: Rule) -> Self {
@@ -45,7 +32,7 @@ impl RuleSet {
         set
     }
 
-    /// Insert a rule into the set.
+    /// Add `rule` to the set.
     #[inline]
     pub const fn insert(&mut self, rule: Rule) {
         let rule = rule as u16;
@@ -54,7 +41,7 @@ impl RuleSet {
         self.0[index] |= 1u64 << shift;
     }
 
-    /// Return whether `rule` is in the set.
+    /// Whether `rule` is in the set.
     #[must_use]
     #[inline]
     pub const fn contains(&self, rule: Rule) -> bool {
@@ -64,7 +51,7 @@ impl RuleSet {
         self.0[index] & (1u64 << shift) != 0
     }
 
-    /// Merge another `RuleSet` into this one (union in place).
+    /// Union `other` into this set in place.
     #[inline]
     pub const fn union(&mut self, other: &Self) {
         let mut i = 0;
@@ -74,7 +61,7 @@ impl RuleSet {
         }
     }
 
-    /// Iterate over all rules in the set in ascending discriminant order.
+    /// Iterate the rules in ascending discriminant order.
     #[must_use]
     pub const fn iter(&self) -> RuleSetIterator {
         RuleSetIterator {
@@ -113,10 +100,8 @@ impl IntoIterator for &RuleSet {
     }
 }
 
-/// Iterator over the rules in a [`RuleSet`].
-///
-/// Uses `trailing_zeros()` to find each set bit without examining zero words,
-/// mirroring Ruff's iterator design.
+/// Iterator over the rules in a [`RuleSet`], using `trailing_zeros()` to skip
+/// zero words.
 pub struct RuleSetIterator {
     set: RuleSet,
     word_index: usize,
@@ -127,7 +112,7 @@ impl Iterator for RuleSetIterator {
     type Item = Rule;
 
     fn next(&mut self) -> Option<Rule> {
-        // Advance past any exhausted words.
+        // Skip fully-consumed words.
         while self.word == 0 {
             self.word_index += 1;
             if self.word_index >= RULESET_SIZE {
