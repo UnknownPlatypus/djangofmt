@@ -74,32 +74,34 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     }
 
     for attr in &element.attrs {
-        if let Attribute::Native(NativeAttribute { name, value, .. }) = attr {
-            if !name.eq_ignore_ascii_case("method") {
-                continue;
-            }
+        let Attribute::Native(NativeAttribute {
+            name,
+            value: Some((value_str, offset)),
+            ..
+        }) = attr
+        else {
+            continue;
+        };
 
-            // Skip if no value
-            let Some((value_str, offset)) = value else {
-                continue;
-            };
+        if !name.eq_ignore_ascii_case("method") {
+            continue;
+        }
 
-            // Skip interpolated values
-            if contains_interpolation(value_str) {
-                continue;
-            }
+        // Skip interpolated values
+        if contains_interpolation(value_str) {
+            continue;
+        }
 
-            let allowed: &[&str] = &["get", "post", "dialog"];
-            if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
-                checker.report_diagnostic(
-                    &InvalidAttrValue {
-                        value: (*value_str).to_string(),
-                        attribute: "method",
-                        allowed,
-                    },
-                    (*offset, value_str.len()).into(),
-                );
-            }
+        let allowed: &[&str] = &["get", "post", "dialog"];
+        if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
+            checker.report_diagnostic(
+                &InvalidAttrValue {
+                    value: (*value_str).to_string(),
+                    attribute: "method",
+                    allowed,
+                },
+                (*offset, value_str.len()).into(),
+            );
         }
     }
 }
