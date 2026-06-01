@@ -1,0 +1,99 @@
+<!-- Populated element -->
+<div>Hello, world!</div>
+
+<!-- Element with nested children -->
+<section>
+    <h2>Title</h2>
+    <p>Body</p>
+</section>
+
+<!-- Void elements have no closing tag -->
+<br>
+<hr>
+<img src="logo.png" alt="Logo" width="100" height="100">
+<input type="text" name="q">
+
+<!-- Self-closing tags -->
+<input type="text" name="q" />
+<br />
+
+<!-- Any attribute signals the empty tag is intentional
+     (CSS hook, JS hook, custom element, ...) -->
+<div id="placeholder"></div>
+<section class="hero"></section>
+<aside
+    class="sidebar"
+    role="complementary">
+</aside>
+<my-widget data-name="x"></my-widget>
+
+<!-- `<script>` with `src` is an external script and legitimately empty -->
+<script src="app.js"></script>
+<link rel="stylesheet" href="app.css">
+
+<!-- `<button>` with an accessible name is intentional -->
+<button aria-label="Close"></button>
+<button type="submit"></button>
+
+<!-- Table and list cells are commonly empty to preserve structure -->
+<table>
+    <tr>
+        <td></td>
+        <th></th>
+    </tr>
+</table>
+<ul>
+    <li></li>
+</ul>
+<dl>
+    <dt></dt>
+    <dd></dd>
+</dl>
+
+<!-- Case-insensitive exclusions: TD/LI/TH/DT/DD -->
+<table>
+    <tr>
+        <TD></TD>
+        <TH></TH>
+    </tr>
+</table>
+
+<!-- Form controls start empty (or are populated by a script) as their normal state;
+     `<option></option>` is a common blank placeholder -->
+<textarea></textarea>
+<select></select>
+<output></output>
+<option></option>
+
+<!-- `<pre>` preserves whitespace, so a whitespace-only `<pre>` is meaningful, not empty -->
+<pre>   </pre>
+
+<!-- `<canvas>` is a script-rendered surface; its children are fallback content only -->
+<canvas></canvas>
+
+<!-- `<slot>` with no name is a web component's default slot -->
+<slot></slot>
+
+<!-- Exemptions are case-insensitive too -->
+<TEXTAREA></TEXTAREA>
+<CANVAS></CANVAS>
+
+<!-- Jinja control flow inside an element is dynamic content -->
+<div>{% if user %}Hello, {{ user.name }}{% endif %}</div>
+<span>{% block title %}{% endblock %}</span>
+
+<!-- Jinja interpolation is dynamic content -->
+<p>{{ description }}</p>
+
+<!-- Jinja comments are content -->
+<div>{# placeholder for future copy #}</div>
+
+<!-- HTML comments are content -->
+<div><!-- TODO: fill in --></div>
+
+<!-- Nested elements as content are not "empty" even when leaves are -->
+<div><span>x</span></div>
+
+<!-- Doctype is not an element with children -->
+<!DOCTYPE html>
+<html lang="en"><body>x</body></html>

@@ -121,6 +121,10 @@ impl<'a> Checker<'a> {
             rules::suspicious::use_https::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::EmptyTagPair) {
+            rules::suspicious::empty_tag_pair::check(element, self);
+        }
+
         if self.is_rule_enabled(Rule::UppercaseFormMethod) {
             rules::style::uppercase_form_method::check(element, self);
         }
