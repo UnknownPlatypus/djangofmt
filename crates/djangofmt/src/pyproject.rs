@@ -64,14 +64,9 @@ fn find_pyproject_toml<P: AsRef<Path>>(start_path: P) -> Option<PathBuf> {
 
 /// Load `pyproject.toml` settings rooted at the current working directory,
 /// falling back to defaults if the cwd can't be determined.
+#[must_use]
 pub fn load_pyproject_from_cwd() -> PyprojectSettings {
-    std::env::current_dir().map_or_else(
-        |err| {
-            debug!("Failed to get current directory: {err}");
-            PyprojectSettings::default()
-        },
-        load_options,
-    )
+    load_options(crate::fs::get_cwd())
 }
 
 /// Loads user configured options from the nearest `pyproject.toml` file from the given path

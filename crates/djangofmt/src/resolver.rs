@@ -124,24 +124,14 @@ fn build_overrides(
         .map_err(|e| Error::Resolve(format!("Failed to build exclude overrides: {e}")))
 }
 
-/// Build include types and exclude overrides from the resolved config.
-///
-/// Returns `(Types, Overrides)` ready to be plugged into a `WalkBuilder`.
-fn build_walk_filters(
-    root: &Path,
-    config: &ResolvedDiscoveryConfig,
-) -> Result<(ignore::types::Types, ignore::overrides::Override), Error> {
-    Ok((build_types(config)?, build_overrides(root, config)?))
-}
-
 /// Return `true` if the given filename should be force-excluded based on the resolved
 /// configuration. Returns `false` if `force_exclude` is disabled.
 pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> Result<bool, Error> {
     if !config.force_exclude {
         return Ok(false);
     }
-    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-    let overrides = build_overrides(&cwd, config)?;
+    let cwd = crate::fs::get_cwd();
+    let overrides = build_overrides(cwd, config)?;
     Ok(overrides.matched(filename, false).is_ignore())
 }
 
@@ -181,7 +171,7 @@ pub fn resolve_files(
             .copied()
             .or_else(|| files.first().and_then(|f| f.parent()))
     {
-        let (_, overrides) = build_walk_filters(root, config)?;
+        let overrides = build_overrides(root, config)?;
         let len_before = files.len();
         files.retain(|file| {
             let dominated = overrides.matched(file, false);
@@ -202,15 +192,14 @@ pub fn resolve_files(
 
     // Walk all directories with a single parallel WalkBuilder.
     if let Some((first, rest)) = dirs.split_first() {
-        let (types, overrides) = build_walk_filters(first, config)?;
+        let types = build_types(config)?;
+        let overrides = build_overrides(first, config)?;
 
         let mut builder = WalkBuilder::new(first);
         for dir in rest {
             builder.add(dir);
         }
-        if let Ok(cwd) = std::env::current_dir() {
-            builder.current_dir(cwd);
-        }
+        builder.current_dir(crate::fs::get_cwd());
         builder
             .standard_filters(config.respect_gitignore)
             .hidden(false)
