@@ -42,7 +42,7 @@ impl<'a> Checker<'a> {
     /// Returns whether the given rule should be checked.
     #[must_use]
     #[inline]
-    pub fn is_rule_enabled(&self, rule: Rule) -> bool {
+    pub const fn is_rule_enabled(&self, rule: Rule) -> bool {
         self.context.is_rule_enabled(rule)
     }
 

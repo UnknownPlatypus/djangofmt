@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use strum::{EnumIter, EnumString};
+use strum::{EnumCount, EnumIter, EnumString};
 
 use crate::fix::FixAvailability;
 use crate::rules;
@@ -111,11 +111,14 @@ define_rules {
             Eq,
             Hash,
             EnumIter,
+            EnumCount,
             EnumString,
             strum::Display,
+            strum::FromRepr,
             Serialize,
             Deserialize
         )]
+        #[repr(u16)]
         #[strum(serialize_all = "kebab-case")]
         #[serde(rename_all = "kebab-case")]
         pub enum Rule {
