@@ -263,4 +263,5 @@ define_rules! {
     (MissingImgDimensions, rules::accessibility::missing_img_dimensions::MissingImgDimensions),
     (TableHeaderMissingScope, rules::accessibility::table_header_missing_scope::TableHeaderMissingScope),
     (SameFilePartialInclude, rules::style::same_file_partial_include::SameFilePartialInclude),
+    (UnsortedTailwindClasses, rules::style::unsorted_tailwind_classes::UnsortedTailwindClasses),
 }
