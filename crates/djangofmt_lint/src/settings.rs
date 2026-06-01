@@ -5,13 +5,15 @@
 //! rules) and the [`PreviewMode`] used to filter preview rules during
 //! resolution.
 //!
-//! Higher layers (CLI / pyproject) construct selectors and call
-//! [`Settings::from_selectors`] to fold them into a [`RuleSet`] using
-//! ruff-style specificity ordering: broadest selectors (`ALL`) apply first,
-//! then category-level, then exact rule selectors. At each level selects /
-//! extends are applied additively and ignores are applied subtractively, so
-//! `select = ["ALL"], ignore = ["invalid-attr-value"]` resolves correctly
-//! without ad-hoc precedence logic.
+//! Higher layers (CLI / pyproject) construct one [`RuleSelection`] per
+//! configuration source and call [`Settings::from_selections`] to fold them
+//! into a [`RuleSet`] using ruff-style specificity ordering: broadest
+//! selectors (`ALL`) apply first, then category-level, then exact rule
+//! selectors. At each level selects / extends are applied additively and
+//! ignores are applied subtractively, so `select = ["ALL"], ignore =
+//! ["invalid-attr-value"]` resolves correctly without ad-hoc precedence logic.
+//! [`Settings::from_selectors`] is a single-layer convenience that delegates
+//! to [`Settings::from_selections`].
 
 use strum::IntoEnumIterator;
 
@@ -72,19 +74,15 @@ impl Default for Settings {
 const DEFAULT_SELECTORS: &[RuleSelector] = &[RuleSelector::All];
 
 impl Settings {
-    /// Build [`Settings`] by resolving a single layer of selectors.
+    /// Build [`Settings`] from a single layer of selectors.
     ///
-    /// Resolution mirrors ruff's `LintConfiguration::as_rule_table` for a
-    /// single layer:
-    ///
-    /// 1. Iterate [`Specificity`] from broadest (`All`) to narrowest (`Rule`).
-    /// 2. At each level, apply `select`/`extend_select` additively, then
-    ///    `ignore`/`extend_ignore` subtractively.
-    ///
-    /// `select` and `extend_select` are treated identically at this layer —
-    /// the replacement-vs-extend distinction belongs to the multi-layer
-    /// resolver in the binary crate, which decides whether a layer's
-    /// `Some(select)` *replaces* the carried set before calling this method.
+    /// A convenience wrapper over [`Settings::from_selections`] for callers
+    /// (defaults, tests, one-shot embedders) that have exactly one layer. The
+    /// selectors are wrapped in a single [`RuleSelection`] whose `Some(select)`
+    /// *replaces* the implicit `ALL` base, so the result is just this layer
+    /// resolved with ruff-style specificity ordering — `select`/`extend_select`
+    /// additive, `ignore`/`extend_ignore` subtractive, narrower selectors
+    /// winning.
     #[must_use]
     pub fn from_selectors(
         select: &[RuleSelector],
@@ -93,28 +91,15 @@ impl Settings {
         extend_ignore: &[RuleSelector],
         preview: PreviewMode,
     ) -> Self {
-        let mut rules = RuleSet::empty();
-
-        for spec in Specificity::iter() {
-            for selector in select
-                .iter()
-                .chain(extend_select.iter())
-                .filter(|s| s.specificity() == spec)
-            {
-                rules.extend(selector.rules(preview));
-            }
-            for selector in ignore
-                .iter()
-                .chain(extend_ignore.iter())
-                .filter(|s| s.specificity() == spec)
-            {
-                for rule in selector.rules(preview) {
-                    rules.remove(rule);
-                }
-            }
-        }
-
-        Self { rules, preview }
+        Self::from_selections(
+            &[RuleSelection {
+                select: Some(select),
+                ignore,
+                extend_select,
+                extend_ignore,
+            }],
+            preview,
+        )
     }
 
     /// Build [`Settings`] from a sequence of [`RuleSelection`] layers.

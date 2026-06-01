@@ -2,7 +2,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
+use djangofmt_lint::{FileDiagnostics, PreviewMode, RuleSelector, Settings, check_ast};
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
 use serde::Serialize;
@@ -202,7 +202,10 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         }
     };
 
-    let settings = Settings::default();
+    // The playground showcases every rule, including preview ones, so the
+    // default stable-only rule set is widened here.
+    let settings =
+        Settings::from_selectors(&[RuleSelector::All], &[], &[], &[], PreviewMode::Enabled);
     let diagnostics = check_ast(source, &ast, &settings);
     let error_count = diagnostics.len();
 

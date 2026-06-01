@@ -193,7 +193,7 @@ pub struct CheckCommand {
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
 
-    /// Comma-separated list of rule codes or categories to enable (or `ALL`).
+    /// Comma-separated list of rule names or categories to enable (or `ALL`).
     /// Replaces the default rule set when provided.
     #[arg(
         long,
@@ -202,7 +202,7 @@ pub struct CheckCommand {
         help_heading = "Rule selection"
     )]
     pub select: Option<Vec<RuleSelector>>,
-    /// Comma-separated list of rule codes or categories to disable.
+    /// Comma-separated list of rule names or categories to disable.
     #[arg(
         long,
         value_delimiter = ',',

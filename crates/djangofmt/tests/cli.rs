@@ -613,6 +613,45 @@ fn check_preview_flag_does_not_error() {
     "#);
 }
 
+#[test]
+fn check_preview_rule_gated_by_preview_flag() {
+    // `empty-tag-pair` is a preview rule. Exact-selecting it must NOT enable
+    // it without `--preview` (matches ruff: preview rules require preview
+    // mode); with `--preview` it runs and flags the empty pair.
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("empty.html");
+    std::fs::write(&file, "<span></span>\n").unwrap();
+
+    let without = cli()
+        .arg("check")
+        .arg("--select=empty-tag-pair")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(
+        without.status.success(),
+        "preview rule should stay off without --preview, got stderr:\n{}",
+        String::from_utf8_lossy(&without.stderr),
+    );
+
+    let with = cli()
+        .arg("check")
+        .arg("--select=empty-tag-pair")
+        .arg("--preview")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(
+        !with.status.success(),
+        "preview rule should run with --preview"
+    );
+    let stderr = String::from_utf8_lossy(&with.stderr);
+    assert!(
+        stderr.contains("Empty `<span>` tag pair"),
+        "expected empty-tag-pair violation, got:\n{stderr}"
+    );
+}
+
 // ── Rule selection via pyproject.toml ────────────────────────────────
 
 #[test]

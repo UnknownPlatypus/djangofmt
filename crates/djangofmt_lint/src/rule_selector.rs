@@ -92,9 +92,11 @@ impl RuleSelector {
     ///
     /// Filtering rules:
     /// - [`RuleGroup::Stable`] — always included
-    /// - [`RuleGroup::Preview`] — included if `preview == Enabled` *or* the
-    ///   selector is exact (the exact-selector escape hatch matches ruff's
-    ///   default `require_explicit = false` behavior)
+    /// - [`RuleGroup::Preview`] — included only when `preview == Enabled`.
+    ///   This matches ruff with its default `require_explicit = false`: an
+    ///   exact selector does *not* pull a preview rule in while preview is
+    ///   off (ruff gates the exact-selector relaxation behind `preview &&`,
+    ///   so preview rules never run without preview mode).
     /// - [`RuleGroup::Deprecated`] — only when `preview == Disabled` *and* the
     ///   selector is exact
     /// - [`RuleGroup::Removed`] — only when the selector is exact
@@ -105,7 +107,7 @@ impl RuleSelector {
 
         Box::new(self.all_rules().filter(move |rule| match rule.group() {
             RuleGroup::Stable { .. } => true,
-            RuleGroup::Preview { .. } => preview_enabled || is_exact,
+            RuleGroup::Preview { .. } => preview_enabled,
             RuleGroup::Deprecated { .. } => !preview_enabled && is_exact,
             RuleGroup::Removed { .. } => is_exact,
         }))
@@ -277,6 +279,21 @@ mod tests {
     fn rules_filter_includes_stable_with_preview_disabled() {
         let rules: Vec<_> = RuleSelector::All.rules(PreviewMode::Disabled).collect();
         assert!(rules.contains(&Rule::InvalidAttrValue));
+    }
+
+    #[test]
+    fn exact_selector_does_not_bypass_preview_gating() {
+        // A preview rule selected by exact name is still gated behind preview
+        // mode (matches ruff: preview rules never run without `--preview`).
+        let preview_rule = RuleSelector::Rule(Rule::EmptyTagPair);
+        assert!(
+            preview_rule.rules(PreviewMode::Disabled).next().is_none(),
+            "preview rule must stay disabled without preview, even when named exactly",
+        );
+        assert_eq!(
+            preview_rule.rules(PreviewMode::Enabled).collect::<Vec<_>>(),
+            vec![Rule::EmptyTagPair],
+        );
     }
 
     #[test]
