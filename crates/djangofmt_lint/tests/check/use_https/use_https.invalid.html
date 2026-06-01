@@ -1,0 +1,66 @@
+<!-- a/href -->
+<a href="http://example.com">Link</a>
+<a href="http://">Link</a>
+<a href='http://example.com'>Link</a>
+
+<!-- img/src -->
+<img src="http://example.com/logo.png">
+
+<!-- form/action -->
+<form action="http://example.com/submit"></form>
+
+<!-- data-url, url, srcset -->
+<div data-url="http://example.com"></div>
+<a url="http://example.com">Link</a>
+<img srcset="http://example.com/a.png 1x">
+
+<!-- script/src and link/href -->
+<script src="http://cdn.example.com/lib.js"></script>
+<link href="http://cdn.example.com/style.css" rel="stylesheet">
+
+<!-- Case-insensitive scheme -->
+<a href="HTTP://example.com">Link</a>
+<a href="Http://example.com">Link</a>
+
+<!-- Case-insensitive attribute name -->
+<a HREF="http://example.com">Link</a>
+<IMG SrC="http://example.com/logo.png">
+
+<!-- Leading whitespace before scheme -->
+<a href="  http://example.com">Link</a>
+
+<!-- Multi-attr element with mixed http/https — only the http one is flagged -->
+<a href="http://example.com" data-url="https://example.com">Link</a>
+
+<!-- Multiple flagged attributes on the same element -->
+<a href="http://example.com" data-url="http://example.com">Link</a>
+
+<!-- srcset candidates are checked independently: every http:// entry is flagged -->
+<img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
+
+<!-- srcset insecure candidate after a secure one — must still be flagged -->
+<img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x">
+
+<!-- srcset without descriptors, comma-separated -->
+<img srcset="http://example.com/a.png, http://example.com/b.png">
+
+<!-- Literal `http://` prefix followed by interpolation in the body is unambiguously insecure -->
+<a href="http://{{ host }}/page">Link</a>
+
+<!-- Inside a Jinja block -->
+{% if show_link %}
+    <a href="http://example.com">Link</a>
+{% endif %}
+
+<!-- Real world example -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
+<img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+<script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<img src="http://stats.amusecode.org/piwik.php?idsite=1">
+<a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
+
+<!-- Loopback look-alike are still flagged: the host only resembles localhost -->
+<a href="http://localhost.evil.com/admin">Phishing</a>
+<a href="http://127.0.0.1.evil.com/">Spoof</a>

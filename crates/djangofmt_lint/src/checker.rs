@@ -113,6 +113,10 @@ impl<'a> Checker<'a> {
             rules::suspicious::duplicate_attr::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::UseHttps) {
+            rules::suspicious::use_https::check(element, self);
+        }
+
         if self.is_rule_enabled(Rule::UppercaseFormMethod) {
             rules::style::uppercase_form_method::check(element, self);
         }

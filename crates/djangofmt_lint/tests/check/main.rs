@@ -49,7 +49,10 @@ fn check_invalid() {
     });
 }
 
-/// Snapshots the post-fix source for each `*.invalid.html` fixture whose rule applies a safe fix.
+/// Snapshots the post-fix source for each `*.invalid.html` fixture that produces a fix.
+///
+/// Safe fixes are snapshot as `{stem}.fixed`;
+/// Unsafe fixes are snapshot as `{stem}.unsafe-fixed`;
 #[test]
 fn fix_snapshot() {
     glob!("**/*.invalid.html", |path| {
@@ -58,15 +61,21 @@ fn fix_snapshot() {
         let ast = parser
             .parse_root()
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
-        let result = fix_ast(&input, &ast, &Settings::default(), Applicability::Safe);
-        if result.applied_count == 0 {
-            return;
+        let stem = path.file_stem().unwrap().to_str().unwrap();
+
+        let safe = fix_ast(&input, &ast, &Settings::default(), Applicability::Safe);
+        if safe.applied_count > 0 {
+            build_settings(path).bind(|| {
+                assert_snapshot!(format!("{stem}.fixed"), safe.output);
+            });
         }
-        build_settings(path).bind(|| {
-            let stem = path.file_stem().unwrap().to_str().unwrap();
-            let name = format!("{stem}.fixed");
-            assert_snapshot!(name, result.output);
-        });
+
+        let unsafe_fixed = fix_ast(&input, &ast, &Settings::default(), Applicability::Unsafe);
+        if unsafe_fixed.applied_count > safe.applied_count {
+            build_settings(path).bind(|| {
+                assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
+            });
+        }
     });
 }
 
