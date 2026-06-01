@@ -12,8 +12,9 @@
 <img srcset="http://localhost:5173/a.png 1x, https://example.com/b.png 2x" alt="" width="0" height="0">
 
 <!-- Relative and root-relative URLs -->
-<a href="/page/">Link</a>
 <a href="page.html">Link</a>
+<!-- `/page/` is a root-relative path django-url-pattern flags; `<area>` is out of its scope -->
+<area href="/page/">
 <img src="/assets/logo.png" alt="" width="0" height="0">
 
 <!-- Protocol-relative URLs (caller defers to surrounding page scheme) -->
@@ -27,8 +28,9 @@
 <a href="ftp://example.com">FTP</a>
 <a href="#section">Anchor</a>
 
-<!-- No false positive when `http://` appears mid-value rather than as the scheme -->
-<a href="/redirect?to=http://example.com">Link</a>
+<!-- No false positive when `http://` appears mid-value rather than as the scheme
+     (`<area>` keeps this internal path out of django-url-pattern's scope) -->
+<area href="/redirect?to=http://example.com">
 <meta name="description" content="See http://example.com for details">
 
 <!-- Interpolation without a literal `http://` prefix is not flagged -->

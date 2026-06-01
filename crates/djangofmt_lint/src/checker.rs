@@ -109,6 +109,10 @@ impl<'a> Checker<'a> {
             rules::suspicious::django_static_url::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::DjangoUrlPattern) {
+            rules::suspicious::django_url_pattern::check(element, self);
+        }
+
         if self.is_rule_enabled(Rule::JavascriptUrl) {
             rules::suspicious::javascript_url::check(element, self);
         }

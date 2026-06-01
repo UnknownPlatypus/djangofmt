@@ -1,0 +1,53 @@
+<!-- a/href: hardcoded absolute path -->
+<a href="/profile/">Profile</a>
+<a href="/accounts/login/">Login</a>
+
+<!-- a/href: query string still counts as an internal URL -->
+<a href="/Collections?handler=RemoveAgreement&id=42">Link</a>
+<a href="/path?param=value">Link</a>
+
+<!-- a/href: a trailing fragment identifier does not exempt the hardcoded path -->
+<a href="/profile/#section">Link</a>
+
+<!-- a/href: hardcoded relative path (no leading slash) -->
+<a href="profile/">Profile</a>
+
+<!-- form/action: hardcoded absolute path -->
+<form action="/submit/"></form>
+<form action="/login/"></form>
+
+<!-- div/span/input data-url and data-src -->
+<div data-src="/table/task/log/"></div>
+<div data-url="/api/items/"></div>
+<span data-url="/api/widgets/"></span>
+<input data-url="/api/things/">
+
+<!-- href on div/span/input is in scope -->
+<div href="/page/">Link</div>
+<span href="/page/">Link</span>
+<input href="/page/">
+
+<!-- action on a/div/span/input is in scope -->
+<a action="/submit/">Link</a>
+<div action="/submit/">Link</div>
+
+<!-- Case-insensitive on tag and attribute names -->
+<A HREF="/page/">Link</A>
+
+<!-- Inside a Jinja block (literal value still flagged) -->
+{% if show_link %}
+    <a href="/page/">Link</a>
+{% endif %}
+
+<!-- Real-world: django-allauth's default auth routes hardcoded as form actions instead of
+     `{% url 'account_login' %}` / `{% url 'account_signup' %}`. This shape recurs across public
+     Django templates (e.g. wireguard_webadmin, hydroshare, trunk-player, Webolith). -->
+<form action="/accounts/login/" method="post"></form>
+<form action="/accounts/signup/" method="post"></form>
+
+<!-- Real-world: hardcoded routes found smoke testing a production Django project — a hyphenated
+     slug route, a root-relative route with no trailing slash, and a form posting to a path that
+     carries a query string. Each should resolve a named pattern through `{% url %}`. -->
+<a href="/gaz-propane-en-citerne/">Propane</a>
+<a href="/devenir-partenaire">Become a partner</a>
+<form method="post" action="/widgetform?form_type=keyword_city"></form>

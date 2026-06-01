@@ -1,4 +1,5 @@
 pub mod django_static_url;
+pub mod django_url_pattern;
 pub mod duplicate_attr;
 pub mod empty_tag_pair;
 pub mod javascript_url;

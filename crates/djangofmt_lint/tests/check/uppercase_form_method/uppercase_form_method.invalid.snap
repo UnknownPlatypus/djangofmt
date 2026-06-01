@@ -94,7 +94,7 @@ Error:
 Error: 
   × Form method `POST` should be lowercase.
     ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:20:13]
- 19 │     action="/submit/"
+ 19 │     action="{% url 'submit' %}"
  20 │     method="POST"
     ·             ──┬─
     ·               ╰── here

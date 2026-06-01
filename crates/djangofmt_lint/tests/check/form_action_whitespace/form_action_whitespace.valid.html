@@ -1,5 +1,5 @@
 <!-- No surrounding whitespace -->
-<form action="/submit/"></form>
+<form action="{% url 'submit' %}"></form>
 <form action=""></form>
 <form action="https://example.com/submit/"></form>
 
@@ -38,5 +38,5 @@
 <!-- Multiline form, trimmed value -->
 <form
     method="post"
-    action="/submit/"
+    action="{% url 'submit' %}"
 ></form>

@@ -19,7 +19,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- Multiline form with uppercase method -->
 <form
-    action="/submit/"
+    action="{% url 'submit' %}"
     method="post"
 ></form>
 
