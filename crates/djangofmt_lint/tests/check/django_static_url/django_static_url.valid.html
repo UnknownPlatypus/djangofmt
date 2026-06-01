@@ -1,0 +1,40 @@
+<!-- Correct {% static %} usage -->
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/app.css' %}">
+<img src="{% static 'img/logo.png' %}">
+<script src="{% static 'js/app.js' %}"></script>
+<source srcset="{% static 'img/picture.webp' %}">
+
+<!-- Interpolated values are dynamic -->
+<link rel="stylesheet" href="{{ asset_url }}">
+<img src="{{ static_url }}/img/logo.png">
+<img src="{% if x %}/static/a.png{% else %}/static/b.png{% endif %}">
+
+<!-- srcset: multi-candidate lists with no hardcoded static path -->
+<img srcset="https://cdn.example.com/a.png 1x, https://cdn.example.com/b.png 2x">
+<img srcset="{% static 'img/a.png' %} 1x, {% static 'img/b.png' %} 2x">
+
+<!-- External absolute URLs -->
+<link rel="stylesheet" href="https://cdn.example.com/static/app.css">
+<img src="https://example.com/static/logo.png">
+<script src="//cdn.example.com/js/app.js"></script>
+
+<!-- Other absolute paths that look similar but are not under /static/ -->
+<img src="/staticpages/intro.png">
+<img src="/media/uploads/avatar.png">
+<link rel="icon" href="/favicon.ico">
+
+<!-- Path is case-sensitive: only lowercase `static/` is the documented prefix -->
+<img src="/Static/img/logo.png">
+<img src="/STATIC/img/logo.png">
+
+<!-- href without a value -->
+<link href>
+
+<!-- Tags outside the asset-element scope: same attribute, different element -->
+<a href="/static/docs.pdf">Static doc</a>
+<iframe src="/static/inner.html"></iframe>
+
+<!-- Attributes outside the URL-attribute scope on in-scope tags -->
+<link rel="canonical" data-url="/static/page.html">
+<img alt="/static/img/logo.png">

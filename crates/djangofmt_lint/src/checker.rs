@@ -105,6 +105,10 @@ impl<'a> Checker<'a> {
             rules::style::redundant_type_attr::check(element, self);
         }
 
+        if self.is_rule_enabled(Rule::DjangoStaticUrl) {
+            rules::suspicious::django_static_url::check(element, self);
+        }
+
         if self.is_rule_enabled(Rule::JavascriptUrl) {
             rules::suspicious::javascript_url::check(element, self);
         }

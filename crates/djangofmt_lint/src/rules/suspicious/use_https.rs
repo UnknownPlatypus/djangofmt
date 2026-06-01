@@ -5,6 +5,7 @@ use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::srcset_candidates;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -104,19 +105,6 @@ fn canonical_url_attr(name: &str) -> Option<&'static str> {
         .iter()
         .copied()
         .find(|c| c.eq_ignore_ascii_case(name))
-}
-
-/// Yields each `srcset` candidate URL with its byte offset in the source.
-/// Candidates are comma-separated; the URL is the first token of each.
-fn srcset_candidates(value: &str, base: usize) -> impl Iterator<Item = (&str, usize)> {
-    let mut pos = 0;
-    value.split(',').filter_map(move |candidate| {
-        let start = pos;
-        pos += candidate.len() + 1; // skip the candidate and its `,`
-        let trimmed = candidate.trim_start_matches(|c: char| c.is_ascii_whitespace());
-        let url = trimmed.split_ascii_whitespace().next()?;
-        Some((url, base + start + candidate.len() - trimmed.len()))
-    })
 }
 
 /// Reports (and offers a fix for) a URL that uses the insecure `http://` scheme.

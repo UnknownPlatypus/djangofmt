@@ -244,6 +244,7 @@ define_rules! {
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
     (EmptyAttrValue, rules::style::empty_attr_value::EmptyAttrValue<'static>),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
+    (DjangoStaticUrl, rules::suspicious::django_static_url::DjangoStaticUrl),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
     (DuplicateAttr, rules::suspicious::duplicate_attr::DuplicateAttr),
     (UseHttps, rules::suspicious::use_https::UseHttps),
