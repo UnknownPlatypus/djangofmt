@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 11 lint error(s)
+  × Found 10 lint error(s)
 
 Error: 
   × Empty `<div>` tag pair.
@@ -61,7 +61,7 @@ Error:
 Error: 
   × Empty `<script>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:21:2]
- 20 │ <!-- Raw-text elements with no attribute and no content -->
+ 20 │ <!-- Empty inline `<script>`/`<style>` with no attribute do nothing -->
  21 │ <script></script>
     ·  ───┬──
     ·     ╰── here
@@ -76,48 +76,37 @@ Error:
  22 │ <style></style>
     ·  ──┬──
     ·    ╰── here
- 23 │ <textarea></textarea>
-    ╰────
-  help: Remove the empty tag pair or add content.
-
-Error: 
-  × Empty `<textarea>` tag pair.
-    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:23:2]
- 22 │ <style></style>
- 23 │ <textarea></textarea>
-    ·  ────┬───
-    ·      ╰── here
- 24 │ 
+ 23 │ 
     ╰────
   help: Remove the empty tag pair or add content.
 
 Error: 
   × Empty `<button>` tag pair.
-    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:26:2]
- 25 │ <!-- Form controls without an accessible name -->
- 26 │ <button></button>
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:25:2]
+ 24 │ <!-- Form controls without an accessible name -->
+ 25 │ <button></button>
     ·  ───┬──
     ·     ╰── here
- 27 │ 
+ 26 │ 
     ╰────
   help: Remove the empty tag pair or add content.
 
 Error: 
   × Empty `<section>` tag pair.
-    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:29:2]
- 28 │ <!-- Generic containers without identifying attributes -->
- 29 │ <section></section>
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:28:2]
+ 27 │ <!-- Generic containers without identifying attributes -->
+ 28 │ <section></section>
     ·  ───┬───
     ·     ╰── here
- 30 │ <aside></aside>
+ 29 │ <aside></aside>
     ╰────
   help: Remove the empty tag pair or add content.
 
 Error: 
   × Empty `<aside>` tag pair.
-    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:30:2]
- 29 │ <section></section>
- 30 │ <aside></aside>
+    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:29:2]
+ 28 │ <section></section>
+ 29 │ <aside></aside>
     ·  ──┬──
     ·    ╰── here
     ╰────

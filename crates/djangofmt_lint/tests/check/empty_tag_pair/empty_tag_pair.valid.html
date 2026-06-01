@@ -58,6 +58,26 @@
     </tr>
 </table>
 
+<!-- Form controls start empty (or are populated by a script) as their normal state;
+     `<option></option>` is a common blank placeholder -->
+<textarea></textarea>
+<select></select>
+<output></output>
+<option></option>
+
+<!-- `<pre>` preserves whitespace, so a whitespace-only `<pre>` is meaningful, not empty -->
+<pre>   </pre>
+
+<!-- `<canvas>` is a script-rendered surface; its children are fallback content only -->
+<canvas></canvas>
+
+<!-- `<slot>` with no name is a web component's default slot -->
+<slot></slot>
+
+<!-- Exemptions are case-insensitive too -->
+<TEXTAREA></TEXTAREA>
+<CANVAS></CANVAS>
+
 <!-- Jinja control flow inside an element is dynamic content -->
 <div>{% if user %}Hello, {{ user.name }}{% endif %}</div>
 <span>{% block title %}{% endblock %}</span>

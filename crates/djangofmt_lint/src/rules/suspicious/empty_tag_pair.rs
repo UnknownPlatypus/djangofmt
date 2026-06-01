@@ -8,13 +8,23 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// Checks for non-void elements with no attributes whose open and close tags wrap no content.
 ///
 /// ## Why is this bad?
-/// A bare `<tag></tag>` pair renders nothing and carries no metadata, so it is almost always
-/// either leftover scaffolding or a typo. Remove it (or replace it with a self-closing element
-/// where appropriate) to keep the template intentional and easier to scan.
+/// A bare `<tag></tag>` pair renders nothing, so it is often leftover scaffolding or a typo.
+/// The HTML specification recommends, "as a general rule," that such elements contain at least
+/// one node of palpable content. That is explicitly *not* a hard requirement — an element may
+/// be empty legitimately "when it is used as a placeholder which will later be filled in by a
+/// script, or when the element is part of a template" — so this rule is a heuristic and stays
+/// in preview.
 ///
-/// Whitespace-only content (newlines, indentation) is treated as empty, matching the way the
-/// browser would render the element. Cells used to preserve table or list structure
-/// (`<td>`, `<li>`, `<th>`, `<dt>`, `<dd>`) are exempt.
+/// To keep false positives low, an element is only reported when it has **no attributes**. An
+/// `id`, `class`, `data-*` hook, or any other attribute signals the empty element is
+/// intentional (a CSS/JS hook, a custom element, an external `<script src>`, ...).
+///
+/// Whitespace-only content (newlines, indentation) is treated as empty. Tags whose empty form
+/// is normal rather than suspicious are exempt: structural cells (`<td>`, `<th>`, `<li>`,
+/// `<dt>`, `<dd>`), form controls that start empty or are populated by a script (`<textarea>`,
+/// `<select>`, `<output>`, `<option>`), the script-rendered `<canvas>` surface, and the
+/// web-component default `<slot>`. `<pre>` is also exempt because whitespace is significant
+/// there, so a whitespace-only `<pre>` is not actually empty.
 ///
 /// ## Example
 /// ```html
@@ -32,7 +42,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [HTML spec: void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements)
 /// - [HTML spec: palpable content](https://html.spec.whatwg.org/multipage/dom.html#palpable-content)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(preview_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct EmptyTagPair {
     pub tag: String,
 }
@@ -51,8 +61,18 @@ impl Violation for EmptyTagPair {
     }
 }
 
-/// Tags commonly left empty to preserve table or list structure.
-const EXCLUDED_TAGS: &[&str] = &["td", "li", "th", "dt", "dd"];
+/// Tags whose empty form is legitimate rather than suspicious.
+///
+/// - `td`, `th`, `li`, `dt`, `dd`: kept empty to preserve table or list structure.
+/// - `textarea`, `select`, `output`, `option`: form controls whose empty or script-populated
+///   state is their normal initial state (`<option></option>` is a common blank placeholder).
+/// - `canvas`: a script-rendered drawing surface whose children are fallback content only.
+/// - `slot`: the default slot of a web component.
+/// - `pre`: whitespace is significant, so a whitespace-only `<pre>` renders meaningful content
+///   and is not "empty".
+const EXCLUDED_TAGS: &[&str] = &[
+    "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
+];
 
 fn is_excluded_tag(tag: &str) -> bool {
     EXCLUDED_TAGS
