@@ -10,11 +10,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// hardcoded `static/` path instead of going through Django's `{% static %}` template tag.
 ///
 /// ## Why is this bad?
-/// Hardcoding `/static/...` couples templates to a single value of Django's `STATIC_URL` setting.
+/// Hardcoding `/static` couples templates to a single value of Django's `STATIC_URL` setting.
 /// Projects that serve assets from a CDN, version assets with `ManifestStaticFilesStorage`, or
-/// mount static files under a different prefix end up with broken or unfingerprinted URLs. The
-/// `{% static %}` tag resolves the configured storage backend at render time, so the same template
-/// works across environments.
+/// mount static files under a different prefix end up with broken URLs.
 ///
 /// ## Example
 /// ```html
@@ -72,9 +70,11 @@ fn starts_with_static_path(value: &str) -> bool {
 }
 
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+    // Fast-path to skip processing tag that cannot have a static url.
     if !is_asset_tag(element.tag_name) {
         return;
     }
+
     for attr in &element.attrs {
         let Attribute::Native(NativeAttribute {
             name,
@@ -84,9 +84,9 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         else {
             continue;
         };
+
         let Some(canonical) = URL_ATTRIBUTES
             .iter()
-            .copied()
             .find(|candidate| candidate.eq_ignore_ascii_case(name))
         else {
             continue;
@@ -94,7 +94,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
 
         // `srcset` is a comma-separated candidate list; every other attribute
         // holds a single URL.
-        if canonical == "srcset" {
+        if *canonical == "srcset" {
             for (url, at) in srcset_candidates(value_str, *offset) {
                 report_static_path(url, at, canonical, checker);
             }
