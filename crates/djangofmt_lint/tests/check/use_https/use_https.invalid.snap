@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 31 lint error(s)
+  × Found 35 lint error(s)
 
 Error: 
   × Avoid `http://` URLs in `href`.
@@ -204,7 +204,7 @@ Error:
 Error: 
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:39:14]
- 38 │ <!-- srcset with multiple descriptors — the value still starts with http:// -->
+ 38 │ <!-- srcset candidates are checked independently: every http:// entry is flagged -->
  39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
     ·              ───┬───
     ·                 ╰── here
@@ -213,131 +213,175 @@ Error:
   help: Use `https://` instead.
 
 Error: 
-  × Avoid `http://` URLs in `href`.
-    ╭─[tests/check/use_https/use_https.invalid.html:42:10]
- 41 │ <!-- Literal `http://` prefix followed by interpolation in the body is unambiguously insecure -->
- 42 │ <a href="http://{{ host }}/page">Link</a>
-    ·          ───┬───
-    ·             ╰── here
+  × Avoid `http://` URLs in `srcset`.
+    ╭─[tests/check/use_https/use_https.invalid.html:39:43]
+ 38 │ <!-- srcset candidates are checked independently: every http:// entry is flagged -->
+ 39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
+    ·                                           ───┬───
+    ·                                              ╰── here
+ 40 │ 
+    ╰────
+  help: Use `https://` instead.
+
+Error: 
+  × Avoid `http://` URLs in `srcset`.
+    ╭─[tests/check/use_https/use_https.invalid.html:42:44]
+ 41 │ <!-- srcset insecure candidate after a secure one — must still be flagged -->
+ 42 │ <img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x">
+    ·                                            ───┬───
+    ·                                               ╰── here
  43 │ 
     ╰────
   help: Use `https://` instead.
 
 Error: 
-  × Avoid `http://` URLs in `href`.
-    ╭─[tests/check/use_https/use_https.invalid.html:46:14]
- 45 │ {% if show_link %}
- 46 │     <a href="http://example.com">Link</a>
+  × Avoid `http://` URLs in `srcset`.
+    ╭─[tests/check/use_https/use_https.invalid.html:45:14]
+ 44 │ <!-- srcset without descriptors, comma-separated -->
+ 45 │ <img srcset="http://example.com/a.png, http://example.com/b.png">
     ·              ───┬───
     ·                 ╰── here
- 47 │ {% endif %}
+ 46 │ 
+    ╰────
+  help: Use `https://` instead.
+
+Error: 
+  × Avoid `http://` URLs in `srcset`.
+    ╭─[tests/check/use_https/use_https.invalid.html:45:40]
+ 44 │ <!-- srcset without descriptors, comma-separated -->
+ 45 │ <img srcset="http://example.com/a.png, http://example.com/b.png">
+    ·                                        ───┬───
+    ·                                           ╰── here
+ 46 │ 
+    ╰────
+  help: Use `https://` instead.
+
+Error: 
+  × Avoid `http://` URLs in `href`.
+    ╭─[tests/check/use_https/use_https.invalid.html:48:10]
+ 47 │ <!-- Literal `http://` prefix followed by interpolation in the body is unambiguously insecure -->
+ 48 │ <a href="http://{{ host }}/page">Link</a>
+    ·          ───┬───
+    ·             ╰── here
+ 49 │ 
+    ╰────
+  help: Use `https://` instead.
+
+Error: 
+  × Avoid `http://` URLs in `href`.
+    ╭─[tests/check/use_https/use_https.invalid.html:52:14]
+ 51 │ {% if show_link %}
+ 52 │     <a href="http://example.com">Link</a>
+    ·              ───┬───
+    ·                 ╰── here
+ 53 │ {% endif %}
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `src`.
-    ╭─[tests/check/use_https/use_https.invalid.html:50:14]
- 49 │ <!-- Real world example -->
- 50 │ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+    ╭─[tests/check/use_https/use_https.invalid.html:56:14]
+ 55 │ <!-- Real world example -->
+ 56 │ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
     ·              ───┬───
     ·                 ╰── here
- 51 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
+ 57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `href`.
-    ╭─[tests/check/use_https/use_https.invalid.html:51:24]
- 50 │ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
- 51 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
+    ╭─[tests/check/use_https/use_https.invalid.html:57:24]
+ 56 │ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
+ 57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
     ·                        ───┬───
     ·                           ╰── here
- 52 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `src`.
-    ╭─[tests/check/use_https/use_https.invalid.html:52:11]
- 51 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
- 52 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+    ╭─[tests/check/use_https/use_https.invalid.html:58:11]
+ 57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
     ·           ───┬───
     ·              ╰── here
- 53 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
+ 59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Redundant type="text/javascript" on <script> tag.
-    ╭─[tests/check/use_https/use_https.invalid.html:53:15]
- 52 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
- 53 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
+    ╭─[tests/check/use_https/use_https.invalid.html:59:15]
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
     ·               ───────┬───────
     ·                      ╰── here
- 54 │ <script src="http://d3js.org/d3.v3.min.js"></script>
+ 60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
 Error: 
   × Avoid `http://` URLs in `src`.
-    ╭─[tests/check/use_https/use_https.invalid.html:53:51]
- 52 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
- 53 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
+    ╭─[tests/check/use_https/use_https.invalid.html:59:51]
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
     ·                                                   ───┬───
     ·                                                      ╰── here
- 54 │ <script src="http://d3js.org/d3.v3.min.js"></script>
+ 60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `src`.
-    ╭─[tests/check/use_https/use_https.invalid.html:54:14]
- 53 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
- 54 │ <script src="http://d3js.org/d3.v3.min.js"></script>
+    ╭─[tests/check/use_https/use_https.invalid.html:60:14]
+ 59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
+ 60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
     ·              ───┬───
     ·                 ╰── here
- 55 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
+ 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `src`.
-    ╭─[tests/check/use_https/use_https.invalid.html:55:11]
- 54 │ <script src="http://d3js.org/d3.v3.min.js"></script>
- 55 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
+    ╭─[tests/check/use_https/use_https.invalid.html:61:11]
+ 60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
+ 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
     ·           ───┬───
     ·              ╰── here
- 56 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
+ 62 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `href`.
-    ╭─[tests/check/use_https/use_https.invalid.html:56:10]
- 55 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
- 56 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
+    ╭─[tests/check/use_https/use_https.invalid.html:62:10]
+ 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
+ 62 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
     ·          ───┬───
     ·             ╰── here
- 57 │ 
+ 63 │ 
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `href`.
-    ╭─[tests/check/use_https/use_https.invalid.html:59:10]
- 58 │ <!-- Loopback look-alike are still flagged: the host only resembles localhost -->
- 59 │ <a href="http://localhost.evil.com/admin">Phishing</a>
+    ╭─[tests/check/use_https/use_https.invalid.html:65:10]
+ 64 │ <!-- Loopback look-alike are still flagged: the host only resembles localhost -->
+ 65 │ <a href="http://localhost.evil.com/admin">Phishing</a>
     ·          ───┬───
     ·             ╰── here
- 60 │ <a href="http://127.0.0.1.evil.com/">Spoof</a>
+ 66 │ <a href="http://127.0.0.1.evil.com/">Spoof</a>
     ╰────
   help: Use `https://` instead.
 
 Error: 
   × Avoid `http://` URLs in `href`.
-    ╭─[tests/check/use_https/use_https.invalid.html:60:10]
- 59 │ <a href="http://localhost.evil.com/admin">Phishing</a>
- 60 │ <a href="http://127.0.0.1.evil.com/">Spoof</a>
+    ╭─[tests/check/use_https/use_https.invalid.html:66:10]
+ 65 │ <a href="http://localhost.evil.com/admin">Phishing</a>
+ 66 │ <a href="http://127.0.0.1.evil.com/">Spoof</a>
     ·          ───┬───
     ·             ╰── here
     ╰────

@@ -35,8 +35,14 @@
 <!-- Multiple flagged attributes on the same element -->
 <a href="http://example.com" data-url="http://example.com">Link</a>
 
-<!-- srcset with multiple descriptors — the value still starts with http:// -->
+<!-- srcset candidates are checked independently: every http:// entry is flagged -->
 <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
+
+<!-- srcset insecure candidate after a secure one — must still be flagged -->
+<img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x">
+
+<!-- srcset without descriptors, comma-separated -->
+<img srcset="http://example.com/a.png, http://example.com/b.png">
 
 <!-- Literal `http://` prefix followed by interpolation in the body is unambiguously insecure -->
 <a href="http://{{ host }}/page">Link</a>

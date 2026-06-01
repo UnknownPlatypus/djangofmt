@@ -63,9 +63,6 @@ impl Violation for UseHttps {
 const HTTP_SCHEME: &str = "http://";
 const HTTPS_SCHEME: &str = "https://";
 
-/// Attributes whose value is a URL subject to the HTTPS check.
-const URL_ATTRIBUTES: &[&str] = &["href", "data-url", "action", "src", "url", "srcset"];
-
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     for attr in &element.attrs {
         let Attribute::Native(NativeAttribute {
@@ -77,35 +74,67 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
             continue;
         };
 
-        let Some(canonical) = URL_ATTRIBUTES
-            .iter()
-            .find(|candidate| candidate.eq_ignore_ascii_case(name))
-        else {
+        let Some(canonical) = canonical_url_attr(name) else {
             continue;
         };
 
-        let trimmed = value_str.trim_start_matches(|c: char| c.is_ascii_whitespace());
-        if trimmed
-            .get(..HTTP_SCHEME.len())
-            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(HTTP_SCHEME))
-        {
-            if is_local_host(&trimmed[HTTP_SCHEME.len()..]) {
-                continue;
+        // `srcset` is a comma-separated candidate list; every other attribute
+        // holds a single URL.
+        if canonical == "srcset" {
+            for (url, at) in srcset_candidates(value_str, *offset) {
+                report_http_scheme(url, at, canonical, checker);
             }
-            let leading_ws = value_str.len() - trimmed.len();
-            let scheme_span = (*offset + leading_ws, HTTP_SCHEME.len());
-            let mut guard = checker.report_diagnostic(
-                &UseHttps {
-                    attribute: canonical,
-                },
-                scheme_span.into(),
-            );
-            guard.set_fix(Fix::unsafe_edit(Edit::replacement(
-                HTTPS_SCHEME,
-                scheme_span.into(),
-            )));
+        } else {
+            report_http_scheme(value_str, *offset, canonical, checker);
         }
     }
+}
+
+/// The canonical name if `name` is a URL-bearing attribute, else `None`.
+/// Matching on length first rejects non-URL attributes (the common case) cheaply.
+fn canonical_url_attr(name: &str) -> Option<&'static str> {
+    let candidates: &[&str] = match name.len() {
+        3 => &["src", "url"],
+        4 => &["href"],
+        6 => &["action", "srcset"],
+        8 => &["data-url"],
+        _ => return None,
+    };
+    candidates
+        .iter()
+        .copied()
+        .find(|c| c.eq_ignore_ascii_case(name))
+}
+
+/// Yields each `srcset` candidate URL with its byte offset in the source.
+/// Candidates are comma-separated; the URL is the first token of each.
+fn srcset_candidates(value: &str, base: usize) -> impl Iterator<Item = (&str, usize)> {
+    let mut pos = 0;
+    value.split(',').filter_map(move |candidate| {
+        let start = pos;
+        pos += candidate.len() + 1; // skip the candidate and its `,`
+        let trimmed = candidate.trim_start_matches(|c: char| c.is_ascii_whitespace());
+        let url = trimmed.split_ascii_whitespace().next()?;
+        Some((url, base + start + candidate.len() - trimmed.len()))
+    })
+}
+
+/// Reports (and offers a fix for) a URL that uses the insecure `http://` scheme.
+/// `offset` is the byte offset of `url` in the source.
+fn report_http_scheme(url: &str, offset: usize, attribute: &'static str, checker: &Checker<'_>) {
+    let trimmed = url.trim_start_matches(|c: char| c.is_ascii_whitespace());
+    let Some(rest) = trimmed.get(HTTP_SCHEME.len()..) else {
+        return;
+    };
+    if !trimmed[..HTTP_SCHEME.len()].eq_ignore_ascii_case(HTTP_SCHEME) || is_local_host(rest) {
+        return;
+    }
+    let scheme_span = (offset + url.len() - trimmed.len(), HTTP_SCHEME.len());
+    let mut guard = checker.report_diagnostic(&UseHttps { attribute }, scheme_span.into());
+    guard.set_fix(Fix::unsafe_edit(Edit::replacement(
+        HTTPS_SCHEME,
+        scheme_span.into(),
+    )));
 }
 
 /// Whether the authority of a URL (the part after `http://`) refers to the local machine.

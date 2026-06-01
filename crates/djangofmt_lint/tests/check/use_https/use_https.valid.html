@@ -5,6 +5,12 @@
 <script src="https://cdn.example.com/lib.js"></script>
 <link href="https://cdn.example.com/style.css" rel="stylesheet">
 
+<!-- srcset with every candidate secure -->
+<img srcset="https://example.com/a.png 1x, https://example.com/b.png 2x">
+
+<!-- srcset whose only http candidate points at a loopback host -->
+<img srcset="http://localhost:5173/a.png 1x, https://example.com/b.png 2x">
+
 <!-- Relative and root-relative URLs -->
 <a href="/page/">Link</a>
 <a href="page.html">Link</a>
