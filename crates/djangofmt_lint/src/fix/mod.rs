@@ -8,6 +8,7 @@
 //! resolves overlap conflicts in a single forward pass.
 
 pub mod apply;
+pub mod edits;
 
 use std::cmp::Ordering;
 
