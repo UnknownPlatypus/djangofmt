@@ -25,10 +25,7 @@ impl RuleSet {
     #[inline]
     pub const fn from_rule(rule: Rule) -> Self {
         let mut set = Self([0u64; RULESET_SIZE]);
-        let rule = rule as u16;
-        let index = rule as usize / SLICE_BITS as usize;
-        let shift = rule % SLICE_BITS;
-        set.0[index] |= 1u64 << shift;
+        set.insert(rule);
         set
     }
 
@@ -112,19 +109,25 @@ impl Iterator for RuleSetIterator {
     type Item = Rule;
 
     fn next(&mut self) -> Option<Rule> {
-        // Skip fully-consumed words.
-        while self.word == 0 {
-            self.word_index += 1;
-            if self.word_index >= RULESET_SIZE {
-                return None;
+        loop {
+            // Skip fully-consumed words.
+            while self.word == 0 {
+                self.word_index += 1;
+                if self.word_index >= RULESET_SIZE {
+                    return None;
+                }
+                self.word = self.set.0[self.word_index];
             }
-            self.word = self.set.0[self.word_index];
+            let bit = self.word.trailing_zeros();
+            // Clear the lowest set bit.
+            self.word &= self.word - 1;
+            let global_index = self.word_index * SLICE_BITS as usize + bit as usize;
+            // A bit with no matching `Rule` (e.g. padding in the final word) is
+            // skipped rather than ending iteration.
+            #[allow(clippy::cast_possible_truncation)]
+            if let Some(rule) = Rule::from_repr(global_index as u16) {
+                return Some(rule);
+            }
         }
-        let bit = self.word.trailing_zeros();
-        // Clear the lowest set bit.
-        self.word &= self.word - 1;
-        let global_index = self.word_index * SLICE_BITS as usize + bit as usize;
-        #[allow(clippy::cast_possible_truncation)]
-        Rule::from_repr(global_index as u16)
     }
 }
