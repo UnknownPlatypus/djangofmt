@@ -49,6 +49,19 @@ pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
     code: include_str!("../resources/zulip/upgrade.html"),
     profile: Profile::Jinja,
 };
+
+pub static ALL_TEMPLATES: [&TestFile; 9] = [
+    &DJANGO_TEMPLATE_SMALL,
+    &DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
+    &DJANGO_TEMPLATE_LARGE,
+    &DJANGO_TEMPLATE_DEEPLY_NESTED,
+    &DJANGO_TEMPLATE_TAG_DENSE,
+    &DJANGO_TEMPLATE_FORM_HEAVY,
+    &DJANGO_TEMPLATE_ATTR_DENSE,
+    &JINJA_TEMPLATE_FORM_HEAVY,
+    &JINJA_TEMPLATE_LARGE,
+];
+
 #[derive(Clone)]
 pub struct TestFile {
     pub name: &'static str,
