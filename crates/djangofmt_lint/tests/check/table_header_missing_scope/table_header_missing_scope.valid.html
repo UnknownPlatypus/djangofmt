@@ -1,0 +1,57 @@
+<!-- scope="col" header -->
+<table>
+    <tr><th scope="col">Name</th><th scope="col">Email</th></tr>
+    <tr><td>Ada</td><td>ada@example.com</td></tr>
+</table>
+
+<!-- scope="row" header -->
+<table>
+    <tr><th scope="row">Total</th><td>42</td></tr>
+</table>
+
+<!-- Case-insensitive scope attribute name -->
+<table>
+    <tr><th SCOPE="col">Name</th></tr>
+</table>
+
+<!-- Empty scope value still counts as present -->
+<table>
+    <tr><th scope="">Name</th></tr>
+</table>
+
+<!-- Boolean (valueless) scope attribute -->
+<table>
+    <tr><th scope>Name</th></tr>
+</table>
+
+<!-- scope value supplied via a Jinja interpolation -->
+<table>
+    <tr><th scope="{{ orientation }}">Name</th></tr>
+</table>
+
+<!-- scope alongside other attributes -->
+<table>
+    <tr><th class="font-bold" scope="col" id="col-name">Name</th></tr>
+</table>
+
+<!-- scope declared in each branch of a wrapping Jinja block -->
+<table>
+    <tr><th {% if vertical %}scope="row"{% else %}scope="col"{% endif %}>Name</th></tr>
+</table>
+
+<!-- scope declared inside a Jinja block alongside other attributes -->
+<table>
+    <tr><th {% if sortable %}scope="col" aria-sort="ascending"{% endif %}>Name</th></tr>
+</table>
+
+<!-- <td> data cells are never flagged -->
+<table>
+    <tr><td>Ada</td><td>ada@example.com</td></tr>
+</table>
+
+<!-- Tag names that merely start with "th" are not <th> -->
+<table>
+    <thead>
+        <tr><td>Header</td></tr>
+    </thead>
+</table>

@@ -1,0 +1,35 @@
+<!-- Bare <th> with no attributes -->
+<table>
+    <tr><th>Name</th><th>Email</th></tr>
+    <tr><td>Ada</td><td>ada@example.com</td></tr>
+</table>
+
+<!-- <th> with other attributes but no scope -->
+<table>
+    <tr><th class="font-bold" id="col-name">Name</th></tr>
+</table>
+
+<!-- Case-insensitive tag name -->
+<table>
+    <tr><TH>Name</TH></tr>
+</table>
+
+<!-- A look-alike attribute that is not scope -->
+<table>
+    <tr><th data-scope="col">Name</th></tr>
+</table>
+
+<!-- <th> inside <thead>/<tbody> structure -->
+<table>
+    <thead>
+        <tr><th>Name</th><th>Email</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Ada</td><td>ada@example.com</td></tr>
+    </tbody>
+</table>
+
+<!-- <th> with a Jinja interpolation in an unrelated attribute -->
+<table>
+    <tr><th class="{{ header_class }}">Name</th></tr>
+</table>
