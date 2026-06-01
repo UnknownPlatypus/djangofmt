@@ -40,7 +40,7 @@ Error:
   × Avoid `http://` URLs in `src`.
    ╭─[tests/check/use_https/use_https.invalid.html:7:11]
  6 │ <!-- img/src -->
- 7 │ <img src="http://example.com/logo.png">
+ 7 │ <img src="http://example.com/logo.png" alt="" width="0" height="0">
    ·           ───┬───
    ·              ╰── here
  8 │ 
@@ -76,7 +76,7 @@ Error:
  14 │ <a url="http://example.com">Link</a>
     ·         ───┬───
     ·            ╰── here
- 15 │ <img srcset="http://example.com/a.png 1x">
+ 15 │ <img srcset="http://example.com/a.png 1x" alt="" width="0" height="0">
     ╰────
   help: Use `https://` instead.
 
@@ -84,7 +84,7 @@ Error:
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:15:14]
  14 │ <a url="http://example.com">Link</a>
- 15 │ <img srcset="http://example.com/a.png 1x">
+ 15 │ <img srcset="http://example.com/a.png 1x" alt="" width="0" height="0">
     ·              ───┬───
     ·                 ╰── here
  16 │ 
@@ -142,7 +142,7 @@ Error:
  26 │ <a HREF="http://example.com">Link</a>
     ·          ───┬───
     ·             ╰── here
- 27 │ <IMG SrC="http://example.com/logo.png">
+ 27 │ <IMG SrC="http://example.com/logo.png" alt="" width="0" height="0">
     ╰────
   help: Use `https://` instead.
 
@@ -150,7 +150,7 @@ Error:
   × Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:27:11]
  26 │ <a HREF="http://example.com">Link</a>
- 27 │ <IMG SrC="http://example.com/logo.png">
+ 27 │ <IMG SrC="http://example.com/logo.png" alt="" width="0" height="0">
     ·           ───┬───
     ·              ╰── here
  28 │ 
@@ -205,7 +205,7 @@ Error:
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:39:14]
  38 │ <!-- srcset candidates are checked independently: every http:// entry is flagged -->
- 39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
+ 39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
     ·              ───┬───
     ·                 ╰── here
  40 │ 
@@ -216,7 +216,7 @@ Error:
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:39:43]
  38 │ <!-- srcset candidates are checked independently: every http:// entry is flagged -->
- 39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
+ 39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
     ·                                           ───┬───
     ·                                              ╰── here
  40 │ 
@@ -227,7 +227,7 @@ Error:
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:42:44]
  41 │ <!-- srcset insecure candidate after a secure one — must still be flagged -->
- 42 │ <img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x">
+ 42 │ <img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
     ·                                            ───┬───
     ·                                               ╰── here
  43 │ 
@@ -238,7 +238,7 @@ Error:
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:45:14]
  44 │ <!-- srcset without descriptors, comma-separated -->
- 45 │ <img srcset="http://example.com/a.png, http://example.com/b.png">
+ 45 │ <img srcset="http://example.com/a.png, http://example.com/b.png" alt="" width="0" height="0">
     ·              ───┬───
     ·                 ╰── here
  46 │ 
@@ -249,7 +249,7 @@ Error:
   × Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:45:40]
  44 │ <!-- srcset without descriptors, comma-separated -->
- 45 │ <img srcset="http://example.com/a.png, http://example.com/b.png">
+ 45 │ <img srcset="http://example.com/a.png, http://example.com/b.png" alt="" width="0" height="0">
     ·                                        ───┬───
     ·                                           ╰── here
  46 │ 
@@ -296,7 +296,7 @@ Error:
  57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
     ·                        ───┬───
     ·                           ╰── here
- 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
     ╰────
   help: Use `https://` instead.
 
@@ -304,7 +304,7 @@ Error:
   × Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:58:11]
  57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
- 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
     ·           ───┬───
     ·              ╰── here
  59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
@@ -314,7 +314,7 @@ Error:
 Error: 
   × Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/use_https/use_https.invalid.html:59:15]
- 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
  59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
     ·               ───────┬───────
     ·                      ╰── here
@@ -325,7 +325,7 @@ Error:
 Error: 
   × Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:59:51]
- 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+ 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
  59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
     ·                                                   ───┬───
     ·                                                      ╰── here
@@ -340,7 +340,7 @@ Error:
  60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
     ·              ───┬───
     ·                 ╰── here
- 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
+ 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1" alt="" width="0" height="0">
     ╰────
   help: Use `https://` instead.
 
@@ -348,7 +348,7 @@ Error:
   × Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:61:11]
  60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
- 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
+ 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1" alt="" width="0" height="0">
     ·           ───┬───
     ·              ╰── here
  62 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
@@ -358,7 +358,7 @@ Error:
 Error: 
   × Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:62:10]
- 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1">
+ 61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1" alt="" width="0" height="0">
  62 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
     ·          ───┬───
     ·             ╰── here

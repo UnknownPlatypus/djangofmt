@@ -1,23 +1,23 @@
 <!-- HTTPS URLs -->
 <a href="https://example.com">Link</a>
-<img src="https://example.com/logo.png">
+<img src="https://example.com/logo.png" alt="" width="0" height="0">
 <form action="https://example.com/submit"></form>
 <script src="https://cdn.example.com/lib.js"></script>
 <link href="https://cdn.example.com/style.css" rel="stylesheet">
 
 <!-- srcset with every candidate secure -->
-<img srcset="https://example.com/a.png 1x, https://example.com/b.png 2x">
+<img srcset="https://example.com/a.png 1x, https://example.com/b.png 2x" alt="" width="0" height="0">
 
 <!-- srcset whose only http candidate points at a loopback host -->
-<img srcset="http://localhost:5173/a.png 1x, https://example.com/b.png 2x">
+<img srcset="http://localhost:5173/a.png 1x, https://example.com/b.png 2x" alt="" width="0" height="0">
 
 <!-- Relative and root-relative URLs -->
 <a href="/page/">Link</a>
 <a href="page.html">Link</a>
-<img src="/assets/logo.png">
+<img src="/assets/logo.png" alt="" width="0" height="0">
 
 <!-- Protocol-relative URLs (caller defers to surrounding page scheme) -->
-<img src="//cdn.example.com/logo.png">
+<img src="//cdn.example.com/logo.png" alt="" width="0" height="0">
 <a href="//example.com">Link</a>
 
 <!-- Other schemes -->
@@ -63,6 +63,6 @@
 <!-- Loopback / localhost: http is fine here and https usually breaks local dev -->
 <a href="http://localhost:3000/admin">Admin</a>
 <script src="http://localhost:5173/@vite/client"></script>
-<img src="http://127.0.0.1:8080/preview.png">
+<img src="http://127.0.0.1:8080/preview.png" alt="" width="0" height="0">
 <a href="http://[::1]:8000/">IPv6 loopback</a>
 <a href="http://app.localhost/">.localhost TLD</a>

@@ -4,9 +4,9 @@
 <link rel="stylesheet" href="static/css/app.css">
 
 <!-- img/src -->
-<img src="/static/img/logo.png">
-<img src='/static/img/logo.png'>
-<img src="static/img/logo.png">
+<img src="/static/img/logo.png" alt="" width="0" height="0">
+<img src='/static/img/logo.png' alt="" width="0" height="0">
+<img src="static/img/logo.png" alt="" width="0" height="0">
 
 <!-- script/src -->
 <script src="/static/js/app.js"></script>
@@ -16,16 +16,16 @@
 <source srcset="/static/img/picture.webp">
 
 <!-- srcset: each candidate is scanned, even when the hardcoded path is not first -->
-<img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x">
+<img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
 <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
 
 <!-- Case-insensitive tag name -->
-<IMG src="/static/img/logo.png">
+<IMG src="/static/img/logo.png" alt="" width="0" height="0">
 
 <!-- Case-insensitive attribute name -->
-<img SRC="/static/img/logo.png">
+<img SRC="/static/img/logo.png" alt="" width="0" height="0">
 
 <!-- Inside a Jinja block -->
 {% if show_logo %}
-    <img src="/static/img/logo.png">
+    <img src="/static/img/logo.png" alt="" width="0" height="0">
 {% endif %}

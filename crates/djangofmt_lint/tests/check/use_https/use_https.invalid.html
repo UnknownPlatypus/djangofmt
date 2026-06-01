@@ -4,7 +4,7 @@
 <a href='http://example.com'>Link</a>
 
 <!-- img/src -->
-<img src="http://example.com/logo.png">
+<img src="http://example.com/logo.png" alt="" width="0" height="0">
 
 <!-- form/action -->
 <form action="http://example.com/submit"></form>
@@ -12,7 +12,7 @@
 <!-- data-url, url, srcset -->
 <div data-url="http://example.com"></div>
 <a url="http://example.com">Link</a>
-<img srcset="http://example.com/a.png 1x">
+<img srcset="http://example.com/a.png 1x" alt="" width="0" height="0">
 
 <!-- script/src and link/href -->
 <script src="http://cdn.example.com/lib.js"></script>
@@ -24,7 +24,7 @@
 
 <!-- Case-insensitive attribute name -->
 <a HREF="http://example.com">Link</a>
-<IMG SrC="http://example.com/logo.png">
+<IMG SrC="http://example.com/logo.png" alt="" width="0" height="0">
 
 <!-- Leading whitespace before scheme -->
 <a href="  http://example.com">Link</a>
@@ -36,13 +36,13 @@
 <a href="http://example.com" data-url="http://example.com">Link</a>
 
 <!-- srcset candidates are checked independently: every http:// entry is flagged -->
-<img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x">
+<img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
 
 <!-- srcset insecure candidate after a secure one — must still be flagged -->
-<img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x">
+<img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
 
 <!-- srcset without descriptors, comma-separated -->
-<img srcset="http://example.com/a.png, http://example.com/b.png">
+<img srcset="http://example.com/a.png, http://example.com/b.png" alt="" width="0" height="0">
 
 <!-- Literal `http://` prefix followed by interpolation in the body is unambiguously insecure -->
 <a href="http://{{ host }}/page">Link</a>
@@ -55,10 +55,10 @@
 <!-- Real world example -->
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
-<img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png">
+<img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
 <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<img src="http://stats.amusecode.org/piwik.php?idsite=1">
+<img src="http://stats.amusecode.org/piwik.php?idsite=1" alt="" width="0" height="0">
 <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
 
 <!-- Loopback look-alike are still flagged: the host only resembles localhost -->
