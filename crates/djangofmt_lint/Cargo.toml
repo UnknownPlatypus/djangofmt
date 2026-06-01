@@ -12,6 +12,7 @@ djangofmt_macros = { workspace = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
 rustc-hash = { workspace = true }
+rustywind_core = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
