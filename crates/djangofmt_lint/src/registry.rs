@@ -260,4 +260,5 @@ define_rules! {
     (MissingTitle, rules::accessibility::missing_title::MissingTitle),
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
     (MissingImgDimensions, rules::accessibility::missing_img_dimensions::MissingImgDimensions),
+    (TableHeaderMissingScope, rules::accessibility::table_header_missing_scope::TableHeaderMissingScope),
 }
