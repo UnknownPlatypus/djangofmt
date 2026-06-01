@@ -53,17 +53,14 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    let has_height = element
-        .attrs
-        .iter()
-        .any(|attr| declares_native_attr(attr, "height"));
-    let has_width = element
-        .attrs
-        .iter()
-        .any(|attr| declares_native_attr(attr, "width"));
-
-    if has_height && has_width {
-        return;
+    let mut has_height = false;
+    let mut has_width = false;
+    for attr in &element.attrs {
+        has_height = has_height || declares_native_attr(attr, "height");
+        has_width = has_width || declares_native_attr(attr, "width");
+        if has_height && has_width {
+            return;
+        }
     }
 
     let offset = checker.source_offset(element.tag_name);
