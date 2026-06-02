@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::NativeAttribute;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -63,39 +63,37 @@ impl Violation for FormActionWhitespace {
     }
 }
 
-/// The caller guarantees `element` is a `<form>`.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
+/// The caller guarantees the attribute belongs to a `<form>`.
+pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        ..
+    } = attr
+    else {
+        return;
+    };
 
-        if !name.eq_ignore_ascii_case("action") {
-            continue;
-        }
-
-        if contains_interpolation(value_str) {
-            continue;
-        }
-
-        let trimmed = value_str.trim_ascii();
-        if trimmed.len() == value_str.len() {
-            continue;
-        }
-
-        let span = (*offset, value_str.len()).into();
-        let mut guard = checker.report_diagnostic(&FormActionWhitespace, span);
-
-        let edit = if trimmed.is_empty() {
-            Edit::deletion(span)
-        } else {
-            Edit::replacement(trimmed.to_string(), span)
-        };
-        guard.set_fix(Fix::safe_edit(edit));
+    if !name.eq_ignore_ascii_case("action") {
+        return;
     }
+
+    if contains_interpolation(value_str) {
+        return;
+    }
+
+    let trimmed = value_str.trim_ascii();
+    if trimmed.len() == value_str.len() {
+        return;
+    }
+
+    let span = (*offset, value_str.len()).into();
+    let mut guard = checker.report_diagnostic(&FormActionWhitespace, span);
+
+    let edit = if trimmed.is_empty() {
+        Edit::deletion(span)
+    } else {
+        Edit::replacement(trimmed.to_string(), span)
+    };
+    guard.set_fix(Fix::safe_edit(edit));
 }

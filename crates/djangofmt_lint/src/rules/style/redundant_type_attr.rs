@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::fix::FixAvailability;
@@ -69,7 +69,7 @@ impl Violation for RedundantTypeAttr {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checker<'_>) {
     let tag = element.tag_name;
 
     let default_type = if tag.eq_ignore_ascii_case("script") {
@@ -80,42 +80,40 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         return;
     };
 
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            quote,
-        }) = attr
-        else {
-            continue;
-        };
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        quote,
+    } = attr
+    else {
+        return;
+    };
 
-        if !name.eq_ignore_ascii_case("type") {
-            continue;
-        }
-
-        if contains_interpolation(value_str) {
-            continue;
-        }
-
-        if !value_str.eq_ignore_ascii_case(default_type) {
-            continue;
-        }
-
-        let mut guard = checker.report_diagnostic(
-            &RedundantTypeAttr {
-                tag: tag.to_string(),
-                type_value: (*value_str).to_string(),
-            },
-            (*offset, value_str.len()).into(),
-        );
-
-        guard.set_fix(delete_attr_fix(
-            checker.context(),
-            name,
-            value_str,
-            *offset,
-            quote.is_some(),
-        ));
+    if !name.eq_ignore_ascii_case("type") {
+        return;
     }
+
+    if contains_interpolation(value_str) {
+        return;
+    }
+
+    if !value_str.eq_ignore_ascii_case(default_type) {
+        return;
+    }
+
+    let mut guard = checker.report_diagnostic(
+        &RedundantTypeAttr {
+            tag: tag.to_string(),
+            type_value: (*value_str).to_string(),
+        },
+        (*offset, value_str.len()).into(),
+    );
+
+    guard.set_fix(delete_attr_fix(
+        checker.context(),
+        name,
+        value_str,
+        *offset,
+        quote.is_some(),
+    ));
 }

@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::NativeAttribute;
 
 use crate::Checker;
 use crate::fix::FixAvailability;
@@ -54,36 +54,34 @@ impl Violation for EmptyAttrValue<'_> {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            quote,
-        }) = attr
-        else {
-            continue;
-        };
+pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        quote,
+    } = attr
+    else {
+        return;
+    };
 
-        if !name.eq_ignore_ascii_case("id") && !name.eq_ignore_ascii_case("class") {
-            continue;
-        }
-
-        if !value_str.is_empty() {
-            continue;
-        }
-
-        let mut guard = checker.report_diagnostic(
-            &EmptyAttrValue { attr: name },
-            (*offset, value_str.len()).into(),
-        );
-
-        guard.set_fix(delete_attr_fix(
-            checker.context(),
-            name,
-            value_str,
-            *offset,
-            quote.is_some(),
-        ));
+    if !name.eq_ignore_ascii_case("id") && !name.eq_ignore_ascii_case("class") {
+        return;
     }
+
+    if !value_str.is_empty() {
+        return;
+    }
+
+    let mut guard = checker.report_diagnostic(
+        &EmptyAttrValue { attr: name },
+        (*offset, value_str.len()).into(),
+    );
+
+    guard.set_fix(delete_attr_fix(
+        checker.context(),
+        name,
+        value_str,
+        *offset,
+        quote.is_some(),
+    ));
 }

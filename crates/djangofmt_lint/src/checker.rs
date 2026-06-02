@@ -1,4 +1,6 @@
-use markup_fmt::ast::{Attribute, Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
+use markup_fmt::ast::{
+    Attribute, Element, JinjaBlock, JinjaTagOrChildren, NativeAttribute, Node, NodeKind, Root,
+};
 use miette::SourceSpan;
 
 use crate::LintDiagnostic;
@@ -100,50 +102,15 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_element(&mut self, element: &Element<'_>) {
-        if self.is_rule_enabled(Rule::InvalidAttrValue) {
-            rules::correctness::invalid_attr_value::check(element, self);
-        }
-
-        if self.is_rule_enabled(Rule::EmptyAttrValue) {
-            rules::style::empty_attr_value::check(element, self);
-        }
-
-        if self.is_rule_enabled(Rule::RedundantTypeAttr) {
-            rules::style::redundant_type_attr::check(element, self);
-        }
-
-        if self.is_rule_enabled(Rule::DjangoStaticUrl) {
-            rules::suspicious::django_static_url::check(element, self);
-        }
-
-        if self.is_rule_enabled(Rule::DjangoUrlPattern) {
-            rules::suspicious::django_url_pattern::check(element, self);
-        }
-
-        if self.is_rule_enabled(Rule::JavascriptUrl) {
-            rules::suspicious::javascript_url::check(element, self);
-        }
-
         if self.is_rule_enabled(Rule::DuplicateAttr) {
             rules::suspicious::duplicate_attr::check(element, self);
-        }
-
-        if self.is_rule_enabled(Rule::UseHttps) {
-            rules::suspicious::use_https::check(element, self);
         }
 
         if self.is_rule_enabled(Rule::EmptyTagPair) {
             rules::suspicious::empty_tag_pair::check(element, self);
         }
 
-        if element.tag_name.eq_ignore_ascii_case("form") {
-            if self.is_rule_enabled(Rule::UppercaseFormMethod) {
-                rules::style::uppercase_form_method::check(element, self);
-            }
-            if self.is_rule_enabled(Rule::FormActionWhitespace) {
-                rules::style::form_action_whitespace::check(element, self);
-            }
-        } else if element.tag_name.eq_ignore_ascii_case("img") {
+        if element.tag_name.eq_ignore_ascii_case("img") {
             if self.is_rule_enabled(Rule::MissingImgAlt) {
                 rules::accessibility::missing_img_alt::check(element, self);
             }
@@ -161,7 +128,7 @@ impl<'a> Checker<'a> {
         }
 
         for attr in &element.attrs {
-            self.visit_attribute(attr);
+            self.visit_attribute(attr, element);
         }
 
         for child in &element.children {
@@ -169,9 +136,50 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_attribute(&mut self, attr: &Attribute<'_>) {
-        if let Attribute::JinjaBlock(block) = attr {
-            self.visit_jinja_attr_block(block);
+    fn visit_attribute(&mut self, attr: &Attribute<'_>, element: &Element<'_>) {
+        match attr {
+            Attribute::Native(native) => self.visit_native_attribute(native, element),
+            Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
+            _ => {}
+        }
+    }
+
+    fn visit_native_attribute(&self, attr: &NativeAttribute<'_>, element: &Element<'_>) {
+        if self.is_rule_enabled(Rule::InvalidAttrValue) {
+            rules::correctness::invalid_attr_value::check(attr, element, self);
+        }
+
+        if self.is_rule_enabled(Rule::EmptyAttrValue) {
+            rules::style::empty_attr_value::check(attr, self);
+        }
+
+        if self.is_rule_enabled(Rule::RedundantTypeAttr) {
+            rules::style::redundant_type_attr::check(attr, element, self);
+        }
+
+        if self.is_rule_enabled(Rule::DjangoStaticUrl) {
+            rules::suspicious::django_static_url::check(attr, element, self);
+        }
+
+        if self.is_rule_enabled(Rule::DjangoUrlPattern) {
+            rules::suspicious::django_url_pattern::check(attr, element, self);
+        }
+
+        if self.is_rule_enabled(Rule::JavascriptUrl) {
+            rules::suspicious::javascript_url::check(attr, element, self);
+        }
+
+        if self.is_rule_enabled(Rule::UseHttps) {
+            rules::suspicious::use_https::check(attr, self);
+        }
+
+        if element.tag_name.eq_ignore_ascii_case("form") {
+            if self.is_rule_enabled(Rule::UppercaseFormMethod) {
+                rules::style::uppercase_form_method::check(attr, self);
+            }
+            if self.is_rule_enabled(Rule::FormActionWhitespace) {
+                rules::style::form_action_whitespace::check(attr, self);
+            }
         }
     }
 
@@ -189,11 +197,15 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_jinja_attr_block(&mut self, block: &JinjaBlock<'_, Attribute<'_>>) {
+    fn visit_jinja_attr_block(
+        &mut self,
+        block: &JinjaBlock<'_, Attribute<'_>>,
+        element: &Element<'_>,
+    ) {
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
-                    self.visit_attribute(child);
+                    self.visit_attribute(child, element);
                 }
             }
         }

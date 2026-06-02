@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
@@ -68,40 +68,38 @@ const fn url_attributes_for(tag_name: &str) -> &'static [&'static str] {
     &[]
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checker<'_>) {
     let attr_names = url_attributes_for(element.tag_name);
     if attr_names.is_empty() {
         return;
     }
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
-        let Some(canonical) = attr_names
-            .iter()
-            .find(|candidate| candidate.eq_ignore_ascii_case(name))
-        else {
-            continue;
-        };
-        if contains_interpolation(value_str) {
-            continue;
-        }
-        if value_str
-            .trim_start()
-            .get(..JS_SCHEME.len())
-            .is_some_and(|prefix| prefix.eq_ignore_ascii_case(JS_SCHEME))
-        {
-            checker.report_diagnostic(
-                &JavascriptUrl {
-                    attribute: canonical,
-                },
-                (*offset, value_str.len()).into(),
-            );
-        }
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        ..
+    } = attr
+    else {
+        return;
+    };
+    let Some(canonical) = attr_names
+        .iter()
+        .find(|candidate| candidate.eq_ignore_ascii_case(name))
+    else {
+        return;
+    };
+    if contains_interpolation(value_str) {
+        return;
+    }
+    if value_str
+        .trim_start()
+        .get(..JS_SCHEME.len())
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case(JS_SCHEME))
+    {
+        checker.report_diagnostic(
+            &JavascriptUrl {
+                attribute: canonical,
+            },
+            (*offset, value_str.len()).into(),
+        );
     }
 }
