@@ -1,0 +1,61 @@
+---
+import IconCopy from "./icons/IconCopy.astro";
+---
+<div class="flex-1 flex flex-col min-w-0 min-h-0 bg-base-100/50">
+    <div
+        role="tablist"
+        class="tabs tabs-sm flex-1 min-h-0 content-start overflow-hidden px-2 bg-base-200/50 border-b border-base-300"
+    >
+        <input
+            type="radio"
+            name="output_tab"
+            class="tab uppercase tracking-wider font-bold text-xs"
+            aria-label="Formatted"
+            checked
+        >
+        <div role="tabpanel" class="tab-content bg-base-100 overflow-hidden">
+            <div id="monacoOutput" class="h-full w-full font-mono text-sm"></div>
+        </div>
+
+        <input
+            type="radio"
+            name="output_tab"
+            class="tab uppercase tracking-wider font-bold text-xs"
+            aria-label="AST"
+        >
+        <div role="tabpanel" class="tab-content bg-base-100 overflow-hidden">
+            <pre
+                id="astOutput"
+                class="h-full w-full m-0 p-4 font-mono text-xs leading-snug overflow-auto whitespace-pre"
+            ></pre>
+        </div>
+
+        <input
+            type="radio"
+            name="output_tab"
+            class="tab uppercase tracking-wider font-bold text-xs"
+            aria-label="Doc IR"
+        >
+        <div role="tabpanel" class="tab-content bg-base-100 overflow-hidden">
+            <pre
+                id="docOutput"
+                class="h-full w-full m-0 p-4 font-mono text-xs leading-snug overflow-auto whitespace-pre"
+            ></pre>
+        </div>
+
+        <button
+            class="btn btn-xs btn-ghost self-center ml-auto text-base-content/50 tooltip tooltip-bottom"
+            data-tip="Copy"
+            aria-label="Copy"
+            data-on:click="
+                const tab = document.querySelector('input[name=output_tab]:checked').getAttribute('aria-label');
+                const text = tab === 'Formatted'
+                    ? monacoOutput.editor.getValue()
+                    : (tab === 'AST' ? astOutput.textContent : docOutput.textContent);
+                writeClipboardText(text);
+            "
+        >
+            <IconCopy />
+        </button>
+    </div>
+</div>

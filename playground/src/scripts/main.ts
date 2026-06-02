@@ -1,5 +1,5 @@
 import AnsiToHtml from "ansi-to-html";
-import init, { format, lint, type LintResult } from "../../pkg/djangofmt_wasm.js";
+import init, { ast, doc_tree, format, lint, type LintResult } from "../../pkg/djangofmt_wasm.js";
 import { writeClipboardText } from "./clipboard";
 import { createEditors, monaco } from "./monaco-editor";
 import { openGithubIssue, savePermalinkToClipboard } from "./permalink";
@@ -13,14 +13,10 @@ function formatCode(
   indent: number,
   mode: string,
 ): { formatted: string; duration: number } {
-  try {
-    const start = performance.now();
-    const formatted = format(source, width, indent, mode.toLowerCase());
-    const duration = performance.now() - start;
-    return { formatted, duration };
-  } catch (e) {
-    return { formatted: `Error: ${e}`, duration: 0 };
-  }
+  const start = performance.now();
+  const formatted = format(source, width, indent, mode.toLowerCase());
+  const duration = performance.now() - start;
+  return { formatted, duration };
 }
 
 const ansiConverter = new AnsiToHtml({ escapeXML: true });
@@ -34,13 +30,14 @@ function lintCode(source: string, mode: string): { text: string; errorCount: num
     return { text: ansiConverter.toHtml(`Error: ${e}`), errorCount: 1 };
   }
 }
-
 declare global {
   interface Window {
     MonacoEnvironment?: monaco.Environment;
     monaco: typeof monaco;
     formatCode: typeof formatCode;
     lintCode: typeof lintCode;
+    astView: typeof ast;
+    docTreeView: typeof doc_tree;
     writeClipboardText: typeof writeClipboardText;
     savePermalinkToClipboard: typeof savePermalinkToClipboard;
     openGithubIssue: typeof openGithubIssue;
@@ -51,6 +48,8 @@ declare global {
 init().then(() => {
   window.formatCode = formatCode;
   window.lintCode = lintCode;
+  window.astView = ast;
+  window.docTreeView = doc_tree;
   window.savePermalinkToClipboard = savePermalinkToClipboard;
   window.writeClipboardText = writeClipboardText;
   window.openGithubIssue = openGithubIssue;
