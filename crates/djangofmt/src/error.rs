@@ -65,11 +65,7 @@ impl CommandError {
 
 impl ParseError {
     #[must_use]
-    pub fn new<E: std::fmt::Debug>(
-        path: Option<PathBuf>,
-        source: String,
-        err: &markup_fmt::FormatError<E>,
-    ) -> Self {
+    pub fn new(path: Option<PathBuf>, source: String, err: &markup_fmt::FormatError) -> Self {
         let (message, hint, span) = match err {
             markup_fmt::FormatError::Syntax(syntax_err) => {
                 match &syntax_err.kind {
