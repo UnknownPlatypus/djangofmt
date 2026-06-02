@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use markup_fmt::ast::NativeAttribute;
@@ -10,6 +12,23 @@ use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 static SORTER: LazyLock<RustyWind> = LazyLock::new(RustyWind::default);
+
+/// Cap on memoized `class` values per worker thread.
+///
+/// Sorting a class list is the expensive part of this rule, and real templates
+/// reuse the same handful of `class` values many times over (e.g. a comparison
+/// table repeats `icon icon-check` hundreds of times). The cap keeps memory
+/// bounded on projects with a large number of distinct class lists; once it is
+/// reached the cache is dropped and repopulated.
+const SORT_CACHE_CAPACITY: usize = 8192;
+
+thread_local! {
+    /// Memoizes the canonical Tailwind ordering of a raw `class` value.
+    ///
+    /// Sorting is a pure, deterministic function of the input string, so cached
+    /// results are reused across attributes and files handled by the same thread.
+    static SORT_CACHE: RefCell<HashMap<Box<str>, Box<str>>> = RefCell::new(HashMap::new());
+}
 
 /// ## What it does
 /// Checks for `class` attributes whose Tailwind CSS utility classes are not in the canonical
@@ -73,10 +92,29 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    let sorted = SORTER.sort_classes(value_str);
-    if sorted.as_str() == *value_str {
+    // Sorting is the costly part of this rule, so memoize it per raw value.
+    // Templates reuse the same `class` strings many times, and the common case
+    // (already-sorted) returns `None` without allocating; only an actual
+    // violation clones the sorted string for the fix.
+    let Some(sorted) = SORT_CACHE.with_borrow_mut(|cache| {
+        if let Some(sorted) = cache.get(*value_str) {
+            let sorted_ref: &str = sorted;
+            return (sorted_ref != *value_str).then(|| sorted.clone());
+        }
+
+        let sorted: Box<str> = SORTER.sort_classes(value_str).into();
+        let sorted_ref: &str = &sorted;
+        let violation = (sorted_ref != *value_str).then(|| sorted.clone());
+
+        if cache.len() >= SORT_CACHE_CAPACITY {
+            cache.clear();
+        }
+        cache.insert((*value_str).into(), sorted);
+
+        violation
+    }) else {
         return;
-    }
+    };
 
     let span = (*offset, value_str.len()).into();
     let mut guard = checker.report_diagnostic(&UnsortedTailwindClasses, span);
