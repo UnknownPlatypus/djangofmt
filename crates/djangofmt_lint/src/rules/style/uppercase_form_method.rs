@@ -61,11 +61,8 @@ impl Violation for UppercaseFormMethod<'_> {
     }
 }
 
+/// The caller guarantees `element` is a `<form>`.
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("form") {
-        return;
-    }
-
     for attr in &element.attrs {
         let Attribute::Native(NativeAttribute {
             name,

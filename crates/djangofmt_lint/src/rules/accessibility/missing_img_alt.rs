@@ -45,11 +45,8 @@ impl Violation for MissingImgAlt {
     }
 }
 
+/// The caller guarantees `element` is an `<img>`.
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("img") {
-        return;
-    }
-
     if element
         .attrs
         .iter()

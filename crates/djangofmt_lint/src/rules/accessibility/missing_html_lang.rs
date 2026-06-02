@@ -49,11 +49,8 @@ impl Violation for MissingHtmlLang {
     }
 }
 
+/// The caller guarantees `element` is an `<html>` element.
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    if !element.tag_name.eq_ignore_ascii_case("html") {
-        return;
-    }
-
     if element
         .attrs
         .iter()
