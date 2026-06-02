@@ -62,7 +62,7 @@ jobs:
           ref: main
           persist-credentials: false
       - name: Build main version
-        run: cargo build -p djangofmt --release --verbose && mv target/release/djangofmt ./main_djangofmt
+        run: cargo build -p djangofmt --verbose && mv target/debug/djangofmt ./main_djangofmt
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -70,7 +70,7 @@ jobs:
           clean: false
 
       - name: Build PR version
-        run: cargo build -p djangofmt --release --verbose && mv target/release/djangofmt ./pr_djangofmt
+        run: cargo build -p djangofmt --verbose && mv target/debug/djangofmt ./pr_djangofmt
 
       - name: Setup uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
