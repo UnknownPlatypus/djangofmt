@@ -136,26 +136,27 @@ impl<'a> Checker<'a> {
             rules::suspicious::empty_tag_pair::check(element, self);
         }
 
-        // Tag-scoped rules: an element matches at most one tag, so dispatch on
-        // the tag a single time.
-        let tag = element.tag_name;
-        if tag.eq_ignore_ascii_case("form") {
+        if element.tag_name.eq_ignore_ascii_case("form") {
             if self.is_rule_enabled(Rule::UppercaseFormMethod) {
                 rules::style::uppercase_form_method::check(element, self);
             }
             if self.is_rule_enabled(Rule::FormActionWhitespace) {
                 rules::style::form_action_whitespace::check(element, self);
             }
-        } else if tag.eq_ignore_ascii_case("img") {
+        } else if element.tag_name.eq_ignore_ascii_case("img") {
             if self.is_rule_enabled(Rule::MissingImgAlt) {
                 rules::accessibility::missing_img_alt::check(element, self);
             }
             if self.is_rule_enabled(Rule::MissingImgDimensions) {
                 rules::accessibility::missing_img_dimensions::check(element, self);
             }
-        } else if tag.eq_ignore_ascii_case("html") && self.is_rule_enabled(Rule::MissingHtmlLang) {
+        } else if element.tag_name.eq_ignore_ascii_case("html")
+            && self.is_rule_enabled(Rule::MissingHtmlLang)
+        {
             rules::accessibility::missing_html_lang::check(element, self);
-        } else if tag.eq_ignore_ascii_case("head") && self.is_rule_enabled(Rule::MissingTitle) {
+        } else if element.tag_name.eq_ignore_ascii_case("head")
+            && self.is_rule_enabled(Rule::MissingTitle)
+        {
             rules::accessibility::missing_title::check(element, self);
         }
 

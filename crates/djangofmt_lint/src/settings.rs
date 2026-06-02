@@ -55,7 +55,6 @@ mod tests {
         let all = Settings::default();
         assert!(all.any_rule_enabled(&[Rule::UseHttps]));
         assert!(all.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
-        // An empty cluster is vacuously disabled.
         assert!(!all.any_rule_enabled(&[]));
 
         let none = Settings {
@@ -63,9 +62,6 @@ mod tests {
         };
         assert!(!none.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
 
-        // A cluster where only one rule is enabled must still report `true`,
-        // and a slice naming only the disabled rule must report `false` — this
-        // pins the `any` semantics against an `all`/first-only implementation.
         let partial = Settings {
             rules: RuleSet::from_rule(Rule::UseHttps),
         };
