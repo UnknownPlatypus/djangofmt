@@ -72,3 +72,11 @@ To disable formatting for a specific node, prefix it with the same comment:
 <div   class="keep-this-unformatted"   >Content</div>
 <div class="this-will-be-formatted">Content</div>
 ```
+
+A Django/Jinja comment works the same way, both inline and at the top of a file.
+Unlike an HTML comment, it isn't rendered to the client:
+
+```html
+{# djangofmt:ignore #}
+<div   class="keep-this-unformatted"   >Content</div>
+```

@@ -70,6 +70,24 @@ fn format_file_with_ignore_directive() {
 }
 
 #[test]
+fn format_file_with_jinja_ignore_directive() {
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("test.html");
+    let original = "{# djangofmt:ignore #}\n<div   class=\"foo\"  ></div>\n";
+    std::fs::write(&file, original).unwrap();
+    assert_cmd_snapshot!(cli().arg(file.as_os_str()), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file skipped !
+    "#);
+    let content = std::fs::read_to_string(&file).unwrap();
+    assert_eq!(content, original);
+}
+
+#[test]
 fn format_nonexistent_file() {
     assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @r#"
     success: false
@@ -185,6 +203,22 @@ fn format_stdin_ignore_directive() {
     exit_code: 0
     ----- stdout -----
     <!-- djangofmt:ignore -->
+    <div   class="foo"  ></div>
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
+fn format_stdin_jinja_ignore_directive() {
+    let source = "{# djangofmt:ignore #}\n<div   class=\"foo\"  ></div>\n";
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin(source),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {# djangofmt:ignore #}
     <div   class="foo"  ></div>
 
     ----- stderr -----
