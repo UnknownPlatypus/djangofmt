@@ -29,6 +29,11 @@ pub struct PyprojectSettings {
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
     /// Optional `[tool.djangofmt.lint]` subtable.
+    ///
+    /// Deserialized leniently (see `deserialize_lenient_lint`): a malformed
+    /// lint table (a typo'd selector or unknown key) is dropped with a warning
+    /// rather than discarding the surrounding formatting options.
+    #[serde(default, deserialize_with = "deserialize_lenient_lint")]
     pub lint: Option<LintTomlSettings>,
 }
 
@@ -48,6 +53,30 @@ pub struct LintTomlSettings {
     pub extend_select: Option<Vec<RuleSelector>>,
     pub extend_ignore: Option<Vec<RuleSelector>>,
     pub preview: Option<bool>,
+}
+
+/// Deserialize the optional `[tool.djangofmt.lint]` subtable leniently.
+///
+/// The lint table is buffered into a [`toml::Value`] and then converted to
+/// [`LintTomlSettings`]. A malformed lint table (a typo'd selector or an
+/// unknown key) is dropped with a warning rather than aborting the whole
+/// parse, so a single bad selector can't silently discard unrelated
+/// formatting options like `line-length` or `profile`.
+fn deserialize_lenient_lint<'de, D>(deserializer: D) -> Result<Option<LintTomlSettings>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value = toml::Value::deserialize(deserializer)?;
+    let lint: Result<LintTomlSettings, _> = value.try_into();
+    match lint {
+        Ok(lint) => Ok(Some(lint)),
+        Err(err) => {
+            warn!(
+                "Ignoring invalid `[tool.djangofmt.lint]` config (other settings preserved): {err}"
+            );
+            Ok(None)
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -371,18 +400,17 @@ show-fixes = true
     }
 
     #[test]
-    fn test_load_options_unknown_key_in_lint_table_returns_default() {
-        // `deny_unknown_fields` on `LintTomlSettings` should cause the whole
-        // pyproject load to fall back to default (matches existing behavior
-        // for other unknown-key cases).
+    fn test_load_options_unknown_key_in_lint_table_drops_lint() {
+        // `deny_unknown_fields` on `LintTomlSettings` rejects the lint table,
+        // which is then dropped (lint = None); with no other settings present
+        // the result equals the default.
         let content = r#"
         [tool.djangofmt.lint]
         bogus = "value"
     "#;
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(result.lint, None);
+        assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
@@ -422,15 +450,45 @@ show-fixes = true
     }
 
     #[test]
-    fn test_load_options_rejects_invalid_rule_selector_in_lint_table() {
+    fn test_load_options_drops_invalid_rule_selector_in_lint_table() {
         let content = r#"
         [tool.djangofmt.lint]
         select = ["definitely-not-a-rule"]
     "#;
-        // Falls back to default on parse failure (matches existing behavior).
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
+        // The malformed lint table is dropped (lint = None); with no other
+        // settings present the result equals the default.
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(result.lint, None);
+        assert_eq!(result, PyprojectSettings::default());
+    }
+
+    #[test]
+    fn test_invalid_lint_table_preserves_other_settings() {
+        // A bad selector in `[tool.djangofmt.lint]` must not discard unrelated
+        // formatting options like `line-length`.
+        let content = r#"
+        [tool.djangofmt]
+        line-length = 100
+        [tool.djangofmt.lint]
+        select = ["definitely-not-a-rule"]
+    "#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(result.line_length, Some(LineLength::try_from(100).unwrap()));
+        assert_eq!(result.lint, None);
+    }
+
+    #[test]
+    fn test_unknown_key_in_lint_table_preserves_other_settings() {
+        // An unknown key in the lint table (rejected by `deny_unknown_fields`)
+        // is likewise scoped to the lint table only.
+        let content = r"
+        [tool.djangofmt]
+        line-length = 100
+        [tool.djangofmt.lint]
+        not-a-real-key = true
+    ";
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(result.line_length, Some(LineLength::try_from(100).unwrap()));
+        assert_eq!(result.lint, None);
     }
 }

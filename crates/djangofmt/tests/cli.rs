@@ -652,6 +652,93 @@ fn check_preview_rule_gated_by_preview_flag() {
     );
 }
 
+#[test]
+fn check_extend_select_invalid_attr_value_reports_violations() {
+    // `--extend-select` adds on top of the default rule set; the violation is
+    // reported (verifies the flag is wired through to the resolver).
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    let output = cli()
+        .arg("check")
+        .arg("--extend-select=invalid-attr-value")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("Invalid value 'put' for attribute 'method'"),
+        "expected 'put' violation, got:\n{stderr}"
+    );
+}
+
+#[test]
+fn check_extend_ignore_invalid_attr_value_suppresses_violations() {
+    // `--extend-ignore` subtracts from the resolved set; the default
+    // `invalid-attr-value` rule is removed and the check passes.
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    assert_cmd_snapshot!(
+        cli()
+            .arg("check")
+            .arg("--extend-ignore=invalid-attr-value")
+            .arg(file.as_os_str()),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    "#);
+}
+
+#[test]
+fn check_no_preview_overrides_pyproject_preview() {
+    // `empty-tag-pair` is a preview rule. pyproject enables preview and selects
+    // it; CLI `--no-preview` must win (CLI > pyproject), so the rule does not
+    // run. This exercises the `--preview`/`--no-preview` `overrides_with` flag.
+    let dir = TempDir::new().unwrap();
+    let file = dir.path().join("empty.html");
+    std::fs::write(&file, "<span></span>\n").unwrap();
+    std::fs::write(
+        dir.path().join("pyproject.toml"),
+        r#"
+[tool.djangofmt.lint]
+select = ["empty-tag-pair"]
+preview = true
+"#,
+    )
+    .unwrap();
+
+    // Sanity: with pyproject `preview = true` the preview rule runs.
+    let with = cli()
+        .current_dir(dir.path())
+        .arg("check")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(
+        !with.status.success(),
+        "preview rule should run with pyproject preview = true, got stderr:\n{}",
+        String::from_utf8_lossy(&with.stderr),
+    );
+
+    // `--no-preview` overrides pyproject and turns preview off.
+    let without = cli()
+        .current_dir(dir.path())
+        .arg("check")
+        .arg("--no-preview")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(
+        without.status.success(),
+        "`--no-preview` must override pyproject preview = true, got stderr:\n{}",
+        String::from_utf8_lossy(&without.stderr),
+    );
+}
+
 // ── Rule selection via pyproject.toml ────────────────────────────────
 
 #[test]

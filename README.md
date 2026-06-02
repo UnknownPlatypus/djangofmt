@@ -133,7 +133,7 @@ Lint rule selection lives in a nested `[tool.djangofmt.lint]` subtable (mirrorin
 
 ```toml
 [tool.djangofmt.lint]
-# Replaces the default rule set when provided (omit to keep "ALL").
+# Replaces the default rule set when provided (omit to keep the default stable set).
 select = ["ALL"]
 # Disable specific rules or whole categories.
 ignore = ["invalid-attr-value"]
