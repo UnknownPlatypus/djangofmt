@@ -261,3 +261,18 @@ fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
         Err(err) => err.to_string(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn control_flow_and_element() {
+        let src = r#"{% if a %}<div class="x">hi</div>{% endif %}"#;
+        insta::assert_snapshot!(super::doc_tree(src, 80, 4, "django"));
+    }
+
+    #[test]
+    fn nested_elements_with_attributes() {
+        let src = r#"<ul class="list"><li data-id="1">one</li><li data-id="2">two</li></ul>"#;
+        insta::assert_snapshot!(super::doc_tree(src, 80, 4, "django"));
+    }
+}

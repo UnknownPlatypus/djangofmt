@@ -462,6 +462,7 @@ version = "0.2.9"
 dependencies = [
  "djangofmt",
  "djangofmt_lint",
+ "insta",
  "markup_fmt",
  "miette",
  "serde",

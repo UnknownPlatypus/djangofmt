@@ -41,9 +41,12 @@ export default function wasmPack() {
         }
       };
       server.watcher.add(cratesDir);
-      server.watcher.on("change", (file) => {
+      const onRustChange = (file) => {
         if (file.startsWith(cratesDir) && file.endsWith(".rs")) rebuild();
-      });
+      };
+      for (const event of ["add", "change", "unlink"]) {
+        server.watcher.on(event, onRustChange);
+      }
     },
   };
 }

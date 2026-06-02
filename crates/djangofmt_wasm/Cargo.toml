@@ -15,7 +15,6 @@ wasm-opt = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 doctest = false
-test = false
 
 [dependencies]
 djangofmt = { path = "../djangofmt" }
@@ -27,6 +26,9 @@ serde-wasm-bindgen = { workspace = true }
 tsify = { workspace = true }
 wasm-bindgen = { workspace = true }
 web-sys = { workspace = true }
+
+[dev-dependencies]
+insta = { workspace = true }
 
 [lints]
 workspace = true

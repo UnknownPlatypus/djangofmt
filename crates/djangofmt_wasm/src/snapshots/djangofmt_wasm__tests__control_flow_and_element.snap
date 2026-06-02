@@ -1,0 +1,38 @@
+---
+source: crates/djangofmt_wasm/src/lib.rs
+expression: "super::doc_tree(src, 80, 4, \"django\")"
+---
+0---List
+|   1---Group
+|   |   2---List
+|   |   |   3---Text("{% if a %}")
+|   |   |   3---List
+|   |   |   |   4---Nest(4)
+|   |   |   |   |   5---Nil
+|   |   |   |   |   5---Group
+|   |   |   |   |   |   6---Group
+|   |   |   |   |   |   |   7---Char('<')
+|   |   |   |   |   |   |   7---Text("div")
+|   |   |   |   |   |   |   7---Char(' ')
+|   |   |   |   |   |   |   7---List
+|   |   |   |   |   |   |   |   8---Text("class")
+|   |   |   |   |   |   |   |   8---Char('=')
+|   |   |   |   |   |   |   |   8---Char('"')
+|   |   |   |   |   |   |   |   8---Nest(4)
+|   |   |   |   |   |   |   |   |   9---Nil
+|   |   |   |   |   |   |   |   |   9---Text("x")
+|   |   |   |   |   |   |   |   8---Nil
+|   |   |   |   |   |   |   |   8---Char('"')
+|   |   |   |   |   |   |   7---Char('>')
+|   |   |   |   |   |   |   7---Nest(4)
+|   |   |   |   |   |   |   |   8---Break(false, 0)
+|   |   |   |   |   |   |   |   8---Group
+|   |   |   |   |   |   |   |   |   9---Alt
+|   |   |   |   |   |   |   |   |   |   10---Text("hi")
+|   |   |   |   |   |   |   |   |   |   10---List
+|   |   |   |   |   |   |   |   |   |   |   11---Text("hi")
+|   |   |   |   |   |   |   7---Break(false, 0)
+|   |   |   |   |   |   |   7---Text("</div>")
+|   |   |   |   4---Nil
+|   |   |   3---Text("{% endif %}")
+|   1---NewLine
