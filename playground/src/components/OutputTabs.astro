@@ -23,7 +23,13 @@ import IconCopy from "./icons/IconCopy.astro";
             class="tab uppercase tracking-wider font-bold text-xs"
             aria-label="AST"
         >
-        <div role="tabpanel" class="tab-content bg-base-100 overflow-hidden">
+        <div
+            role="tabpanel"
+            class="tab-content bg-base-100 overflow-hidden outline-none focus:outline-none caret-transparent cursor-default"
+            spellcheck="false"
+            contenteditable="true"
+            data-on:beforeinput="evt.preventDefault()"
+        >
             <pre
                 id="astOutput"
                 class="h-full w-full m-0 p-4 font-mono text-xs leading-snug overflow-auto whitespace-pre"
@@ -36,7 +42,13 @@ import IconCopy from "./icons/IconCopy.astro";
             class="tab uppercase tracking-wider font-bold text-xs"
             aria-label="Doc IR"
         >
-        <div role="tabpanel" class="tab-content bg-base-100 overflow-hidden">
+        <div
+            role="tabpanel"
+            class="tab-content bg-base-100 overflow-hidden outline-none focus:outline-none caret-transparent cursor-default"
+            spellcheck="false"
+            contenteditable="true"
+            data-on:beforeinput="evt.preventDefault()"
+        >
             <pre
                 id="docOutput"
                 class="h-full w-full m-0 p-4 font-mono text-xs leading-snug overflow-auto whitespace-pre"

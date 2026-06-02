@@ -56,6 +56,6 @@ init().then(() => {
 
   import(
     // @ts-expect-error
-    "https://cdn.jsdelivr.net/gh/starfederation/datastar@1.0.0-RC.7/bundles/datastar.js"
+    "https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.2/bundles/datastar.js"
   );
 });
