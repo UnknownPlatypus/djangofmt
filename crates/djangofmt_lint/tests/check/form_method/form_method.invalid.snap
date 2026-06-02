@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 5 lint error(s)
+  × Found 6 lint error(s)
 
 Error: 
   × Invalid value 'put' for attribute 'method'.
@@ -55,5 +55,15 @@ Error:
     ·                   ──┬──
     ·                     ╰── here
  14 │ </div>
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'delete' for attribute 'method'.
+    ╭─[tests/check/form_method/form_method.invalid.html:17:28]
+ 16 │ <!-- Jinja block as attribute -->
+ 17 │ <form {% if show %}method="delete"{% endif %}>Submit</form>
+    ·                            ───┬──
+    ·                               ╰── here
     ╰────
   help: Use one of: get, post, dialog

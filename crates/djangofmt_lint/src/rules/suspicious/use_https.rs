@@ -1,6 +1,6 @@
 use std::net::IpAddr;
 
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::NativeAttribute;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -64,30 +64,28 @@ impl Violation for UseHttps {
 const HTTP_SCHEME: &str = "http://";
 const HTTPS_SCHEME: &str = "https://";
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
+pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        ..
+    } = attr
+    else {
+        return;
+    };
 
-        let Some(canonical) = canonical_url_attr(name) else {
-            continue;
-        };
+    let Some(canonical) = canonical_url_attr(name) else {
+        return;
+    };
 
-        // `srcset` is a comma-separated candidate list; every other attribute
-        // holds a single URL.
-        if canonical == "srcset" {
-            for (url, at) in srcset_candidates(value_str, *offset) {
-                report_http_scheme(url, at, canonical, checker);
-            }
-        } else {
-            report_http_scheme(value_str, *offset, canonical, checker);
+    // `srcset` is a comma-separated candidate list; every other attribute
+    // holds a single URL.
+    if canonical == "srcset" {
+        for (url, at) in srcset_candidates(value_str, *offset) {
+            report_http_scheme(url, at, canonical, checker);
         }
+    } else {
+        report_http_scheme(value_str, *offset, canonical, checker);
     }
 }
 

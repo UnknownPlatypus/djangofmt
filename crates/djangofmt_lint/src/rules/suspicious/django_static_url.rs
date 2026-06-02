@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
@@ -69,38 +69,36 @@ fn starts_with_static_path(value: &str) -> bool {
     matches!(after.as_bytes().first(), Some(b'/'))
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checker<'_>) {
     // Fast-path to skip processing tag that cannot have a static url.
     if !is_asset_tag(element.tag_name) {
         return;
     }
 
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        ..
+    } = attr
+    else {
+        return;
+    };
 
-        let Some(canonical) = URL_ATTRIBUTES
-            .iter()
-            .find(|candidate| candidate.eq_ignore_ascii_case(name))
-        else {
-            continue;
-        };
+    let Some(canonical) = URL_ATTRIBUTES
+        .iter()
+        .find(|candidate| candidate.eq_ignore_ascii_case(name))
+    else {
+        return;
+    };
 
-        // `srcset` is a comma-separated candidate list; every other attribute
-        // holds a single URL.
-        if *canonical == "srcset" {
-            for (url, at) in srcset_candidates(value_str, *offset) {
-                report_static_path(url, at, canonical, checker);
-            }
-        } else {
-            report_static_path(value_str, *offset, canonical, checker);
+    // `srcset` is a comma-separated candidate list; every other attribute
+    // holds a single URL.
+    if *canonical == "srcset" {
+        for (url, at) in srcset_candidates(value_str, *offset) {
+            report_static_path(url, at, canonical, checker);
         }
+    } else {
+        report_static_path(value_str, *offset, canonical, checker);
     }
 }
 

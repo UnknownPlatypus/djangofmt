@@ -1,4 +1,4 @@
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::NativeAttribute;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -61,38 +61,36 @@ impl Violation for UppercaseFormMethod<'_> {
     }
 }
 
-/// The caller guarantees `element` is a `<form>`.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
-    for attr in &element.attrs {
-        let Attribute::Native(NativeAttribute {
-            name,
-            value: Some((value_str, offset)),
-            ..
-        }) = attr
-        else {
-            continue;
-        };
+/// The caller guarantees the attribute belongs to a `<form>`.
+pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+    let NativeAttribute {
+        name,
+        value: Some((value_str, offset)),
+        ..
+    } = attr
+    else {
+        return;
+    };
 
-        if !name.eq_ignore_ascii_case("method") {
-            continue;
-        }
-
-        if contains_interpolation(value_str) {
-            continue;
-        }
-
-        if !value_str.chars().any(|c| c.is_ascii_uppercase()) {
-            continue;
-        }
-
-        let mut guard = checker.report_diagnostic(
-            &UppercaseFormMethod { value: value_str },
-            (*offset, value_str.len()).into(),
-        );
-
-        guard.set_fix(Fix::safe_edit(Edit::replacement(
-            value_str.to_ascii_lowercase(),
-            (*offset, value_str.len()).into(),
-        )));
+    if !name.eq_ignore_ascii_case("method") {
+        return;
     }
+
+    if contains_interpolation(value_str) {
+        return;
+    }
+
+    if !value_str.chars().any(|c| c.is_ascii_uppercase()) {
+        return;
+    }
+
+    let mut guard = checker.report_diagnostic(
+        &UppercaseFormMethod { value: value_str },
+        (*offset, value_str.len()).into(),
+    );
+
+    guard.set_fix(Fix::safe_edit(Edit::replacement(
+        value_str.to_ascii_lowercase(),
+        (*offset, value_str.len()).into(),
+    )));
 }
