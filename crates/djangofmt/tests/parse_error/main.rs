@@ -55,7 +55,7 @@ fn format_str(
     profile: Profile,
 ) -> Result<String, ParseError> {
     let format_result = format_text(input, Language::from(profile), format_options, |code, _| {
-        Ok::<_, ()>(code.into())
+        Ok(code.into())
     });
 
     format_result.map_err(|err| ParseError::new(name, input.to_string(), &err))

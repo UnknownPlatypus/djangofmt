@@ -262,7 +262,7 @@ pub fn format_text(
     source: &str,
     config: &FormatterConfig,
     profile: Profile,
-) -> std::result::Result<Option<String>, markup_fmt::FormatError<crate::error::Error>> {
+) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
     if source.starts_with(DJANGOFMT_IGNORE_COMMENT) {
         return Ok(None);
     }

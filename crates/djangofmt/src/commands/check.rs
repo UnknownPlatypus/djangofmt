@@ -239,7 +239,7 @@ fn check_path(
             return Err(Box::new(CommandError::Parse(ParseError::new(
                 Some(path.to_path_buf()),
                 source,
-                &FormatError::<markup_fmt::SyntaxError>::Syntax(err),
+                &FormatError::Syntax(err),
             ))));
         }
     };
