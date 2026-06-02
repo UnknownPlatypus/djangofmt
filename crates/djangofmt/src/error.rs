@@ -28,6 +28,19 @@ pub fn path_display(path: Option<&PathBuf>) -> String {
     path.map_or_else(|| "<unknown>".to_string(), relativize_path)
 }
 
+/// Build a span that miette can always draw a caret under.
+/// If the parse error is at EOF, place the caret just before
+fn eof_aware_span(source: &str, pos: usize) -> SourceSpan {
+    if pos < source.len() {
+        pos.into()
+    } else {
+        source.char_indices().next_back().map_or_else(
+            || pos.into(),
+            |(start, _)| SourceSpan::new(start.into(), source.len() - start),
+        )
+    }
+}
+
 #[derive(Debug, Diagnostic, Error)]
 #[error("{message}")]
 pub struct ParseError {
@@ -88,7 +101,11 @@ impl ParseError {
                         Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
                         SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), tag_name.len()),
                     ),
-                    _ => (syntax_err.kind.to_string(), None, syntax_err.pos.into()),
+                    _ => (
+                        syntax_err.kind.to_string(),
+                        None,
+                        eof_aware_span(&source, syntax_err.pos),
+                    ),
                 }
             }
             markup_fmt::FormatError::External(errors) => {

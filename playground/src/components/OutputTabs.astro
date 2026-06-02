@@ -1,0 +1,73 @@
+---
+import IconCopy from "./icons/IconCopy.astro";
+---
+<div class="relative flex-1 flex flex-col min-w-0 min-h-0 bg-base-100/50">
+    <div
+        role="tablist"
+        class="tabs tabs-sm flex-1 min-h-0 content-start overflow-hidden pl-2 pr-10 bg-base-200/50 border-b border-base-300"
+    >
+        <input
+            type="radio"
+            name="output_tab"
+            class="tab uppercase tracking-wider font-bold text-xs"
+            aria-label="Formatted"
+            checked
+        >
+        <div role="tabpanel" class="tab-content bg-base-100 overflow-hidden">
+            <div id="monacoOutput" class="h-full w-full font-mono text-sm"></div>
+        </div>
+
+        <input
+            type="radio"
+            name="output_tab"
+            class="tab uppercase tracking-wider font-bold text-xs"
+            aria-label="AST"
+        >
+        <div
+            role="tabpanel"
+            class="tab-content bg-base-100 overflow-hidden outline-none focus:outline-none caret-transparent cursor-default"
+            spellcheck="false"
+            contenteditable="true"
+            data-on:beforeinput="evt.preventDefault()"
+        >
+            <pre
+                id="astOutput"
+                class="h-full w-full m-0 p-4 font-mono text-xs leading-snug overflow-auto whitespace-pre"
+            ></pre>
+        </div>
+
+        <input
+            type="radio"
+            name="output_tab"
+            class="tab uppercase tracking-wider font-bold text-xs"
+            aria-label="Doc IR"
+        >
+        <div
+            role="tabpanel"
+            class="tab-content bg-base-100 overflow-hidden outline-none focus:outline-none caret-transparent cursor-default"
+            spellcheck="false"
+            contenteditable="true"
+            data-on:beforeinput="evt.preventDefault()"
+        >
+            <pre
+                id="docOutput"
+                class="h-full w-full m-0 p-4 font-mono text-xs leading-snug overflow-auto whitespace-pre"
+            ></pre>
+        </div>
+    </div>
+
+    <button
+        class="btn btn-xs btn-ghost absolute top-1 right-2 text-base-content/50 tooltip tooltip-bottom"
+        data-tip="Copy"
+        aria-label="Copy"
+        data-on:click="
+            const tab = document.querySelector('input[name=output_tab]:checked').getAttribute('aria-label');
+            const text = tab === 'Formatted'
+                ? monacoOutput.editor.getValue()
+                : (tab === 'AST' ? astOutput.textContent : docOutput.textContent);
+            writeClipboardText(text);
+        "
+    >
+        <IconCopy />
+    </button>
+</div>

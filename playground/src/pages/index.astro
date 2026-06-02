@@ -3,6 +3,7 @@ import EditorPanel from "../components/EditorPanel.astro";
 import Footer from "../components/Footer.astro";
 import LintPanel from "../components/LintPanel.astro";
 import Navbar from "../components/Navbar.astro";
+import OutputTabs from "../components/OutputTabs.astro";
 import "../styles/global.css";
 ---
 <html
@@ -36,6 +37,8 @@ import "../styles/global.css";
             monacoOutput.editor.setValue(fmtResult.formatted);
             // innerHTML is safe here because lintCode sanityze inputs.
             lintOutput.innerHTML = lintResult.text;
+            astOutput.textContent = astView($inputCode, $mode);
+            docOutput.textContent = docTreeView($inputCode, $width, $indent, $mode);
 
             $formatDuration = fmtResult.duration;
             $lintErrorCount = lintResult.errorCount;
@@ -53,12 +56,7 @@ import "../styles/global.css";
                 </EditorPanel>
                 <LintPanel />
             </div>
-            <EditorPanel id="monacoOutput">
-                <span class="text-xs font-bold text-success uppercase tracking-wider flex items-center gap-1">
-                    <span class="size-2 rounded-full bg-success inline-block"></span>
-                    Formatted Result
-                </span>
-            </EditorPanel>
+            <OutputTabs />
         </main>
         <Footer />
     </body>

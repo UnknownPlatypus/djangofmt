@@ -22,7 +22,7 @@ ignore = { version = "0.4.25" }
 insta = { version = "1.47.2", features = ["filters", "glob", "yaml"] }
 insta-cmd = { version = "0.6.0" }
 malva = { version = "0.16.0", features = ["config_serde"] }
-markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "5321e97be10eef9a3d14a7b597f097609eb20318" }
+markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "23bc3e2c32d7a2a6955380168aa11a7983b4a301" }
 miette = { version = "7.6.0", features = ["fancy"] }
 proc-macro2 = { version = "1.0" }
 quote = { version = "1.0" }

@@ -1,0 +1,68 @@
+---
+source: crates/djangofmt_wasm/src/lib.rs
+expression: "super::doc_tree(src, 80, 4, \"django\")"
+---
+0---List
+|   1---Group
+|   |   2---Group
+|   |   |   3---Char('<')
+|   |   |   3---Text("ul")
+|   |   |   3---Char(' ')
+|   |   |   3---List
+|   |   |   |   4---Text("class")
+|   |   |   |   4---Char('=')
+|   |   |   |   4---Char('"')
+|   |   |   |   4---Nest(4)
+|   |   |   |   |   5---Nil
+|   |   |   |   |   5---Text("list")
+|   |   |   |   4---Nil
+|   |   |   |   4---Char('"')
+|   |   |   3---Char('>')
+|   |   |   3---Nest(4)
+|   |   |   |   4---NewLine
+|   |   |   3---Nest(4)
+|   |   |   |   4---Group
+|   |   |   |   |   5---Group
+|   |   |   |   |   |   6---Char('<')
+|   |   |   |   |   |   6---Text("li")
+|   |   |   |   |   |   6---Char(' ')
+|   |   |   |   |   |   6---List
+|   |   |   |   |   |   |   7---Text("data-id")
+|   |   |   |   |   |   |   7---Char('=')
+|   |   |   |   |   |   |   7---Char('"')
+|   |   |   |   |   |   |   7---Text("1")
+|   |   |   |   |   |   |   7---Char('"')
+|   |   |   |   |   |   6---Char('>')
+|   |   |   |   |   |   6---Nest(4)
+|   |   |   |   |   |   |   7---Break(false, 0)
+|   |   |   |   |   |   |   7---Group
+|   |   |   |   |   |   |   |   8---Alt
+|   |   |   |   |   |   |   |   |   9---Text("one")
+|   |   |   |   |   |   |   |   |   9---List
+|   |   |   |   |   |   |   |   |   |   10---Text("one")
+|   |   |   |   |   |   6---Break(false, 0)
+|   |   |   |   |   |   6---Text("</li>")
+|   |   |   |   |   5---NewLine
+|   |   |   |   |   5---Group
+|   |   |   |   |   |   6---Char('<')
+|   |   |   |   |   |   6---Text("li")
+|   |   |   |   |   |   6---Char(' ')
+|   |   |   |   |   |   6---List
+|   |   |   |   |   |   |   7---Text("data-id")
+|   |   |   |   |   |   |   7---Char('=')
+|   |   |   |   |   |   |   7---Char('"')
+|   |   |   |   |   |   |   7---Text("2")
+|   |   |   |   |   |   |   7---Char('"')
+|   |   |   |   |   |   6---Char('>')
+|   |   |   |   |   |   6---Nest(4)
+|   |   |   |   |   |   |   7---Break(false, 0)
+|   |   |   |   |   |   |   7---Group
+|   |   |   |   |   |   |   |   8---Alt
+|   |   |   |   |   |   |   |   |   9---Text("two")
+|   |   |   |   |   |   |   |   |   9---List
+|   |   |   |   |   |   |   |   |   |   10---Text("two")
+|   |   |   |   |   |   6---Break(false, 0)
+|   |   |   |   |   |   6---Text("</li>")
+|   |   |   3---NewLine
+|   |   |   3---Text("</ul>")
+|   1---NewLine
