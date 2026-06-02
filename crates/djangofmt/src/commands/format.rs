@@ -105,6 +105,7 @@ macro_rules! ignore_directive {
 }
 const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
 const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
+const DJANGOFMT_IGNORE_COMMENT_JINJA: &str = concat!("{# ", ignore_directive!(), " #}");
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
@@ -263,7 +264,9 @@ pub fn format_text(
     config: &FormatterConfig,
     profile: Profile,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
-    if source.starts_with(DJANGOFMT_IGNORE_COMMENT) {
+    if source.starts_with(DJANGOFMT_IGNORE_COMMENT)
+        || source.starts_with(DJANGOFMT_IGNORE_COMMENT_JINJA)
+    {
         return Ok(None);
     }
     markup_fmt::format_text(
