@@ -37,7 +37,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [MDN: Mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content)
 /// - [WHATWG Fetch: HTTPS state](https://fetch.spec.whatwg.org/#concept-request-https-state)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.10")]
 pub struct UseHttps {
     pub attribute: &'static str,
 }

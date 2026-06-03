@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.2.10](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.9..v0.2.10) - 2026-06-03
+
+### ⛰️ Features
+
+- *(format)* Allow `{# djangofmt:ignore #}` to disable formatting ([#333](https://github.com/UnknownPlatypus/djangofmt/issues/333)) - ([8de13fc](https://github.com/UnknownPlatypus/djangofmt/commit/8de13fc09e22779d903dda472f506b44b827954e))
+- *(lint)* Add `django-url-pattern` lint rule ([#314](https://github.com/UnknownPlatypus/djangofmt/issues/314)) - ([9cfc71c](https://github.com/UnknownPlatypus/djangofmt/commit/9cfc71c9fc530f18f04bbcf49d622aecbf9ee4b2))
+- *(lint)* Add `empty-tag-pair` lint rule ([#313](https://github.com/UnknownPlatypus/djangofmt/issues/313)) - ([5ac93df](https://github.com/UnknownPlatypus/djangofmt/commit/5ac93dfe72040647eb1568ba7a3e5a1ae68c8e25))
+- *(lint)* Add `missing-img-alt` lint rule ([#312](https://github.com/UnknownPlatypus/djangofmt/issues/312)) - ([d7e3d38](https://github.com/UnknownPlatypus/djangofmt/commit/d7e3d3802992d472279cc260fc08761a9fddf29f))
+- *(lint)* Add `django-static-url` lint rule ([#311](https://github.com/UnknownPlatypus/djangofmt/issues/311)) - ([27836b6](https://github.com/UnknownPlatypus/djangofmt/commit/27836b62f6cb1236b0168204d9d89ce21412ffb2))
+- *(lint)* Add `use-https` lint rule ([#308](https://github.com/UnknownPlatypus/djangofmt/issues/308)) - ([3503bc7](https://github.com/UnknownPlatypus/djangofmt/commit/3503bc73b7fbe9a21ea111456d416be70dd74873))
+- *(playground)* Add ast + Doc IR representation in playground ([#331](https://github.com/UnknownPlatypus/djangofmt/issues/331)) - ([c9489bb](https://github.com/UnknownPlatypus/djangofmt/commit/c9489bb8e1291c048d961e7e548100e2d5b38e97))
+
+### 🐛 Bug Fixes
+
+- *(format)* Stabilize indentation of `<script>` tag content ([#335](https://github.com/UnknownPlatypus/djangofmt/issues/335)) - ([8c98e1e](https://github.com/UnknownPlatypus/djangofmt/commit/8c98e1e235bac6cbfe208e2a02c0f2b287f1d83a))
+
+### 🚜 Refactor
+
+- *(lint)* Dispatch per-attribute rules from a single attribute visitor ([#330](https://github.com/UnknownPlatypus/djangofmt/issues/330)) - ([d02925c](https://github.com/UnknownPlatypus/djangofmt/commit/d02925cf815622d92a13b0db2192bdc71c294fd3))
+- *(lint)* Dispatch tag-scoped rules by tag ([#326](https://github.com/UnknownPlatypus/djangofmt/issues/326)) - ([4c1a059](https://github.com/UnknownPlatypus/djangofmt/commit/4c1a0594f1d284c21bf4e5bc8b9bbc3bf1e598de))
+- *(lint)* Check img height and width attributes in a single pass ([#322](https://github.com/UnknownPlatypus/djangofmt/issues/322)) - ([5164cea](https://github.com/UnknownPlatypus/djangofmt/commit/5164cea1512d440fc563fbcecb11070157004894))
+- *(lint)* Reuse fs::get_cwd and drop build_walk_filters wrapper ([#320](https://github.com/UnknownPlatypus/djangofmt/issues/320)) - ([9aab7b7](https://github.com/UnknownPlatypus/djangofmt/commit/9aab7b707538e1c700ce2b02edf6683c09404bc6))
+- *(lint)* Add `fix::edits` module with `delete_attr_fix` helper ([#319](https://github.com/UnknownPlatypus/djangofmt/issues/319)) - ([d7cc9ad](https://github.com/UnknownPlatypus/djangofmt/commit/d7cc9ad8b33ccc67a4c56413d14a2e21902fa878))
+- *(lint)* Extract jinja-aware attr-presence helper ([#318](https://github.com/UnknownPlatypus/djangofmt/issues/318)) - ([6910bd9](https://github.com/UnknownPlatypus/djangofmt/commit/6910bd972adad609506edd9e82b014fb01071fc9))
+- *(lint)* Fold attribute value match into NativeAttribute pattern ([#317](https://github.com/UnknownPlatypus/djangofmt/issues/317)) - ([67f5802](https://github.com/UnknownPlatypus/djangofmt/commit/67f58023fa7a58952cd580996f8d7b1f83d84aba))
+- *(playground)* Switch to deno ([#316](https://github.com/UnknownPlatypus/djangofmt/issues/316)) - ([2abd19d](https://github.com/UnknownPlatypus/djangofmt/commit/2abd19d6ff5967ae8fd2e6f9e4a42c5f6194119c))
+- *(test)* Share benchmark template list via `ALL_TEMPLATES` const ([#321](https://github.com/UnknownPlatypus/djangofmt/issues/321)) - ([2eab77b](https://github.com/UnknownPlatypus/djangofmt/commit/2eab77b5cb9bf5bdcd4d6a802238fc27419021cc))
+
+### ⚡ Performance
+
+- *(format)* Update `markup_fmt` leading to average perf improvement of 2x ([#329](https://github.com/UnknownPlatypus/djangofmt/issues/329)) - ([d0329ca](https://github.com/UnknownPlatypus/djangofmt/commit/d0329caa34e3fd6d128f1cb5a0f383dfc793d3fc))
+- *(lint)* Use a BitSet to store enabled rules ([#325](https://github.com/UnknownPlatypus/djangofmt/issues/325)) - ([347d0b9](https://github.com/UnknownPlatypus/djangofmt/commit/347d0b95f736ca87bd5630a79a5e4f0585f2137b))
+
 ## [0.2.9](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.8..v0.2.9) - 2026-05-29
 
 ### ⛰️ Features

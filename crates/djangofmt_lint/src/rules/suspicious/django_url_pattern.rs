@@ -31,7 +31,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [Django: the `url` template tag](https://docs.djangoproject.com/en/stable/ref/templates/builtins/#url)
 /// - [Django: URL dispatcher](https://docs.djangoproject.com/en/stable/topics/http/urls/)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(preview_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(preview_since = "0.2.10")]
 pub struct DjangoUrlPattern {
     pub attribute: &'static str,
 }

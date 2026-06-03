@@ -31,7 +31,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [Django: managing static files](https://docs.djangoproject.com/en/stable/howto/static-files/)
 /// - [Django: the `{% static %}` template tag](https://docs.djangoproject.com/en/stable/ref/templates/builtins/#static)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.10")]
 pub struct DjangoStaticUrl {
     pub attribute: &'static str,
 }

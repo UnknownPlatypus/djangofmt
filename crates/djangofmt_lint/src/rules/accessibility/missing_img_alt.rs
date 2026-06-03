@@ -28,7 +28,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [MDN: HTML `alt` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#alt)
 /// - [WCAG 1.1.1: Non-text Content](https://www.w3.org/WAI/WCAG21/Understanding/non-text-content.html)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.10")]
 pub struct MissingImgAlt;
 
 impl Violation for MissingImgAlt {

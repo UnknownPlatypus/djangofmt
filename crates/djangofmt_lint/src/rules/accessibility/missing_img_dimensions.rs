@@ -28,7 +28,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [MDN: `<img>` — Setting `width` and `height`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#setting_width_and_height)
 /// - [web.dev: Optimize Cumulative Layout Shift](https://web.dev/articles/optimize-cls#images-without-dimensions)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.10")]
 pub struct MissingImgDimensions;
 
 impl Violation for MissingImgDimensions {

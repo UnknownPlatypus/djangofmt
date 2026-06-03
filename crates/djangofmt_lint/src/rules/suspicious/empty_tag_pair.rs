@@ -29,7 +29,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [HTML spec: void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements)
 /// - [HTML spec: palpable content](https://html.spec.whatwg.org/multipage/dom.html#palpable-content)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(preview_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(preview_since = "0.2.10")]
 pub struct EmptyTagPair {
     pub tag: String,
 }
