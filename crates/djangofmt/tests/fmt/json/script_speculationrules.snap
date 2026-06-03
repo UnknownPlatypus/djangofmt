@@ -1,5 +1,5 @@
 ---
-source: tests/fmt/main.rs
+source: crates/djangofmt/tests/fmt/main.rs
 ---
 <script type="speculationrules">
 {
