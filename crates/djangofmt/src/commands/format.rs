@@ -321,11 +321,78 @@ pub fn format_text(
                             .into())
                     }
                 }
+                "markup-fmt-jinja-expr" => {
+                    let jinja_config = build_pretty_jinja_config(
+                        hints.print_width,
+                        config.markup.layout.indent_width,
+                    );
+                    Ok(pretty_jinja::format_expr(code, &jinja_config).map_or_else(
+                        |error| {
+                            debug!(
+                                "Failed to format Jinja expression, falling back to original code. Error: {:?}",
+                                error
+                            );
+                            code.into()
+                        },
+                        Cow::from,
+                    ))
+                }
+                "markup-fmt-jinja-stmt" => {
+                    let jinja_config = build_pretty_jinja_config(
+                        hints.print_width,
+                        config.markup.layout.indent_width,
+                    );
+                    Ok(pretty_jinja::format_stmt(code, &jinja_config).map_or_else(
+                        |error| {
+                            debug!(
+                                "Failed to format Jinja statement, falling back to original code. Error: {:?}",
+                                error
+                            );
+                            code.into()
+                        },
+                        Cow::from,
+                    ))
+                }
                 _ => Ok(code.into()),
             }
         },
     )
     .map(Some)
+}
+
+/// Build `pretty_jinja` options for formatting Jinja expressions and statements.
+const fn build_pretty_jinja_config(
+    print_width: usize,
+    indent_width: usize,
+) -> pretty_jinja::config::FormatOptions {
+    pretty_jinja::config::FormatOptions {
+        layout: pretty_jinja::config::LayoutOptions {
+            print_width,
+            indent_width,
+            use_tabs: false,
+            line_break: pretty_jinja::config::LineBreak::Lf,
+        },
+        language: pretty_jinja::config::LanguageOptions {
+            operator_linebreak: pretty_jinja::config::OperatorLineBreak::Before,
+            trailing_comma: pretty_jinja::config::TrailingComma::OnlyMultiLine,
+            args_trailing_comma: None,
+            expr_dict_trailing_comma: None,
+            expr_list_trailing_comma: None,
+            expr_tuple_trailing_comma: None,
+            params_trailing_comma: None,
+            prefer_single_line: true,
+            args_prefer_single_line: Some(true),
+            expr_dict_prefer_single_line: Some(true),
+            expr_list_prefer_single_line: Some(true),
+            expr_tuple_prefer_single_line: Some(true),
+            params_prefer_single_line: Some(true),
+            brace_spacing: true,
+            bracket_spacing: false,
+            args_paren_spacing: false,
+            params_paren_spacing: false,
+            tuple_paren_spacing: false,
+        },
+    }
 }
 
 /// Format the file at the given [`Path`].

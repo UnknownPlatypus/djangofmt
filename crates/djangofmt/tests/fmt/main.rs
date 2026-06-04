@@ -50,7 +50,12 @@ fn build_config(pyproject: &PyprojectSettings) -> FormatterConfig {
 }
 
 fn run_format_test(path: &Path, input: &str, config: &FormatterConfig) -> String {
-    let profile = Profile::Django;
+    // Fixtures living under a `jinja` directory are formatted with the Jinja profile.
+    let profile = if path.components().any(|c| c.as_os_str() == "jinja") {
+        Profile::Jinja
+    } else {
+        Profile::Django
+    };
 
     let output = format_text(input, config, profile)
         .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))

@@ -1,0 +1,18 @@
+{% import "macros.html" as  macros %}
+{% set greeting="hello" %}
+{% set items=[1,2,3] %}
+{% set mapping={"a":1,"b":2} %}
+<p>{{ user.name|upper }}</p>
+<p>{{ value|default("n/a")|title }}</p>
+{% with total=items|sum %}
+    <span>{{ total }}</span>
+{% endwith %}
+{% if user.is_active and user.is_staff or user.is_superuser %}
+    <b>{{ _("Welcome") }}</b>
+{% elif user.is_anonymous %}
+    <b>{{ _("Please log in") }}</b>
+{% endif %}
+{% for item in items %}
+    <li>{{ loop.index }}: {{ item|string }}</li>
+{% endfor %}
+{{ data|join(", ") }}

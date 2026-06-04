@@ -24,6 +24,9 @@ insta-cmd = { version = "0.6.0" }
 malva = { version = "0.16.0", features = ["config_serde"] }
 markup_fmt = { git = "https://github.com/UnknownPlatypus/markup_fmt", rev = "a124844fa6783925450a48636acb1bbdd90a70fd" }
 miette = { version = "7.6.0", features = ["fancy"] }
+pretty_jinja = { git = "https://github.com/g-plane/pretty_jinja", rev = "v0.2.0", features = [
+  "config_serde"
+] }
 proc-macro2 = { version = "1.0" }
 quote = { version = "1.0" }
 rayon = { version = "1.12.0" }

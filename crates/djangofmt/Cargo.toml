@@ -23,6 +23,7 @@ malva = { workspace = true }
 markup_fmt = { workspace = true }
 # Error reporting
 miette = { workspace = true }
+pretty_jinja = { workspace = true }
 rayon = { workspace = true }
 rustc-hash = { workspace = true }
 serde = { workspace = true }
