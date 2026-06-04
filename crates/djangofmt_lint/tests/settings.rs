@@ -114,6 +114,56 @@ fn extend_ignore_subtracts_after_select() {
 }
 
 #[test]
+fn same_specificity_ignore_beats_select() {
+    // select and ignore of the same category are both at Category specificity;
+    // within a level ignores apply after selects, so the rule ends disabled.
+    let settings = Settings::from_selectors(
+        &[category(RuleCategory::Correctness)],
+        &[category(RuleCategory::Correctness)],
+        &[],
+        &[],
+        PreviewMode::Disabled,
+    );
+    assert!(!settings.is_enabled(Rule::InvalidAttrValue));
+    assert!(settings.rules.is_empty());
+}
+
+#[test]
+fn extend_select_does_not_override_same_specificity_ignore() {
+    // extend_select and ignore both target the rule at Rule specificity; the
+    // ignore is applied after the selects in that level, so extend_select
+    // cannot rescue a rule that is also ignored.
+    let settings = Settings::from_selectors(
+        &[RuleSelector::All],
+        &[rule(Rule::InvalidAttrValue)],
+        &[rule(Rule::InvalidAttrValue)],
+        &[],
+        PreviewMode::Disabled,
+    );
+    assert!(!settings.is_enabled(Rule::InvalidAttrValue));
+}
+
+#[test]
+fn full_lint_table_combination_resolves_as_expected() {
+    // Mirrors the `test_load_options_with_full_lint_table` fixture and asserts
+    // the *resolved* set: select=[ALL] with a rule-level ignore and a
+    // category-level extend_ignore both disable invalid-attr-value, while
+    // rules outside the ignored category stay enabled.
+    let settings = Settings::from_selectors(
+        &[RuleSelector::All],
+        &[rule(Rule::InvalidAttrValue)],
+        &[category(RuleCategory::Correctness)],
+        &[category(RuleCategory::Correctness)],
+        PreviewMode::Disabled,
+    );
+    assert!(!settings.is_enabled(Rule::InvalidAttrValue));
+    assert!(
+        !settings.rules.is_empty(),
+        "rules outside the ignored correctness category should remain enabled",
+    );
+}
+
+#[test]
 fn preview_mode_field_propagated() {
     let settings = Settings::from_selectors(&[], &[], &[], &[], PreviewMode::Enabled);
     assert_eq!(settings.preview, PreviewMode::Enabled);
