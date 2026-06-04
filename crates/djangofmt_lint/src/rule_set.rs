@@ -109,14 +109,6 @@ impl FromIterator<Rule> for RuleSet {
     }
 }
 
-impl Extend<Rule> for RuleSet {
-    fn extend<I: IntoIterator<Item = Rule>>(&mut self, iter: I) {
-        for rule in iter {
-            self.insert(rule);
-        }
-    }
-}
-
 impl IntoIterator for RuleSet {
     type Item = Rule;
     type IntoIter = RuleSetIterator;

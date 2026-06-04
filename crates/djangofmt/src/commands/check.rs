@@ -1,6 +1,6 @@
 use djangofmt_lint::{
     Applicability, FileDiagnostics, FixerError, PreviewMode, RuleFixSummary, RuleSelection,
-    RuleSelector, Settings, check_ast, lint_fix,
+    Settings, check_ast, lint_fix,
 };
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
@@ -226,9 +226,10 @@ fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
 /// `PreviewMode` precedence is `--preview` > `--no-preview` > pyproject >
 /// disabled.
 fn resolve_settings(cli: &CheckCommand, pyproject: &PyprojectSettings) -> Settings {
-    let pyproject_layer = Layer::from_pyproject(pyproject.lint.as_ref());
-    let cli_layer = Layer::from_cli(cli);
-    let selections = [pyproject_layer.as_selection(), cli_layer.as_selection()];
+    let selections = [
+        pyproject_selection(pyproject.lint.as_ref()),
+        cli_selection(cli),
+    ];
 
     Settings::from_selections(&selections, resolve_preview(cli, pyproject))
 }
@@ -245,54 +246,27 @@ fn resolve_preview(cli: &CheckCommand, pyproject: &PyprojectSettings) -> Preview
         .map_or(PreviewMode::Disabled, PreviewMode::from)
 }
 
-/// Borrowed view of a single rule-selection layer.
+/// Build the pyproject rule-selection layer.
 ///
-/// Mirrors `LintTomlSettings` / `CheckCommand`'s rule-selection fields with
-/// uniform `Option<&[...]>` slots, ready to be converted to a
-/// [`RuleSelection`] for [`Settings::from_selections`].
-struct Layer<'a> {
-    select: Option<&'a [RuleSelector]>,
-    ignore: Option<&'a [RuleSelector]>,
-    extend_select: Option<&'a [RuleSelector]>,
-    extend_ignore: Option<&'a [RuleSelector]>,
+/// A missing `[tool.djangofmt.lint]` table yields an empty layer (`select`
+/// `None`, the rest `&[]`), which extends the implicit default rather than
+/// replacing it.
+fn pyproject_selection(lint: Option<&LintTomlSettings>) -> RuleSelection<'_> {
+    lint.map_or_else(RuleSelection::default, |l| RuleSelection {
+        select: l.select.as_deref(),
+        ignore: l.ignore.as_deref().unwrap_or(&[]),
+        extend_select: l.extend_select.as_deref().unwrap_or(&[]),
+        extend_ignore: l.extend_ignore.as_deref().unwrap_or(&[]),
+    })
 }
 
-impl<'a> Layer<'a> {
-    fn from_pyproject(lint: Option<&'a LintTomlSettings>) -> Self {
-        lint.map_or_else(Self::empty, |l| Self {
-            select: l.select.as_deref(),
-            ignore: l.ignore.as_deref(),
-            extend_select: l.extend_select.as_deref(),
-            extend_ignore: l.extend_ignore.as_deref(),
-        })
-    }
-
-    fn from_cli(cli: &'a CheckCommand) -> Self {
-        Self {
-            select: cli.select.as_deref(),
-            ignore: cli.ignore.as_deref(),
-            extend_select: cli.extend_select.as_deref(),
-            extend_ignore: cli.extend_ignore.as_deref(),
-        }
-    }
-
-    const fn empty() -> Self {
-        Self {
-            select: None,
-            ignore: None,
-            extend_select: None,
-            extend_ignore: None,
-        }
-    }
-
-    /// Convert to a [`RuleSelection`] for the lint crate's resolver.
-    fn as_selection(&self) -> RuleSelection<'a> {
-        RuleSelection {
-            select: self.select,
-            ignore: self.ignore.unwrap_or(&[]),
-            extend_select: self.extend_select.unwrap_or(&[]),
-            extend_ignore: self.extend_ignore.unwrap_or(&[]),
-        }
+/// Build the CLI rule-selection layer.
+fn cli_selection(cli: &CheckCommand) -> RuleSelection<'_> {
+    RuleSelection {
+        select: cli.select.as_deref(),
+        ignore: cli.ignore.as_deref().unwrap_or(&[]),
+        extend_select: cli.extend_select.as_deref().unwrap_or(&[]),
+        extend_ignore: cli.extend_ignore.as_deref().unwrap_or(&[]),
     }
 }
 
@@ -382,7 +356,7 @@ fn check_path(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use djangofmt_lint::{Rule, RuleCategory};
+    use djangofmt_lint::{Rule, RuleCategory, RuleSelector};
     use tracing_test::traced_test;
 
     #[test]

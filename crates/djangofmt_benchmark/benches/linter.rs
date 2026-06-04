@@ -1,5 +1,5 @@
 use djangofmt_benchmark::{ALL_TEMPLATES, TestFile};
-use djangofmt_lint::{PreviewMode, RuleSelector, Settings, check_ast};
+use djangofmt_lint::{PreviewMode, Settings, check_ast};
 use markup_fmt::parser::Parser;
 
 fn main() {
@@ -10,8 +10,7 @@ fn main() {
 fn check_templates(bencher: divan::Bencher, template: &'static TestFile) {
     // Benchmark every rule, including preview ones, so throughput stays
     // comparable across commits regardless of a rule's stability group.
-    let settings =
-        Settings::from_selectors(&[RuleSelector::All], &[], &[], &[], PreviewMode::Enabled);
+    let settings = Settings::all_rules(PreviewMode::Enabled);
 
     bencher
         .counter(divan::counter::BytesCount::of_str(template.code))

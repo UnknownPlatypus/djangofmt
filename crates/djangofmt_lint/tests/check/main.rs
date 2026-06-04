@@ -3,8 +3,7 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, PreviewMode, RuleSelector, Settings, check_ast,
-    fix_ast,
+    Applicability, FileDiagnostics, LintDiagnostic, PreviewMode, Settings, check_ast, fix_ast,
 };
 
 use insta::{assert_snapshot, glob};
@@ -85,7 +84,7 @@ const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 /// Settings for fixture tests: every rule, including preview ones, so that a
 /// rule's fixtures are exercised regardless of its stability group.
 fn test_settings() -> Settings {
-    Settings::from_selectors(&[RuleSelector::All], &[], &[], &[], PreviewMode::Enabled)
+    Settings::all_rules(PreviewMode::Enabled)
 }
 
 fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {

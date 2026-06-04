@@ -65,7 +65,7 @@ pub struct Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        Self::from_selectors(&[RuleSelector::All], &[], &[], &[], PreviewMode::Disabled)
+        Self::all_rules(PreviewMode::Disabled)
     }
 }
 
@@ -99,6 +99,16 @@ impl Settings {
             }],
             preview,
         )
+    }
+
+    /// Build [`Settings`] with every registered rule selected.
+    ///
+    /// Convenience for embedders, benchmarks, and tests that want the full
+    /// rule set; `preview` controls whether preview-stability rules are
+    /// included.
+    #[must_use]
+    pub fn all_rules(preview: PreviewMode) -> Self {
+        Self::from_selectors(&[RuleSelector::All], &[], &[], &[], preview)
     }
 
     /// Build [`Settings`] from a sequence of [`RuleSelection`] layers.
@@ -141,14 +151,23 @@ impl Settings {
         let ignore_iter = || layer.ignore.iter();
         let extend_ignore_iter = || layer.extend_ignore.iter();
 
-        let mut updates: Vec<(Rule, bool)> = Vec::new();
+        // A layer with `Some(select)` rebuilds from scratch (replacement
+        // semantics, dropping prior state including ignores); otherwise it
+        // merges onto the running set. The base is fixed before any update, so
+        // selects/ignores can apply directly per specificity level.
+        let mut next = if layer.select.is_some() {
+            RuleSet::empty()
+        } else {
+            running
+        };
+
         for spec in Specificity::iter() {
             for selector in select_iter()
                 .chain(extend_select_iter())
                 .filter(|s| s.specificity() == spec)
             {
                 for rule in selector.rules(preview) {
-                    updates.push((rule, true));
+                    next.insert(rule);
                 }
             }
             for selector in ignore_iter()
@@ -156,22 +175,8 @@ impl Settings {
                 .filter(|s| s.specificity() == spec)
             {
                 for rule in selector.rules(preview) {
-                    updates.push((rule, false));
+                    next.remove(rule);
                 }
-            }
-        }
-
-        let mut next = if layer.select.is_some() {
-            // Replacement semantics: drop everything carried so far.
-            RuleSet::empty()
-        } else {
-            running
-        };
-        for (rule, enabled) in updates {
-            if enabled {
-                next.insert(rule);
-            } else {
-                next.remove(rule);
             }
         }
         next
