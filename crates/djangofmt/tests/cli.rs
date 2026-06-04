@@ -616,8 +616,8 @@ fn check_preview_flag_does_not_error() {
 #[test]
 fn check_preview_rule_gated_by_preview_flag() {
     // `empty-tag-pair` is a preview rule. Exact-selecting it must NOT enable
-    // it without `--preview` (matches ruff: preview rules require preview
-    // mode); with `--preview` it runs and flags the empty pair.
+    // it without `--preview` (preview rules require preview mode); with
+    // `--preview` it runs and flags the empty pair.
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("empty.html");
     std::fs::write(&file, "<span></span>\n").unwrap();

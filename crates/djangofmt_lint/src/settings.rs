@@ -7,7 +7,7 @@
 //!
 //! Higher layers (CLI / pyproject) construct one [`RuleSelection`] per
 //! configuration source and call [`Settings::from_selections`] to fold them
-//! into a [`RuleSet`] using ruff-style specificity ordering: broadest
+//! into a [`RuleSet`] using specificity ordering: broadest
 //! selectors (`ALL`) apply first, then category-level, then exact rule
 //! selectors. At each level selects / extends are applied additively and
 //! ignores are applied subtractively, so `select = ["ALL"], ignore =
@@ -41,7 +41,6 @@ impl From<bool> for PreviewMode {
 
 /// A single rule-selection layer.
 ///
-/// Mirrors ruff's `RuleSelection` (`crates/ruff_workspace/src/configuration.rs`).
 /// A layer carries the four selector lists that the user can express in one
 /// "place" (defaults, pyproject, CLI flags). The `select` slot is
 /// `Option<&[...]>` so the caller can distinguish a missing `select`
@@ -80,7 +79,7 @@ impl Settings {
     /// (defaults, tests, one-shot embedders) that have exactly one layer. The
     /// selectors are wrapped in a single [`RuleSelection`] whose `Some(select)`
     /// *replaces* the implicit `ALL` base, so the result is just this layer
-    /// resolved with ruff-style specificity ordering — `select`/`extend_select`
+    /// resolved with specificity ordering — `select`/`extend_select`
     /// additive, `ignore`/`extend_ignore` subtractive, narrower selectors
     /// winning.
     #[must_use]
@@ -104,8 +103,8 @@ impl Settings {
 
     /// Build [`Settings`] from a sequence of [`RuleSelection`] layers.
     ///
-    /// Mirrors ruff's `LintConfiguration::as_rule_table` multi-layer
-    /// resolution. An implicit base layer (`select = ["ALL"]`) is prepended
+    /// Folds a sequence of selection layers into a single rule set. An
+    /// implicit base layer (`select = ["ALL"]`) is prepended
     /// so the very first layer's `extend_select` / `ignore` behave the way
     /// users expect (additive on the default rule set). The layers in
     /// `selections` are then applied in order, each one either *replacing*

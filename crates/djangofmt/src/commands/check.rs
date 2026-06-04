@@ -608,7 +608,8 @@ mod tests {
 
         // CLI `select=[ALL]` *replaces*: the new running set is recomputed
         // entirely from the CLI layer's selectors, discarding pyproject's
-        // ignore. Matches ruff's `RuleSelection`-replacement semantics.
+        // ignore. This is the layer-replacement semantics (a layer with
+        // `Some(select)` rebuilds the running set from scratch).
         let cli_with_select = CheckCommand {
             select: Some(vec![RuleSelector::All]),
             ..cli_default()

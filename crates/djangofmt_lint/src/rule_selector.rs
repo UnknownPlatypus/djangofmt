@@ -1,16 +1,15 @@
 //! User-facing rule selectors (e.g. `ALL`, `correctness`, `invalid-attr-value`).
 //!
-//! Mirrors ruff's `RuleSelector` (`crates/ruff_linter/src/rule_selector.rs`)
-//! at djangofmt scale. djangofmt has no rule codes or linter-prefix taxonomy,
-//! so selectors are limited to:
+//! djangofmt has no rule codes or linter-prefix taxonomy, so selectors are
+//! limited to:
 //!
 //! - [`RuleSelector::All`] — every registered rule
 //! - [`RuleSelector::Category`] — every rule of a given functional category
 //! - [`RuleSelector::Rule`] — a single rule, addressed by its kebab-case name
 //!
-//! The two-step expansion (`all_rules` then `rules(preview)`) mirrors ruff so
-//! that the `Deprecated`/`Removed` stability paths fit cleanly without further
-//! refactoring once we start using them.
+//! The two-step expansion (`all_rules` then `rules(preview)`) keeps the
+//! `Deprecated`/`Removed` stability paths cleanly separable for when they are
+//! used.
 
 use std::fmt::{self, Display, Formatter};
 use std::str::FromStr;
@@ -92,11 +91,9 @@ impl RuleSelector {
     ///
     /// Filtering rules:
     /// - [`RuleGroup::Stable`] — always included
-    /// - [`RuleGroup::Preview`] — included only when `preview == Enabled`.
-    ///   This matches ruff with its default `require_explicit = false`: an
+    /// - [`RuleGroup::Preview`] — included only when `preview == Enabled`. An
     ///   exact selector does *not* pull a preview rule in while preview is
-    ///   off (ruff gates the exact-selector relaxation behind `preview &&`,
-    ///   so preview rules never run without preview mode).
+    ///   off, so preview rules never run without preview mode.
     /// - [`RuleGroup::Deprecated`] — only when `preview == Disabled` *and* the
     ///   selector is exact
     /// - [`RuleGroup::Removed`] — only when the selector is exact
@@ -284,7 +281,7 @@ mod tests {
     #[test]
     fn exact_selector_does_not_bypass_preview_gating() {
         // A preview rule selected by exact name is still gated behind preview
-        // mode (matches ruff: preview rules never run without `--preview`).
+        // mode: preview rules never run without `--preview`.
         let preview_rule = RuleSelector::Rule(Rule::EmptyTagPair);
         assert!(
             preview_rule.rules(PreviewMode::Disabled).next().is_none(),

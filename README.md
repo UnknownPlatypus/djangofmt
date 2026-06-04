@@ -129,7 +129,7 @@ Command-line arguments always take precedence over `pyproject.toml` settings.
 
 See [Controlling the formatting](https://unknownplatypus.github.io/djangofmt/docs/formatting/) for the behaviour of each option and how to opt into per-node overrides.
 
-Lint rule selection lives in a nested `[tool.djangofmt.lint]` subtable (mirroring `ruff`). The `check` subcommand is still preview; expect the surface to evolve.
+Lint rule selection lives in a nested `[tool.djangofmt.lint]` subtable, alongside the formatter options above. The `check` subcommand is still preview; expect the surface to evolve.
 
 ```toml
 [tool.djangofmt.lint]
