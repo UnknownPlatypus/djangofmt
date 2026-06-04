@@ -16,9 +16,10 @@ pub enum RuleGroup {
     Stable { since: &'static str },
     /// Unstable since the given djangofmt version; requires preview mode.
     Preview { since: &'static str },
-    /// Deprecated since the given djangofmt version; warns on selection.
+    /// Deprecated since the given djangofmt version; still functional, but only
+    /// selectable by exact name (never via `ALL` or a category).
     Deprecated { since: &'static str },
-    /// Removed in the given djangofmt version; docs kept for history.
+    /// Removed in the given djangofmt version; never selectable, docs kept for history.
     Removed { since: &'static str },
 }
 

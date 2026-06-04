@@ -90,13 +90,15 @@ impl RuleSelector {
     /// Rules matched by this selector after applying stability filtering.
     ///
     /// Filtering rules:
-    /// - [`RuleGroup::Stable`] — always included
+    /// - [`RuleGroup::Stable`] — always included.
     /// - [`RuleGroup::Preview`] — included only when `preview == Enabled`. An
     ///   exact selector does *not* pull a preview rule in while preview is
     ///   off, so preview rules never run without preview mode.
-    /// - [`RuleGroup::Deprecated`] — only when `preview == Disabled` *and* the
-    ///   selector is exact
-    /// - [`RuleGroup::Removed`] — only when the selector is exact
+    /// - [`RuleGroup::Deprecated`] — still functional, so it is included when
+    ///   named by an exact selector (in any mode), but never pulled in by
+    ///   `ALL` or a category selector.
+    /// - [`RuleGroup::Removed`] — never included; a removed rule does not run
+    ///   even when named exactly.
     #[must_use]
     pub fn rules(&self, preview: PreviewMode) -> Box<dyn Iterator<Item = Rule> + '_> {
         let is_exact = self.is_exact();
@@ -105,8 +107,8 @@ impl RuleSelector {
         Box::new(self.all_rules().filter(move |rule| match rule.group() {
             RuleGroup::Stable { .. } => true,
             RuleGroup::Preview { .. } => preview_enabled,
-            RuleGroup::Deprecated { .. } => !preview_enabled && is_exact,
-            RuleGroup::Removed { .. } => is_exact,
+            RuleGroup::Deprecated { .. } => is_exact,
+            RuleGroup::Removed { .. } => false,
         }))
     }
 }
