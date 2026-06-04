@@ -28,6 +28,9 @@ markup_fmt = {
   rev = "084d68e60da1f13545a97c19b4171ec9ea7c3a5b"
 }
 miette = { version = "7.6.0", features = ["fancy"] }
+pretty_jinja = { git = "https://github.com/g-plane/pretty_jinja", rev = "v0.2.0", features = [
+  "config_serde"
+] }
 proc-macro2 = { version = "1.0" }
 quote = { version = "1.0" }
 rayon = { version = "1.12.0" }
