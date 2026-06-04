@@ -502,6 +502,27 @@ fn check_select_invalid_attr_value_reports_violations() {
 }
 
 #[test]
+fn check_select_tolerates_whitespace_and_empty_entries() {
+    // Leading/trailing/doubled commas and surrounding whitespace are ignored,
+    // so a sloppy `--select` value still resolves to its real selectors.
+    let dir = TempDir::new().unwrap();
+    let file = write_invalid_form_method_file(&dir);
+    let output = cli()
+        .arg("check")
+        .arg("--select= invalid-attr-value , ,")
+        .arg(file.as_os_str())
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert_eq!(output.status.code(), Some(1));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("Invalid value 'put' for attribute 'method'"),
+        "expected 'put' violation despite the messy selector value, got:\n{stderr}"
+    );
+}
+
+#[test]
 fn check_ignore_invalid_attr_value_suppresses_violations() {
     let dir = TempDir::new().unwrap();
     let file = write_invalid_form_method_file(&dir);

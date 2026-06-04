@@ -2,11 +2,48 @@ use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
-use djangofmt_lint::RuleSelector;
+use djangofmt_lint::{ParseError, RuleSelector};
 use serde::Deserialize;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 use markup_fmt::Language;
+
+/// A comma-separated list of [`RuleSelector`]s parsed from a single CLI flag.
+///
+/// Empty entries — from leading, trailing, or doubled commas — and surrounding
+/// whitespace are ignored, so `--select=correctness,` and `--select=a, b`
+/// parse cleanly. A non-empty but unrecognised entry is still an error.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RuleSelectors(Vec<RuleSelector>);
+
+impl std::ops::Deref for RuleSelectors {
+    type Target = [RuleSelector];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl FromStr for RuleSelectors {
+    type Err = ParseError;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        value
+            .split(',')
+            .map(str::trim)
+            .filter(|entry| !entry.is_empty())
+            .map(RuleSelector::from_str)
+            .collect::<Result<Vec<_>, _>>()
+            .map(Self)
+    }
+}
+
+impl From<Vec<RuleSelector>> for RuleSelectors {
+    fn from(selectors: Vec<RuleSelector>) -> Self {
+        Self(selectors)
+    }
+}
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands
@@ -195,37 +232,17 @@ pub struct CheckCommand {
 
     /// Comma-separated list of rule names or categories to enable (or `ALL`).
     /// Replaces the default rule set when provided.
-    #[arg(
-        long,
-        value_delimiter = ',',
-        value_name = "RULE_OR_CATEGORY",
-        help_heading = "Rule selection"
-    )]
-    pub select: Option<Vec<RuleSelector>>,
+    #[arg(long, value_name = "RULE_OR_CATEGORY", help_heading = "Rule selection")]
+    pub select: Option<RuleSelectors>,
     /// Comma-separated list of rule names or categories to disable.
-    #[arg(
-        long,
-        value_delimiter = ',',
-        value_name = "RULE_OR_CATEGORY",
-        help_heading = "Rule selection"
-    )]
-    pub ignore: Option<Vec<RuleSelector>>,
+    #[arg(long, value_name = "RULE_OR_CATEGORY", help_heading = "Rule selection")]
+    pub ignore: Option<RuleSelectors>,
     /// Like `--select`, but adds on top of the existing rule set instead of replacing it.
-    #[arg(
-        long,
-        value_delimiter = ',',
-        value_name = "RULE_OR_CATEGORY",
-        help_heading = "Rule selection"
-    )]
-    pub extend_select: Option<Vec<RuleSelector>>,
+    #[arg(long, value_name = "RULE_OR_CATEGORY", help_heading = "Rule selection")]
+    pub extend_select: Option<RuleSelectors>,
     /// Like `--ignore`, but adds on top of the existing ignore set instead of replacing it.
-    #[arg(
-        long,
-        value_delimiter = ',',
-        value_name = "RULE_OR_CATEGORY",
-        help_heading = "Rule selection"
-    )]
-    pub extend_ignore: Option<Vec<RuleSelector>>,
+    #[arg(long, value_name = "RULE_OR_CATEGORY", help_heading = "Rule selection")]
+    pub extend_ignore: Option<RuleSelectors>,
     /// Enable preview-stability rules. Use `--no-preview` to disable.
     #[arg(long, overrides_with("no_preview"), help_heading = "Rule selection")]
     pub preview: bool,

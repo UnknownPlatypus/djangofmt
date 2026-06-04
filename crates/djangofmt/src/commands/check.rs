@@ -540,7 +540,7 @@ mod tests {
     #[test]
     fn cli_ignore_disables_rule() {
         let cli = CheckCommand {
-            ignore: Some(vec![RuleSelector::Rule(Rule::InvalidAttrValue)]),
+            ignore: Some(vec![RuleSelector::Rule(Rule::InvalidAttrValue)].into()),
             ..cli_default()
         };
         let pyproject = PyprojectSettings::default();
@@ -552,7 +552,7 @@ mod tests {
     fn cli_select_replaces_pyproject_select() {
         // pyproject says select = []; CLI says select = [ALL] — CLI wins.
         let cli = CheckCommand {
-            select: Some(vec![RuleSelector::All]),
+            select: Some(vec![RuleSelector::All].into()),
             ..cli_default()
         };
         let pyproject = PyprojectSettings {
@@ -585,7 +585,7 @@ mod tests {
         // ignore. This is the layer-replacement semantics (a layer with
         // `Some(select)` rebuilds the running set from scratch).
         let cli_with_select = CheckCommand {
-            select: Some(vec![RuleSelector::All]),
+            select: Some(vec![RuleSelector::All].into()),
             ..cli_default()
         };
         let settings = resolve_settings(&cli_with_select, &pyproject_only);
@@ -605,7 +605,7 @@ mod tests {
             ..Default::default()
         };
         let cli = CheckCommand {
-            select: Some(vec![RuleSelector::Rule(Rule::InvalidAttrValue)]),
+            select: Some(vec![RuleSelector::Rule(Rule::InvalidAttrValue)].into()),
             ..cli_default()
         };
         let settings = resolve_settings(&cli, &pyproject);
@@ -616,7 +616,7 @@ mod tests {
     fn cli_extend_select_extends_pyproject() {
         // pyproject select = [] (nothing enabled). CLI extend-select=[correctness].
         let cli = CheckCommand {
-            extend_select: Some(vec![RuleSelector::Category(RuleCategory::Correctness)]),
+            extend_select: Some(vec![RuleSelector::Category(RuleCategory::Correctness)].into()),
             ..cli_default()
         };
         let pyproject = PyprojectSettings {
