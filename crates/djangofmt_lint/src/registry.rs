@@ -48,6 +48,7 @@ impl RuleGroup {
     EnumIter,
     EnumString,
     strum::Display,
+    strum::VariantNames,
     Serialize,
     Deserialize,
 )]
