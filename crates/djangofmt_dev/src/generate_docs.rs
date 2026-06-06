@@ -43,7 +43,7 @@ fn render(rule: Rule, explanation: &str) -> String {
     let name = rule.to_string();
     let file = rule.source_file().replace('\\', "/");
     let line = rule.source_line();
-    let category = rule.category().label().to_ascii_lowercase();
+    let category = rule.category();
 
     let mut output = String::new();
     let _ = writeln!(&mut output, "---\ntags:\n  - lint - {category}\n---\n");
