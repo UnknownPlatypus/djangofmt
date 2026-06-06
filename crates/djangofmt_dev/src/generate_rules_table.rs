@@ -30,7 +30,7 @@ fn render() -> String {
         if rules.is_empty() {
             continue;
         }
-        let _ = writeln!(&mut out, "## {}\n", category.label());
+        let _ = writeln!(&mut out, "## {category:?}\n");
         out.push_str("| Name | Message | Fix |\n");
         out.push_str("| ---- | ------- | --- |\n");
         for rule in rules {

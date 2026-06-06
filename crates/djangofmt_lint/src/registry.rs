@@ -38,39 +38,33 @@ impl RuleGroup {
 /// Functional categories for lint rules.
 ///
 /// Categories help users enable/disable groups of related rules.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter, EnumString, Serialize, Deserialize)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    EnumIter,
+    EnumString,
+    strum::Display,
+    Serialize,
+    Deserialize,
+)]
 #[strum(serialize_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
 pub enum RuleCategory {
-    /// Errors that are likely to cause runtime crashes or logic failures.
+    /// Code that is outright wrong or useless.
     Correctness,
-    /// Code that looks incorrect or useless.
+    /// Code that is most likely wrong or useless.
     Suspicious,
-    /// Code that violates stylistic conventions.
+    /// Code that should be written in a more idiomatic way.
     Style,
-    /// Code that is overly complex.
+    /// Code that does something simple but in a complex way.
     Complexity,
     /// Code that creates accessibility (a11y) barriers.
     Accessibility,
-    /// New rules that are not yet stable.
-    Nursery,
 }
-
-impl RuleCategory {
-    /// Capitalized label for the docs table.
-    #[must_use]
-    pub const fn label(self) -> &'static str {
-        match self {
-            Self::Correctness => "Correctness",
-            Self::Suspicious => "Suspicious",
-            Self::Style => "Style",
-            Self::Complexity => "Complexity",
-            Self::Accessibility => "Accessibility",
-            Self::Nursery => "Nursery",
-        }
-    }
-}
-
 /// The single source of truth for all lint rules.
 ///
 /// # Format
