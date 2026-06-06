@@ -64,9 +64,14 @@ struct CheckResult {
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
-    let config = CheckConfig::from_args(args, &resolved.pyproject);
+    let lint = resolved.pyproject.lint.as_ref();
+    let config = CheckConfig::from_args(args, lint);
 
-    let settings = Settings::default();
+    let (settings, warnings) = resolve_rule_selection(&args.rule_selection, lint)?.into_settings();
+    for warning in &warnings {
+        warn!("{warning}");
+    }
+
     let threshold = if config.unsafe_fixes {
         Applicability::Unsafe
     } else {
