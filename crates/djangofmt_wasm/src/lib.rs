@@ -202,7 +202,7 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         }
     };
 
-    let settings = Settings::default();
+    let settings = Settings::all();
     let diagnostics = check_ast(source, &ast, &settings);
     let error_count = diagnostics.len();
 
