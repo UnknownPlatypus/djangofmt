@@ -289,7 +289,7 @@ mod tests {
 
               --profile <PROFILE>
                   Template language profile to use [default: django]
-
+                  
                   [possible values: django, jinja]
 
               --custom-blocks <BLOCK_NAMES>
