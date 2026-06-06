@@ -72,6 +72,9 @@ class CliOptions(Serializable):
             args = ["--profile", self.profile]
             if command is Command.FORMAT and self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))
+            if command is Command.CHECK:
+                # Select every rule, including preview, for maximum ecosystem coverage.
+                args.extend(("--select", "category:all", "--preview"))
             return args
         elif executable_name == Formatter.DJADE:
             return []
