@@ -10,14 +10,14 @@ use rustc_hash::FxHashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
 
 use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
-use crate::pyproject::PyprojectSettings;
-use crate::resolver::resolve_bool_arg;
+use crate::pyproject::LintSettings;
+use crate::resolver::{resolve_bool_arg, resolve_rule_selection};
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
 #[derive(Debug, PartialEq, Eq)]
@@ -28,20 +28,22 @@ pub struct CheckConfig {
 }
 
 impl CheckConfig {
-    /// Build a [`CheckConfig`] by merging CLI arguments with pyproject.toml settings.
+    /// Build a [`CheckConfig`] by merging CLI arguments with `[tool.djangofmt.lint]` settings.
     ///
     /// CLI arguments take precedence over pyproject settings, which take precedence over defaults.
     #[must_use]
-    pub fn from_args(args: &CheckCommand, pyproject: &PyprojectSettings) -> Self {
+    pub fn from_args(args: &CheckCommand, lint: Option<&LintSettings>) -> Self {
+        let default = LintSettings::default();
+        let lint = lint.unwrap_or(&default);
         Self {
             fix: resolve_bool_arg(args.fix, args.no_fix)
-                .or(pyproject.fix)
+                .or(lint.fix)
                 .unwrap_or_default(),
             unsafe_fixes: resolve_bool_arg(args.unsafe_fixes, args.no_unsafe_fixes)
-                .or(pyproject.unsafe_fixes)
+                .or(lint.unsafe_fixes)
                 .unwrap_or_default(),
             show_fixes: resolve_bool_arg(args.show_fixes, args.no_show_fixes)
-                .or(pyproject.show_fixes)
+                .or(lint.show_fixes)
                 .unwrap_or_default(),
         }
     }
@@ -300,13 +302,12 @@ fn check_path(
 mod tests {
     use super::{CheckConfig, print_summary};
     use crate::args::CheckCommand;
-    use crate::pyproject::PyprojectSettings;
+    use crate::pyproject::LintSettings;
     use tracing_test::traced_test;
 
     #[test]
     fn check_config_defaults_to_false() {
-        let config =
-            CheckConfig::from_args(&CheckCommand::default(), &PyprojectSettings::default());
+        let config = CheckConfig::from_args(&CheckCommand::default(), None);
         assert_eq!(
             config,
             CheckConfig {
@@ -319,13 +320,13 @@ mod tests {
 
     #[test]
     fn check_config_reads_pyproject_settings() {
-        let pyproject = PyprojectSettings {
+        let lint = LintSettings {
             fix: Some(true),
             unsafe_fixes: Some(true),
             show_fixes: Some(true),
             ..Default::default()
         };
-        let config = CheckConfig::from_args(&CheckCommand::default(), &pyproject);
+        let config = CheckConfig::from_args(&CheckCommand::default(), Some(&lint));
         assert_eq!(
             config,
             CheckConfig {
@@ -338,7 +339,7 @@ mod tests {
 
     #[test]
     fn check_config_cli_yes_overrides_pyproject() {
-        let pyproject = PyprojectSettings {
+        let lint = LintSettings {
             fix: Some(false),
             unsafe_fixes: Some(false),
             show_fixes: Some(false),
@@ -350,7 +351,7 @@ mod tests {
             show_fixes: true,
             ..Default::default()
         };
-        let config = CheckConfig::from_args(&args, &pyproject);
+        let config = CheckConfig::from_args(&args, Some(&lint));
         assert!(config.fix);
         assert!(config.unsafe_fixes);
         assert!(config.show_fixes);
@@ -358,7 +359,7 @@ mod tests {
 
     #[test]
     fn check_config_cli_no_overrides_pyproject() {
-        let pyproject = PyprojectSettings {
+        let lint = LintSettings {
             fix: Some(true),
             unsafe_fixes: Some(true),
             show_fixes: Some(true),
@@ -370,7 +371,7 @@ mod tests {
             no_show_fixes: true,
             ..Default::default()
         };
-        let config = CheckConfig::from_args(&args, &pyproject);
+        let config = CheckConfig::from_args(&args, Some(&lint));
         assert!(!config.fix);
         assert!(!config.unsafe_fixes);
         assert!(!config.show_fixes);
