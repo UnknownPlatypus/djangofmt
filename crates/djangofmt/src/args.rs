@@ -5,6 +5,7 @@ use clap::builder::styling::{AnsiColor, Effects};
 use serde::Deserialize;
 use std::path::PathBuf;
 
+use djangofmt_lint::RuleSelector;
 use markup_fmt::Language;
 
 /// All configuration options that can be passed "globally",
@@ -163,6 +164,29 @@ pub enum Commands {
     },
 }
 
+/// CLI arguments for selecting which lint rules run.
+#[derive(Clone, Debug, Default, clap::Args)]
+#[command(next_help_heading = "Rule selection")]
+pub struct RuleSelectionArgs {
+    /// Comma-separated list of rules or categories to enable (e.g. `category:all`, `category:correctness`, `missing-img-alt`).
+    #[arg(long, value_delimiter = ',', value_parser = parse_rule_selector, value_name = "RULE")]
+    pub select: Option<Vec<RuleSelector>>,
+    /// Comma-separated list of rules or categories to disable.
+    #[arg(long, value_delimiter = ',', value_parser = parse_rule_selector, value_name = "RULE")]
+    pub ignore: Option<Vec<RuleSelector>>,
+    /// Enable preview rules.
+    #[arg(long)]
+    pub preview: bool,
+}
+
+/// Parse a single rule selector, surfacing the grammar error as a clap error.
+fn parse_rule_selector(value: &str) -> Result<RuleSelector, String> {
+    value
+        .trim()
+        .parse::<RuleSelector>()
+        .map_err(|err| err.to_string())
+}
+
 #[derive(Clone, Debug, Default, clap::Parser)]
 #[expect(clippy::struct_excessive_bools)]
 pub struct CheckCommand {
@@ -189,6 +213,8 @@ pub struct CheckCommand {
     pub show_fixes: bool,
     #[arg(long, overrides_with("show_fixes"), hide = true)]
     pub no_show_fixes: bool,
+    #[clap(flatten)]
+    pub rule_selection: RuleSelectionArgs,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
 }
@@ -263,7 +289,7 @@ mod tests {
 
               --profile <PROFILE>
                   Template language profile to use [default: django]
-                  
+
                   [possible values: django, jinja]
 
               --custom-blocks <BLOCK_NAMES>
