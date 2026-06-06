@@ -21,6 +21,15 @@ pub struct PyprojectSettings {
     pub extend_include: Option<Vec<String>>,
     pub respect_gitignore: Option<bool>,
     pub force_exclude: Option<bool>,
+    pub lint: Option<LintSettings>,
+}
+
+#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct LintSettings {
+    pub select: Option<Vec<String>>,
+    pub ignore: Option<Vec<String>>,
+    pub preview: Option<bool>,
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
@@ -221,7 +230,7 @@ preserve-unquoted-attrs = true
     #[test]
     fn test_load_fix_flags() {
         let content = r"
-[tool.djangofmt]
+[tool.djangofmt.lint]
 fix = true
 unsafe-fixes = true
 show-fixes = true
@@ -230,9 +239,38 @@ show-fixes = true
         assert_eq!(
             result,
             PyprojectSettings {
-                fix: Some(true),
-                unsafe_fixes: Some(true),
-                show_fixes: Some(true),
+                lint: Some(LintSettings {
+                    fix: Some(true),
+                    unsafe_fixes: Some(true),
+                    show_fixes: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_lint_select_ignore_preview() {
+        let content = r#"
+[tool.djangofmt.lint]
+select = ["category:all"]
+ignore = ["category:style", "missing-img-alt"]
+preview = true
+"#;
+        let result = load_options_from_pyproject_toml(content);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                lint: Some(LintSettings {
+                    select: Some(vec!["category:all".to_string()]),
+                    ignore: Some(vec![
+                        "category:style".to_string(),
+                        "missing-img-alt".to_string()
+                    ]),
+                    preview: Some(true),
+                    ..Default::default()
+                }),
                 ..Default::default()
             }
         );
