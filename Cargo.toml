@@ -7,7 +7,7 @@ version = "0.2.10"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
-rust-version = "1.93.1"
+rust-version = "1.94.0"
 repository = "https://github.com/UnknownPlatypus/djangofmt"
 license = "MIT"
 
