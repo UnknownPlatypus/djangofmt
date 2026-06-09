@@ -13,7 +13,7 @@
 //! let mut parser = Parser::new(source, Language::Jinja, vec![]);
 //! let ast = parser.parse_root().unwrap();
 //!
-//! let diagnostics = check_ast(source, &ast, &Settings::default());
+//! let diagnostics = check_ast(source, &ast, &Settings::default(), None);
 //! assert_eq!(diagnostics.len(), 1);
 //! ```
 
@@ -37,6 +37,8 @@ pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use rule_set::RuleSet;
 pub use settings::Settings;
 pub use violation::{Violation, ViolationMetadata};
+
+use std::path::Path;
 
 use markup_fmt::ast::Root;
 use miette::{Diagnostic, NamedSource, SourceSpan};
@@ -120,9 +122,16 @@ impl FileDiagnostics {
 /// Check the AST for lint errors.
 ///
 /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
+///
+/// `path` enables path-aware rules; pass [`None`] when linting a buffer without a backing file.
 #[must_use]
-pub fn check_ast(source: &str, ast: &Root<'_>, settings: &Settings) -> Vec<LintDiagnostic> {
-    let mut checker = Checker::new(source, settings);
+pub fn check_ast(
+    source: &str,
+    ast: &Root<'_>,
+    settings: &Settings,
+    path: Option<&Path>,
+) -> Vec<LintDiagnostic> {
+    let mut checker = Checker::new(source, settings, path);
     checker.visit_root(ast);
     checker.into_diagnostics()
 }
