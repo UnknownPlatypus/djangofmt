@@ -9,8 +9,11 @@
   // Wait a week before proposing updates to mitigate supply chain attacks
   // via compromised releases that get yanked shortly after publication.
   minimumReleaseAge: "7 days",
+  // Disable lock file maintenance (enabled by `config:best-practices`),
+  // it refreshes transitive deps to releases younger than `minimumReleaseAge`.
+  lockFileMaintenance: { enabled: false },
   prHourlyLimit: 10,
-  enabledManagers: ["github-actions","cargo", "pep621", "npm", "bun", "custom.regex"],
+  enabledManagers: ["github-actions", "cargo", "pep621", "npm", "deno", "custom.regex"],
   pinDigests: true, // Pin GitHub Actions to immutable SHAs.
   cargo: {
     // See https://docs.renovatebot.com/configuration-options/#rangestrategy
@@ -20,6 +23,10 @@
     // The default for this package manager is to only search for `pyproject.toml` files
     // found at the repository root: https://docs.renovatebot.com/modules/manager/pep621/#file-matching
     managerFilePatterns: ["/^python/.*pyproject\\.toml$/"],
+  },
+  npm: {
+    // Only python/benchmarks uses npm; the deno manager owns playground/package.json.
+    managerFilePatterns: ["/^python/.*package\\.json$/"],
   },
   packageRules: [
     {
@@ -71,7 +78,7 @@
       // (`Missing field tsconfigPaths on BindingViteResolvePluginConfig.resolveOptions`).
       // The aliasOnly:false change from tailwindlabs/tailwindcss#19803 triggers
       // an oxc resolve path that requires tsconfigPaths, which vite 8 doesn't pass.
-      matchManagers: ["npm", "bun"],
+      matchManagers: ["deno"],
       matchDepNames: ["@tailwindcss/vite", "tailwindcss"],
       allowedVersions: "<=4.2.2",
       description: "Pin tailwindcss to 4.2.2 due to vite 8 / rolldown incompatibility",
