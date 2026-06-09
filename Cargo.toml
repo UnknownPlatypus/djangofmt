@@ -37,7 +37,7 @@ syn = { version = "2.0" }
 tempfile = { version = "3.27.0" }
 thiserror = { version = "2.0.18" }
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.
-tikv-jemallocator = { version = "0.6.1" }
+tikv-jemallocator = { version = "0.7.0" }
 toml = { version = "1.1.2" }
 tracing = { version = "0.1.44" }
 # Pin to avoid https://github.com/tokio-rs/tracing/issues/3369
