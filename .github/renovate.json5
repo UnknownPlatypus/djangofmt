@@ -2,15 +2,19 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   dependencyDashboard: true,
   suppressNotifications: ["prEditedNotification"],
-  extends: ["config:best-practices", "group:allNonMajor", "helpers:pinGitHubActionDigestsToSemver"],
+  extends: [
+    "config:best-practices",
+    "group:allNonMajor",
+    "helpers:pinGitHubActionDigestsToSemver",
+    // Update annotated `*_VERSION` env vars in workflow files.
+    "customManagers:githubActionsVersions",
+  ],
   labels: ["dependencies"],
   schedule: ["before 4am on Monday"],
   separateMajorMinor: false,
-  // Wait a week before proposing updates to mitigate supply chain attacks
-  // via compromised releases that get yanked shortly after publication.
+  // Wait a week before proposing updates to mitigate supply chain attacks via compromised releases that get yanked shortly after publication.
   minimumReleaseAge: "7 days",
-  // Disable lock file maintenance (enabled by `config:best-practices`),
-  // it refreshes transitive deps to releases younger than `minimumReleaseAge`.
+  // Disable lock file maintenance (enabled by `config:best-practices`), it refreshes transitive deps to releases younger than `minimumReleaseAge`.
   lockFileMaintenance: { enabled: false },
   prHourlyLimit: 10,
   enabledManagers: ["github-actions", "cargo", "pep621", "npm", "deno", "custom.regex"],
@@ -36,8 +40,7 @@
       versioning: "regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$",
     },
     {
-      // Group upload/download artifact updates, the versions are dependent
-      // only match git tags too otherwise this spams too much.
+      // Group upload/download artifact updates, the versions are dependent only match git tags too otherwise this spams too much.
       groupName: "Artifact GitHub Actions dependencies",
       matchManagers: ["github-actions"],
       matchDatasources: ["gitea-tags", "github-tags"],
@@ -45,9 +48,7 @@
       description: "Weekly update of artifact-related GitHub Actions dependencies",
     },
     {
-      // This package rule disables updates for GitHub runners:
-      // we'd only pin them to a specific version
-      // if there was a deliberate reason to do so
+      // This package rule disables updates for GitHub runners: we'd only pin them to a specific version if there was a deliberate reason to do so
       groupName: "GitHub runners",
       matchManagers: ["github-actions"],
       matchDatasources: ["github-runners"],
@@ -60,8 +61,7 @@
       "enabled": false
     },
     {
-      // Disable automatic updates for markup_fmt, updates are handled manually
-      matchManagers: ["cargo"],
+      // Disable automatic updates for markup_fmt (cargo dep and dprint plugin), updates are handled manually.
       matchDepNames: ["markup_fmt"],
       enabled: false,
       description: "Disable updates for markup_fmt due to known issue"
@@ -90,7 +90,6 @@
       // We have a rolling support policy for the MSRV
       // 2 releases back * 6 weeks per release * 7 days per week + 1
       minimumReleaseAge: "85 days",
-      internalChecksFilter: "strict",
       groupName: "MSRV",
     },
     {
@@ -138,9 +137,46 @@
       packageNameTemplate: "rust-lang/rust",
       datasourceTemplate: "github-releases",
     },
+    // Deno version used in setup-deno
+    {
+      customType: "regex",
+      managerFilePatterns: ["/.github/workflows/publish-playground-and-docs\\.yml$/"],
+      matchStrings: ['deno-version: "(?<currentValue>\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "deno",
+      packageNameTemplate: "denoland/deno",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.*)$",
+    },
+    // wasm-pack version used in wasm-pack-action
+    {
+      customType: "regex",
+      managerFilePatterns: ["/.github/workflows/publish-playground-and-docs\\.yml$/"],
+      matchStrings: ["version: (?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "wasm-pack",
+      packageNameTemplate: "rustwasm/wasm-pack",
+      datasourceTemplate: "github-releases",
+    },
+    // Official dprint plugins (plugins.dprint.dev/<name>-<version>.wasm)
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^dprint\\.json$/"],
+      matchStrings: ['"https://plugins\\.dprint\\.dev/(?<depName>[a-z0-9_]+)-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.wasm"'],
+      packageNameTemplate: "dprint/dprint-plugin-{{depName}}",
+      datasourceTemplate: "github-releases",
+    },
+    // g-plane dprint plugins (plugins.dprint.dev/g-plane/<name>-v<version>.wasm)
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^dprint\\.json$/"],
+      matchStrings: ['"https://plugins\\.dprint\\.dev/g-plane/(?<depName>[a-z0-9_]+)-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\.wasm"'],
+      packageNameTemplate: "g-plane/{{depName}}",
+      datasourceTemplate: "github-releases",
+    },
   ],
   vulnerabilityAlerts: {
     commitMessageSuffix: "",
     labels: ["dependencies", "security"],
   },
+  // Also source vulnerability alerts from OSV (better crates.io coverage).
+  osvVulnerabilityAlerts: true,
 }
