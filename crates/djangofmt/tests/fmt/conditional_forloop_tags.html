@@ -1,0 +1,4 @@
+{% for deal in offer.deals.all %}
+  {% if forloop.first %}<br><small>{% translate 'Related deals' %}: {% endif %}
+  {% link_or_none deal %}{% if forloop.last %}</small>{% else %}, {% endif %}
+{% endfor %}
