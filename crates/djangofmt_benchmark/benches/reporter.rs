@@ -26,6 +26,7 @@ fn render(bencher: divan::Bencher, template: &'static TestFile) {
         template.profile.into(),
         &[],
         &Settings::all(),
+        None,
     )
     .expect("Parsing to succeed");
     assert!(!diagnostics.is_empty(), "{} tripped no rule", template.name);

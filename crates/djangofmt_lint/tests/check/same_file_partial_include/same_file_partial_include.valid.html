@@ -1,0 +1,27 @@
+<!-- Correct usage: render the same-file partial with `{% partial %}` -->
+{% partialdef item-list %}<li>An item</li>{% endpartialdef %}
+{% partial item-list %}
+
+<!-- Cross-file: the include targets a different file, so it is left alone -->
+{% include "other_app/items_list.html#item-list" %}
+
+<!-- Path matches but this file defines no partial named `missing`, so it is left alone -->
+{% include "same_file_partial_include.valid.html#missing" %}
+
+<!-- Whole-file include of this file (no `#fragment`) -->
+{% include "same_file_partial_include.valid.html" %}
+
+<!-- Dynamic template name (variable): the documented `try_include` exception -->
+{% include template_name %}
+
+<!-- Interpolated template string is dynamic -->
+{% include "{{ template }}#item-list" %}
+
+<!-- Filter applied to the template string makes it dynamic -->
+{% include "same_file_partial_include.valid.html#item-list"|default:fallback %}
+
+<!-- Path and fragment match, but `{% partial %}` has no `with` context, so this is left alone -->
+{% include "same_file_partial_include.valid.html#item-list" with obj=row %}
+
+<!-- ... and neither are `only` includes -->
+{% include "same_file_partial_include.valid.html#item-list" only %}

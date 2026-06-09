@@ -262,4 +262,5 @@ define_rules! {
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
     (MissingImgDimensions, rules::accessibility::missing_img_dimensions::MissingImgDimensions),
     (TableHeaderMissingScope, rules::accessibility::table_header_missing_scope::TableHeaderMissingScope),
+    (SameFilePartialInclude, rules::style::same_file_partial_include::SameFilePartialInclude),
 }
