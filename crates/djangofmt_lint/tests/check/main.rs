@@ -19,7 +19,7 @@ fn check_valid() {
     glob!("**/*.valid.html", |path| {
         build_settings(path).bind(|| {
             let input = fs::read_to_string(path).unwrap();
-            let diagnostics = collect_diagnostics(&input);
+            let diagnostics = collect_diagnostics(&input, path);
             assert!(
                 diagnostics.is_empty(),
                 "Expected no diagnostics for {}, but found {}:\n{}",
@@ -36,7 +36,7 @@ fn check_valid() {
 fn check_invalid() {
     glob!("**/*.invalid.html", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let file_diagnostics = collect_diagnostics(&input);
+        let file_diagnostics = collect_diagnostics(&input, path);
         assert!(
             !file_diagnostics.is_empty(),
             "Expected diagnostics, got none"
@@ -63,14 +63,26 @@ fn fix_snapshot() {
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
 
-        let safe = fix_ast(&input, &ast, &Settings::all(), Applicability::Safe);
+        let safe = fix_ast(
+            &input,
+            &ast,
+            &Settings::all(),
+            Applicability::Safe,
+            Some(path),
+        );
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &Settings::all(), Applicability::Unsafe);
+        let unsafe_fixed = fix_ast(
+            &input,
+            &ast,
+            &Settings::all(),
+            Applicability::Unsafe,
+            Some(path),
+        );
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
@@ -81,11 +93,11 @@ fn fix_snapshot() {
 
 const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
-fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
+fn collect_diagnostics(input: &str, path: &Path) -> Vec<LintDiagnostic> {
     let mut parser = Parser::new(input, Language::Django, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
     let settings = Settings::all();
-    check_ast(input, &ast, &settings)
+    check_ast(input, &ast, &settings, Some(path))
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {

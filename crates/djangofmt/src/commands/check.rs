@@ -252,7 +252,7 @@ fn check_path(
     };
 
     if fix {
-        match lint_fix(&source, settings, profile.into(), threshold) {
+        match lint_fix(&source, settings, profile.into(), threshold, Some(path)) {
             Ok(result) => {
                 if result.applied_count > 0 && result.source != source {
                     fs::write(path, &result.source)
@@ -288,7 +288,7 @@ fn check_path(
         }
     }
 
-    let diagnostics = check_ast(&source, &ast, settings);
+    let diagnostics = check_ast(&source, &ast, settings, Some(path));
     let file_diagnostics = if diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {

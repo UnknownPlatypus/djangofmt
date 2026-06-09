@@ -1,0 +1,70 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 6 lint error(s)
+
+Error: 
+  × Same-file partial `item-list` rendered via `{% include %}`.
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:10:1]
+  9 │ <!-- Same-file partial included by the file's own name + fragment -->
+ 10 │ {% include "same_file_partial_include.invalid.html#item-list" %}
+    · ────────────────────────────────┬───────────────────────────────
+    ·                                 ╰── here
+ 11 │ 
+    ╰────
+  help: Render it with `{% partial item-list %}` to avoid reloading the template from disk.
+
+Error: 
+  × Same-file partial `card` rendered via `{% include %}`.
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:13:1]
+ 12 │ <!-- Matched by a multi-segment path suffix -->
+ 13 │ {% include "same_file_partial_include/same_file_partial_include.invalid.html#card" %}
+    · ──────────────────────────────────────────┬──────────────────────────────────────────
+    ·                                           ╰── here
+ 14 │ 
+    ╰────
+  help: Render it with `{% partial card %}` to avoid reloading the template from disk.
+
+Error: 
+  × Same-file partial `header` rendered via `{% include %}`.
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:16:1]
+ 15 │ <!-- Single-quoted template string -->
+ 16 │ {% include 'same_file_partial_include.invalid.html#header' %}
+    · ──────────────────────────────┬──────────────────────────────
+    ·                               ╰── here
+ 17 │ 
+    ╰────
+  help: Render it with `{% partial header %}` to avoid reloading the template from disk.
+
+Error: 
+  × Same-file partial `footer` rendered via `{% include %}`.
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:19:1]
+ 18 │ <!-- Whitespace-control markers are carried over to the fix -->
+ 19 │ {%- include "same_file_partial_include.invalid.html#footer" -%}
+    · ───────────────────────────────┬───────────────────────────────
+    ·                                ╰── here
+ 20 │ 
+    ╰────
+  help: Render it with `{% partial footer %}` to avoid reloading the template from disk.
+
+Error: 
+  × Same-file partial `attrs` rendered via `{% include %}`.
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:22:6]
+ 21 │ <!-- Include in attribute position -->
+ 22 │ <div {% include "same_file_partial_include.invalid.html#attrs" %}>Highlighted</div>
+    ·      ──────────────────────────────┬─────────────────────────────
+    ·                                    ╰── here
+ 23 │ 
+    ╰────
+  help: Render it with `{% partial attrs %}` to avoid reloading the template from disk.
+
+Error: 
+  × Same-file partial `menu` rendered via `{% include %}`.
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:27:5]
+ 26 │   {% if show_menu %}
+ 27 │     {% include "same_file_partial_include.invalid.html#menu" %}
+    ·     ─────────────────────────────┬─────────────────────────────
+    ·                                  ╰── here
+ 28 │   {% endif %}
+    ╰────
+  help: Render it with `{% partial menu %}` to avoid reloading the template from disk.

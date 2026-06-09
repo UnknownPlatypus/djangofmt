@@ -23,6 +23,7 @@ fn check_templates(bencher: divan::Bencher, template: &'static TestFile) {
                 divan::black_box(template.code),
                 divan::black_box(&ast),
                 divan::black_box(&settings),
+                divan::black_box(None),
             )
         });
 }
