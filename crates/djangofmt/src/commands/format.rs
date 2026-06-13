@@ -464,38 +464,30 @@ mod tests {
         assert_eq!(merge_custom_blocks(None, None), None);
     }
 
-    #[test]
-    fn merge_custom_blocks_only_cli() {
-        let mut result = merge_custom_blocks(Some(vec!["foo".into(), "bar".into()]), None).unwrap();
+    #[rstest]
+    #[case::only_cli(Some(vec!["foo", "bar"]), None, vec!["bar", "foo"])]
+    #[case::only_pyproject(None, Some(vec!["baz"]), vec!["baz"])]
+    #[case::both_without_overlap(Some(vec!["foo"]), Some(vec!["bar"]), vec!["bar", "foo"])]
+    #[case::both_with_duplicates(
+        Some(vec!["foo", "bar"]),
+        Some(vec!["bar", "baz"]),
+        vec!["bar", "baz", "foo"],
+    )]
+    fn merge_custom_blocks_cases(
+        #[case] cli: Option<Vec<&str>>,
+        #[case] pyproject: Option<Vec<&str>>,
+        #[case] expected: Vec<&str>,
+    ) {
+        let cli = cli.map(to_strings);
+        let pyproject = pyproject.map(to_strings);
+        let mut result = merge_custom_blocks(cli, pyproject).unwrap();
+
         result.sort();
-        assert_eq!(result, vec!["bar", "foo"]);
+        assert_eq!(result, to_strings(expected));
     }
 
-    #[test]
-    fn merge_custom_blocks_only_pyproject() {
-        assert_eq!(
-            merge_custom_blocks(None, Some(vec!["baz".into()])),
-            Some(vec!["baz".to_string()])
-        );
-    }
-
-    #[test]
-    fn merge_custom_blocks_both_without_overlap() {
-        let mut result =
-            merge_custom_blocks(Some(vec!["foo".into()]), Some(vec!["bar".into()])).unwrap();
-        result.sort();
-        assert_eq!(result, vec!["bar", "foo"]);
-    }
-
-    #[test]
-    fn merge_custom_blocks_both_with_duplicates() {
-        let mut result = merge_custom_blocks(
-            Some(vec!["foo".into(), "bar".into()]),
-            Some(vec!["bar".into(), "baz".into()]),
-        )
-        .unwrap();
-        result.sort();
-        assert_eq!(result, vec!["bar", "baz", "foo"]);
+    fn to_strings(values: Vec<&str>) -> Vec<String> {
+        values.into_iter().map(String::from).collect()
     }
 
     #[test]
