@@ -20,3 +20,48 @@ pub fn relativize_path<P: AsRef<Path>>(path: P) -> String {
     }
     path.display().to_string()
 }
+
+/// Finds the nearest `file_name` by traversing directories upward from `start_path`.
+pub fn find_nearest_ancestor_file<P: AsRef<Path>>(
+    start_path: P,
+    file_name: &str,
+) -> Option<PathBuf> {
+    start_path
+        .as_ref()
+        .ancestors()
+        .map(|directory| directory.join(file_name))
+        .find(|candidate| candidate.is_file())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_support::Project;
+
+    #[test]
+    fn returns_none_when_absent() {
+        let project = Project::new();
+        assert_eq!(
+            find_nearest_ancestor_file(project.path(), "marker.toml"),
+            None
+        );
+    }
+
+    #[test]
+    fn finds_file_in_start_dir() {
+        let project = Project::new().file("marker.toml", "");
+        assert_eq!(
+            find_nearest_ancestor_file(project.path(), "marker.toml"),
+            Some(project.join("marker.toml"))
+        );
+    }
+
+    #[test]
+    fn finds_file_in_ancestor_dir() {
+        let project = Project::new().file("marker.toml", "").dir("child");
+        assert_eq!(
+            find_nearest_ancestor_file(project.join("child"), "marker.toml"),
+            Some(project.join("marker.toml"))
+        );
+    }
+}
