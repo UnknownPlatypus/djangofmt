@@ -6,6 +6,7 @@
 
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
+use std::path::Path;
 
 use miette::SourceSpan;
 
@@ -23,14 +24,16 @@ pub struct LintContext<'a> {
     diagnostics: RefCell<Vec<LintDiagnostic>>,
     source: &'a str,
     settings: &'a Settings,
+    path: Option<&'a Path>,
 }
 
 impl<'a> LintContext<'a> {
     #[must_use]
-    pub const fn new(source: &'a str, settings: &'a Settings) -> Self {
+    pub const fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
         Self {
             source,
             settings,
+            path,
             diagnostics: RefCell::new(Vec::new()),
         }
     }
@@ -39,6 +42,12 @@ impl<'a> LintContext<'a> {
     #[must_use]
     pub const fn source(&self) -> &'a str {
         self.source
+    }
+
+    /// The path of the file being linted, or [`None`] when there is no backing file.
+    #[must_use]
+    pub const fn path(&self) -> Option<&'a Path> {
+        self.path
     }
 
     /// The settings active for this run.

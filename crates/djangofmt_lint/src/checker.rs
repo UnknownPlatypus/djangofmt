@@ -1,5 +1,8 @@
+use std::path::Path;
+
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaTagOrChildren, NativeAttribute, Node, NodeKind, Root,
+    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
+    Root,
 };
 use miette::SourceSpan;
 
@@ -17,9 +20,9 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub const fn new(source: &'a str, settings: &'a Settings) -> Self {
+    pub const fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
         Self {
-            context: LintContext::new(source, settings),
+            context: LintContext::new(source, settings, path),
         }
     }
 
@@ -97,7 +100,14 @@ impl<'a> Checker<'a> {
         match &node.kind {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
+            NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
             _ => {}
+        }
+    }
+
+    fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
+        if self.is_rule_enabled(Rule::SameFilePartialInclude) {
+            rules::style::same_file_partial_include::check(tag, self);
         }
     }
 
@@ -140,6 +150,7 @@ impl<'a> Checker<'a> {
         match attr {
             Attribute::Native(native) => self.visit_native_attribute(native, element),
             Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
+            Attribute::JinjaTag(tag) => self.visit_jinja_tag(tag),
             _ => {}
         }
     }
