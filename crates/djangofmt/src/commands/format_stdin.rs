@@ -14,7 +14,7 @@ use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
 /// Run the formatter over a single file, read from `stdin`.
 pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     let stdin_filename = cli.stdin_filename.as_deref();
-    let pyproject = load_pyproject_from_cwd();
+    let pyproject = load_pyproject_from_cwd()?;
     let discovery_config = ResolvedDiscoveryConfig::new(&cli.file_selection, &pyproject);
 
     // If force-exclude matches the (virtual) stdin filename, parrot stdin to
