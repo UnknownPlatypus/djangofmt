@@ -63,14 +63,14 @@ fn fix_snapshot() {
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
 
-        let safe = fix_ast(&input, &ast, &Settings::default(), Applicability::Safe);
+        let safe = fix_ast(&input, &ast, &Settings::all(), Applicability::Safe);
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &Settings::default(), Applicability::Unsafe);
+        let unsafe_fixed = fix_ast(&input, &ast, &Settings::all(), Applicability::Unsafe);
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
@@ -84,7 +84,7 @@ const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
     let mut parser = Parser::new(input, Language::Django, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
-    let settings = Settings::default();
+    let settings = Settings::all();
     check_ast(input, &ast, &settings)
 }
 

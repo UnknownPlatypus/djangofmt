@@ -8,7 +8,7 @@ fn main() {
 
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_templates(bencher: divan::Bencher, template: &'static TestFile) {
-    let settings = Settings::default();
+    let settings = Settings::all();
 
     bencher
         .counter(divan::counter::BytesCount::of_str(template.code))

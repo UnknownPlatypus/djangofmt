@@ -1,5 +1,5 @@
 ecosystem_cache_dir := "/tmp/djangofmt-ecosystem-repos"
-
+export INSTA_UPDATE := "always"
 
 # List all commands
 _default:
@@ -21,8 +21,8 @@ lint:
 
 # Run the full test suite, accepting snapshot updates automatically.
 [group('dev')]
-test update="always":
-    INSTA_UPDATE={{update}} cargo test --workspace --all-targets --all-features
+test:
+    cargo test --workspace --all-targets --all-features
 
 # Pre-merge request checks
 [group('dev')]
@@ -30,7 +30,7 @@ pre-mr-check:
     SKIP=actionlint,renovate-config-validator pre-commit run -a
     uv run maturin develop
     just lint
-    just test no
+    just test
     just docs-build
 
 # Regenerate the per-rule documentation under docs/rules/ and docs/rules.md

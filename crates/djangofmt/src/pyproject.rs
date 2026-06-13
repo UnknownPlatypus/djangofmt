@@ -1,8 +1,10 @@
+use djangofmt_lint::RuleSelector;
 use serde::Deserialize;
 use std::{fs, path::Path};
-use tracing::{debug, warn};
+use tracing::debug;
 
 use crate::args::Profile;
+use crate::error::{Error, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
 /// Serde-only struct for deserializing `[tool.djangofmt]` from `pyproject.toml`.
@@ -21,6 +23,15 @@ pub struct PyprojectSettings {
     pub extend_include: Option<Vec<String>>,
     pub respect_gitignore: Option<bool>,
     pub force_exclude: Option<bool>,
+    pub lint: Option<LintSettings>,
+}
+
+#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct LintSettings {
+    pub select: Option<Vec<RuleSelector>>,
+    pub ignore: Option<Vec<RuleSelector>>,
+    pub preview: Option<bool>,
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
@@ -38,25 +49,20 @@ struct Tool {
 }
 
 /// Loads `Options` from a given `pyproject.toml` file
-fn load_options_from_pyproject_toml(content: &str) -> PyprojectSettings {
-    match toml::from_str::<PyProject>(content) {
-        Ok(pyproject) => pyproject.tool.and_then(|t| t.djangofmt).unwrap_or_default(),
-        Err(err) => {
-            warn!("Failed to parse pyproject.toml: {err}");
-            PyprojectSettings::default()
-        }
-    }
+fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> {
+    let pyproject = toml::from_str::<PyProject>(content)
+        .map_err(|err| Error::Resolve(format!("Failed to parse pyproject.toml: {err}")))?;
+    Ok(pyproject.tool.and_then(|t| t.djangofmt).unwrap_or_default())
 }
 
 /// Load `pyproject.toml` settings rooted at the current working directory,
 /// falling back to defaults if the cwd can't be determined.
-#[must_use]
-pub fn load_pyproject_from_cwd() -> PyprojectSettings {
+pub fn load_pyproject_from_cwd() -> Result<PyprojectSettings> {
     load_options(crate::fs::get_cwd())
 }
 
 /// Loads user configured options from the nearest `pyproject.toml` file from the given path
-pub fn load_options<P: AsRef<Path>>(start_path: P) -> PyprojectSettings {
+pub fn load_options<P: AsRef<Path>>(start_path: P) -> Result<PyprojectSettings> {
     let Some(pyproject_path) =
         crate::fs::find_nearest_ancestor_file(start_path.as_ref(), "pyproject.toml")
     else {
@@ -64,20 +70,19 @@ pub fn load_options<P: AsRef<Path>>(start_path: P) -> PyprojectSettings {
             "No pyproject.toml found starting search from: {}",
             start_path.as_ref().display()
         );
-        return PyprojectSettings::default();
+        return Ok(PyprojectSettings::default());
     };
     debug!(
         "Loading options from pyproject.toml at: {}",
         pyproject_path.display()
     );
 
-    let content = match fs::read_to_string(&pyproject_path) {
-        Ok(c) => c,
-        Err(err) => {
-            warn!("Failed to read {}: {}", pyproject_path.display(), err);
-            return PyprojectSettings::default();
-        }
-    };
+    let content = fs::read_to_string(&pyproject_path).map_err(|err| {
+        Error::Resolve(format!(
+            "Failed to read {}: {err}",
+            pyproject_path.display()
+        ))
+    })?;
     load_options_from_pyproject_toml(&content)
 }
 
@@ -100,7 +105,7 @@ mod tests {
             html-void-self-closing='always'
             ",
         );
-        let result = load_options(project.join("pyproject.toml"));
+        let result = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -123,7 +128,7 @@ mod tests {
             line-length=200
             ",
         );
-        let result = load_options(project.join("pyproject.toml"));
+        let result = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -136,14 +141,14 @@ mod tests {
     #[test]
     fn test_load_options_returns_default_when_no_pyproject_toml() {
         let project = Project::new();
-        let result = load_options(project.path());
+        let result = load_options(project.path()).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
     fn test_load_options_returns_default_when_empty_pyproject_toml() {
         let project = Project::new().file("pyproject.toml", "");
-        let result = load_options(project.join("pyproject.toml"));
+        let result = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
 
@@ -153,11 +158,11 @@ mod tests {
     #[case("[tool.djangofmt]\nline-length = 321")]
     #[case("[tool.djangofmt]\nindent-width = 0")]
     #[case("[tool.djangofmt]\nindent-width = 17")]
-    fn test_load_options_returns_default_on_invalid_toml(#[case] content: &str) {
-        assert_eq!(
-            load_options_from_pyproject_toml(content),
-            PyprojectSettings::default()
-        );
+    #[case("[tool.djangofmt.lint]\nselect = [\"not-a-real-rule\"]")]
+    fn test_load_options_errors_on_invalid_toml(#[case] content: &str) {
+        // Invalid config (including unknown lint selectors) must fail fast rather
+        // than silently falling back to defaults.
+        assert!(load_options_from_pyproject_toml(content).is_err());
     }
 
     #[test]
@@ -171,7 +176,7 @@ mod tests {
         extend-include = ["*.djhtml"]
         respect-gitignore = false
     "#;
-        let result = load_options_from_pyproject_toml(content);
+        let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -192,7 +197,7 @@ mod tests {
         [tool.djangofmt]
         extend-exclude = ["build"]
     "#;
-        let result = load_options_from_pyproject_toml(content);
+        let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -208,7 +213,7 @@ mod tests {
 [tool.djangofmt]
 preserve-unquoted-attrs = true
 ";
-        let result = load_options_from_pyproject_toml(content);
+        let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -221,18 +226,49 @@ preserve-unquoted-attrs = true
     #[test]
     fn test_load_fix_flags() {
         let content = r"
-[tool.djangofmt]
+[tool.djangofmt.lint]
 fix = true
 unsafe-fixes = true
 show-fixes = true
 ";
-        let result = load_options_from_pyproject_toml(content);
+        let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
-                fix: Some(true),
-                unsafe_fixes: Some(true),
-                show_fixes: Some(true),
+                lint: Some(LintSettings {
+                    fix: Some(true),
+                    unsafe_fixes: Some(true),
+                    show_fixes: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_lint_select_ignore_preview() {
+        use djangofmt_lint::{Rule, RuleCategory};
+
+        let content = r#"
+[tool.djangofmt.lint]
+select = ["category:all"]
+ignore = ["category:style", "missing-img-alt"]
+preview = true
+"#;
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                lint: Some(LintSettings {
+                    select: Some(vec![RuleSelector::All]),
+                    ignore: Some(vec![
+                        RuleSelector::Category(RuleCategory::Style),
+                        RuleSelector::Rule(Rule::MissingImgAlt)
+                    ]),
+                    preview: Some(true),
+                    ..Default::default()
+                }),
                 ..Default::default()
             }
         );
@@ -247,7 +283,7 @@ show-fixes = true
         profile = "jinja"
         custom-blocks = ["cache"]
     "#;
-        let result = load_options_from_pyproject_toml(content);
+        let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {

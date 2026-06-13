@@ -6,9 +6,11 @@ use ignore::overrides::OverrideBuilder;
 use ignore::types::TypesBuilder;
 use tracing::{debug, warn};
 
-use crate::args::FileSelectionArgs;
+use djangofmt_lint::RuleSelection;
+
+use crate::args::{FileSelectionArgs, RuleSelectionArgs};
 use crate::error::Error;
-use crate::pyproject::PyprojectSettings;
+use crate::pyproject::{LintSettings, PyprojectSettings};
 
 /// Default file patterns to include when discovering files.
 pub const DEFAULT_INCLUDE: &[&str] = &["*.html", "*.jinja", "*.jinja2", "*.j2"];
@@ -43,6 +45,34 @@ pub(crate) fn resolve_bool_arg(yes: bool, no: bool) -> Option<bool> {
         (false, true) => Some(false),
         (false, false) => None,
         (..) => unreachable!("Clap should make this impossible"),
+    }
+}
+
+/// Merge CLI rule-selection flags with `[tool.djangofmt.lint]` into a [`RuleSelection`].
+///
+/// Precedence mirrors file selection CLI -> pyproject -> defaults.
+#[must_use]
+pub fn resolve_rule_selection(
+    cli: &RuleSelectionArgs,
+    lint: Option<&LintSettings>,
+) -> RuleSelection {
+    let select = cli
+        .select
+        .clone()
+        .or_else(|| lint.and_then(|l| l.select.clone()));
+    let ignore = cli
+        .ignore
+        .clone()
+        .or_else(|| lint.and_then(|l| l.ignore.clone()))
+        .unwrap_or_default();
+    let preview = resolve_bool_arg(cli.preview, cli.no_preview)
+        .or_else(|| lint.and_then(|l| l.preview))
+        .unwrap_or(false);
+
+    RuleSelection {
+        select,
+        ignore,
+        preview,
     }
 }
 

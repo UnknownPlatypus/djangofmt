@@ -15,16 +15,35 @@ pub fn main(args: &Args) -> Result<()> {
     apply(args.mode, &path, &render())
 }
 
+const SELECTING_RULES: &str = r#"
+By default djangofmt runs every stable rule.
+
+Override that with `select` and `ignore`, either on the command line (`--select`, `--ignore`) or under `[tool.djangofmt.lint]` in `pyproject.toml`.
+
+```toml
+[tool.djangofmt.lint]
+select = ["category:all"]
+ignore = ["category:style", "missing-img-alt"]
+preview = true
+```
+
+A selector is either:
+
+- single rule name (e.g. `missing-img-alt`)
+- a group prefixed with `category:` (e.g. `category:all`, `category:style`, ...)
+
+
+
+
+Preview rules are off by default. Enable them with `--preview` or `preview = true`.
+"#;
+
 fn render() -> String {
     let mut out = String::new();
     out.push_str("---\ntags:\n  - lint\n---\n\n");
     out.push_str(AUTOGEN_HEADER);
     out.push_str("# Lint rules\n\n");
-    out.push_str(
-        "djangofmt's built-in lint rules, grouped by category. Each rule has a stable \
-         kebab-case name; click through for the rule's documentation, examples, and \
-         source location.\n\n",
-    );
+    out.push_str(SELECTING_RULES);
     for category in RuleCategory::iter() {
         let rules: Vec<Rule> = Rule::iter().filter(|r| r.category() == category).collect();
         if rules.is_empty() {

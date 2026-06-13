@@ -21,7 +21,7 @@ pub(crate) fn resolve_command(
     profile: Option<Profile>,
     file_selection: &FileSelectionArgs,
 ) -> Result<ResolvedCommand> {
-    let pyproject = load_pyproject_from_cwd();
+    let pyproject = load_pyproject_from_cwd()?;
     let profile = profile.or(pyproject.profile);
     let discovery_config = ResolvedDiscoveryConfig::new(file_selection, &pyproject);
     let resolved_files = resolve_files(files, &discovery_config)?;

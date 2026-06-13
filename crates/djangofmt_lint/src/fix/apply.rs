@@ -483,7 +483,7 @@ mod tests {
     #[test]
     fn lint_fix_no_op_returns_no_iterations() {
         let source = "<div></div>";
-        let settings = Settings::default();
+        let settings = Settings::all();
         let result = lint_fix(
             source,
             &settings,
