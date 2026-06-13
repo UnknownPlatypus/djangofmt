@@ -1,4 +1,5 @@
 ---
+import BookIcon from "./icons/BookIcon.astro";
 import BugIcon from "./icons/BugIcon.astro";
 import DarkTheme from "./icons/DarkTheme.astro";
 import IconShare from "./icons/IconShare.astro";
@@ -29,6 +30,15 @@ import PlusMinusInput from "./PlusMinusInput.astro";
     </div>
 
     <div class="flex items-center gap-2">
+        <a
+            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
+            data-tip="Open the documentation"
+            href="https://unknownplatypus.github.io/djangofmt/docs/"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <BookIcon />
+        </a>
         <button
             class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
             data-tip="Report an issue on GitHub"
