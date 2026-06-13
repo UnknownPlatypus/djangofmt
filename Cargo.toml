@@ -43,8 +43,7 @@ thiserror = { version = "2.0.18" }
 tikv-jemallocator = { version = "0.7.0" }
 toml = { version = "1.1.2" }
 tracing = { version = "0.1.44" }
-# Pin to avoid https://github.com/tokio-rs/tracing/issues/3369
-tracing-subscriber = { version = "=0.3.23" }
+tracing-subscriber = { version = "0.3.23" }
 tracing-test = { version = "0.2.6", features = ["no-env-filter"] }
 tracing-tree = { version = "0.4.1" }
 tsify = { version = "0.5.6" }

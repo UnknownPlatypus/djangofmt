@@ -67,13 +67,6 @@
       description: "Disable updates for markup_fmt due to known issue"
     },
     {
-      // Pin tracing-subscriber to avoid https://github.com/tokio-rs/tracing/issues/3369
-      matchManagers: ["cargo"],
-      matchDepNames: ["tracing-subscriber"],
-      enabled: false,
-      description: "Disable updates for tracing-subscriber due to known issue",
-    },
-    {
       // @tailwindcss/vite 4.2.3+ broke build with vite 8 / rolldown
       // (`Missing field tsconfigPaths on BindingViteResolvePluginConfig.resolveOptions`).
       // The aliasOnly:false change from tailwindlabs/tailwindcss#19803 triggers
