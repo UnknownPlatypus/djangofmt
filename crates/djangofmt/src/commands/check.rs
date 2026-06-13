@@ -393,13 +393,6 @@ mod tests {
 
     #[test]
     #[traced_test]
-    fn summary_apply_to_disk_reports_fixed_and_remaining() {
-        print_summary(2, 3, 0, 0, true, false, 0);
-        assert!(logs_contain("Found 5 errors (3 fixed, 2 remaining)."));
-    }
-
-    #[test]
-    #[traced_test]
     fn summary_apply_to_disk_ignores_fixable_counts() {
         // Under `--fix`, fixable counts shouldn't leak into the message.
         print_summary(2, 3, 4, 5, true, true, 0);

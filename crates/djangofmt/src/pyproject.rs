@@ -152,26 +152,6 @@ mod tests {
     }
 
     #[test]
-    fn test_load_options_from_incomplete_pyproject_toml() {
-        let temp_dir = tempdir().unwrap();
-        let pyproject_path = temp_dir.path().join("pyproject.toml");
-        let pyproject_content = r"
-            [tool.djangofmt]
-            line-length=200
-            ";
-
-        fs::write(&pyproject_path, pyproject_content).unwrap();
-        let result = load_options(&pyproject_path);
-        assert_eq!(
-            result,
-            PyprojectSettings {
-                line_length: Some(LineLength::try_from(200).unwrap()),
-                ..Default::default()
-            }
-        );
-    }
-
-    #[test]
     fn test_load_options_returns_default_when_no_pyproject_toml() {
         let temp_dir = tempdir().unwrap();
         let result = load_options(temp_dir.path());
@@ -197,6 +177,26 @@ mod tests {
         assert_eq!(
             load_options_from_pyproject_toml(content),
             PyprojectSettings::default()
+        );
+    }
+
+    #[test]
+    fn test_load_options_from_incomplete_pyproject_toml() {
+        let temp_dir = tempdir().unwrap();
+        let pyproject_path = temp_dir.path().join("pyproject.toml");
+        let pyproject_content = r"
+            [tool.djangofmt]
+            line-length=200
+            ";
+
+        fs::write(&pyproject_path, pyproject_content).unwrap();
+        let result = load_options(&pyproject_path);
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                line_length: Some(LineLength::try_from(200).unwrap()),
+                ..Default::default()
+            }
         );
     }
 

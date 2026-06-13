@@ -351,8 +351,6 @@ mod tests {
             diag_with_fix(Fix::safe_edit(Edit::replacement("Y", span(5, 1)))),
         ];
         let result = apply_fixes(source, &diags, Applicability::Safe);
-        assert_eq!(result.output, "Xbcde Yghij".replace(' ', ""));
-        // (Use plain string to avoid confusion.)
         assert_eq!(result.output, "XbcdeYghij");
         assert_eq!(result.applied_count, 2);
     }

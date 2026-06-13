@@ -341,6 +341,13 @@ mod tests {
         fs::write(&path, "<div>test</div>").unwrap();
     }
 
+    fn file_names(files: &[PathBuf]) -> Vec<String> {
+        files
+            .iter()
+            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
+            .collect()
+    }
+
     #[test]
     fn test_defaults() {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
@@ -446,12 +453,6 @@ mod tests {
     }
 
     #[test]
-    fn test_respect_gitignore_default_true() {
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
-        assert!(config.respect_gitignore);
-    }
-
-    #[test]
     fn test_respect_gitignore_pyproject_false() {
         let pyproject = PyprojectSettings {
             respect_gitignore: Some(false),
@@ -487,10 +488,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(names.contains(&"a.html".to_string()));
         assert!(names.contains(&"b.jinja".to_string()));
         assert!(names.contains(&"c.jinja2".to_string()));
@@ -521,10 +519,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(names.contains(&"good.html".to_string()));
         assert!(!names.contains(&"bad.html".to_string()));
     }
@@ -544,10 +539,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(names.contains(&"included.html".to_string()));
         assert!(!names.contains(&"excluded.html".to_string()));
     }
@@ -571,10 +563,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(names.contains(&"included.html".to_string()));
         assert!(names.contains(&"also_included.html".to_string()));
     }
@@ -619,10 +608,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(!names.contains(&"a.html".to_string()));
         assert!(names.contains(&"b.txt".to_string()));
     }
@@ -648,10 +634,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert_eq!(names, vec!["a.html", "b.html", "c.html"]);
     }
 
@@ -686,10 +669,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(names.contains(&"included.html".to_string()));
         assert!(!names.contains(&"excluded.html".to_string()));
     }
@@ -712,10 +692,7 @@ mod tests {
         )
         .unwrap();
 
-        let names: Vec<String> = files
-            .iter()
-            .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-            .collect();
+        let names = file_names(&files);
         assert!(names.contains(&"a.html".to_string()));
         assert!(!names.contains(&"b.html".to_string()));
     }
