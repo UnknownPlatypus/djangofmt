@@ -125,7 +125,17 @@ preserve-unquoted-attrs = false
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
 The first `pyproject.toml` found is used. If no file is found or the file doesn't contain a `[tool.djangofmt]` section, defaults are used.
 
-Command-line arguments always take precedence over `pyproject.toml` settings.
+Djangofmt also reads [EditorConfig](https://editorconfig.org/) settings from the nearest `.editorconfig` file:
+
+```ini
+root = true
+
+[*]
+indent_size = 4
+max_line_length = 120
+```
+
+Command-line arguments always take precedence over `pyproject.toml` settings, which take precedence over `.editorconfig` settings.
 
 See [Controlling the formatting](https://unknownplatypus.github.io/djangofmt/docs/formatting/) for the behaviour of each option and how to opt into per-node overrides.
 

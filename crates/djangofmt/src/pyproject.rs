@@ -1,8 +1,5 @@
 use serde::Deserialize;
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::Path};
 use tracing::{debug, warn};
 
 use crate::args::Profile;
@@ -51,17 +48,6 @@ fn load_options_from_pyproject_toml(content: &str) -> PyprojectSettings {
     }
 }
 
-/// Finds the `pyproject.toml` settings file by traversing directories upward from the given path
-fn find_pyproject_toml<P: AsRef<Path>>(start_path: P) -> Option<PathBuf> {
-    for directory in start_path.as_ref().ancestors() {
-        let pyproject_toml = directory.join("pyproject.toml");
-        if pyproject_toml.is_file() {
-            return Some(pyproject_toml);
-        }
-    }
-    None
-}
-
 /// Load `pyproject.toml` settings rooted at the current working directory,
 /// falling back to defaults if the cwd can't be determined.
 #[must_use]
@@ -71,7 +57,9 @@ pub fn load_pyproject_from_cwd() -> PyprojectSettings {
 
 /// Loads user configured options from the nearest `pyproject.toml` file from the given path
 pub fn load_options<P: AsRef<Path>>(start_path: P) -> PyprojectSettings {
-    let Some(pyproject_path) = find_pyproject_toml(start_path.as_ref()) else {
+    let Some(pyproject_path) =
+        crate::fs::find_nearest_ancestor_file(start_path.as_ref(), "pyproject.toml")
+    else {
         debug!(
             "No pyproject.toml found starting search from: {}",
             start_path.as_ref().display()
@@ -96,53 +84,28 @@ pub fn load_options<P: AsRef<Path>>(start_path: P) -> PyprojectSettings {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::Project;
     use rstest::rstest;
-    use tempfile::tempdir;
-
-    #[test]
-    fn test_find_pyproject_toml_should_return_none() {
-        let temp_dir = tempdir().unwrap();
-        assert_eq!(find_pyproject_toml(temp_dir), None);
-    }
-
-    #[test]
-    fn test_find_pyproject_toml_in_current_dir() {
-        let temp_dir = tempdir().unwrap();
-        let pyproject_path = temp_dir.path().join("pyproject.toml");
-        fs::write(&pyproject_path, "").unwrap();
-        assert_eq!(find_pyproject_toml(temp_dir), Some(pyproject_path));
-    }
-
-    #[test]
-    fn test_find_pyproject_toml_in_parent_dir() {
-        let parent_dir = tempdir().unwrap();
-        let pyproject_path = parent_dir.path().join("pyproject.toml");
-        fs::write(&pyproject_path, "").unwrap();
-        fs::create_dir(parent_dir.path().join("child_dir")).unwrap();
-        let child_dir = parent_dir.path().join("child_dir");
-        assert_eq!(find_pyproject_toml(child_dir), Some(pyproject_path));
-    }
 
     #[test]
     fn test_load_options_from_pyproject_toml() {
-        let temp_dir = tempdir().unwrap();
-        let pyproject_path = temp_dir.path().join("pyproject.toml");
-        let pyproject_content = r"
+        let project = Project::new().file(
+            "pyproject.toml",
+            r"
             [tool.djangofmt]
             line-length=200
             indent-width=4
             custom-blocks=['foo', 'bar']
             profile='django'
             html-void-self-closing='always'
-            ";
-
-        fs::write(&pyproject_path, pyproject_content).unwrap();
-        let result = load_options(&pyproject_path);
+            ",
+        );
+        let result = load_options(project.join("pyproject.toml"));
         assert_eq!(
             result,
             PyprojectSettings {
-                line_length: Some(LineLength::try_from(200).unwrap()),
-                indent_width: Some(IndentWidth::try_from(4).unwrap()),
+                line_length: Some(LineLength::try_from(200u16).unwrap()),
+                indent_width: Some(IndentWidth::try_from(4u8).unwrap()),
                 custom_blocks: Some(vec!["foo".to_string(), "bar".to_string()]),
                 profile: Some(Profile::Django),
                 html_void_self_closing: Some(SelfClosing::Always),
@@ -152,18 +115,35 @@ mod tests {
     }
 
     #[test]
+    fn test_load_options_from_incomplete_pyproject_toml() {
+        let project = Project::new().file(
+            "pyproject.toml",
+            r"
+            [tool.djangofmt]
+            line-length=200
+            ",
+        );
+        let result = load_options(project.join("pyproject.toml"));
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                line_length: Some(LineLength::try_from(200u16).unwrap()),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
     fn test_load_options_returns_default_when_no_pyproject_toml() {
-        let temp_dir = tempdir().unwrap();
-        let result = load_options(temp_dir.path());
+        let project = Project::new();
+        let result = load_options(project.path());
         assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
     fn test_load_options_returns_default_when_empty_pyproject_toml() {
-        let temp_dir = tempdir().unwrap();
-        let pyproject_path = temp_dir.path().join("pyproject.toml");
-        fs::write(&pyproject_path, "").unwrap();
-        let result = load_options(&pyproject_path);
+        let project = Project::new().file("pyproject.toml", "");
+        let result = load_options(project.join("pyproject.toml"));
         assert_eq!(result, PyprojectSettings::default());
     }
 
@@ -177,26 +157,6 @@ mod tests {
         assert_eq!(
             load_options_from_pyproject_toml(content),
             PyprojectSettings::default()
-        );
-    }
-
-    #[test]
-    fn test_load_options_from_incomplete_pyproject_toml() {
-        let temp_dir = tempdir().unwrap();
-        let pyproject_path = temp_dir.path().join("pyproject.toml");
-        let pyproject_content = r"
-            [tool.djangofmt]
-            line-length=200
-            ";
-
-        fs::write(&pyproject_path, pyproject_content).unwrap();
-        let result = load_options(&pyproject_path);
-        assert_eq!(
-            result,
-            PyprojectSettings {
-                line_length: Some(LineLength::try_from(200).unwrap()),
-                ..Default::default()
-            }
         );
     }
 
@@ -215,7 +175,7 @@ mod tests {
         assert_eq!(
             result,
             PyprojectSettings {
-                line_length: Some(LineLength::try_from(120).unwrap()),
+                line_length: Some(LineLength::try_from(120u16).unwrap()),
                 exclude: Some(vec![".git".to_string(), ".venv".to_string()]),
                 extend_exclude: Some(vec!["vendor".to_string()]),
                 include: Some(vec!["*.html".to_string()]),
@@ -291,8 +251,8 @@ show-fixes = true
         assert_eq!(
             result,
             PyprojectSettings {
-                line_length: Some(LineLength::try_from(80).unwrap()),
-                indent_width: Some(IndentWidth::try_from(2).unwrap()),
+                line_length: Some(LineLength::try_from(80u16).unwrap()),
+                indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
                 profile: Some(Profile::Jinja),
                 custom_blocks: Some(vec!["cache".to_string()]),
                 ..Default::default()

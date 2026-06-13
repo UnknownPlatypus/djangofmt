@@ -9,12 +9,15 @@ use tracing::{debug, error, info};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
+use crate::editorconfig::{self, EditorconfigSettings};
 use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::PyprojectSettings;
 use crate::resolver::resolve_bool_arg;
+use editorconfig_parser::EditorConfig;
 
 /// Pre-built configuration for all formatters.
+#[derive(Clone)]
 pub struct FormatterConfig {
     /// Config for main HTML/Jinja formatter
     pub markup: markup_fmt::config::FormatOptions,
@@ -46,18 +49,24 @@ impl FormatterConfig {
         }
     }
 
-    /// Build a [`FormatterConfig`] by merging CLI arguments with pyproject.toml settings.
+    /// Build a [`FormatterConfig`] by merging CLI arguments with `pyproject.toml` and `.editorconfig` settings.
     ///
-    /// CLI arguments take precedence over pyproject settings, which take precedence over defaults.
+    /// Precedence is `cli` > `pyproject` > `editorconfig` > `default`
     #[must_use]
-    pub fn from_args(args: &FormatCommand, pyproject: &PyprojectSettings) -> Self {
+    pub fn from_args(
+        args: &FormatCommand,
+        pyproject: &PyprojectSettings,
+        editorconfig: &EditorconfigSettings,
+    ) -> Self {
         let line_length = args
             .line_length
             .or(pyproject.line_length)
+            .or(editorconfig.line_length)
             .unwrap_or_default();
         let indent_width = args
             .indent_width
             .or(pyproject.indent_width)
+            .or(editorconfig.indent_width)
             .unwrap_or_default();
         let custom_blocks =
             merge_custom_blocks(args.custom_blocks.clone(), pyproject.custom_blocks.clone());
@@ -214,16 +223,72 @@ fn build_json_config(
         .build()
 }
 
+/// Per-run inputs used to derive a per-file [`FormatterConfig`] and [`Profile`].
+struct FormatContext<'a> {
+    args: &'a FormatCommand,
+    pyproject: &'a PyprojectSettings,
+    editorconfig: Option<&'a EditorConfig>,
+    profile: Option<Profile>,
+    /// Built once when `.editorconfig` can't vary per file (no config, or only `[*]`).
+    config: Option<FormatterConfig>,
+}
+
+impl<'a> FormatContext<'a> {
+    fn new(
+        args: &'a FormatCommand,
+        pyproject: &'a PyprojectSettings,
+        editorconfig: Option<&'a EditorConfig>,
+        profile: Option<Profile>,
+    ) -> Self {
+        let mut context = Self {
+            args,
+            pyproject,
+            editorconfig,
+            profile,
+            config: None,
+        };
+        if !editorconfig::has_per_file_sections(editorconfig) {
+            // Any filename resolves the same settings here, so build the config once.
+            context.config = Some(context.build_config(Path::new("any")));
+        }
+        context
+    }
+
+    fn profile_for(&self, path: &Path) -> Profile {
+        self.profile
+            .or_else(|| Profile::from_path(path))
+            .unwrap_or_default()
+    }
+
+    /// The config for `path`: the shared one when set, otherwise built for this file.
+    fn config_for(&self, path: &Path) -> Cow<'_, FormatterConfig> {
+        self.config
+            .as_ref()
+            .map_or_else(|| Cow::Owned(self.build_config(path)), Cow::Borrowed)
+    }
+
+    fn build_config(&self, path: &Path) -> FormatterConfig {
+        let editorconfig = editorconfig::resolve_editorconfig(self.editorconfig, path);
+        FormatterConfig::from_args(self.args, self.pyproject, &editorconfig)
+    }
+}
+
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
-    let config = FormatterConfig::from_args(args, &resolved.pyproject);
+    let editorconfig = editorconfig::load_editorconfig_from_cwd();
+    let context = FormatContext::new(
+        args,
+        &resolved.pyproject,
+        editorconfig.as_ref(),
+        resolved.profile,
+    );
 
     // Format files in parallel
     let start = Instant::now();
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|entry| format_path(entry, &config, resolved.profile))
+        .map(|entry| format_path(entry, &context))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(err),
@@ -332,16 +397,14 @@ pub fn format_text(
 #[tracing::instrument(level="debug", skip_all, fields(path = %path.display()))]
 fn format_path(
     path: &Path,
-    config: &FormatterConfig,
-    profile: Option<Profile>,
+    context: &FormatContext,
 ) -> std::result::Result<FormatResult, Box<CommandError>> {
-    let profile = profile
-        .or_else(|| Profile::from_path(path))
-        .unwrap_or_default();
+    let profile = context.profile_for(path);
+    let config = context.config_for(path);
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
-    let formatted = match format_text(&unformatted, config, profile) {
+    let formatted = match format_text(&unformatted, &config, profile) {
         Ok(f) => f,
         Err(err) => {
             return Err(Box::new(CommandError::Parse(ParseError::new(
@@ -505,7 +568,8 @@ mod tests {
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings::default();
-        let config = FormatterConfig::from_args(&args, &pyproject);
+        let config =
+            FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert_eq!(config.markup.layout.print_width, 120);
         assert_eq!(config.markup.layout.indent_width, 4);
     }
@@ -530,7 +594,8 @@ mod tests {
             html_void_self_closing: Some(SelfClosing::Never),
             ..Default::default()
         };
-        let config = FormatterConfig::from_args(&args, &pyproject);
+        let config =
+            FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert_eq!(config.markup.layout.print_width, 80);
         assert_eq!(config.markup.layout.indent_width, 2);
         assert_eq!(config.markup.language.html_void_self_closing, Some(true));
@@ -554,8 +619,33 @@ mod tests {
             line_length: Some(LineLength::try_from(200u16).unwrap()),
             ..Default::default()
         };
-        let config = FormatterConfig::from_args(&args, &pyproject);
+        let config =
+            FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert_eq!(config.markup.layout.print_width, 200);
+    }
+
+    #[test]
+    fn formatter_config_from_args_falls_back_to_editorconfig() {
+        let args = FormatCommand {
+            files: vec![],
+            stdin_filename: None,
+            line_length: None,
+            indent_width: None,
+            profile: None,
+            custom_blocks: None,
+            html_void_self_closing: None,
+            preserve_unquoted_attrs: false,
+            no_preserve_unquoted_attrs: false,
+            file_selection: crate::args::FileSelectionArgs::default(),
+        };
+        let editorconfig = EditorconfigSettings {
+            line_length: Some(LineLength::try_from(100u16).unwrap()),
+            indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
+        };
+        let config =
+            FormatterConfig::from_args(&args, &PyprojectSettings::default(), &editorconfig);
+        assert_eq!(config.markup.layout.print_width, 100);
+        assert_eq!(config.markup.layout.indent_width, 2);
     }
 
     #[test]
@@ -573,7 +663,8 @@ mod tests {
             file_selection: crate::args::FileSelectionArgs::default(),
         };
         let pyproject = PyprojectSettings::default();
-        let config = FormatterConfig::from_args(&args, &pyproject);
+        let config =
+            FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert!(config.markup.language.preserve_unquoted_attrs);
     }
 
@@ -595,7 +686,8 @@ mod tests {
             preserve_unquoted_attrs: Some(true),
             ..Default::default()
         };
-        let config = FormatterConfig::from_args(&args, &pyproject);
+        let config =
+            FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert!(config.markup.language.preserve_unquoted_attrs);
     }
 
@@ -617,7 +709,8 @@ mod tests {
             preserve_unquoted_attrs: Some(true),
             ..Default::default()
         };
-        let config = FormatterConfig::from_args(&args, &pyproject);
+        let config =
+            FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert!(!config.markup.language.preserve_unquoted_attrs);
     }
 

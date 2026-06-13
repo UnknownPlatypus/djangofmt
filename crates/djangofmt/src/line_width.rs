@@ -36,6 +36,21 @@ impl TryFrom<u16> for LineLength {
     }
 }
 
+impl TryFrom<usize> for LineLength {
+    type Error = String;
+
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        u16::try_from(value)
+            .map_err(|_| {
+                format!(
+                    "line-length must be between 1 and {} (got {value})",
+                    Self::MAX
+                )
+            })
+            .and_then(Self::try_from)
+    }
+}
+
 impl From<LineLength> for usize {
     fn from(value: LineLength) -> Self {
         value.0.get() as Self
@@ -97,6 +112,21 @@ impl TryFrom<u8> for IndentWidth {
                 Self::MAX
             )),
         }
+    }
+}
+
+impl TryFrom<usize> for IndentWidth {
+    type Error = String;
+
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        u8::try_from(value)
+            .map_err(|_| {
+                format!(
+                    "indent-width must be between 1 and {} (got {value})",
+                    Self::MAX
+                )
+            })
+            .and_then(Self::try_from)
     }
 }
 

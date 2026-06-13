@@ -8,12 +8,15 @@ use crate::args::Args;
 use crate::logging::setup_tracing;
 pub mod args;
 pub mod commands;
+pub mod editorconfig;
 pub mod error;
 pub mod fs;
 pub mod line_width;
 mod logging;
 pub mod pyproject;
 pub mod resolver;
+#[cfg(test)]
+mod test_support;
 
 #[derive(Copy, Clone)]
 pub enum ExitStatus {
