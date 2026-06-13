@@ -1,6 +1,9 @@
 use insta_cmd::{assert_cmd_snapshot, get_cargo_bin};
 use std::process::Command;
-use tempfile::TempDir;
+
+#[path = "../src/test_support.rs"]
+mod test_support;
+use test_support::Project;
 
 fn cli() -> Command {
     Command::new(get_cargo_bin("djangofmt"))
@@ -21,10 +24,8 @@ macro_rules! assert_cmd_snapshot_tmpdir {
 
 #[test]
 fn format_single_file() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "<div   class=\"foo\"  >\n</div>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", "<div   class=\"foo\"  >\n</div>\n");
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -32,16 +33,13 @@ fn format_single_file() {
     ----- stderr -----
     1 file reformatted !
     "#);
-    let content = std::fs::read_to_string(&file).unwrap();
-    assert_eq!(content, "<div class=\"foo\"></div>\n");
+    assert_eq!(project.read("test.html"), "<div class=\"foo\"></div>\n");
 }
 
 #[test]
 fn format_already_formatted_file() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "<div class=\"foo\"></div>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", "<div class=\"foo\"></div>\n");
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -53,11 +51,9 @@ fn format_already_formatted_file() {
 
 #[test]
 fn format_file_with_ignore_directive() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
     let original = "<!-- djangofmt:ignore -->\n<div   class=\"foo\"  ></div>\n";
-    std::fs::write(&file, original).unwrap();
-    assert_cmd_snapshot!(cli().arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -65,17 +61,14 @@ fn format_file_with_ignore_directive() {
     ----- stderr -----
     1 file skipped !
     "#);
-    let content = std::fs::read_to_string(&file).unwrap();
-    assert_eq!(content, original);
+    assert_eq!(project.read("test.html"), original);
 }
 
 #[test]
 fn format_file_with_jinja_ignore_directive() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
     let original = "{# djangofmt:ignore #}\n<div   class=\"foo\"  ></div>\n";
-    std::fs::write(&file, original).unwrap();
-    assert_cmd_snapshot!(cli().arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -83,8 +76,7 @@ fn format_file_with_jinja_ignore_directive() {
     ----- stderr -----
     1 file skipped !
     "#);
-    let content = std::fs::read_to_string(&file).unwrap();
-    assert_eq!(content, original);
+    assert_eq!(project.read("test.html"), original);
 }
 
 #[test]
@@ -102,10 +94,10 @@ fn format_nonexistent_file() {
 
 #[test]
 fn format_directory() {
-    let dir = TempDir::new().unwrap();
-    std::fs::write(dir.path().join("a.html"), "<div   ></div>\n").unwrap();
-    std::fs::write(dir.path().join("b.html"), "<span   ></span>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg(dir.path().as_os_str()), @r#"
+    let project = Project::new()
+        .file("a.html", "<div   ></div>\n")
+        .file("b.html", "<span   ></span>\n");
+    assert_cmd_snapshot!(cli().arg(project.path()), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -117,10 +109,8 @@ fn format_directory() {
 
 #[test]
 fn format_quiet() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "<div   ></div>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg("-q").arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", "<div   ></div>\n");
+    assert_cmd_snapshot!(cli().arg("-q").arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -303,14 +293,10 @@ fn format_stdin_filename_alone_without_dash() {
     "#);
 }
 
-// ── Check subcommand ─────────────────────────────────────────────────
-
 #[test]
 fn check_clean_file() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "<form method=\"post\"></form>\n").unwrap();
-    assert_cmd_snapshot!(cli().arg("check").arg(file.as_os_str()), @r###"
+    let project = Project::new().file("test.html", "<form method=\"post\"></form>\n");
+    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -322,10 +308,8 @@ fn check_clean_file() {
 
 #[test]
 fn check_file_with_lint_error() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "<form method=\"put\"></form>\n").unwrap();
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", "<form method=\"put\"></form>\n");
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -359,11 +343,9 @@ fn check_nonexistent_file() {
 
 #[test]
 fn check_fixable_file_without_fix() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
     let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
-    std::fs::write(&file, original).unwrap();
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -383,15 +365,16 @@ fn check_fixable_file_without_fix() {
     Found 1 errors. [*] 1 fixable with the --fix option.
     "#);
     // Ensure we didn't apply anything without --fix.
-    assert_eq!(std::fs::read_to_string(&file).unwrap(), original);
+    assert_eq!(project.read("test.html"), original);
 }
 
 #[test]
 fn check_fixable_file_with_fix() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "{% blocktranslate %}Hello{% endblocktranslate %}\n").unwrap();
-    assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(file.as_os_str()), @r#"
+    let project = Project::new().file(
+        "test.html",
+        "{% blocktranslate %}Hello{% endblocktranslate %}\n",
+    );
+    assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -401,18 +384,19 @@ fn check_fixable_file_with_fix() {
     "#);
     // Ensure file was mutated.
     assert_eq!(
-        std::fs::read_to_string(&file).unwrap(),
+        project.read("test.html"),
         "{% blocktranslate trimmed %}Hello{% endblocktranslate %}\n"
     );
 }
 
 #[test]
 fn check_fixable_file_with_show_fixes() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "{% blocktranslate %}Hello{% endblocktranslate %}\n").unwrap();
+    let project = Project::new().file(
+        "test.html",
+        "{% blocktranslate %}Hello{% endblocktranslate %}\n",
+    );
     assert_cmd_snapshot_tmpdir!(
-        cli().args(["check", "--fix", "--show-fixes"]).arg(file.as_os_str()),
+        cli().args(["check", "--fix", "--show-fixes"]).arg(project.join("test.html")),
         @r#"
     success: true
     exit_code: 0
@@ -428,10 +412,8 @@ fn check_fixable_file_with_show_fixes() {
 
 #[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
-    let dir = TempDir::new().unwrap();
-    let file = dir.path().join("test.html");
-    std::fs::write(&file, "{% if x %}\n  unclosed\n").unwrap();
-    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(file.as_os_str()), @r#"
+    let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
