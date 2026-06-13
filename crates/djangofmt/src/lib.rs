@@ -8,6 +8,7 @@ use crate::args::Args;
 use crate::logging::setup_tracing;
 pub mod args;
 pub mod commands;
+pub mod editorconfig;
 pub mod error;
 pub mod fs;
 pub mod line_width;

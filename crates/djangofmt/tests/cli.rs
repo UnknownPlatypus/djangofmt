@@ -294,6 +294,58 @@ fn format_stdin_filename_alone_without_dash() {
 }
 
 #[test]
+fn format_respects_editorconfig() {
+    let project = Project::new()
+        .file(
+            ".editorconfig",
+            "root = true\n\n[*]\nindent_size = 2\nmax_line_length = 40\n",
+        )
+        .file(
+            "test.html",
+            "<div class=\"alpha beta gamma delta epsilon\"><span>hello world</span></div>\n",
+        );
+    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file reformatted !
+    "#);
+    // The line wraps because of `max_line_length` and is indented by `indent_size`.
+    assert_eq!(
+        project.read("test.html"),
+        "<div class=\"alpha beta gamma delta epsilon\">\n  <span>hello world</span>\n</div>\n"
+    );
+}
+
+#[test]
+fn format_pyproject_overrides_editorconfig() {
+    let project = Project::new()
+        .file(
+            ".editorconfig",
+            "root = true\n\n[*]\nindent_size = 2\nmax_line_length = 40\n",
+        )
+        .file("pyproject.toml", "[tool.djangofmt]\nindent-width = 8\n")
+        .file(
+            "test.html",
+            "<div class=\"alpha beta gamma delta epsilon\"><span>hello world</span></div>\n",
+        );
+    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file reformatted !
+    "#);
+    assert_eq!(
+        project.read("test.html"),
+        "<div class=\"alpha beta gamma delta epsilon\">\n        <span>hello world</span>\n</div>\n"
+    );
+}
+
+#[test]
 fn check_clean_file() {
     let project = Project::new().file("test.html", "<form method=\"post\"></form>\n");
     assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
