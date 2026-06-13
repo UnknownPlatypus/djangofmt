@@ -389,6 +389,7 @@ dependencies = [
  "clap_complete_command",
  "djangofmt_lint",
  "dprint-plugin-json",
+ "editorconfig-parser",
  "ignore",
  "insta",
  "insta-cmd",
@@ -509,6 +510,15 @@ dependencies = [
  "jsonc-parser",
  "serde",
  "text_lines",
+]
+
+[[package]]
+name = "editorconfig-parser"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e587c7336689e4dbb79157eb50ca5de9b3f75a48b85f17c1297d9c31e9d3bbc3"
+dependencies = [
+ "globset",
 ]
 
 [[package]]

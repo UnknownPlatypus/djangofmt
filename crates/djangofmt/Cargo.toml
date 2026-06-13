@@ -18,6 +18,7 @@ clap = { workspace = true }
 clap_complete_command = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 dprint-plugin-json = { workspace = true }
+editorconfig-parser = { workspace = true }
 ignore = { workspace = true }
 malva = { workspace = true }
 markup_fmt = { workspace = true }
