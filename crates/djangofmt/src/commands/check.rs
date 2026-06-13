@@ -67,7 +67,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let lint = resolved.pyproject.lint.as_ref();
     let config = CheckConfig::from_args(args, lint);
 
-    let (settings, warnings) = resolve_rule_selection(&args.rule_selection, lint)?.into_settings();
+    let (settings, warnings) = resolve_rule_selection(&args.rule_selection, lint).into_settings();
     for warning in &warnings {
         warn!("{warning}");
     }

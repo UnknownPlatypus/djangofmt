@@ -6,7 +6,7 @@ use ignore::overrides::OverrideBuilder;
 use ignore::types::TypesBuilder;
 use tracing::{debug, warn};
 
-use djangofmt_lint::{RuleSelection, RuleSelector};
+use djangofmt_lint::RuleSelection;
 
 use crate::args::{FileSelectionArgs, RuleSelectionArgs};
 use crate::error::Error;
@@ -51,44 +51,29 @@ pub(crate) fn resolve_bool_arg(yes: bool, no: bool) -> Option<bool> {
 /// Merge CLI rule-selection flags with `[tool.djangofmt.lint]` into a [`RuleSelection`].
 ///
 /// Precedence mirrors file selection CLI -> pyproject -> defaults.
+#[must_use]
 pub fn resolve_rule_selection(
     cli: &RuleSelectionArgs,
     lint: Option<&LintSettings>,
-) -> Result<RuleSelection, Error> {
-    let select = if let Some(selectors) = &cli.select {
-        Some(selectors.clone())
-    } else {
-        parse_selectors(lint.and_then(|l| l.select.as_deref()))?
-    };
-    let ignore = if let Some(selectors) = &cli.ignore {
-        selectors.clone()
-    } else {
-        parse_selectors(lint.and_then(|l| l.ignore.as_deref()))?.unwrap_or_default()
-    };
-    let preview = cli.preview || lint.and_then(|l| l.preview).unwrap_or(false);
+) -> RuleSelection {
+    let select = cli
+        .select
+        .clone()
+        .or_else(|| lint.and_then(|l| l.select.clone()));
+    let ignore = cli
+        .ignore
+        .clone()
+        .or_else(|| lint.and_then(|l| l.ignore.clone()))
+        .unwrap_or_default();
+    let preview = resolve_bool_arg(cli.preview, cli.no_preview)
+        .or_else(|| lint.and_then(|l| l.preview))
+        .unwrap_or(false);
 
-    Ok(RuleSelection {
+    RuleSelection {
         select,
         ignore,
         preview,
-    })
-}
-
-/// Parse raw pyproject selector strings, reporting the first invalid one as a hard error.
-fn parse_selectors(raw: Option<&[String]>) -> Result<Option<Vec<RuleSelector>>, Error> {
-    raw.map(|values| {
-        values
-            .iter()
-            .map(|value| {
-                value.trim().parse::<RuleSelector>().map_err(|err| {
-                    Error::Resolve(format!(
-                        "invalid rule selector `{value}` in pyproject.toml: {err}"
-                    ))
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()
-    })
-    .transpose()
+    }
 }
 
 /// Resolved File selection configuration after merging CLI, pyproject, and defaults.

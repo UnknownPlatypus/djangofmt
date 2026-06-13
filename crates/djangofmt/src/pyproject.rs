@@ -1,3 +1,4 @@
+use djangofmt_lint::RuleSelector;
 use serde::Deserialize;
 use std::{fs, path::Path};
 use tracing::{debug, warn};
@@ -27,8 +28,8 @@ pub struct PyprojectSettings {
 #[derive(Debug, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct LintSettings {
-    pub select: Option<Vec<String>>,
-    pub ignore: Option<Vec<String>>,
+    pub select: Option<Vec<RuleSelector>>,
+    pub ignore: Option<Vec<RuleSelector>>,
     pub preview: Option<bool>,
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
@@ -252,6 +253,8 @@ show-fixes = true
 
     #[test]
     fn test_load_lint_select_ignore_preview() {
+        use djangofmt_lint::{Rule, RuleCategory};
+
         let content = r#"
 [tool.djangofmt.lint]
 select = ["category:all"]
@@ -263,10 +266,10 @@ preview = true
             result,
             PyprojectSettings {
                 lint: Some(LintSettings {
-                    select: Some(vec!["category:all".to_string()]),
+                    select: Some(vec![RuleSelector::All]),
                     ignore: Some(vec![
-                        "category:style".to_string(),
-                        "missing-img-alt".to_string()
+                        RuleSelector::Category(RuleCategory::Style),
+                        RuleSelector::Rule(Rule::MissingImgAlt)
                     ]),
                     preview: Some(true),
                     ..Default::default()

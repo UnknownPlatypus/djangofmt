@@ -19,14 +19,13 @@ impl Default for Settings {
 }
 
 impl Settings {
-    /// Every rule, including preview rules.
-    ///
-    /// Used by tests, benchmarks, the playground, and the ecosystem check to
-    /// exercise the full rule set regardless of lifecycle.
+    /// Every runnable rule, including preview rules.
     #[must_use]
     pub fn all() -> Self {
         Self {
-            rules: Rule::iter().collect(),
+            rules: Rule::iter()
+                .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
+                .collect(),
         }
     }
 
@@ -38,9 +37,6 @@ impl Settings {
     }
 
     /// Check if any of the given rules is enabled.
-    ///
-    /// Cheap pre-filter for a cluster of related rules: each test is a bitset
-    /// lookup, so a fully-disabled cluster can be skipped with one call.
     #[must_use]
     #[inline]
     pub const fn any_rule_enabled(&self, rules: &[Rule]) -> bool {
@@ -83,7 +79,10 @@ impl RuleSelection {
             .map(|selector| (selector, true))
             .chain(self.ignore.into_iter().map(|selector| (selector, false)))
             .collect();
-        items.sort_by_key(|(selector, is_select)| (selector.specificity(), u8::from(!*is_select)));
+        items.sort_by_key(|(selector, is_select)| {
+            (selector.specificity(), u8::from(!*is_select), *selector)
+        });
+        items.dedup();
 
         let mut rules = RuleSet::default();
         let mut warnings = Vec::new();
@@ -190,6 +189,27 @@ mod tests {
             ..RuleSelection::default()
         }
         .into_settings();
+        assert!(!settings.is_enabled(Rule::EmptyTagPair));
+        assert_eq!(
+            warnings,
+            vec![SelectionWarning::PreviewRuleSkipped(Rule::EmptyTagPair)]
+        );
+    }
+
+    /// A selector listed twice is collapsed even when another selector sits between the duplicates
+    #[test]
+    fn duplicate_selectors_are_deduped() {
+        let (settings, warnings) = RuleSelection {
+            select: Some(vec![
+                RuleSelector::Rule(Rule::EmptyTagPair),
+                RuleSelector::Rule(Rule::UseHttps),
+                RuleSelector::Rule(Rule::EmptyTagPair),
+            ]),
+            ..RuleSelection::default()
+        }
+        .into_settings();
+
+        assert!(settings.is_enabled(Rule::UseHttps));
         assert!(!settings.is_enabled(Rule::EmptyTagPair));
         assert_eq!(
             warnings,

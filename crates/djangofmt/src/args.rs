@@ -174,9 +174,11 @@ pub struct RuleSelectionArgs {
     /// Comma-separated list of rules or categories to disable.
     #[arg(long, value_delimiter = ',', value_parser = parse_rule_selector, value_name = "RULE")]
     pub ignore: Option<Vec<RuleSelector>>,
-    /// Enable preview rules.
-    #[arg(long)]
+    /// Enable preview rules. Use `--no-preview` to disable.
+    #[arg(long, overrides_with("no_preview"))]
     pub preview: bool,
+    #[arg(long, overrides_with("preview"), hide = true)]
+    pub no_preview: bool,
 }
 
 /// Parse a single rule selector, surfacing the grammar error as a clap error.

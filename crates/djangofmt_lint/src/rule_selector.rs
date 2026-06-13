@@ -18,7 +18,7 @@ use crate::registry::{Rule, RuleCategory};
 /// Prefix that marks a group (a category, or `all`) selector.
 const CATEGORY_PREFIX: &str = "category:";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RuleSelector {
     /// Select all rules (includes rules in preview if enabled)
     All,
@@ -105,6 +105,18 @@ impl FromStr for RuleSelector {
                 SelectorParseError::unknown_rule(value)
             }
         })
+    }
+}
+
+/// Deserialize a selector from its string form, reusing [`FromStr`] so the
+/// `[tool.djangofmt.lint]` config and the CLI accept exactly the same grammar.
+impl<'de> serde::Deserialize<'de> for RuleSelector {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = <String as serde::Deserialize>::deserialize(deserializer)?;
+        value.trim().parse().map_err(serde::de::Error::custom)
     }
 }
 
