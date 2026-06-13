@@ -20,7 +20,7 @@ pub fn load_editorconfig_from_cwd() -> Option<EditorConfig> {
 /// Parse the nearest `.editorconfig` searching upward from `start_path`.
 ///
 /// Section globs are anchored at the file's own directory, so the parsed config
-/// is resolved against each formatted file's real path via [`settings_for`].
+/// is resolved against each formatted file's real path via [`resolve_editorconfig`].
 pub fn load_editorconfig<P: AsRef<Path>>(start_path: P) -> Option<EditorConfig> {
     let Some(path) = crate::fs::find_nearest_ancestor_file(start_path.as_ref(), ".editorconfig")
     else {
@@ -44,7 +44,10 @@ pub fn load_editorconfig<P: AsRef<Path>>(start_path: P) -> Option<EditorConfig> 
 
 /// Resolve `.editorconfig` indent/line settings for `path`.
 #[must_use]
-pub fn settings_for(editorconfig: Option<&EditorConfig>, path: &Path) -> EditorconfigSettings {
+pub fn resolve_editorconfig(
+    editorconfig: Option<&EditorConfig>,
+    path: &Path,
+) -> EditorconfigSettings {
     let Some(editorconfig) = editorconfig else {
         return EditorconfigSettings::default();
     };
@@ -87,7 +90,7 @@ mod tests {
     /// Resolve settings for `file` against an `.editorconfig` written at the project root.
     fn settings(editorconfig: &str, file: &str) -> EditorconfigSettings {
         let project = Project::new().file(".editorconfig", editorconfig);
-        settings_for(
+        resolve_editorconfig(
             load_editorconfig(project.path()).as_ref(),
             &project.join(file),
         )
@@ -97,7 +100,7 @@ mod tests {
     fn returns_default_when_no_editorconfig() {
         let project = Project::new();
         assert_eq!(
-            settings_for(
+            resolve_editorconfig(
                 load_editorconfig(project.path()).as_ref(),
                 &project.join("x.html")
             ),
@@ -185,7 +188,7 @@ indent_size = 3
         // Only the nearest file is used, the parent one is not merged in.
         let editorconfig = load_editorconfig(project.join("child"));
         assert_eq!(
-            settings_for(editorconfig.as_ref(), &project.join("child/x.html")),
+            resolve_editorconfig(editorconfig.as_ref(), &project.join("child/x.html")),
             EditorconfigSettings {
                 line_length: None,
                 indent_width: Some(IndentWidth::try_from(8u8).unwrap()),

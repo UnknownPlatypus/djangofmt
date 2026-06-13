@@ -32,7 +32,7 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
         .or(pyproject.profile)
         .unwrap_or_default();
     let editorconfig = editorconfig::load_editorconfig_from_cwd();
-    let settings = editorconfig::settings_for(
+    let settings = editorconfig::resolve_editorconfig(
         editorconfig.as_ref(),
         stdin_filename.unwrap_or_else(|| Path::new("")),
     );

@@ -230,7 +230,7 @@ struct FormatContext<'a> {
     editorconfig: Option<&'a EditorConfig>,
     profile: Option<Profile>,
     /// Built once when `.editorconfig` can't vary per file (no config, or only `[*]`).
-    shared_config: Option<FormatterConfig>,
+    config: Option<FormatterConfig>,
 }
 
 impl<'a> FormatContext<'a> {
@@ -245,11 +245,11 @@ impl<'a> FormatContext<'a> {
             pyproject,
             editorconfig,
             profile,
-            shared_config: None,
+            config: None,
         };
         if !editorconfig::has_per_file_sections(editorconfig) {
             // Any filename resolves the same settings here, so build the config once.
-            context.shared_config = Some(context.build_config(Path::new("any")));
+            context.config = Some(context.build_config(Path::new("any")));
         }
         context
     }
@@ -262,14 +262,14 @@ impl<'a> FormatContext<'a> {
 
     /// The config for `path`: the shared one when set, otherwise built for this file.
     fn config_for(&self, path: &Path) -> Cow<'_, FormatterConfig> {
-        self.shared_config
+        self.config
             .as_ref()
             .map_or_else(|| Cow::Owned(self.build_config(path)), Cow::Borrowed)
     }
 
     fn build_config(&self, path: &Path) -> FormatterConfig {
-        let settings = editorconfig::settings_for(self.editorconfig, path);
-        FormatterConfig::from_args(self.args, self.pyproject, &settings)
+        let editorconfig = editorconfig::resolve_editorconfig(self.editorconfig, path);
+        FormatterConfig::from_args(self.args, self.pyproject, &editorconfig)
     }
 }
 

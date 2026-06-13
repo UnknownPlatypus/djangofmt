@@ -125,7 +125,7 @@ preserve-unquoted-attrs = false
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
 The first `pyproject.toml` found is used. If no file is found or the file doesn't contain a `[tool.djangofmt]` section, defaults are used.
 
-Djangofmt also picks up [EditorConfig](https://editorconfig.org/) settings from the nearest `.editorconfig` file:
+Djangofmt also reads [EditorConfig](https://editorconfig.org/) settings from the nearest `.editorconfig` file:
 
 ```ini
 root = true
