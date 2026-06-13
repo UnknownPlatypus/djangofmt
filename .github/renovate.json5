@@ -56,9 +56,10 @@
       enabled: false,
     },
     {
-      // This file is managed by cargo-dist, don't try to update it.
-      "matchFileNames": [".github/workflows/release.yml"],
-      "enabled": false
+      // This file is managed by cargo-dist, don't try to update actions inside it.
+      matchManagers: ["github-actions"],
+      matchFileNames: [".github/workflows/release.yml"],
+      enabled: false,
     },
     {
       // Disable automatic updates for markup_fmt (cargo dep and dprint plugin), updates are handled manually.
@@ -94,6 +95,11 @@
       matchManagers: ["custom.regex"],
       matchDepNames: ["maturin"],
       commitMessageTopic: "maturin",
+    },
+    {
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["cargo-dist"],
+      commitMessageTopic: "cargo-dist",
     },
   ],
   customManagers: [
@@ -164,6 +170,20 @@
       matchStrings: ['"https://plugins\\.dprint\\.dev/g-plane/(?<depName>[a-z0-9_]+)-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\.wasm"'],
       packageNameTemplate: "g-plane/{{depName}}",
       datasourceTemplate: "github-releases",
+    },
+    // cargo-dist version, kept in sync between dist-workspace.toml and the generated release.yml installer.
+    {
+      customType: "regex",
+      managerFilePatterns: [
+        "/(^|/)dist-workspace\\.toml$/",
+        "/.github/workflows/release\\.yml$/",
+      ],
+      matchStrings: [
+        '(?<packageName>[\\w-]+?)-version = "(?<currentValue>\\d+\\.\\d+\\.\\d+)"',
+        'https://github\\.com/axodotdev/(?<packageName>[\\w-]+?)/releases/download/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/',
+      ],
+      datasourceTemplate: "crate",
+      versioningTemplate: "semver",
     },
   ],
   vulnerabilityAlerts: {
