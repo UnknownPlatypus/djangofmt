@@ -48,6 +48,7 @@ pub fn setup_tracing(level: LogLevel) {
             .with(
                 tracing_subscriber::fmt::layer()
                     .with_writer(std::io::stderr)
+                    .with_ansi_sanitization(false)
                     .event_format(
                         format()
                             .compact()
