@@ -33,6 +33,7 @@ quote = { version = "1.0" }
 rayon = { version = "1.12.0" }
 rstest = { version = "=0.26.1" }
 rustc-hash = { version = "2.1.2" }
+rustywind_core = { git = "https://github.com/avencera/rustywind", rev = "3b906779bd46046ccf35285a90f0046ebdfe3737" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde-wasm-bindgen = { version = "0.6.5" }
 similar-asserts = { version = "2.0.0" }

@@ -1,0 +1,20 @@
+<!-- Already in canonical Tailwind order -->
+<div class="m-4 flex p-4"></div>
+<span class="flex inline flex-col">Label</span>
+<button class="m-4 flex p-4 hover:p-1">Save</button>
+
+<!-- Custom (non-Tailwind) classes keep their authored order -->
+<div class="card card--primary"></div>
+<div class="btn btn-primary"></div>
+<nav class="container mx-auto px-4"></nav>
+
+<!-- A single class is trivially sorted -->
+<div class="flex"></div>
+
+<!-- An element without a class attribute is never inspected -->
+<p>Plain paragraph with no class attribute.</p>
+
+<!-- Template interpolation: the rendered token list is unknown, so skip (djangofmt #6) -->
+<div class="flex {{ extra_classes }} p-4"></div>
+<div class="p-4 {% if active %}flex{% endif %} m-4"></div>
+<div class="{{ button_classes }}"></div>
