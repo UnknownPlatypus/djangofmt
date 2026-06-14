@@ -125,6 +125,10 @@ impl<'a> Checker<'a> {
             && self.is_rule_enabled(Rule::MissingTitle)
         {
             rules::accessibility::missing_title::check(element, self);
+        } else if element.tag_name.eq_ignore_ascii_case("th")
+            && self.is_rule_enabled(Rule::TableHeaderMissingScope)
+        {
+            rules::accessibility::table_header_missing_scope::check(element, self);
         }
 
         for attr in &element.attrs {
