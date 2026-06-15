@@ -45,10 +45,6 @@ impl Violation for EmptyAttrValue<'_> {
         format!("Empty `{}` attribute can be removed.", self.attr)
     }
 
-    fn help(&self) -> Option<String> {
-        Some(format!("Remove the empty `{}` attribute.", self.attr))
-    }
-
     fn fix_title(&self) -> Option<String> {
         Some("Remove empty attribute".to_string())
     }
