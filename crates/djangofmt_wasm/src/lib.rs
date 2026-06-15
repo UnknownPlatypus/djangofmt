@@ -9,7 +9,6 @@ use serde::Serialize;
 use std::path::PathBuf;
 use tsify::Tsify;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 #[wasm_bindgen]
 #[must_use]
 pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -> String {
@@ -238,13 +237,7 @@ pub(crate) fn into_error<E: std::fmt::Display>(err: E) -> JsError {
 fn get_profile(profile: &str) -> Profile {
     match profile.to_ascii_lowercase().as_str() {
         "jinja" => Profile::Jinja,
-        "django" => Profile::Django,
-        _ => {
-            console::log_1(
-                &format!("Invalid profile: '{profile}'. Falling back to 'Django'").into(),
-            );
-            Profile::Django
-        }
+        _ => Profile::Django,
     }
 }
 
