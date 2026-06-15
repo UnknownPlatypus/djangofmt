@@ -539,3 +539,51 @@ fn check_respects_pyproject_custom_blocks() {
     Couldn't check 1 files!
     "###);
 }
+
+#[test]
+fn check_respects_pyproject_per_file_ignores() {
+    // Same violation in both files: the glob must silence it in `legacy/` only.
+    let violation = "<form method=\"put\"></form>\n";
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt.lint.per-file-ignores]\n\"legacy/*\" = [\"invalid-attr-value\"]\n",
+        )
+        .file("legacy/old.html", violation)
+        .file("new.html", violation);
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "."]), @r###"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Invalid value 'put' for attribute 'method'.
+       ╭─[new.html:1:15]
+     1 │ <form method="put"></form>
+       ·               ─┬─
+       ·                ╰── here
+       ╰────
+      help: Use one of: get, post, dialog
+
+    Found 1 errors.
+    "###);
+
+    // Globs anchor at the `pyproject.toml` directory, not the cwd: `legacy/*` keeps
+    // matching when djangofmt runs from inside `legacy/`.
+    assert_cmd_snapshot_tmpdir!(cli().current_dir(project.join("legacy")).args(["check", ".."]), @r###"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Invalid value 'put' for attribute 'method'.
+       ╭─[[TMP]/new.html:1:15]
+     1 │ <form method="put"></form>
+       ·               ─┬─
+       ·                ╰── here
+       ╰────
+      help: Use one of: get, post, dialog
+
+    Found 1 errors.
+    "###);
+}
