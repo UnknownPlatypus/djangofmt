@@ -4,7 +4,7 @@
     "npm:@tailwindcss/vite@4.2.2": "4.2.2_vite@8.0.16",
     "npm:ansi-to-html@~0.7.2": "0.7.2",
     "npm:astro@^6.1.2": "6.4.2",
-    "npm:daisyui@5.5.20": "5.5.20",
+    "npm:daisyui@5.5.23": "5.5.23",
     "npm:diff@9": "9.0.0",
     "npm:lz-string@^1.5.0": "1.5.0",
     "npm:monaco-editor@~0.55.1": "0.55.1",
@@ -1040,8 +1040,8 @@
         "css-tree@2.2.1"
       ]
     },
-    "daisyui@5.5.20": {
-      "integrity": "sha512-HemJcjl0Gk9rQ8BcgofN6p+EURrqftQG9wK1Hkxs98i49xe68+QxpNvry+PyxwkIUgrbMpNmZ5ZWjmtffAjfhQ=="
+    "daisyui@5.5.23": {
+      "integrity": "sha512-xuheNUSL4T6ZVtWXoioqcNkjoyGX85QTDz4HTw2aBPfqk4fuMjax5HDo8qCmpV6M1YN8bGvfx5BpYCoDeRlt+A=="
     },
     "debug@4.4.3": {
       "integrity": "sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==",
@@ -2529,7 +2529,7 @@
         "npm:@tailwindcss/vite@4.2.2",
         "npm:ansi-to-html@~0.7.2",
         "npm:astro@^6.1.2",
-        "npm:daisyui@5.5.20",
+        "npm:daisyui@5.5.23",
         "npm:diff@9",
         "npm:lz-string@^1.5.0",
         "npm:monaco-editor@~0.55.1",
