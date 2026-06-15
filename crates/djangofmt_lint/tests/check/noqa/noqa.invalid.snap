@@ -1,0 +1,59 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 5 lint error(s)
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+   ╭─[tests/check/noqa/noqa.invalid.html:3:15]
+ 2 │ {# noqa: untrimmed-blocktranslate #}
+ 3 │ <form method="put">Submit</form>
+   ·               ─┬─
+   ·                ╰── here
+ 4 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+   ╭─[tests/check/noqa/noqa.invalid.html:7:15]
+ 6 │ {# just a regular template comment #}
+ 7 │ <form method="put">Submit</form>
+   ·               ─┬─
+   ·                ╰── here
+ 8 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa.invalid.html:11:15]
+ 10 │ {# noqa: #}
+ 11 │ <form method="put">Submit</form>
+    ·               ─┬─
+    ·                ╰── here
+ 12 │ 
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa.invalid.html:15:15]
+ 14 │ {# prenoqasuffix #}
+ 15 │ <form method="put">Submit</form>
+    ·               ─┬─
+    ·                ╰── here
+ 16 │ 
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa.invalid.html:20:15]
+ 19 │      must come before the node it governs. -->
+ 20 │ <form method="put">Submit</form>
+    ·               ─┬─
+    ·                ╰── here
+ 21 │ {# noqa: invalid-attr-value #}
+    ╰────
+  help: Use one of: get, post, dialog

@@ -1,0 +1,21 @@
+<!-- A directive for an unrelated rule does not suppress the diagnostic. -->
+{# noqa: untrimmed-blocktranslate #}
+<form method="put">Submit</form>
+
+<!-- A comment without the keyword does not suppress. -->
+{# just a regular template comment #}
+<form method="put">Submit</form>
+
+<!-- A malformed payload (`noqa:` with no codes) is discarded; diagnostic remains. -->
+{# noqa: #}
+<form method="put">Submit</form>
+
+<!-- A substring match without a word boundary does not trigger. -->
+{# prenoqasuffix #}
+<form method="put">Submit</form>
+
+<!-- A TRAILING directive does not govern the PRECEDING element. This is exactly
+     the position the formatter relocates comments to, which is why a directive
+     must come before the node it governs. -->
+<form method="put">Submit</form>
+{# noqa: invalid-attr-value #}

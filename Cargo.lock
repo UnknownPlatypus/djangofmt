@@ -441,6 +441,7 @@ dependencies = [
  "insta",
  "markup_fmt",
  "miette",
+ "rstest",
  "rustc-hash",
  "serde",
  "strum",

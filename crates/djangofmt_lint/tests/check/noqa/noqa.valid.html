@@ -1,0 +1,39 @@
+<!-- A directive sits on its own line immediately before the node it governs. -->
+
+<!-- Blanket `{# noqa #}` suppresses every diagnostic on the governed node. -->
+{# noqa #}
+<form method="put">Submit</form>
+
+<!-- A specific code suppresses only that rule. -->
+{# noqa: invalid-attr-value #}
+<form method="put">Submit</form>
+
+<!-- The keyword is case-insensitive. -->
+{# NOQA #}
+<form method="put">Submit</form>
+
+<!-- Leading comment text before the keyword is tolerated. -->
+{# justifying the legacy verb, noqa: invalid-attr-value #}
+<form method="put">Submit</form>
+
+<!-- A whitespace-only gap between the directive and the node is tolerated. -->
+{# noqa: invalid-attr-value #}
+
+<form method="put">Submit</form>
+
+<!-- Multiple codes (comma- or whitespace-separated) cover the whole subtree:
+     the invalid `method` value AND the untrimmed blocktranslate inside it. -->
+{# noqa: invalid-attr-value, untrimmed-blocktranslate #}
+<form method="put">{% blocktranslate %}This string has {{ value }} inside.{% endblocktranslate %}</form>
+
+<!-- A directive before a parent governs diagnostics on its descendants. -->
+{# noqa: invalid-attr-value #}
+<div>
+    <form method="put">Submit</form>
+</div>
+
+<!-- Suppression works inside a Jinja block. -->
+{% if show %}
+    {# noqa: invalid-attr-value #}
+    <form method="put">Submit</form>
+{% endif %}
