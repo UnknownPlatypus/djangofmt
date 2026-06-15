@@ -470,7 +470,6 @@ dependencies = [
  "serde-wasm-bindgen",
  "tsify",
  "wasm-bindgen",
- "web-sys",
 ]
 
 [[package]]

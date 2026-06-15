@@ -49,7 +49,6 @@ tracing-test = { version = "0.2.6", features = ["no-env-filter"] }
 tracing-tree = { version = "0.4.1" }
 tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.122" }
-web-sys = { version = "0.3.99", features = ["console"] }
 
 [workspace.lints.clippy]
 missing_errors_doc = "allow"
