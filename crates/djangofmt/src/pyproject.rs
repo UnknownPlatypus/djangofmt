@@ -1,4 +1,5 @@
 use djangofmt_lint::RuleSelector;
+use rustc_hash::FxHashMap;
 use serde::Deserialize;
 use std::{fs, path::Path};
 use tracing::debug;
@@ -35,6 +36,8 @@ pub struct LintSettings {
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
+    /// Map of glob -> rule selectors to ignore for matching files.
+    pub per_file_ignores: Option<FxHashMap<String, Vec<RuleSelector>>>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -271,6 +274,22 @@ preview = true
                 }),
                 ..Default::default()
             }
+        );
+    }
+
+    #[test]
+    fn test_load_lint_per_file_ignores() {
+        use djangofmt_lint::Rule;
+
+        let content = r#"
+[tool.djangofmt.lint.per-file-ignores]
+"templates/admin/*.html" = ["missing-img-alt"]
+"#;
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        let per_file = result.lint.unwrap().per_file_ignores.unwrap();
+        assert_eq!(
+            per_file.get("templates/admin/*.html"),
+            Some(&vec![RuleSelector::Rule(Rule::MissingImgAlt)])
         );
     }
 

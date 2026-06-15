@@ -16,6 +16,7 @@ use crate::ExitStatus;
 use crate::args::{CheckCommand, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
+use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::LintSettings;
 use crate::resolver::{resolve_bool_arg, resolve_rule_selection};
 
@@ -72,6 +73,11 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         warn!("{warning}");
     }
 
+    let per_file_ignores = lint
+        .and_then(|l| l.per_file_ignores.as_ref())
+        .map(|patterns| PerFileIgnores::new(patterns, &resolved.project_root))
+        .transpose()?;
+
     let threshold = if config.unsafe_fixes {
         Applicability::Unsafe
     } else {
@@ -82,7 +88,14 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|path| check_path(path, resolved.profile, &settings, config.fix, threshold))
+        .map(|path| {
+            // Reuse the global settings unless per-file-ignores narrow them for this path.
+            let file_settings = per_file_ignores.as_ref().map(|pfi| Settings {
+                rules: pfi.rules_for(path, &settings.rules),
+            });
+            let settings = file_settings.as_ref().unwrap_or(&settings);
+            check_path(path, resolved.profile, settings, config.fix, threshold)
+        })
         .partition_map(|result| match result {
             Ok(r) => Left(r),
             Err(err) => Right(err),

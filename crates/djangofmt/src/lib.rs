@@ -13,6 +13,7 @@ pub mod error;
 pub mod fs;
 pub mod line_width;
 mod logging;
+pub mod per_file_ignores;
 pub mod pyproject;
 pub mod resolver;
 #[cfg(test)]

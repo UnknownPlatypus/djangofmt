@@ -390,6 +390,7 @@ dependencies = [
  "djangofmt_lint",
  "dprint-plugin-json",
  "editorconfig-parser",
+ "globset",
  "ignore",
  "insta",
  "insta-cmd",

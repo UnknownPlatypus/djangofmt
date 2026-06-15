@@ -19,6 +19,7 @@ divan = { package = "codspeed-divan-compat", version = "*" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
 dprint-plugin-json = { version = "0.21.3" }
 editorconfig-parser = { version = "0.0.4" }
+globset = { version = "0.4.18" }
 ignore = { version = "0.4.25" }
 insta = { version = "1.47.2", features = ["filters", "glob", "yaml"] }
 insta-cmd = { version = "0.6.0" }
