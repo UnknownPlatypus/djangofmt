@@ -26,9 +26,9 @@ pub fn delete_attr_fix(
 /// Walk backwards from `offset` over ASCII whitespace bytes in `source`,
 /// returning the offset of the first non-whitespace byte.
 #[inline]
-fn reverse_consume_ws(source: &[u8], mut offset: usize) -> usize {
-    while offset > 0 && source[offset - 1].is_ascii_whitespace() {
-        offset -= 1;
-    }
-    offset
+fn reverse_consume_ws(source: &[u8], offset: usize) -> usize {
+    source[..offset]
+        .iter()
+        .rposition(|b| !b.is_ascii_whitespace())
+        .map_or(0, |i| i + 1)
 }
