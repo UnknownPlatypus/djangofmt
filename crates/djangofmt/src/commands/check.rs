@@ -79,26 +79,19 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     };
 
     let start = Instant::now();
-    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
+    let (results, parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
         .map(|path| check_path(path, resolved.profile, &settings, config.fix, threshold))
         .partition_map(|result| match result {
             Ok(r) => Left(r),
-            Err(err) => Right(err),
+            Err(err) => Right(*err),
         });
 
     let duration = start.elapsed();
     debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
-    parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let error_count = parse_errors.len();
-    for err in parse_errors {
-        error!("{:?}", miette::Report::new(*err));
-    }
-    if error_count > 0 {
-        error!("Couldn't check {} files!", error_count);
-    }
+    let error_count = super::report_parse_errors(parse_errors, "check");
 
     let mut total_diagnostics = 0usize;
     let mut total_applied = 0usize;

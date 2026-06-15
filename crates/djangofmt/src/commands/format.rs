@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use tracing::{debug, error, info};
+use tracing::{debug, info};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
@@ -285,13 +285,13 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     // Format files in parallel
     let start = Instant::now();
-    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
+    let (results, parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
         .map(|entry| format_path(entry, &context))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
-            Err(err) => Right(err),
+            Err(err) => Right(*err),
         });
 
     debug!(
@@ -300,15 +300,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         start.elapsed()
     );
 
-    // Report on any parsing errors.
-    parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let nb_errors = parse_errors.len();
-    for error in parse_errors {
-        error!("{:?}", miette::Report::new(*error));
-    }
-    if nb_errors > 0 {
-        error!("Couldn't format {nb_errors} files!");
-    }
+    let nb_errors = super::report_parse_errors(parse_errors, "format");
 
     // Report on the formatting changes.
     let summary = build_summary(results.as_ref());
