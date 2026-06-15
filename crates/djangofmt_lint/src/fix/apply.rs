@@ -196,6 +196,8 @@ pub struct FixerResult {
 /// Errors from [`lint_fix`].
 #[derive(Debug)]
 pub enum FixerError {
+    /// `source` failed to parse; no fix was attempted.
+    InitialParse(SyntaxError),
     /// A fix introduced a syntax error in source that previously parsed.
     SyntaxRegression {
         iteration: usize,
@@ -206,12 +208,11 @@ pub enum FixerError {
 /// Run the lint-and-fix loop on `source`.
 ///
 /// 1. Parse → lint → apply.
-/// 2. If anything was applied, re-parse and repeat up to
-///    [`MAX_FIX_ITERATIONS`].
-/// 3. Bail with [`FixerError::SyntaxRegression`] if a fix introduced a
-///    syntax error in source that previously parsed.
-/// 4. On convergence-failure (iteration limit reached with more fixes
-///    pending), log a warning and return the work done so far.
+/// 2. If anything was applied, re-parse and repeat up to [`MAX_FIX_ITERATIONS`].
+/// 3. Bail with [`FixerError::InitialParse`] if `source` never parsed,
+///    or [`FixerError::SyntaxRegression`] if a fix broke source that previously parsed.
+/// 4. On convergence-failure (iteration limit reached with more fixes pending),
+///    log a warning and return the work done so far.
 pub fn lint_fix(
     source: &str,
     settings: &Settings,
@@ -257,16 +258,7 @@ pub fn lint_fix(
                     error: err,
                 });
             }
-            Err(_) => {
-                return Ok(FixerResult {
-                    source: current.into_owned(),
-                    remaining_diagnostics: Vec::new(),
-                    applied_count: total_applied,
-                    skipped_count: total_skipped,
-                    iterations,
-                    applied_by_rule,
-                });
-            }
+            Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
         let diagnostics = check_ast(&current, &ast, settings);

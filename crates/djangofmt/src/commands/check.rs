@@ -232,18 +232,6 @@ fn check_path(
     let source = fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
-    let mut parser = Parser::new(&source, profile.into(), vec![]);
-    let ast = match parser.parse_root() {
-        Ok(ast) => ast,
-        Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                Some(path.to_path_buf()),
-                source,
-                &FormatError::Syntax(err),
-            ))));
-        }
-    };
-
     if fix {
         match lint_fix(&source, settings, profile.into(), threshold) {
             Ok(result) => {
@@ -268,6 +256,13 @@ fn check_path(
                     fixes_by_rule: result.applied_by_rule,
                 });
             }
+            Err(FixerError::InitialParse(err)) => {
+                return Err(Box::new(CommandError::Parse(ParseError::new(
+                    Some(path.to_path_buf()),
+                    source,
+                    &FormatError::Syntax(err),
+                ))));
+            }
             Err(FixerError::SyntaxRegression {
                 iteration,
                 error: _,
@@ -276,10 +271,22 @@ fn check_path(
                     "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
                     path.display()
                 );
-                // Fall through to the no-fix path on the original AST.
+                // Fall through and lint the unchanged source.
             }
         }
     }
+
+    let mut parser = Parser::new(&source, profile.into(), vec![]);
+    let ast = match parser.parse_root() {
+        Ok(ast) => ast,
+        Err(err) => {
+            return Err(Box::new(CommandError::Parse(ParseError::new(
+                Some(path.to_path_buf()),
+                source,
+                &FormatError::Syntax(err),
+            ))));
+        }
+    };
 
     let diagnostics = check_ast(&source, &ast, settings);
     let file_diagnostics = if diagnostics.is_empty() {
