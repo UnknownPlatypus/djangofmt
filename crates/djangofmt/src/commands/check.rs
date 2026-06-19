@@ -79,26 +79,19 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     };
 
     let start = Instant::now();
-    let (results, mut parse_errors): (Vec<_>, Vec<_>) = resolved
+    let (results, parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
         .map(|path| check_path(path, resolved.profile, &settings, config.fix, threshold))
         .partition_map(|result| match result {
             Ok(r) => Left(r),
-            Err(err) => Right(err),
+            Err(err) => Right(*err),
         });
 
     let duration = start.elapsed();
     debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
-    parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let error_count = parse_errors.len();
-    for err in parse_errors {
-        error!("{:?}", miette::Report::new(*err));
-    }
-    if error_count > 0 {
-        error!("Couldn't check {} files!", error_count);
-    }
+    let error_count = super::report_parse_errors(parse_errors, "check");
 
     let mut total_diagnostics = 0usize;
     let mut total_applied = 0usize;
@@ -239,18 +232,6 @@ fn check_path(
     let source = fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
-    let mut parser = Parser::new(&source, profile.into(), vec![]);
-    let ast = match parser.parse_root() {
-        Ok(ast) => ast,
-        Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                Some(path.to_path_buf()),
-                source,
-                &FormatError::Syntax(err),
-            ))));
-        }
-    };
-
     if fix {
         match lint_fix(&source, settings, profile.into(), threshold) {
             Ok(result) => {
@@ -275,6 +256,13 @@ fn check_path(
                     fixes_by_rule: result.applied_by_rule,
                 });
             }
+            Err(FixerError::InitialParse(err)) => {
+                return Err(Box::new(CommandError::Parse(ParseError::new(
+                    Some(path.to_path_buf()),
+                    source,
+                    &FormatError::Syntax(err),
+                ))));
+            }
             Err(FixerError::SyntaxRegression {
                 iteration,
                 error: _,
@@ -283,10 +271,22 @@ fn check_path(
                     "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
                     path.display()
                 );
-                // Fall through to the no-fix path on the original AST.
+                // Fall through and lint the unchanged source.
             }
         }
     }
+
+    let mut parser = Parser::new(&source, profile.into(), vec![]);
+    let ast = match parser.parse_root() {
+        Ok(ast) => ast,
+        Err(err) => {
+            return Err(Box::new(CommandError::Parse(ParseError::new(
+                Some(path.to_path_buf()),
+                source,
+                &FormatError::Syntax(err),
+            ))));
+        }
+    };
 
     let diagnostics = check_ast(&source, &ast, settings);
     let file_diagnostics = if diagnostics.is_empty() {
