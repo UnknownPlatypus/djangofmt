@@ -89,6 +89,8 @@ repos:
               docs/rules/.*|
               docs/index\.md|
               docs/changelog\.md|
+              docs/known-limitations\.md|
+              docs/formatting\.md|
               docs/contributing\.md
           )$
   - repo: https://github.com/AndrejOrsula/pre-commit-cargo
