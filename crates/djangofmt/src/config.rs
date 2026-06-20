@@ -9,7 +9,7 @@ use std::path::Path;
 use djangofmt_lint::RuleSelection;
 
 use crate::args::{Profile, RuleSelectionArgs};
-use crate::pyproject::LintSettings;
+use crate::pyproject::{LintSettings, UnsortedTailwindClassesOptions};
 
 /// Collapse a `--flag` / `--no-flag` pair into an optional bool.
 #[must_use]
@@ -54,11 +54,17 @@ pub fn resolve_rule_selection(
     let preview = resolve_bool_arg(cli.preview, cli.no_preview)
         .or_else(|| lint.and_then(|l| l.preview))
         .unwrap_or(false);
+    // Per-rule config is pyproject-only (no CLI flags), mirroring ruff's per-linter sections.
+    let unsorted_tailwind_classes = lint
+        .and_then(|l| l.unsorted_tailwind_classes.clone())
+        .map(UnsortedTailwindClassesOptions::into_settings)
+        .unwrap_or_default();
 
     RuleSelection {
         select,
         ignore,
         preview,
+        unsorted_tailwind_classes,
     }
 }
 

@@ -106,6 +106,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
             // Reuse the global settings unless per-file-ignores narrow them for this path.
             let file_settings = per_file_ignores.as_ref().map(|pfi| Settings {
                 rules: pfi.rules_for(path, &settings.rules),
+                ..settings.clone()
             });
             let settings = file_settings.as_ref().unwrap_or(&settings);
             let profile = resolve_profile(
