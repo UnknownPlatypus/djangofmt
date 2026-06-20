@@ -30,6 +30,7 @@ dist
 # Zensical build output
 site/
 
-# LLM
+# LLM — local Claude Code config stays out; shared project skills under .agents/skills/ are tracked
 .claude
-.agents
+.agents/*
+!.agents/skills/
