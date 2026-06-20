@@ -1,0 +1,19 @@
+<!-- Distinct block names -->
+{% block title %}Title{% endblock %}
+{% block content %}Content{% endblock %}
+{% block footer %}Footer{% endblock %}
+
+<!-- Distinct nested names: nesting alone must not trigger -->
+{% block outer %}
+    {% block inner %}nested{% endblock %}
+{% endblock %}
+
+<!-- A single block used once -->
+{% block sidebar %}Sidebar{% endblock %}
+
+<!-- blocktranslate / blocktrans are not `block` tags, even when repeated verbatim.
+     `trimmed` keeps the untrimmed-blocktranslate rule quiet (all rules run here). -->
+{% blocktranslate trimmed %}Hello{% endblocktranslate %}
+{% blocktranslate trimmed %}Hello{% endblocktranslate %}
+{% blocktrans trimmed %}Hi{% endblocktrans %}
+{% blocktrans trimmed %}Hi{% endblocktrans %}

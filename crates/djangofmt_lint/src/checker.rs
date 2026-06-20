@@ -2,6 +2,7 @@ use markup_fmt::ast::{
     Attribute, Element, JinjaBlock, JinjaTagOrChildren, NativeAttribute, Node, NodeKind, Root,
 };
 use miette::SourceSpan;
+use smallvec::SmallVec;
 
 use crate::LintDiagnostic;
 use crate::Settings;
@@ -13,6 +14,10 @@ use crate::violation::Violation;
 /// AST visitor that collects lint diagnostics.
 pub struct Checker<'a> {
     context: LintContext<'a>,
+    /// Block names collected during the traversal.
+    /// Blocks in attribute position (`<div {% block x %}…>`) are not visited here, so are not recorded.
+    /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
+    block_names: SmallVec<[&'a str; 8]>,
 }
 
 impl<'a> Checker<'a> {
@@ -20,6 +25,7 @@ impl<'a> Checker<'a> {
     pub const fn new(source: &'a str, settings: &'a Settings) -> Self {
         Self {
             context: LintContext::new(source, settings),
+            block_names: SmallVec::new_const(),
         }
     }
 
@@ -27,6 +33,12 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub const fn context(&self) -> &LintContext<'a> {
         &self.context
+    }
+
+    /// Block names recorded during the traversal, borrowed from the source.
+    #[must_use]
+    pub fn block_names(&self) -> &[&'a str] {
+        &self.block_names
     }
 
     /// Compute the byte offset of a string slice within the source.
@@ -83,7 +95,7 @@ impl<'a> Checker<'a> {
     }
 
     /// Visit the root of the AST and run all lint rules.
-    pub fn visit_root(&mut self, root: &Root<'_>) {
+    pub fn visit_root(&mut self, root: &Root<'a>) {
         if self.is_rule_enabled(Rule::MissingDoctype) {
             rules::style::missing_doctype::check(root, self);
         }
@@ -91,9 +103,14 @@ impl<'a> Checker<'a> {
         for node in &root.children {
             self.visit_node(node);
         }
+
+        // Cross-node finalize: now that every `{% block %}` has been recorded, flag duplicates.
+        if self.is_rule_enabled(Rule::DuplicateBlockName) {
+            rules::correctness::duplicate_block_name::check(self);
+        }
     }
 
-    fn visit_node(&mut self, node: &Node<'_>) {
+    fn visit_node(&mut self, node: &Node<'a>) {
         match &node.kind {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
@@ -101,7 +118,7 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_element(&mut self, element: &Element<'_>) {
+    fn visit_element(&mut self, element: &Element<'a>) {
         if self.is_rule_enabled(Rule::DuplicateAttr) {
             rules::suspicious::duplicate_attr::check(element, self);
         }
@@ -136,7 +153,7 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_attribute(&mut self, attr: &Attribute<'_>, element: &Element<'_>) {
+    fn visit_attribute(&mut self, attr: &Attribute<'a>, element: &Element<'a>) {
         match attr {
             Attribute::Native(native) => self.visit_native_attribute(native, element),
             Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
@@ -144,7 +161,7 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_native_attribute(&self, attr: &NativeAttribute<'_>, element: &Element<'_>) {
+    fn visit_native_attribute(&self, attr: &NativeAttribute<'a>, element: &Element<'a>) {
         if self.is_rule_enabled(Rule::InvalidAttrValue) {
             rules::correctness::invalid_attr_value::check(attr, element, self);
         }
@@ -183,9 +200,13 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_jinja_block(&mut self, block: &JinjaBlock<'_, Node<'_>>) {
+    fn visit_jinja_block(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
         if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
             rules::correctness::untrimmed_blocktranslate::check(block, self);
+        }
+
+        if self.is_rule_enabled(Rule::DuplicateBlockName) {
+            self.record_block_name(block);
         }
 
         for item in &block.body {
@@ -197,10 +218,16 @@ impl<'a> Checker<'a> {
         }
     }
 
+    fn record_block_name(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
+        if let Some(name) = rules::correctness::duplicate_block_name::block_name(block) {
+            self.block_names.push(name);
+        }
+    }
+
     fn visit_jinja_attr_block(
         &mut self,
-        block: &JinjaBlock<'_, Attribute<'_>>,
-        element: &Element<'_>,
+        block: &JinjaBlock<'a, Attribute<'a>>,
+        element: &Element<'a>,
     ) {
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
