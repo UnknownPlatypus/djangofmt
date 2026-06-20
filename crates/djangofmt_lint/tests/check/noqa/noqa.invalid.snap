@@ -1,0 +1,59 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 5 lint error(s)
+
+Error: 
+  × Invalid value 'yes' for attribute 'method'.
+   ╭─[tests/check/noqa/noqa.invalid.html:3:15]
+ 2 │ {# noqa #}
+ 3 │ <form method="yes"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 4 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'yes' for attribute 'method'.
+   ╭─[tests/check/noqa/noqa.invalid.html:7:15]
+ 6 │ {# noqa: #}
+ 7 │ <form method="yes"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 8 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'yes' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa.invalid.html:11:15]
+ 10 │ {# noqa: not-a-real-rule #}
+ 11 │ <form method="yes"></form>
+    ·               ─┬─
+    ·                ╰── here
+ 12 │ 
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'yes' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa.invalid.html:15:15]
+ 14 │ {# noqa: empty-attr-value #}
+ 15 │ <form method="yes"></form>
+    ·               ─┬─
+    ·                ╰── here
+ 16 │ 
+    ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'yes' for attribute 'method'.
+    ╭─[tests/check/noqa/noqa.invalid.html:18:15]
+ 17 │ {# A comment after the node does not reach back to it #}
+ 18 │ <form method="yes"></form>
+    ·               ─┬─
+    ·                ╰── here
+ 19 │ {# noqa: invalid-attr-value #}
+    ╰────
+  help: Use one of: get, post, dialog

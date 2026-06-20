@@ -1,0 +1,19 @@
+{# Bare noqa (no codes) does not suppress #}
+{# noqa #}
+<form method="yes"></form>
+
+{# noqa with an empty code list does not suppress #}
+{# noqa: #}
+<form method="yes"></form>
+
+{# Unknown code matches nothing #}
+{# noqa: not-a-real-rule #}
+<form method="yes"></form>
+
+{# Code mismatch: this silences a different rule than the one that fires #}
+{# noqa: empty-attr-value #}
+<form method="yes"></form>
+
+{# A comment after the node does not reach back to it #}
+<form method="yes"></form>
+{# noqa: invalid-attr-value #}

@@ -20,6 +20,7 @@
 mod checker;
 pub mod fix;
 pub mod lint_context;
+mod noqa;
 pub mod registry;
 pub mod rule_selector;
 pub mod rule_set;
@@ -126,5 +127,6 @@ impl FileDiagnostics {
 pub fn check_ast(source: &str, ast: &Root<'_>, settings: &Settings) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings);
     checker.visit_root(ast);
-    checker.into_diagnostics()
+    let diagnostics = checker.into_diagnostics();
+    noqa::filter_suppressed(source, ast, diagnostics)
 }

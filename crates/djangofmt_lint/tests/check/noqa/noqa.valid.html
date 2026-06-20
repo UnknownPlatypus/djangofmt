@@ -1,0 +1,18 @@
+{# Single code on the immediately preceding node #}
+{# noqa: invalid-attr-value #}
+<form method="yes"></form>
+
+{# Comma-separated codes share one comment #}
+{# noqa: empty-attr-value, invalid-attr-value #}
+<form method="yes" id=""></form>
+
+{# Suppression reaches across whitespace between comment and node #}
+{# noqa: empty-attr-value #}
+
+<div class=""></div>
+
+{# noqa nested inside an element suppresses the child it precedes #}
+<div>
+  {# noqa: invalid-attr-value #}
+  <form method="yes"></form>
+</div>
