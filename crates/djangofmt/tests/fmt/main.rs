@@ -6,7 +6,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::pyproject::PyprojectSettings;
 use insta::{assert_snapshot, glob};
-use std::{collections::HashMap, fs, path::Path};
+use std::{collections::BTreeMap, fs, path::Path};
 
 #[test]
 fn fmt_snapshot() {
@@ -15,7 +15,7 @@ fn fmt_snapshot() {
 
         let options = fs::read_to_string(path.with_file_name("config.toml"))
             .map(|config_file| {
-                toml::from_str::<HashMap<String, PyprojectSettings>>(&config_file).unwrap()
+                toml::from_str::<BTreeMap<String, PyprojectSettings>>(&config_file).unwrap()
             })
             .ok();
 

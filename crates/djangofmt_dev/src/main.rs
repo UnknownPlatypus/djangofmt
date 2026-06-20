@@ -2,7 +2,11 @@
 //!
 //! Run with `cargo run -p djangofmt_dev -- <subcommand>`.
 
-#![allow(clippy::print_stdout, clippy::print_stderr)]
+#![expect(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "developer CLI writes results to the terminal"
+)]
 
 use std::path::Path;
 
@@ -34,7 +38,6 @@ struct Args {
 }
 
 #[derive(Subcommand)]
-#[allow(clippy::enum_variant_names)]
 enum Command {
     /// Run all code and documentation generation steps.
     GenerateAll(generate_all::Args),

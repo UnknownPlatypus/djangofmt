@@ -1,4 +1,7 @@
-#![allow(clippy::result_large_err)]
+#![expect(
+    clippy::result_large_err,
+    reason = "test surfaces the large error type directly"
+)]
 #[path = "../common.rs"]
 mod common;
 
