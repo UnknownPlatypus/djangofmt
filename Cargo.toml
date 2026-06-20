@@ -51,6 +51,7 @@ tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.122" }
 
 [workspace.lints.clippy]
+iter_over_hash_type = "deny"  # iteration order must be explicit; output must stay deterministic
 missing_errors_doc = "allow"
 nursery = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
