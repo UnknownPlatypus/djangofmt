@@ -51,10 +51,23 @@ tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.122" }
 
 [workspace.lints.clippy]
+clone_on_ref_ptr = "deny"
+dbg_macro = "deny"
+empty_drop = "deny"
+empty_structs_with_brackets = "deny"
+exit = "deny"
+get_unwrap = "deny"
 iter_over_hash_type = "deny"  # iteration order must be explicit; output must stay deterministic
 missing_errors_doc = "allow"
 nursery = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
+print_stderr = "deny"
+print_stdout = "deny"
+rc_buffer = "deny"
+rc_mutex = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+todo = "deny"
+unimplemented = "deny"
 unwrap_used = "deny"
 
 [profile.release]
