@@ -1,4 +1,5 @@
 use djangofmt_lint::RuleSelector;
+use djangofmt_lint::settings::unsorted_tailwind_classes;
 use serde::Deserialize;
 use std::{fs, path::Path};
 use tracing::debug;
@@ -35,6 +36,31 @@ pub struct LintSettings {
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
+    /// Per-rule config: `[tool.djangofmt.lint.unsorted-tailwind-classes]`.
+    pub unsorted_tailwind_classes: Option<UnsortedTailwindClassesOptions>,
+}
+
+/// Deserialized `[tool.djangofmt.lint.unsorted-tailwind-classes]` options.
+///
+/// Ruff equivalent: a per-linter `Options` struct (e.g. `Flake8BooleanTrapOptions`) with
+/// `into_settings`.
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct UnsortedTailwindClassesOptions {
+    /// Custom Tailwind prefix (e.g. `tw-` for v3, `tw:` for v4).
+    pub prefix: Option<String>,
+}
+
+impl UnsortedTailwindClassesOptions {
+    /// Resolve into the linter's per-rule settings.
+    ///
+    /// Ruff equivalent: `Flake8BooleanTrapOptions::into_settings`.
+    #[must_use]
+    pub fn into_settings(self) -> unsorted_tailwind_classes::Settings {
+        unsorted_tailwind_classes::Settings {
+            prefix: self.prefix,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -159,6 +185,7 @@ mod tests {
     #[case("[tool.djangofmt]\nindent-width = 0")]
     #[case("[tool.djangofmt]\nindent-width = 17")]
     #[case("[tool.djangofmt.lint]\nselect = [\"not-a-real-rule\"]")]
+    #[case("[tool.djangofmt.lint.unsorted-tailwind-classes]\nunknown-key = 1")]
     fn test_load_options_errors_on_invalid_toml(#[case] content: &str) {
         // Invalid config (including unknown lint selectors) must fail fast rather
         // than silently falling back to defaults.
@@ -239,6 +266,27 @@ show-fixes = true
                     fix: Some(true),
                     unsafe_fixes: Some(true),
                     show_fixes: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_lint_unsorted_tailwind_classes_prefix() {
+        let content = r#"
+[tool.djangofmt.lint.unsorted-tailwind-classes]
+prefix = "tw-"
+"#;
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                lint: Some(LintSettings {
+                    unsorted_tailwind_classes: Some(UnsortedTailwindClassesOptions {
+                        prefix: Some("tw-".to_string()),
+                    }),
                     ..Default::default()
                 }),
                 ..Default::default()

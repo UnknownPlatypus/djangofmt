@@ -4,11 +4,29 @@ use crate::registry::Rule;
 use crate::rule_selector::{RuleSelector, SelectionWarning};
 use crate::rule_set::RuleSet;
 
+/// Resolved configuration for the `unsorted-tailwind-classes` rule.
+///
+/// Ruff equivalent: a per-linter `settings::Settings` (e.g.
+/// `flake8_boolean_trap::settings::Settings`) aggregated onto the linter settings. djangofmt keys
+/// per-rule config by rule name since it has no plugin grouping.
+pub mod unsorted_tailwind_classes {
+    /// Settings for [`crate::registry::Rule::UnsortedTailwindClasses`].
+    #[derive(Debug, Clone, Default, PartialEq, Eq)]
+    pub struct Settings {
+        /// Custom Tailwind prefix (e.g. `tw-` for v3, `tw:` for v4). `None` means no prefix.
+        pub prefix: Option<String>,
+    }
+}
+
 /// Configuration settings for the linter.
+///
+/// Ruff equivalent: `LinterSettings`.
 #[derive(Debug, Clone)]
 pub struct Settings {
     /// The set of rules that are active for this run.
     pub rules: RuleSet,
+    /// Per-rule configuration for `unsorted-tailwind-classes`.
+    pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
 impl Default for Settings {
@@ -26,6 +44,7 @@ impl Settings {
             rules: Rule::iter()
                 .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
                 .collect(),
+            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         }
     }
 
@@ -51,8 +70,10 @@ impl Settings {
     }
 }
 
-/// Raw rule-selection input, merged from CLI flags and `[tool.djangofmt.lint]`,
-/// resolved into a [`Settings`] by [`RuleSelection::into_settings`].
+/// Raw lint input, merged from CLI flags and `[tool.djangofmt.lint]`, resolved into a [`Settings`]
+/// by [`RuleSelection::into_settings`]. Carries both rule selection and per-rule configuration.
+///
+/// Ruff equivalent: `LintConfiguration`.
 #[derive(Debug, Clone, Default)]
 pub struct RuleSelection {
     /// Selectors to enable. `None` falls back to the default selection (`category:all`).
@@ -61,6 +82,8 @@ pub struct RuleSelection {
     pub ignore: Vec<RuleSelector>,
     /// Whether preview rules are enabled.
     pub preview: bool,
+    /// Resolved per-rule config forwarded to [`Settings::unsorted_tailwind_classes`].
+    pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
 impl RuleSelection {
@@ -108,7 +131,13 @@ impl RuleSelection {
             }
         }
 
-        (Settings { rules }, warnings)
+        (
+            Settings {
+                rules,
+                unsorted_tailwind_classes: self.unsorted_tailwind_classes,
+            },
+            warnings,
+        )
     }
 }
 
@@ -117,7 +146,7 @@ mod tests {
     use std::str::FromStr;
     use strum::VariantNames;
 
-    use super::{RuleSelection, Settings};
+    use super::{RuleSelection, Settings, unsorted_tailwind_classes};
     use crate::registry::{Rule, RuleCategory};
     use crate::rule_selector::{RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
@@ -131,11 +160,13 @@ mod tests {
 
         let none = Settings {
             rules: RuleSet::default(),
+            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         };
         assert!(!none.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
 
         let partial = Settings {
             rules: RuleSet::from_rule(Rule::UseHttps),
+            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         };
         assert!(partial.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
         assert!(!partial.any_rule_enabled(&[Rule::InvalidAttrValue]));
@@ -148,6 +179,7 @@ mod tests {
             select: Some(vec![RuleSelector::All, RuleSelector::Rule(Rule::UseHttps)]),
             ignore: vec![RuleSelector::Category(RuleCategory::Suspicious)],
             preview: false,
+            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         };
         let (settings, warnings) = selection.into_settings();
         assert!(warnings.is_empty());
