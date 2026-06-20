@@ -221,7 +221,7 @@ pub struct CheckCommand {
     pub file_selection: FileSelectionArgs,
 }
 
-#[allow(clippy::module_name_repetitions)]
+#[expect(clippy::module_name_repetitions)]
 #[derive(Debug, Default, Clone, clap::Args)]
 pub struct LogLevelArgs {
     /// Enable verbose logging.

@@ -6,7 +6,6 @@ use strum::EnumCount as _;
 use crate::registry::Rule;
 
 /// `u64` words needed for one bit per `Rule`, derived from `Rule::COUNT` so it scales as rules are added.
-#[allow(clippy::manual_div_ceil)]
 const RULESET_SIZE: usize = Rule::COUNT.div_ceil(64);
 
 /// A compact bitset of enabled lint rules: one bit per rule, tested with an array index + shift.

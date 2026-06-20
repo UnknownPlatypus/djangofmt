@@ -30,7 +30,7 @@ pub fn main() -> ExitCode {
     match run(args) {
         Ok(exit_status) => exit_status.into(),
         Err(err) => {
-            #[allow(clippy::print_stderr)]
+            #[expect(clippy::print_stderr)]
             {
                 // Unhandled error from djangofmt.
                 eprintln!("djangofmt failed");
