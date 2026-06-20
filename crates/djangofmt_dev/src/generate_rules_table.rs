@@ -36,6 +36,24 @@ A selector is either:
 
 
 Preview rules are off by default. Enable them with `--preview` or `preview = true`.
+
+## Suppressing diagnostics
+
+Silence a rule on a specific node with a `{# noqa: <code> #}` comment placed on the node **immediately before** it. Anchoring to the preceding node (rather than a line) keeps the suppression attached to the right markup even after reformatting.
+
+```jinja
+{# noqa: invalid-attr-value #}
+<form method="yes">Submit</form>
+```
+
+Suppress several rules at once with a comma-separated list:
+
+```jinja
+{# noqa: invalid-attr-value, empty-attr-value #}
+<form method="yes" id=""></form>
+```
+
+A code is required: a bare `{# noqa #}` suppresses nothing.
 "#;
 
 fn render() -> String {
