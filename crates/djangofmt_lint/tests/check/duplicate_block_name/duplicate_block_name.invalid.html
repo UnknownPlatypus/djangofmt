@@ -1,0 +1,20 @@
+<!-- Two top-level blocks with the same name (the issue's example) -->
+{% block title %}Title 1{% endblock %}
+{% block title %}Title 2{% endblock %}
+
+<!-- Three occurrences of one name report two diagnostics -->
+{% block header %}a{% endblock %}
+{% block header %}b{% endblock %}
+{% block header %}c{% endblock %}
+
+<!-- A block nested inside another block of the same name -->
+{% block content %}
+    {% block content %}inner{% endblock %}
+{% endblock %}
+
+<!-- The same name in different {% if %} branches still counts (Django registers both) -->
+{% if cond %}
+    {% block sidebar %}on{% endblock %}
+{% else %}
+    {% block sidebar %}off{% endblock %}
+{% endif %}

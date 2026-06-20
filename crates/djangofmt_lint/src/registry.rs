@@ -244,6 +244,7 @@ define_rules {
 define_rules! {
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
+    (DuplicateBlockName, rules::correctness::duplicate_block_name::DuplicateBlockName),
     (EmptyAttrValue, rules::style::empty_attr_value::EmptyAttrValue<'static>),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
     (DjangoStaticUrl, rules::suspicious::django_static_url::DjangoStaticUrl),

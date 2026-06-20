@@ -123,7 +123,11 @@ impl FileDiagnostics {
 ///
 /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
 #[must_use]
-pub fn check_ast(source: &str, ast: &Root<'_>, settings: &Settings) -> Vec<LintDiagnostic> {
+pub fn check_ast<'a>(
+    source: &'a str,
+    ast: &Root<'a>,
+    settings: &'a Settings,
+) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings);
     checker.visit_root(ast);
     checker.into_diagnostics()

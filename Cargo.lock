@@ -443,6 +443,7 @@ dependencies = [
  "miette",
  "rustc-hash",
  "serde",
+ "smallvec",
  "strum",
  "thiserror",
  "tracing",
