@@ -1,5 +1,8 @@
 //! Shared filesystem helpers for tests.
-#![allow(dead_code)] // Each test binary uses only a subset of these helpers.
+#![allow(
+    dead_code,
+    reason = "each test binary uses only a subset of these shared helpers"
+)]
 
 use std::fs;
 use std::path::{Path, PathBuf};

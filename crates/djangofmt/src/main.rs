@@ -30,7 +30,7 @@ pub fn main() -> ExitCode {
     match run(args) {
         Ok(exit_status) => exit_status.into(),
         Err(err) => {
-            #[expect(clippy::print_stderr)]
+            #[expect(clippy::print_stderr, reason = "last-resort error output before exit")]
             {
                 // Unhandled error from djangofmt.
                 eprintln!("djangofmt failed");

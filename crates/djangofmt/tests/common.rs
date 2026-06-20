@@ -1,4 +1,7 @@
-#![allow(clippy::missing_panics_doc)]
+#![allow(
+    clippy::missing_panics_doc,
+    reason = "test helpers panic to fail the test"
+)]
 use std::path::Path;
 
 use insta::Settings;

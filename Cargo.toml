@@ -51,6 +51,8 @@ tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.122" }
 
 [workspace.lints.clippy]
+allow_attributes = "deny"
+allow_attributes_without_reason = "deny"
 clone_on_ref_ptr = "deny"
 dbg_macro = "deny"
 empty_drop = "deny"

@@ -2,7 +2,11 @@
 //!
 //! Run with `cargo run -p djangofmt_dev -- <subcommand>`.
 
-#![expect(clippy::print_stdout, clippy::print_stderr)]
+#![expect(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "developer CLI writes results to the terminal"
+)]
 
 use std::path::Path;
 

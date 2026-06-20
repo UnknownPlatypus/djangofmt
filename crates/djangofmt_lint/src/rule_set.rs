@@ -14,7 +14,10 @@ pub struct RuleSet([u64; RULESET_SIZE]);
 
 // Todo: add [`from_rules`](https://github.com/astral-sh/ruff/blob/f414174695c9c2067b04c95b51709c28d27a1d03/crates/ruff_linter/src/registry/rule_set.rs#L54) ?
 impl RuleSet {
-    #[expect(clippy::cast_possible_truncation)] // u64::BITS is 64, fits in u16
+    #[expect(
+        clippy::cast_possible_truncation,
+        reason = "u64::BITS is 64, fits in u16"
+    )]
     const SLICE_BITS: u16 = u64::BITS as u16;
 
     /// Returns an empty rule set.
@@ -140,7 +143,10 @@ impl Iterator for RuleSetIterator {
             self.word &= self.word - 1;
             let global_index = self.word_index * RuleSet::SLICE_BITS as usize + bit as usize;
             // A bit with no matching `Rule` (e.g. padding in the final word) is skipped rather than ending iteration.
-            #[expect(clippy::cast_possible_truncation)]
+            #[expect(
+                clippy::cast_possible_truncation,
+                reason = "rule indices stay well below u16::MAX"
+            )]
             if let Some(rule) = Rule::from_repr(global_index as u16) {
                 return Some(rule);
             }

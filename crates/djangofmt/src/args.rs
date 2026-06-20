@@ -53,7 +53,10 @@ pub struct Args {
 /// CLI arguments for File selection behavior.
 #[derive(Clone, Debug, Default, clap::Args)]
 #[command(next_help_heading = "File selection")]
-#[expect(clippy::struct_excessive_bools)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "each bool is a distinct user-facing CLI flag"
+)]
 pub struct FileSelectionArgs {
     /// List of file path patterns to exclude. If provided, replaces the default excludes.
     #[arg(long, value_delimiter = ',', value_name = "FILE_PATTERN")]
@@ -190,7 +193,10 @@ fn parse_rule_selector(value: &str) -> Result<RuleSelector, String> {
 }
 
 #[derive(Clone, Debug, Default, clap::Parser)]
-#[expect(clippy::struct_excessive_bools)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "each bool is a distinct user-facing CLI flag"
+)]
 pub struct CheckCommand {
     /// List of files or directories to check.
     #[arg(required = true)]
@@ -221,7 +227,10 @@ pub struct CheckCommand {
     pub file_selection: FileSelectionArgs,
 }
 
-#[expect(clippy::module_name_repetitions)]
+#[expect(
+    clippy::module_name_repetitions,
+    reason = "the `Args` suffix is the shared clap convention"
+)]
 #[derive(Debug, Default, Clone, clap::Args)]
 pub struct LogLevelArgs {
     /// Enable verbose logging.
