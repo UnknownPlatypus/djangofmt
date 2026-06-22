@@ -38,7 +38,7 @@
     "https://plugins.dprint.dev/typescript-0.96.1.wasm",
     "https://plugins.dprint.dev/json-0.21.3.wasm",
     "https://plugins.dprint.dev/g-plane/markup_fmt-v0.25.3.wasm",
-    "https://plugins.dprint.dev/dockerfile-0.3.4.wasm",
+    "https://plugins.dprint.dev/dockerfile-0.4.0.wasm",
     "https://plugins.dprint.dev/g-plane/malva-v0.16.0.wasm"
   ]
 }
