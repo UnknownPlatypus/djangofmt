@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.2.11](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.10..v0.2.11) - 2026-06-26
+
+### ⛰️ Features
+
+- *(format)* Preserve single-line Django blocks inside attribute lists ([#360](https://github.com/UnknownPlatypus/djangofmt/issues/360)) - ([ca3d825](https://github.com/UnknownPlatypus/djangofmt/commit/ca3d825aa7dd8f1eff93d76bd52670085c3b3682))
+- *(format)* Support `.editorconfig` configuration files ([#349](https://github.com/UnknownPlatypus/djangofmt/issues/349)) - ([0df2c71](https://github.com/UnknownPlatypus/djangofmt/commit/0df2c71c63db5c497cbf4d6e34cd3bb42d644f58))
+- *(lint)* Add duplicate-block-name lint rule - ([4fe9aef](https://github.com/UnknownPlatypus/djangofmt/commit/4fe9aef5534b55680b1e921a99cc9bb329dd4a10))
+- *(lint)* Add rule selection (select/ignore + preview) ([#350](https://github.com/UnknownPlatypus/djangofmt/issues/350)) - ([7d0eb76](https://github.com/UnknownPlatypus/djangofmt/commit/7d0eb76d78eca7d94fa420d522dc42e46ce97646))
+- *(playground)* Add documentation link to navbar ([#351](https://github.com/UnknownPlatypus/djangofmt/issues/351)) - ([0923257](https://github.com/UnknownPlatypus/djangofmt/commit/0923257c860fa39a50c2c1ccdf6e02cb7964e8b4))
+
+### 🐛 Bug Fixes
+
+- *(format)* Fix formatting of multiline django template tags ([#359](https://github.com/UnknownPlatypus/djangofmt/issues/359)) - ([2908461](https://github.com/UnknownPlatypus/djangofmt/commit/290846188d5a3c2920f8d29edf81f944abe328b5))
+- *(lint)* Restore correct ANSI display in error messages ([#346](https://github.com/UnknownPlatypus/djangofmt/issues/346)) - ([d4c21ba](https://github.com/UnknownPlatypus/djangofmt/commit/d4c21ba49ed3de0f7d5212ccd7f645512789b8ec))
+
+### 🚜 Refactor
+
+- *(lint)* Avoid double parse when fixing ([#362](https://github.com/UnknownPlatypus/djangofmt/issues/362)) - ([621980e](https://github.com/UnknownPlatypus/djangofmt/commit/621980e9988a896e094903a9705d60c8fe1fb2ae))
+- *(lint)* Drop redundant help on empty-attr-value rule ([#357](https://github.com/UnknownPlatypus/djangofmt/issues/357)) - ([e10ed1e](https://github.com/UnknownPlatypus/djangofmt/commit/e10ed1e91783d1db5ead6d56acd687e7270497ca))
+- *(lint)* Cleanup RuleSet implementation and simplify ([#336](https://github.com/UnknownPlatypus/djangofmt/issues/336)) - ([17c0668](https://github.com/UnknownPlatypus/djangofmt/commit/17c06682b8dda632b0d343b60a79cc6e2ca9b5b8))
+- *(misc)* Minor cleanup ([#356](https://github.com/UnknownPlatypus/djangofmt/issues/356)) - ([2b1346b](https://github.com/UnknownPlatypus/djangofmt/commit/2b1346bdb144bfed8c0fc3020a9cbba1d4fa69f7))
+- *(tests)* Misc test simplification ([#348](https://github.com/UnknownPlatypus/djangofmt/issues/348)) - ([cdda76a](https://github.com/UnknownPlatypus/djangofmt/commit/cdda76a57c2ed99c50bbfc6dcc7d93a74179f5d7))
+
+### 🧪 Testing
+
+- *(bench)* Isolate check_ast cost from parsing ([#364](https://github.com/UnknownPlatypus/djangofmt/issues/364)) - ([8251c11](https://github.com/UnknownPlatypus/djangofmt/commit/8251c110d182c192b71e67dee9821c621fc9183d))
+- *(clippy)* Enable more clippy restriction rules ([#363](https://github.com/UnknownPlatypus/djangofmt/issues/363)) - ([539450c](https://github.com/UnknownPlatypus/djangofmt/commit/539450c56345ee74bf482a6cc5953f243c4621e3))
+- *(ecosystem-check)* Select all rules + preview in check ecosystem run ([#352](https://github.com/UnknownPlatypus/djangofmt/issues/352)) - ([17110ef](https://github.com/UnknownPlatypus/djangofmt/commit/17110efb4e931ea97ba9320db6a88e7c59f379f9))
+
+### ⚙️ Miscellaneous Tasks
+
+- *(codspeed)* Pin glibc CPU-feature dispatch to reduce benchmark variance ([#366](https://github.com/UnknownPlatypus/djangofmt/issues/366)) - ([5175539](https://github.com/UnknownPlatypus/djangofmt/commit/5175539b81f8836c533a66748d117d8d0b42667b))
+
 ## [0.2.10](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.9..v0.2.10) - 2026-06-03
 
 ### ⛰️ Features
