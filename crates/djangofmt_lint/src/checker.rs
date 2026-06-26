@@ -198,6 +198,12 @@ impl<'a> Checker<'a> {
                 rules::style::form_action_whitespace::check(attr, self);
             }
         }
+
+        if self.is_rule_enabled(Rule::UnsortedTailwindClasses)
+            && attr.name.eq_ignore_ascii_case("class")
+        {
+            rules::style::unsorted_tailwind_classes::check(attr, self);
+        }
     }
 
     fn visit_jinja_block(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
