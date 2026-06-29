@@ -1,0 +1,92 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 8 lint error(s)
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+   ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:3:10]
+ 2 │ <table>
+ 3 │     <tr><th>Name</th><th>Email</th></tr>
+   ·          ─┬
+   ·           ╰── here
+ 4 │     <tr><td>Ada</td><td>ada@example.com</td></tr>
+   ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+   ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:3:23]
+ 2 │ <table>
+ 3 │     <tr><th>Name</th><th>Email</th></tr>
+   ·                       ─┬
+   ·                        ╰── here
+ 4 │     <tr><td>Ada</td><td>ada@example.com</td></tr>
+   ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:9:10]
+  8 │ <table>
+  9 │     <tr><th class="font-bold" id="col-name">Name</th></tr>
+    ·          ─┬
+    ·           ╰── here
+ 10 │ </table>
+    ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:14:10]
+ 13 │ <table>
+ 14 │     <tr><TH>Name</TH></tr>
+    ·          ─┬
+    ·           ╰── here
+ 15 │ </table>
+    ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:19:10]
+ 18 │ <table>
+ 19 │     <tr><th data-scope="col">Name</th></tr>
+    ·          ─┬
+    ·           ╰── here
+ 20 │ </table>
+    ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:25:14]
+ 24 │     <thead>
+ 25 │         <tr><th>Name</th><th>Email</th></tr>
+    ·              ─┬
+    ·               ╰── here
+ 26 │     </thead>
+    ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:25:27]
+ 24 │     <thead>
+ 25 │         <tr><th>Name</th><th>Email</th></tr>
+    ·                           ─┬
+    ·                            ╰── here
+ 26 │     </thead>
+    ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
+
+Error: 
+  × Missing `scope` attribute on `<th>`.
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:34:10]
+ 33 │ <table>
+ 34 │     <tr><th class="{{ header_class }}">Name</th></tr>
+    ·          ─┬
+    ·           ╰── here
+ 35 │ </table>
+    ╰────
+  help: Add `scope="col"` or `scope="row"` to associate the header with its data.
