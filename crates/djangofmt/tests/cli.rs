@@ -59,7 +59,7 @@ fn format_file_with_ignore_directive() {
     ----- stdout -----
 
     ----- stderr -----
-    1 file skipped !
+    1 file left unchanged !
     "#);
     assert_eq!(project.read("test.html"), original);
 }
@@ -74,9 +74,32 @@ fn format_file_with_jinja_ignore_directive() {
     ----- stdout -----
 
     ----- stderr -----
-    1 file skipped !
+    1 file left unchanged !
     "#);
     assert_eq!(project.read("test.html"), original);
+}
+
+#[test]
+fn format_ignore_directive_does_not_suppress_syntax_error() {
+    // The ignore directive suppresses *reformatting*, not syntax errors:
+    // an unparsable file must still be reported, not silently skipped.
+    assert_cmd_snapshot!(
+        cli().arg("-").pass_stdin("{# djangofmt:ignore #}\n<div id=>\n</div>\n"),
+        @r#"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+      × expected attribute value
+       ╭─[<unknown>:2:9]
+     1 │ {# djangofmt:ignore #}
+     2 │ <div id=>
+       ·         ▲
+       ·         ╰── here
+     3 │ </div>
+       ╰────
+    "#);
 }
 
 #[test]

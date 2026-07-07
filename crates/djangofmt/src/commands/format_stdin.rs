@@ -69,10 +69,9 @@ fn format_source_code(
         }
     };
 
-    let output = formatted.as_deref().unwrap_or(&source);
     stdout()
         .lock()
-        .write_all(output.as_bytes())
+        .write_all(formatted.as_bytes())
         .map_err(|err| Box::new(CommandError::Write(path.map(Path::to_path_buf), err)))?;
     Ok(())
 }

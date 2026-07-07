@@ -24,7 +24,7 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
     );
 
     match format_text(source, &config, profile) {
-        Ok(opt) => opt.unwrap_or_else(|| source.to_string()),
+        Ok(formatted) => formatted,
         Err(err) => render_parse_error(source, &err),
     }
 }

@@ -54,8 +54,7 @@ fn run_format_test(path: &Path, input: &str, config: &FormatterConfig) -> String
 
     let output = format_text(input, config, profile)
         .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))
-        .expect("Failed to format text in test")
-        .unwrap_or_else(|| input.to_string());
+        .expect("Failed to format text in test");
     // Stability test: format the output again and ensure it's the same
     let regression_format = format_text(&output, config, profile)
         .map_err(|err| {
@@ -65,8 +64,7 @@ fn run_format_test(path: &Path, input: &str, config: &FormatterConfig) -> String
                 err
             )
         })
-        .expect("Failed to format text in stability test")
-        .unwrap_or_else(|| input.to_string());
+        .expect("Failed to format text in stability test");
 
     similar_asserts::assert_eq!(
         &output,

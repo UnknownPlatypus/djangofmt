@@ -113,8 +113,6 @@ macro_rules! ignore_directive {
     };
 }
 const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
-const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
-const DJANGOFMT_IGNORE_COMMENT_JINJA: &str = concat!("{# ", ignore_directive!(), " #}");
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
@@ -320,12 +318,7 @@ pub fn format_text(
     source: &str,
     config: &FormatterConfig,
     profile: Profile,
-) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
-    if source.starts_with(DJANGOFMT_IGNORE_COMMENT)
-        || source.starts_with(DJANGOFMT_IGNORE_COMMENT_JINJA)
-    {
-        return Ok(None);
-    }
+) -> std::result::Result<String, markup_fmt::FormatError> {
     markup_fmt::format_text(
         source,
         markup_fmt::Language::from(profile),
@@ -382,7 +375,6 @@ pub fn format_text(
             }
         },
     )
-    .map(Some)
 }
 
 /// Format the file at the given [`Path`].
@@ -405,10 +397,6 @@ fn format_path(
                 &err,
             ))));
         }
-    };
-
-    let Some(formatted) = formatted else {
-        return Ok(FormatResult::Skipped);
     };
 
     // Checked if something changed and write to file if necessary
@@ -434,39 +422,31 @@ pub enum FormatResult {
 
     /// The file was unchanged, as the formatted contents matched the existing contents.
     Unchanged,
-
-    /// The file was skipped due to a top-level ignore comment.
-    Skipped,
 }
 
 /// Write a summary of the formatting results to stdout.
 #[must_use]
 pub fn build_summary(results: &[FormatResult]) -> String {
-    let (mut changed, mut unchanged, mut skipped) = (0usize, 0usize, 0usize);
+    let (mut changed, mut unchanged) = (0usize, 0usize);
     for result in results {
         match result {
             FormatResult::Formatted => changed += 1,
             FormatResult::Unchanged => unchanged += 1,
-            FormatResult::Skipped => skipped += 1,
         }
     }
 
-    let parts: Vec<String> = [
-        (changed, "reformatted"),
-        (unchanged, "left unchanged"),
-        (skipped, "skipped"),
-    ]
-    .iter()
-    .filter(|(count, _)| *count > 0)
-    .map(|(count, label)| {
-        format!(
-            "{} file{} {}",
-            count,
-            if *count == 1 { "" } else { "s" },
-            label
-        )
-    })
-    .collect();
+    let parts: Vec<String> = [(changed, "reformatted"), (unchanged, "left unchanged")]
+        .iter()
+        .filter(|(count, _)| *count > 0)
+        .map(|(count, label)| {
+            format!(
+                "{} file{} {}",
+                count,
+                if *count == 1 { "" } else { "s" },
+                label
+            )
+        })
+        .collect();
 
     parts.join(", ")
 }
@@ -712,23 +692,8 @@ mod tests {
     #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files reformatted")]
     #[case(vec![FormatResult::Unchanged], "1 file left unchanged")]
     #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged], "2 files left unchanged")]
-    #[case(vec![FormatResult::Skipped], "1 file skipped")]
-    #[case(vec![FormatResult::Skipped, FormatResult::Skipped], "2 files skipped")]
     #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file reformatted, 1 file left unchanged")]
     #[case(vec![FormatResult::Formatted, FormatResult::Formatted, FormatResult::Unchanged], "2 files reformatted, 1 file left unchanged")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Skipped], "1 file reformatted, 1 file skipped")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Skipped, FormatResult::Skipped], "1 file reformatted, 2 files skipped")]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Skipped], "1 file left unchanged, 1 file skipped")]
-    #[case(vec![FormatResult::Unchanged, FormatResult::Unchanged, FormatResult::Skipped], "2 files left unchanged, 1 file skipped")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged, FormatResult::Skipped], "1 file reformatted, 1 file left unchanged, 1 file skipped")]
-    #[case(vec![
-        FormatResult::Formatted,
-        FormatResult::Formatted,
-        FormatResult::Unchanged,
-        FormatResult::Skipped,
-        FormatResult::Skipped,
-        FormatResult::Skipped,
-    ], "2 files reformatted, 1 file left unchanged, 3 files skipped")]
     fn test_write_summary(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
         assert_eq!(build_summary(&results), expected);
     }
