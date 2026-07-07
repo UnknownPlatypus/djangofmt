@@ -80,7 +80,9 @@ jobs:
           enable-cache: false
 
       - name: Install rustywind
-        run: npm install -g rustywind
+        run: |
+          npm ci --prefix python/benchmarks
+          echo "$PWD/python/benchmarks/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: Run `djangofmt` ecosystem check
         run: |
