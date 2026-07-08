@@ -1,6 +1,5 @@
 {
   "nodeModulesDir": "auto",
-  "minimumDependencyAge": "P7D",
   "tasks": {
     "dev": "astro dev",
     "build": "tsc && astro build --minify",
