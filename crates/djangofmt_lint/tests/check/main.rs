@@ -3,7 +3,7 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Settings, check_ast, fix_ast,
+    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, check_ast, fix_ast,
 };
 
 use insta::{assert_snapshot, glob};
@@ -12,6 +12,7 @@ use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
 use std::fs;
 use std::path::Path;
+use std::str::FromStr;
 
 /// Asserts every `*.valid.html` fixture produces zero diagnostics.
 #[test]
@@ -19,7 +20,7 @@ fn check_valid() {
     glob!("**/*.valid.html", |path| {
         build_settings(path).bind(|| {
             let input = fs::read_to_string(path).unwrap();
-            let diagnostics = collect_diagnostics(&input);
+            let diagnostics = collect_diagnostics(path, &input);
             assert!(
                 diagnostics.is_empty(),
                 "Expected no diagnostics for {}, but found {}:\n{}",
@@ -36,7 +37,7 @@ fn check_valid() {
 fn check_invalid() {
     glob!("**/*.invalid.html", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let file_diagnostics = collect_diagnostics(&input);
+        let file_diagnostics = collect_diagnostics(path, &input);
         assert!(
             !file_diagnostics.is_empty(),
             "Expected diagnostics, got none"
@@ -62,15 +63,16 @@ fn fix_snapshot() {
             .parse_root()
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
+        let settings = fixture_settings(path);
 
-        let safe = fix_ast(&input, &ast, &Settings::all(), Applicability::Safe);
+        let safe = fix_ast(&input, &ast, &settings, Applicability::Safe);
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &Settings::all(), Applicability::Unsafe);
+        let unsafe_fixed = fix_ast(&input, &ast, &settings, Applicability::Unsafe);
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
@@ -81,11 +83,25 @@ fn fix_snapshot() {
 
 const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
-fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
+/// Settings enabling only the rule named by the fixture's directory, so each
+/// fixture exercises its own rule without dodging every other one.
+fn fixture_settings(path: &Path) -> Settings {
+    let dir = path
+        .parent()
+        .and_then(Path::file_name)
+        .and_then(|name| name.to_str())
+        .expect("fixture path must have a parent directory");
+    let rule = Rule::from_str(&dir.replace('_', "-"))
+        .unwrap_or_else(|_| panic!("fixture directory `{dir}` does not name a rule"));
+    Settings {
+        rules: RuleSet::from_rule(rule),
+    }
+}
+
+fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
     let mut parser = Parser::new(input, Language::Django, vec![]);
     let ast = parser.parse_root().expect("Failed to parse AST in test");
-    let settings = Settings::all();
-    check_ast(input, &ast, &settings)
+    check_ast(input, &ast, &fixture_settings(path))
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {
