@@ -1,0 +1,355 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 32 lint error(s)
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+   ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:6:1]
+ 5 │ <!-- Text around raw-text elements is still flagged (script content is not) -->
+ 6 │ Foo<script>alert('Foo');</script>Bar
+   · ─┬─
+   ·  ╰── here
+ 7 │ 
+   ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+   ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:6:34]
+ 5 │ <!-- Text around raw-text elements is still flagged (script content is not) -->
+ 6 │ Foo<script>alert('Foo');</script>Bar
+   ·                                  ─┬─
+   ·                                   ╰── here
+ 7 │ 
+   ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:9:1]
+  8 │ <!-- Interpolation-adjacent text: diagnostic only, no fix -->
+  9 │ Foo{{ bar }}Baz
+    · ─┬─
+    ·  ╰── here
+ 10 │ <!-- Comments between text and interpolation are skipped when classifying -->
+    ╰────
+  help: Wrap the text and its variables in `{% blocktranslate %}...{% endblocktranslate %}`; placeholders may need manual names.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:9:13]
+  8 │ <!-- Interpolation-adjacent text: diagnostic only, no fix -->
+  9 │ Foo{{ bar }}Baz
+    ·             ─┬─
+    ·              ╰── here
+ 10 │ <!-- Comments between text and interpolation are skipped when classifying -->
+    ╰────
+  help: Wrap the text and its variables in `{% blocktranslate %}...{% endblocktranslate %}`; placeholders may need manual names.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:38:1]
+ 37 │ <!-- Angular-style [[ ]] is not Django interpolation -->
+ 38 │ Foo [[yoyo]] bar
+    · ────────┬───────
+    ·         ╰── here
+ 39 │ 
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+   ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:2:5]
+ 1 │ <!-- Plain body text -->
+ 2 │ <h1>Foo</h1>
+   ·     ─┬─
+   ·      ╰── here
+ 3 │ <h1>Foo</h1><p>Bar</p>
+   ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+   ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:3:5]
+ 2 │ <h1>Foo</h1>
+ 3 │ <h1>Foo</h1><p>Bar</p>
+   ·     ─┬─
+   ·      ╰── here
+ 4 │ 
+   ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+   ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:3:16]
+ 2 │ <h1>Foo</h1>
+ 3 │ <h1>Foo</h1><p>Bar</p>
+   ·                ─┬─
+   ·                 ╰── here
+ 4 │ 
+   ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:11:4]
+ 10 │ <!-- Comments between text and interpolation are skipped when classifying -->
+ 11 │ <p>Price: {# unit pending #}{{ price }}</p>
+    ·    ───┬──
+    ·       ╰── here
+ 12 │ 
+    ╰────
+  help: Wrap the text and its variables in `{% blocktranslate %}...{% endblocktranslate %}`; placeholders may need manual names.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:14:4]
+ 13 │     <!-- Multiline runs wrap in blocktranslate -->
+ 14 │ ╭─▶ <p>Hello
+ 15 │ ├─▶ world</p>
+    · ╰──── here
+ 16 │     
+    ╰────
+  help: Wrap the text in `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:18:4]
+ 17 │ <!-- Quote and escape handling in the translate fix -->
+ 18 │ <p>Say "hi" to the team</p>
+    ·    ──────────┬─────────
+    ·              ╰── here
+ 19 │ <p>John's dog</p>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:19:4]
+ 18 │ <p>Say "hi" to the team</p>
+ 19 │ <p>John's dog</p>
+    ·    ─────┬────
+    ·         ╰── here
+ 20 │ <p>Say "it's fine"</p>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:20:4]
+ 19 │ <p>John's dog</p>
+ 20 │ <p>Say "it's fine"</p>
+    ·    ───────┬───────
+    ·           ╰── here
+ 21 │ <p>Get 100%} off</p>
+    ╰────
+  help: Wrap the text in `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:21:4]
+ 20 │ <p>Say "it's fine"</p>
+ 21 │ <p>Get 100%} off</p>
+    ·    ──────┬──────
+    ·          ╰── here
+ 22 │ <p>Path is C:\temp</p>
+    ╰────
+  help: Wrap the text in `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:22:4]
+ 21 │ <p>Get 100%} off</p>
+ 22 │ <p>Path is C:\temp</p>
+    ·    ───────┬───────
+    ·           ╰── here
+ 23 │ 
+    ╰────
+  help: Wrap the text in `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:25:23]
+ 24 │ <!-- Text beside standalone tags is still standalone -->
+ 25 │ <form>{% csrf_token %}Submit now</form>
+    ·                       ─────┬────
+    ·                            ╰── here
+ 26 │ 
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:28:14]
+ 27 │ <!-- Text inside ordinary blocks -->
+ 28 │ {% if cond %}Hello{% endif %}
+    ·              ──┬──
+    ·                ╰── here
+ 29 │ {% filter upper %}shouty text{% endfilter %}
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:29:19]
+ 28 │ {% if cond %}Hello{% endif %}
+ 29 │ {% filter upper %}shouty text{% endfilter %}
+    ·                   ─────┬─────
+    ·                        ╰── here
+ 30 │ 
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:32:8]
+ 31 │ <!-- Cases from django-template-i18n-lint tests -->
+ 32 │ <title>My site</title>
+    ·        ───┬───
+    ·           ╰── here
+ 33 │ <p>Tom &amp; Jerry</p>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:33:4]
+ 32 │ <title>My site</title>
+ 33 │ <p>Tom &amp; Jerry</p>
+    ·    ───────┬───────
+    ·           ╰── here
+ 34 │ <option selected>Option</option>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:34:18]
+ 33 │ <p>Tom &amp; Jerry</p>
+ 34 │ <option selected>Option</option>
+    ·                  ───┬──
+    ·                     ╰── here
+ 35 │ <!-- Regression: amandasaurus/django-template-i18n-lint #30 — boolean attrs must not hide body text -->
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:36:18]
+ 35 │ <!-- Regression: amandasaurus/django-template-i18n-lint #30 — boolean attrs must not hide body text -->
+ 36 │ <form novalidate>Submit</form>
+    ·                  ───┬──
+    ·                     ╰── here
+ 37 │ <!-- Angular-style [[ ]] is not Django interpolation -->
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:42:3]
+ 41 │ <h1>
+ 42 │   Welcome home
+    ·   ──────┬─────
+    ·         ╰── here
+ 43 │ </h1>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:46:25]
+ 45 │ <!-- Translatable attributes -->
+ 46 │ <img src="cat.jpg" alt="A cat">
+    ·                         ──┬──
+    ·                           ╰── here
+ 47 │ <a title='Home page'>{{ x }}</a>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:47:11]
+ 46 │ <img src="cat.jpg" alt="A cat">
+ 47 │ <a title='Home page'>{{ x }}</a>
+    ·           ────┬────
+    ·               ╰── here
+ 48 │ <input placeholder="Search">
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:48:21]
+ 47 │ <a title='Home page'>{{ x }}</a>
+ 48 │ <input placeholder="Search">
+    ·                     ───┬──
+    ·                        ╰── here
+ 49 │ <button aria-label="Close">{{ icon }}</button>
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:49:21]
+ 48 │ <input placeholder="Search">
+ 49 │ <button aria-label="Close">{{ icon }}</button>
+    ·                     ──┬──
+    ·                       ╰── here
+ 50 │ <!-- Regression: amandasaurus/django-template-i18n-lint #17 — flag only the value, not attr boundaries -->
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:51:29]
+ 50 │ <!-- Regression: amandasaurus/django-template-i18n-lint #17 — flag only the value, not attr boundaries -->
+ 51 │ <input type="submit" value="Confirm" class="btn btn-danger" />
+    ·                             ───┬───
+    ·                                ╰── here
+ 52 │ 
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:54:22]
+ 53 │ <!-- Attribute corner cases: diagnostic without fix -->
+ 54 │ <img src=foo.jpg alt=Photo>
+    ·                      ──┬──
+    ·                        ╰── here
+ 55 │ <img src="pals.jpg" alt="John's 'best' friend">
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:55:26]
+ 54 │ <img src=foo.jpg alt=Photo>
+ 55 │ <img src="pals.jpg" alt="John's 'best' friend">
+    ·                          ──────────┬─────────
+    ·                                    ╰── here
+ 56 │ <input placeholder="100%} left">
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:56:21]
+ 55 │ <img src="pals.jpg" alt="John's 'best' friend">
+ 56 │ <input placeholder="100%} left">
+    ·                     ─────┬────
+    ·                          ╰── here
+ 57 │ <img src="two.jpg" alt="line one
+    ╰────
+  help: Wrap the text in `{% translate %}`.
+
+Error: 
+  × Found text that is not wrapped in a translation tag.
+    ╭─[tests/check/untranslated_text/untranslated_text.invalid.html:57:25]
+ 56 │     <input placeholder="100%} left">
+ 57 │ ╭─▶ <img src="two.jpg" alt="line one
+ 58 │ ├─▶ line two">
+    · ╰──── here
+    ╰────
+  help: Wrap the text in `{% translate %}`.

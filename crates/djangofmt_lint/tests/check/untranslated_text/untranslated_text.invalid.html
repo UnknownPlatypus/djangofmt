@@ -1,0 +1,58 @@
+<!-- Plain body text -->
+<h1>Foo</h1>
+<h1>Foo</h1><p>Bar</p>
+
+<!-- Text around raw-text elements is still flagged (script content is not) -->
+Foo<script>alert('Foo');</script>Bar
+
+<!-- Interpolation-adjacent text: diagnostic only, no fix -->
+Foo{{ bar }}Baz
+<!-- Comments between text and interpolation are skipped when classifying -->
+<p>Price: {# unit pending #}{{ price }}</p>
+
+<!-- Multiline runs wrap in blocktranslate -->
+<p>Hello
+world</p>
+
+<!-- Quote and escape handling in the translate fix -->
+<p>Say "hi" to the team</p>
+<p>John's dog</p>
+<p>Say "it's fine"</p>
+<p>Get 100%} off</p>
+<p>Path is C:\temp</p>
+
+<!-- Text beside standalone tags is still standalone -->
+<form>{% csrf_token %}Submit now</form>
+
+<!-- Text inside ordinary blocks -->
+{% if cond %}Hello{% endif %}
+{% filter upper %}shouty text{% endfilter %}
+
+<!-- Cases from django-template-i18n-lint tests -->
+<title>My site</title>
+<p>Tom &amp; Jerry</p>
+<option selected>Option</option>
+<!-- Regression: amandasaurus/django-template-i18n-lint #30 — boolean attrs must not hide body text -->
+<form novalidate>Submit</form>
+<!-- Angular-style [[ ]] is not Django interpolation -->
+Foo [[yoyo]] bar
+
+<!-- Leading/trailing whitespace stays outside the inserted tag -->
+<h1>
+  Welcome home
+</h1>
+
+<!-- Translatable attributes -->
+<img src="cat.jpg" alt="A cat">
+<a title='Home page'>{{ x }}</a>
+<input placeholder="Search">
+<button aria-label="Close">{{ icon }}</button>
+<!-- Regression: amandasaurus/django-template-i18n-lint #17 — flag only the value, not attr boundaries -->
+<input type="submit" value="Confirm" class="btn btn-danger" />
+
+<!-- Attribute corner cases: diagnostic without fix -->
+<img src=foo.jpg alt=Photo>
+<img src="pals.jpg" alt="John's 'best' friend">
+<input placeholder="100%} left">
+<img src="two.jpg" alt="line one
+line two">

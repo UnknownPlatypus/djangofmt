@@ -1,0 +1,61 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Plain body text -->
+<h1>{% translate "Foo" %}</h1>
+<h1>{% translate "Foo" %}</h1><p>{% translate "Bar" %}</p>
+
+<!-- Text around raw-text elements is still flagged (script content is not) -->
+{% translate "Foo" %}<script>alert('Foo');</script>{% translate "Bar" %}
+
+<!-- Interpolation-adjacent text: diagnostic only, no fix -->
+Foo{{ bar }}Baz
+<!-- Comments between text and interpolation are skipped when classifying -->
+<p>Price: {# unit pending #}{{ price }}</p>
+
+<!-- Multiline runs wrap in blocktranslate -->
+<p>{% blocktranslate trimmed %}Hello
+world{% endblocktranslate %}</p>
+
+<!-- Quote and escape handling in the translate fix -->
+<p>{% translate 'Say "hi" to the team' %}</p>
+<p>{% translate "John's dog" %}</p>
+<p>{% blocktranslate trimmed %}Say "it's fine"{% endblocktranslate %}</p>
+<p>{% blocktranslate trimmed %}Get 100%} off{% endblocktranslate %}</p>
+<p>{% blocktranslate trimmed %}Path is C:\temp{% endblocktranslate %}</p>
+
+<!-- Text beside standalone tags is still standalone -->
+<form>{% csrf_token %}{% translate "Submit now" %}</form>
+
+<!-- Text inside ordinary blocks -->
+{% if cond %}{% translate "Hello" %}{% endif %}
+{% filter upper %}{% translate "shouty text" %}{% endfilter %}
+
+<!-- Cases from django-template-i18n-lint tests -->
+<title>{% translate "My site" %}</title>
+<p>{% translate "Tom &amp; Jerry" %}</p>
+<option selected>{% translate "Option" %}</option>
+<!-- Regression: amandasaurus/django-template-i18n-lint #30 — boolean attrs must not hide body text -->
+<form novalidate>{% translate "Submit" %}</form>
+<!-- Angular-style [[ ]] is not Django interpolation -->
+{% translate "Foo [[yoyo]] bar" %}
+
+<!-- Leading/trailing whitespace stays outside the inserted tag -->
+<h1>
+  {% translate "Welcome home" %}
+</h1>
+
+<!-- Translatable attributes -->
+<img src="cat.jpg" alt="{% translate 'A cat' %}">
+<a title='{% translate "Home page" %}'>{{ x }}</a>
+<input placeholder="{% translate 'Search' %}">
+<button aria-label="{% translate 'Close' %}">{{ icon }}</button>
+<!-- Regression: amandasaurus/django-template-i18n-lint #17 — flag only the value, not attr boundaries -->
+<input type="submit" value="{% translate 'Confirm' %}" class="btn btn-danger" />
+
+<!-- Attribute corner cases: diagnostic without fix -->
+<img src=foo.jpg alt=Photo>
+<img src="pals.jpg" alt="John's 'best' friend">
+<input placeholder="100%} left">
+<img src="two.jpg" alt="line one
+line two">

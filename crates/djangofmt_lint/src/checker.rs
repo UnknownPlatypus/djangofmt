@@ -1,6 +1,7 @@
 use markup_fmt::ast::{
     Attribute, Element, JinjaBlock, JinjaTagOrChildren, NativeAttribute, Node, NodeKind, Root,
 };
+use markup_fmt::parser::parse_jinja_tag_name;
 use miette::SourceSpan;
 use smallvec::SmallVec;
 
@@ -11,6 +12,23 @@ use crate::registry::Rule;
 use crate::rules;
 use crate::violation::Violation;
 
+bitflags::bitflags! {
+    /// Semantic context of the current traversal position, queryable by any
+    /// rule through [`Checker::flags`]. Flags are set when entering a construct
+    /// and restored from a snapshot when leaving, so nesting needs no counters.
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct ContextFlags: u8 {
+        /// Inside a raw-text element (`<script>`, `<style>`, `<pre>`, `<textarea>`).
+        const RAW_TEXT_ELEMENT = 1 << 0;
+        /// Inside a `{% blocktranslate %}` / `{% blocktrans %}` body.
+        const TRANSLATED_BLOCK = 1 << 1;
+        /// Inside a `{% comment %}` body.
+        const COMMENT_BLOCK = 1 << 2;
+        /// Inside a `{% verbatim %}` body.
+        const VERBATIM_BLOCK = 1 << 3;
+    }
+}
+
 /// AST visitor that collects lint diagnostics.
 pub struct Checker<'a> {
     context: LintContext<'a>,
@@ -18,6 +36,8 @@ pub struct Checker<'a> {
     /// Blocks in attribute position (`<div {% block x %}…>`) are not visited here, so are not recorded.
     /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
     block_names: SmallVec<[&'a str; 8]>,
+    /// Semantic context of the current traversal position (see [`ContextFlags`]).
+    flags: ContextFlags,
 }
 
 impl<'a> Checker<'a> {
@@ -26,6 +46,7 @@ impl<'a> Checker<'a> {
         Self {
             context: LintContext::new(source, settings),
             block_names: SmallVec::new_const(),
+            flags: ContextFlags::empty(),
         }
     }
 
@@ -39,6 +60,12 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub fn block_names(&self) -> &[&'a str] {
         &self.block_names
+    }
+
+    /// Semantic context flags at the current traversal position.
+    #[must_use]
+    pub const fn flags(&self) -> ContextFlags {
+        self.flags
     }
 
     /// Compute the byte offset of a string slice within the source.
@@ -100,9 +127,7 @@ impl<'a> Checker<'a> {
             rules::style::missing_doctype::check(root, self);
         }
 
-        for node in &root.children {
-            self.visit_node(node);
-        }
+        self.visit_children(&root.children);
 
         // Cross-node finalize: now that every `{% block %}` has been recorded, flag duplicates.
         if self.is_rule_enabled(Rule::DuplicateBlockName) {
@@ -115,6 +140,17 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             _ => {}
+        }
+    }
+
+    /// Visit a group of sibling nodes, running sibling-scoped rules before recursing.
+    fn visit_children(&mut self, children: &[Node<'a>]) {
+        if self.is_rule_enabled(Rule::UntranslatedText) {
+            rules::i18n::untranslated_text::check_text(children, self);
+        }
+
+        for child in children {
+            self.visit_node(child);
         }
     }
 
@@ -148,9 +184,12 @@ impl<'a> Checker<'a> {
             self.visit_attribute(attr, element);
         }
 
-        for child in &element.children {
-            self.visit_node(child);
+        let snapshot = self.flags;
+        if is_raw_text_element(element.tag_name) {
+            self.flags |= ContextFlags::RAW_TEXT_ELEMENT;
         }
+        self.visit_children(&element.children);
+        self.flags = snapshot;
     }
 
     fn visit_attribute(&mut self, attr: &Attribute<'a>, element: &Element<'a>) {
@@ -190,6 +229,10 @@ impl<'a> Checker<'a> {
             rules::suspicious::use_https::check(attr, self);
         }
 
+        if self.is_rule_enabled(Rule::UntranslatedText) {
+            rules::i18n::untranslated_text::check_attr(attr, element, self);
+        }
+
         if element.tag_name.eq_ignore_ascii_case("form") {
             if self.is_rule_enabled(Rule::UppercaseFormMethod) {
                 rules::style::uppercase_form_method::check(attr, self);
@@ -209,13 +252,14 @@ impl<'a> Checker<'a> {
             self.record_block_name(block);
         }
 
+        let snapshot = self.flags;
+        self.flags |= block_context_flags(&block.body);
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
-                for child in children {
-                    self.visit_node(child);
-                }
+                self.visit_children(children);
             }
         }
+        self.flags = snapshot;
     }
 
     fn record_block_name(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
@@ -229,6 +273,8 @@ impl<'a> Checker<'a> {
         block: &JinjaBlock<'a, Attribute<'a>>,
         element: &Element<'a>,
     ) {
+        let snapshot = self.flags;
+        self.flags |= block_context_flags(&block.body);
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
@@ -236,5 +282,26 @@ impl<'a> Checker<'a> {
                 }
             }
         }
+        self.flags = snapshot;
+    }
+}
+
+/// Elements whose content the parser captures as a single raw text node.
+fn is_raw_text_element(tag_name: &str) -> bool {
+    ["script", "style", "pre", "textarea"]
+        .iter()
+        .any(|tag| tag_name.eq_ignore_ascii_case(tag))
+}
+
+/// Context flags contributed by a Jinja block, keyed on its opening tag name.
+fn block_context_flags<T>(body: &[JinjaTagOrChildren<'_, T>]) -> ContextFlags {
+    let Some(JinjaTagOrChildren::Tag(open_tag)) = body.first() else {
+        return ContextFlags::empty();
+    };
+    match parse_jinja_tag_name(open_tag) {
+        "blocktranslate" | "blocktrans" => ContextFlags::TRANSLATED_BLOCK,
+        "comment" => ContextFlags::COMMENT_BLOCK,
+        "verbatim" => ContextFlags::VERBATIM_BLOCK,
+        _ => ContextFlags::empty(),
     }
 }

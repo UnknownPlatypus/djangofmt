@@ -437,6 +437,7 @@ name = "djangofmt_lint"
 version = "0.2.11"
 dependencies = [
  "anyhow",
+ "bitflags",
  "djangofmt_macros",
  "insta",
  "markup_fmt",

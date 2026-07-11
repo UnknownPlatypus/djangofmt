@@ -67,6 +67,8 @@ pub enum RuleCategory {
     Complexity,
     /// Code that creates accessibility (a11y) barriers.
     Accessibility,
+    /// Content that bypasses the project's internationalization (i18n) workflow.
+    I18n,
 }
 /// The single source of truth for all lint rules.
 ///
@@ -260,4 +262,5 @@ define_rules! {
     (MissingTitle, rules::accessibility::missing_title::MissingTitle),
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
     (MissingImgDimensions, rules::accessibility::missing_img_dimensions::MissingImgDimensions),
+    (UntranslatedText, rules::i18n::untranslated_text::UntranslatedText),
 }

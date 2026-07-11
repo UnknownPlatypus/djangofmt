@@ -27,7 +27,7 @@ mod rules;
 pub mod settings;
 mod violation;
 
-pub use checker::Checker;
+pub use checker::{Checker, ContextFlags};
 pub use fix::apply::{
     AppliedFix, ApplyResult, FixerError, FixerResult, MAX_FIX_ITERATIONS, RuleFixSummary,
     SourceMap, SourceMarker, apply_fixes, fix_ast, lint_fix,

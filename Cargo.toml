@@ -13,6 +13,7 @@ license = "MIT"
 
 [workspace.dependencies]
 anyhow = { version = "1.0.102" }
+bitflags = { version = "2.12.1" }
 clap = { version = "4.6.1", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }

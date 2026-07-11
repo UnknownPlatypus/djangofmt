@@ -1,0 +1,51 @@
+<!-- Already translated -->
+<b>{% trans 'Foo' %}</b>
+<b>{% translate "Foo" %}</b>
+{% blocktrans %}Foo{% endblocktrans %}
+{% blocktrans with name=user.name %}Hello {{ name }}{% endblocktrans %}
+{% blocktranslate %}Text with a <b>nested</b> element{% endblocktranslate %}
+{% blocktranslate trimmed count counter=list|length %}
+There is {{ counter }} object.
+{% plural %}
+There are {{ counter }} objects.
+{% endblocktranslate %}
+
+<!-- Non-rendered or literal blocks -->
+{% comment %}Draft copy, do not translate{% endcomment %}
+{% verbatim %}<p>Hello {{ vue_binding }}</p>{% endverbatim %}
+<div {% verbatim %}title="Raw tooltip"{% endverbatim %}></div>
+
+<!-- Raw-text elements -->
+<script>alert('Untranslated alert');</script>
+<style>.foo { content: "hi"; }</style>
+<pre>raw <span>nested</span> text with {{ var }}</pre>
+<textarea>default content</textarea>
+
+<!-- Tags, comments and interpolations alone -->
+{% load i18n %}
+{% csrf_token %}
+{# a template comment #}
+<!-- an HTML comment -->
+<p>{{ user.name }}</p>
+
+<!-- No letters -->
+<b>123.456,789</b>
+<span>&nbsp;</span>
+<span>&times; &#8212; &#x2014; · %</span>
+<p>   </p>
+
+<!-- Dynamic attribute values -->
+<img alt="{{ photo_description }}">
+<input placeholder="{% trans 'Search' %}">
+<a title="{# tooltip pending #}">{{ x }}</a>
+
+<!-- Non-translatable attributes -->
+<a href="/about" class="nav-link">{{ label }}</a>
+<!-- Regression: amandasaurus/django-template-i18n-lint PR #28 — valued data-* attributes are not scanned -->
+<div data-id="card">{{ body }}</div>
+<!-- Divergence from amandasaurus/django-template-i18n-lint #17: data-original-title is not scanned -->
+<a href="#" title="" data-placement="top" data-original-title="Twitter"><i class="fa fa-twitter"></i></a>
+<input type="text" value="John">
+<input value="loose">
+<input type="{{ input_type }}" value="Go">
+<img src="my.jpg" ismap />
