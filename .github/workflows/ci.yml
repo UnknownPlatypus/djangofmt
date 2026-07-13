@@ -194,6 +194,31 @@ jobs:
           tool: cargo-llvm-cov
       - run: cargo llvm-cov --workspace --exclude djangofmt_dev --all-targets --all-features --fail-under-lines 85
 
+  msrv_check:
+    name: "cargo build (msrv)"
+    runs-on: ubuntu-24.04
+    needs: changed_files
+    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Read MSRV from Cargo.toml
+        id: msrv
+        run: |
+          MSRV=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].rust_version')
+          echo "value=${MSRV}" >> "$GITHUB_OUTPUT"
+      - name: Install Rust toolchain
+        env:
+          MSRV: ${{ steps.msrv.outputs.value }}
+        run: rustup toolchain install "${MSRV}"
+      - name: Build tests with MSRV
+        env:
+          MSRV: ${{ steps.msrv.outputs.value }}
+        run: cargo "+${MSRV}" test --no-run --workspace --all-targets --all-features
+
   docs_check:
     name: "rule docs up to date"
     runs-on: ubuntu-24.04
