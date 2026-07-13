@@ -56,9 +56,9 @@ jobs:
       - uses: jetli/wasm-bindgen-action@20b33e20595891ab1a0ed73145d8a21fc96e7c29 # v0.2.0
       - name: "Run wasm-pack build"
         run: wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
-      - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
-          deno-version: "2.9.1"
+          deno-version: "2.9.2"
       - name: Install playground dependencies
         run: deno install --frozen
         working-directory: playground
@@ -66,7 +66,7 @@ jobs:
         run: deno task build
         working-directory: playground
       - name: Setup uv
-        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        uses: astral-sh/setup-uv@d31148d669074a8d0a63714ba94f3201e7020bc3 # v8.3.0
         with:
           enable-cache: true
       - name: Regenerate rule docs and synced pages
