@@ -2,7 +2,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
+use djangofmt_lint::{FileDiagnostics, Settings, check_ast, file_ignores_invalid_syntax};
 use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
 use serde::Serialize;
@@ -196,6 +196,10 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let ast = match parser.parse_root() {
         Ok(ast) => ast,
         Err(e) => {
+            // Match the CLI: `file-ignore[invalid-syntax]` skips the file.
+            if file_ignores_invalid_syntax(source) {
+                return Ok(LintResult::new(0, String::new()));
+            }
             let err: markup_fmt::FormatError = markup_fmt::FormatError::Syntax(e);
             return Ok(LintResult::new(1, render_parse_error(source, &err)));
         }

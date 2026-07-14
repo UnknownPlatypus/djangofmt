@@ -1,5 +1,6 @@
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, check_ast, lint_fix,
+    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, check_ast,
+    file_ignores_invalid_syntax, lint_fix,
 };
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
@@ -59,6 +60,8 @@ struct CheckResult {
     applied_count: usize,
     /// Per-rule applied summaries, for `--show-fixes`.
     fixes_by_rule: FxHashMap<String, RuleFixSummary>,
+    /// Whether the file was skipped via `file-ignore[invalid-syntax]`.
+    skipped: bool,
 }
 
 /// Check the given source code for linting errors.
@@ -130,6 +133,16 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         config.unsafe_fixes,
         error_count,
     );
+
+    // Surface files quarantined via `file-ignore[invalid-syntax]`, mirroring
+    // the format command's skip counter.
+    let skipped_count = results.iter().filter(|result| result.skipped).count();
+    if skipped_count > 0 {
+        info!(
+            "{skipped_count} file{} skipped !",
+            if skipped_count == 1 { "" } else { "s" }
+        );
+    }
 
     if config.show_fixes && total_applied > 0 {
         print_show_fixes(&results, total_applied);
@@ -254,14 +267,11 @@ fn check_path(
                     file_diagnostics,
                     applied_count: result.applied_count,
                     fixes_by_rule: result.applied_by_rule,
+                    skipped: false,
                 });
             }
             Err(FixerError::InitialParse(err)) => {
-                return Err(Box::new(CommandError::Parse(ParseError::new(
-                    Some(path.to_path_buf()),
-                    source,
-                    &FormatError::Syntax(err),
-                ))));
+                return parse_failure(path, source, err);
             }
             Err(FixerError::SyntaxRegression {
                 iteration,
@@ -280,11 +290,7 @@ fn check_path(
     let ast = match parser.parse_root() {
         Ok(ast) => ast,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                Some(path.to_path_buf()),
-                source,
-                &FormatError::Syntax(err),
-            ))));
+            return parse_failure(path, source, err);
         }
     };
 
@@ -300,7 +306,34 @@ fn check_path(
         file_diagnostics,
         applied_count: 0,
         fixes_by_rule: FxHashMap::default(),
+        skipped: false,
     })
+}
+
+const PARSE_ERROR_HINT: &str = "Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.";
+
+/// Handle a parse failure: a top-level `{# djangofmt: file-ignore[invalid-syntax] #}`
+/// directive skips the file entirely, otherwise the error is reported with a
+/// hint pointing at the available escape hatches.
+fn parse_failure(
+    path: &Path,
+    source: String,
+    err: markup_fmt::SyntaxError,
+) -> std::result::Result<CheckResult, Box<CommandError>> {
+    if file_ignores_invalid_syntax(&source) {
+        debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
+        return Ok(CheckResult {
+            path: path.to_path_buf(),
+            file_diagnostics: FileDiagnostics::empty(),
+            applied_count: 0,
+            fixes_by_rule: FxHashMap::default(),
+            skipped: true,
+        });
+    }
+    Err(Box::new(CommandError::Parse(
+        ParseError::new(Some(path.to_path_buf()), source, &FormatError::Syntax(err))
+            .with_hint(PARSE_ERROR_HINT),
+    )))
 }
 
 #[cfg(test)]

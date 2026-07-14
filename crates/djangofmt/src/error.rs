@@ -126,4 +126,14 @@ impl ParseError {
             hint,
         }
     }
+
+    /// Append a help line to the error, preserving any existing hint.
+    #[must_use]
+    pub fn with_hint(mut self, hint: &str) -> Self {
+        self.hint = Some(self.hint.take().map_or_else(
+            || hint.to_string(),
+            |existing| format!("{existing}\n{hint}"),
+        ));
+        self
+    }
 }

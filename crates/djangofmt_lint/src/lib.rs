@@ -39,6 +39,7 @@ pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use rule_selector::{RuleSelector, SelectionWarning, SelectorParseError};
 pub use rule_set::RuleSet;
 pub use settings::{RuleSelection, Settings};
+pub use suppression::file_ignores_invalid_syntax;
 pub use violation::{Violation, ViolationMetadata};
 
 use markup_fmt::ast::Root;
