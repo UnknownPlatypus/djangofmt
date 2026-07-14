@@ -1,0 +1,35 @@
+{# Single rule on the immediately preceding node #}
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
+{# Comma-separated rules share one comment #}
+{# djangofmt: ignore[empty-attr-value, invalid-attr-value] #}
+<form method="yes" id=""></form>
+
+{# Suppression reaches across whitespace between comment and node #}
+{# djangofmt: ignore[empty-attr-value] #}
+
+<div class=""></div>
+
+{# Suppression nested inside an element silences the child it precedes #}
+<div>
+  {# djangofmt: ignore[invalid-attr-value] #}
+  <form method="yes"></form>
+</div>
+
+{# Whitespace after djangofmt: is optional #}
+{# djangofmt:ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
+{# Suppression reaches past intervening comments #}
+{# djangofmt: ignore[invalid-attr-value] #}
+{# TODO: fix this legacy form #}
+<form method="yes"></form>
+
+{# Stacked directives all reach the same node #}
+{# djangofmt: ignore[invalid-attr-value] #}
+{# djangofmt: ignore[empty-attr-value] #}
+<form method="yes" id=""></form>
+
+<!-- djangofmt: ignore[invalid-attr-value] -->
+<form method="yes"></form>

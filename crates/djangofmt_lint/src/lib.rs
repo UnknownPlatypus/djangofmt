@@ -25,6 +25,7 @@ pub mod rule_selector;
 pub mod rule_set;
 mod rules;
 pub mod settings;
+mod suppression;
 mod violation;
 
 pub use checker::Checker;
@@ -130,5 +131,6 @@ pub fn check_ast<'a>(
 ) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings);
     checker.visit_root(ast);
-    checker.into_diagnostics()
+    let diagnostics = checker.into_diagnostics();
+    suppression::filter_suppressed(source, ast, diagnostics)
 }

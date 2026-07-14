@@ -1,0 +1,19 @@
+{# The formatter directive is not a lint suppression #}
+{# djangofmt:ignore #}
+<form method="yes"></form>
+
+{# An empty rule list does not suppress #}
+{# djangofmt: ignore[] #}
+<form method="yes"></form>
+
+{# Unknown rule matches nothing #}
+{# djangofmt: ignore[not-a-real-rule] #}
+<form method="yes"></form>
+
+{# Rule mismatch: this silences a different rule than the one that fires #}
+{# djangofmt: ignore[empty-attr-value] #}
+<form method="yes"></form>
+
+{# A comment after the node does not reach back to it #}
+<form method="yes"></form>
+{# djangofmt: ignore[invalid-attr-value] #}

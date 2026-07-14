@@ -1,0 +1,25 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Found 2 lint error(s)
+
+Error: 
+  × Invalid value 'yes' for attribute 'method'.
+   ╭─[tests/check/suppression/file_ignore.invalid.html:3:15]
+ 2 │ {# The file-ignore above lists a different rule than the one firing #}
+ 3 │ <form method="yes"></form>
+   ·               ─┬─
+   ·                ╰── here
+ 4 │ 
+   ╰────
+  help: Use one of: get, post, dialog
+
+Error: 
+  × Invalid value 'put' for attribute 'method'.
+   ╭─[tests/check/suppression/file_ignore.invalid.html:7:15]
+ 6 │ {# djangofmt: file-ignore[invalid-attr-value] #}
+ 7 │ <form method="put"></form>
+   ·               ─┬─
+   ·                ╰── here
+   ╰────
+  help: Use one of: get, post, dialog

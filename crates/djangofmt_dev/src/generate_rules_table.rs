@@ -36,6 +36,30 @@ A selector is either:
 
 
 Preview rules are off by default. Enable them with `--preview` or `preview = true`.
+
+## Suppressing diagnostics
+
+Silence rules on a specific node with a `{# djangofmt: ignore[<rule>] #}` comment placed **immediately before** it. Anchoring to the following node (rather than a line) keeps the suppression attached to the right markup even after reformatting.
+
+```jinja
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes">Submit</form>
+```
+
+Suppress several rules at once with a comma-separated list:
+
+```jinja
+{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
+<form method="yes" id=""></form>
+```
+
+Silence rules for a whole file with a `{# djangofmt: file-ignore[<rule>] #}` comment at the very top of the file:
+
+```jinja
+{# djangofmt: file-ignore[missing-img-alt] #}
+```
+
+Rules must always be listed explicitly: there is no blanket form. Lint suppression never affects formatting — the formatter has its own `{# djangofmt:ignore #}` directive.
 "#;
 
 fn render() -> String {
