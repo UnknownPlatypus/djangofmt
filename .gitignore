@@ -29,7 +29,3 @@ dist
 
 # Zensical build output
 site/
-
-# LLM
-.claude
-.agents
