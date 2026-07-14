@@ -61,11 +61,10 @@ fn format_source_code(
     let formatted = match format_text(&source, config, profile) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                path.map(Path::to_path_buf),
-                source,
-                &err,
-            ))));
+            return Err(Box::new(CommandError::Parse(
+                ParseError::new(path.map(Path::to_path_buf), source, &err)
+                    .with_hint(super::format::SKIP_FILE_HINT),
+            )));
         }
     };
 

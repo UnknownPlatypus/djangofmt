@@ -107,14 +107,29 @@ fn merge_custom_blocks(
     }
 }
 
+macro_rules! skip_directive {
+    () => {
+        "djangofmt:skip"
+    };
+}
+/// Legacy spelling of [`skip_directive!`], kept as a permanent alias.
 macro_rules! ignore_directive {
     () => {
         "djangofmt:ignore"
     };
 }
-const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
-const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
-const DJANGOFMT_IGNORE_COMMENT_JINJA: &str = concat!("{# ", ignore_directive!(), " #}");
+const DJANGOFMT_SKIP_COMMENTS: [&str; 4] = [
+    concat!("<!-- ", skip_directive!(), " -->"),
+    concat!("{# ", skip_directive!(), " #}"),
+    concat!("<!-- ", ignore_directive!(), " -->"),
+    concat!("{# ", ignore_directive!(), " #}"),
+];
+
+pub(crate) const SKIP_FILE_HINT: &str = concat!(
+    "Add `{# ",
+    skip_directive!(),
+    " #}` at the top of this file, or list it in `extend-exclude`, to skip it."
+);
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
@@ -165,11 +180,15 @@ pub fn build_markup_options(
             // Preserve unquoted HTML attribute values:
             // <c-button editable=True /> -> stays as editable=True
             preserve_unquoted_attrs,
-            // Ignore formatting with comment directive:
-            // <!-- djangofmt:ignore -->
+            // Skip formatting with a comment directive (legacy `djangofmt:ignore`
+            // spelling kept as an alias):
+            // <!-- djangofmt:skip -->
             // <div>unformatted</div>
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_comment_directive: vec![skip_directive!().into(), ignore_directive!().into()],
+            ignore_file_comment_directive: vec![
+                skip_directive!().into(),
+                ignore_directive!().into(),
+            ],
             // Indent style tags content:
             // <style>
             //     body { color: red }
@@ -206,8 +225,11 @@ fn build_malva_config(
             keyframe_selector_notation: Some(malva::config::KeyframeSelectorNotation::Percentage),
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            // malva only takes a single directive, so CSS inside <style> blocks
+            // keeps the legacy spelling; the `djangofmt:skip` canonical doesn't
+            // apply there.
+            ignore_comment_directive: ignore_directive!().into(),
+            ignore_file_comment_directive: ignore_directive!().into(),
             ..malva::config::LanguageOptions::default()
         },
     }
@@ -321,8 +343,15 @@ pub fn format_text(
     config: &FormatterConfig,
     profile: Profile,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
-    if source.starts_with(DJANGOFMT_IGNORE_COMMENT)
-        || source.starts_with(DJANGOFMT_IGNORE_COMMENT_JINJA)
+    // Tolerate a UTF-8 BOM and leading whitespace before the directive, like
+    // the lint side's `file_ignores_invalid_syntax`.
+    let head = source
+        .strip_prefix('\u{feff}')
+        .unwrap_or(source)
+        .trim_start();
+    if DJANGOFMT_SKIP_COMMENTS
+        .iter()
+        .any(|directive| head.starts_with(directive))
     {
         return Ok(None);
     }
@@ -399,11 +428,10 @@ fn format_path(
     let formatted = match format_text(&unformatted, &config, profile) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                Some(path.to_path_buf()),
-                unformatted,
-                &err,
-            ))));
+            return Err(Box::new(CommandError::Parse(
+                ParseError::new(Some(path.to_path_buf()), unformatted, &err)
+                    .with_hint(SKIP_FILE_HINT),
+            )));
         }
     };
 

@@ -11,8 +11,8 @@
 //! `invalid-syntax` code suppresses parse errors ([`file_ignores_invalid_syntax`]).
 //!
 //! Rules must always be listed explicitly: there is no blanket form, and the
-//! formatter's bare `djangofmt:ignore` directive is unrelated to lint
-//! suppression.
+//! formatter's bare `djangofmt:skip` / `djangofmt:ignore` directives are
+//! unrelated to lint suppression.
 
 use std::ops::Range;
 
@@ -179,7 +179,7 @@ fn offset_of(source: &str, slice: &str) -> usize {
 /// Grammar: `djangofmt:`, optional whitespace, then `ignore[...]` or
 /// `file-ignore[...]` with a non-empty comma-separated rule list and nothing
 /// after the closing bracket. Anything else — including the formatter's bare
-/// `djangofmt:ignore` — is not a lint directive.
+/// `djangofmt:skip` / `djangofmt:ignore` — is not a lint directive.
 fn parse_directive(raw: &str) -> Option<Directive<'_>> {
     let rest = raw.trim().strip_prefix("djangofmt:")?.trim_start();
     let (file_level, rest) = match rest.strip_prefix("file-ignore[") {
@@ -236,6 +236,7 @@ mod tests {
     #[test]
     fn reject_non_directives() {
         assert_eq!(parse_directive(" djangofmt:ignore "), None); // formatter directive
+        assert_eq!(parse_directive(" djangofmt:skip "), None); // formatter directive
         assert_eq!(parse_directive("djangofmt: ignore[]"), None); // explicit rules only
         assert_eq!(parse_directive("djangofmt: ignore[ , ]"), None); // only separators
         assert_eq!(parse_directive("djangofmt: ignore[a] trailing"), None); // nothing after bracket

@@ -59,7 +59,7 @@ Silence rules for a whole file with a `{# djangofmt: file-ignore[<rule>] #}` com
 {# djangofmt: file-ignore[invalid-syntax] #}
 ```
 
-Rules must always be listed explicitly: there is no blanket form. Lint suppression never affects formatting — the formatter has its own `{# djangofmt:ignore #}` directive.
+Rules must always be listed explicitly: there is no blanket form. Lint suppression never affects formatting — the formatter has its own `{# djangofmt:skip #}` directive.
 "#;
 
 fn render() -> String {

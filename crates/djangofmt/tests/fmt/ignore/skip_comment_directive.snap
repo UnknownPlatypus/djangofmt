@@ -1,0 +1,10 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<div>
+    <!-- djangofmt:skip -->
+    <p     class="unformatted"      >This should not be formatted</p>
+</div>
+{# djangofmt:skip #}
+<p     class="unformatted"     >This should not be formatted</p>
+<p class="formatted">This should be formatted</p>

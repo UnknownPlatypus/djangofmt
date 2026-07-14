@@ -50,6 +50,44 @@ fn format_already_formatted_file() {
 }
 
 #[test]
+fn format_file_with_skip_directive() {
+    let original = "{# djangofmt:skip #}\n<div   class=\"foo\"  ></div>\n";
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file skipped !
+    "#);
+    assert_eq!(project.read("test.html"), original);
+}
+
+#[test]
+fn format_unparsable_file_reports_error_with_hint() {
+    let project = Project::new().file("test.html", "<div id=>\n</div>\n");
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × expected attribute value
+       ╭─[[TMP]/test.html:1:9]
+     1 │ <div id=>
+       ·         ▲
+       ·         ╰── here
+     2 │ </div>
+       ╰────
+      help: Add `{# djangofmt:skip #}` at the top of this file, or list it in
+            `extend-exclude`, to skip it.
+
+    Couldn't format 1 files!
+    "###);
+}
+
+#[test]
 fn format_file_with_ignore_directive() {
     let original = "<!-- djangofmt:ignore -->\n<div   class=\"foo\"  ></div>\n";
     let project = Project::new().file("test.html", original);
@@ -219,7 +257,7 @@ fn format_stdin_jinja_ignore_directive() {
 fn format_stdin_parse_error_exits_2() {
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
-        @r#"
+        @r###"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -231,7 +269,9 @@ fn format_stdin_parse_error_exits_2() {
        · ─┬─
        ·  ╰── here
        ╰────
-    "#);
+      help: Add `{# djangofmt:skip #}` at the top of this file, or list it in
+            `extend-exclude`, to skip it.
+    "###);
 }
 
 #[test]
