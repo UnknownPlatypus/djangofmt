@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.12](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.11..v0.2.12) - 2026-07-15
+
+### ⛰️ Features
+
+- *(lint)* Add `table-header-missing-scope` lint rule ([#345](https://github.com/UnknownPlatypus/djangofmt/issues/345)) - ([4d9f72c](https://github.com/UnknownPlatypus/djangofmt/commit/4d9f72c7bf953bc0d69366243fb213491c67bd32))
+
+### 🐛 Bug Fixes
+
+- *(format)* Skip formatting Django `verbatim` blocks ([#370](https://github.com/UnknownPlatypus/djangofmt/issues/370)) - ([caf2fe4](https://github.com/UnknownPlatypus/djangofmt/commit/caf2fe41c3f4c1b35d64682973583daa3b2b7aa2))
+
 ## [0.2.11](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.10..v0.2.11) - 2026-06-26
 
 ### ⛰️ Features

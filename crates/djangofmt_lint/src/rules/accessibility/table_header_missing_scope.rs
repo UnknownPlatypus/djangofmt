@@ -46,7 +46,7 @@ pub enum ScopeViolation {
 /// - [WCAG H63: Using the `scope` attribute](https://www.w3.org/WAI/WCAG21/Techniques/html/H63)
 /// - [MDN: `<th>` `scope`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th#scope)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "0.2.12")]
 pub struct TableHeaderMissingScope {
     pub kind: ScopeViolation,
 }
