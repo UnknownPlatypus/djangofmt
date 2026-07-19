@@ -433,7 +433,8 @@ fn build_pretty_jinja_config(
             expr_list_prefer_single_line: Some(true),
             expr_tuple_prefer_single_line: Some(true),
             params_prefer_single_line: Some(true),
-            brace_spacing: true,
+            // Tight braces also avoid `{}` rendering as `{  }`.
+            brace_spacing: false,
             bracket_spacing: false,
             args_paren_spacing: false,
             params_paren_spacing: false,
