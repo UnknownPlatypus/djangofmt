@@ -171,8 +171,8 @@ pub fn build_markup_options(
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
             // <div>unformatted</div>
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
+            ignore_file_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
             // Indent style tags content:
             // <style>
             //     body { color: red }
@@ -339,6 +339,10 @@ pub fn format_text(
     {
         return Ok(None);
     }
+    let jinja_dialect = match profile {
+        Profile::Django => pretty_jinja::config::Dialect::Django,
+        Profile::Jinja => pretty_jinja::config::Dialect::Jinja,
+    };
     markup_fmt::format_text(
         source,
         markup_fmt::Language::from(profile),
@@ -379,6 +383,7 @@ pub fn format_text(
                 "markup-fmt-jinja-expr" => {
                     let mut jinja_config = config.jinja.clone();
                     jinja_config.layout.print_width = hints.print_width;
+                    jinja_config.language.dialect = jinja_dialect;
                     Ok(pretty_jinja::format_expr(code, &jinja_config).map_or_else(
                         |error| format_fallback("Jinja expression", code, error),
                         Cow::from,
@@ -387,6 +392,7 @@ pub fn format_text(
                 "markup-fmt-jinja-stmt" => {
                     let mut jinja_config = config.jinja.clone();
                     jinja_config.layout.print_width = hints.print_width;
+                    jinja_config.language.dialect = jinja_dialect;
                     Ok(pretty_jinja::format_stmt(code, &jinja_config).map_or_else(
                         |error| format_fallback("Jinja statement", code, error),
                         Cow::from,
@@ -412,6 +418,8 @@ fn build_pretty_jinja_config(
             line_break: pretty_jinja::config::LineBreak::Lf,
         },
         language: pretty_jinja::config::LanguageOptions {
+            // Base dialect; format_text overrides it per profile.
+            dialect: pretty_jinja::config::Dialect::Jinja,
             operator_linebreak: pretty_jinja::config::OperatorLineBreak::Before,
             trailing_comma: pretty_jinja::config::TrailingComma::OnlyMultiLine,
             args_trailing_comma: None,

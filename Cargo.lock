@@ -863,7 +863,7 @@ dependencies = [
 [[package]]
 name = "markup_fmt"
 version = "0.27.3"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=084d68e60da1f13545a97c19b4171ec9ea7c3a5b#084d68e60da1f13545a97c19b4171ec9ea7c3a5b"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=78d1e0f1579d06895f24ceb66dbed7d4f123ae88#78d1e0f1579d06895f24ceb66dbed7d4f123ae88"
 dependencies = [
  "aho-corasick",
  "anyhow",
@@ -994,7 +994,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 [[package]]
 name = "pretty_jinja"
 version = "0.2.0"
-source = "git+https://github.com/g-plane/pretty_jinja?rev=v0.2.0#b4d32d50d77ec0157a60a8423e71e8659ade7717"
+source = "git+https://github.com/UnknownPlatypus/pretty_jinja?rev=d90575e7f8a345994ef674f2431d78186ffc2645#d90575e7f8a345994ef674f2431d78186ffc2645"
 dependencies = [
  "rowan",
  "serde",
