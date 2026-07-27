@@ -1,10 +1,9 @@
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import "monaco-editor/min/vs/editor/editor.main.css";
-import "monaco-editor/esm/vs/editor/editor.all.js";
-import "monaco-editor/esm/vs/basic-languages/html/html.contribution.js";
-import "monaco-editor/esm/vs/language/html/monaco.contribution.js";
-import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
-import htmlWorker from "monaco-editor/esm/vs/language/html/html.worker?worker";
+import * as monaco from "monaco-editor/editor/editor.api.js";
+import "monaco-editor/features/register.all.js";
+import "monaco-editor/languages/definitions/html/register.js";
+import "monaco-editor/languages/features/html/register.js";
+import editorWorker from "monaco-editor/editor/editor.worker.js?worker";
+import htmlWorker from "monaco-editor/languages/features/html/html.worker.js?worker";
 import { parsePermalinkCode } from "./permalink";
 
 const defaultTemplate = `\

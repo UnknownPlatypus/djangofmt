@@ -4,12 +4,7 @@
     "types": [
       "vite/client"
     ],
-    "moduleResolution": "bundler",
-    "paths": {
-      "monaco-editor/esm/vs/editor/editor.api": [
-        "./node_modules/monaco-editor/esm/vs/editor/editor.api"
-      ]
-    }
+    "moduleResolution": "bundler"
   },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"]
