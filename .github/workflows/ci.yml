@@ -17,7 +17,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   # renovate: datasource=github-releases depName=astral-sh/uv
-  UV_VERSION: 0.11.29
+  UV_VERSION: 0.11.32
   # Make sure CI fails on all warnings, including Clippy lints
   RUSTFLAGS: "-Dwarnings"
   # Line-tables-only debug info: faster builds, backtraces still work.
@@ -174,7 +174,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: cargo-bins/cargo-binstall@ead08b90bd7b2e6d81963fb9cf0b7239f66d5db4 # v1.21.0
+      - uses: cargo-bins/cargo-binstall@e00d2c94cc0067b77737821097a62d91c0301baa # v1.21.1
       - run: cargo binstall --no-confirm cargo-shear
       - run: cargo shear
 
@@ -189,7 +189,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: taiki-e/install-action@a6b2e2dcd845ddd7f509ce4f3ed3d922b80cc5d9 # v2.84.0
+      - uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
         with:
           tool: cargo-llvm-cov
       - run: cargo llvm-cov --workspace --exclude djangofmt_dev --all-targets --all-features --fail-under-lines 85
