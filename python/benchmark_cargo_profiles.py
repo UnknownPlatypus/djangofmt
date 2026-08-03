@@ -60,10 +60,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Sequence
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import NamedTuple, Any
-from collections.abc import Sequence
+from typing import Any, NamedTuple
 
 from rich import print as _rich_print
 from rich.console import Console

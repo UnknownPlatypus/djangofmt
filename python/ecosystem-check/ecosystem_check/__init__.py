@@ -2,4 +2,4 @@ from __future__ import annotations
 
 import logging
 
-logger = logging.getLogger("ecosystem-check")  # noqa: RUF067
+logger = logging.getLogger("ecosystem-check")  # ruff: ignore[non-empty-init-module]
