@@ -9,9 +9,9 @@
     "preview": "astro preview"
   },
   "devDependencies": {
-    "daisyui": "5.7.4",
+    "daisyui": "5.7.9",
     "typescript": "7.0.2",
-    "vite": "8.1.5"
+    "vite": "8.2.0"
   },
   "overrides": {
     "dompurify": "^3.3.3"
