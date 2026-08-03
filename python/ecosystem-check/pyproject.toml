@@ -6,7 +6,7 @@ dependencies = [
   "djade==1.9.0",
   "tomli==2.4.1",
   "tomli_w==1.2.0",
-  "unidiff==0.7.5",
+  "unidiff==1.0.0",
 ]
 
 [project.scripts]
