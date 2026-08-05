@@ -13,7 +13,7 @@
   schedule: ["before 4am on Monday"],
   separateMajorMinor: false,
   // Wait a week before proposing updates to mitigate supply chain attacks via compromised releases that get yanked shortly after publication.
-  minimumReleaseAge: "7 days",
+  minimumReleaseAge: "5 days",
   // Disable lock file maintenance (enabled by `config:best-practices`), it refreshes transitive deps to releases younger than `minimumReleaseAge`.
   lockFileMaintenance: { enabled: false },
   prHourlyLimit: 10,

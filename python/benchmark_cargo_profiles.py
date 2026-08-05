@@ -51,6 +51,8 @@ Usage:
 Based on https://github.com/astral-sh/ruff/pull/9031
 """
 
+from __future__ import annotations
+
 import argparse
 import enum
 import json
@@ -100,7 +102,7 @@ class Profile(NamedTuple):
         return f"lto{self.lto_option.name.lower()}_cg{self.codegen_unit}"
 
 
-##### Configuration for benchmarking #####
+# Configuration for benchmarking #####
 BENCHMARK_ARGS = "--profile django --line-length 120 --quiet"
 WARMUP_RUNS = 10
 BENCHMARK_RUNS = 100
@@ -120,7 +122,7 @@ def _run(cmd: Sequence[str], **kwargs: Any) -> CompletedProcess[str]:
         if stderr := getattr(e, "stderr", None):
             print(f"Command failed: '{' '.join(cmd)}'", file=sys.stderr)
             print(stderr, file=sys.stderr)
-        raise SystemExit(e.returncode)
+        raise SystemExit(e.returncode) from None
 
 
 def rich_print(msg: str) -> None:

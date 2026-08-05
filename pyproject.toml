@@ -190,13 +190,39 @@ strip = true
 [tool.mypy]
 strict = true
 
+[tool.ruff]
+unsafe-fixes = true
+fix = true
+
+[tool.ruff.lint]
+select = [
+  "E",  # pycodestyle (error)
+  "F",  # pyflakes
+  "B",  # bugbear
+  "B9",
+  "C4",  # flake8-comprehensions
+  "SIM",  # flake8-simplify
+  "I",  # isort
+  "UP",  # pyupgrade
+  "PIE",  # flake8-pie
+  "PGH",  # pygrep-hooks
+  "PYI",  # flake8-pyi
+  "RUF",  # Ruff specific
+]
+ignore = ["E501"]
+preview = true
+allowed-confusables = ["σ"]
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
 
 [tool.uv]
 # Supply chain mitigation: ignore package versions released in the last week.
 # https://docs.astral.sh/uv/reference/settings/#exclude-newer
-exclude-newer = "1 week"
+exclude-newer = "5 days"
 
 [tool.uv.workspace]
 members = [
