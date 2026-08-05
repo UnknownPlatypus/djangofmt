@@ -33,9 +33,10 @@ quote = { version = "1.0" }
 rayon = { version = "1.12.0" }
 rstest = { version = "=0.26.1" }
 rustc-hash = { version = "2.1.2" }
+# Pinned to the UnknownPlatypus fork until avencera/rustywind#151 (sort_class_value) merges.
 rustywind_core = {
-  git = "https://github.com/avencera/rustywind",
-  rev = "3b906779bd46046ccf35285a90f0046ebdfe3737"
+  git = "https://github.com/UnknownPlatypus/rustywind",
+  rev = "ce65550522fb5fb005ba99cf9a188f8323be051b"
 }
 serde = { version = "1.0.228", features = ["derive"] }
 serde-wasm-bindgen = { version = "0.6.5" }

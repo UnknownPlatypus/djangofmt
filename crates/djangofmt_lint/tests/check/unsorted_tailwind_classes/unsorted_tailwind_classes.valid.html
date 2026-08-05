@@ -14,7 +14,9 @@
 <!-- An element without a class attribute is never inspected -->
 <p>Plain paragraph with no class attribute.</p>
 
-<!-- Template interpolation: the rendered token list is unknown, so skip (djangofmt #6) -->
+<!-- Template interpolation: static runs around it are already sorted, interpolations untouched -->
 <div class="flex {{ extra_classes }} p-4"></div>
 <div class="p-4 {% if active %}flex{% endif %} m-4"></div>
 <div class="{{ button_classes }}"></div>
+<div class="badge badge-{{ item.status }} gap-2"></div>
+<input class="input validator {% if field.errors %}input-error{% endif %} w-full {{ class }}" />

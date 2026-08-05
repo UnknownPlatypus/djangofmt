@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 9 lint error(s)
+  × Found 11 lint error(s)
 
 Error: 
   × CSS classes are not sorted in the canonical Tailwind order.
@@ -90,4 +90,24 @@ Error:
  26 │ <button class="tw:text-white tw:bg-purple-600 tw:hover:bg-purple-800 tw:focus:ring-4 tw:focus:ring-primary-300 tw:font-medium tw:rounded-lg tw:text-sm tw:px-5 tw:py-2.5">Submit</button>
     ·                ────────────────────────────────────────────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────
     ·                                                                                            ╰── here
+ 27 │ 
+    ╰────
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:29:13]
+ 28 │ <!-- Template interpolation: static runs on each side are sorted, interpolations untouched -->
+ 29 │ <div class="p-4 flex m-4 {{ extra_classes }}"></div>
+    ·             ────────────────┬───────────────
+    ·                             ╰── here
+ 30 │ <span class="text-white p-4 {% if active %}flex{% endif %} bg-blue-700"></span>
+    ╰────
+
+Error: 
+  × CSS classes are not sorted in the canonical Tailwind order.
+    ╭─[tests/check/unsorted_tailwind_classes/unsorted_tailwind_classes.invalid.html:30:14]
+ 29 │ <div class="p-4 flex m-4 {{ extra_classes }}"></div>
+ 30 │ <span class="text-white p-4 {% if active %}flex{% endif %} bg-blue-700"></span>
+    ·              ────────────────────────────┬────────────────────────────
+    ·                                          ╰── here
     ╰────
