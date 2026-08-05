@@ -24,3 +24,7 @@
 <!-- With prefix (v4) -->
 <a class="tw:text-white tw:bg-blue-700 btn tw:hover:bg-blue-900 tw:mt-4">Sign up</a>
 <button class="tw:text-white tw:bg-purple-600 tw:hover:bg-purple-800 tw:focus:ring-4 tw:focus:ring-primary-300 tw:font-medium tw:rounded-lg tw:text-sm tw:px-5 tw:py-2.5">Submit</button>
+
+<!-- Template interpolation: static runs on each side are sorted, interpolations untouched -->
+<div class="p-4 flex m-4 {{ extra_classes }}"></div>
+<span class="text-white p-4 {% if active %}flex{% endif %} bg-blue-700"></span>

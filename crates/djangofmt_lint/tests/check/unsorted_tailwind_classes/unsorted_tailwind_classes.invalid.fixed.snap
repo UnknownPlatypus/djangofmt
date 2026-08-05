@@ -27,3 +27,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- With prefix (v4) -->
 <a class="btn tw:mt-4 tw:bg-blue-700 tw:text-white tw:hover:bg-blue-900">Sign up</a>
 <button class="tw:focus:ring-primary-300 tw:rounded-lg tw:bg-purple-600 tw:px-5 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-purple-800 tw:focus:ring-4">Submit</button>
+
+<!-- Template interpolation: static runs on each side are sorted, interpolations untouched -->
+<div class="m-4 flex p-4 {{ extra_classes }}"></div>
+<span class="p-4 text-white {% if active %}flex{% endif %} bg-blue-700"></span>

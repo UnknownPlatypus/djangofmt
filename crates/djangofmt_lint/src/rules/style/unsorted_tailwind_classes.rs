@@ -1,15 +1,18 @@
 use markup_fmt::ast::NativeAttribute;
-use rustywind_core::RustyWind;
+use rustywind_core::{RustyWind, SourceLanguage};
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
 /// Checks for `class` attributes whose Tailwind CSS utility classes are not in the canonical
 /// order produced by the Tailwind class sorter.
+///
+/// Values containing template interpolations (`{{ ... }}` or `{% ... %}`) are supported: each
+/// static run of classes between interpolations is sorted independently, and the interpolations
+/// themselves are preserved byte-for-byte.
 ///
 /// ## Why is this bad?
 /// Tailwind recommends a single, deterministic class order so the same set of utilities always
@@ -71,12 +74,9 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    if contains_interpolation(value_str) {
-        return;
-    }
-
     // Built per call rather than cached: `RustyWind::default()` allocates nothing, and the
     // expensive sorter it drives (and any prefixed variant) is memoized globally inside rustywind.
+    // Static class runs are sorted independently; interpolations are preserved and never crossed.
     let sorted = RustyWind {
         tailwind_prefix: checker
             .context()
@@ -86,14 +86,14 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
             .clone(),
         ..RustyWind::default()
     }
-    .sort_classes(value_str);
-    if sorted.as_str() == *value_str {
+    .sort_class_value(value_str, SourceLanguage::Django);
+    if sorted == *value_str {
         return;
     }
 
     let span = (*offset, value_str.len()).into();
     let mut guard = checker.report_diagnostic(&UnsortedTailwindClasses, span);
-    guard.set_fix(Fix::safe_edit(Edit::replacement(sorted, span)));
+    guard.set_fix(Fix::safe_edit(Edit::replacement(sorted.into_owned(), span)));
 }
 
 #[cfg(test)]
