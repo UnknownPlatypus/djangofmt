@@ -381,6 +381,26 @@ fn check_file_with_lint_error() {
 }
 
 #[test]
+fn check_concise_output_format() {
+    let project = Project::new().file(
+        "test.html",
+        "<form method=\"put\"></form>\n{% blocktranslate %}Hello{% endblocktranslate %}\n",
+    );
+    assert_cmd_snapshot_tmpdir!(
+        cli().args(["check", "--output-format", "concise"]).arg(project.join("test.html")),
+        @r#"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:15: invalid-attr-value Invalid value 'put' for attribute 'method'.
+    [TMP]/test.html:2:3: untrimmed-blocktranslate [*] `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+    Found 2 errors. [*] 1 fixable with the --fix option.
+    "#);
+}
+
+#[test]
 fn check_nonexistent_file() {
     assert_cmd_snapshot!(cli().args(["check", "/nonexistent/path.html"]), @r#"
     success: false
