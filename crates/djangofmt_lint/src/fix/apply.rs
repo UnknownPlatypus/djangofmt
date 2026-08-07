@@ -21,7 +21,7 @@ use crate::fix::{Applicability, IsolationLevel};
 #[derive(Debug, Clone)]
 pub struct AppliedFix {
     /// Rule code of the diagnostic the fix came from.
-    pub code: String,
+    pub code: &'static str,
     /// Short imperative summary of the fix, if the rule provided one.
     pub fix_title: Option<String>,
 }
@@ -139,7 +139,7 @@ pub fn apply_fixes(
         }
         applied_count += 1;
         applied_fixes.push(AppliedFix {
-            code: diag.code.clone(),
+            code: diag.code,
             fix_title: diag.fix_title.clone(),
         });
     }
@@ -190,7 +190,7 @@ pub struct FixerResult {
     /// Number of fix iterations that ran.
     pub iterations: usize,
     /// Per-rule applied summaries, used by `--show-fixes`.
-    pub applied_by_rule: rustc_hash::FxHashMap<String, RuleFixSummary>,
+    pub applied_by_rule: rustc_hash::FxHashMap<&'static str, RuleFixSummary>,
 }
 
 /// Errors from [`lint_fix`].
@@ -224,7 +224,7 @@ pub fn lint_fix(
     let mut total_skipped = 0usize;
     let mut iterations = 0usize;
     let mut had_valid_first_parse = false;
-    let mut applied_by_rule: FxHashMap<String, RuleFixSummary> = FxHashMap::default();
+    let mut applied_by_rule: FxHashMap<&'static str, RuleFixSummary> = FxHashMap::default();
 
     loop {
         if iterations >= MAX_FIX_ITERATIONS {
@@ -265,7 +265,7 @@ pub fn lint_fix(
         let result = apply_fixes(&current, &diagnostics, threshold);
         total_skipped += result.skipped_count;
         for applied in &result.applied_fixes {
-            let entry = applied_by_rule.entry(applied.code.clone()).or_default();
+            let entry = applied_by_rule.entry(applied.code).or_default();
             entry.count += 1;
             if entry.fix_title.is_none() {
                 entry.fix_title.clone_from(&applied.fix_title);
@@ -302,7 +302,7 @@ mod tests {
 
     fn diag_with_fix(fix: Fix) -> LintDiagnostic {
         LintDiagnostic {
-            code: "test-rule".to_string(),
+            code: "test-rule",
             message: "test".to_string(),
             span: span(0, 0),
             help: None,
@@ -313,7 +313,7 @@ mod tests {
 
     fn diag_without_fix() -> LintDiagnostic {
         LintDiagnostic {
-            code: "test-rule".to_string(),
+            code: "test-rule",
             message: "test".to_string(),
             span: span(0, 0),
             help: None,

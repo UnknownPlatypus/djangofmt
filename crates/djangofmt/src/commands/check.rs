@@ -63,7 +63,7 @@ struct CheckResult {
     /// Total fixes applied to this file (0 when `--fix` is off).
     applied_count: usize,
     /// Per-rule applied summaries, for `--show-fixes`.
-    fixes_by_rule: FxHashMap<String, RuleFixSummary>,
+    fixes_by_rule: FxHashMap<&'static str, RuleFixSummary>,
 }
 
 /// Check the given source code for linting errors.
