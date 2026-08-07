@@ -1,10 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-
-  × Found 12 lint error(s)
-
-Error:   × Empty `id` attribute can be removed.
+  × Empty `id` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:10]
  1 │ <!-- Empty id -->
  2 │ <div id=""></div>
@@ -12,7 +9,8 @@ Error:   × Empty `id` attribute can be removed.
    ·          ╰── here
  3 │ 
    ╰────
-Error:   × Empty `class` attribute can be removed.
+
+  × Empty `class` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:5:13]
  4 │ <!-- Empty class -->
  5 │ <div class=""></div>
@@ -20,7 +18,8 @@ Error:   × Empty `class` attribute can be removed.
    ·             ╰── here
  6 │ 
    ╰────
-Error:   × Empty `id` attribute can be removed.
+
+  × Empty `id` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:8]
  7 │ <!-- Both empty on the same element -->
  8 │ <p id="" class="help-block">copy</p>
@@ -28,7 +27,8 @@ Error:   × Empty `id` attribute can be removed.
    ·        ╰── here
  9 │ 
    ╰────
-Error:   × Empty `ID` attribute can be removed.
+
+  × Empty `ID` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:11:10]
  10 │ <!-- Case-insensitive attribute name -->
  11 │ <div ID=""></div>
@@ -36,7 +36,8 @@ Error:   × Empty `ID` attribute can be removed.
     ·          ╰── here
  12 │ <div CLASS=""></div>
     ╰────
-Error:   × Empty `CLASS` attribute can be removed.
+
+  × Empty `CLASS` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:12:13]
  11 │ <div ID=""></div>
  12 │ <div CLASS=""></div>
@@ -44,7 +45,8 @@ Error:   × Empty `CLASS` attribute can be removed.
     ·             ╰── here
  13 │ 
     ╰────
-Error:   × Empty `id` attribute can be removed.
+
+  × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:15:10]
  14 │ <!-- Case-insensitive tag name -->
  15 │ <DIV id=""></DIV>
@@ -52,7 +54,8 @@ Error:   × Empty `id` attribute can be removed.
     ·          ╰── here
  16 │ 
     ╰────
-Error:   × Empty `id` attribute can be removed.
+
+  × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:18:10]
  17 │ <!-- Single-quoted empty values -->
  18 │ <div id=''></div>
@@ -60,7 +63,8 @@ Error:   × Empty `id` attribute can be removed.
     ·          ╰── here
  19 │ <div class=''></div>
     ╰────
-Error:   × Empty `class` attribute can be removed.
+
+  × Empty `class` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:19:13]
  18 │ <div id=''></div>
  19 │ <div class=''></div>
@@ -68,7 +72,8 @@ Error:   × Empty `class` attribute can be removed.
     ·             ╰── here
  20 │ 
     ╰────
-Error:   × Empty `class` attribute can be removed.
+
+  × Empty `class` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:24:12]
  23 │     role="banner"
  24 │     class=""
@@ -76,7 +81,8 @@ Error:   × Empty `class` attribute can be removed.
     ·            ╰── here
  25 │ ></div>
     ╰────
-Error:   × Empty `id` attribute can be removed.
+
+  × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:29:9]
  28 │ <div
  29 │     id=""
@@ -84,7 +90,8 @@ Error:   × Empty `id` attribute can be removed.
     ·         ╰── here
  30 │     role="banner"
     ╰────
-Error:   × Empty `id` attribute can be removed.
+
+  × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:34:12]
  33 │ <!-- Self-closing void element -->
  34 │ <input id="" name="email" />
@@ -92,7 +99,8 @@ Error:   × Empty `id` attribute can be removed.
     ·            ╰── here
  35 │ 
     ╰────
-Error:   × Empty `id` attribute can be removed.
+
+  × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:38:15]
  37 │ {% if show %}
  38 │     <span id=""></span>

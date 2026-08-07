@@ -1,10 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-
-  × Found 9 lint error(s)
-
-Error:   × Empty `<html>` tag pair.
+  × Empty `<html>` tag pair.
    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:3:2]
  2 │ <!-- No attributes at all -->
  3 │ <html>
@@ -13,7 +10,8 @@ Error:   × Empty `<html>` tag pair.
  4 │ </html>
    ╰────
   help: Remove the empty tag pair or add content.
-Error:   × `<html>` tag should declare a `lang` attribute.
+
+  × `<html>` tag should declare a `lang` attribute.
    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:3:2]
  2 │ <!-- No attributes at all -->
  3 │ <html>
@@ -22,7 +20,8 @@ Error:   × `<html>` tag should declare a `lang` attribute.
  4 │ </html>
    ╰────
   help: Add `lang="en"` (or the appropriate language code).
-Error:   × `<html>` tag should declare a `lang` attribute.
+
+  × `<html>` tag should declare a `lang` attribute.
    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:7:2]
  6 │ <!-- Has other attributes but no lang -->
  7 │ <html class="no-js" dir="ltr">
@@ -31,7 +30,8 @@ Error:   × `<html>` tag should declare a `lang` attribute.
  8 │ </html>
    ╰────
   help: Add `lang="en"` (or the appropriate language code).
-Error:   × Empty `<HTML>` tag pair.
+
+  × Empty `<HTML>` tag pair.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:11:2]
  10 │ <!-- Case-insensitive tag name -->
  11 │ <HTML>
@@ -40,7 +40,8 @@ Error:   × Empty `<HTML>` tag pair.
  12 │ </HTML>
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × `<html>` tag should declare a `lang` attribute.
+
+  × `<html>` tag should declare a `lang` attribute.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:11:2]
  10 │ <!-- Case-insensitive tag name -->
  11 │ <HTML>
@@ -49,7 +50,8 @@ Error:   × `<html>` tag should declare a `lang` attribute.
  12 │ </HTML>
     ╰────
   help: Add `lang="en"` (or the appropriate language code).
-Error:   × Empty `<html>` tag pair.
+
+  × Empty `<html>` tag pair.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:16:6]
  15 │ {% if base_template %}
  16 │     <html>
@@ -58,7 +60,8 @@ Error:   × Empty `<html>` tag pair.
  17 │     </html>
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × `<html>` tag should declare a `lang` attribute.
+
+  × `<html>` tag should declare a `lang` attribute.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:16:6]
  15 │ {% if base_template %}
  16 │     <html>
@@ -67,7 +70,8 @@ Error:   × `<html>` tag should declare a `lang` attribute.
  17 │     </html>
     ╰────
   help: Add `lang="en"` (or the appropriate language code).
-Error:   × `<html>` tag should declare a `lang` attribute.
+
+  × `<html>` tag should declare a `lang` attribute.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:21:2]
  20 │ <!-- Multi-line opening tag with no lang -->
  21 │ <html
@@ -76,7 +80,8 @@ Error:   × `<html>` tag should declare a `lang` attribute.
  22 │     xmlns="http://www.w3.org/1999/xhtml"
     ╰────
   help: Add `lang="en"` (or the appropriate language code).
-Error:   × `<html>` tag should declare a `lang` attribute.
+
+  × `<html>` tag should declare a `lang` attribute.
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:27:2]
  26 │ <!-- XHTML `xml:lang` alone: HTML5 ignores it; screen readers need `lang` -->
  27 │ <html xml:lang="en">

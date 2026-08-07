@@ -1,10 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-
-  × Found 10 lint error(s)
-
-Error:   × Empty `<div>` tag pair.
+  × Empty `<div>` tag pair.
    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:2:2]
  1 │ <!-- Plain empty pair -->
  2 │ <div></div>
@@ -13,7 +10,8 @@ Error:   × Empty `<div>` tag pair.
  3 │ 
    ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<span>` tag pair.
+
+  × Empty `<span>` tag pair.
    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:5:2]
  4 │ <!-- Whitespace-only content (newlines + indent) is still empty -->
  5 │ <span>
@@ -22,7 +20,8 @@ Error:   × Empty `<span>` tag pair.
  6 │     </span>
    ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<p>` tag pair.
+
+  × Empty `<p>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:9:2]
   8 │ <!-- Tab/space-only content -->
   9 │ <p>   </p>
@@ -31,7 +30,8 @@ Error:   × Empty `<p>` tag pair.
  10 │ 
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<DIV>` tag pair.
+
+  × Empty `<DIV>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:12:2]
  11 │ <!-- Case-insensitive tag name -->
  12 │ <DIV></DIV>
@@ -40,7 +40,8 @@ Error:   × Empty `<DIV>` tag pair.
  13 │ 
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<header>` tag pair.
+
+  × Empty `<header>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:16:6]
  15 │ <article>
  16 │     <header></header>
@@ -49,7 +50,8 @@ Error:   × Empty `<header>` tag pair.
  17 │     <p>Body</p>
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<script>` tag pair.
+
+  × Empty `<script>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:21:2]
  20 │ <!-- Empty inline `<script>`/`<style>` with no attribute do nothing -->
  21 │ <script></script>
@@ -58,7 +60,8 @@ Error:   × Empty `<script>` tag pair.
  22 │ <style></style>
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<style>` tag pair.
+
+  × Empty `<style>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:22:2]
  21 │ <script></script>
  22 │ <style></style>
@@ -67,7 +70,8 @@ Error:   × Empty `<style>` tag pair.
  23 │ 
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<button>` tag pair.
+
+  × Empty `<button>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:25:2]
  24 │ <!-- Form controls without an accessible name -->
  25 │ <button></button>
@@ -76,7 +80,8 @@ Error:   × Empty `<button>` tag pair.
  26 │ 
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<section>` tag pair.
+
+  × Empty `<section>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:28:2]
  27 │ <!-- Generic containers without identifying attributes -->
  28 │ <section></section>
@@ -85,7 +90,8 @@ Error:   × Empty `<section>` tag pair.
  29 │ <aside></aside>
     ╰────
   help: Remove the empty tag pair or add content.
-Error:   × Empty `<aside>` tag pair.
+
+  × Empty `<aside>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:29:2]
  28 │ <section></section>
  29 │ <aside></aside>

@@ -6,7 +6,7 @@ use djangofmt_benchmark::{
 };
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
-use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
+use miette::{GraphicalReportHandler, GraphicalTheme};
 
 fn main() {
     divan::main();
@@ -19,17 +19,14 @@ static DIAGNOSTIC_HEAVY: [&TestFile; 3] = [
     &JINJA_TEMPLATE_LARGE,
 ];
 
-/// Every diagnostic of a file, rendered to the terminal output the user sees.
+/// Every diagnostic of a file, rendered as its own self-contained block.
 #[divan::bench(args = DIAGNOSTIC_HEAVY)]
 fn render(bencher: divan::Bencher, template: &'static TestFile) {
     let mut parser = Parser::new(template.code, template.profile.into(), vec![]);
     let ast = parser.parse_root().expect("Parsing to succeed");
     let diagnostics = check_ast(template.code, &ast, &Settings::all());
     assert!(!diagnostics.is_empty(), "{} tripped no rule", template.name);
-    let file_diagnostics = FileDiagnostics::new(
-        NamedSource::new(template.name, template.code.to_string()),
-        diagnostics,
-    );
+    let file_diagnostics = FileDiagnostics::new(template.name, template.code, diagnostics);
 
     // Pinned to what an interactive `check` renders, so the terminal the
     // benchmark happens to run in can't change the result.
@@ -37,8 +34,8 @@ fn render(bencher: divan::Bencher, template: &'static TestFile) {
 
     bencher.counter(file_diagnostics.len()).bench(|| {
         let mut out = String::new();
-        handler
-            .render_report(&mut out, divan::black_box(&file_diagnostics))
+        divan::black_box(&file_diagnostics)
+            .render(&handler, &mut out)
             .expect("rendering to a String cannot fail");
         out
     });

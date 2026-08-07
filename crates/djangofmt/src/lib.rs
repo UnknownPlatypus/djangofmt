@@ -52,7 +52,6 @@ pub fn run(
     }: Args,
 ) -> error::Result<ExitStatus> {
     setup_tracing(global_options.log_level());
-    setup_miette()?;
 
     match command {
         Some(args::Commands::Check(ref check_args)) => commands::check::check(check_args),
@@ -92,15 +91,4 @@ fn is_stdin(files: &[PathBuf], stdin_filename: Option<&Path>) -> bool {
         return false;
     };
     file == stdin_sentinel
-}
-
-fn setup_miette() -> error::Result<()> {
-    miette::set_hook(Box::new(|_| {
-        Box::new(
-            // `oxc-miette` always renders related errors as nested, so the
-            // upstream `show_related_errors_as_nested()` opt-in is gone.
-            miette::MietteHandlerOpts::new().build(),
-        )
-    }))?;
-    Ok(())
 }

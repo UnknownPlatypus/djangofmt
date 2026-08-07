@@ -142,7 +142,8 @@ impl Edit {
     /// End offset (exclusive).
     #[must_use]
     pub const fn end(&self) -> usize {
-        (self.range.offset() + self.range.len()) as usize
+        // Widen before adding: two clamped `u32::MAX` spans overflow a `u32`.
+        self.range.offset() as usize + self.range.len() as usize
     }
 
     /// Replacement / insertion content, or [`None`] for pure deletion.
@@ -324,6 +325,14 @@ mod tests {
         assert_eq!(edit.start(), 4);
         assert_eq!(edit.end(), 4);
         assert_eq!(edit.content(), Some("xyz"));
+    }
+
+    #[test]
+    fn edit_end_does_not_overflow_clamped_spans() {
+        // `span` clamps both offset and length to `u32::MAX`; summing them
+        // inside a `u32` would wrap.
+        let edit = Edit::deletion(span(usize::MAX, usize::MAX));
+        assert_eq!(edit.end(), 2 * u32::MAX as usize);
     }
 
     #[test]

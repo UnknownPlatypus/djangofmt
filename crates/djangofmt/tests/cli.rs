@@ -368,10 +368,7 @@ fn check_file_with_lint_error() {
     ----- stdout -----
 
     ----- stderr -----
-
-      × Found 1 lint error(s)
-
-    Error:   × Invalid value 'put' for attribute 'method'.
+      × Invalid value 'put' for attribute 'method'.
        ╭─[[TMP]/test.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─
@@ -426,10 +423,7 @@ fn check_fixable_file_without_fix() {
     ----- stdout -----
 
     ----- stderr -----
-
-      × Found 1 lint error(s)
-
-    Error:   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
+      × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
       │ indentation into translation strings.
        ╭─[[TMP]/test.html:1:3]
      1 │ {% blocktranslate %}Hello{% endblocktranslate %}
