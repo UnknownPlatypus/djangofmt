@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::Element;
 
 use crate::registry::{Rule, RuleCategory};
@@ -36,12 +38,12 @@ impl Violation for MissingImgAlt {
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "`<img>` tag should declare an `alt` attribute.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "`<img>` tag should declare an `alt` attribute.".into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Add `alt=\"\"` for decorative images, or a short description otherwise.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Add `alt=\"\"` for decorative images, or a short description otherwise.".into())
     }
 }
 

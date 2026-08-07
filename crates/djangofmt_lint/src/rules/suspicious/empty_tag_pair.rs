@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Element, Node, NodeKind};
 
 use crate::registry::{Rule, RuleCategory};
@@ -39,12 +41,12 @@ impl Violation for EmptyTagPair {
     const CATEGORY: RuleCategory = RuleCategory::Suspicious;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Empty `<{}>` tag pair.", self.tag)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Empty `<{}>` tag pair.", self.tag).into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Remove the empty tag pair or add content.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Remove the empty tag pair or add content.".into())
     }
 }
 
@@ -87,7 +89,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     let offset = checker.source_offset(element.tag_name);
     checker.report_diagnostic(
         &EmptyTagPair {
-            tag: element.tag_name.to_string(),
+            tag: element.tag_name.into(),
         },
         span(offset, element.tag_name.len()),
     );

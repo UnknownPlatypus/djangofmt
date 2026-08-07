@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt::Debug;
 
 pub use djangofmt_macros::{ViolationMetadata, derive_message_formats};
@@ -53,7 +54,9 @@ pub trait Violation: Debug {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::None;
 
     /// The message to be displayed to the user.
-    fn message(&self) -> String;
+    ///
+    /// Returns a [`Cow`] so the (common) static-message case never allocates.
+    fn message(&self) -> Cow<'static, str>;
 
     /// The static format strings that [`message`](Self::message) could return.
     ///
@@ -63,14 +66,14 @@ pub trait Violation: Debug {
     fn message_formats() -> &'static [&'static str];
 
     /// Optional help text with suggestions for fixing the issue.
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         None
     }
 
     /// A short, imperative summary of what the fix does (e.g. `"Add trimmed"`).
     ///
     /// Set on the diagnostic by [`crate::LintContext::report_diagnostic`].
-    fn fix_title(&self) -> Option<String> {
+    fn fix_title(&self) -> Option<&'static str> {
         None
     }
 }

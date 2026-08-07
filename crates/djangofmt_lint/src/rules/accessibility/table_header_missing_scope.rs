@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Attribute, Element};
 
 use crate::registry::{Rule, RuleCategory};
@@ -56,25 +58,25 @@ impl Violation for TableHeaderMissingScope {
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
+    fn message(&self) -> Cow<'static, str> {
         match &self.kind {
             ScopeViolation::MissingOrEmpty => {
-                "Missing or empty `scope` attribute on `<th>`.".to_string()
+                "Missing or empty `scope` attribute on `<th>`.".into()
             }
             ScopeViolation::InvalidValue { value } => {
-                format!("Invalid `scope` value `{value}` on `<th>`.")
+                format!("Invalid `scope` value `{value}` on `<th>`.").into()
             }
         }
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         Some(match &self.kind {
             ScopeViolation::MissingOrEmpty => {
                 "Add `scope=\"col\"` or `scope=\"row\"` to associate the header with its data."
-                    .to_string()
+                    .into()
             }
             ScopeViolation::InvalidValue { .. } => {
-                "Change `scope` to one of `row`, `col`, `rowgroup`, or `colgroup`.".to_string()
+                "Change `scope` to one of `row`, `col`, `rowgroup`, or `colgroup`.".into()
             }
         })
     }
@@ -118,7 +120,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
             checker.report_diagnostic(
                 &TableHeaderMissingScope {
                     kind: ScopeViolation::InvalidValue {
-                        value: value.to_string(),
+                        value: value.into(),
                     },
                 },
                 span(offset, value.len()),

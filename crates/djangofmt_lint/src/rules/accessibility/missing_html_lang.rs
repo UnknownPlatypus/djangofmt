@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::Element;
 
 use crate::registry::{Rule, RuleCategory};
@@ -40,12 +42,12 @@ impl Violation for MissingHtmlLang {
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "`<html>` tag should declare a `lang` attribute.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "`<html>` tag should declare a `lang` attribute.".into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Add `lang=\"en\"` (or the appropriate language code).".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Add `lang=\"en\"` (or the appropriate language code).".into())
     }
 }
 

@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::NativeAttribute;
 
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -45,19 +47,16 @@ impl Violation for UppercaseFormMethod<'_> {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Form method `{}` should be lowercase.", self.value)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Form method `{}` should be lowercase.", self.value).into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some(format!(
-            "Use `{}` instead.",
-            self.value.to_ascii_lowercase()
-        ))
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some(format!("Use `{}` instead.", self.value.to_ascii_lowercase()).into())
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Lowercase `method` value".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Lowercase `method` value")
     }
 }
 

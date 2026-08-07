@@ -94,6 +94,8 @@ Pick the lifecycle keyword for the rule:
 Import the trait alongside `Violation`:
 
 ```rust
+use std::borrow::Cow;
+
 use crate::violation::{Violation, ViolationMetadata};
 ```
 
@@ -105,17 +107,18 @@ impl Violation for MyRule {
     const CATEGORY: RuleCategory = RuleCategory::Style; // pick the right one
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always; // omit if no fix
 
-    fn message(&self) -> String {
-        // Concise, includes relevant values from fields
+    fn message(&self) -> Cow<'static, str> {
+        // Concise, includes relevant values from fields.
+        // Static text: `"…".into()`; formatted: `format!("…", …).into()`.
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         // Actionable fix suggestion, or None
     }
 
     // Only for rules that produce a fix:
-    fn fix_title(&self) -> Option<String> {
-        Some("Short imperative summary".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Short imperative summary")
     }
 }
 ```

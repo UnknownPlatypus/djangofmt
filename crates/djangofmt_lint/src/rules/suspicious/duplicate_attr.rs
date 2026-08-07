@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::registry::{Rule, RuleCategory};
@@ -35,15 +37,15 @@ impl Violation for DuplicateAttr<'_> {
     const CATEGORY: RuleCategory = RuleCategory::Suspicious;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Duplicate attribute `{}`.", self.name)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Duplicate attribute `{}`.", self.name).into()
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         Some(format!(
             "Remove the duplicate `{}` attribute, or merge its value into the first occurrence (browsers keep the first one).",
             self.name
-        ))
+        ).into())
     }
 }
 

@@ -40,6 +40,8 @@ pub use rule_set::RuleSet;
 pub use settings::{RuleSelection, Settings};
 pub use violation::{Violation, ViolationMetadata};
 
+use std::borrow::Cow;
+
 use markup_fmt::ast::Root;
 use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
 use std::fmt;
@@ -69,13 +71,13 @@ pub struct LintDiagnostic {
     #[diagnostic(code)]
     pub code: &'static str,
     /// Human-readable error message.
-    pub message: String,
+    pub message: Cow<'static, str>,
     /// Source span where the error occurred.
     #[label("here")]
     pub span: SourceSpan,
     /// Optional help text with suggestions.
     #[help]
-    pub help: Option<String>,
+    pub help: Option<Cow<'static, str>>,
     /// Optional fix attached to the diagnostic.
     ///
     /// Stored on the diagnostic; applicability gating happens at apply time.
@@ -84,7 +86,7 @@ pub struct LintDiagnostic {
     ///
     /// Stored separately from `help` so the renderer can mark it as fix-related
     /// (and so a rule's `help()` and `fix_title()` don't fight for the same field).
-    pub fix_title: Option<String>,
+    pub fix_title: Option<&'static str>,
 }
 
 /// A collection of lint diagnostics for a single file.

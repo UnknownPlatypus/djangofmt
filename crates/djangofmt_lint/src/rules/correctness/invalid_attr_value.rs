@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::registry::{Rule, RuleCategory};
@@ -49,18 +51,19 @@ impl Violation for InvalidAttrValue {
     const CATEGORY: RuleCategory = RuleCategory::Correctness;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
+    fn message(&self) -> Cow<'static, str> {
         format!(
             "Invalid value '{}' for attribute '{}'.",
             self.value, self.attribute,
         )
+        .into()
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         if self.allowed.is_empty() {
             None
         } else {
-            Some(format!("Use one of: {}", self.allowed.join(", ")))
+            Some(format!("Use one of: {}", self.allowed.join(", ")).into())
         }
     }
 }
@@ -95,7 +98,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
     if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
         checker.report_diagnostic(
             &InvalidAttrValue {
-                value: (*value_str).to_string(),
+                value: (*value_str).into(),
                 attribute: "method",
                 allowed,
             },

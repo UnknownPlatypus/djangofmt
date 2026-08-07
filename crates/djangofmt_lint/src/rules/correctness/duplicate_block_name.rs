@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
 
 use crate::registry::{Rule, RuleCategory};
@@ -38,16 +40,16 @@ impl Violation for DuplicateBlockName<'_> {
     const CATEGORY: RuleCategory = RuleCategory::Correctness;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Duplicate `{{% block %}}` name `{}`.", self.name)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Duplicate `{{% block %}}` name `{}`.", self.name).into()
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         Some(format!(
             "Rename or remove one of the `{{% block {} %}}` tags; Django requires block names to be \
              unique within a template.",
             self.name
-        ))
+        ).into())
     }
 }
 

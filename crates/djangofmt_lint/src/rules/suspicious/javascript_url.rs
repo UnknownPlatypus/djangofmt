@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::registry::{Rule, RuleCategory};
@@ -43,12 +45,12 @@ impl Violation for JavascriptUrl {
     const CATEGORY: RuleCategory = RuleCategory::Suspicious;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Avoid `javascript:` URLs in `{}`.", self.attribute)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Avoid `javascript:` URLs in `{}`.", self.attribute).into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Use an event handler and a real URL instead.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Use an event handler and a real URL instead.".into())
     }
 }
 

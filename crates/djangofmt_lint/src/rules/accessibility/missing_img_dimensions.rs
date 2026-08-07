@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::Element;
 
 use crate::registry::{Rule, RuleCategory};
@@ -36,15 +38,12 @@ impl Violation for MissingImgDimensions {
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "`<img>` tag should declare both `height` and `width` attributes.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "`<img>` tag should declare both `height` and `width` attributes.".into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some(
-            "Add explicit `height` and `width` to avoid layout shifts as the image loads."
-                .to_string(),
-        )
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Add explicit `height` and `width` to avoid layout shifts as the image loads.".into())
     }
 }
 

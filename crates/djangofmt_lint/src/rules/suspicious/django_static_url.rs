@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::registry::{Rule, RuleCategory};
@@ -41,12 +43,12 @@ impl Violation for DjangoStaticUrl {
     const CATEGORY: RuleCategory = RuleCategory::Suspicious;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Hardcoded static path in `{}`.", self.attribute)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Hardcoded static path in `{}`.", self.attribute).into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Use `{% static 'path/to/file' %}` instead.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Use `{% static 'path/to/file' %}` instead.".into())
     }
 }
 

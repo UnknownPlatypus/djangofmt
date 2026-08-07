@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::fix::FixAvailability;
@@ -49,23 +51,27 @@ impl Violation for RedundantTypeAttr {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
+    fn message(&self) -> Cow<'static, str> {
         format!(
             "Redundant type=\"{}\" on <{}> tag.",
             self.type_value, self.tag
         )
+        .into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some(format!(
-            "Remove the `type` attribute. `<{}>` defaults to `type=\"{}\"`.",
-            self.tag,
-            self.type_value.to_ascii_lowercase()
-        ))
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some(
+            format!(
+                "Remove the `type` attribute. `<{}>` defaults to `type=\"{}\"`.",
+                self.tag,
+                self.type_value.to_ascii_lowercase()
+            )
+            .into(),
+        )
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Remove redundant `type` attribute".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Remove redundant `type` attribute")
     }
 }
 
@@ -103,8 +109,8 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
 
     let mut guard = checker.report_diagnostic(
         &RedundantTypeAttr {
-            tag: tag.to_string(),
-            type_value: (*value_str).to_string(),
+            tag: tag.into(),
+            type_value: (*value_str).into(),
         },
         span(*offset, value_str.len()),
     );

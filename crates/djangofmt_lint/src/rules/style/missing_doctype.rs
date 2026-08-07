@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{NodeKind, Root};
 
 use crate::registry::{Rule, RuleCategory};
@@ -44,12 +46,12 @@ impl Violation for MissingDoctype {
     const CATEGORY: RuleCategory = RuleCategory::Style;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "Missing `<!DOCTYPE html>` declaration.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "Missing `<!DOCTYPE html>` declaration.".into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Add `<!DOCTYPE html>` before the `<html>` tag.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Add `<!DOCTYPE html>` before the `<html>` tag.".into())
     }
 }
 

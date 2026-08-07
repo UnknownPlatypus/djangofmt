@@ -249,7 +249,7 @@ fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
         entries.sort_by(|a, b| a.0.cmp(b.0));
         for (rule, summary) in entries {
             let count = summary.count;
-            if let Some(title) = summary.fix_title.as_deref() {
+            if let Some(title) = summary.fix_title {
                 info!("    {count} × {rule} ({title})");
             } else {
                 info!("    {count} × {rule}");

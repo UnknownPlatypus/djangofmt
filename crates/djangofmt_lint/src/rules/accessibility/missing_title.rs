@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind};
 
 use crate::registry::{Rule, RuleCategory};
@@ -50,17 +52,17 @@ impl Violation for MissingTitle {
     const CATEGORY: RuleCategory = RuleCategory::Accessibility;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "Missing or empty `<title>` in `<head>`.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "Missing or empty `<title>` in `<head>`.".into()
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         Some(match self.kind {
             TitleViolation::Absent => {
-                "Add a `<title>` element with descriptive text inside `<head>`.".to_string()
+                "Add a `<title>` element with descriptive text inside `<head>`.".into()
             }
             TitleViolation::Empty => {
-                "Fill the existing `<title>` element with descriptive text.".to_string()
+                "Fill the existing `<title>` element with descriptive text.".into()
             }
         })
     }
