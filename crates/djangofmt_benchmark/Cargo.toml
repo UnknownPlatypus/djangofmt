@@ -28,6 +28,10 @@ name = "parser"
 
 [[bench]]
 harness = false
+name = "reporter"
+
+[[bench]]
+harness = false
 name = "summary"
 
 [dependencies]
@@ -37,6 +41,7 @@ djangofmt = { path = "../djangofmt" }
 divan = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 markup_fmt = { workspace = true }
+miette = { workspace = true }
 
 [lints]
 workspace = true

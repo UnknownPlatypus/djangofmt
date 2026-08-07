@@ -419,6 +419,7 @@ dependencies = [
  "djangofmt",
  "djangofmt_lint",
  "markup_fmt",
+ "miette",
 ]
 
 [[package]]
