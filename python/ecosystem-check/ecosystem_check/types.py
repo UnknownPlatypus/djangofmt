@@ -116,27 +116,25 @@ class HistoriesForHunks(list[Diff]):
 
 
 class CheckDiff(Serializable):
-    """Difference in check (lint) diagnostics between baseline and comparison."""
+    """Difference in check (lint) behavior between baseline and comparison."""
 
-    def __init__(self, baseline_output: str, comparison_output: str) -> None:
-        self.baseline_output = baseline_output
-        self.comparison_output = comparison_output
+    def __init__(
+        self, baseline_output: str, comparison_output: str, fix_diff: Diff
+    ) -> None:
+        self.fix_diff = fix_diff
 
-        # Split into sorted lines for comparison (diagnostic output order is not guaranteed)
-        baseline_lines = sorted(baseline_output.splitlines(keepends=True))
-        comparison_lines = sorted(comparison_output.splitlines(keepends=True))
-
+        # Sort lines before diffing, diagnostic output order is not guaranteed
         self._diff_lines = list(
             difflib.unified_diff(
-                baseline_lines,
-                comparison_lines,
+                sorted(baseline_output.splitlines(keepends=True)),
+                sorted(comparison_output.splitlines(keepends=True)),
                 fromfile="baseline",
                 tofile="comparison",
             )
         )
 
     def __bool__(self) -> bool:
-        return bool(self._diff_lines)
+        return bool(self._diff_lines or self.fix_diff)
 
     @property
     def diagnostics_added(self) -> int:
@@ -156,30 +154,18 @@ class CheckDiff(Serializable):
 
     def jsonable(self) -> Any:
         return {
-            "baseline": self.baseline_output,
-            "comparison": self.comparison_output,
+            "diagnostics": self._diff_lines,
+            "fixes": self.fix_diff.jsonable(),
         }
 
-    def format_markdown(self) -> str:
-        # Use raw (unsorted) output for display — sorted lines are only for
-        # __bool__ and diagnostics_added/removed counting.
+    def format_markdown(self, repo: ClonedRepository) -> str:
         lines: list[str] = []
-        if self.comparison_output and not self.baseline_output:
-            lines.append("**New diagnostics:**")
-            lines.append(f"```\n{self.comparison_output.strip()}\n```")
-        elif self.baseline_output and not self.comparison_output:
-            lines.append("**Removed diagnostics:**")
-            lines.append(f"```\n{self.baseline_output.strip()}\n```")
-        else:
-            # For two-sided diffs, diff the raw lines for readability.
-            raw_diff = difflib.unified_diff(
-                self.baseline_output.splitlines(keepends=True),
-                self.comparison_output.splitlines(keepends=True),
-                fromfile="baseline",
-                tofile="comparison",
-            )
+        if self.fix_diff:
+            lines.append(self.fix_diff.format_markdown(repo=repo))
+        if self._diff_lines:
+            lines.append("**Diagnostics:**")
             lines.append("```diff")
-            lines.extend(line.rstrip("\n") for line in raw_diff)
+            lines.extend(line.rstrip("\n") for line in self._diff_lines)
             lines.append("```")
         return "\n".join(lines)
 

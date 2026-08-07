@@ -74,7 +74,18 @@ class CliOptions(Serializable):
                 args.extend(("--custom-blocks", self.custom_blocks))
             if command is Command.CHECK:
                 # Select every rule, including preview, for maximum ecosystem coverage.
-                args.extend(("--select", "category:all", "--preview"))
+                # Fixes are applied so they can be reviewed as a source diff.
+                args.extend(
+                    (
+                        "--select",
+                        "category:all",
+                        "--preview",
+                        "--fix",
+                        "--unsafe-fixes",
+                        "--output-format",
+                        "concise",
+                    )
+                )
             return args
         elif executable_name == Formatter.DJADE:
             return []
@@ -204,7 +215,7 @@ class Repository(Serializable):
         Reset the cloned repository to the ref it started at.
         """
         process = await create_subprocess_exec(
-            *["git", "reset", "--hard", "origin/" + self.ref] if self.ref else [],
+            *["git", "reset", "--hard", *(["origin/" + self.ref] if self.ref else [])],
             cwd=checkout_dir,
             env={"GIT_TERMINAL_PROMPT": "0"},
             stdout=PIPE,
