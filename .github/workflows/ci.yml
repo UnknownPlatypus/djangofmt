@@ -123,15 +123,16 @@ jobs:
             cat placeholder-comment.txt
             echo "## \`ecosystem-check\` results"
             cat ecosystem-result
-          } >> full-comment.txt
+          } > full-comment.txt
 
-          # Determine if the comment exceeds 65536 characters
-          char_count=$(wc -c < full-comment.txt)
-          if [ "$char_count" -gt 65536 ]; then
+          # GitHub rejects comment bodies over 65536 characters
+          if [ "$(wc -c < full-comment.txt)" -gt 65536 ]; then
               {
                 cat placeholder-comment.txt
                 echo "## \`ecosystem-check\` results (partial, see full diff [here](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))"
-                cat ecosystem-result
+                # Drop the last line: it may be cut mid-way through a multi-byte character
+                head -c 64000 ecosystem-result | head -n -1
+                printf '\n\n> [!CAUTION]\n> **Truncated:** the full output is %s.\n' "$(du -h ecosystem-result | cut -f1)"
               } > full-comment.txt
           fi
 
