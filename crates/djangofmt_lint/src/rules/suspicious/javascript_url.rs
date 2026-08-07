@@ -1,9 +1,9 @@
 use markup_fmt::ast::{Element, NativeAttribute};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `javascript:` URLs in HTML elements.
@@ -99,7 +99,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
             &JavascriptUrl {
                 attribute: canonical,
             },
-            (*offset, value_str.len()).into(),
+            span(*offset, value_str.len()),
         );
     }
 }

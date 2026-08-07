@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 12 lint error(s)
-
-Error: 
   × Empty `id` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:10]
  1 │ <!-- Empty id -->
@@ -13,7 +10,6 @@ Error:
  3 │ 
    ╰────
 
-Error: 
   × Empty `class` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:5:13]
  4 │ <!-- Empty class -->
@@ -23,7 +19,6 @@ Error:
  6 │ 
    ╰────
 
-Error: 
   × Empty `id` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:8:8]
  7 │ <!-- Both empty on the same element -->
@@ -33,7 +28,6 @@ Error:
  9 │ 
    ╰────
 
-Error: 
   × Empty `ID` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:11:10]
  10 │ <!-- Case-insensitive attribute name -->
@@ -43,7 +37,6 @@ Error:
  12 │ <div CLASS=""></div>
     ╰────
 
-Error: 
   × Empty `CLASS` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:12:13]
  11 │ <div ID=""></div>
@@ -53,7 +46,6 @@ Error:
  13 │ 
     ╰────
 
-Error: 
   × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:15:10]
  14 │ <!-- Case-insensitive tag name -->
@@ -63,7 +55,6 @@ Error:
  16 │ 
     ╰────
 
-Error: 
   × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:18:10]
  17 │ <!-- Single-quoted empty values -->
@@ -73,7 +64,6 @@ Error:
  19 │ <div class=''></div>
     ╰────
 
-Error: 
   × Empty `class` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:19:13]
  18 │ <div id=''></div>
@@ -83,7 +73,6 @@ Error:
  20 │ 
     ╰────
 
-Error: 
   × Empty `class` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:24:12]
  23 │     role="banner"
@@ -93,7 +82,6 @@ Error:
  25 │ ></div>
     ╰────
 
-Error: 
   × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:29:9]
  28 │ <div
@@ -103,7 +91,6 @@ Error:
  30 │     role="banner"
     ╰────
 
-Error: 
   × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:34:12]
  33 │ <!-- Self-closing void element -->
@@ -113,7 +100,6 @@ Error:
  35 │ 
     ╰────
 
-Error: 
   × Empty `id` attribute can be removed.
     ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:38:15]
  37 │ {% if show %}

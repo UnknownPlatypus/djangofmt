@@ -3,10 +3,11 @@ use djangofmt_lint::{
 };
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
-use miette::{NamedSource, SourceCode};
+use miette::{SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rustc_hash::FxHashMap;
+use std::fmt::Write;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -105,7 +106,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     for result in &results {
         total_diagnostics += result.file_diagnostics.len();
         total_applied += result.applied_count;
-        for diag in &result.file_diagnostics.related {
+        for diag in &result.file_diagnostics.diagnostics {
             let Some(fix) = diag.fix.as_ref() else {
                 continue;
             };
@@ -121,13 +122,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     }
 
     match config.output_format {
-        OutputFormat::Full => {
-            for result in &results {
-                if !result.file_diagnostics.is_empty() {
-                    error!("{:?}", miette::Report::new(result.file_diagnostics.clone()));
-                }
-            }
-        }
+        OutputFormat::Full => print_full(&results),
         OutputFormat::Concise => print_concise(&results, threshold),
     }
 
@@ -151,12 +146,28 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     Ok(ExitStatus::Failure)
 }
 
+/// Render each diagnostic as its own block, with source snippet and help text.
+fn print_full(results: &[CheckResult]) {
+    for result in results {
+        if result.file_diagnostics.is_empty() {
+            continue;
+        }
+        // One record per file: `error!` adds its own newline, so rendering each
+        // diagnostic separately would double the blank line between blocks.
+        let mut rendered = String::new();
+        for report in result.file_diagnostics.reports() {
+            write!(rendered, "{report:?}").expect("rendering to a String cannot fail");
+        }
+        error!("{}", rendered.trim_start_matches('\n'));
+    }
+}
+
 /// Render one `path:line:col: rule [*] message` line per diagnostic.
 fn print_concise(results: &[CheckResult], threshold: Applicability) {
     for result in results {
         let source = &result.file_diagnostics.source_code;
         let path = relativize_path(&result.path);
-        for diag in &result.file_diagnostics.related {
+        for diag in &result.file_diagnostics.diagnostics {
             let (line, column) = source
                 .read_span(&diag.span, 0, 0)
                 .map_or((0, 0), |contents| {
@@ -278,7 +289,8 @@ fn check_path(
                     FileDiagnostics::empty()
                 } else {
                     FileDiagnostics::new(
-                        NamedSource::new(relativize_path(path), result.source),
+                        relativize_path(path),
+                        result.source,
                         result.remaining_diagnostics,
                     )
                 };
@@ -326,7 +338,7 @@ fn check_path(
     let file_diagnostics = if diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
-        FileDiagnostics::new(NamedSource::new(relativize_path(path), source), diagnostics)
+        FileDiagnostics::new(relativize_path(path), source, diagnostics)
     };
 
     Ok(CheckResult {

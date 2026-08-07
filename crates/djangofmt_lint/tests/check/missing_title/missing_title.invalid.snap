@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 13 lint error(s)
-
-Error: 
   × Empty `<head>` tag pair.
    ╭─[tests/check/missing_title/missing_title.invalid.html:3:6]
  2 │ <html lang="en">
@@ -14,7 +11,6 @@ Error:
    ╰────
   help: Remove the empty tag pair or add content.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
    ╭─[tests/check/missing_title/missing_title.invalid.html:3:6]
  2 │ <html lang="en">
@@ -25,7 +21,6 @@ Error:
    ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:9:6]
   8 │ <html lang="en">
@@ -36,7 +31,6 @@ Error:
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:17:6]
  16 │ <HTML LANG="en">
@@ -47,7 +41,6 @@ Error:
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:23:2]
  22 │ <!-- <head> without an enclosing <html> -->
@@ -58,7 +51,6 @@ Error:
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:29:6]
  28 │ {% if base_template %}
@@ -69,7 +61,6 @@ Error:
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:36:6]
  35 │ <html lang="en">
@@ -80,7 +71,6 @@ Error:
     ╰────
   help: Fill the existing `<title>` element with descriptive text.
 
-Error: 
   × Empty `<title>` tag pair.
     ╭─[tests/check/missing_title/missing_title.invalid.html:37:10]
  36 │     <head>
@@ -91,7 +81,6 @@ Error:
     ╰────
   help: Remove the empty tag pair or add content.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:43:6]
  42 │ <html lang="en">
@@ -102,7 +91,6 @@ Error:
     ╰────
   help: Fill the existing `<title>` element with descriptive text.
 
-Error: 
   × Empty `<title>` tag pair.
     ╭─[tests/check/missing_title/missing_title.invalid.html:44:10]
  43 │     <head>
@@ -113,7 +101,6 @@ Error:
     ╰────
   help: Remove the empty tag pair or add content.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:50:6]
  49 │ <html lang="en">
@@ -124,7 +111,6 @@ Error:
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:61:6]
  60 │ <html amp lang="en">
@@ -135,7 +121,6 @@ Error:
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-Error: 
   × Empty `<body>` tag pair.
     ╭─[tests/check/missing_title/missing_title.invalid.html:66:6]
  65 │     </head>

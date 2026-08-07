@@ -2,11 +2,11 @@ use std::net::IpAddr;
 
 use markup_fmt::ast::NativeAttribute;
 
-use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::srcset_candidates;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `http://` URLs in HTML attributes that load or link external resources.
@@ -115,11 +115,11 @@ fn report_http_scheme(url: &str, offset: usize, attribute: &'static str, checker
     if !trimmed[..HTTP_SCHEME.len()].eq_ignore_ascii_case(HTTP_SCHEME) || is_local_host(rest) {
         return;
     }
-    let scheme_span = (offset + url.len() - trimmed.len(), HTTP_SCHEME.len());
-    let mut guard = checker.report_diagnostic(&UseHttps { attribute }, scheme_span.into());
+    let scheme_span = span(offset + url.len() - trimmed.len(), HTTP_SCHEME.len());
+    let mut guard = checker.report_diagnostic(&UseHttps { attribute }, scheme_span);
     guard.set_fix(Fix::unsafe_edit(Edit::replacement(
         HTTPS_SCHEME,
-        scheme_span.into(),
+        scheme_span,
     )));
 }
 

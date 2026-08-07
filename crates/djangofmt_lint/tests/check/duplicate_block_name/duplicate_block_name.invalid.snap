@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 5 lint error(s)
-
-Error: 
   × Duplicate `{% block %}` name `title`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:3:10]
  2 │ {% block title %}Title 1{% endblock %}
@@ -14,7 +11,6 @@ Error:
    ╰────
   help: Rename or remove one of the `{% block title %}` tags; Django requires block names to be unique within a template.
 
-Error: 
   × Duplicate `{% block %}` name `header`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:7:10]
  6 │ {% block header %}a{% endblock %}
@@ -25,7 +21,6 @@ Error:
    ╰────
   help: Rename or remove one of the `{% block header %}` tags; Django requires block names to be unique within a template.
 
-Error: 
   × Duplicate `{% block %}` name `header`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:8:10]
  7 │ {% block header %}b{% endblock %}
@@ -36,7 +31,6 @@ Error:
    ╰────
   help: Rename or remove one of the `{% block header %}` tags; Django requires block names to be unique within a template.
 
-Error: 
   × Duplicate `{% block %}` name `content`.
     ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:12:14]
  11 │ {% block content %}
@@ -47,7 +41,6 @@ Error:
     ╰────
   help: Rename or remove one of the `{% block content %}` tags; Django requires block names to be unique within a template.
 
-Error: 
   × Duplicate `{% block %}` name `sidebar`.
     ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:19:14]
  18 │ {% else %}

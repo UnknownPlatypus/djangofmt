@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 6 lint error(s)
-
-Error: 
   × Invalid value 'put' for attribute 'method'.
    ╭─[tests/check/form_method/form_method.invalid.html:2:15]
  1 │ <!-- Invalid methods -->
@@ -14,7 +11,6 @@ Error:
    ╰────
   help: Use one of: get, post, dialog
 
-Error: 
   × Invalid value 'delete' for attribute 'method'.
    ╭─[tests/check/form_method/form_method.invalid.html:3:15]
  2 │ <form method="put">Submit</form>
@@ -25,7 +21,6 @@ Error:
    ╰────
   help: Use one of: get, post, dialog
 
-Error: 
   × Invalid value 'patch' for attribute 'method'.
    ╭─[tests/check/form_method/form_method.invalid.html:4:15]
  3 │ <form method="delete">Submit</form>
@@ -36,7 +31,6 @@ Error:
    ╰────
   help: Use one of: get, post, dialog
 
-Error: 
   × Invalid value 'invalid' for attribute 'method'.
    ╭─[tests/check/form_method/form_method.invalid.html:8:19]
  7 │ {% if show_form %}
@@ -47,7 +41,6 @@ Error:
    ╰────
   help: Use one of: get, post, dialog
 
-Error: 
   × Invalid value 'patch' for attribute 'method'.
     ╭─[tests/check/form_method/form_method.invalid.html:13:19]
  12 │ <div>
@@ -58,7 +51,6 @@ Error:
     ╰────
   help: Use one of: get, post, dialog
 
-Error: 
   × Invalid value 'delete' for attribute 'method'.
     ╭─[tests/check/form_method/form_method.invalid.html:17:28]
  16 │ <!-- Jinja block as attribute -->

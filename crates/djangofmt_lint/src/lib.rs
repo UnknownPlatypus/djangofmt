@@ -41,12 +41,27 @@ pub use settings::{RuleSelection, Settings};
 pub use violation::{Violation, ViolationMetadata};
 
 use markup_fmt::ast::Root;
-use miette::{Diagnostic, NamedSource, SourceSpan};
+use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
+use std::fmt;
+use std::sync::{Arc, LazyLock};
+
+/// Narrow a `usize` byte offset or length to the `u32` `oxc-miette` stores.
+///
+/// Files larger than 4 GiB are not a supported input, so this saturates.
+#[must_use]
+pub fn clamp_offset(value: usize) -> u32 {
+    u32::try_from(value).unwrap_or(u32::MAX)
+}
+
+/// Build a [`SourceSpan`] from `usize` byte offsets.
+#[must_use]
+pub fn span(start: usize, len: usize) -> SourceSpan {
+    SourceSpan::new(clamp_offset(start).into(), clamp_offset(len))
+}
 
 /// A single lint diagnostic without source code.
 ///
-/// Source code is added later via [`FileDiagnostics`] to avoid cloning
-/// the entire file content for each diagnostic.
+/// Source code is attached at render time by [`FileDiagnostics::reports`].
 #[derive(Debug, Clone, Diagnostic, thiserror::Error)]
 #[error("{message}")]
 pub struct LintDiagnostic {
@@ -74,48 +89,65 @@ pub struct LintDiagnostic {
 
 /// A collection of lint diagnostics for a single file.
 ///
-/// This struct holds the source code once and references it for all diagnostics,
-/// avoiding the need to clone the source for each individual diagnostic.
-#[derive(Debug, Clone, Diagnostic, thiserror::Error)]
-#[error("Found {} lint error(s)", self.related.len())]
+/// The source is held once, behind an [`Arc`], and shared with every
+/// diagnostic at render time.
+#[derive(Debug, Clone)]
 pub struct FileDiagnostics {
     /// The source code of the file.
-    #[source_code]
-    pub source_code: NamedSource<String>,
+    pub source_code: NamedSource<Arc<str>>,
     /// All diagnostics found in this file.
-    #[related]
-    pub related: Vec<LintDiagnostic>,
+    pub diagnostics: Vec<LintDiagnostic>,
 }
 
 impl FileDiagnostics {
     /// Create a new `FileDiagnostics` from source code and diagnostics.
     #[must_use]
-    pub const fn new(source_code: NamedSource<String>, diagnostics: Vec<LintDiagnostic>) -> Self {
+    pub fn new(
+        name: impl AsRef<str>,
+        source: impl Into<Arc<str>>,
+        diagnostics: Vec<LintDiagnostic>,
+    ) -> Self {
         Self {
-            source_code,
-            related: diagnostics,
+            source_code: NamedSource::new(name, source.into()),
+            diagnostics,
         }
     }
 
     /// Create a new empty `FileDiagnostics`.
+    ///
+    /// The empty source is shared: this is on the path of every clean file.
     #[must_use]
     pub fn empty() -> Self {
+        static EMPTY: LazyLock<Arc<str>> = LazyLock::new(|| Arc::from(""));
         Self {
-            source_code: NamedSource::new("", String::new()),
-            related: vec![],
+            source_code: NamedSource::new("", Arc::clone(&EMPTY)),
+            diagnostics: Vec::new(),
         }
     }
 
     /// Returns true if there are no diagnostics.
     #[must_use]
     pub const fn is_empty(&self) -> bool {
-        self.related.is_empty()
+        self.diagnostics.is_empty()
     }
 
     /// Returns the number of diagnostics.
     #[must_use]
     pub const fn len(&self) -> usize {
-        self.related.len()
+        self.diagnostics.len()
+    }
+
+    /// Each diagnostic paired with the file's source, ready to render on its own.
+    pub fn reports(&self) -> impl Iterator<Item = Report> + '_ {
+        self.diagnostics.iter().map(|diagnostic| {
+            Report::new(diagnostic.clone()).with_source_code(self.source_code.clone())
+        })
+    }
+
+    /// Render each diagnostic as a standalone block, propagating `handler` errors.
+    pub fn render(&self, handler: &GraphicalReportHandler, out: &mut String) -> fmt::Result {
+        self.reports()
+            .try_for_each(|report| handler.render_report(out, report.as_ref()))
     }
 }
 

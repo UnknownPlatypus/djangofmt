@@ -1,10 +1,10 @@
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
 use markup_fmt::parser::parse_jinja_tag_name;
 
-use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `{% blocktranslate %}` / `{% blocktrans %}` blocks that omit
@@ -83,7 +83,7 @@ pub fn check(block: &JinjaBlock<'_, Node<'_>>, checker: &Checker<'_>) {
         return;
     }
 
-    let span = (open_tag.start, open_tag.content.len()).into();
+    let span = span(open_tag.start, open_tag.content.len());
     let Some(mut guard) = checker.report_diagnostic_if_enabled(&UntrimmedBlocktranslate, span)
     else {
         return;

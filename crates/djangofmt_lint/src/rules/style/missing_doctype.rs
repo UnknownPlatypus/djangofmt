@@ -1,8 +1,8 @@
 use markup_fmt::ast::{NodeKind, Root};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for HTML documents that contain an `<html>` tag but no `<!DOCTYPE html>` declaration.
@@ -80,7 +80,7 @@ pub fn check(root: &Root<'_>, checker: &Checker<'_>) {
     };
 
     let offset = checker.source_offset(html.tag_name);
-    checker.report_diagnostic(&MissingDoctype, (offset, html.tag_name.len()).into());
+    checker.report_diagnostic(&MissingDoctype, span(offset, html.tag_name.len()));
 }
 
 /// Returns `true` if `content` is the body of a Jinja `{% extends %}` tag.

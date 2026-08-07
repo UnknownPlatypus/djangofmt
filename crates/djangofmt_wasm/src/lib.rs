@@ -4,7 +4,7 @@ use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
 use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
 use markup_fmt::parser::Parser;
-use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
+use miette::{GraphicalReportHandler, GraphicalTheme};
 use serde::Serialize;
 use std::path::PathBuf;
 use tsify::Tsify;
@@ -210,21 +210,12 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         return Ok(result);
     }
 
-    let file_diagnostics =
-        FileDiagnostics::new(NamedSource::new("", source.to_string()), diagnostics);
+    let file_diagnostics = FileDiagnostics::new("", source, diagnostics);
     let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode());
     let mut output = String::new();
-    handler
-        .render_report(&mut output, &file_diagnostics)
+    file_diagnostics
+        .render(&handler, &mut output)
         .map_err(into_error)?;
-
-    // Drop the redundant 2-line `× Found N lint error(s)` header.
-    let skip_pos = output
-        .char_indices()
-        .filter(|(_, c)| *c == '\n')
-        .nth(1)
-        .map_or(0, |(i, _)| i + 1);
-    output.drain(..skip_pos);
 
     let result = LintResult::new(error_count, output);
     Ok(result)

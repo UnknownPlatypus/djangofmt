@@ -1,10 +1,10 @@
 use markup_fmt::ast::NativeAttribute;
 
-use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for leading or trailing whitespace in the `action` attribute of `<form>` elements.
@@ -87,7 +87,7 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    let span = (*offset, value_str.len()).into();
+    let span = span(*offset, value_str.len());
     let mut guard = checker.report_diagnostic(&FormActionWhitespace, span);
 
     let edit = if trimmed.is_empty() {

@@ -1,5 +1,6 @@
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
+use crate::span;
 
 /// Builds a safe fix that deletes a whole native attribute.
 ///
@@ -20,7 +21,7 @@ pub fn delete_attr_fix(
     let name_start = ctx.source_offset(name);
     let attr_end = value_offset + value_str.len() + usize::from(quoted);
     let fix_start = reverse_consume_ws(ctx.source().as_bytes(), name_start);
-    Fix::safe_edit(Edit::deletion((fix_start, attr_end - fix_start).into()))
+    Fix::safe_edit(Edit::deletion(span(fix_start, attr_end - fix_start)))
 }
 
 /// Walk backwards from `offset` over ASCII whitespace bytes in `source`,

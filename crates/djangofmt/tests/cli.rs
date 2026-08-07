@@ -219,19 +219,20 @@ fn format_stdin_jinja_ignore_directive() {
 fn format_stdin_parse_error_exits_2() {
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
-        @r#"
+        @r###"
     success: false
     exit_code: 2
     ----- stdout -----
 
     ----- stderr -----
+
       × expected close tag for opening tag <div>
        ╭─[<unknown>:1:1]
      1 │ <div   class="foo"  >
        · ─┬─
        ·  ╰── here
        ╰────
-    "#);
+    "###);
 }
 
 #[test]
@@ -361,23 +362,22 @@ fn check_clean_file() {
 #[test]
 fn check_file_with_lint_error() {
     let project = Project::new().file("test.html", "<form method=\"put\"></form>\n");
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r###"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-      × Found 1 lint error(s)
-      ╰─▶   × Invalid value 'put' for attribute 'method'.
-             ╭─[[TMP]/test.html:1:15]
-           1 │ <form method="put"></form>
-             ·               ─┬─
-             ·                ╰── here
-             ╰────
-            help: Use one of: get, post, dialog
+      × Invalid value 'put' for attribute 'method'.
+       ╭─[[TMP]/test.html:1:15]
+     1 │ <form method="put"></form>
+       ·               ─┬─
+       ·                ╰── here
+       ╰────
+      help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "#);
+    "###);
 }
 
 #[test]
@@ -417,25 +417,24 @@ fn check_nonexistent_file() {
 fn check_fixable_file_without_fix() {
     let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
     let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r###"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-      × Found 1 lint error(s)
-      ╰─▶   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
-            │ indentation into translation strings.
-             ╭─[[TMP]/test.html:1:3]
-           1 │ {% blocktranslate %}Hello{% endblocktranslate %}
-             ·   ────────┬───────
-             ·           ╰── here
-             ╰────
-            help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate
-                  trimmed %}...{% endblocktranslate %}`.
+      × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
+      │ indentation into translation strings.
+       ╭─[[TMP]/test.html:1:3]
+     1 │ {% blocktranslate %}Hello{% endblocktranslate %}
+       ·   ────────┬───────
+       ·           ╰── here
+       ╰────
+      help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed
+            %}...{% endblocktranslate %}`.
 
     Found 1 errors. [*] 1 fixable with the --fix option.
-    "#);
+    "###);
     // Ensure we didn't apply anything without --fix.
     assert_eq!(project.read("test.html"), original);
 }
@@ -485,12 +484,13 @@ fn check_fixable_file_with_show_fixes() {
 #[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
-    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r###"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
+
       × unclosed {% if %} block.
        ╭─[[TMP]/test.html:1:4]
      1 │ {% if x %}
@@ -502,5 +502,5 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
             finding the end tag.
 
     Couldn't check 1 files!
-    "#);
+    "###);
 }

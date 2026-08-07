@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 1 lint error(s)
-
-Error: 
   × Missing `<!DOCTYPE html>` declaration.
    ╭─[tests/check/missing_doctype/missing_doctype_load_tag.invalid.html:4:2]
  3 │ {% load static %}

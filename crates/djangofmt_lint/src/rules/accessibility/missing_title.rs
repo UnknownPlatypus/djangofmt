@@ -1,8 +1,8 @@
 use markup_fmt::ast::{Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum TitleViolation {
@@ -75,10 +75,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     };
 
     let offset = checker.source_offset(element.tag_name);
-    checker.report_diagnostic(
-        &MissingTitle { kind },
-        (offset, element.tag_name.len()).into(),
-    );
+    checker.report_diagnostic(&MissingTitle { kind }, span(offset, element.tag_name.len()));
 }
 
 /// Outcome of inspecting a `<head>`'s descendants for a `<title>`.

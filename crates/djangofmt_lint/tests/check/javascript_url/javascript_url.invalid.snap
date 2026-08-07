@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 16 lint error(s)
-
-Error: 
   × Avoid `javascript:` URLs in `href`.
    ╭─[tests/check/javascript_url/javascript_url.invalid.html:2:10]
  1 │ <!-- a/href (djLint H019) -->
@@ -14,7 +11,6 @@ Error:
    ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
    ╭─[tests/check/javascript_url/javascript_url.invalid.html:3:10]
  2 │ <a href="javascript:void(0)">Link</a>
@@ -25,7 +21,6 @@ Error:
    ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
    ╭─[tests/check/javascript_url/javascript_url.invalid.html:4:10]
  3 │ <a href="javascript:alert('xss')">Link</a>
@@ -36,7 +31,6 @@ Error:
    ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
    ╭─[tests/check/javascript_url/javascript_url.invalid.html:7:10]
  6 │ <!-- Jinja tag in link text must not mask the violation -->
@@ -47,7 +41,6 @@ Error:
    ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `action`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:10:15]
   9 │ <!-- form/action (djLint H019) -->
@@ -58,7 +51,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `data-url`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:13:14]
  12 │ <!-- a/data-url -->
@@ -69,7 +61,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:16:12]
  15 │ <!-- div/span/input scopes -->
@@ -80,7 +71,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:17:13]
  16 │ <div href="javascript:doStuff()">Link</div>
@@ -91,7 +81,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:18:14]
  17 │ <span href="javascript:doStuff()">Link</span>
@@ -102,7 +91,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `data-url`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:19:16]
  18 │ <input href="javascript:doStuff()">
@@ -113,7 +101,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `data-url`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:20:17]
  19 │ <div data-url="javascript:doStuff()">Link</div>
@@ -124,7 +111,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `data-url`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:21:18]
  20 │ <span data-url="javascript:doStuff()">Link</span>
@@ -135,7 +121,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:23:10]
  22 │ <!-- Case-insensitive -->
@@ -146,7 +131,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:24:10]
  23 │ <a href="JavaScript:void(0)">Link</a>
@@ -157,7 +141,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:27:10]
  26 │ <!-- Leading whitespace before scheme -->
@@ -168,7 +151,6 @@ Error:
     ╰────
   help: Use an event handler and a real URL instead.
 
-Error: 
   × Avoid `javascript:` URLs in `href`.
     ╭─[tests/check/javascript_url/javascript_url.invalid.html:31:14]
  30 │ {% if show_link %}

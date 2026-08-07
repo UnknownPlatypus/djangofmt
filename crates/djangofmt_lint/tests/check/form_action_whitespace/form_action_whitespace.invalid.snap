@@ -1,9 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Found 13 lint error(s)
-
-Error: 
   × Extra whitespace found in form `action`.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:2:15]
  1 │ <!-- Leading whitespace -->
@@ -14,7 +11,6 @@ Error:
    ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Hardcoded internal URL in `action`.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:5:15]
  4 │ <!-- Trailing whitespace -->
@@ -25,7 +21,6 @@ Error:
    ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-Error: 
   × Extra whitespace found in form `action`.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:5:15]
  4 │ <!-- Trailing whitespace -->
@@ -36,7 +31,6 @@ Error:
    ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:8:15]
  7 │ <!-- Both -->
@@ -47,7 +41,6 @@ Error:
    ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:11:15]
  10 │ <!-- Whitespace-only value -->
@@ -58,7 +51,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:14:15]
  13 │ <!-- Tab and newline characters -->
@@ -70,7 +62,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:18:15]
  17 │ <!-- Case-insensitive tag name -->
@@ -81,7 +72,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Hardcoded internal URL in `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:19:15]
  18 │ <FORM action=" /submit/ "></FORM>
@@ -92,7 +82,6 @@ Error:
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:19:15]
  18 │ <FORM action=" /submit/ "></FORM>
@@ -103,7 +92,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:22:15]
  21 │ <!-- Case-insensitive attribute name -->
@@ -114,7 +102,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:25:15]
  24 │ <!-- Single-quoted -->
@@ -125,7 +112,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:30:13]
  29 │     method="post"
@@ -136,7 +122,6 @@ Error:
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-Error: 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:35:19]
  34 │ {% if show_form %}

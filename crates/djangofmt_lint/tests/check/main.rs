@@ -9,7 +9,7 @@ use djangofmt_lint::{
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
 use markup_fmt::parser::Parser;
-use miette::{GraphicalReportHandler, GraphicalTheme, NamedSource};
+use miette::{GraphicalReportHandler, GraphicalTheme};
 use std::fs;
 use std::path::Path;
 
@@ -91,15 +91,19 @@ fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {
     let display_path = path.strip_prefix(MANIFEST_DIR).unwrap_or(path);
     render_diagnostics(&FileDiagnostics::new(
-        NamedSource::new(display_path.to_string_lossy(), input),
+        display_path.to_string_lossy(),
+        input,
         diagnostics,
     ))
 }
 
 fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {
     let mut output = String::new();
-    GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor())
-        .render_report(&mut output, diagnostics)
+    diagnostics
+        .render(
+            &GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor()),
+            &mut output,
+        )
         .expect("Failed to render diagnostics");
     output
 }

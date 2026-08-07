@@ -14,10 +14,6 @@ pub enum Error {
     #[diagnostic(code(djangofmt::io_error))]
     Io(#[from] std::io::Error),
 
-    #[error(transparent)]
-    #[diagnostic(code(djangofmt::miette_error))]
-    Miette(#[from] miette::InstallError),
-
     #[error("{0}")]
     #[diagnostic(code(djangofmt::resolve_error))]
     Resolve(String),
@@ -32,11 +28,11 @@ pub fn path_display(path: Option<&PathBuf>) -> String {
 /// If the parse error is at EOF, place the caret just before
 fn eof_aware_span(source: &str, pos: usize) -> SourceSpan {
     if pos < source.len() {
-        pos.into()
+        djangofmt_lint::span(pos, 0)
     } else {
         source.char_indices().next_back().map_or_else(
-            || pos.into(),
-            |(start, _)| SourceSpan::new(start.into(), source.len() - start),
+            || djangofmt_lint::span(pos, 0),
+            |(start, _)| djangofmt_lint::span(start, source.len() - start),
         )
     }
 }
@@ -90,7 +86,7 @@ impl ParseError {
                     } => (
                         format!("expected close tag for opening tag <{tag_name}>"),
                         None,
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column), tag_name.len()),
+                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column), djangofmt_lint::clamp_offset(tag_name.len())),
                     ),
                     markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {
                         tag_name,
@@ -99,7 +95,7 @@ impl ParseError {
                     } => (
                         format!("unclosed {{% {tag_name} %}} block."),
                         Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), tag_name.len()),
+                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), djangofmt_lint::clamp_offset(tag_name.len())),
                     ),
                     _ => (
                         syntax_err.kind.to_string(),
