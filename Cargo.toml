@@ -25,7 +25,7 @@ insta-cmd = { version = "0.6.0" }
 malva = { version = "0.16.0", features = ["config_serde"] }
 markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
-  rev = "76ccd171f6eee458ed9b8b0f23119e84c3df6907"
+  rev = "a977ae6a8bbb6550dfd2433c935f95eac57eb505"
 }
 miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
 proc-macro2 = { version = "1.0" }

@@ -2,6 +2,7 @@
 source: crates/djangofmt/tests/fmt/main.rs
 ---
 <a {% comment %}c{% endcomment %} href="x">y</a>
+<a {% comment %} keep my spaces {% endcomment %} href="x">y</a>
 <button
     class="x"
     {% comment %}
@@ -16,7 +17,7 @@ source: crates/djangofmt/tests/fmt/main.rs
         class="x"
         {% comment %}
     a badly indented note
-              {% endcomment %}
+        {% endcomment %}
         type="button"
     >
         y
