@@ -1,8 +1,8 @@
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for multiple `{% block %}` tags that share the same name within a single template.
@@ -73,7 +73,7 @@ pub fn check(checker: &Checker<'_>) {
     for (i, &name) in names.iter().enumerate() {
         if names[..i].contains(&name) {
             let offset = checker.source_offset(name);
-            checker.report_diagnostic(&DuplicateBlockName { name }, (offset, name.len()).into());
+            checker.report_diagnostic(&DuplicateBlockName { name }, span(offset, name.len()));
         }
     }
 }

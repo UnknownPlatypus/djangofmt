@@ -3,7 +3,7 @@ use djangofmt_lint::{
 };
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
-use miette::{NamedSource, SourceCode};
+use miette::{NamedSource, SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rustc_hash::FxHashMap;

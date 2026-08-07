@@ -1,10 +1,10 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Found 12 lint error(s)
 
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:3:10]
  2 │ <table>
  3 │     <tr><th>Name</th><th>Email</th></tr>
@@ -13,9 +13,7 @@ Error:
  4 │     <tr><td>Ada</td><td>ada@example.com</td></tr>
    ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:3:23]
  2 │ <table>
  3 │     <tr><th>Name</th><th>Email</th></tr>
@@ -24,9 +22,7 @@ Error:
  4 │     <tr><td>Ada</td><td>ada@example.com</td></tr>
    ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:9:10]
   8 │ <table>
   9 │     <tr><th class="font-bold" id="col-name">Name</th></tr>
@@ -35,9 +31,7 @@ Error:
  10 │ </table>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:14:10]
  13 │ <table>
  14 │     <tr><TH>Name</TH></tr>
@@ -46,9 +40,7 @@ Error:
  15 │ </table>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:19:10]
  18 │ <table>
  19 │     <tr><th data-scope="col">Name</th></tr>
@@ -57,9 +49,7 @@ Error:
  20 │ </table>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:25:14]
  24 │     <thead>
  25 │         <tr><th>Name</th><th>Email</th></tr>
@@ -68,9 +58,7 @@ Error:
  26 │     </thead>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:25:27]
  24 │     <thead>
  25 │         <tr><th>Name</th><th>Email</th></tr>
@@ -79,9 +67,7 @@ Error:
  26 │     </thead>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:34:10]
  33 │ <table>
  34 │     <tr><th class="{{ header_class }}">Name</th></tr>
@@ -90,9 +76,7 @@ Error:
  35 │ </table>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Invalid `scope` value `column` on `<th>`.
+Error:   × Invalid `scope` value `column` on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:39:20]
  38 │ <table>
  39 │     <tr><th scope="column">Name</th></tr>
@@ -101,9 +85,7 @@ Error:
  40 │ </table>
     ╰────
   help: Change `scope` to one of `row`, `col`, `rowgroup`, or `colgroup`.
-
-Error: 
-  × Invalid `scope` value `auto` on `<th>`.
+Error:   × Invalid `scope` value `auto` on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:44:20]
  43 │ <table>
  44 │     <tr><th scope="auto">Name</th></tr>
@@ -112,9 +94,7 @@ Error:
  45 │ </table>
     ╰────
   help: Change `scope` to one of `row`, `col`, `rowgroup`, or `colgroup`.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:49:13]
  48 │ <table>
  49 │     <tr><th scope="">Name</th></tr>
@@ -123,9 +103,7 @@ Error:
  50 │ </table>
     ╰────
   help: Add `scope="col"` or `scope="row"` to associate the header with its data.
-
-Error: 
-  × Missing or empty `scope` attribute on `<th>`.
+Error:   × Missing or empty `scope` attribute on `<th>`.
     ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:54:13]
  53 │ <table>
  54 │     <tr><th scope>Name</th></tr>

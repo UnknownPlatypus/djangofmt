@@ -291,14 +291,11 @@ pub fn lint_fix(
 
 #[cfg(test)]
 mod tests {
-    use miette::SourceSpan;
 
     use super::*;
     use crate::fix::{Edit, Fix};
 
-    fn span(start: usize, len: usize) -> SourceSpan {
-        SourceSpan::new(start.into(), len)
-    }
+    use crate::span;
 
     fn diag_with_fix(fix: Fix) -> LintDiagnostic {
         LintDiagnostic {

@@ -1,10 +1,10 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Found 2 lint error(s)
 
-Error: 
-  × Missing `<!DOCTYPE html>` declaration.
+Error:   × Missing `<!DOCTYPE html>` declaration.
    ╭─[tests/check/missing_doctype/missing_doctype_extends_lookalike.invalid.html:3:2]
  2 │ {% extendsfoo "base.html" %}
  3 │ <html lang="en">
@@ -13,9 +13,7 @@ Error:
  4 │     <body></body>
    ╰────
   help: Add `<!DOCTYPE html>` before the `<html>` tag.
-
-Error: 
-  × Empty `<body>` tag pair.
+Error:   × Empty `<body>` tag pair.
    ╭─[tests/check/missing_doctype/missing_doctype_extends_lookalike.invalid.html:4:6]
  3 │ <html lang="en">
  4 │     <body></body>

@@ -1,8 +1,8 @@
 use markup_fmt::ast::{Element, Node, NodeKind};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for non-void elements with no attributes whose open and close tags wrap no content.
@@ -89,6 +89,6 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         &EmptyTagPair {
             tag: element.tag_name.to_string(),
         },
-        (offset, element.tag_name.len()).into(),
+        span(offset, element.tag_name.len()),
     );
 }

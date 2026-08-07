@@ -43,6 +43,20 @@ pub use violation::{Violation, ViolationMetadata};
 use markup_fmt::ast::Root;
 use miette::{Diagnostic, NamedSource, SourceSpan};
 
+/// Narrow a `usize` byte offset or length to the `u32` `oxc-miette` stores.
+///
+/// Files larger than 4 GiB are not a supported input, so this saturates.
+#[must_use]
+pub fn clamp_offset(value: usize) -> u32 {
+    u32::try_from(value).unwrap_or(u32::MAX)
+}
+
+/// Build a [`SourceSpan`] from `usize` byte offsets.
+#[must_use]
+pub fn span(start: usize, len: usize) -> SourceSpan {
+    SourceSpan::new(clamp_offset(start).into(), clamp_offset(len))
+}
+
 /// A single lint diagnostic without source code.
 ///
 /// Source code is added later via [`FileDiagnostics`] to avoid cloning

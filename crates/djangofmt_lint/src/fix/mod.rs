@@ -14,6 +14,8 @@ use std::cmp::Ordering;
 
 use miette::SourceSpan;
 
+use crate::span;
+
 /// Forward-looking declaration of fix availability for a rule.
 ///
 /// Carried on the [`crate::violation::Violation`] trait so rule authors declare
@@ -117,7 +119,7 @@ impl Edit {
             "use `Edit::deletion` for empty insertion content"
         );
         Self {
-            range: SourceSpan::new(at.into(), 0),
+            range: span(at, 0),
             content: Some(content),
         }
     }
@@ -134,13 +136,13 @@ impl Edit {
     /// Start offset (inclusive).
     #[must_use]
     pub const fn start(&self) -> usize {
-        self.range.offset()
+        self.range.offset() as usize
     }
 
     /// End offset (exclusive).
     #[must_use]
     pub const fn end(&self) -> usize {
-        self.range.offset() + self.range.len()
+        (self.range.offset() + self.range.len()) as usize
     }
 
     /// Replacement / insertion content, or [`None`] for pure deletion.
@@ -306,9 +308,7 @@ impl Fix {
 mod tests {
     use super::*;
 
-    fn span(start: usize, len: usize) -> SourceSpan {
-        SourceSpan::new(start.into(), len)
-    }
+    use crate::span;
 
     #[test]
     fn edit_replacement() {

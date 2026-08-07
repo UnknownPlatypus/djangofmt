@@ -1,9 +1,9 @@
 use markup_fmt::ast::{Element, NativeAttribute};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::{contains_interpolation, srcset_candidates};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for asset URLs in `<link>`, `<img>`, `<script>`, and `<source>` elements that point at a
@@ -109,6 +109,6 @@ fn report_static_path(url: &str, offset: usize, attribute: &'static str, checker
         return;
     }
     if starts_with_static_path(url) {
-        checker.report_diagnostic(&DjangoStaticUrl { attribute }, (offset, url.len()).into());
+        checker.report_diagnostic(&DjangoStaticUrl { attribute }, span(offset, url.len()));
     }
 }

@@ -1,9 +1,9 @@
 use markup_fmt::ast::{Attribute, Element};
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::{contains_interpolation, declares_native_attr};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// The keywords a `scope` attribute may take (HTML spec / WCAG H63).
 const VALID_SCOPE_VALUES: [&str; 4] = ["row", "col", "rowgroup", "colgroup"];
@@ -101,7 +101,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
             &TableHeaderMissingScope {
                 kind: ScopeViolation::MissingOrEmpty,
             },
-            (offset, element.tag_name.len()).into(),
+            span(offset, element.tag_name.len()),
         );
         return;
     };
@@ -121,7 +121,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
                         value: value.to_string(),
                     },
                 },
-                (offset, value.len()).into(),
+                span(offset, value.len()),
             );
         }
         // `scope=""` or a valueless `scope`: present but with no usable value.
@@ -131,7 +131,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
                 &TableHeaderMissingScope {
                     kind: ScopeViolation::MissingOrEmpty,
                 },
-                (offset, scope.name.len()).into(),
+                span(offset, scope.name.len()),
             );
         }
     }

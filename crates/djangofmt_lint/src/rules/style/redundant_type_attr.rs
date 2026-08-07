@@ -1,11 +1,11 @@
 use markup_fmt::ast::{Element, NativeAttribute};
 
-use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for redundant `type` attributes on `<script>` and `<style>` tags.
@@ -106,7 +106,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
             tag: tag.to_string(),
             type_value: (*value_str).to_string(),
         },
-        (*offset, value_str.len()).into(),
+        span(*offset, value_str.len()),
     );
 
     guard.set_fix(delete_attr_fix(

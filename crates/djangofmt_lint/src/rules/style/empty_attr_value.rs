@@ -1,10 +1,10 @@
 use markup_fmt::ast::NativeAttribute;
 
-use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for empty `id` or `class` attribute values on HTML elements.
@@ -70,7 +70,7 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
 
     let mut guard = checker.report_diagnostic(
         &EmptyAttrValue { attr: name },
-        (*offset, value_str.len()).into(),
+        span(*offset, value_str.len()),
     );
 
     guard.set_fix(delete_attr_fix(

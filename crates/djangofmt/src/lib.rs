@@ -97,9 +97,9 @@ fn is_stdin(files: &[PathBuf], stdin_filename: Option<&Path>) -> bool {
 fn setup_miette() -> error::Result<()> {
     miette::set_hook(Box::new(|_| {
         Box::new(
-            miette::MietteHandlerOpts::new()
-                .show_related_errors_as_nested()
-                .build(),
+            // `oxc-miette` always renders related errors as nested, so the
+            // upstream `show_related_errors_as_nested()` opt-in is gone.
+            miette::MietteHandlerOpts::new().build(),
         )
     }))?;
     Ok(())

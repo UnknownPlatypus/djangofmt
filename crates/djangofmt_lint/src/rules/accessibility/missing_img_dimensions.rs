@@ -1,9 +1,9 @@
 use markup_fmt::ast::Element;
 
-use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::declares_native_attr;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `<img>` tags that omit the `height` or `width` attribute.
@@ -61,8 +61,5 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     }
 
     let offset = checker.source_offset(element.tag_name);
-    checker.report_diagnostic(
-        &MissingImgDimensions,
-        (offset, element.tag_name.len()).into(),
-    );
+    checker.report_diagnostic(&MissingImgDimensions, span(offset, element.tag_name.len()));
 }
