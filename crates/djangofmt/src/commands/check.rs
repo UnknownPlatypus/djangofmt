@@ -3,7 +3,7 @@ use djangofmt_lint::{
 };
 use markup_fmt::FormatError;
 use markup_fmt::parser::Parser;
-use miette::NamedSource;
+use miette::{NamedSource, SourceCode};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rustc_hash::FxHashMap;
@@ -13,7 +13,7 @@ use std::time::Instant;
 use tracing::{debug, error, info, warn};
 
 use crate::ExitStatus;
-use crate::args::{CheckCommand, Profile};
+use crate::args::{CheckCommand, OutputFormat, Profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::pyproject::LintSettings;
@@ -25,6 +25,7 @@ pub struct CheckConfig {
     pub fix: bool,
     pub unsafe_fixes: bool,
     pub show_fixes: bool,
+    pub output_format: OutputFormat,
 }
 
 impl CheckConfig {
@@ -44,6 +45,10 @@ impl CheckConfig {
                 .unwrap_or_default(),
             show_fixes: resolve_bool_arg(args.show_fixes, args.no_show_fixes)
                 .or(lint.show_fixes)
+                .unwrap_or_default(),
+            output_format: args
+                .output_format
+                .or(lint.output_format)
                 .unwrap_or_default(),
         }
     }
@@ -115,10 +120,15 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         total_unsafe_fixable = 0;
     }
 
-    for result in &results {
-        if !result.file_diagnostics.is_empty() {
-            error!("{:?}", miette::Report::new(result.file_diagnostics.clone()));
+    match config.output_format {
+        OutputFormat::Full => {
+            for result in &results {
+                if !result.file_diagnostics.is_empty() {
+                    error!("{:?}", miette::Report::new(result.file_diagnostics.clone()));
+                }
+            }
         }
+        OutputFormat::Concise => print_concise(&results, threshold),
     }
 
     print_summary(
@@ -139,6 +149,30 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         return Ok(ExitStatus::Success);
     }
     Ok(ExitStatus::Failure)
+}
+
+/// Render one `path:line:col: rule [*] message` line per diagnostic.
+fn print_concise(results: &[CheckResult], threshold: Applicability) {
+    for result in results {
+        let source = &result.file_diagnostics.source_code;
+        let path = relativize_path(&result.path);
+        for diag in &result.file_diagnostics.related {
+            let (line, column) = source
+                .read_span(&diag.span, 0, 0)
+                .map_or((0, 0), |contents| {
+                    (contents.line() + 1, contents.column() + 1)
+                });
+            let fixable = if diag.fix.as_ref().is_some_and(|fix| fix.applies(threshold)) {
+                " [*]"
+            } else {
+                ""
+            };
+            error!(
+                "{path}:{line}:{column}: {}{fixable} {}",
+                diag.code, diag.message
+            );
+        }
+    }
 }
 
 fn print_summary(
@@ -306,7 +340,7 @@ fn check_path(
 #[cfg(test)]
 mod tests {
     use super::{CheckConfig, print_summary};
-    use crate::args::CheckCommand;
+    use crate::args::{CheckCommand, OutputFormat};
     use crate::pyproject::LintSettings;
     use tracing_test::traced_test;
 
@@ -319,6 +353,7 @@ mod tests {
                 fix: false,
                 unsafe_fixes: false,
                 show_fixes: false,
+                output_format: OutputFormat::Full,
             }
         );
     }
@@ -329,6 +364,7 @@ mod tests {
             fix: Some(true),
             unsafe_fixes: Some(true),
             show_fixes: Some(true),
+            output_format: Some(OutputFormat::Concise),
             ..Default::default()
         };
         let config = CheckConfig::from_args(&CheckCommand::default(), Some(&lint));
@@ -338,6 +374,7 @@ mod tests {
                 fix: true,
                 unsafe_fixes: true,
                 show_fixes: true,
+                output_format: OutputFormat::Concise,
             }
         );
     }
@@ -348,15 +385,18 @@ mod tests {
             fix: Some(false),
             unsafe_fixes: Some(false),
             show_fixes: Some(false),
+            output_format: Some(OutputFormat::Concise),
             ..Default::default()
         };
         let args = CheckCommand {
             fix: true,
             unsafe_fixes: true,
             show_fixes: true,
+            output_format: Some(OutputFormat::Full),
             ..Default::default()
         };
         let config = CheckConfig::from_args(&args, Some(&lint));
+        assert_eq!(config.output_format, OutputFormat::Full);
         assert!(config.fix);
         assert!(config.unsafe_fixes);
         assert!(config.show_fixes);

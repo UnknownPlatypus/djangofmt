@@ -167,6 +167,17 @@ pub enum Commands {
     },
 }
 
+/// How `check` renders diagnostics.
+#[derive(Copy, Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum OutputFormat {
+    /// Rich diagnostics with source snippets and help text.
+    #[default]
+    Full,
+    /// One line per diagnostic: `path:line:col: rule [*] message`.
+    Concise,
+}
+
 /// CLI arguments for selecting which lint rules run.
 #[derive(Clone, Debug, Default, clap::Args)]
 #[command(next_help_heading = "Rule selection")]
@@ -216,6 +227,9 @@ pub struct CheckCommand {
     pub unsafe_fixes: bool,
     #[arg(long, overrides_with("unsafe_fixes"), hide = true)]
     pub no_unsafe_fixes: bool,
+    /// Output format for diagnostics [default: full]
+    #[arg(long, value_enum)]
+    pub output_format: Option<OutputFormat>,
     /// List per-rule fix counts after applying. Use `--no-show-fixes` to disable.
     #[arg(long, overrides_with("no_show_fixes"))]
     pub show_fixes: bool,

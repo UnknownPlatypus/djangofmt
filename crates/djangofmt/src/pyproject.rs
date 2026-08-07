@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::{fs, path::Path};
 use tracing::debug;
 
-use crate::args::Profile;
+use crate::args::{OutputFormat, Profile};
 use crate::error::{Error, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
@@ -35,6 +35,7 @@ pub struct LintSettings {
     pub fix: Option<bool>,
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
+    pub output_format: Option<OutputFormat>,
 }
 
 #[derive(Deserialize, Debug)]
