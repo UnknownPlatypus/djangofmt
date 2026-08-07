@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::NativeAttribute;
 
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -50,16 +52,16 @@ impl Violation for FormActionWhitespace {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "Extra whitespace found in form `action`.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "Extra whitespace found in form `action`.".into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Remove leading and trailing whitespace from the `action` value.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Remove leading and trailing whitespace from the `action` value.".into())
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Trim whitespace from `action` value".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Trim whitespace from `action` value")
     }
 }
 
@@ -93,7 +95,7 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     let edit = if trimmed.is_empty() {
         Edit::deletion(span)
     } else {
-        Edit::replacement(trimmed.to_string(), span)
+        Edit::replacement(trimmed, span)
     };
     guard.set_fix(Fix::safe_edit(edit));
 }

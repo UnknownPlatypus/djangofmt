@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
 use markup_fmt::parser::parse_jinja_tag_name;
 
@@ -44,22 +46,22 @@ impl Violation for UntrimmedBlocktranslate {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
+    fn message(&self) -> Cow<'static, str> {
         "`{% blocktranslate %}` should declare `trimmed` to avoid leaking \
          indentation into translation strings."
-            .to_string()
+            .into()
     }
 
-    fn help(&self) -> Option<String> {
+    fn help(&self) -> Option<Cow<'static, str>> {
         Some(
             "Add `trimmed` to the opening tag, e.g. \
              `{% blocktranslate trimmed %}...{% endblocktranslate %}`."
-                .to_string(),
+                .into(),
         )
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Add trimmed".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Add trimmed")
     }
 }
 

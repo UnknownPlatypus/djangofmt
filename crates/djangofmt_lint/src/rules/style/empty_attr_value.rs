@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::NativeAttribute;
 
 use crate::fix::FixAvailability;
@@ -41,12 +43,12 @@ impl Violation for EmptyAttrValue<'_> {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Empty `{}` attribute can be removed.", self.attr)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Empty `{}` attribute can be removed.", self.attr).into()
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Remove empty attribute".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Remove empty attribute")
     }
 }
 

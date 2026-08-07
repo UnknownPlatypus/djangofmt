@@ -23,7 +23,7 @@ pub struct AppliedFix {
     /// Rule code of the diagnostic the fix came from.
     pub code: &'static str,
     /// Short imperative summary of the fix, if the rule provided one.
-    pub fix_title: Option<String>,
+    pub fix_title: Option<&'static str>,
 }
 
 /// Result of a single fix-application pass.
@@ -140,7 +140,7 @@ pub fn apply_fixes(
         applied_count += 1;
         applied_fixes.push(AppliedFix {
             code: diag.code,
-            fix_title: diag.fix_title.clone(),
+            fix_title: diag.fix_title,
         });
     }
 
@@ -173,7 +173,7 @@ pub struct RuleFixSummary {
     /// Number of fixes applied for this rule across all iterations.
     pub count: usize,
     /// Short imperative summary of the fix, if the rule provided one.
-    pub fix_title: Option<String>,
+    pub fix_title: Option<&'static str>,
 }
 
 /// Result of [`lint_fix`].
@@ -268,7 +268,7 @@ pub fn lint_fix(
             let entry = applied_by_rule.entry(applied.code).or_default();
             entry.count += 1;
             if entry.fix_title.is_none() {
-                entry.fix_title.clone_from(&applied.fix_title);
+                entry.fix_title = applied.fix_title;
             }
         }
 
@@ -300,7 +300,7 @@ mod tests {
     fn diag_with_fix(fix: Fix) -> LintDiagnostic {
         LintDiagnostic {
             code: "test-rule",
-            message: "test".to_string(),
+            message: "test".into(),
             span: span(0, 0),
             help: None,
             fix: Some(fix),
@@ -311,7 +311,7 @@ mod tests {
     fn diag_without_fix() -> LintDiagnostic {
         LintDiagnostic {
             code: "test-rule",
-            message: "test".to_string(),
+            message: "test".into(),
             span: span(0, 0),
             help: None,
             fix: None,

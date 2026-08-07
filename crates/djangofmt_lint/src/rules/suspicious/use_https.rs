@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use std::net::IpAddr;
 
 use markup_fmt::ast::NativeAttribute;
@@ -48,16 +50,16 @@ impl Violation for UseHttps {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        format!("Avoid `http://` URLs in `{}`.", self.attribute)
+    fn message(&self) -> Cow<'static, str> {
+        format!("Avoid `http://` URLs in `{}`.", self.attribute).into()
     }
 
-    fn help(&self) -> Option<String> {
-        Some("Use `https://` instead.".to_string())
+    fn help(&self) -> Option<Cow<'static, str>> {
+        Some("Use `https://` instead.".into())
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Replace `http://` with `https://`".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Replace `http://` with `https://`")
     }
 }
 

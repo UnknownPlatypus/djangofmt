@@ -1,7 +1,7 @@
 //! `#[derive_message_formats]` attribute macro.
 //!
 //! Applied to a `Violation::message` impl, this parses the last expression of
-//! the function body and extracts every static `format!("…")` / `"…".to_string()`
+//! the function body and extracts every static `"…".into()` / `format!("…").into()`
 //! literal it could return, then emits a sibling `message_formats()` method
 //! returning those literals as `&'static [&'static str]`.
 //!
@@ -79,29 +79,28 @@ fn parse_expr(expr: &Expr, strings: &mut TokenStream) -> Result<(), TokenStream>
             turbofish: None,
             paren_token,
             args,
-        }) if *method == *"to_string"
+        }) if *method == *"into"
             && attrs.is_empty()
             && args.is_empty()
             && *paren_token == Paren::default()
             && *dot_token == Dot::default() =>
         {
-            let Expr::Lit(ExprLit {
+            if let Expr::Lit(ExprLit {
                 lit: Lit::Str(ref literal_string),
                 ..
             }) = **receiver
-            else {
-                return Err(quote_spanned!(
-                    expr.span() =>
-                    compile_error!("expected `to_string` to be called on a string literal")
-                ));
-            };
-            let str_token = literal_string.token();
-            strings.extend(quote! { #str_token, });
-            Ok(())
+            {
+                let str_token = literal_string.token();
+                strings.extend(quote! { #str_token, });
+                Ok(())
+            } else {
+                // `format!("…").into()`: recurse to reuse the `format!` arm.
+                parse_expr(receiver, strings)
+            }
         }
         _ => Err(quote_spanned!(
             expr.span() =>
-            compile_error!("expected last expression to be a `format!` macro, a string literal with `.to_string()`, or a `match` block")
+            compile_error!("expected last expression to be a string literal or `format!` macro with `.into()`, or a `match` block")
         )),
     }
 }
