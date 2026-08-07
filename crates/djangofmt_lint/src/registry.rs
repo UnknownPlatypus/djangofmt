@@ -113,6 +113,7 @@ define_rules {
             EnumCount,
             EnumString,
             strum::Display,
+            strum::IntoStaticStr,
             strum::FromRepr,
             Serialize,
             Deserialize

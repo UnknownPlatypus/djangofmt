@@ -67,7 +67,7 @@ pub fn span(start: usize, len: usize) -> SourceSpan {
 pub struct LintDiagnostic {
     /// Rule code (e.g., "invalid-attr-value").
     #[diagnostic(code)]
-    pub code: String,
+    pub code: &'static str,
     /// Human-readable error message.
     pub message: String,
     /// Source span where the error occurred.

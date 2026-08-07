@@ -103,7 +103,7 @@ impl<'a> LintContext<'a> {
         DiagnosticGuard {
             context: self,
             diagnostic: Some(LintDiagnostic {
-                code: V::RULE.to_string(),
+                code: V::RULE.into(),
                 message: violation.message(),
                 span,
                 help: violation.help(),
