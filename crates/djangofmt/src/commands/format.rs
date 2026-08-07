@@ -168,8 +168,8 @@ pub fn build_markup_options(
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
             // <div>unformatted</div>
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
+            ignore_file_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
             // Indent style tags content:
             // <style>
             //     body { color: red }

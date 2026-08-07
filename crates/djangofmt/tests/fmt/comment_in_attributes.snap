@@ -1,0 +1,24 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<a {% comment %}c{% endcomment %} href="x">y</a>
+<button
+    class="x"
+    {% comment %}
+      a note about the attribute below
+    {% endcomment %}
+    type="button"
+>
+    y
+</button>
+<div>
+    <button
+        class="x"
+        {% comment %}
+    a badly indented note
+              {% endcomment %}
+        type="button"
+    >
+        y
+    </button>
+</div>
