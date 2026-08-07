@@ -18,6 +18,7 @@ from ecosystem_check.projects import Command
 from ecosystem_check.types import (
     CheckDiff,
     Comparison,
+    Diff,
     Result,
     ToolError,
 )
@@ -34,34 +35,28 @@ def markdown_check_result(result: Result) -> str:
     Render a `djangofmt check` ecosystem check result as markdown.
     """
     error_count = len(result.errored)
-    projects_with_changes = sum(
-        1
-        for _, comp in result.completed
-        if isinstance(comp.diff, CheckDiff) and comp.diff
-    )
-    total_added = sum(
-        comp.diff.diagnostics_added
-        for _, comp in result.completed
-        if isinstance(comp.diff, CheckDiff)
-    )
-    total_removed = sum(
-        comp.diff.diagnostics_removed
-        for _, comp in result.completed
-        if isinstance(comp.diff, CheckDiff)
-    )
+    diffs = [
+        comp.diff for _, comp in result.completed if isinstance(comp.diff, CheckDiff)
+    ]
+    projects_with_changes = sum(bool(d) for d in diffs)
+    total_added = sum(d.diagnostics_added for d in diffs)
+    total_removed = sum(d.diagnostics_removed for d in diffs)
+    total_fixed_added = sum(d.fix_diff.lines_added for d in diffs)
+    total_fixed_removed = sum(d.fix_diff.lines_removed for d in diffs)
 
-    if total_added == 0 and total_removed == 0 and error_count == 0:
+    if projects_with_changes == 0 and error_count == 0:
         return "\u2705 ecosystem check detected no check changes."
 
     lines: list[str] = []
-    if total_added == 0 and total_removed == 0:
+    if projects_with_changes == 0:
         lines.append(
             f"\u2139\ufe0f ecosystem check **encountered check errors**. "
             f"(no diagnostic changes; {error_count} project error{add_s(error_count)})"
         )
     else:
         changes = (
-            f"+{total_added} -{total_removed} diagnostic lines "
+            f"+{total_added} -{total_removed} diagnostic lines, "
+            f"+{total_fixed_added} -{total_fixed_removed} fixed lines "
             f"in {projects_with_changes} project{add_s(projects_with_changes)}"
         )
 
@@ -81,16 +76,24 @@ def markdown_check_result(result: Result) -> str:
     lines.append("")
 
     for project, comparison in result.completed:
-        if not comparison.diff:
+        diff = comparison.diff
+        if not diff or not isinstance(diff, CheckDiff):
             continue
 
-        assert isinstance(comparison.diff, CheckDiff)
-        title = f"+{comparison.diff.diagnostics_added} -{comparison.diff.diagnostics_removed} diagnostic lines"
+        title = (
+            f"+{diff.diagnostics_added} -{diff.diagnostics_removed} diagnostic lines"
+        )
+        if diff.fix_diff:
+            files = diff.fix_diff.modified_files
+            title += (
+                f", +{diff.fix_diff.lines_added} -{diff.fix_diff.lines_removed} "
+                f"fixed lines across {files} file{add_s(files)}"
+            )
 
         lines.extend(
             markdown_project_section(
                 title=title,
-                content=comparison.diff.format_markdown(),
+                content=diff.format_markdown(repo=comparison.repo),
                 options=project.cli_options,
                 project=project,
             )
@@ -115,12 +118,18 @@ async def compare_check(
     options: CliOptions,
     cloned_repo: ClonedRepository,
 ) -> Comparison:
+    # Both runs apply their fixes, so fixable rules are compared as a source diff and only the unfixable diagnostics are compared as text.
     baseline_output = await check(
         executable=baseline_executable.resolve(),
         path=cloned_repo.path,
         repo_fullname=cloned_repo.fullname,
         options=options,
     )
+    commit = await cloned_repo.commit(
+        message=f"Fixed with baseline {baseline_executable}"
+    )
+    await cloned_repo.reset(cloned_repo.path)
+
     comparison_output = await check(
         executable=comparison_executable.resolve(),
         path=cloned_repo.path,
@@ -129,7 +138,11 @@ async def compare_check(
     )
 
     return Comparison(
-        diff=CheckDiff(baseline_output, comparison_output),
+        diff=CheckDiff(
+            baseline_output,
+            comparison_output,
+            Diff(await cloned_repo.diff(commit)),
+        ),
         repo=cloned_repo,
     )
 
@@ -141,7 +154,7 @@ async def check(
     repo_fullname: str,
     options: CliOptions,
 ) -> str:
-    """Run `djangofmt check` against the specified path and return diagnostic output."""
+    """Run `djangofmt check --fix` against the path, returning unfixed diagnostics."""
     # The check CLI does not support --custom-blocks
     args = ["check", *options.to_args(executable.name, command=Command.CHECK)]
     files = set(
@@ -177,5 +190,9 @@ async def check(
     if proc.returncode not in [0, 1]:
         raise ToolError(err.decode("utf8"))
 
-    # Diagnostics are reported to stderr
-    return err.decode("utf8")
+    # Diagnostics are reported to stderr, minus the per-run summary line we want to drop here
+    return "".join(
+        line
+        for line in err.decode("utf8").splitlines(keepends=True)
+        if not line.startswith(("Found ", "All checks passed!"))
+    )
