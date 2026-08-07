@@ -21,6 +21,8 @@ use editorconfig_parser::EditorConfig;
 pub struct FormatterConfig {
     /// Config for main HTML/Jinja formatter
     pub markup: markup_fmt::config::FormatOptions,
+    /// Base config for Jinja expressions and statements embedded in markup
+    pub jinja: pretty_jinja::config::FormatOptions,
     /// Config for CSS/SCSS formatter
     pub malva: malva::config::FormatOptions,
     /// Config for JSON formatter
@@ -44,6 +46,7 @@ impl FormatterConfig {
                 html_void_self_closing,
                 preserve_unquoted_attrs,
             ),
+            jinja: build_pretty_jinja_config(print_width, indent_width),
             malva: build_malva_config(print_width, indent_width),
             json: build_json_config(print_width, indent_width),
         }
@@ -168,8 +171,8 @@ pub fn build_markup_options(
             // Ignore formatting with comment directive:
             // <!-- djangofmt:ignore -->
             // <div>unformatted</div>
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
+            ignore_file_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
             // Indent style tags content:
             // <style>
             //     body { color: red }
@@ -315,6 +318,16 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     }
 }
 
+/// Log a formatter failure and fall back to the unformatted source.
+fn format_fallback<'a, E: std::fmt::Debug>(
+    language: &str,
+    code: &'a str,
+    error: E,
+) -> Cow<'a, str> {
+    debug!("Failed to format {language}, falling back to original code. Error: {error:?}");
+    code.into()
+}
+
 /// Format the given source code.
 pub fn format_text(
     source: &str,
@@ -326,6 +339,10 @@ pub fn format_text(
     {
         return Ok(None);
     }
+    let jinja_dialect = match profile {
+        Profile::Django => pretty_jinja::config::Dialect::Django,
+        Profile::Jinja => pretty_jinja::config::Dialect::Jinja,
+    };
     markup_fmt::format_text(
         source,
         markup_fmt::Language::from(profile),
@@ -339,13 +356,7 @@ pub fn format_text(
                     match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
                         Ok(Some(formatted)) => Ok(formatted.into()),
                         Ok(None) => Ok(code.into()),
-                        Err(error) => {
-                            debug!(
-                                "Failed to format JSON, falling back to original code. Error: {:?}",
-                                error
-                            );
-                            Ok(code.into())
-                        }
+                        Err(error) => Ok(format_fallback("JSON", code, error)),
                     }
                 }
                 "css" | "scss" | "sass" | "less" => {
@@ -353,16 +364,7 @@ pub fn format_text(
                     malva_config.layout.print_width = hints.print_width;
 
                     let formatted_css = malva::format_text(code, malva::Syntax::Css, &malva_config)
-                        .map_or_else(
-                            |error| {
-                                debug!(
-                                    "Failed to format CSS, falling back to original code. Error: {:?}",
-                                    error
-                                );
-                                code.into()
-                            },
-                            Cow::from,
-                        );
+                        .map_or_else(|error| format_fallback("CSS", code, error), Cow::from);
 
                     // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
                     // Tries to keep on formatting style attr on a single line like expected with
@@ -378,11 +380,67 @@ pub fn format_text(
                             .into())
                     }
                 }
+                "markup-fmt-jinja-expr" => {
+                    let mut jinja_config = config.jinja.clone();
+                    jinja_config.layout.print_width = hints.print_width;
+                    jinja_config.language.dialect = jinja_dialect;
+                    Ok(pretty_jinja::format_expr(code, &jinja_config).map_or_else(
+                        |error| format_fallback("Jinja expression", code, error),
+                        Cow::from,
+                    ))
+                }
+                "markup-fmt-jinja-stmt" => {
+                    let mut jinja_config = config.jinja.clone();
+                    jinja_config.layout.print_width = hints.print_width;
+                    jinja_config.language.dialect = jinja_dialect;
+                    Ok(pretty_jinja::format_stmt(code, &jinja_config).map_or_else(
+                        |error| format_fallback("Jinja statement", code, error),
+                        Cow::from,
+                    ))
+                }
                 _ => Ok(code.into()),
             }
         },
     )
     .map(Some)
+}
+
+/// Build `pretty_jinja` options for formatting Jinja expressions and statements.
+fn build_pretty_jinja_config(
+    print_width: LineLength,
+    indent_width: IndentWidth,
+) -> pretty_jinja::config::FormatOptions {
+    pretty_jinja::config::FormatOptions {
+        layout: pretty_jinja::config::LayoutOptions {
+            print_width: print_width.into(),
+            indent_width: indent_width.into(),
+            use_tabs: false,
+            line_break: pretty_jinja::config::LineBreak::Lf,
+        },
+        language: pretty_jinja::config::LanguageOptions {
+            // Base dialect; format_text overrides it per profile.
+            dialect: pretty_jinja::config::Dialect::Jinja,
+            operator_linebreak: pretty_jinja::config::OperatorLineBreak::Before,
+            trailing_comma: pretty_jinja::config::TrailingComma::OnlyMultiLine,
+            args_trailing_comma: None,
+            expr_dict_trailing_comma: None,
+            expr_list_trailing_comma: None,
+            expr_tuple_trailing_comma: None,
+            params_trailing_comma: None,
+            prefer_single_line: true,
+            args_prefer_single_line: Some(true),
+            expr_dict_prefer_single_line: Some(true),
+            expr_list_prefer_single_line: Some(true),
+            expr_tuple_prefer_single_line: Some(true),
+            params_prefer_single_line: Some(true),
+            // Tight braces also avoid `{}` rendering as `{  }`.
+            brace_spacing: false,
+            bracket_spacing: false,
+            args_paren_spacing: false,
+            params_paren_spacing: false,
+            tuple_paren_spacing: false,
+        },
+    }
 }
 
 /// Format the file at the given [`Path`].

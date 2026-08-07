@@ -1,0 +1,25 @@
+{% import "macros.html" as  macros %}
+{% set greeting="hello" %}
+{% set items=[1,2,3] %}
+{% set mapping={"a":1,"b":2} %}
+<p>{{ user.name|upper }}</p>
+<p>{{ value|default("n/a")|title }}</p>
+{% with total=items|sum %}
+    <span>{{ total }}</span>
+{% endwith %}
+{% if user.is_active and user.is_staff or user.is_superuser %}
+    <b>{{ _("Welcome") }}</b>
+{% elif user.is_anonymous %}
+    <b>{{ _("Please log in") }}</b>
+{% endif %}
+{% for item in items %}
+    <li>{{ loop.index }}: {{ item|string }}</li>
+{% endfor %}
+{{ data|join(", ") }}
+{% set page_title=_("Public view of {org_name} | Zulip team chat").format(org_name=realm_name) %}
+{% set page_description=_("Browse the publicly accessible channels in {org_name} without logging in.").format(org_name=realm_name) %}
+{% if downgrade_at_end_of_free_trial or downgrade_at_end_of_cycle or complimentary_access_plan or fixed_price_plan or (free_trial and not charge_automatically) %}
+    <p>
+        {{ _("A long translation message that has to wrap onto its own lines with a trailing comma once it no longer fits within the configured print width.") }}
+    </p>
+{% endif %}
