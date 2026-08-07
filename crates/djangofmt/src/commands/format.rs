@@ -8,7 +8,7 @@ use std::time::Instant;
 use tracing::{debug, info};
 
 use crate::ExitStatus;
-use crate::args::{FormatCommand, Profile};
+use crate::args::{FormatCommand, OutputFormat, Profile};
 use crate::editorconfig::{self, EditorconfigSettings};
 use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
@@ -300,7 +300,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         start.elapsed()
     );
 
-    let nb_errors = super::report_parse_errors(parse_errors, "format");
+    let nb_errors = super::report_parse_errors(parse_errors, "format", OutputFormat::Full);
 
     // Report on the formatting changes.
     let summary = build_summary(results.as_ref());

@@ -9,12 +9,12 @@ fn cli() -> Command {
     Command::new(get_cargo_bin("djangofmt"))
 }
 
-/// Like [`assert_cmd_snapshot!`] but redacts the leading directory of `test.html`
-/// occurrences (i.e. the per-run `TempDir` prefix in miette diagnostics).
+/// Like [`assert_cmd_snapshot!`] but redacts the leading directory of `.html` paths
+/// (i.e. the per-run `TempDir` prefix in miette diagnostics).
 macro_rules! assert_cmd_snapshot_tmpdir {
     ($cmd:expr, @$snapshot:literal $(,)?) => {
         insta::with_settings!(
-            { filters => vec![(r"[^\s\[]+/test\.html", "[TMP]/test.html")] },
+            { filters => vec![(r"[^\s\[]+/(\w+\.html)", "[TMP]/$1")] },
             { assert_cmd_snapshot!($cmd, @$snapshot) }
         )
     };
@@ -382,22 +382,26 @@ fn check_file_with_lint_error() {
 
 #[test]
 fn check_concise_output_format() {
-    let project = Project::new().file(
-        "test.html",
-        "<form method=\"put\"></form>\n{% blocktranslate %}Hello{% endblocktranslate %}\n",
-    );
+    let project = Project::new()
+        .file(
+            "test.html",
+            "<form method=\"put\"></form>\n{% blocktranslate %}Hello{% endblocktranslate %}\n",
+        )
+        .file("unparsable.html", "<div>\n");
     assert_cmd_snapshot_tmpdir!(
-        cli().args(["check", "--output-format", "concise"]).arg(project.join("test.html")),
-        @r#"
+        cli().args(["check", "--output-format", "concise"]).arg(project.path()),
+        @r###"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
+    [TMP]/unparsable.html:1:1: expected close tag for opening tag <div>
+    Couldn't check 1 files!
     [TMP]/test.html:1:15: invalid-attr-value Invalid value 'put' for attribute 'method'.
     [TMP]/test.html:2:3: untrimmed-blocktranslate [*] `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     Found 2 errors. [*] 1 fixable with the --fix option.
-    "#);
+    "###);
 }
 
 #[test]

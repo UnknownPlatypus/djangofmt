@@ -1,4 +1,4 @@
-use miette::{Diagnostic, NamedSource, SourceOffset, SourceSpan};
+use miette::{Diagnostic, NamedSource, SourceCode, SourceOffset, SourceSpan, SpanContents};
 use std::io;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -70,6 +70,19 @@ impl CommandError {
             Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
         }
     }
+
+    /// Render as a single `path:line:column: message` line.
+    #[must_use]
+    pub fn concise(&self) -> String {
+        match self {
+            Self::Parse(err) => {
+                let (line, column) = err.location();
+                let path = path_display(err.path.as_ref());
+                format!("{path}:{line}:{column}: {}", err.message)
+            }
+            Self::Read(..) | Self::Write(..) => self.to_string(),
+        }
+    }
 }
 
 impl ParseError {
@@ -121,5 +134,14 @@ impl ParseError {
             span,
             hint,
         }
+    }
+
+    /// 1-based line and column the error points at.
+    fn location(&self) -> (usize, usize) {
+        self.src
+            .read_span(&self.span, 0, 0)
+            .map_or((0, 0), |contents| {
+                (contents.line() + 1, contents.column() + 1)
+            })
     }
 }
