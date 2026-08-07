@@ -10,6 +10,7 @@
 pub mod apply;
 pub mod edits;
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 
 use miette::SourceSpan;
@@ -75,15 +76,15 @@ pub enum IsolationLevel {
 ///
 /// `range` is a [`miette::SourceSpan`] for codebase consistency.
 ///
-/// `content` uses [`Option<Box<str>>`] to distinguish pure deletion ([`None`])
-/// from non-empty replacement ([`Some(...)`]) while preserving the niche
-/// optimization (same size as `Box<str>`). Empty replacement content is
+/// `content` distinguishes pure deletion ([`None`]) from non-empty
+/// replacement ([`Some(...)`]); the [`Cow`] keeps static replacement content
+/// (the common case) allocation-free. Empty replacement content is
 /// rejected by [`Edit::replacement`] and [`Edit::insertion`] via a
 /// `debug_assert!`; use [`Edit::deletion`] for the empty case.
 #[derive(Clone, Debug)]
 pub struct Edit {
     range: SourceSpan,
-    content: Option<Box<str>>,
+    content: Option<Cow<'static, str>>,
 }
 
 impl Edit {
@@ -94,7 +95,7 @@ impl Edit {
     /// In debug builds, panics if `content` is empty. Use [`Edit::deletion`]
     /// for pure deletions.
     #[must_use]
-    pub fn replacement(content: impl Into<Box<str>>, range: SourceSpan) -> Self {
+    pub fn replacement(content: impl Into<Cow<'static, str>>, range: SourceSpan) -> Self {
         let content = content.into();
         debug_assert!(
             !content.is_empty(),
@@ -112,7 +113,7 @@ impl Edit {
     ///
     /// In debug builds, panics if `content` is empty.
     #[must_use]
-    pub fn insertion(content: impl Into<Box<str>>, at: usize) -> Self {
+    pub fn insertion(content: impl Into<Cow<'static, str>>, at: usize) -> Self {
         let content = content.into();
         debug_assert!(
             !content.is_empty(),
