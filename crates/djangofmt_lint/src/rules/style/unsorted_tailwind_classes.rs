@@ -1,10 +1,12 @@
+use std::borrow::Cow;
+
 use markup_fmt::ast::NativeAttribute;
 use rustywind_core::{RustyWind, SourceLanguage};
 
-use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `class` attributes whose Tailwind CSS utility classes are not in the canonical
@@ -51,12 +53,12 @@ impl Violation for UnsortedTailwindClasses {
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
-    fn message(&self) -> String {
-        "CSS classes are not sorted in the canonical Tailwind order.".to_string()
+    fn message(&self) -> Cow<'static, str> {
+        "CSS classes are not sorted in the canonical Tailwind order.".into()
     }
 
-    fn fix_title(&self) -> Option<String> {
-        Some("Sort Tailwind CSS classes".to_string())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Sort Tailwind CSS classes")
     }
 }
 
@@ -91,7 +93,7 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    let span = (*offset, value_str.len()).into();
+    let span = span(*offset, value_str.len());
     let mut guard = checker.report_diagnostic(&UnsortedTailwindClasses, span);
     guard.set_fix(Fix::safe_edit(Edit::replacement(sorted.into_owned(), span)));
 }
