@@ -10,7 +10,7 @@ use djangofmt_lint::RuleSelection;
 
 use crate::args::{FileSelectionArgs, RuleSelectionArgs};
 use crate::error::Error;
-use crate::pyproject::{LintSettings, PyprojectSettings};
+use crate::pyproject::{LintSettings, PyprojectSettings, UnsortedTailwindClassesOptions};
 
 /// Default file patterns to include when discovering files.
 pub const DEFAULT_INCLUDE: &[&str] = &["*.html", "*.jinja", "*.jinja2", "*.j2"];
@@ -68,11 +68,17 @@ pub fn resolve_rule_selection(
     let preview = resolve_bool_arg(cli.preview, cli.no_preview)
         .or_else(|| lint.and_then(|l| l.preview))
         .unwrap_or(false);
+    // Per-rule config is pyproject-only (no CLI flags), mirroring ruff's per-linter sections.
+    let unsorted_tailwind_classes = lint
+        .and_then(|l| l.unsorted_tailwind_classes.clone())
+        .map(UnsortedTailwindClassesOptions::into_settings)
+        .unwrap_or_default();
 
     RuleSelection {
         select,
         ignore,
         preview,
+        unsorted_tailwind_classes,
     }
 }
 
@@ -376,6 +382,24 @@ mod tests {
             .iter()
             .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
             .collect()
+    }
+
+    #[test]
+    fn resolve_rule_selection_reads_tailwind_prefix_from_pyproject() {
+        use crate::args::RuleSelectionArgs;
+
+        let lint = LintSettings {
+            unsorted_tailwind_classes: Some(UnsortedTailwindClassesOptions {
+                prefix: Some("tw-".to_string()),
+            }),
+            ..Default::default()
+        };
+        let (settings, _) =
+            resolve_rule_selection(&RuleSelectionArgs::default(), Some(&lint)).into_settings();
+        assert_eq!(
+            settings.unsorted_tailwind_classes.prefix.as_deref(),
+            Some("tw-")
+        );
     }
 
     #[test]
