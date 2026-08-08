@@ -218,6 +218,81 @@ DEFAULT_TARGETS = [
             )
         ),
     ),
+    Project(repo=Repository(owner="e-valuation", name="EvaP", ref="main")),
+    Project(
+        repo=Repository(owner="django", name="djangoproject.com", ref="main"),
+        cli_options=CliOptions(
+            exclude=(
+                # <a> opened inside a {% blocktranslate %} and closed outside
+                "djangoproject/templates/aggregator/local-django-community.html",
+                "djangoproject/templates/releases/download.html",  # Nested unclosed <p>
+                "djangoproject/templates/start.html",  # </span> inside a {% translate %} string
+                "docs/templates/docs/doc.html",  # <ul><li> opened inside a {% for %}
+                "docs/templates/docs/genindex.html",  # Invalid <br/ > self close
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "djangoproject/templates/base_weblog.html",
+                "djangoproject/templates/foundation/coreawardcohort_list.html",
+                "djangoproject/templates/fundraising/includes/_hero_with_logo.html",
+                "djangoproject/templates/fundraising/includes/display_django_heroes.html",
+                "djangoproject/templates/fundraising/manage-donations.html",
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="healthchecks", name="healthchecks", ref="master"),
+        cli_options=CliOptions(
+            exclude=(
+                "templates/accounts/project.html",  # TODO: spurious unclosed <div>
+                "templates/front/channels.html",  # TODO: `<span>---</span>` fails to parse
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="babybuddy", name="babybuddy", ref="master"),
+        cli_options=CliOptions(
+            exclude=(
+                "babybuddy/templates/babybuddy/form_field.html",  # Stray quote in class attribute
+                "babybuddy/templates/babybuddy/paginator.html",  # Missing closing li
+                "babybuddy/templates/registration/base.html",  # Dangling </a>
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="inventree", name="InvenTree", ref="master"),
+        cli_options=CliOptions(
+            exclude=(
+                # Missing closing div
+                "src/backend/InvenTree/web/templates/web/index.html",
+            )
+        ),
+    ),
+    Project(
+        repo=Repository(owner="netbox-community", name="netbox", ref="main"),
+        cli_options=CliOptions(
+            exclude=(
+                "netbox/templates/core/inc/config_data.html",  # Missing closing tr
+                "netbox/templates/extras/inc/configcontext_data.html",  # Unterminated id attribute
+                # Template tag used as an attribute name, e.g. `{% formaction %}="{{ url }}"`
+                "netbox/templates/core/buttons/bulk_sync.html",
+                "netbox/templates/dcim/buttons/bulk_add_components.html",
+                "netbox/templates/dcim/buttons/bulk_disconnect.html",
+                "netbox/templates/virtualization/buttons/bulk_add_components.html",
+                "netbox/utilities/templates/buttons/bulk_delete.html",
+                "netbox/utilities/templates/buttons/bulk_edit.html",
+                "netbox/utilities/templates/buttons/bulk_rename.html",
+                # TODO: `{% tag %}` is a custom inline tag here but parsed as a block
+                "netbox/templates/circuits/inc/circuit_termination.html",
+                "netbox/templates/circuits/panels/circuit_circuit_termination.html",
+                "netbox/templates/dcim/trace/cable.html",
+                "netbox/templates/extras/panels/tags.html",
+                "netbox/templates/inc/panels/tags.html",
+                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
+                "netbox/templates/django/forms/widgets/select.html",
+                "netbox/utilities/templates/builtins/badge.html",
+                "netbox/utilities/templates/builtins/tag.html",
+            )
+        ),
+    ),
     Project(
         repo=Repository(
             owner="emmaDelescolle",
