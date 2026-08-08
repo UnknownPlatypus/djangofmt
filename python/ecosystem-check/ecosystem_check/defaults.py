@@ -58,21 +58,11 @@ DEFAULT_TARGETS = [
                 "tests/forms_tests/templates/forms_tests/use_fieldset.html",
                 "tests/template_backends/templates/template_backends/syntax_error.html",
                 "tests/test_client_regress/bad_templates/404.html",
-                # Contains invalid blocktranslate syntax
-                "tests/i18n/commands/templates/test.html",
             ),
         ),
     ),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
-    Project(
-        repo=Repository(owner="saleor", name="saleor", ref="main"),
-        cli_options=CliOptions(
-            exclude=(
-                # TODO: Fails to parse <a href={% url "api" %}  target="_blank">
-                "templates/home/index.html",
-            )
-        ),
-    ),
+    Project(repo=Repository(owner="saleor", name="saleor", ref="main")),
     Project(
         repo=Repository(
             owner="django-commons", name="django-debug-toolbar", ref="main"
@@ -139,13 +129,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(
             owner="silentsokolov", name="django-admin-rangefilter", ref="master"
-        ),
-        cli_options=CliOptions(
-            exclude=(
-                # Django comments https://github.com/UnknownPlatypus/djangofmt/issues/8
-                "rangefilter/templates/rangefilter/date_range_quick_select_list_filter.html",
-            )
-        ),
+        )
     ),
     Project(
         repo=Repository(
@@ -155,20 +139,12 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(
             owner="django-import-export", name="django-import-export", ref="main"
-        ),
-        cli_options=CliOptions(
-            exclude=(
-                # https://github.com/g-plane/markup_fmt/pull/98
-                "import_export/templates/admin/import_export/export.html",
-            )
-        ),
+        )
     ),
     Project(
         repo=Repository(owner="unfoldadmin", name="django-unfold", ref="main"),
         cli_options=CliOptions(
             exclude=(
-                "src/unfold/contrib/simple_history/templates/simple_history/object_history_list.html",  # Broken close tag
-                "src/unfold/templates/admin/auth/user/add_form.html",  # Broken close tag
                 "src/unfold/templates/unfold/helpers/display_header.html",  # Broken close tag
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "src/unfold/templates/admin/actions.html",
@@ -181,7 +157,6 @@ DEFAULT_TARGETS = [
                 "src/unfold/templates/unfold_crispy/whole_uni_form.html",
                 # conditional tag name with differing end tag like </{% if cl.model_admin.list_filter_submit %}form{% else %}div{% endif %}>
                 "src/unfold/templates/unfold/components/button.html",
-                "src/unfold/templates/unfold/helpers/change_list_filter.html",
                 "src/unfold/templates/unfold/helpers/display_dropdown.html",
                 "src/unfold/templates/unfold/helpers/site_icon.html",
                 "src/unfold/templates/unfold_crispy/field.html",
@@ -202,7 +177,6 @@ DEFAULT_TARGETS = [
                 "src/sentry/templates/sentry/debug/error-page-embed.html",  # Broken close tag
                 "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
                 "src/sentry/templates/sentry/integrations/notify-disable.html",  # Dangling </a>
-                "src/sentry/templates/sentry/integrations/sentry-app-notify-disable.html",  # Dangling </a>
                 "src/sentry/templates/sentry/toolbar/iframe.html",  # Intentionally unclosed body tag
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "src/sentry/templates/sentry/emails/reports/body.html",
@@ -210,14 +184,7 @@ DEFAULT_TARGETS = [
             ),
         ),
     ),
-    Project(
-        repo=Repository(owner="makeplane", name="plane", ref="preview"),
-        cli_options=CliOptions(
-            exclude=(
-                "apiserver/templates/emails/test_email.html",  # Invalid </br> tag
-            )
-        ),
-    ),
+    Project(repo=Repository(owner="makeplane", name="plane", ref="preview")),
     Project(repo=Repository(owner="e-valuation", name="EvaP", ref="main")),
     Project(
         repo=Repository(owner="django", name="djangoproject.com", ref="main"),
