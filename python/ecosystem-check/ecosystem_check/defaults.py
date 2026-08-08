@@ -239,6 +239,8 @@ DEFAULT_TARGETS = [
             exclude=(
                 "netbox/templates/core/inc/config_data.html",  # Missing closing tr
                 "netbox/templates/extras/inc/configcontext_data.html",  # Unterminated id attribute
+                # Unstable: code after a multiline template literal is re-indented on every pass
+                "netbox/templates/graphql/graphiql.html",
                 # Template tag used as an attribute name, e.g. `{% formaction %}="{{ url }}"`
                 "netbox/templates/core/buttons/bulk_sync.html",
                 "netbox/templates/dcim/buttons/bulk_add_components.html",

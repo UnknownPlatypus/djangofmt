@@ -342,7 +342,8 @@ def markdown_stale_exclusions(executable: Path, result: Result) -> str:
         return "✅ every exclusion is still needed."
     return "\n".join(
         [
-            "⚠️ these exclusions are stale (file gone or formats without error), "
+            "⚠️ these exclusions are stale (file gone, or formats without error "
+            "and converges), "
             "drop them from `defaults.py`:",
             "",
             *lines,
@@ -351,19 +352,24 @@ def markdown_stale_exclusions(executable: Path, result: Result) -> str:
 
 
 def _is_stale(executable: Path, path: Path, args: list[str], file: str) -> bool:
-    """An exclusion is stale once the file is gone from the repo or formats without error."""
+    """An exclusion is stale once the file is gone, or formats without error and converges."""
     source = path.joinpath(file)
     if not source.is_file():
         return True
+
     # Format through stdin so the excluded file isn't rewritten
-    proc = run(
-        [executable.absolute(), *args, "--stdin-filename", file],
-        input=source.read_bytes(),
-        stdout=DEVNULL,
-        stderr=DEVNULL,
-        cwd=path,
-    )
-    return proc.returncode == 0
+    def format_code(code: bytes) -> bytes | None:
+        proc = run(
+            [executable.absolute(), *args, "--stdin-filename", file],
+            input=code,
+            stdout=PIPE,
+            stderr=DEVNULL,
+            cwd=path,
+        )
+        return proc.stdout if proc.returncode == 0 else None
+
+    formatted = format_code(source.read_bytes())
+    return formatted is not None and format_code(formatted) == formatted
 
 
 class FormatComparison(StrEnum):
