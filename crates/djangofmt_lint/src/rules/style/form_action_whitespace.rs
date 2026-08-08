@@ -95,7 +95,7 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     let edit = if trimmed.is_empty() {
         Edit::deletion(span)
     } else {
-        Edit::replacement(trimmed, span)
+        Edit::replacement(trimmed.to_string(), span)
     };
     guard.set_fix(Fix::safe_edit(edit));
 }
