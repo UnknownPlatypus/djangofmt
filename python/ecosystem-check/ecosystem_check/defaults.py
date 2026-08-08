@@ -249,12 +249,6 @@ DEFAULT_TARGETS = [
                 "netbox/utilities/templates/buttons/bulk_delete.html",
                 "netbox/utilities/templates/buttons/bulk_edit.html",
                 "netbox/utilities/templates/buttons/bulk_rename.html",
-                # TODO: `{% tag %}` is a custom inline tag here but parsed as a block
-                "netbox/templates/circuits/inc/circuit_termination.html",
-                "netbox/templates/circuits/panels/circuit_circuit_termination.html",
-                "netbox/templates/dcim/trace/cable.html",
-                "netbox/templates/extras/panels/tags.html",
-                "netbox/templates/inc/panels/tags.html",
                 # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
                 "netbox/templates/django/forms/widgets/select.html",
                 "netbox/utilities/templates/builtins/badge.html",
