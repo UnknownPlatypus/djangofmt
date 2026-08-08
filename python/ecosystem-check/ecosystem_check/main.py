@@ -18,6 +18,7 @@ from ecosystem_check.format import (
     can_format_project,
     compare_format,
     markdown_format_result,
+    markdown_stale_exclusions,
 )
 from ecosystem_check.projects import (
     Command,
@@ -107,6 +108,9 @@ async def main(
             match command:
                 case Command.FORMAT:
                     print(markdown_format_result(result))
+                    if format_comparison is FormatComparison.BASE_AND_COMP:
+                        print()
+                        print(markdown_stale_exclusions(comparison_executable, result))
                 case Command.CHECK:
                     print(markdown_check_result(result))
                 case _:

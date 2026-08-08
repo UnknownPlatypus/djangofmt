@@ -11,7 +11,7 @@ from asyncio import create_subprocess_exec
 from collections.abc import Sequence
 from enum import StrEnum
 from pathlib import Path
-from subprocess import PIPE
+from subprocess import DEVNULL, PIPE, run
 from typing import TYPE_CHECKING
 
 from ecosystem_check import logger
@@ -322,6 +322,48 @@ async def format(
 
     lines = result.decode("utf8").splitlines()
     return lines
+
+
+def markdown_stale_exclusions(executable: Path, result: Result) -> str:
+    """Report exclusions that are no longer needed, so they don't linger unnoticed."""
+    lines: list[str] = []
+    for project, comparison in result.completed:
+        options = project.cli_options
+        args = options.to_args(executable_name=executable.name, command=Command.FORMAT)
+        stale = [
+            f"`{file}`"
+            for file in options.excluded_files(executable.name)
+            if _is_stale(executable, comparison.repo.path, args, file)
+        ]
+        if stale:
+            lines.append(f"- `{project.repo.fullname}`: {' '.join(stale)}")
+
+    if not lines:
+        return "✅ every exclusion is still needed."
+    return "\n".join(
+        [
+            "⚠️ these exclusions are stale (file gone or formats without error), "
+            "drop them from `defaults.py`:",
+            "",
+            *lines,
+        ]
+    )
+
+
+def _is_stale(executable: Path, path: Path, args: list[str], file: str) -> bool:
+    """An exclusion is stale once the file is gone from the repo or formats without error."""
+    source = path.joinpath(file)
+    if not source.is_file():
+        return True
+    # Format through stdin so the excluded file isn't rewritten
+    proc = run(
+        [executable.absolute(), *args, "--stdin-filename", file],
+        input=source.read_bytes(),
+        stdout=DEVNULL,
+        stderr=DEVNULL,
+        cwd=path,
+    )
+    return proc.returncode == 0
 
 
 class FormatComparison(StrEnum):
