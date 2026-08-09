@@ -92,7 +92,7 @@ impl FormatterConfig {
 }
 
 /// Merge custom blocks from CLI arguments and pyproject.toml settings, deduplicating entries.
-fn merge_custom_blocks(
+pub(crate) fn merge_custom_blocks(
     cli: Option<Vec<String>>,
     pyproject: Option<Vec<String>>,
 ) -> Option<Vec<String>> {

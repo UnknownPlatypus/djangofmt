@@ -2,8 +2,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
-use markup_fmt::parser::Parser;
+use djangofmt_lint::{FileDiagnostics, Settings, lint_source};
 use miette::{GraphicalReportHandler, GraphicalTheme};
 use serde::Serialize;
 use std::path::PathBuf;
@@ -33,13 +32,9 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
 #[must_use]
 pub fn ast(source: &str, profile: &str) -> String {
     let profile = get_profile(profile);
-    let mut parser = Parser::new(source, markup_fmt::Language::from(profile), vec![]);
-    match parser.parse_root() {
+    match djangofmt_lint::parse(source, profile.into(), &[]) {
         Ok(ast) => format!("{ast:#?}"),
-        Err(e) => {
-            let err: markup_fmt::FormatError = markup_fmt::FormatError::Syntax(e);
-            render_parse_error(source, &err)
-        }
+        Err(e) => render_parse_error(source, &markup_fmt::FormatError::Syntax(e)),
     }
 }
 
@@ -192,17 +187,13 @@ pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
 
 fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let profile = get_profile(profile);
-    let mut parser = Parser::new(source, markup_fmt::Language::from(profile), vec![]);
-    let ast = match parser.parse_root() {
-        Ok(ast) => ast,
+    let diagnostics = match lint_source(source, profile.into(), &[], &Settings::all()) {
+        Ok(diagnostics) => diagnostics,
         Err(e) => {
-            let err: markup_fmt::FormatError = markup_fmt::FormatError::Syntax(e);
+            let err = markup_fmt::FormatError::Syntax(e);
             return Ok(LintResult::new(1, render_parse_error(source, &err)));
         }
     };
-
-    let settings = Settings::all();
-    let diagnostics = check_ast(source, &ast, &settings);
     let error_count = diagnostics.len();
 
     if error_count == 0 {

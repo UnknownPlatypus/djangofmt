@@ -4,8 +4,7 @@
 use djangofmt_benchmark::{
     DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, TestFile,
 };
-use djangofmt_lint::{FileDiagnostics, Settings, check_ast};
-use markup_fmt::parser::Parser;
+use djangofmt_lint::{FileDiagnostics, Settings, lint_source};
 use miette::{GraphicalReportHandler, GraphicalTheme};
 
 fn main() {
@@ -22,9 +21,13 @@ static DIAGNOSTIC_HEAVY: [&TestFile; 3] = [
 /// Every diagnostic of a file, rendered as its own self-contained block.
 #[divan::bench(args = DIAGNOSTIC_HEAVY)]
 fn render(bencher: divan::Bencher, template: &'static TestFile) {
-    let mut parser = Parser::new(template.code, template.profile.into(), vec![]);
-    let ast = parser.parse_root().expect("Parsing to succeed");
-    let diagnostics = check_ast(template.code, &ast, &Settings::all());
+    let diagnostics = lint_source(
+        template.code,
+        template.profile.into(),
+        &[],
+        &Settings::all(),
+    )
+    .expect("Parsing to succeed");
     assert!(!diagnostics.is_empty(), "{} tripped no rule", template.name);
     let file_diagnostics = FileDiagnostics::new(template.name, template.code, diagnostics);
 

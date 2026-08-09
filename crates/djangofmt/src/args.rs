@@ -214,6 +214,14 @@ pub struct CheckCommand {
     /// Template language profile to use [default: django]
     #[arg(long, value_enum)]
     pub profile: Option<Profile>,
+    /// Comma-separated list of custom block name to enable
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_parser = clap::builder::ValueParser::new(|s: &str| Ok::<String, String>(s.trim().to_string())),
+        value_name = "BLOCK_NAMES",
+    )]
+    pub custom_blocks: Option<Vec<String>>,
     /// Apply safe fixes automatically. Use `--no-fix` to disable.
     #[arg(long, overrides_with("no_fix"))]
     pub fix: bool,

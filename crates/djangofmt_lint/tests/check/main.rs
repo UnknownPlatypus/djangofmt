@@ -3,12 +3,11 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Settings, check_ast, fix_ast,
+    Applicability, FileDiagnostics, LintDiagnostic, Settings, fix_ast, lint_source, parse,
 };
 
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
-use markup_fmt::parser::Parser;
 use miette::{GraphicalReportHandler, GraphicalTheme};
 use std::fs;
 use std::path::Path;
@@ -57,9 +56,7 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.html", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let mut parser = Parser::new(&input, Language::Django, vec![]);
-        let ast = parser
-            .parse_root()
+        let ast = parse(&input, Language::Django, &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
 
@@ -82,10 +79,8 @@ fn fix_snapshot() {
 const MANIFEST_DIR: &str = env!("CARGO_MANIFEST_DIR");
 
 fn collect_diagnostics(input: &str) -> Vec<LintDiagnostic> {
-    let mut parser = Parser::new(input, Language::Django, vec![]);
-    let ast = parser.parse_root().expect("Failed to parse AST in test");
-    let settings = Settings::all();
-    check_ast(input, &ast, &settings)
+    lint_source(input, Language::Django, &[], &Settings::all())
+        .expect("Failed to parse AST in test")
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {

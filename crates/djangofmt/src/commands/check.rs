@@ -1,8 +1,7 @@
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, check_ast, lint_fix,
+    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, lint_fix, lint_source,
 };
 use markup_fmt::FormatError;
-use markup_fmt::parser::Parser;
 use miette::{SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -19,6 +18,8 @@ use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::pyproject::LintSettings;
 use crate::resolver::{resolve_bool_arg, resolve_rule_selection};
+
+use super::format::merge_custom_blocks;
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
 #[derive(Debug, PartialEq, Eq)]
@@ -84,11 +85,27 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         Applicability::Safe
     };
 
+    // Same custom blocks as `format`, so both commands lint/format the same AST.
+    let custom_blocks = merge_custom_blocks(
+        args.custom_blocks.clone(),
+        resolved.pyproject.custom_blocks.clone(),
+    )
+    .unwrap_or_default();
+
     let start = Instant::now();
     let (results, parse_errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|path| check_path(path, resolved.profile, &settings, config.fix, threshold))
+        .map(|path| {
+            check_path(
+                path,
+                resolved.profile,
+                &settings,
+                &custom_blocks,
+                config.fix,
+                threshold,
+            )
+        })
         .partition_map(|result| match result {
             Ok(r) => Left(r),
             Err(err) => Right(*err),
@@ -268,6 +285,7 @@ fn check_path(
     path: &Path,
     profile: Option<Profile>,
     settings: &Settings,
+    custom_blocks: &[String],
     fix: bool,
     threshold: Applicability,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
@@ -278,7 +296,7 @@ fn check_path(
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
     if fix {
-        match lint_fix(&source, settings, profile.into(), threshold) {
+        match lint_fix(&source, settings, profile.into(), custom_blocks, threshold) {
             Ok(result) => {
                 if result.applied_count > 0 && result.source != source {
                     fs::write(path, &result.source)
@@ -322,9 +340,8 @@ fn check_path(
         }
     }
 
-    let mut parser = Parser::new(&source, profile.into(), vec![]);
-    let ast = match parser.parse_root() {
-        Ok(ast) => ast,
+    let diagnostics = match lint_source(&source, profile.into(), custom_blocks, settings) {
+        Ok(diagnostics) => diagnostics,
         Err(err) => {
             return Err(Box::new(CommandError::Parse(ParseError::new(
                 Some(path.to_path_buf()),
@@ -333,8 +350,6 @@ fn check_path(
             ))));
         }
     };
-
-    let diagnostics = check_ast(&source, &ast, settings);
     let file_diagnostics = if diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
