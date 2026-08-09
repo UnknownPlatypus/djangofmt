@@ -14,11 +14,11 @@ use tracing::{debug, error, info, warn};
 
 use crate::ExitStatus;
 use crate::args::{CheckCommand, OutputFormat, Profile};
+use crate::config::{resolve_bool_arg, resolve_profile, resolve_rule_selection};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::LintSettings;
-use crate::resolver::{resolve_bool_arg, resolve_rule_selection};
 
 use super::format::merge_custom_blocks;
 
@@ -71,8 +71,7 @@ struct CheckResult {
 
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
-    let resolved =
-        super::resolve_command(&args.files, args.template.profile, &args.file_selection)?;
+    let resolved = super::resolve_command(&args.files, &args.file_selection)?;
     let lint = resolved.pyproject.lint.as_ref();
     let config = CheckConfig::from_args(args, lint);
 
@@ -109,9 +108,14 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
                 rules: pfi.rules_for(path, &settings.rules),
             });
             let settings = file_settings.as_ref().unwrap_or(&settings);
+            let profile = resolve_profile(
+                args.template.profile,
+                resolved.pyproject.profile,
+                Some(path),
+            );
             check_path(
                 path,
-                resolved.profile,
+                profile,
                 settings,
                 &custom_blocks,
                 config.fix,
@@ -295,15 +299,12 @@ fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
 )]
 fn check_path(
     path: &Path,
-    profile: Option<Profile>,
+    profile: Profile,
     settings: &Settings,
     custom_blocks: &[String],
     fix: bool,
     threshold: Applicability,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
-    let profile = profile
-        .or_else(|| Profile::from_path(path))
-        .unwrap_or_default();
     let source = fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 

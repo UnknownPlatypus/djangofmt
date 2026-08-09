@@ -166,6 +166,26 @@ fn format_stdin_with_filename_html() {
 }
 
 #[test]
+fn format_stdin_pyproject_profile_beats_extension() {
+    // Same precedence as the file path (CLI > pyproject > extension): the
+    // configured django profile wins over `.jinja` and strips `{{- -}}` markers.
+    let project = Project::new().file("pyproject.toml", "[tool.djangofmt]\nprofile = \"django\"\n");
+    assert_cmd_snapshot!(
+        cli()
+            .current_dir(project.path())
+            .args(["--stdin-filename", "foo.jinja"])
+            .pass_stdin("{{- foo -}}\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {{ foo }}
+
+    ----- stderr -----
+    "#);
+}
+
+#[test]
 fn format_stdin_with_filename_infers_jinja_profile() {
     // Jinja whitespace-control modifiers (`{{- ... -}}`) are preserved under the jinja
     // profile, but stripped under django — proving the profile was inferred from `.jinja`.

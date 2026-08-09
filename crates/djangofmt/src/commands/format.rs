@@ -9,11 +9,11 @@ use tracing::{debug, info};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, OutputFormat, Profile};
+use crate::config::{resolve_bool_arg, resolve_profile};
 use crate::editorconfig::{self, EditorconfigSettings};
 use crate::error::{CommandError, ParseError, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::pyproject::PyprojectSettings;
-use crate::resolver::resolve_bool_arg;
 use editorconfig_parser::EditorConfig;
 
 /// Pre-built configuration for all formatters.
@@ -230,7 +230,6 @@ struct FormatContext<'a> {
     args: &'a FormatCommand,
     pyproject: &'a PyprojectSettings,
     editorconfig: Option<&'a EditorConfig>,
-    profile: Option<Profile>,
     /// Built once when `.editorconfig` can't vary per file (no config, or only `[*]`).
     config: Option<FormatterConfig>,
 }
@@ -240,13 +239,11 @@ impl<'a> FormatContext<'a> {
         args: &'a FormatCommand,
         pyproject: &'a PyprojectSettings,
         editorconfig: Option<&'a EditorConfig>,
-        profile: Option<Profile>,
     ) -> Self {
         let mut context = Self {
             args,
             pyproject,
             editorconfig,
-            profile,
             config: None,
         };
         if !editorconfig::has_per_file_sections(editorconfig) {
@@ -257,9 +254,11 @@ impl<'a> FormatContext<'a> {
     }
 
     fn profile_for(&self, path: &Path) -> Profile {
-        self.profile
-            .or_else(|| Profile::from_path(path))
-            .unwrap_or_default()
+        resolve_profile(
+            self.args.template.profile,
+            self.pyproject.profile,
+            Some(path),
+        )
     }
 
     /// The config for `path`: the shared one when set, otherwise built for this file.
@@ -276,15 +275,9 @@ impl<'a> FormatContext<'a> {
 }
 
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
-    let resolved =
-        super::resolve_command(&args.files, args.template.profile, &args.file_selection)?;
+    let resolved = super::resolve_command(&args.files, &args.file_selection)?;
     let editorconfig = editorconfig::load_editorconfig_from_cwd();
-    let context = FormatContext::new(
-        args,
-        &resolved.pyproject,
-        editorconfig.as_ref(),
-        resolved.profile,
-    );
+    let context = FormatContext::new(args, &resolved.pyproject, editorconfig.as_ref());
 
     // Format files in parallel
     let start = Instant::now();
