@@ -80,8 +80,8 @@ body = """
     {% endif %}\
 {% else %}\
     ## [unreleased]
-{% endif %}\
-
+{% endif %}
+[**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
     {% for commit in commits
