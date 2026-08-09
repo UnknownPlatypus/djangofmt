@@ -281,16 +281,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Redundant type="text/javascript" on <script> tag.
-    ╭─[tests/check/use_https/use_https.invalid.html:59:15]
- 58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
- 59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
-    ·               ───────┬───────
-    ·                      ╰── here
- 60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
-    ╰────
-  help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
-
   × Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:59:51]
  58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">

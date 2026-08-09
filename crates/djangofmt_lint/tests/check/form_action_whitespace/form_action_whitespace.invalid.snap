@@ -11,16 +11,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Remove leading and trailing whitespace from the `action` value.
 
-  × Hardcoded internal URL in `action`.
-   ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:5:15]
- 4 │ <!-- Trailing whitespace -->
- 5 │ <form action="/submit/ "></form>
-   ·               ────┬────
-   ·                   ╰── here
- 6 │ 
-   ╰────
-  help: Use `{% url 'view_name' %}` to reference a named URL pattern.
-
   × Extra whitespace found in form `action`.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:5:15]
  4 │ <!-- Trailing whitespace -->
@@ -71,16 +61,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
  19 │ <forM action="/submit/ "></forM>
     ╰────
   help: Remove leading and trailing whitespace from the `action` value.
-
-  × Hardcoded internal URL in `action`.
-    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:19:15]
- 18 │ <FORM action=" /submit/ "></FORM>
- 19 │ <forM action="/submit/ "></forM>
-    ·               ────┬────
-    ·                   ╰── here
- 20 │ 
-    ╰────
-  help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
   × Extra whitespace found in form `action`.
     ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:19:15]
