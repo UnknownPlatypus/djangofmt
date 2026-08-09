@@ -70,7 +70,8 @@ struct CheckResult {
 
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
-    let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
+    let resolved =
+        super::resolve_command(&args.files, args.template.profile, &args.file_selection)?;
     let lint = resolved.pyproject.lint.as_ref();
     let config = CheckConfig::from_args(args, lint);
 
@@ -87,7 +88,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
 
     // Same custom blocks as `format`, so both commands lint/format the same AST.
     let custom_blocks = merge_custom_blocks(
-        args.custom_blocks.clone(),
+        args.template.custom_blocks.clone(),
         resolved.pyproject.custom_blocks.clone(),
     )
     .unwrap_or_default();

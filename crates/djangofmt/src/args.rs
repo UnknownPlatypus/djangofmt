@@ -80,6 +80,22 @@ pub struct FileSelectionArgs {
     pub no_force_exclude: bool,
 }
 
+/// CLI arguments controlling how templates are parsed, shared by `format` and `check`.
+#[derive(Clone, Debug, Default, clap::Args)]
+pub struct TemplateArgs {
+    /// Template language profile to use [default: django]
+    #[arg(long, value_enum)]
+    pub profile: Option<Profile>,
+    /// Comma-separated list of custom block name to enable
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_parser = clap::builder::ValueParser::new(|s: &str| Ok::<String, String>(s.trim().to_string())),
+        value_name = "BLOCK_NAMES",
+    )]
+    pub custom_blocks: Option<Vec<String>>,
+}
+
 #[derive(Clone, Debug, clap::Parser)]
 pub struct FormatCommand {
     /// List of files or directories to format.
@@ -94,17 +110,8 @@ pub struct FormatCommand {
     /// Set the indent width [default: 4]
     #[arg(long)]
     pub indent_width: Option<IndentWidth>,
-    /// Template language profile to use [default: django]
-    #[arg(long, value_enum)]
-    pub profile: Option<Profile>,
-    /// Comma-separated list of custom block name to enable
-    #[arg(
-        long,
-        value_delimiter = ',',
-        value_parser = clap::builder::ValueParser::new(|s: &str| Ok::<String, String>(s.trim().to_string())),
-        value_name = "BLOCK_NAMES",
-    )]
-    pub custom_blocks: Option<Vec<String>>,
+    #[clap(flatten)]
+    pub template: TemplateArgs,
     /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
@@ -211,17 +218,8 @@ pub struct CheckCommand {
     /// List of files or directories to check.
     #[arg(required = true)]
     pub files: Vec<PathBuf>,
-    /// Template language profile to use [default: django]
-    #[arg(long, value_enum)]
-    pub profile: Option<Profile>,
-    /// Comma-separated list of custom block name to enable
-    #[arg(
-        long,
-        value_delimiter = ',',
-        value_parser = clap::builder::ValueParser::new(|s: &str| Ok::<String, String>(s.trim().to_string())),
-        value_name = "BLOCK_NAMES",
-    )]
-    pub custom_blocks: Option<Vec<String>>,
+    #[clap(flatten)]
+    pub template: TemplateArgs,
     /// Apply safe fixes automatically. Use `--no-fix` to disable.
     #[arg(long, overrides_with("no_fix"))]
     pub fix: bool,

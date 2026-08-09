@@ -68,8 +68,10 @@ impl FormatterConfig {
             .or(pyproject.indent_width)
             .or(editorconfig.indent_width)
             .unwrap_or_default();
-        let custom_blocks =
-            merge_custom_blocks(args.custom_blocks.clone(), pyproject.custom_blocks.clone());
+        let custom_blocks = merge_custom_blocks(
+            args.template.custom_blocks.clone(),
+            pyproject.custom_blocks.clone(),
+        );
         let html_void_self_closing = args
             .html_void_self_closing
             .or(pyproject.html_void_self_closing)
@@ -274,7 +276,8 @@ impl<'a> FormatContext<'a> {
 }
 
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
-    let resolved = super::resolve_command(&args.files, args.profile, &args.file_selection)?;
+    let resolved =
+        super::resolve_command(&args.files, args.template.profile, &args.file_selection)?;
     let editorconfig = editorconfig::load_editorconfig_from_cwd();
     let context = FormatContext::new(
         args,
@@ -552,8 +555,7 @@ mod tests {
             stdin_filename: None,
             line_length: None,
             indent_width: None,
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: false,
@@ -573,8 +575,7 @@ mod tests {
             stdin_filename: None,
             line_length: Some(LineLength::try_from(80u16).unwrap()),
             indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: Some(SelfClosing::Always),
             preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: false,
@@ -600,8 +601,7 @@ mod tests {
             stdin_filename: None,
             line_length: None,
             indent_width: None,
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: false,
@@ -623,8 +623,7 @@ mod tests {
             stdin_filename: None,
             line_length: None,
             indent_width: None,
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: false,
@@ -647,8 +646,7 @@ mod tests {
             stdin_filename: None,
             line_length: None,
             indent_width: None,
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: None,
             preserve_unquoted_attrs: true,
             no_preserve_unquoted_attrs: false,
@@ -667,8 +665,7 @@ mod tests {
             stdin_filename: None,
             line_length: None,
             indent_width: None,
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: false,
@@ -690,8 +687,7 @@ mod tests {
             stdin_filename: None,
             line_length: None,
             indent_width: None,
-            profile: None,
-            custom_blocks: None,
+            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: None,
             preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: true,
