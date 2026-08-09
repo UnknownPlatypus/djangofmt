@@ -40,7 +40,6 @@ djangofmt = { path = "../djangofmt" }
 [dev-dependencies]
 divan = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
-markup_fmt = { workspace = true }
 miette = { workspace = true }
 
 [lints]

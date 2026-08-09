@@ -418,7 +418,6 @@ dependencies = [
  "codspeed-divan-compat",
  "djangofmt",
  "djangofmt_lint",
- "markup_fmt",
  "oxc-miette",
 ]
 
