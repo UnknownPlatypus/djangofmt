@@ -202,7 +202,10 @@ If the rule's `check` uses `report_diagnostic_if_enabled` internally instead of 
 
 ## Step 5: Create test fixtures
 
-Create directory `crates/djangofmt_lint/tests/check/{rule_name}/` with two files:
+Create directory `crates/djangofmt_lint/tests/check/{rule_name}/` with two files.
+The directory name must be the rule code with underscores — the test runner derives
+the rule from it and runs **only that rule**, so fixtures never trip other rules'
+diagnostics (and a coverage test fails if the directory is missing or misnamed):
 
 ### `{rule_name}.invalid.html`
 

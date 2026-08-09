@@ -31,16 +31,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Add explicit `height` and `width` to avoid layout shifts as the image loads.
 
-  × `<img>` tag should declare an `alt` attribute.
-    ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:11:2]
- 10 │ <!-- Completely empty `<img>` -->
- 11 │ <img>
-    ·  ─┬─
-    ·   ╰── here
- 12 │ 
-    ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
-
   × `<img>` tag should declare both `height` and `width` attributes.
     ╭─[tests/check/missing_img_dimensions/missing_img_dimensions.invalid.html:11:2]
  10 │ <!-- Completely empty `<img>` -->

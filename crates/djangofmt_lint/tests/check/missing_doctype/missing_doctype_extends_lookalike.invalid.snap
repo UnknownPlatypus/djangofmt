@@ -10,13 +10,3 @@ source: crates/djangofmt_lint/tests/check/main.rs
  4 │     <body></body>
    ╰────
   help: Add `<!DOCTYPE html>` before the `<html>` tag.
-
-  × Empty `<body>` tag pair.
-   ╭─[tests/check/missing_doctype/missing_doctype_extends_lookalike.invalid.html:4:6]
- 3 │ <html lang="en">
- 4 │     <body></body>
-   ·      ──┬─
-   ·        ╰── here
- 5 │ </html>
-   ╰────
-  help: Remove the empty tag pair or add content.
