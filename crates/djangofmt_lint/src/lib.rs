@@ -6,14 +6,11 @@
 //! # Example
 //!
 //! ```
-//! use djangofmt_lint::{check_ast, Settings};
-//! use markup_fmt::{Language, parser::Parser};
+//! use djangofmt_lint::{lint_source, Settings};
+//! use markup_fmt::Language;
 //!
 //! let source = r#"<form method="put"></form>"#;
-//! let mut parser = Parser::new(source, Language::Jinja, vec![]);
-//! let ast = parser.parse_root().unwrap();
-//!
-//! let diagnostics = check_ast(source, &ast, &Settings::default());
+//! let diagnostics = lint_source(source, Language::Jinja, &[], &Settings::default()).unwrap();
 //! assert_eq!(diagnostics.len(), 1);
 //! ```
 
@@ -43,6 +40,8 @@ pub use violation::{Violation, ViolationMetadata};
 use std::borrow::Cow;
 
 use markup_fmt::ast::Root;
+use markup_fmt::parser::Parser;
+use markup_fmt::{Language, SyntaxError};
 use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
 use std::fmt;
 use std::sync::{Arc, LazyLock};
@@ -165,4 +164,28 @@ pub fn check_ast<'a>(
     let mut checker = Checker::new(source, settings);
     checker.visit_root(ast);
     checker.into_diagnostics()
+}
+
+/// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block.
+///
+/// The single door to the parser: every consumer (check, fix, playground,
+/// benches, tests) must parse with the same configuration or lint on a
+/// different AST than the one the formatter sees.
+pub fn parse<'a>(
+    source: &'a str,
+    language: Language,
+    custom_blocks: &[String],
+) -> Result<Root<'a>, SyntaxError> {
+    Parser::new(source, language, custom_blocks.to_vec()).parse_root()
+}
+
+/// Parse and lint `source` in one call.
+pub fn lint_source(
+    source: &str,
+    language: Language,
+    custom_blocks: &[String],
+    settings: &Settings,
+) -> Result<Vec<LintDiagnostic>, SyntaxError> {
+    let ast = parse(source, language, custom_blocks)?;
+    Ok(check_ast(source, &ast, settings))
 }

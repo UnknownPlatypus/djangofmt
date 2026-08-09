@@ -9,7 +9,6 @@ use std::borrow::Cow;
 
 use markup_fmt::SyntaxError;
 use markup_fmt::ast::Root;
-use markup_fmt::parser::Parser;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::LintDiagnostic;
@@ -217,6 +216,7 @@ pub fn lint_fix(
     source: &str,
     settings: &Settings,
     profile: markup_fmt::Language,
+    custom_blocks: &[String],
     threshold: Applicability,
 ) -> Result<FixerResult, FixerError> {
     let mut current: Cow<'_, str> = Cow::Borrowed(source);
@@ -244,8 +244,7 @@ pub fn lint_fix(
             });
         }
 
-        let mut parser = Parser::new(&current, profile, vec![]);
-        let ast = match parser.parse_root() {
+        let ast = match crate::parse(&current, profile, custom_blocks) {
             Ok(ast) => {
                 if iterations == 0 {
                     had_valid_first_parse = true;
@@ -477,6 +476,7 @@ mod tests {
             source,
             &settings,
             markup_fmt::Language::Django,
+            &[],
             Applicability::Safe,
         )
         .expect("lint_fix");

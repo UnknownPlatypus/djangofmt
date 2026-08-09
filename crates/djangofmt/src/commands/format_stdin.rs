@@ -27,6 +27,7 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     }
 
     let profile = cli
+        .template
         .profile
         .or_else(|| stdin_filename.and_then(Profile::from_path))
         .or(pyproject.profile)

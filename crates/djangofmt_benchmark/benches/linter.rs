@@ -1,6 +1,5 @@
 use djangofmt_benchmark::{ALL_TEMPLATES, TestFile};
-use djangofmt_lint::{RuleSet, Settings, check_ast};
-use markup_fmt::parser::Parser;
+use djangofmt_lint::{RuleSet, Settings, check_ast, parse};
 
 fn main() {
     divan::main();
@@ -28,8 +27,7 @@ fn check_all_rules(bencher: divan::Bencher, template: &'static TestFile) {
 /// parse cost (see `parser::parse_templates`) doesn't swamp the linter signal.
 /// The `check_all_rules` − `check_no_rules` gap is then pure rule-body cost.
 fn bench_check(bencher: divan::Bencher, template: &TestFile, settings: &Settings) {
-    let mut parser = Parser::new(template.code, template.profile.into(), vec![]);
-    let ast = parser.parse_root().expect("Parsing to succeed");
+    let ast = parse(template.code, template.profile.into(), &[]).expect("Parsing to succeed");
 
     bencher
         .counter(divan::counter::BytesCount::of_str(template.code))

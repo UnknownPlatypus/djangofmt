@@ -508,3 +508,34 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
     Couldn't check 1 files!
     "###);
 }
+
+#[test]
+fn check_respects_pyproject_custom_blocks() {
+    // `check` must parse with the same custom blocks as `format`: without them
+    // this unclosed `{% stage %}` is two flat tags and silently passes.
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt]\ncustom-blocks = [\"stage\"]\n",
+        )
+        .file("test.html", "{% stage %}\n<p>hi</p>\n");
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r###"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+
+      × unclosed {% stage %} block.
+       ╭─[test.html:1:4]
+     1 │ {% stage %}
+       ·    ──┬──
+       ·      ╰── here
+     2 │ <p>hi</p>
+       ╰────
+      help: Check for invalid HTML syntax inside the block that might prevent
+            finding the end tag.
+
+    Couldn't check 1 files!
+    "###);
+}
