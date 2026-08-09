@@ -79,7 +79,7 @@ fn fix_snapshot() {
     });
 }
 
-/// Every runnable rule has a fixture directory named after it.
+/// Every runnable rule has a non-empty fixture directory named after it.
 #[test]
 fn every_rule_has_a_fixture_directory() {
     for rule in Rule::iter().filter(|rule| !rule.is_deprecated() && !rule.is_removed()) {
@@ -88,8 +88,8 @@ fn every_rule_has_a_fixture_directory() {
             .join("tests/check")
             .join(code.replace('-', "_"));
         assert!(
-            dir.is_dir(),
-            "rule `{code}` has no fixture directory at {}",
+            fs::read_dir(&dir).is_ok_and(|mut entries| entries.next().is_some()),
+            "rule `{code}` has no fixture directory, or an empty one, at {}",
             dir.display()
         );
     }
