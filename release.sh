@@ -2,6 +2,12 @@
 
 set -e
 
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" != "main" ]; then
+	echo "Releases must be cut from the 'main' branch (currently on '$branch')."
+	exit 1
+fi
+
 if ! command -v typos &>/dev/null; then
 	echo "typos is not installed. Run 'cargo install typos-cli' to install it, otherwise the typos won't be fixed"
 fi
