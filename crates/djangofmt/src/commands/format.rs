@@ -550,17 +550,7 @@ mod tests {
 
     #[test]
     fn formatter_config_from_args_defaults() {
-        let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
-            line_length: None,
-            indent_width: None,
-            template: crate::args::TemplateArgs::default(),
-            html_void_self_closing: None,
-            preserve_unquoted_attrs: false,
-            no_preserve_unquoted_attrs: false,
-            file_selection: crate::args::FileSelectionArgs::default(),
-        };
+        let args = FormatCommand::default();
         let pyproject = PyprojectSettings::default();
         let config =
             FormatterConfig::from_args(&args, &pyproject, &EditorconfigSettings::default());
@@ -571,15 +561,10 @@ mod tests {
     #[test]
     fn formatter_config_from_args_cli_overrides_pyproject() {
         let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
             line_length: Some(LineLength::try_from(80u16).unwrap()),
             indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
-            template: crate::args::TemplateArgs::default(),
             html_void_self_closing: Some(SelfClosing::Always),
-            preserve_unquoted_attrs: false,
-            no_preserve_unquoted_attrs: false,
-            file_selection: crate::args::FileSelectionArgs::default(),
+            ..Default::default()
         };
         let pyproject = PyprojectSettings {
             line_length: Some(LineLength::try_from(200u16).unwrap()),
@@ -596,17 +581,7 @@ mod tests {
 
     #[test]
     fn formatter_config_from_args_falls_back_to_pyproject() {
-        let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
-            line_length: None,
-            indent_width: None,
-            template: crate::args::TemplateArgs::default(),
-            html_void_self_closing: None,
-            preserve_unquoted_attrs: false,
-            no_preserve_unquoted_attrs: false,
-            file_selection: crate::args::FileSelectionArgs::default(),
-        };
+        let args = FormatCommand::default();
         let pyproject = PyprojectSettings {
             line_length: Some(LineLength::try_from(200u16).unwrap()),
             ..Default::default()
@@ -618,17 +593,7 @@ mod tests {
 
     #[test]
     fn formatter_config_from_args_falls_back_to_editorconfig() {
-        let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
-            line_length: None,
-            indent_width: None,
-            template: crate::args::TemplateArgs::default(),
-            html_void_self_closing: None,
-            preserve_unquoted_attrs: false,
-            no_preserve_unquoted_attrs: false,
-            file_selection: crate::args::FileSelectionArgs::default(),
-        };
+        let args = FormatCommand::default();
         let editorconfig = EditorconfigSettings {
             line_length: Some(LineLength::try_from(100u16).unwrap()),
             indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
@@ -642,15 +607,8 @@ mod tests {
     #[test]
     fn formatter_config_preserve_unquoted_attrs_from_cli() {
         let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
-            line_length: None,
-            indent_width: None,
-            template: crate::args::TemplateArgs::default(),
-            html_void_self_closing: None,
             preserve_unquoted_attrs: true,
-            no_preserve_unquoted_attrs: false,
-            file_selection: crate::args::FileSelectionArgs::default(),
+            ..Default::default()
         };
         let pyproject = PyprojectSettings::default();
         let config =
@@ -660,17 +618,7 @@ mod tests {
 
     #[test]
     fn formatter_config_preserve_unquoted_attrs_from_pyproject() {
-        let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
-            line_length: None,
-            indent_width: None,
-            template: crate::args::TemplateArgs::default(),
-            html_void_self_closing: None,
-            preserve_unquoted_attrs: false,
-            no_preserve_unquoted_attrs: false,
-            file_selection: crate::args::FileSelectionArgs::default(),
-        };
+        let args = FormatCommand::default();
         let pyproject = PyprojectSettings {
             preserve_unquoted_attrs: Some(true),
             ..Default::default()
@@ -683,15 +631,8 @@ mod tests {
     #[test]
     fn formatter_config_no_preserve_unquoted_attrs_cli_overrides_pyproject() {
         let args = FormatCommand {
-            files: vec![],
-            stdin_filename: None,
-            line_length: None,
-            indent_width: None,
-            template: crate::args::TemplateArgs::default(),
-            html_void_self_closing: None,
-            preserve_unquoted_attrs: false,
             no_preserve_unquoted_attrs: true,
-            file_selection: crate::args::FileSelectionArgs::default(),
+            ..Default::default()
         };
         let pyproject = PyprojectSettings {
             preserve_unquoted_attrs: Some(true),

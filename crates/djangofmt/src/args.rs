@@ -96,7 +96,7 @@ pub struct TemplateArgs {
     pub custom_blocks: Option<Vec<String>>,
 }
 
-#[derive(Clone, Debug, clap::Parser)]
+#[derive(Clone, Debug, Default, clap::Parser)]
 pub struct FormatCommand {
     /// List of files or directories to format.
     #[arg(required_unless_present = "stdin_filename")]
