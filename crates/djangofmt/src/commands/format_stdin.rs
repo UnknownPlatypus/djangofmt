@@ -6,6 +6,7 @@ use tracing::error;
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
 use crate::commands::format::{FormatterConfig, format_text};
+use crate::config::resolve_profile;
 use crate::editorconfig;
 use crate::error::{CommandError, ParseError, Result};
 use crate::pyproject::load_pyproject_from_cwd;
@@ -26,12 +27,7 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
         return Ok(ExitStatus::Success);
     }
 
-    let profile = cli
-        .template
-        .profile
-        .or_else(|| stdin_filename.and_then(Profile::from_path))
-        .or(pyproject.profile)
-        .unwrap_or_default();
+    let profile = resolve_profile(cli.template.profile, pyproject.profile, stdin_filename);
     let editorconfig = editorconfig::load_editorconfig_from_cwd();
     let settings = editorconfig::resolve_editorconfig(
         editorconfig.as_ref(),
