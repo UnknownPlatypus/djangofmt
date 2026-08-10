@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from ecosystem_check.projects import (
     CliOptions,
+    ExcludeReason,
     GitDomain,
     Profile,
     Project,
@@ -27,38 +28,44 @@ DEFAULT_TARGETS = [
             ref="main",
         ),
         cli_options=CliOptions(
-            exclude=(
-                # Conditionals using raw tags, similar to https://github.com/g-plane/markup_fmt/issues/97
-                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/elements/button.html",
-                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/layouts/entrance.html",
-                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/base.html",
-                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
-                "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
-            ),
             profile=Profile.JINJA,
+            exclude={
+                ExcludeReason.DYNAMIC_TAG_NAME: (
+                    "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/elements/button.html",
+                ),
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/allauth/layouts/entrance.html",
+                    "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/base.html",
+                    "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_detail.html",
+                    "{{cookiecutter.project_slug}}/{{cookiecutter.project_slug}}/templates/users/user_form.html",
+                ),
+            },
         ),
     ),
     # Django templates
     Project(
         repo=Repository(owner="django", name="django", ref="main"),
         cli_options=CliOptions(
-            exclude=(
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "django/contrib/admin/templates/admin/edit_inline/stacked.html",
-                "django/contrib/admin/templates/admin/edit_inline/tabular.html",
-                "django/contrib/admin/templates/admin/includes/fieldset.html",
-                "django/contrib/admin/templates/admin/widgets/clearable_file_input.html",
-                "django/contrib/admin/templates/admin/widgets/foreign_key_raw_id.html",
-                "django/contrib/admin/templates/admin/widgets/url.html",
-                "django/forms/templates/django/forms/field.html",
-                "django/forms/templates/django/forms/widgets/input_option.html",
-                "django/forms/templates/django/forms/widgets/multiple_input.html",
-                "django/forms/templates/django/forms/widgets/select.html",
-                "django/views/templates/technical_500.html",
-                "tests/forms_tests/templates/forms_tests/use_fieldset.html",
-                "tests/template_backends/templates/template_backends/syntax_error.html",
-                "tests/test_client_regress/bad_templates/404.html",
-            ),
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "django/contrib/admin/templates/admin/edit_inline/stacked.html",
+                    "django/contrib/admin/templates/admin/edit_inline/tabular.html",
+                    "django/contrib/admin/templates/admin/includes/fieldset.html",
+                    "django/contrib/admin/templates/admin/widgets/clearable_file_input.html",
+                    "django/contrib/admin/templates/admin/widgets/foreign_key_raw_id.html",
+                    "django/contrib/admin/templates/admin/widgets/url.html",
+                    "django/forms/templates/django/forms/field.html",
+                    "django/forms/templates/django/forms/widgets/input_option.html",
+                    "django/forms/templates/django/forms/widgets/multiple_input.html",
+                    "django/forms/templates/django/forms/widgets/select.html",
+                    "django/views/templates/technical_500.html",
+                    "tests/forms_tests/templates/forms_tests/use_fieldset.html",
+                ),
+                ExcludeReason.INTENTIONALLY_INVALID: (
+                    "tests/template_backends/templates/template_backends/syntax_error.html",
+                    "tests/test_client_regress/bad_templates/404.html",
+                ),
+            },
         ),
     ),
     Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
@@ -68,62 +75,82 @@ DEFAULT_TARGETS = [
             owner="django-commons", name="django-debug-toolbar", ref="main"
         ),
         cli_options=CliOptions(
-            exclude=(
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "debug_toolbar/templates/debug_toolbar/includes/panel_button.html",
-                "debug_toolbar/templates/debug_toolbar/panels/sql_explain.html",
-            )
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "debug_toolbar/templates/debug_toolbar/includes/panel_button.html",
+                    "debug_toolbar/templates/debug_toolbar/panels/sql_explain.html",
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
         cli_options=CliOptions(
-            exclude=(
-                "tests/_site/templates/oscar/layout.html",  # Actual invalid html
-                "src/oscar/templates/oscar/dashboard/partners/partner_manage.html",  # Missing closing div
-                "src/oscar/templates/oscar/dashboard/shipping/messages/band_deleted.html",  # Missing closing p
-                "src/oscar/templates/oscar/dashboard/users/detail.html",  # Last endblock should be in div
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "src/oscar/templates/oscar/catalogue/browse.html",
-                "src/oscar/templates/oscar/catalogue/reviews/partials/review_stars.html",
-                "src/oscar/templates/oscar/checkout/shipping_address.html",
-                "src/oscar/templates/oscar/dashboard/reviews/review_list.html",
-            ),
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "src/oscar/templates/oscar/catalogue/browse.html",
+                    "src/oscar/templates/oscar/catalogue/reviews/partials/review_stars.html",
+                    "src/oscar/templates/oscar/checkout/shipping_address.html",
+                    "src/oscar/templates/oscar/dashboard/reviews/review_list.html",
+                    "src/oscar/templates/oscar/dashboard/users/detail.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "src/oscar/templates/oscar/dashboard/shipping/messages/band_deleted.html",  # </p>
+                    "tests/_site/templates/oscar/layout.html",  # </li>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "src/oscar/templates/oscar/dashboard/partners/partner_manage.html",  # Missing closing div
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="django-cms", name="django-cms", ref="main"),
         cli_options=CliOptions(
-            exclude=(
-                "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # Invalid <span>{% trans "Copy" %}<span>
-                "cms/templates/admin/cms/page/tree/base.html",  # Weird </form> tag placement
-                "cms/templates/cms/headless/placeholder.html",  # Unconventional use of {% spaceless %}
-                "cms/templates/cms/noapphook.html",  # Missing html closing tag
-                # Weird comment that look like a tag error <--noplaceholder-->
-                "cms/test_utils/project/sampleapp/templates/sampleapp/home.html",
-            ),
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <body> opened inside a {% spaceless %} and closed outside
+                    "cms/templates/cms/headless/placeholder.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "cms/templates/cms/noapphook.html",  # </html>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # <span>{% trans "Copy" %}<span>
+                    # Comment that looks like a broken tag: <--noplaceholder-->
+                    "cms/test_utils/project/sampleapp/templates/sampleapp/home.html",
+                ),
+                ExcludeReason.UNKNOWN: (
+                    # Breaks somewhere inside the multiline data-json='{...}' attribute
+                    "cms/templates/admin/cms/page/tree/base.html",
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="wagtail", name="wagtail", ref="main"),
         cli_options=CliOptions(
-            exclude=(
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "wagtail/admin/templates/wagtailadmin/shared/icon.html",
-                "wagtail/admin/templates/wagtailadmin/tables/references_cell.html",
-            ),
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "wagtail/admin/templates/wagtailadmin/shared/icon.html",
+                    "wagtail/admin/templates/wagtailadmin/tables/references_cell.html",
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="pennersr", name="django-allauth", ref="main"),
         cli_options=CliOptions(
             custom_blocks="slot,element",
-            exclude=(
-                "examples/regular-django/example/templates/allauth/elements/form.html",
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "allauth/templates/allauth/elements/button.html",
-                "examples/regular-django/example/templates/allauth/elements/button.html",
-            ),
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "examples/regular-django/example/templates/allauth/elements/form.html",
+                ),
+                ExcludeReason.DYNAMIC_TAG_NAME: (
+                    "allauth/templates/allauth/elements/button.html",
+                    "examples/regular-django/example/templates/allauth/elements/button.html",
+                ),
+            },
         ),
     ),
     Project(
@@ -144,23 +171,27 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="unfoldadmin", name="django-unfold", ref="main"),
         cli_options=CliOptions(
-            exclude=(
-                "src/unfold/templates/unfold/helpers/display_header.html",  # Broken close tag
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "src/unfold/templates/admin/actions.html",
-                "src/unfold/templates/admin/date_hierarchy.html",
-                "src/unfold/templates/admin/edit_inline/stacked.html",
-                "src/unfold/templates/admin/edit_inline/tabular.html",
-                "src/unfold/templates/unfold/widgets/radio.html",
-                "src/unfold/templates/unfold/widgets/radio_option.html",
-                "src/unfold/templates/unfold_crispy/layout/table_inline_formset.html",
-                "src/unfold/templates/unfold_crispy/whole_uni_form.html",
-                # conditional tag name with differing end tag like </{% if cl.model_admin.list_filter_submit %}form{% else %}div{% endif %}>
-                "src/unfold/templates/unfold/components/button.html",
-                "src/unfold/templates/unfold/helpers/display_dropdown.html",
-                "src/unfold/templates/unfold/helpers/site_icon.html",
-                "src/unfold/templates/unfold_crispy/field.html",
-            )
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "src/unfold/templates/admin/actions.html",
+                    "src/unfold/templates/admin/date_hierarchy.html",
+                    "src/unfold/templates/admin/edit_inline/stacked.html",
+                    "src/unfold/templates/admin/edit_inline/tabular.html",
+                    "src/unfold/templates/unfold/widgets/radio.html",
+                    "src/unfold/templates/unfold/widgets/radio_option.html",
+                    "src/unfold/templates/unfold_crispy/layout/table_inline_formset.html",
+                    "src/unfold/templates/unfold_crispy/whole_uni_form.html",
+                ),
+                ExcludeReason.DYNAMIC_TAG_NAME: (
+                    "src/unfold/templates/unfold/components/button.html",
+                    "src/unfold/templates/unfold/helpers/display_dropdown.html",
+                    "src/unfold/templates/unfold/helpers/site_icon.html",
+                    "src/unfold/templates/unfold_crispy/field.html",
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "src/unfold/templates/unfold/helpers/display_header.html",  # </div> closing a <span>
+                ),
+            },
         ),
     ),
     Project(
@@ -173,15 +204,20 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="getsentry", name="sentry", ref="master"),
         cli_options=CliOptions(
-            exclude=(
-                "src/sentry/templates/sentry/debug/error-page-embed.html",  # Broken close tag
-                "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
-                "src/sentry/templates/sentry/integrations/notify-disable.html",  # Dangling </a>
-                "src/sentry/templates/sentry/toolbar/iframe.html",  # Intentionally unclosed body tag
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "src/sentry/templates/sentry/emails/reports/body.html",
-                "src/sentry/templates/sentry/partial/system-status.html",
-            ),
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "src/sentry/templates/sentry/emails/reports/body.html",
+                    "src/sentry/templates/sentry/partial/system-status.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "src/sentry/templates/sentry/toolbar/iframe.html",  # </body>, left out on purpose
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "src/sentry/templates/sentry/debug/error-page-embed.html",  # Broken close tag
+                    "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
+                    "src/sentry/templates/sentry/integrations/notify-disable.html",  # Dangling </a>
+                ),
+            },
         ),
     ),
     Project(repo=Repository(owner="makeplane", name="plane", ref="preview")),
@@ -189,70 +225,92 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="django", name="djangoproject.com", ref="main"),
         cli_options=CliOptions(
-            exclude=(
-                # <a> opened inside a {% blocktranslate %} and closed outside
-                "djangoproject/templates/aggregator/local-django-community.html",
-                "djangoproject/templates/releases/download.html",  # Nested unclosed <p>
-                "djangoproject/templates/start.html",  # </span> inside a {% translate %} string
-                "docs/templates/docs/doc.html",  # <ul><li> opened inside a {% for %}
-                "docs/templates/docs/genindex.html",  # Invalid <br/ > self close
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "djangoproject/templates/base_weblog.html",
-                "djangoproject/templates/foundation/coreawardcohort_list.html",
-                "djangoproject/templates/fundraising/includes/_hero_with_logo.html",
-                "djangoproject/templates/fundraising/includes/display_django_heroes.html",
-                "djangoproject/templates/fundraising/manage-donations.html",
-            )
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <a> opened inside a {% blocktranslate %} and closed outside
+                    "djangoproject/templates/aggregator/local-django-community.html",
+                    "djangoproject/templates/base_weblog.html",
+                    "djangoproject/templates/foundation/coreawardcohort_list.html",
+                    "djangoproject/templates/fundraising/includes/_hero_with_logo.html",
+                    "djangoproject/templates/fundraising/includes/display_django_heroes.html",
+                    "djangoproject/templates/fundraising/manage-donations.html",
+                    # <ul><li> opened inside a {% for %}
+                    "docs/templates/docs/doc.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "djangoproject/templates/releases/download.html",  # Nested </p>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "djangoproject/templates/start.html",  # </span> inside a {% translate %} string
+                    "docs/templates/docs/genindex.html",  # Invalid <br/ > self close
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="healthchecks", name="healthchecks", ref="master"),
         cli_options=CliOptions(
-            exclude=(
-                "templates/accounts/project.html",  # TODO: spurious unclosed <div>
-            )
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # {% endwith %} placed inside the <div> the {% with %} opened before
+                    "templates/accounts/project.html",
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="babybuddy", name="babybuddy", ref="master"),
         cli_options=CliOptions(
-            exclude=(
-                "babybuddy/templates/babybuddy/form_field.html",  # Stray quote in class attribute
-                "babybuddy/templates/babybuddy/paginator.html",  # Missing closing li
-                "babybuddy/templates/registration/base.html",  # Dangling </a>
-            )
+            exclude={
+                ExcludeReason.MISSING_END_TAG: (
+                    "babybuddy/templates/babybuddy/paginator.html",  # </li>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "babybuddy/templates/babybuddy/form_field.html",  # Stray quote in class attribute
+                    "babybuddy/templates/registration/base.html",  # Dangling </a>
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="inventree", name="InvenTree", ref="master"),
         cli_options=CliOptions(
-            exclude=(
-                # Missing closing div
-                "src/backend/InvenTree/web/templates/web/index.html",
-            )
+            exclude={
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "src/backend/InvenTree/web/templates/web/index.html",  # Missing closing div
+                ),
+            },
         ),
     ),
     Project(
         repo=Repository(owner="netbox-community", name="netbox", ref="main"),
         cli_options=CliOptions(
-            exclude=(
-                "netbox/templates/core/inc/config_data.html",  # Missing closing tr
-                "netbox/templates/extras/inc/configcontext_data.html",  # Unterminated id attribute
-                # Unstable: code after a multiline template literal is re-indented on every pass
-                "netbox/templates/graphql/graphiql.html",
-                # Template tag used as an attribute name, e.g. `{% formaction %}="{{ url }}"`
-                "netbox/templates/core/buttons/bulk_sync.html",
-                "netbox/templates/dcim/buttons/bulk_add_components.html",
-                "netbox/templates/dcim/buttons/bulk_disconnect.html",
-                "netbox/templates/virtualization/buttons/bulk_add_components.html",
-                "netbox/utilities/templates/buttons/bulk_delete.html",
-                "netbox/utilities/templates/buttons/bulk_edit.html",
-                "netbox/utilities/templates/buttons/bulk_rename.html",
-                # Conditional open/close tags -> https://github.com/g-plane/markup_fmt/issues/97
-                "netbox/templates/django/forms/widgets/select.html",
-                "netbox/utilities/templates/builtins/badge.html",
-                "netbox/utilities/templates/builtins/tag.html",
-            )
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "netbox/templates/django/forms/widgets/select.html",
+                    "netbox/utilities/templates/builtins/badge.html",
+                    "netbox/utilities/templates/builtins/tag.html",
+                ),
+                ExcludeReason.TEMPLATE_TAG_AS_ATTRIBUTE: (
+                    "netbox/templates/core/buttons/bulk_sync.html",
+                    "netbox/templates/dcim/buttons/bulk_add_components.html",
+                    "netbox/templates/dcim/buttons/bulk_disconnect.html",
+                    "netbox/templates/virtualization/buttons/bulk_add_components.html",
+                    "netbox/utilities/templates/buttons/bulk_delete.html",
+                    "netbox/utilities/templates/buttons/bulk_edit.html",
+                    "netbox/utilities/templates/buttons/bulk_rename.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "netbox/templates/core/inc/config_data.html",  # </tr>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "netbox/templates/extras/inc/configcontext_data.html",  # Unterminated id attribute
+                ),
+                ExcludeReason.UNSTABLE_FORMATTING: (
+                    # Code after a multiline template literal is re-indented on every pass
+                    "netbox/templates/graphql/graphiql.html",
+                ),
+            },
         ),
     ),
     Project(

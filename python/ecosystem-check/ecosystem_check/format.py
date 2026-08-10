@@ -294,7 +294,7 @@ async def format(
     args = options.to_args(executable_name=executable.name, command=Command.FORMAT)
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
-    ) - set(options.excluded_files(executable.name))
+    ) - set(options.excluded_files())
     logger.debug(
         f"Formatting {repo_fullname} with cmd {executable!r} ({len(files)} files)"
     )
@@ -331,8 +331,8 @@ def markdown_stale_exclusions(executable: Path, result: Result) -> str:
         options = project.cli_options
         args = options.to_args(executable_name=executable.name, command=Command.FORMAT)
         stale = [
-            f"`{file}`"
-            for file in options.excluded_files(executable.name)
+            f"`{file}` ({options.reason_for(file)})"
+            for file in options.excluded_files()
             if _is_stale(executable, comparison.repo.path, args, file)
         ]
         if stale:

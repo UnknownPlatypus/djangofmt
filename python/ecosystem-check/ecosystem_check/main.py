@@ -88,12 +88,11 @@ async def main(
         ],
         return_exceptions=not raise_on_failure,
     )
-    comparisons_by_target = dict(zip(targets, comparisons, strict=True))
 
     # Split comparisons into errored / completed
     errored: list[tuple[Project, BaseException]] = []
     completed: list[tuple[Project, Comparison]] = []
-    for target, comparison in comparisons_by_target.items():
+    for target, comparison in zip(targets, comparisons, strict=True):
         if isinstance(comparison, BaseException):
             errored.append((target, comparison))
         else:

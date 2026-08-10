@@ -159,7 +159,7 @@ async def check(
     args = ["check", *options.to_args(executable.name, command=Command.CHECK)]
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
-    ) - set(options.excluded_files(executable.name))
+    ) - set(options.excluded_files())
 
     if not files:
         logger.debug(f"No files to check for {repo_fullname}")
