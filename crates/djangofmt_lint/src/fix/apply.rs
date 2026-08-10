@@ -34,30 +34,10 @@ pub struct ApplyResult {
     pub applied_count: usize,
     /// Number of fixes that were filtered out (overlap, isolation, applicability).
     pub skipped_count: usize,
-    /// Source map mapping byte offsets in the original source to offsets in
-    /// the output.
-    pub source_map: SourceMap,
     /// Metadata for each applied fix, in application order.
     ///
     /// Used by the CLI's `--show-fixes` to render per-rule counts.
     pub applied_fixes: Vec<AppliedFix>,
-}
-
-/// Sequence of [`SourceMarker`]s describing the offset transformation from
-/// the original source to the fixed output.
-#[derive(Debug, Default)]
-pub struct SourceMap {
-    pub markers: Vec<SourceMarker>,
-}
-
-/// A start/end pair of byte offsets pinning a region in the original source
-/// to its image in the output.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct SourceMarker {
-    /// Byte offset in the original source.
-    pub source: usize,
-    /// Byte offset in the output.
-    pub dest: usize,
 }
 
 /// Maximum number of fix iterations before giving up.
@@ -88,7 +68,6 @@ pub fn apply_fixes(
     });
 
     let mut output = String::with_capacity(source.len());
-    let mut markers: Vec<SourceMarker> = Vec::new();
     let mut last_pos: usize = 0;
     let mut applied_count = 0usize;
     let mut skipped_count = 0usize;
@@ -119,17 +98,9 @@ pub fn apply_fixes(
 
         for edit in edits {
             output.push_str(&source[last_pos..edit.start()]);
-            markers.push(SourceMarker {
-                source: edit.start(),
-                dest: output.len(),
-            });
             if let Some(content) = edit.content() {
                 output.push_str(content);
             }
-            markers.push(SourceMarker {
-                source: edit.end(),
-                dest: output.len(),
-            });
             last_pos = edit.end();
         }
 
@@ -149,7 +120,6 @@ pub fn apply_fixes(
         output,
         applied_count,
         skipped_count,
-        source_map: SourceMap { markers },
         applied_fixes,
     }
 }
@@ -383,7 +353,6 @@ mod tests {
         let diags = vec![
             diag_with_fix(Fix::safe_edit(Edit::replacement("S", span(0, 1)))),
             diag_with_fix(Fix::unsafe_edit(Edit::replacement("U", span(2, 1)))),
-            diag_with_fix(Fix::display_only_edit(Edit::replacement("D", span(4, 1)))),
         ];
 
         // Safe threshold: only the safe fix applies.
@@ -395,11 +364,6 @@ mod tests {
         let result = apply_fixes(source, &diags, Applicability::Unsafe);
         assert_eq!(result.output, "SbUdefghij");
         assert_eq!(result.applied_count, 2);
-
-        // DisplayOnly threshold: all apply.
-        let result = apply_fixes(source, &diags, Applicability::DisplayOnly);
-        assert_eq!(result.output, "SbUdDfghij");
-        assert_eq!(result.applied_count, 3);
     }
 
     #[test]
@@ -444,28 +408,6 @@ mod tests {
         assert_eq!(result.output, "abc");
         assert_eq!(result.applied_count, 0);
         assert_eq!(result.skipped_count, 0);
-    }
-
-    #[test]
-    fn source_map_markers() {
-        let source = "hello world";
-        let diags = vec![diag_with_fix(Fix::safe_edit(Edit::replacement(
-            "Rust",
-            span(6, 5),
-        )))];
-        let result = apply_fixes(source, &diags, Applicability::Safe);
-        assert_eq!(result.source_map.markers.len(), 2);
-        assert_eq!(
-            result.source_map.markers[0],
-            SourceMarker { source: 6, dest: 6 }
-        );
-        assert_eq!(
-            result.source_map.markers[1],
-            SourceMarker {
-                source: 11,
-                dest: 10
-            }
-        );
     }
 
     #[test]

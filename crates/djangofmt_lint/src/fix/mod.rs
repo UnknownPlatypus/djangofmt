@@ -50,12 +50,10 @@ impl std::fmt::Display for FixAvailability {
     }
 }
 
-/// Three-tier safety classification for fixes, ordered ascending so `>=`
-/// reads as a "minimum required" applicability check.
+/// Safety classification for fixes, ordered ascending so `>=` reads as a
+/// "minimum required" applicability check.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Applicability {
-    /// Likely incorrect; surfaced in diagnostics but never applied automatically.
-    DisplayOnly,
     /// May change runtime behavior; applied only with `--unsafe-fixes`.
     Unsafe,
     /// Preserves exact semantics; applied with `--fix`.
@@ -231,12 +229,6 @@ impl Fix {
         Self::single(edit, Applicability::Unsafe)
     }
 
-    /// Single-edit display-only fix.
-    #[must_use]
-    pub fn display_only_edit(edit: Edit) -> Self {
-        Self::single(edit, Applicability::DisplayOnly)
-    }
-
     /// Multi-edit safe fix.
     #[must_use]
     pub fn safe_edits<I>(first: Edit, rest: I) -> Self
@@ -255,26 +247,10 @@ impl Fix {
         Self::multi(first, rest, Applicability::Unsafe)
     }
 
-    /// Multi-edit display-only fix.
-    #[must_use]
-    pub fn display_only_edits<I>(first: Edit, rest: I) -> Self
-    where
-        I: IntoIterator<Item = Edit>,
-    {
-        Self::multi(first, rest, Applicability::DisplayOnly)
-    }
-
     /// Set the isolation level (builder).
     #[must_use]
     pub const fn isolate(mut self, level: IsolationLevel) -> Self {
         self.isolation_level = level;
-        self
-    }
-
-    /// Override the applicability (builder).
-    #[must_use]
-    pub const fn with_applicability(mut self, applicability: Applicability) -> Self {
-        self.applicability = applicability;
         self
     }
 
@@ -389,12 +365,6 @@ mod tests {
     }
 
     #[test]
-    fn fix_display_only_edit() {
-        let fix = Fix::display_only_edit(Edit::insertion("x", 5));
-        assert_eq!(fix.applicability(), Applicability::DisplayOnly);
-    }
-
-    #[test]
     fn fix_safe_edits_sorts() {
         let fix = Fix::safe_edits(
             Edit::insertion("late", 10),
@@ -422,43 +392,23 @@ mod tests {
     }
 
     #[test]
-    fn fix_display_only_edits() {
-        let fix = Fix::display_only_edits(Edit::insertion("a", 0), [Edit::insertion("b", 5)]);
-        assert_eq!(fix.applicability(), Applicability::DisplayOnly);
-    }
-
-    #[test]
     fn fix_isolate_builder() {
         let fix = Fix::safe_edit(Edit::insertion("x", 0)).isolate(IsolationLevel::Group(7));
         assert!(matches!(fix.isolation(), IsolationLevel::Group(7)));
     }
 
     #[test]
-    fn fix_with_applicability_builder() {
-        let fix = Fix::safe_edit(Edit::insertion("x", 0)).with_applicability(Applicability::Unsafe);
-        assert_eq!(fix.applicability(), Applicability::Unsafe);
-    }
-
-    #[test]
     fn fix_applies_threshold_semantics() {
         let safe = Fix::safe_edit(Edit::insertion("x", 0));
         let unsafe_ = Fix::unsafe_edit(Edit::insertion("x", 0));
-        let display = Fix::display_only_edit(Edit::insertion("x", 0));
 
         // threshold = Safe admits only Safe
         assert!(safe.applies(Applicability::Safe));
         assert!(!unsafe_.applies(Applicability::Safe));
-        assert!(!display.applies(Applicability::Safe));
 
         // threshold = Unsafe admits Safe + Unsafe
         assert!(safe.applies(Applicability::Unsafe));
         assert!(unsafe_.applies(Applicability::Unsafe));
-        assert!(!display.applies(Applicability::Unsafe));
-
-        // threshold = DisplayOnly admits everything
-        assert!(safe.applies(Applicability::DisplayOnly));
-        assert!(unsafe_.applies(Applicability::DisplayOnly));
-        assert!(display.applies(Applicability::DisplayOnly));
     }
 
     #[test]
