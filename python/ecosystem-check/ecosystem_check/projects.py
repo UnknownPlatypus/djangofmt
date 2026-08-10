@@ -57,6 +57,36 @@ class Profile(enum.StrEnum):
     JINJA = "jinja"
 
 
+class ExcludeReason(enum.StrEnum):
+    """Why a template is excluded from the ecosystem check."""
+
+    # An element's open and close tags sit in different template branches or blocks,
+    # so no tree can be built. https://github.com/g-plane/markup_fmt/issues/97
+    TAG_SPANS_TEMPLATE_BLOCK = enum.auto()
+
+    # A templated element name, e.g. `<{% if href %}a{% else %}button{% endif %}>`.
+    DYNAMIC_TAG_NAME = enum.auto()
+
+    # A template tag standing in for an attribute name, e.g. `{% formaction %}="{{ url }}"`.
+    TEMPLATE_TAG_AS_ATTRIBUTE = enum.auto()
+
+    # An end tag HTML5 allows omitting (`</li>`, `</p>`, `</tr>`, `</body>`, ...).
+    # Legal, but discouraged enough that we keep requiring it.
+    MISSING_END_TAG = enum.auto()
+
+    # Malformed markup in the upstream project.
+    INVALID_SOURCE_HTML = enum.auto()
+
+    # Upstream fixture that is deliberately unparsable.
+    INTENTIONALLY_INVALID = enum.auto()
+
+    # Parses fine but formatting never converges.
+    UNSTABLE_FORMATTING = enum.auto()
+
+    # Root cause not identified yet.
+    UNKNOWN = enum.auto()
+
+
 @dataclass(frozen=True, slots=True)
 class CliOptions(Serializable):
     """
@@ -65,7 +95,7 @@ class CliOptions(Serializable):
 
     profile: Profile = Profile.DJANGO
     custom_blocks: str = ""  # Comma-separated list of custom blocks
-    exclude: tuple[str, ...] = field(default_factory=tuple)
+    exclude: dict[ExcludeReason, tuple[str, ...]] = field(default_factory=dict)
 
     def to_args(self, executable_name: str, *, command: Command) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:
@@ -95,8 +125,11 @@ class CliOptions(Serializable):
             f"Cannot cast format options for this executable: {executable_name}"
         )
 
-    def excluded_files(self, executable_name: str) -> tuple[str, ...]:
-        return self.exclude
+    def excluded_files(self) -> tuple[str, ...]:
+        return tuple(file for files in self.exclude.values() for file in files)
+
+    def reason_for(self, file: str) -> ExcludeReason:
+        return next(reason for reason, files in self.exclude.items() if file in files)
 
 
 class ProjectSetupError(Exception):
