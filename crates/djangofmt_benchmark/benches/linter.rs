@@ -17,7 +17,14 @@ fn check_no_rules(bencher: divan::Bencher, template: &'static TestFile) {
     );
 }
 
-/// `check_ast` with all rules: traversal + every rule body.
+/// `check_ast` with the default selection (every stable rule, preview off): what a user
+/// with no rule config pays, so opt-in preview rules don't move this number.
+#[divan::bench(args = ALL_TEMPLATES)]
+fn check_default_rules(bencher: divan::Bencher, template: &'static TestFile) {
+    bench_check(bencher, template, &Settings::default());
+}
+
+/// `check_ast` with all rules, preview included: traversal + every rule body.
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_all_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(bencher, template, &Settings::all());
