@@ -210,7 +210,6 @@ DEFAULT_TARGETS = [
         cli_options=CliOptions(
             exclude=(
                 "templates/accounts/project.html",  # TODO: spurious unclosed <div>
-                "templates/front/channels.html",  # TODO: `<span>---</span>` fails to parse
             )
         ),
     ),
