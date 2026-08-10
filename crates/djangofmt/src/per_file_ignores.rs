@@ -161,7 +161,8 @@ mod tests {
             "/proj/templates/admin/deep/page.html",
         ] {
             assert!(
-                !pfi.rules_for(Path::new(path), &base).contains(Rule::UseHttps),
+                !pfi.rules_for(Path::new(path), &base)
+                    .contains(Rule::UseHttps),
                 "{path} should match `templates/*.html`"
             );
         }
