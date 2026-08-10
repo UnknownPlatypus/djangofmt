@@ -111,6 +111,7 @@ fn settings_for(path: &Path) -> Settings {
         .unwrap_or_else(|_| panic!("fixture directory `{dir}` does not name a rule"));
     Settings {
         rules: RuleSet::from_rule(rule),
+        ..Settings::default()
     }
 }
 
