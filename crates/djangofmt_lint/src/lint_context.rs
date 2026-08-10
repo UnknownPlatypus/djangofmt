@@ -5,7 +5,6 @@
 //! pushes it into the context's buffer.
 
 use std::cell::RefCell;
-use std::ops::{Deref, DerefMut};
 
 use miette::SourceSpan;
 
@@ -110,7 +109,6 @@ impl<'a> LintContext<'a> {
                 fix: None,
                 fix_title: violation.fix_title(),
             }),
-            rule: V::RULE,
         }
     }
 
@@ -122,14 +120,9 @@ impl<'a> LintContext<'a> {
 }
 
 /// Guard that holds a partially-built diagnostic and pushes it on Drop.
-///
-/// Implements [`Deref`] / [`DerefMut`] to the underlying [`LintDiagnostic`]
-/// so callers can override fields like `help` or `fix_title` if needed.
 pub struct DiagnosticGuard<'ctx, 'a> {
     context: &'ctx LintContext<'a>,
     diagnostic: Option<LintDiagnostic>,
-    /// Rule the diagnostic was reported for. Used for tracing on fallible fixes.
-    rule: Rule,
 }
 
 impl DiagnosticGuard<'_, '_> {
@@ -139,46 +132,6 @@ impl DiagnosticGuard<'_, '_> {
         if let Some(diag) = self.diagnostic.as_mut() {
             diag.fix = Some(fix);
         }
-    }
-
-    /// Compute a fix fallibly; on `Err`, log at debug and skip attachment.
-    pub fn try_set_fix(&mut self, f: impl FnOnce() -> anyhow::Result<Fix>) {
-        match f() {
-            Ok(fix) => self.set_fix(fix),
-            Err(err) => {
-                tracing::debug!(rule = %self.rule, "failed to compute fix: {err}");
-            }
-        }
-    }
-
-    /// Compute an optional fix fallibly; on `Ok(None)`, skip; on `Err`, log
-    /// and skip.
-    pub fn try_set_optional_fix(&mut self, f: impl FnOnce() -> anyhow::Result<Option<Fix>>) {
-        match f() {
-            Ok(Some(fix)) => self.set_fix(fix),
-            Ok(None) => {}
-            Err(err) => {
-                tracing::debug!(rule = %self.rule, "failed to compute optional fix: {err}");
-            }
-        }
-    }
-}
-
-impl Deref for DiagnosticGuard<'_, '_> {
-    type Target = LintDiagnostic;
-
-    fn deref(&self) -> &Self::Target {
-        self.diagnostic
-            .as_ref()
-            .expect("diagnostic accessed during Drop")
-    }
-}
-
-impl DerefMut for DiagnosticGuard<'_, '_> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.diagnostic
-            .as_mut()
-            .expect("diagnostic accessed during Drop")
     }
 }
 

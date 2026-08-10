@@ -27,7 +27,7 @@ mod violation;
 pub use checker::Checker;
 pub use fix::apply::{
     AppliedFix, ApplyResult, FixerError, FixerResult, MAX_FIX_ITERATIONS, RuleFixSummary,
-    SourceMap, SourceMarker, apply_fixes, fix_ast, lint_fix,
+    apply_fixes, fix_ast, lint_fix,
 };
 pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
 pub use lint_context::{DiagnosticGuard, LintContext};

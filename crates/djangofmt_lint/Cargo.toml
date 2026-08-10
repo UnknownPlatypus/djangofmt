@@ -7,7 +7,6 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-anyhow = { workspace = true }
 djangofmt_macros = { workspace = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
