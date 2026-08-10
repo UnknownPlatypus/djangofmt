@@ -16,6 +16,8 @@ pub(crate) struct ResolvedCommand {
     pub pyproject: PyprojectSettings,
     pub profile: Option<Profile>,
     pub files: Vec<PathBuf>,
+    /// Directory of the nearest `pyproject.toml` (or the cwd), anchoring path-relative config.
+    pub project_root: PathBuf,
 }
 
 pub(crate) fn resolve_command(
@@ -23,7 +25,7 @@ pub(crate) fn resolve_command(
     profile: Option<Profile>,
     file_selection: &FileSelectionArgs,
 ) -> Result<ResolvedCommand> {
-    let pyproject = load_pyproject_from_cwd()?;
+    let (pyproject, project_root) = load_pyproject_from_cwd()?;
     let profile = profile.or(pyproject.profile);
     let discovery_config = ResolvedDiscoveryConfig::new(file_selection, &pyproject);
     let resolved_files = resolve_files(files, &discovery_config)?;
@@ -31,6 +33,7 @@ pub(crate) fn resolve_command(
         pyproject,
         profile,
         files: resolved_files,
+        project_root,
     })
 }
 

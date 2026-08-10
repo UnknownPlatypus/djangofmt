@@ -1,6 +1,10 @@
 use djangofmt_lint::RuleSelector;
 use serde::Deserialize;
-use std::{fs, path::Path};
+use std::{
+    collections::BTreeMap,
+    fs,
+    path::{Path, PathBuf},
+};
 use tracing::debug;
 
 use crate::args::{OutputFormat, Profile};
@@ -36,6 +40,7 @@ pub struct LintSettings {
     pub unsafe_fixes: Option<bool>,
     pub show_fixes: Option<bool>,
     pub output_format: Option<OutputFormat>,
+    pub per_file_ignores: Option<BTreeMap<String, Vec<RuleSelector>>>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -58,12 +63,15 @@ fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> 
 
 /// Load `pyproject.toml` settings rooted at the current working directory,
 /// falling back to defaults if the cwd can't be determined.
-pub fn load_pyproject_from_cwd() -> Result<PyprojectSettings> {
+pub fn load_pyproject_from_cwd() -> Result<(PyprojectSettings, PathBuf)> {
     load_options(crate::fs::get_cwd())
 }
 
-/// Loads user configured options from the nearest `pyproject.toml` file from the given path
-pub fn load_options<P: AsRef<Path>>(start_path: P) -> Result<PyprojectSettings> {
+/// Loads user configured options from the nearest `pyproject.toml` file from the given path.
+///
+/// Also returns the directory that file was found in (the search start when there is none),
+/// which anchors path-relative config such as `per-file-ignores`.
+pub fn load_options<P: AsRef<Path>>(start_path: P) -> Result<(PyprojectSettings, PathBuf)> {
     let Some(pyproject_path) =
         crate::fs::find_nearest_ancestor_file(start_path.as_ref(), "pyproject.toml")
     else {
@@ -71,7 +79,10 @@ pub fn load_options<P: AsRef<Path>>(start_path: P) -> Result<PyprojectSettings> 
             "No pyproject.toml found starting search from: {}",
             start_path.as_ref().display()
         );
-        return Ok(PyprojectSettings::default());
+        return Ok((
+            PyprojectSettings::default(),
+            start_path.as_ref().to_path_buf(),
+        ));
     };
     debug!(
         "Loading options from pyproject.toml at: {}",
@@ -84,7 +95,10 @@ pub fn load_options<P: AsRef<Path>>(start_path: P) -> Result<PyprojectSettings> 
             pyproject_path.display()
         ))
     })?;
-    load_options_from_pyproject_toml(&content)
+    let root = pyproject_path
+        .parent()
+        .map_or_else(|| start_path.as_ref().to_path_buf(), Path::to_path_buf);
+    Ok((load_options_from_pyproject_toml(&content)?, root))
 }
 
 #[cfg(test)]
@@ -106,7 +120,7 @@ mod tests {
             html-void-self-closing='always'
             ",
         );
-        let result = load_options(project.join("pyproject.toml")).unwrap();
+        let (result, _) = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -129,7 +143,7 @@ mod tests {
             line-length=200
             ",
         );
-        let result = load_options(project.join("pyproject.toml")).unwrap();
+        let (result, _) = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(
             result,
             PyprojectSettings {
@@ -142,14 +156,14 @@ mod tests {
     #[test]
     fn test_load_options_returns_default_when_no_pyproject_toml() {
         let project = Project::new();
-        let result = load_options(project.path()).unwrap();
+        let (result, _) = load_options(project.path()).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
     fn test_load_options_returns_default_when_empty_pyproject_toml() {
         let project = Project::new().file("pyproject.toml", "");
-        let result = load_options(project.join("pyproject.toml")).unwrap();
+        let (result, _) = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
 
@@ -272,6 +286,22 @@ preview = true
                 }),
                 ..Default::default()
             }
+        );
+    }
+
+    #[test]
+    fn test_load_lint_per_file_ignores() {
+        use djangofmt_lint::Rule;
+
+        let content = r#"
+[tool.djangofmt.lint.per-file-ignores]
+"templates/admin/*.html" = ["missing-img-alt"]
+"#;
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        let per_file = result.lint.unwrap().per_file_ignores.unwrap();
+        assert_eq!(
+            per_file.get("templates/admin/*.html"),
+            Some(&vec![RuleSelector::Rule(Rule::MissingImgAlt)])
         );
     }
 
