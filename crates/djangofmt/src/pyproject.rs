@@ -42,14 +42,10 @@ pub struct LintSettings {
     pub show_fixes: Option<bool>,
     pub output_format: Option<OutputFormat>,
     pub per_file_ignores: Option<BTreeMap<String, Vec<RuleSelector>>>,
-    /// Per-rule config: `[tool.djangofmt.lint.unsorted-tailwind-classes]`.
     pub unsorted_tailwind_classes: Option<UnsortedTailwindClassesOptions>,
 }
 
-/// Deserialized `[tool.djangofmt.lint.unsorted-tailwind-classes]` options.
-///
-/// Ruff equivalent: a per-linter `Options` struct (e.g. `Flake8BooleanTrapOptions`) with
-/// `into_settings`.
+/// `[tool.djangofmt.lint.unsorted-tailwind-classes]` options.
 #[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct UnsortedTailwindClassesOptions {
@@ -58,9 +54,6 @@ pub struct UnsortedTailwindClassesOptions {
 }
 
 impl UnsortedTailwindClassesOptions {
-    /// Resolve into the linter's per-rule settings.
-    ///
-    /// Ruff equivalent: `Flake8BooleanTrapOptions::into_settings`.
     #[must_use]
     pub fn into_settings(self) -> unsorted_tailwind_classes::Settings {
         unsorted_tailwind_classes::Settings {

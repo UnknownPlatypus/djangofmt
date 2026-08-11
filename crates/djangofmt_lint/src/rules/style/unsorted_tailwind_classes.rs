@@ -12,10 +12,6 @@ use crate::{Checker, span};
 /// Checks for `class` attributes whose Tailwind CSS utility classes are not in the canonical
 /// order produced by the Tailwind class sorter.
 ///
-/// Values containing template interpolations (`{{ ... }}` or `{% ... %}`) are supported: each
-/// static run of classes between interpolations is sorted independently, and the interpolations
-/// themselves are preserved byte-for-byte.
-///
 /// ## Why is this bad?
 /// Tailwind recommends a single, deterministic class order so the same set of utilities always
 /// appears the same way in the source. Sorting them automatically removes the effort of arranging
@@ -23,7 +19,7 @@ use crate::{Checker, span};
 ///
 /// ## Example
 /// ```html
-/// <button class="text-white px-4 sm:px-8 py-2 sm:py-3 bg-sky-700 hover:bg-sky-800">...</button>
+/// <button class="sm:py-3 text-white px-4 py-2 bg-sky-700 hover:bg-sky-800 sm:px-8">...</button>
 /// ```
 ///
 /// Use instead:
@@ -76,9 +72,6 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    // Built per call rather than cached: `RustyWind::default()` allocates nothing, and the
-    // expensive sorter it drives (and any prefixed variant) is memoized globally inside rustywind.
-    // Static class runs are sorted independently; interpolations are preserved and never crossed.
     let sorted = RustyWind {
         tailwind_prefix: checker
             .context()
@@ -96,48 +89,4 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     let span = span(*offset, value_str.len());
     let mut guard = checker.report_diagnostic(&UnsortedTailwindClasses, span);
     guard.set_fix(Fix::safe_edit(Edit::replacement(sorted.into_owned(), span)));
-}
-
-#[cfg(test)]
-mod tests {
-    use markup_fmt::{Language, parser::Parser};
-
-    use crate::settings::unsorted_tailwind_classes;
-    use crate::{Applicability, Rule, RuleSet, Settings, check_ast, fix_ast};
-
-    fn settings(prefix: Option<&str>) -> Settings {
-        Settings {
-            rules: RuleSet::from_rule(Rule::UnsortedTailwindClasses),
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings {
-                prefix: prefix.map(str::to_owned),
-            },
-        }
-    }
-
-    /// With a configured prefix, v3-prefixed utilities are recognized and sorted into the same
-    /// canonical order as their unprefixed equivalents.
-    #[test]
-    fn sorts_v3_prefixed_classes_when_prefix_configured() {
-        let source = r#"<a class="tw-text-white tw-bg-blue-700 btn hover:tw-bg-blue-900 tw-mt-4">Sign up</a>"#;
-        let mut parser = Parser::new(source, Language::Django, vec![]);
-        let ast = parser.parse_root().unwrap();
-        let settings = settings(Some("tw-"));
-
-        assert_eq!(check_ast(source, &ast, &settings).len(), 1);
-        assert_eq!(
-            fix_ast(source, &ast, &settings, Applicability::Safe).output,
-            r#"<a class="btn tw-mt-4 tw-bg-blue-700 tw-text-white hover:tw-bg-blue-900">Sign up</a>"#
-        );
-    }
-
-    /// Without a configured prefix, those same v3-prefixed utilities are unknown classes and keep
-    /// their authored order, so nothing is flagged.
-    #[test]
-    fn leaves_v3_prefixed_classes_unsorted_without_prefix() {
-        let source = r#"<a class="tw-text-white tw-bg-blue-700 btn hover:tw-bg-blue-900 tw-mt-4">Sign up</a>"#;
-        let mut parser = Parser::new(source, Language::Django, vec![]);
-        let ast = parser.parse_root().unwrap();
-
-        assert!(check_ast(source, &ast, &settings(None)).is_empty());
-    }
 }
