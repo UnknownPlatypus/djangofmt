@@ -5,7 +5,7 @@
 //!  - a group via the `category:` prefix (e.g. `category:all`, `category:correctness`, …).
 //!
 //! Selectors are parsed from CLI arguments and the `[tool.djangofmt.lint]` config, then resolved
-//! into a [`RuleSet`](crate::rule_set::RuleSet) by [`RuleSelection`](crate::settings::RuleSelection).
+//! into a [`RuleSet`](crate::rule_set::RuleSet) by [`LintConfiguration`](crate::settings::LintConfiguration).
 
 use std::fmt;
 use std::str::FromStr;
@@ -168,7 +168,7 @@ pub fn category_list() -> String {
         .join(", ")
 }
 
-/// A non-fatal issue surfaced while resolving a [`RuleSelection`](crate::settings::RuleSelection).
+/// A non-fatal issue surfaced while resolving a [`LintConfiguration`](crate::settings::LintConfiguration).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SelectionWarning {
     /// A preview rule was named explicitly without preview mode; it was skipped.

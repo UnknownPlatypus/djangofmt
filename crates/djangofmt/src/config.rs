@@ -6,7 +6,7 @@
 
 use std::path::Path;
 
-use djangofmt_lint::RuleSelection;
+use djangofmt_lint::LintConfiguration;
 
 use crate::args::{Profile, RuleSelectionArgs};
 use crate::pyproject::{LintSettings, UnsortedTailwindClassesOptions};
@@ -36,12 +36,12 @@ pub fn resolve_profile(
         .unwrap_or_default()
 }
 
-/// Merge CLI rule-selection flags with `[tool.djangofmt.lint]` into a [`RuleSelection`].
+/// Merge CLI rule-selection flags with `[tool.djangofmt.lint]` into a [`LintConfiguration`].
 #[must_use]
 pub fn resolve_rule_selection(
     cli: &RuleSelectionArgs,
     lint: Option<&LintSettings>,
-) -> RuleSelection {
+) -> LintConfiguration {
     let select = cli
         .select
         .clone()
@@ -54,13 +54,13 @@ pub fn resolve_rule_selection(
     let preview = resolve_bool_arg(cli.preview, cli.no_preview)
         .or_else(|| lint.and_then(|l| l.preview))
         .unwrap_or(false);
-    // Per-rule config is pyproject-only (no CLI flags), mirroring ruff's per-linter sections.
+    // Per-rule config is pyproject-only, it has no CLI flags.
     let unsorted_tailwind_classes = lint
         .and_then(|l| l.unsorted_tailwind_classes.clone())
         .map(UnsortedTailwindClassesOptions::into_settings)
         .unwrap_or_default();
 
-    RuleSelection {
+    LintConfiguration {
         select,
         ignore,
         preview,

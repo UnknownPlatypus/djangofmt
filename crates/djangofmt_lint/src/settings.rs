@@ -4,11 +4,7 @@ use crate::registry::Rule;
 use crate::rule_selector::{RuleSelector, SelectionWarning};
 use crate::rule_set::RuleSet;
 
-/// Resolved configuration for the `unsorted-tailwind-classes` rule.
-///
-/// Ruff equivalent: a per-linter `settings::Settings` (e.g.
-/// `flake8_boolean_trap::settings::Settings`) aggregated onto the linter settings. djangofmt keys
-/// per-rule config by rule name since it has no plugin grouping.
+/// Per-rule config is keyed by rule name, since djangofmt has no plugin grouping to key it by.
 pub mod unsorted_tailwind_classes {
     /// Settings for [`crate::registry::Rule::UnsortedTailwindClasses`].
     #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -19,20 +15,17 @@ pub mod unsorted_tailwind_classes {
 }
 
 /// Configuration settings for the linter.
-///
-/// Ruff equivalent: `LinterSettings`.
 #[derive(Debug, Clone)]
 pub struct Settings {
     /// The set of rules that are active for this run.
     pub rules: RuleSet,
-    /// Per-rule configuration for `unsorted-tailwind-classes`.
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
 impl Default for Settings {
     /// The default selection: every stable rule, preview rules disabled.
     fn default() -> Self {
-        RuleSelection::default().into_settings().0
+        LintConfiguration::default().into_settings().0
     }
 }
 
@@ -71,22 +64,19 @@ impl Settings {
 }
 
 /// Raw lint input, merged from CLI flags and `[tool.djangofmt.lint]`, resolved into a [`Settings`]
-/// by [`RuleSelection::into_settings`]. Carries both rule selection and per-rule configuration.
-///
-/// Ruff equivalent: `LintConfiguration`.
+/// by [`LintConfiguration::into_settings`].
 #[derive(Debug, Clone, Default)]
-pub struct RuleSelection {
+pub struct LintConfiguration {
     /// Selectors to enable. `None` falls back to the default selection (`category:all`).
     pub select: Option<Vec<RuleSelector>>,
     /// Selectors to disable.
     pub ignore: Vec<RuleSelector>,
     /// Whether preview rules are enabled.
     pub preview: bool,
-    /// Resolved per-rule config forwarded to [`Settings::unsorted_tailwind_classes`].
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
-impl RuleSelection {
+impl LintConfiguration {
     /// Resolve the selection into a [`Settings`] plus any non-fatal warnings.
     ///
     /// Selectors are applied in ascending specificity (`all` < category < rule),
@@ -146,7 +136,7 @@ mod tests {
     use std::str::FromStr;
     use strum::VariantNames;
 
-    use super::{RuleSelection, Settings, unsorted_tailwind_classes};
+    use super::{LintConfiguration, Settings, unsorted_tailwind_classes};
     use crate::registry::{Rule, RuleCategory};
     use crate::rule_selector::{RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
@@ -175,7 +165,7 @@ mod tests {
     /// a bare rule in `select` (specificity 2) beats a `category:` in `ignore` (specificity 1), which beats `category:all` (specificity 0).
     #[test]
     fn specificity_resolution_is_order_independent() {
-        let selection = RuleSelection {
+        let selection = LintConfiguration {
             select: Some(vec![RuleSelector::All, RuleSelector::Rule(Rule::UseHttps)]),
             ignore: vec![RuleSelector::Category(RuleCategory::Suspicious)],
             preview: false,
@@ -207,18 +197,18 @@ mod tests {
     #[test]
     fn preview_gate_for_category_and_explicit_rule() {
         // category:all with preview on includes preview rules.
-        let all_rules = RuleSelection {
+        let all_rules = LintConfiguration {
             preview: true,
-            ..RuleSelection::default()
+            ..LintConfiguration::default()
         }
         .into_settings()
         .0;
         assert!(all_rules.is_enabled(Rule::EmptyTagPair));
 
         // Naming a preview rule without preview warns and skips it.
-        let (settings, warnings) = RuleSelection {
+        let (settings, warnings) = LintConfiguration {
             select: Some(vec![RuleSelector::Rule(Rule::EmptyTagPair)]),
-            ..RuleSelection::default()
+            ..LintConfiguration::default()
         }
         .into_settings();
         assert!(!settings.is_enabled(Rule::EmptyTagPair));
@@ -231,13 +221,13 @@ mod tests {
     /// A selector listed twice is collapsed even when another selector sits between the duplicates
     #[test]
     fn duplicate_selectors_are_deduped() {
-        let (settings, warnings) = RuleSelection {
+        let (settings, warnings) = LintConfiguration {
             select: Some(vec![
                 RuleSelector::Rule(Rule::EmptyTagPair),
                 RuleSelector::Rule(Rule::UseHttps),
                 RuleSelector::Rule(Rule::EmptyTagPair),
             ]),
-            ..RuleSelection::default()
+            ..LintConfiguration::default()
         }
         .into_settings();
 
