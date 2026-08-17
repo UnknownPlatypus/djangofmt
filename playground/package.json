@@ -9,7 +9,7 @@
     "preview": "astro preview"
   },
   "devDependencies": {
-    "daisyui": "5.7.16",
+    "daisyui": "5.7.17",
     "typescript": "7.0.2",
     "vite": "8.2.1"
   },
