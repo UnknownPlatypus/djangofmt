@@ -28,7 +28,7 @@ markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
   rev = "65d0ef7c38db6ec1b81a366681cded7e1252fe17"
 }
-miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
+miette = { package = "oxc-miette", version = "4.0.0", features = ["fancy"] }
 proc-macro2 = { version = "1.0" }
 quote = { version = "1.0" }
 rayon = { version = "1.12.0" }
