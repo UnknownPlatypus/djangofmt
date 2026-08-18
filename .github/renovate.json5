@@ -68,6 +68,13 @@
       description: "Disable updates for markup_fmt due to known issue"
     },
     {
+      // oxc archived oxc-miette and stripped it down for their own use, 3.0.1 is the last version
+      // with the APIs and performance we need. We'll move to ruff's annotate-snippets renderer instead.
+      matchPackageNames: ["oxc-miette", "miette"],
+      enabled: false,
+      description: "Pin oxc-miette to 3.0.1, later versions dropped features we rely on",
+    },
+    {
       // @tailwindcss/vite 4.2.3+ broke build with vite 8 / rolldown
       // (`Missing field tsconfigPaths on BindingViteResolvePluginConfig.resolveOptions`).
       // The aliasOnly:false change from tailwindlabs/tailwindcss#19803 triggers

@@ -17,12 +17,12 @@ clap = { version = "4.6.1", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
-dprint-plugin-json = { version = "0.21.3" }
+dprint-plugin-json = { version = "0.23.0" }
 editorconfig-parser = { version = "0.0.4" }
 globset = { version = "0.4.18" }
 ignore = { version = "0.4.25" }
 insta = { version = "1.47.2", features = ["filters", "glob", "yaml"] }
-insta-cmd = { version = "0.6.0" }
+insta-cmd = { version = "0.7.0" }
 malva = { version = "0.16.0", features = ["config_serde"] }
 markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
