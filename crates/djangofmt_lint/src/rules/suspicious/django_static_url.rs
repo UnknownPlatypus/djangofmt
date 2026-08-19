@@ -110,7 +110,11 @@ fn report_static_path(url: &str, offset: usize, attribute: &'static str, checker
     if contains_interpolation(url) {
         return;
     }
-    if starts_with_static_path(url) {
-        checker.report_diagnostic(&DjangoStaticUrl { attribute }, span(offset, url.len()));
+    // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
+    let trimmed = url.trim_ascii_start();
+    let offset = offset + url.len() - trimmed.len();
+    let trimmed = trimmed.trim_ascii_end();
+    if starts_with_static_path(trimmed) {
+        checker.report_diagnostic(&DjangoStaticUrl { attribute }, span(offset, trimmed.len()));
     }
 }

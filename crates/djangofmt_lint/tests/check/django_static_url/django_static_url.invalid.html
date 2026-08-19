@@ -29,3 +29,6 @@
 {% if show_logo %}
     <img src="/static/img/logo.png" alt="" width="0" height="0">
 {% endif %}
+
+<!-- Browsers strip surrounding whitespace, so a padded value still resolves the static path -->
+<img src=" /static/img/logo.png " alt="" width="0" height="0">
