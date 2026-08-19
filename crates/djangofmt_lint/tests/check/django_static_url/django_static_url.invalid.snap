@@ -152,10 +152,10 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Use `{% static 'path/to/file' %}` instead.
 
   × Hardcoded static path in `src`.
-    ╭─[tests/check/django_static_url/django_static_url.invalid.html:34:12]
+    ╭─[tests/check/django_static_url/django_static_url.invalid.html:34:11]
  33 │ <!-- Browsers strip surrounding whitespace, so a padded value still resolves the static path -->
  34 │ <img src=" /static/img/logo.png " alt="" width="0" height="0">
-    ·            ──────────┬─────────
+    ·           ───────────┬──────────
     ·                      ╰── here
     ╰────
   help: Use `{% static 'path/to/file' %}` instead.

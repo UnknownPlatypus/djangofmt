@@ -242,10 +242,10 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
   × Hardcoded internal URL in `href`.
-    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:56:11]
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:56:10]
  55 │ <!-- Browsers strip surrounding whitespace, so a padded value still resolves the internal path -->
  56 │ <a href=" /profile/ ">Profile</a>
-    ·           ────┬────
+    ·          ─────┬─────
     ·               ╰── here
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
