@@ -11,6 +11,10 @@ aarch64-unknown-linux-gnu = "2.28"
 
 # Config for 'dist'
 [dist]
+# `release.yml` is hand-patched for least-privilege job permissions and to keep the
+# release tag out of shell source, so `dist` must not verify or regenerate it.
+# Re-apply those patches after any `dist init`.
+allow-dirty = ["ci"]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
 cargo-dist-version = "0.32.0"
 # CI backends to support
