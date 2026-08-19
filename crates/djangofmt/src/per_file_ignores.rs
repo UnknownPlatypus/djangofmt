@@ -39,7 +39,14 @@ impl PerFileIgnores {
         // Files are discovered as canonical paths, so anchor the globs at the canonical
         // root. Fall back to the raw root if it can't be canonicalized.
         let root = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
-        let escaped_root = escape(&root.to_string_lossy());
+        // Globset normalizes Windows candidates to `/`, so the root must use `/` too
+        // (candidates are canonicalized like the root, so `\\?\` appears on both sides);
+        // on Unix `\` is a legal filename byte and must stay literal.
+        let escaped_root = if cfg!(windows) {
+            escape(&root.to_string_lossy().replace('\\', "/"))
+        } else {
+            escape(&root.to_string_lossy())
+        };
 
         let mut basenames = GlobSetBuilder::new();
         let mut absolutes = GlobSetBuilder::new();
@@ -166,6 +173,29 @@ mod tests {
                 "{path} should match `templates/*.html`"
             );
         }
+    }
+
+    /// A `/`-containing pattern anchored at a canonical Windows root (`\\?\` prefix,
+    /// `\` separators) must match candidates globset normalizes to `/`.
+    #[cfg(windows)]
+    #[test]
+    fn windows_verbatim_root_matches_path_patterns() {
+        let mut map = BTreeMap::new();
+        map.insert(
+            "templates/admin/**".to_string(),
+            vec![RuleSelector::Rule(Rule::UseHttps)],
+        );
+        let pfi = PerFileIgnores::new(&map, Path::new(r"\\?\C:\proj")).unwrap();
+        let base = all_rules();
+
+        let admin = pfi.rules_for(Path::new(r"\\?\C:\proj\templates\admin\page.html"), &base);
+        assert!(!admin.contains(Rule::UseHttps));
+        // The anchor still holds: the same dir nested deeper doesn't match.
+        let nested = pfi.rules_for(
+            Path::new(r"\\?\C:\proj\app\templates\admin\page.html"),
+            &base,
+        );
+        assert_eq!(nested, base);
     }
 
     #[test]
