@@ -26,6 +26,8 @@ The file must contain:
 
 The doc comment on the struct **is** the rule's documentation and its single source of truth. It MUST be one `///` doc comment attached directly to the struct — not a `//!` module-level comment, and not a second `///` block elsewhere in the file. The `#[derive(ViolationMetadata)]` macro (step 1b) reads it from the struct to populate `docs/rules/{name}.md`.
 
+Write it for the template author reading the rendered docs: **what** the rule flags and why, NEVER **how** the implementation detects it. Detection mechanics — path matching, gates, skip conditions — live in the code; in the docs they are noise that goes stale.
+
 Mirror the structure of `RedundantTypeAttr` exactly:
 
 ````rust
