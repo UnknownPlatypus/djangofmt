@@ -27,6 +27,9 @@ use crate::{Checker, span};
 /// <button class="bg-sky-700 px-4 py-2 text-white hover:bg-sky-800 sm:px-8 sm:py-3">...</button>
 /// ```
 ///
+/// ## Fix safety
+/// In addition to sorting classes, this rule will also remove duplicated ones.
+///
 /// ## Options
 /// - `lint.unsorted-tailwind-classes.prefix`
 ///
