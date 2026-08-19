@@ -173,10 +173,14 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         print_show_fixes(&results, total_applied);
     }
 
-    if total_diagnostics == 0 && error_count == 0 {
-        return Ok(ExitStatus::Success);
+    // I/O and parse errors take precedence over lint violations in the exit code.
+    if error_count > 0 {
+        return Ok(ExitStatus::Error);
     }
-    Ok(ExitStatus::Failure)
+    if total_diagnostics > 0 {
+        return Ok(ExitStatus::Failure);
+    }
+    Ok(ExitStatus::Success)
 }
 
 /// Render each diagnostic as its own block, with source snippet and help text.

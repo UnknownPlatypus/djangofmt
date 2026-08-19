@@ -307,7 +307,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     if nb_errors == 0 {
         Ok(ExitStatus::Success)
     } else {
-        Ok(ExitStatus::Failure)
+        Ok(ExitStatus::Error)
     }
 }
 
