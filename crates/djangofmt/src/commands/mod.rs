@@ -24,7 +24,7 @@ pub(crate) fn resolve_command(
     file_selection: &FileSelectionArgs,
 ) -> Result<ResolvedCommand> {
     let (pyproject, project_root) = load_pyproject_from_cwd()?;
-    let discovery_config = ResolvedDiscoveryConfig::new(file_selection, &pyproject);
+    let discovery_config = ResolvedDiscoveryConfig::new(file_selection, &pyproject, &project_root);
     let resolved_files = resolve_files(files, &discovery_config)?;
     Ok(ResolvedCommand {
         pyproject,
