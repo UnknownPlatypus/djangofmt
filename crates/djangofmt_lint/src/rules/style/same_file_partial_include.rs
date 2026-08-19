@@ -10,11 +10,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use crate::{Checker, span};
 
 /// ## What it does
-/// Checks for `{% include %}` tags that render a partial defined in the same template file: the
-/// include's template path (before `#`) is a suffix of the linted file's path and a matching
-/// `{% partialdef %}` exists in the file. Dynamic template names and includes passing `with` /
-/// `only` context are left alone, and the rule is skipped when the file path is unknown (e.g.
-/// the playground).
+/// Checks for `{% include %}` tags that render a partial defined in the same template file.
 ///
 /// ## Why is this bad?
 /// `{% include "file.html#name" %}` reloads the template from disk to extract the `name` partial.
@@ -36,7 +32,7 @@ use crate::{Checker, span};
 /// ## Fix safety
 /// This rule's fix is marked as safe: it only fires when the include's template path matches the
 /// file being linted and the partial is defined in it, so `{% partial %}` renders the same partial
-/// `{% include %}` would load. Whitespace-control markers (`{%-` / `-%}`) are preserved.
+/// `{% include %}` would load.
 ///
 /// ## References
 /// - [django-template-partials](https://github.com/carltongibson/django-template-partials)
