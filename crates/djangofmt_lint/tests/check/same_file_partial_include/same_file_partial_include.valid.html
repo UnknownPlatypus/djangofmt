@@ -8,6 +8,9 @@
 <!-- Path matches but this file defines no partial named `missing`, so it is left alone -->
 {% include "same_file_partial_include.valid.html#missing" %}
 
+<!-- `item` is only a prefix of the defined `item-list` partial, not a definition of `item` -->
+{% include "same_file_partial_include.valid.html#item" %}
+
 <!-- Whole-file include of this file (no `#fragment`) -->
 {% include "same_file_partial_include.valid.html" %}
 

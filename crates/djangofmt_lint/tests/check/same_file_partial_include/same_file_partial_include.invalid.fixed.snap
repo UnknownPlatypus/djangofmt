@@ -8,6 +8,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 {% partialdef menu %}<li>A menu entry</li>{% endpartialdef %}
 {% partialdef footer %}<small>A footer</small>{% endpartialdef %}
 {% partialdef attrs %}class="highlight"{% endpartialdef %}
+{% partialdef sidebar inline %}<aside>A sidebar</aside>{% endpartialdef %}
 
 <!-- Same-file partial included by the file's own name + fragment -->
 {% partial item-list %}
@@ -20,6 +21,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- Whitespace-control markers are carried over to the fix -->
 {%- partial footer -%}
+
+<!-- `inline` partialdefs are matched too -->
+{% partial sidebar %}
 
 <!-- Include in attribute position -->
 <div {% partial attrs %}>Highlighted</div>
