@@ -23,11 +23,6 @@
     // See https://docs.renovatebot.com/configuration-options/#rangestrategy
     rangeStrategy: "update-lockfile",
   },
-  pep621: {
-    // The default for this package manager is to only search for `pyproject.toml` files
-    // found at the repository root: https://docs.renovatebot.com/modules/manager/pep621/#file-matching
-    managerFilePatterns: ["/^python/.*pyproject\\.toml$/"],
-  },
   npm: {
     // Only python/benchmarks uses npm; the deno manager owns playground/package.json.
     managerFilePatterns: ["/^python/.*package\\.json$/"],
