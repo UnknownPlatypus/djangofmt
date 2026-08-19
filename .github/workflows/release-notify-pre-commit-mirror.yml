@@ -11,6 +11,10 @@ on:
         required: true
         type: string
 
+# Release artifacts must not be built from caches that other workflows can write.
+env:
+  ACTIONS_CACHE_MODE: none
+
 jobs:
   update-dependents:
     name: Notify pre-commit mirror
