@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
+use globset::{Glob, GlobSet, GlobSetBuilder, escape};
 use ignore::WalkBuilder;
 use ignore::overrides::OverrideBuilder;
-use ignore::types::TypesBuilder;
 use tracing::{debug, warn};
 
 use crate::args::FileSelectionArgs;
@@ -45,6 +45,9 @@ pub struct ResolvedDiscoveryConfig {
     pub include: Vec<String>,
     pub respect_gitignore: bool,
     pub force_exclude: bool,
+    /// Directory the `include` globs are anchored at, so `templates/*.html` means the
+    /// project's `templates/`, not whatever directory happens to be on the command line.
+    pub project_root: PathBuf,
 }
 
 impl ResolvedDiscoveryConfig {
@@ -52,7 +55,11 @@ impl ResolvedDiscoveryConfig {
     ///
     /// Precedence (highest to lowest): CLI > pyproject > defaults.
     #[must_use]
-    pub fn new(cli: &FileSelectionArgs, pyproject: &PyprojectSettings) -> Self {
+    pub fn new(
+        cli: &FileSelectionArgs,
+        pyproject: &PyprojectSettings,
+        project_root: &Path,
+    ) -> Self {
         let mut exclude = cli
             .exclude
             .clone()
@@ -82,30 +89,41 @@ impl ResolvedDiscoveryConfig {
             force_exclude: resolve_bool_arg(cli.force_exclude, cli.no_force_exclude)
                 .or(pyproject.force_exclude)
                 .unwrap_or(false),
+            // Discovery walks canonical roots, so anchor at the canonical project root too.
+            project_root: project_root
+                .canonicalize()
+                .unwrap_or_else(|_| project_root.to_path_buf()),
         }
     }
 }
 
-/// Build the include `Types` matcher from the resolved config.
-fn build_types(config: &ResolvedDiscoveryConfig) -> Result<ignore::types::Types, Error> {
-    let mut types_builder = TypesBuilder::new();
+/// Build the include matcher from the resolved config, matched against a file's full path.
+///
+/// Glob semantics follow ruff's `FilePattern`, so config ports over unchanged: every pattern
+/// is anchored at the project root, and a pattern without a separator is registered a second
+/// time unanchored so `*.html` keeps matching at any depth. `*` crosses `/`, which makes
+/// `templates/*.html` cover nested files too.
+fn build_include(config: &ResolvedDiscoveryConfig) -> Result<GlobSet, Error> {
+    let escaped_root = escape(&config.project_root.to_string_lossy());
+    let mut builder = GlobSetBuilder::new();
     for pattern in &config.include {
-        // Include globs match file names only; a path component would silently match nothing.
-        if pattern.contains('/') {
-            return Err(Error::Resolve(format!(
-                "Invalid include pattern '{pattern}': include patterns match file names only \
-                 and cannot contain path separators. \
-                 Use `exclude`/`extend-exclude` for path-based filtering."
-            )));
+        let compile = |glob: &str| {
+            Glob::new(glob)
+                .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))
+        };
+        let anchored = if Path::new(pattern).is_absolute() {
+            pattern.clone()
+        } else {
+            format!("{escaped_root}/{pattern}")
+        };
+        builder.add(compile(&anchored)?);
+        if !pattern.contains('/') {
+            builder.add(compile(pattern)?);
         }
-        types_builder
-            .add("djangofmt", pattern)
-            .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))?;
     }
-    types_builder.select("djangofmt");
-    types_builder
+    builder
         .build()
-        .map_err(|e| Error::Resolve(format!("Failed to build file types: {e}")))
+        .map_err(|e| Error::Resolve(format!("Failed to build include patterns: {e}")))
 }
 
 /// Build the exclude `Override` matcher from the resolved config.
@@ -142,7 +160,7 @@ pub fn resolve_files(
     config: &ResolvedDiscoveryConfig,
 ) -> Result<Vec<PathBuf>, Error> {
     let mut files: Vec<PathBuf> = Vec::with_capacity(paths.len());
-    let mut dirs: Vec<&Path> = vec![];
+    let mut dirs: Vec<PathBuf> = vec![];
 
     // Process the provided paths, collecting directories for later recursive processing.
     // Explicit files paths are canonicalized.
@@ -159,7 +177,11 @@ pub fn resolve_files(
             })?;
             files.push(canonical);
         } else if path.is_dir() {
-            dirs.push(path);
+            // Walk canonical roots so discovered paths line up with the anchored include globs.
+            let canonical = std::fs::canonicalize(path).map_err(|e| {
+                Error::Resolve(format!("Failed to canonicalize {}: {e}", path.display()))
+            })?;
+            dirs.push(canonical);
         }
     }
 
@@ -168,7 +190,7 @@ pub fn resolve_files(
         && !files.is_empty()
         && let Some(root) = dirs
             .first()
-            .copied()
+            .map(PathBuf::as_path)
             .or_else(|| files.first().and_then(|f| f.parent()))
     {
         let overrides = build_overrides(root, config)?;
@@ -192,7 +214,7 @@ pub fn resolve_files(
 
     // Walk all directories with a single parallel WalkBuilder.
     if let Some((first, rest)) = dirs.split_first() {
-        let types = build_types(config)?;
+        let include = build_include(config)?;
         let overrides = build_overrides(first, config)?;
 
         let mut builder = WalkBuilder::new(first);
@@ -204,7 +226,6 @@ pub fn resolve_files(
             .standard_filters(config.respect_gitignore)
             .hidden(false)
             .follow_links(true)
-            .types(types)
             .overrides(overrides)
             .threads(
                 std::thread::available_parallelism()
@@ -213,7 +234,7 @@ pub fn resolve_files(
             );
 
         let state = WalkFilesState::new();
-        let mut visitor_builder = FileVisitorBuilder::new(&state);
+        let mut visitor_builder = FileVisitorBuilder::new(&state, &include);
         builder.build_parallel().visit(&mut visitor_builder);
         files.extend(state.finish()?);
     }
@@ -248,11 +269,12 @@ impl WalkFilesState {
 
 struct FileVisitorBuilder<'s> {
     state: &'s WalkFilesState,
+    include: &'s GlobSet,
 }
 
 impl<'s> FileVisitorBuilder<'s> {
-    const fn new(state: &'s WalkFilesState) -> Self {
-        Self { state }
+    const fn new(state: &'s WalkFilesState, include: &'s GlobSet) -> Self {
+        Self { state, include }
     }
 }
 
@@ -262,6 +284,7 @@ impl<'s> ignore::ParallelVisitorBuilder<'s> for FileVisitorBuilder<'s> {
             local_files: vec![],
             local_error: None,
             global: self.state,
+            include: self.include,
         })
     }
 }
@@ -270,12 +293,16 @@ struct FileVisitor<'s> {
     local_files: Vec<PathBuf>,
     local_error: Option<Error>,
     global: &'s WalkFilesState,
+    include: &'s GlobSet,
 }
 
 impl ignore::ParallelVisitor for FileVisitor<'_> {
     fn visit(&mut self, result: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
         match result {
             Ok(entry) if entry.file_type().is_some_and(|ft| ft.is_file()) => {
+                if !self.include.is_match(entry.path()) {
+                    return ignore::WalkState::Continue;
+                }
                 match std::fs::canonicalize(entry.path()) {
                     Ok(canonical) => {
                         debug!("Discovered: {}", canonical.display());
@@ -332,6 +359,12 @@ mod tests {
         PyprojectSettings::default()
     }
 
+    /// Config for the merge-precedence tests, which never discover files so the anchor
+    /// the `include` globs resolve against is irrelevant.
+    fn resolved(cli: &FileSelectionArgs, pyproject: &PyprojectSettings) -> ResolvedDiscoveryConfig {
+        ResolvedDiscoveryConfig::new(cli, pyproject, Path::new("."))
+    }
+
     /// Helper to create a file in a temp dir
     fn create_file(base: &Path, relative: &str) {
         let path = base.join(relative);
@@ -350,7 +383,7 @@ mod tests {
 
     #[test]
     fn test_defaults() {
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = resolved(&default_cli(), &default_pyproject());
         assert_eq!(
             config.include,
             vec!["*.html", "*.jinja", "*.jinja2", "*.j2"]
@@ -367,7 +400,7 @@ mod tests {
             exclude: Some(vec!["custom_dir".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = resolved(&default_cli(), &pyproject);
         assert_eq!(config.exclude, vec!["custom_dir"]);
     }
 
@@ -377,7 +410,7 @@ mod tests {
             extend_exclude: Some(vec!["vendor".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = resolved(&default_cli(), &pyproject);
         assert!(config.exclude.contains(&".git".to_string()));
         assert!(config.exclude.contains(&"vendor".to_string()));
     }
@@ -392,7 +425,7 @@ mod tests {
             exclude: Some(vec!["should_be_replaced".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&cli, &pyproject);
+        let config = resolved(&cli, &pyproject);
         assert_eq!(config.exclude, vec!["migrations"]);
     }
 
@@ -406,7 +439,7 @@ mod tests {
             extend_exclude: Some(vec!["pyproject_extra".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&cli, &pyproject);
+        let config = resolved(&cli, &pyproject);
         assert!(config.exclude.contains(&"pyproject_extra".to_string()));
         assert!(config.exclude.contains(&"cli_extra".to_string()));
     }
@@ -422,7 +455,7 @@ mod tests {
             extend_exclude: Some(vec!["build".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&cli, &pyproject);
+        let config = resolved(&cli, &pyproject);
         assert!(config.exclude.contains(&"migrations".to_string()));
         assert!(config.exclude.contains(&"build".to_string()));
         assert!(config.exclude.contains(&"vendor".to_string()));
@@ -435,7 +468,7 @@ mod tests {
             include: Some(vec!["*.txt".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = resolved(&default_cli(), &pyproject);
         assert_eq!(config.include, vec!["*.txt"]);
     }
 
@@ -445,7 +478,7 @@ mod tests {
             extend_include: Some(vec!["*.djhtml".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = resolved(&default_cli(), &pyproject);
         assert_eq!(
             config.include,
             vec!["*.html", "*.jinja", "*.jinja2", "*.j2", "*.djhtml"]
@@ -458,7 +491,7 @@ mod tests {
             respect_gitignore: Some(false),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = resolved(&default_cli(), &pyproject);
         assert!(!config.respect_gitignore);
     }
 
@@ -472,7 +505,7 @@ mod tests {
             respect_gitignore: Some(true),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&cli, &pyproject);
+        let config = resolved(&cli, &pyproject);
         assert!(!config.respect_gitignore);
     }
 
@@ -485,7 +518,7 @@ mod tests {
         create_file(dir.path(), "d.py");
         create_file(dir.path(), "e.css");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -503,7 +536,7 @@ mod tests {
         fs::create_dir_all(&excluded_dir).unwrap();
         create_file(dir.path(), ".venv/template.html");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let explicit_file = excluded_dir.join("template.html");
         let files = resolve_files(&[explicit_file], &config).unwrap();
 
@@ -516,7 +549,7 @@ mod tests {
         create_file(dir.path(), "good.html");
         create_file(dir.path(), ".venv/bad.html");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -536,7 +569,7 @@ mod tests {
         create_file(dir.path(), "included.html");
         create_file(dir.path(), "ignored/excluded.html");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -560,7 +593,7 @@ mod tests {
             respect_gitignore: Some(false),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -571,14 +604,14 @@ mod tests {
     #[test]
     fn test_resolve_files_empty_directory() {
         let dir = tempdir().unwrap();
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
         assert!(files.is_empty());
     }
 
     #[test]
     fn test_resolve_files_nonexistent_path_errors() {
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = resolved(&default_cli(), &default_pyproject());
         let result = resolve_files(&[PathBuf::from("/nonexistent/path")], &config);
         assert!(result.is_err());
     }
@@ -590,7 +623,7 @@ mod tests {
         create_file(dir.path(), "sub/nested.html");
         create_file(dir.path(), "sub/deep/deeper.jinja2");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
         assert_eq!(files.len(), 3);
     }
@@ -605,7 +638,7 @@ mod tests {
             include: Some(vec!["*.txt".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -613,12 +646,64 @@ mod tests {
         assert!(names.contains(&"b.txt".to_string()));
     }
 
+    /// Worked example of ruff's `include` glob semantics: a pattern with a separator is
+    /// anchored at the project root and `*` crosses `/`, while a bare pattern matches at
+    /// any depth.
+    #[test]
+    fn test_resolve_files_include_glob_semantics() {
+        let dir = tempdir().unwrap();
+        for path in [
+            "root.html",
+            "templates/page.html",
+            "templates/deep/page.html",
+            "other/page.html",
+        ] {
+            create_file(dir.path(), path);
+        }
+        let root = dir.path().canonicalize().unwrap();
+
+        let matched = |pattern: &str| {
+            let pyproject = PyprojectSettings {
+                include: Some(vec![pattern.to_string()]),
+                ..Default::default()
+            };
+            let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
+            let mut found: Vec<String> = resolve_files(&[dir.path().to_path_buf()], &config)
+                .unwrap()
+                .iter()
+                .map(|p| p.strip_prefix(&root).unwrap().display().to_string())
+                .collect();
+            found.sort();
+            found
+        };
+
+        // Bare pattern: any depth.
+        assert_eq!(
+            matched("*.html"),
+            [
+                "other/page.html",
+                "root.html",
+                "templates/deep/page.html",
+                "templates/page.html"
+            ]
+        );
+        // Anchored at the root, and `*` crosses `/` so nested files match too.
+        assert_eq!(
+            matched("templates/*.html"),
+            ["templates/deep/page.html", "templates/page.html"]
+        );
+        // `**/` still spans directories.
+        assert_eq!(matched("**/deep/*.html"), ["templates/deep/page.html"]);
+        // A bare pattern is anchored at neither end, unlike a path one.
+        assert_eq!(matched("r*.html"), ["root.html"]);
+    }
+
     #[test]
     fn test_resolve_files_deduplicates() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "a.html");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let explicit = dir.path().join("a.html");
         let files = resolve_files(&[dir.path().to_path_buf(), explicit], &config).unwrap();
         assert_eq!(files.len(), 1);
@@ -631,7 +716,7 @@ mod tests {
         create_file(dir.path(), "a.html");
         create_file(dir.path(), "b.html");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -647,7 +732,7 @@ mod tests {
             include: Some(vec!["[invalid".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject);
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
         let result = resolve_files(&[dir.path().to_path_buf()], &config);
         assert!(result.is_err());
     }
@@ -666,7 +751,7 @@ mod tests {
         create_file(dir.path(), "sub/included.html");
         create_file(dir.path(), "sub/ignored_nested/excluded.html");
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         let names = file_names(&files);
@@ -685,7 +770,7 @@ mod tests {
             exclude: Some(vec!["b.html".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), dir.path());
         let files = resolve_files(
             &[dir.path().join("a.html"), dir.path().join("b.html")],
             &config,
@@ -707,7 +792,7 @@ mod tests {
             exclude: Some(vec!["b.html".to_string()]),
             ..Default::default()
         };
-        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), dir.path());
         let files = resolve_files(
             &[dir.path().join("a.html"), dir.path().join("b.html")],
             &config,
@@ -725,7 +810,7 @@ mod tests {
         std::os::unix::fs::symlink(dir.path().join("real_dir"), dir.path().join("link_dir"))
             .unwrap();
 
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject());
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
         assert!(

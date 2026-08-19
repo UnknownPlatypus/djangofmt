@@ -93,25 +93,6 @@ fn format_nonexistent_file() {
 }
 
 #[test]
-fn format_include_pattern_with_path_separator_errors() {
-    let project = Project::new()
-        .file(
-            "pyproject.toml",
-            "[tool.djangofmt]\ninclude = [\"templates/*.html\"]\n",
-        )
-        .file("templates/test.html", "<div   ></div>\n");
-    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("."), @r#"
-    success: false
-    exit_code: 2
-    ----- stdout -----
-
-    ----- stderr -----
-    djangofmt failed
-      Error: Invalid include pattern 'templates/*.html': include patterns match file names only and cannot contain path separators. Use `exclude`/`extend-exclude` for path-based filtering.
-    "#);
-}
-
-#[test]
 fn format_directory() {
     let project = Project::new()
         .file("a.html", "<div   ></div>\n")
