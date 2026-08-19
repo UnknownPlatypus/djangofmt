@@ -98,7 +98,10 @@ impl ParseError {
                         column,
                     } => (
                         format!("expected close tag for opening tag <{tag_name}>"),
-                        None,
+                        Some(format!(
+                            "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag: \
+                             https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags"
+                        )),
                         SourceSpan::new(SourceOffset::from_location(&source, *line, *column), djangofmt_lint::clamp_offset(tag_name.len())),
                     ),
                     markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {

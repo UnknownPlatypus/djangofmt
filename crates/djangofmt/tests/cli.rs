@@ -252,6 +252,9 @@ fn format_stdin_parse_error_exits_2() {
        · ─┬─
        ·  ╰── here
        ╰────
+      help: If a `</div>` does exist, it must live in the same block as the
+            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
+            limitations/#conditional-openclose-tags
     "###);
 }
 
