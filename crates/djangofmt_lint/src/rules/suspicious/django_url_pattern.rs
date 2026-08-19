@@ -91,7 +91,8 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
     if contains_interpolation(value_str) {
         return;
     }
-    if is_hardcoded_internal_path(value_str) {
+    // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
+    if is_hardcoded_internal_path(value_str.trim_ascii()) {
         checker.report_diagnostic(
             &DjangoUrlPattern {
                 attribute: canonical,
