@@ -130,7 +130,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let duration = start.elapsed();
     debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
-    let error_count = super::report_parse_errors(parse_errors, "check", config.output_format);
+    let nb_parse_errors = super::report_parse_errors(parse_errors, "check", config.output_format);
 
     let mut total_diagnostics = 0usize;
     let mut total_applied = 0usize;
@@ -166,7 +166,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         total_unsafe_fixable,
         config.fix,
         config.unsafe_fixes,
-        error_count,
+        nb_parse_errors,
     );
 
     if config.show_fixes && total_applied > 0 {
@@ -174,7 +174,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     }
 
     // I/O and parse errors take precedence over lint violations in the exit code.
-    if error_count > 0 {
+    if nb_parse_errors > 0 {
         return Ok(ExitStatus::Error);
     }
     if total_diagnostics > 0 {

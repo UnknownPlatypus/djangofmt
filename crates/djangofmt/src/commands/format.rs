@@ -296,7 +296,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         start.elapsed()
     );
 
-    let nb_errors = super::report_parse_errors(parse_errors, "format", OutputFormat::Full);
+    let nb_parse_errors = super::report_parse_errors(parse_errors, "format", OutputFormat::Full);
 
     // Report on the formatting changes.
     let summary = build_summary(results.as_ref());
@@ -304,7 +304,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         info!("{} !", summary);
     }
 
-    if nb_errors == 0 {
+    if nb_parse_errors == 0 {
         Ok(ExitStatus::Success)
     } else {
         Ok(ExitStatus::Error)
