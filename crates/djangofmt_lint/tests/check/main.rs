@@ -63,14 +63,14 @@ fn fix_snapshot() {
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let safe = fix_ast(&input, &ast, &settings, Applicability::Safe);
+        let safe = fix_ast(&input, &ast, &settings, Applicability::Safe, Some(path));
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &settings, Applicability::Unsafe);
+        let unsafe_fixed = fix_ast(&input, &ast, &settings, Applicability::Unsafe, Some(path));
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
@@ -115,8 +115,14 @@ fn settings_for(path: &Path) -> Settings {
 }
 
 fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
-    lint_source(input, Language::Django, &[], &settings_for(path))
-        .expect("Failed to parse AST in test")
+    lint_source(
+        input,
+        Language::Django,
+        &[],
+        &settings_for(path),
+        Some(path),
+    )
+    .expect("Failed to parse AST in test")
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {

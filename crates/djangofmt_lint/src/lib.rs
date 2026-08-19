@@ -10,7 +10,7 @@
 //! use markup_fmt::Language;
 //!
 //! let source = r#"<form method="put"></form>"#;
-//! let diagnostics = lint_source(source, Language::Jinja, &[], &Settings::default()).unwrap();
+//! let diagnostics = lint_source(source, Language::Jinja, &[], &Settings::default(), None).unwrap();
 //! assert_eq!(diagnostics.len(), 1);
 //! ```
 
@@ -38,6 +38,7 @@ pub use settings::{RuleSelection, Settings};
 pub use violation::{Violation, ViolationMetadata};
 
 use std::borrow::Cow;
+use std::path::Path;
 
 use markup_fmt::ast::Root;
 use markup_fmt::parser::Parser;
@@ -155,13 +156,16 @@ impl FileDiagnostics {
 /// Check the AST for lint errors.
 ///
 /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
+///
+/// `path` enables path-aware rules; pass [`None`] when linting a buffer without a backing file.
 #[must_use]
 pub fn check_ast<'a>(
     source: &'a str,
     ast: &Root<'a>,
     settings: &'a Settings,
+    path: Option<&'a Path>,
 ) -> Vec<LintDiagnostic> {
-    let mut checker = Checker::new(source, settings);
+    let mut checker = Checker::new(source, settings, path);
     checker.visit_root(ast);
     checker.into_diagnostics()
 }
@@ -180,12 +184,15 @@ pub fn parse<'a>(
 }
 
 /// Parse and lint `source` in one call.
+///
+/// `path` is forwarded to path-aware rules; pass [`None`] when there is no backing file.
 pub fn lint_source(
     source: &str,
     language: Language,
     custom_blocks: &[String],
     settings: &Settings,
+    path: Option<&Path>,
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
     let ast = parse(source, language, custom_blocks)?;
-    Ok(check_ast(source, &ast, settings))
+    Ok(check_ast(source, &ast, settings, path))
 }

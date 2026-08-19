@@ -187,7 +187,7 @@ pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
 
 fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let profile = get_profile(profile);
-    let diagnostics = match lint_source(source, profile.into(), &[], &Settings::all()) {
+    let diagnostics = match lint_source(source, profile.into(), &[], &Settings::all(), None) {
         Ok(diagnostics) => diagnostics,
         Err(e) => {
             let err = markup_fmt::FormatError::Syntax(e);

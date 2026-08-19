@@ -485,6 +485,46 @@ fn check_fixable_file_with_fix() {
 }
 
 #[test]
+fn check_passes_file_path_to_path_aware_rules() {
+    // `same-file-partial-include` only fires when the checked file's path reaches the rule:
+    // cover both the report path (`lint_source`) and the fix path (`lint_fix`).
+    let project = Project::new().file(
+        "app/page.html",
+        "{% partialdef nav %}<a>Home</a>{% endpartialdef %}\n{% include \"app/page.html#nav\" %}\n",
+    );
+    let args = [
+        "check",
+        "--preview",
+        "--select",
+        "same-file-partial-include",
+    ];
+    assert_cmd_snapshot_tmpdir!(
+        cli().args(args).args(["--output-format", "concise"]).arg(project.join("app/page.html")),
+        @r###"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/page.html:2:1: same-file-partial-include [*] Same-file partial `nav` rendered via `{% include %}`.
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    "###
+    );
+    assert_cmd_snapshot!(cli().args(args).arg("--fix").arg(project.join("app/page.html")), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    "###);
+    assert_eq!(
+        project.read("app/page.html"),
+        "{% partialdef nav %}<a>Home</a>{% endpartialdef %}\n{% partial nav %}\n"
+    );
+}
+
+#[test]
 fn check_fixable_file_with_show_fixes() {
     let project = Project::new().file(
         "test.html",

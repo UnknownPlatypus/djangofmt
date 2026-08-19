@@ -6,6 +6,7 @@
 //! lint, apply, re-parse) up to [`MAX_FIX_ITERATIONS`].
 
 use std::borrow::Cow;
+use std::path::Path;
 
 use markup_fmt::SyntaxError;
 use markup_fmt::ast::Root;
@@ -131,8 +132,9 @@ pub fn fix_ast(
     ast: &Root<'_>,
     settings: &Settings,
     threshold: Applicability,
+    path: Option<&Path>,
 ) -> ApplyResult {
-    let diagnostics = check_ast(source, ast, settings);
+    let diagnostics = check_ast(source, ast, settings, path);
     apply_fixes(source, &diagnostics, threshold)
 }
 
@@ -182,12 +184,15 @@ pub enum FixerError {
 ///    or [`FixerError::SyntaxRegression`] if a fix broke source that previously parsed.
 /// 4. On convergence-failure (iteration limit reached with more fixes pending),
 ///    log a warning and return the work done so far.
+///
+/// `path` is forwarded to path-aware rules; pass [`None`] when there is no backing file.
 pub fn lint_fix(
     source: &str,
     settings: &Settings,
     profile: markup_fmt::Language,
     custom_blocks: &[String],
     threshold: Applicability,
+    path: Option<&Path>,
 ) -> Result<FixerResult, FixerError> {
     let mut current: Cow<'_, str> = Cow::Borrowed(source);
     let mut total_applied = 0usize;
@@ -230,7 +235,7 @@ pub fn lint_fix(
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
-        let diagnostics = check_ast(&current, &ast, settings);
+        let diagnostics = check_ast(&current, &ast, settings, path);
         let result = apply_fixes(&current, &diagnostics, threshold);
         total_skipped += result.skipped_count;
         for applied in &result.applied_fixes {
@@ -420,6 +425,7 @@ mod tests {
             markup_fmt::Language::Django,
             &[],
             Applicability::Safe,
+            None,
         )
         .expect("lint_fix");
         assert_eq!(result.source, source);

@@ -43,6 +43,7 @@ fn bench_check(bencher: divan::Bencher, template: &TestFile, settings: &Settings
                 divan::black_box(template.code),
                 divan::black_box(&ast),
                 divan::black_box(settings),
+                divan::black_box(None),
             )
         });
 }

@@ -309,7 +309,14 @@ fn check_path(
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
     if fix {
-        match lint_fix(&source, settings, profile.into(), custom_blocks, threshold) {
+        match lint_fix(
+            &source,
+            settings,
+            profile.into(),
+            custom_blocks,
+            threshold,
+            Some(path),
+        ) {
             Ok(result) => {
                 if result.applied_count > 0 && result.source != source {
                     fs::write(path, &result.source)
@@ -353,16 +360,17 @@ fn check_path(
         }
     }
 
-    let diagnostics = match lint_source(&source, profile.into(), custom_blocks, settings) {
-        Ok(diagnostics) => diagnostics,
-        Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                Some(path.to_path_buf()),
-                source,
-                &FormatError::Syntax(err),
-            ))));
-        }
-    };
+    let diagnostics =
+        match lint_source(&source, profile.into(), custom_blocks, settings, Some(path)) {
+            Ok(diagnostics) => diagnostics,
+            Err(err) => {
+                return Err(Box::new(CommandError::Parse(ParseError::new(
+                    Some(path.to_path_buf()),
+                    source,
+                    &FormatError::Syntax(err),
+                ))));
+            }
+        };
     let file_diagnostics = if diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
