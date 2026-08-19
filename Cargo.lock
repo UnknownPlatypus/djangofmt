@@ -422,6 +422,7 @@ dependencies = [
  "clap",
  "clap_complete_command",
  "djangofmt_lint",
+ "djangofmt_macros",
  "dprint-plugin-json",
  "editorconfig-parser",
  "globset",

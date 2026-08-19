@@ -55,6 +55,9 @@ Mirror the structure of `RedundantTypeAttr` exactly:
 /// unsafe and why — e.g. "marked as safe: removing the attribute preserves
 /// runtime semantics."
 ///
+/// ## Options
+/// - `lint.my-rule.some-option`
+///
 /// ## References
 /// - [Spec/docs link](https://example.com/relevant-spec)
 #[derive(Debug, PartialEq, Eq)]
@@ -70,6 +73,7 @@ Formatting rules (these match `RedundantTypeAttr` exactly — diverging is an er
 - `## Why is this bad?` — content immediately after the heading. Add follow-up paragraphs (separated by blank `///`) for exclusions or non-obvious behaviour. Keep the voice declarative and plain ("`eval()` is insecure as it enables arbitrary code execution"). Avoid editorial flair like "classic X sink" or "brittle across browsers", filler adjectives, and second-person ("you").
 - `## Example` — code fence on the line **immediately after** the heading. No blank `///` between heading and `` ```html ``. After the closing fence, blank line, then plain text `Use instead:` (NOT a sub-heading, no `##`), then the corrected code fence immediately on the next line. Use HTML/Jinja, not Python.
 - `## Fix safety` — include only when the rule registers a fix. One short paragraph documenting the safety classification and why.
+- `## Options` — include only when the rule reads settings from `pyproject.toml`. Bullet list of dotted option paths in backticks, nothing else: the generator turns each into a link to `docs/settings.md` and fails on unknown options. Document the option itself (doc comment, default, type, example) on its field in `pyproject.rs`, never in the rule.
 - `## References` — include when there is a relevant spec, framework doc, or upstream issue to link. Bullet list, one link per line. Link primary sources only (WHATWG/W3C specs, MDN, framework documentation, CWE/OWASP). Do **not** link other linters' rule pages; the cross-reference belongs in the PR description, not in the user-facing docs.
 
 ### 1b. Derive `ViolationMetadata` and declare the lifecycle

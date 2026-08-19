@@ -72,5 +72,6 @@ nav:
       - known-limitations.md
       - benchmarks.md
   - Lint rules: rules.md
+  - Settings: settings.md
   - Contributing: contributing.md
   - Changelog: changelog.md

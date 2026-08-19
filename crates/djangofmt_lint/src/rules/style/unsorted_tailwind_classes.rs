@@ -28,14 +28,7 @@ use crate::{Checker, span};
 /// ```
 ///
 /// ## Options
-/// By default, utilities are matched against Tailwind's standard names. Projects using a custom
-/// prefix must configure it, otherwise prefixed utilities are treated as unknown classes and left
-/// unsorted:
-///
-/// ```toml
-/// [tool.djangofmt.lint.unsorted-tailwind-classes]
-/// prefix = "tw-"  # Tailwind v3; use "tw:" for v4
-/// ```
+/// - `lint.unsorted-tailwind-classes.prefix`
 ///
 /// ## References
 /// - [Tailwind CSS: Automatic class sorting](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier)

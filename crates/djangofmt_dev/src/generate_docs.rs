@@ -2,9 +2,11 @@
 
 use std::fmt::Write as _;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use strum::IntoEnumIterator;
 
+use djangofmt::options_metadata::OptionsMetadata;
+use djangofmt::pyproject::PyprojectSettings;
 use djangofmt_lint::{FixAvailability, Rule, RuleGroup};
 
 use crate::generate_all::{AUTOGEN_HEADER, Args, apply};
@@ -23,7 +25,7 @@ pub fn main(args: &Args) -> Result<()> {
             continue;
         };
         let path = dir.join(rule.to_string()).with_extension("md");
-        apply(args.mode, &path, &render(rule, explanation))?;
+        apply(args.mode, &path, &render(rule, explanation)?)?;
     }
     Ok(())
 }
@@ -39,7 +41,7 @@ fn since_link(since: &str) -> String {
     }
 }
 
-fn render(rule: Rule, explanation: &str) -> String {
+fn render(rule: Rule, explanation: &str) -> Result<String> {
     let name = rule.to_string();
     let file = rule.source_file().replace('\\', "/");
     let line = rule.source_line();
@@ -90,9 +92,43 @@ fn render(rule: Rule, explanation: &str) -> String {
         );
     }
 
-    output.push_str(ensure_blank_after_headings(explanation.trim()).trim_end());
+    let explanation = link_options(rule, explanation.trim())?;
+    output.push_str(ensure_blank_after_headings(&explanation).trim_end());
     output.push('\n');
-    output
+    Ok(output)
+}
+
+/// Turn the option bullets of a rule's `## Options` section into links to the settings reference,
+/// so rules never restate an option's documentation. Unknown options are an error: they would
+/// otherwise render as dead links once the option is renamed.
+fn link_options(rule: Rule, explanation: &str) -> Result<String> {
+    let mut output = String::with_capacity(explanation.len());
+    let mut in_options = false;
+    for line in explanation.lines() {
+        if line.starts_with("## ") {
+            in_options = line == "## Options";
+        }
+        let option = if in_options {
+            line.strip_prefix("- `")
+                .and_then(|rest| rest.strip_suffix('`'))
+        } else {
+            None
+        };
+        match option {
+            Some(option) if PyprojectSettings::metadata().find(option).is_none() => {
+                bail!("rule `{rule}` references unknown option `{option}`");
+            }
+            Some(option) => {
+                let anchor = option.replace('.', "_");
+                let _ = writeln!(&mut output, "- [`{option}`](../settings.md#{anchor})");
+            }
+            None => {
+                output.push_str(line);
+                output.push('\n');
+            }
+        }
+    }
+    Ok(output)
 }
 
 /// Insert a blank line after any ATX heading (`#`, `##`, …) that is immediately
@@ -117,4 +153,30 @@ fn ensure_blank_after_headings(text: &str) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::link_options;
+    use djangofmt_lint::Rule;
+
+    #[test]
+    fn options_bullets_become_settings_links() {
+        let linked = link_options(
+            Rule::UnsortedTailwindClasses,
+            "## Options\n- `lint.unsorted-tailwind-classes.prefix`\n\n## References\n- `not an option`\n",
+        )
+        .unwrap();
+        assert_eq!(
+            linked,
+            "## Options\n- [`lint.unsorted-tailwind-classes.prefix`](../settings.md#lint_unsorted-tailwind-classes_prefix)\n\n## References\n- `not an option`\n"
+        );
+    }
+
+    #[test]
+    fn unknown_option_is_an_error() {
+        assert!(
+            link_options(Rule::UnsortedTailwindClasses, "## Options\n- `lint.nope`\n").is_err()
+        );
+    }
 }
