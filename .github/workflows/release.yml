@@ -14,8 +14,7 @@
 # title/body based on your changelogs.
 
 name: Release
-permissions:
-  "contents": "write"
+permissions: {}
 
 # This task will run whenever you workflow_dispatch with a tag that looks like a version
 # like "1.0.0", "v0.1.0-prerelease.1", "my-app/0.1.0", "releases/v1.0.0", etc.
@@ -51,6 +50,8 @@ on:
 jobs:
   # Run 'dist plan' (or host) to determine what tasks we need to do
   plan:
+    permissions:
+      "contents": "read"
     runs-on: "ubuntu-22.04"
     outputs:
       val: ${{ steps.plan.outputs.manifest }}
@@ -106,12 +107,16 @@ jobs:
     with:
       plan: ${{ needs.plan.outputs.val }}
     secrets: inherit
+    permissions:
+      "contents": "read"
 
   # Build and package all the platform-agnostic(ish) things
   build-global-artifacts:
     needs:
       - plan
       - custom-release-build-binaries
+    permissions:
+      "contents": "read"
     runs-on: "ubuntu-22.04"
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -167,6 +172,8 @@ jobs:
       - build-global-artifacts
     # Only run if we're "publishing", and only if plan, local and global didn't fail (skipped is fine)
     if: ${{ always() && needs.plan.result == 'success' && needs.plan.outputs.publishing == 'true' && (needs.build-global-artifacts.result == 'skipped' || needs.build-global-artifacts.result == 'success') && (needs.custom-release-build-binaries.result == 'skipped' || needs.custom-release-build-binaries.result == 'success') }}
+    permissions:
+      "contents": "read"
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: "ubuntu-22.04"
@@ -222,6 +229,7 @@ jobs:
     secrets: inherit
     # publish jobs get escalated permissions
     permissions:
+      "contents": "read"
       "id-token": "write"
       "packages": "write"
 
@@ -231,6 +239,9 @@ jobs:
       - plan
       - host
       - custom-release-publish-pypi
+    permissions:
+      # Creating the GitHub Release.
+      "contents": "write"
     # use "always() && ..." to allow us to wait for all publish jobs while
     # still allowing individual publish jobs to skip themselves (for prereleases).
     # "host" however must run to completion, no skipping allowed!
@@ -285,5 +296,6 @@ jobs:
       plan: ${{ needs.plan.outputs.val }}
     secrets: inherit
     permissions:
+      "contents": "read"
       "id-token": "write"
       "pages": "write"

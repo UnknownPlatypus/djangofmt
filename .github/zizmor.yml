@@ -7,6 +7,3 @@ rules:
   secrets-inherit:
     ignore:
       - release.yml
-  excessive-permissions:
-    ignore:
-      - release.yml
