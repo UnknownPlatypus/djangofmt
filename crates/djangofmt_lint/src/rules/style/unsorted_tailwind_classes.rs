@@ -75,6 +75,8 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
             .unsorted_tailwind_classes
             .prefix
             .clone(),
+        // Keep the original whitespace so multi-line class attributes retain their shape.
+        preserve_whitespace: true,
         ..RustyWind::default()
     }
     .sort_class_value(value_str, SourceLanguage::Django);

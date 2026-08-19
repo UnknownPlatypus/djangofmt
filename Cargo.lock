@@ -1298,8 +1298,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "rustywind_core"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69fe485768fc19bb200610dfdb3c7f7d089ccfe24b8bfb779541d123bb6386ef"
+source = "git+https://github.com/UnknownPlatypus/rustywind?rev=348f0b80656eaee910b73b12e61a94217a664410#348f0b80656eaee910b73b12e61a94217a664410"
 dependencies = [
  "ahash",
  "aho-corasick",
