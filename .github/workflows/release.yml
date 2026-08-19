@@ -80,8 +80,15 @@ jobs:
       # (PRs run on the *source* but secrets are usually on the *target* -- that's *good*
       # but also really annoying to build CI around when it needs secrets to work right.)
       - id: plan
+        shell: bash
+        env:
+          DIST_TAG_FLAG: ${{ inputs.tag && inputs.tag != 'dry-run' && format('--tag={0}', inputs.tag) || '' }}
         run: |
-          dist ${{ (inputs.tag && inputs.tag != 'dry-run' && format('host --steps=create --tag={0}', inputs.tag)) || 'plan' }} --output-format=json > plan-dist-manifest.json
+          dist_args=(plan)
+          if [[ -n "$DIST_TAG_FLAG" ]]; then
+            dist_args=(host --steps=create "$DIST_TAG_FLAG")
+          fi
+          dist "${dist_args[@]}" --output-format=json > plan-dist-manifest.json
           echo "dist ran successfully"
           cat plan-dist-manifest.json
           echo "manifest=$(jq -c "." plan-dist-manifest.json)" >> "$GITHUB_OUTPUT"
@@ -129,8 +136,14 @@ jobs:
           merge-multiple: true
       - id: cargo-dist
         shell: bash
+        env:
+          DIST_TAG_FLAG: ${{ needs.plan.outputs.tag-flag }}
         run: |
-          dist build ${{ needs.plan.outputs.tag-flag }} --output-format=json "--artifacts=global" > dist-manifest.json
+          dist_args=()
+          if [[ -n "$DIST_TAG_FLAG" ]]; then
+            dist_args+=("$DIST_TAG_FLAG")
+          fi
+          dist build "${dist_args[@]}" --output-format=json "--artifacts=global" > dist-manifest.json
           echo "dist ran successfully"
 
           # Parse out what we just built and upload it to scratch storage
@@ -180,8 +193,14 @@ jobs:
       # This is a harmless no-op for GitHub Releases, hosting for that happens in "announce"
       - id: host
         shell: bash
+        env:
+          DIST_TAG_FLAG: ${{ needs.plan.outputs.tag-flag }}
         run: |
-          dist host ${{ needs.plan.outputs.tag-flag }} --steps=upload --steps=release --output-format=json > dist-manifest.json
+          dist_args=()
+          if [[ -n "$DIST_TAG_FLAG" ]]; then
+            dist_args+=("$DIST_TAG_FLAG")
+          fi
+          dist host "${dist_args[@]}" --steps=upload --steps=release --output-format=json > dist-manifest.json
           echo "artifacts uploaded and released successfully"
           cat dist-manifest.json
           echo "manifest=$(jq -c "." dist-manifest.json)" >> "$GITHUB_OUTPUT"
@@ -241,11 +260,12 @@ jobs:
           ANNOUNCEMENT_TITLE: "${{ fromJson(needs.host.outputs.val).announcement_title }}"
           ANNOUNCEMENT_BODY: "${{ fromJson(needs.host.outputs.val).announcement_github_body }}"
           RELEASE_COMMIT: "${{ github.sha }}"
+          RELEASE_TAG: "${{ needs.plan.outputs.tag }}"
         run: |
           # Write and read notes from a file to avoid quoting breaking things
           echo "$ANNOUNCEMENT_BODY" > $RUNNER_TEMP/notes.txt
 
-          gh release create "${{ needs.plan.outputs.tag }}" --target "$RELEASE_COMMIT" $PRERELEASE_FLAG --title "$ANNOUNCEMENT_TITLE" --notes-file "$RUNNER_TEMP/notes.txt" artifacts/*
+          gh release create "$RELEASE_TAG" --target "$RELEASE_COMMIT" $PRERELEASE_FLAG --title "$ANNOUNCEMENT_TITLE" --notes-file "$RUNNER_TEMP/notes.txt" artifacts/*
 
   custom-release-notify-pre-commit-mirror:
     needs:
