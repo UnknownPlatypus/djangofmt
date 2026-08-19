@@ -187,15 +187,12 @@ async def check(
         f"Finished checking {repo_fullname} with {executable} in {end - start:.2f}s"
     )
 
-    # Exit 2 with a completion summary means some files couldn't be parsed — an
-    # expected outcome on real-world templates, not a tool failure.
-    stderr = err.decode("utf8")
-    if proc.returncode not in [0, 1] and "Couldn't check " not in stderr:
-        raise ToolError(stderr)
+    if proc.returncode not in [0, 1]:
+        raise ToolError(err.decode("utf8"))
 
     # Diagnostics are reported to stderr, minus the per-run summary line we want to drop here
     return "".join(
         line
-        for line in stderr.splitlines(keepends=True)
+        for line in err.decode("utf8").splitlines(keepends=True)
         if not line.startswith(("Found ", "All checks passed!"))
     )

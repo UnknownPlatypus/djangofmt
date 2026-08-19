@@ -317,11 +317,8 @@ async def format(
         f"Finished formatting {repo_fullname} with {executable} in {end - start:.2f}s"
     )
 
-    # Exit 2 with a completion summary means some files couldn't be parsed — an
-    # expected outcome on real-world templates, not a tool failure.
-    stderr = err.decode("utf8")
-    if proc.returncode not in [0, 1] and "Couldn't format " not in stderr:
-        raise ToolError(stderr)
+    if proc.returncode not in [0, 1]:
+        raise ToolError(err.decode("utf8"))
 
     lines = result.decode("utf8").splitlines()
     return lines
