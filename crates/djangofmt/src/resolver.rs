@@ -90,6 +90,14 @@ impl ResolvedDiscoveryConfig {
 fn build_types(config: &ResolvedDiscoveryConfig) -> Result<ignore::types::Types, Error> {
     let mut types_builder = TypesBuilder::new();
     for pattern in &config.include {
+        // Include globs match file names only; a path component would silently match nothing.
+        if pattern.contains('/') {
+            return Err(Error::Resolve(format!(
+                "Invalid include pattern '{pattern}': include patterns match file names only \
+                 and cannot contain path separators. \
+                 Use `exclude`/`extend-exclude` for path-based filtering."
+            )));
+        }
         types_builder
             .add("djangofmt", pattern)
             .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))?;
