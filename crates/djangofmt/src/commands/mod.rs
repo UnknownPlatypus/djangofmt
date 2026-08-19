@@ -35,6 +35,7 @@ pub(crate) fn resolve_command(
 
 /// Sort parse errors by path, log each as a report, and return the count.
 /// `verb` fills the summary line, e.g. "Couldn't format N files!".
+/// The ecosystem check greps for that summary to tell parse errors from tool failures.
 pub(crate) fn report_parse_errors(
     mut parse_errors: Vec<CommandError>,
     verb: &str,
