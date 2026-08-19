@@ -61,6 +61,10 @@ DEFAULT_TARGETS = [
                     "django/views/templates/technical_500.html",
                     "tests/forms_tests/templates/forms_tests/use_fieldset.html",
                 ),
+                ExcludeReason.MISSING_END_TAG: (
+                    # Trailing <li> where </li> was intended
+                    "django/contrib/admindocs/templates/admin_doc/model_index.html",
+                ),
                 ExcludeReason.INTENTIONALLY_INVALID: (
                     "tests/template_backends/templates/template_backends/syntax_error.html",
                     "tests/test_client_regress/bad_templates/404.html",
@@ -77,6 +81,8 @@ DEFAULT_TARGETS = [
         cli_options=CliOptions(
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <template> opened inside {% if use_shadow_dom %}
+                    "debug_toolbar/templates/debug_toolbar/base.html",
                     "debug_toolbar/templates/debug_toolbar/includes/panel_button.html",
                     "debug_toolbar/templates/debug_toolbar/panels/sql_explain.html",
                 ),
@@ -111,6 +117,12 @@ DEFAULT_TARGETS = [
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # <body> opened inside a {% spaceless %} and closed outside
                     "cms/templates/cms/headless/placeholder.html",
+                    # <div> opened in {% if %}/{% else %} branches, closed once outside
+                    "cms/templates/cms/toolbar/toolbar_with_structure.html",
+                ),
+                ExcludeReason.TEMPLATE_TAG_AS_ATTRIBUTE: (
+                    # {{ attr }}="{{ val }}" dynamic attribute name
+                    "cms/templates/cms/widgets/pagesmartlinkwidget.html",
                 ),
                 ExcludeReason.MISSING_END_TAG: (
                     "cms/templates/cms/noapphook.html",  # </html>
@@ -174,17 +186,26 @@ DEFAULT_TARGETS = [
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "src/unfold/templates/admin/actions.html",
+                    "src/unfold/templates/admin/dataset_actions.html",
                     "src/unfold/templates/admin/date_hierarchy.html",
                     "src/unfold/templates/admin/edit_inline/stacked.html",
                     "src/unfold/templates/admin/edit_inline/tabular.html",
+                    "src/unfold/templates/admin/includes/fieldset.html",
                     "src/unfold/templates/unfold/widgets/radio.html",
                     "src/unfold/templates/unfold/widgets/radio_option.html",
+                    "src/unfold/templates/unfold/widgets/select.html",
                     "src/unfold/templates/unfold_crispy/layout/table_inline_formset.html",
                     "src/unfold/templates/unfold_crispy/whole_uni_form.html",
+                    "src/unfold/templates/unfold_crispy/whole_uni_formset.html",
                 ),
                 ExcludeReason.DYNAMIC_TAG_NAME: (
                     "src/unfold/templates/unfold/components/button.html",
+                    "src/unfold/templates/unfold/components/card.html",
+                    "src/unfold/templates/unfold/helpers/change_list_filter_vertical.html",
                     "src/unfold/templates/unfold/helpers/display_dropdown.html",
+                    "src/unfold/templates/unfold/helpers/edit_inline/inline_delete.html",
+                    "src/unfold/templates/unfold/helpers/header_title.html",
+                    "src/unfold/templates/unfold/helpers/label.html",
                     "src/unfold/templates/unfold/helpers/site_icon.html",
                     "src/unfold/templates/unfold_crispy/field.html",
                 ),
@@ -220,7 +241,16 @@ DEFAULT_TARGETS = [
             },
         ),
     ),
-    Project(repo=Repository(owner="makeplane", name="plane", ref="preview")),
+    Project(
+        repo=Repository(owner="makeplane", name="plane", ref="preview"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "apps/api/templates/emails/test_email.html",  # Stray </br>
+                ),
+            },
+        ),
+    ),
     Project(repo=Repository(owner="e-valuation", name="EvaP", ref="main")),
     Project(
         repo=Repository(owner="django", name="djangoproject.com", ref="main"),
@@ -319,6 +349,16 @@ DEFAULT_TARGETS = [
             name="django-admin-deux",
             ref="main",
             domain=GitDomain.CODEBERG,
+        ),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <div>s opened in one {% if %} and closed in a later one
+                    "djadmin-classy-doc/djadmin_classy_doc/templates/djadmin_classy_doc/view_detail.html",
+                    # <li> opened inside {% if use_list_items %}
+                    "djadmin/templates/djadmin/includes/_action_buttons.html",
+                ),
+            },
         ),
     ),
 ]
