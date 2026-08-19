@@ -31,6 +31,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
+  # Release artifacts must not be built from caches that other workflows can write.
+  ACTIONS_CACHE_MODE: none
   PACKAGE_NAME: djangofmt
   PYTHON_VERSION: "3.13"
   CARGO_INCREMENTAL: 0
@@ -47,10 +49,12 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build sdist"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           command: sdist
           args: --out dist
@@ -79,11 +83,13 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: ${{ matrix.target }}
           manylinux: "2_17"
@@ -155,10 +161,12 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           manylinux: ${{ matrix.platform.manylinux }}
@@ -220,11 +228,13 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: ${{ matrix.target }}
           manylinux: musllinux_1_2
@@ -281,10 +291,12 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           manylinux: musllinux_1_2
@@ -335,12 +347,14 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
 
       - name: "Build wheels - x86_64"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: x86_64
           args: --release --locked --out dist --compatibility pypi
@@ -375,12 +389,14 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: arm64
 
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: aarch64
           args: --release --locked --out dist --compatibility pypi
@@ -428,12 +444,14 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
+          cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: ${{ matrix.platform.arch }}
 
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          sccache: false
           maturin-version: v1.14.1
           target: ${{ matrix.platform.target }}
           args: --release --locked --out dist --compatibility pypi
