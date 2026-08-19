@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{NodeKind, Root};
+use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
+use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -61,8 +62,8 @@ pub fn check(root: &Root<'_>, checker: &Checker<'_>) {
 
     for node in &root.children {
         match &node.kind {
-            NodeKind::JinjaBlock(_) => return,
-            NodeKind::JinjaTag(tag) if is_extends_tag(tag.content) => return,
+            NodeKind::JinjaBlock(block) if is_block_partial(block) => return,
+            NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return,
             NodeKind::Doctype(_) => has_doctype = true,
             NodeKind::Element(el)
                 if html_element.is_none() && el.tag_name.eq_ignore_ascii_case("html") =>
@@ -85,21 +86,11 @@ pub fn check(root: &Root<'_>, checker: &Checker<'_>) {
     checker.report_diagnostic(&MissingDoctype, span(offset, html.tag_name.len()));
 }
 
-/// Returns `true` if `content` is the body of a Jinja `{% extends %}` tag.
-///
-/// Handles Jinja's whitespace-stripping markers (`{%-` / `-%}`), which the parser preserves as
-/// leading/trailing `-` inside `content`. The check after `extends` requires a word boundary so
-/// e.g. `{% extendsfoo %}` is not matched.
-fn is_extends_tag(content: &str) -> bool {
-    let trimmed = content
-        .trim_start()
-        .strip_prefix('-')
-        .map_or_else(|| content.trim_start(), str::trim_start);
-    let Some(after_extends) = trimmed.strip_prefix("extends") else {
-        return false;
-    };
-    after_extends
-        .chars()
-        .next()
-        .is_none_or(|c| c.is_ascii_whitespace())
+/// Returns `true` if the block opens with `{% block %}`, marking the file as a partial.
+/// Other root-level blocks (`{% if %}`, `{% for %}`, ...) are legitimate in full documents.
+fn is_block_partial(block: &JinjaBlock<'_, Node<'_>>) -> bool {
+    matches!(
+        block.body.first(),
+        Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "block"
+    )
 }
