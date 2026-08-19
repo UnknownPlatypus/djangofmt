@@ -1,4 +1,4 @@
-use miette::{Diagnostic, NamedSource, SourceCode, SourceOffset, SourceSpan, SpanContents};
+use miette::{Diagnostic, NamedSource, SourceCode, SourceSpan, SpanContents};
 use std::io;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -35,6 +35,84 @@ fn eof_aware_span(source: &str, pos: usize) -> SourceSpan {
             |(start, _)| djangofmt_lint::span(start, source.len() - start),
         )
     }
+}
+
+/// Byte offset where 1-based `line` starts.
+fn line_start(source: &str, line: usize) -> usize {
+    if line <= 1 {
+        0
+    } else {
+        source
+            .match_indices('\n')
+            .nth(line - 2)
+            .map_or(0, |(nl, _)| nl + 1)
+    }
+}
+
+/// Invert `markup_fmt`'s `pos_to_line_col`: columns are byte-based, biased +1 on
+/// line 1 and +2 on later lines, and reported as 0 when pos is on the last line.
+fn line_col_to_pos(source: &str, line: usize, column: usize) -> Option<usize> {
+    match (line, column) {
+        (_, 0) => None,
+        (1, column) => Some(column - 1),
+        (line, column) => Some((line_start(source, line) + column).saturating_sub(2)),
+    }
+}
+
+/// True if the char at `pos` could extend a tag name.
+fn is_name_char_at(source: &str, pos: usize) -> bool {
+    source[pos..]
+        .chars()
+        .next()
+        .is_some_and(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_'))
+}
+
+/// Where a jinja tag name starts after `{%`, skipping whitespace-trim markers.
+fn jinja_name_pos(source: &str, after_brace: usize) -> usize {
+    let rest = &source[after_brace..];
+    after_brace + (rest.len() - rest.trim_start_matches(['+', '-']).trim_start().len())
+}
+
+fn name_span(source: &str, name_pos: Option<usize>, len: usize) -> SourceSpan {
+    name_pos.map_or_else(
+        || eof_aware_span(source, source.len()),
+        |pos| djangofmt_lint::span(pos, len),
+    )
+}
+
+/// Caret span on the name of the unclosed `<tag_name ...>` reported at (line, column).
+fn open_tag_span(source: &str, tag_name: &str, line: usize, column: usize) -> SourceSpan {
+    // markup_fmt points at the `<`; move onto the name.
+    let name_pos = line_col_to_pos(source, line, column)
+        .map(|pos| pos + 1)
+        .or_else(|| {
+            // The column was lost (last line): find the innermost `<tag_name` on that line.
+            let start = line_start(source, line);
+            source[start..]
+                .rmatch_indices(&format!("<{tag_name}"))
+                .map(|(idx, _)| start + idx + 1)
+                .find(|&pos| !is_name_char_at(source, pos + tag_name.len()))
+        });
+    name_span(source, name_pos, tag_name.len())
+}
+
+/// Caret span on the name of the unclosed `{% tag_name %}` reported at (line, column).
+fn jinja_tag_span(source: &str, tag_name: &str, line: usize, column: usize) -> SourceSpan {
+    // markup_fmt points just past the `{%`; move onto the name.
+    let name_pos = line_col_to_pos(source, line, column)
+        .map(|pos| jinja_name_pos(source, pos))
+        .or_else(|| {
+            // The column was lost (last line): find the innermost `{% tag_name` on that line.
+            let start = line_start(source, line);
+            source[start..]
+                .rmatch_indices("{%")
+                .map(|(idx, _)| jinja_name_pos(source, start + idx + 2))
+                .find(|&pos| {
+                    source[pos..].starts_with(tag_name)
+                        && !is_name_char_at(source, pos + tag_name.len())
+                })
+        });
+    name_span(source, name_pos, tag_name.len())
 }
 
 #[derive(Debug, Diagnostic, Error)]
@@ -102,7 +180,7 @@ impl ParseError {
                             "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag: \
                              https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags"
                         )),
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column), djangofmt_lint::clamp_offset(tag_name.len())),
+                        open_tag_span(&source, tag_name, *line, *column),
                     ),
                     markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {
                         tag_name,
@@ -111,7 +189,7 @@ impl ParseError {
                     } => (
                         format!("unclosed {{% {tag_name} %}} block."),
                         Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), djangofmt_lint::clamp_offset(tag_name.len())),
+                        jinja_tag_span(&source, tag_name, *line, *column),
                     ),
                     _ => (
                         syntax_err.kind.to_string(),
@@ -146,5 +224,26 @@ impl ParseError {
             .map_or((0, 0), |contents| {
                 (contents.line() + 1, contents.column() + 1)
             })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::line_col_to_pos;
+
+    #[test]
+    fn inverts_markup_fmt_line_col_encoding() {
+        // Byte layout: a=0, é=1..3, b=3, \n=4, c=5, d=6, \n=7, e=8.
+        let source = "aéb\ncd\ne";
+        assert_eq!(line_col_to_pos(source, 1, 1), Some(0));
+        // Line-1 columns are byte-based and biased by 1.
+        assert_eq!(line_col_to_pos(source, 1, 4), Some(3));
+        // A position exactly on a newline reports that line's numbers.
+        assert_eq!(line_col_to_pos(source, 1, 5), Some(4));
+        // Columns on later lines are biased by 2.
+        assert_eq!(line_col_to_pos(source, 2, 2), Some(5));
+        assert_eq!(line_col_to_pos(source, 2, 4), Some(7));
+        // The last line loses the column entirely.
+        assert_eq!(line_col_to_pos(source, 3, 0), None);
     }
 }
