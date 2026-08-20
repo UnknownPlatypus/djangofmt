@@ -119,6 +119,30 @@ fn format_quiet() {
     "#);
 }
 
+#[test]
+fn format_file_parse_error_exits_2() {
+    let project = Project::new().file("test.html", "<div   class=\"foo\"  >");
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+
+      × expected close tag for opening tag <div>
+       ╭─[[TMP]/test.html:1:1]
+     1 │ <div   class="foo"  >
+       · ─┬─
+       ·  ╰── here
+       ╰────
+      help: If a `</div>` does exist, it must live in the same block as the
+            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
+            limitations/#conditional-openclose-tags
+
+    Couldn't format 1 files!
+    "###);
+}
+
 // ── Format from stdin ────────────────────────────────────────────────
 
 #[test]
@@ -415,7 +439,7 @@ fn check_concise_output_format() {
         cli().args(["check", "--output-format", "concise"]).arg(project.path()),
         @r###"
     success: false
-    exit_code: 1
+    exit_code: 2
     ----- stdout -----
 
     ----- stderr -----
@@ -553,7 +577,7 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
     assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r###"
     success: false
-    exit_code: 1
+    exit_code: 2
     ----- stdout -----
 
     ----- stderr -----
@@ -584,7 +608,7 @@ fn check_respects_pyproject_custom_blocks() {
         .file("test.html", "{% stage %}\n<p>hi</p>\n");
     assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r###"
     success: false
-    exit_code: 1
+    exit_code: 2
     ----- stdout -----
 
     ----- stderr -----
