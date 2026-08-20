@@ -16,6 +16,7 @@ use clap::{Parser, Subcommand};
 mod generate_all;
 mod generate_docs;
 mod generate_rules_table;
+mod generate_settings;
 mod sync_top_level;
 
 /// Workspace root, derived from this crate's manifest dir without `..` segments
@@ -45,6 +46,8 @@ enum Command {
     GenerateDocs(generate_all::Args),
     /// Generate the rules index page at `docs/rules.md`.
     GenerateRulesTable(generate_all::Args),
+    /// Generate the settings reference at `docs/settings.md`.
+    GenerateSettings(generate_all::Args),
     /// Sync README, CHANGELOG and CONTRIBUTING into `docs/`.
     SyncTopLevel(generate_all::Args),
 }
@@ -55,6 +58,7 @@ fn main() -> Result<()> {
         Command::GenerateAll(args) => generate_all::main(&args),
         Command::GenerateDocs(args) => generate_docs::main(&args),
         Command::GenerateRulesTable(args) => generate_rules_table::main(&args),
+        Command::GenerateSettings(args) => generate_settings::main(&args),
         Command::SyncTopLevel(args) => sync_top_level::main(&args),
     }
 }

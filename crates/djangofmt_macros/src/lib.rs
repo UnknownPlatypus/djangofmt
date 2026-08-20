@@ -4,6 +4,7 @@ use proc_macro::TokenStream;
 use syn::{DeriveInput, Error, ItemFn, parse_macro_input};
 
 mod derive_message_formats;
+mod options_metadata;
 mod violation_metadata;
 
 /// Derives `djangofmt_lint::ViolationMetadata` for a lint violation struct.
@@ -30,4 +31,17 @@ pub fn derive_violation_metadata(item: TokenStream) -> TokenStream {
 pub fn derive_message_formats(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func = parse_macro_input!(item as ItemFn);
     derive_message_formats::derive(&func).into()
+}
+
+/// Derives `djangofmt::options_metadata::OptionsMetadata` for a `pyproject.toml` options struct.
+///
+/// Fields opt in with `#[option(default = "…", value_type = "…", example = "…")]` — their doc
+/// comment becomes the option's documentation — or with `#[option_group]` for a nested
+/// `Option<T>` table. Fields carrying neither attribute are left out of the generated docs.
+#[proc_macro_derive(OptionsMetadata, attributes(option, option_group))]
+pub fn derive_options_metadata(item: TokenStream) -> TokenStream {
+    let input: DeriveInput = parse_macro_input!(item);
+    options_metadata::derive(input)
+        .unwrap_or_else(Error::into_compile_error)
+        .into()
 }

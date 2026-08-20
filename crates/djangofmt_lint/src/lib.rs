@@ -34,7 +34,7 @@ pub use lint_context::{DiagnosticGuard, LintContext};
 pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use rule_selector::{RuleSelector, SelectionWarning, SelectorParseError};
 pub use rule_set::RuleSet;
-pub use settings::{RuleSelection, Settings};
+pub use settings::{LintConfiguration, Settings};
 pub use violation::{Violation, ViolationMetadata};
 
 use std::borrow::Cow;

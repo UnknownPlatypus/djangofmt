@@ -113,7 +113,7 @@ fn parse_version(meta: &ParseNestedMeta) -> syn::Result<LitStr> {
     }
 }
 
-fn collect_docs(attrs: &[Attribute]) -> String {
+pub fn collect_docs(attrs: &[Attribute]) -> String {
     let mut out = String::new();
     for attr in attrs {
         if !attr.path().is_ident("doc") {

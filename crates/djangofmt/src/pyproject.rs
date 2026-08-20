@@ -1,4 +1,6 @@
 use djangofmt_lint::RuleSelector;
+use djangofmt_lint::settings::unsorted_tailwind_classes;
+use djangofmt_macros::OptionsMetadata;
 use serde::Deserialize;
 use std::{
     collections::BTreeMap,
@@ -11,36 +13,191 @@ use crate::args::{OutputFormat, Profile};
 use crate::error::{Error, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
-/// Serde-only struct for deserializing `[tool.djangofmt]` from `pyproject.toml`.
-#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
+/// Options shared by the `format` and `check` commands.
+#[derive(Debug, Default, Deserialize, PartialEq, Eq, OptionsMetadata)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct PyprojectSettings {
+    /// The line length the formatter should fit code into when possible.
+    #[option(default = "120", value_type = "int", example = "line-length = 88")]
     pub line_length: Option<LineLength>,
+
+    /// The number of spaces per indentation level.
+    #[option(default = "4", value_type = "int", example = "indent-width = 2")]
     pub indent_width: Option<IndentWidth>,
+
+    /// The template language to parse. Defaults to the file extension when unset
+    /// (`.html` is Django, `.jinja`/`.jinja2`/`.j2` are Jinja).
+    #[option(
+        default = r#""django""#,
+        value_type = r#""django" | "jinja""#,
+        example = r#"profile = "jinja""#
+    )]
     pub profile: Option<Profile>,
+
+    /// Names of custom block tags to treat as paired blocks, so their content is indented
+    /// instead of left untouched.
+    #[option(
+        default = "[]",
+        value_type = "list[str]",
+        example = r#"custom-blocks = ["cache", "spaceless"]"#
+    )]
     pub custom_blocks: Option<Vec<String>>,
+
+    /// Whether void HTML elements are written self-closing (`<br />`) or not (`<br>`).
+    /// `unchanged` keeps whatever the source uses.
+    #[option(
+        default = r#""never""#,
+        value_type = r#""never" | "always" | "unchanged""#,
+        example = r#"html-void-self-closing = "always""#
+    )]
     pub html_void_self_closing: Option<SelfClosing>,
+
+    /// Whether to leave unquoted attribute values (e.g. `prop=True`) as-is instead of quoting
+    /// them. Useful for template syntaxes that assign non-string values through attributes.
+    #[option(
+        default = "false",
+        value_type = "bool",
+        example = "preserve-unquoted-attrs = true"
+    )]
     pub preserve_unquoted_attrs: Option<bool>,
+
+    /// File and directory patterns to exclude from discovery, replacing the default excludes.
+    #[option(
+        default = r#"[".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache", ".nox", ".pants.d", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__", "_build", "buck-out", "dist", "node_modules", "venv"]"#,
+        value_type = "list[str]",
+        example = r#"exclude = ["generated"]"#
+    )]
     pub exclude: Option<Vec<String>>,
+
+    /// File and directory patterns to exclude in addition to the default excludes.
+    #[option(
+        default = "[]",
+        value_type = "list[str]",
+        example = r#"extend-exclude = ["templates/vendor"]"#
+    )]
     pub extend_exclude: Option<Vec<String>>,
+
+    /// File patterns to format and lint, replacing the default includes.
+    #[option(
+        default = r#"["*.html", "*.jinja", "*.jinja2", "*.j2"]"#,
+        value_type = "list[str]",
+        example = r#"include = ["*.html"]"#
+    )]
     pub include: Option<Vec<String>>,
+
+    /// File patterns to format and lint in addition to the default includes.
+    #[option(
+        default = "[]",
+        value_type = "list[str]",
+        example = r#"extend-include = ["*.djhtml"]"#
+    )]
     pub extend_include: Option<Vec<String>>,
+
+    /// Whether to skip files ignored by `.gitignore`, `.ignore` and friends when discovering files.
+    #[option(
+        default = "true",
+        value_type = "bool",
+        example = "respect-gitignore = false"
+    )]
     pub respect_gitignore: Option<bool>,
+
+    /// Whether to apply `exclude` patterns to files passed on the command line too. Useful when
+    /// running under pre-commit, which passes every changed file explicitly.
+    #[option(
+        default = "false",
+        value_type = "bool",
+        example = "force-exclude = true"
+    )]
     pub force_exclude: Option<bool>,
+
+    #[option_group]
     pub lint: Option<LintSettings>,
 }
 
-#[derive(Debug, Default, Deserialize, PartialEq, Eq)]
+/// Options for the `check` command.
+#[derive(Debug, Default, Deserialize, PartialEq, Eq, OptionsMetadata)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct LintSettings {
+    /// Rules and categories to enable, e.g. `category:all`, `category:correctness` or a rule name.
+    #[option(
+        default = r#"["category:all"]"#,
+        value_type = "list[RuleSelector]",
+        example = r#"select = ["category:correctness", "use-https"]"#
+    )]
     pub select: Option<Vec<RuleSelector>>,
+
+    /// Rules and categories to disable. A more specific selector always wins, regardless of order.
+    #[option(
+        default = "[]",
+        value_type = "list[RuleSelector]",
+        example = r#"ignore = ["category:style"]"#
+    )]
     pub ignore: Option<Vec<RuleSelector>>,
+
+    /// Whether to enable rules that are still in preview.
+    #[option(default = "false", value_type = "bool", example = "preview = true")]
     pub preview: Option<bool>,
+
+    /// Whether to apply safe fixes automatically.
+    #[option(default = "false", value_type = "bool", example = "fix = true")]
     pub fix: Option<bool>,
+
+    /// Whether to include unsafe fixes when applying with `fix`. Without `fix`, diagnostics from
+    /// unsafe fixes are still reported as fixable.
+    #[option(
+        default = "false",
+        value_type = "bool",
+        example = "unsafe-fixes = true"
+    )]
     pub unsafe_fixes: Option<bool>,
+
+    /// Whether to list per-rule fix counts after applying fixes.
+    #[option(default = "false", value_type = "bool", example = "show-fixes = true")]
     pub show_fixes: Option<bool>,
+
+    /// How diagnostics are rendered.
+    #[option(
+        default = r#""full""#,
+        value_type = r#""full" | "concise""#,
+        example = r#"output-format = "concise""#
+    )]
     pub output_format: Option<OutputFormat>,
+
+    /// Rules to disable for files matching a glob pattern, relative to the `pyproject.toml`
+    /// directory.
+    #[option(
+        default = "{}",
+        value_type = "dict[str, list[RuleSelector]]",
+        scope = "per-file-ignores",
+        example = r#""templates/admin/*.html" = ["missing-img-alt"]"#
+    )]
     pub per_file_ignores: Option<BTreeMap<String, Vec<RuleSelector>>>,
+
+    #[option_group]
+    pub unsorted_tailwind_classes: Option<UnsortedTailwindClassesOptions>,
+}
+
+/// Options for the [`unsorted-tailwind-classes`](rules/unsorted-tailwind-classes.md) rule.
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq, OptionsMetadata)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct UnsortedTailwindClassesOptions {
+    /// The Tailwind prefix your utilities are configured with. Without it, prefixed utilities are
+    /// treated as unknown classes and left unsorted.
+    #[option(
+        default = "null",
+        value_type = "str",
+        example = r#"prefix = "tw-"  # Tailwind v3; use "tw:" for v4"#
+    )]
+    pub prefix: Option<String>,
+}
+
+impl UnsortedTailwindClassesOptions {
+    #[must_use]
+    pub fn into_settings(self) -> unsorted_tailwind_classes::Settings {
+        unsorted_tailwind_classes::Settings {
+            prefix: self.prefix,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -174,6 +331,7 @@ mod tests {
     #[case("[tool.djangofmt]\nindent-width = 0")]
     #[case("[tool.djangofmt]\nindent-width = 17")]
     #[case("[tool.djangofmt.lint]\nselect = [\"not-a-real-rule\"]")]
+    #[case("[tool.djangofmt.lint.unsorted-tailwind-classes]\nunknown-key = 1")]
     fn test_load_options_errors_on_invalid_toml(#[case] content: &str) {
         // Invalid config (including unknown lint selectors) must fail fast rather
         // than silently falling back to defaults.
@@ -254,6 +412,27 @@ show-fixes = true
                     fix: Some(true),
                     unsafe_fixes: Some(true),
                     show_fixes: Some(true),
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn test_load_lint_unsorted_tailwind_classes_prefix() {
+        let content = r#"
+[tool.djangofmt.lint.unsorted-tailwind-classes]
+prefix = "tw-"
+"#;
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        assert_eq!(
+            result,
+            PyprojectSettings {
+                lint: Some(LintSettings {
+                    unsorted_tailwind_classes: Some(UnsortedTailwindClassesOptions {
+                        prefix: Some("tw-".to_string()),
+                    }),
                     ..Default::default()
                 }),
                 ..Default::default()
