@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use globset::{Glob, GlobSet, GlobSetBuilder, escape};
 use ignore::WalkBuilder;
+use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use ignore::overrides::OverrideBuilder;
 use tracing::{debug, warn};
 
@@ -45,8 +46,9 @@ pub struct ResolvedDiscoveryConfig {
     pub include: Vec<String>,
     pub respect_gitignore: bool,
     pub force_exclude: bool,
-    /// Directory the `include` globs are anchored at, so `templates/*.html` means the
-    /// project's `templates/`, not whatever directory happens to be on the command line.
+    /// Directory that path-relative `include` and `exclude` patterns are anchored at
+    /// (the `pyproject.toml` directory), so `templates/*.html` means the project's
+    /// `templates/`, not whatever directory happens to be on the command line.
     pub project_root: PathBuf,
 }
 
@@ -126,12 +128,9 @@ fn build_include(config: &ResolvedDiscoveryConfig) -> Result<GlobSet, Error> {
         .map_err(|e| Error::Resolve(format!("Failed to build include patterns: {e}")))
 }
 
-/// Build the exclude `Override` matcher from the resolved config.
-fn build_overrides(
-    root: &Path,
-    config: &ResolvedDiscoveryConfig,
-) -> Result<ignore::overrides::Override, Error> {
-    let mut override_builder = OverrideBuilder::new(root);
+/// Build the exclude `Override` matcher used to prune the directory walk.
+fn build_overrides(config: &ResolvedDiscoveryConfig) -> Result<ignore::overrides::Override, Error> {
+    let mut override_builder = OverrideBuilder::new(&config.project_root);
     for pattern in &config.exclude {
         override_builder
             .add(&format!("!{pattern}"))
@@ -142,15 +141,40 @@ fn build_overrides(
         .map_err(|e| Error::Resolve(format!("Failed to build exclude overrides: {e}")))
 }
 
+/// Build the exclude matcher for explicitly-passed paths, which (unlike the walk,
+/// where excluded directories are pruned) must also match via parent directories.
+fn build_exclude_matcher(config: &ResolvedDiscoveryConfig) -> Result<Gitignore, Error> {
+    let mut builder = GitignoreBuilder::new(&config.project_root);
+    for pattern in &config.exclude {
+        builder
+            .add_line(None, pattern)
+            .map_err(|e| Error::Resolve(format!("Invalid exclude pattern '{pattern}': {e}")))?;
+    }
+    builder
+        .build()
+        .map_err(|e| Error::Resolve(format!("Failed to build exclude matcher: {e}")))
+}
+
+/// Return whether `path` or any of its parent directories up to the project root
+/// matches an exclude pattern. Paths outside the root are never excluded.
+fn is_excluded(matcher: &Gitignore, path: &Path) -> bool {
+    path.strip_prefix(matcher.path()).is_ok_and(|relative| {
+        matcher
+            .matched_path_or_any_parents(relative, false)
+            .is_ignore()
+    })
+}
+
 /// Return `true` if the given filename should be force-excluded based on the resolved
 /// configuration. Returns `false` if `force_exclude` is disabled.
 pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> Result<bool, Error> {
     if !config.force_exclude {
         return Ok(false);
     }
-    let cwd = crate::fs::get_cwd();
-    let overrides = build_overrides(cwd, config)?;
-    Ok(overrides.matched(filename, false).is_ignore())
+    let matcher = build_exclude_matcher(config)?;
+    // Stdin filenames may be relative to the cwd and may not exist on disk.
+    let path = crate::fs::get_cwd().join(filename);
+    Ok(is_excluded(&matcher, &path.canonicalize().unwrap_or(path)))
 }
 
 /// Resolve a list of CLI paths (files and/or directories) into a flat,
@@ -163,7 +187,7 @@ pub fn resolve_files(
     let mut dirs: Vec<PathBuf> = vec![];
 
     // Process the provided paths, collecting directories for later recursive processing.
-    // Explicit files paths are canonicalized.
+    // Paths are canonicalized so they match patterns anchored at the canonical project root.
     for path in paths {
         if !path.exists() {
             return Err(Error::Resolve(format!(
@@ -171,33 +195,22 @@ pub fn resolve_files(
                 path.display()
             )));
         }
-        if path.is_file() {
-            let canonical = std::fs::canonicalize(path).map_err(|e| {
-                Error::Resolve(format!("Failed to canonicalize {}: {e}", path.display()))
-            })?;
+        let canonical = std::fs::canonicalize(path).map_err(|e| {
+            Error::Resolve(format!("Failed to canonicalize {}: {e}", path.display()))
+        })?;
+        if canonical.is_file() {
             files.push(canonical);
-        } else if path.is_dir() {
-            // Walk canonical roots so discovered paths line up with the anchored include globs.
-            let canonical = std::fs::canonicalize(path).map_err(|e| {
-                Error::Resolve(format!("Failed to canonicalize {}: {e}", path.display()))
-            })?;
+        } else if canonical.is_dir() {
             dirs.push(canonical);
         }
     }
 
     // When force_exclude is enabled, apply exclude patterns to explicitly-passed files too.
-    if config.force_exclude
-        && !files.is_empty()
-        && let Some(root) = dirs
-            .first()
-            .map(PathBuf::as_path)
-            .or_else(|| files.first().and_then(|f| f.parent()))
-    {
-        let overrides = build_overrides(root, config)?;
+    if config.force_exclude && !files.is_empty() {
+        let matcher = build_exclude_matcher(config)?;
         let len_before = files.len();
         files.retain(|file| {
-            let dominated = overrides.matched(file, false);
-            if dominated.is_ignore() {
+            if is_excluded(&matcher, file) {
                 debug!("Force-excluded: {}", file.display());
                 false
             } else {
@@ -215,7 +228,7 @@ pub fn resolve_files(
     // Walk all directories with a single parallel WalkBuilder.
     if let Some((first, rest)) = dirs.split_first() {
         let include = build_include(config)?;
-        let overrides = build_overrides(first, config)?;
+        let overrides = build_overrides(config)?;
 
         let mut builder = WalkBuilder::new(first);
         for dir in rest {
@@ -780,6 +793,23 @@ mod tests {
         let names = file_names(&files);
         assert!(names.contains(&"a.html".to_string()));
         assert!(!names.contains(&"b.html".to_string()));
+    }
+
+    #[test]
+    fn test_resolve_files_force_exclude_keeps_files_outside_project_root() {
+        // Root-anchored patterns can't apply outside the project root: keep the file.
+        let root = tempdir().unwrap();
+        let outside = tempdir().unwrap();
+        create_file(outside.path(), ".venv/a.html");
+
+        let cli = FileSelectionArgs {
+            force_exclude: true,
+            ..Default::default()
+        };
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), root.path());
+        let files = resolve_files(&[outside.path().join(".venv/a.html")], &config).unwrap();
+
+        assert_eq!(files.len(), 1);
     }
 
     #[test]
