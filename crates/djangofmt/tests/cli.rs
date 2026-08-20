@@ -130,10 +130,10 @@ fn format_file_parse_error_exits_2() {
     ----- stderr -----
 
       × expected close tag for opening tag <div>
-       ╭─[[TMP]/test.html:1:1]
+       ╭─[[TMP]/test.html:1:2]
      1 │ <div   class="foo"  >
-       · ─┬─
-       ·  ╰── here
+       ·  ─┬─
+       ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
             opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-

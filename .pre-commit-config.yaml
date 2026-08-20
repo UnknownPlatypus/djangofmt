@@ -19,8 +19,6 @@ repos:
       - id: check-merge-conflict
       - id: check-symlinks
       - id: end-of-file-fixer
-        # Some parse error fixtures test EOF behavior and must not gain a trailing newline
-        exclude: ^crates/djangofmt/tests/parse_error/.*\.html$
       - id: trailing-whitespace
         exclude: \.snap|^crates/djangofmt/src/args\.rs$
   - repo: https://github.com/asottile/pyupgrade
