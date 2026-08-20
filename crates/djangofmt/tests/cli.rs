@@ -108,6 +108,49 @@ fn format_directory() {
 }
 
 #[test]
+fn format_force_exclude_skips_file_in_excluded_dir() {
+    // Pre-commit passes explicit paths: force-exclude must also match files
+    // through an excluded parent directory (here the default `.venv`).
+    let original = "<div   ></div>\n";
+    let project = Project::new()
+        .file("pyproject.toml", "[tool.djangofmt]\nforce-exclude = true\n")
+        .file(".venv/lib/tpl.html", original);
+    assert_cmd_snapshot!(
+        cli().current_dir(project.path()).arg(".venv/lib/tpl.html"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    "#);
+    assert_eq!(project.read(".venv/lib/tpl.html"), original);
+}
+
+#[test]
+fn format_exclude_anchors_at_project_root() {
+    // `templates/vendor` anchors at the pyproject.toml directory, not at the
+    // first CLI path: it must still apply when the walk starts in `templates`.
+    let original = "<div   ></div>\n";
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt]\nextend-exclude = [\"templates/vendor\"]\n",
+        )
+        .file("templates/page.html", original)
+        .file("templates/vendor/lib.html", original);
+    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("templates"), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file reformatted !
+    "#);
+    assert_eq!(project.read("templates/vendor/lib.html"), original);
+}
+
+#[test]
 fn format_quiet() {
     let project = Project::new().file("test.html", "<div   ></div>\n");
     assert_cmd_snapshot!(cli().arg("-q").arg(project.join("test.html")), @r#"
