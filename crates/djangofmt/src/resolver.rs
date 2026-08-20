@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::sync::Mutex;
 
 use globset::{Glob, GlobSet, GlobSetBuilder, escape};
@@ -155,14 +155,23 @@ fn build_exclude_matcher(config: &ResolvedDiscoveryConfig) -> Result<Gitignore, 
         .map_err(|e| Error::Resolve(format!("Failed to build exclude matcher: {e}")))
 }
 
-/// Return whether `path` or any of its parent directories up to the project root
-/// matches an exclude pattern. Paths outside the root are never excluded.
-fn is_excluded(matcher: &Gitignore, path: &Path) -> bool {
-    path.strip_prefix(matcher.path()).is_ok_and(|relative| {
-        matcher
-            .matched_path_or_any_parents(relative, false)
-            .is_ignore()
-    })
+/// Return whether `path` or any of its parent directories matches an exclude pattern.
+///
+/// Mirrors ruff's `is_file_excluded`: parents are walked up to the project root, or all the
+/// way up when the path lies outside it (where only name patterns like `.venv` can match).
+fn is_excluded(matcher: &Gitignore, path: &Path, is_dir: bool) -> bool {
+    // `matched_path_or_any_parents` rejects rooted paths, so keep the named components.
+    let relative = path.strip_prefix(matcher.path()).map_or_else(
+        |_| {
+            path.components()
+                .filter(|c| matches!(c, Component::Normal(_)))
+                .collect()
+        },
+        Path::to_path_buf,
+    );
+    matcher
+        .matched_path_or_any_parents(relative, is_dir)
+        .is_ignore()
 }
 
 /// Return `true` if the given filename should be force-excluded based on the resolved
@@ -174,7 +183,11 @@ pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> R
     let matcher = build_exclude_matcher(config)?;
     // Stdin filenames may be relative to the cwd and may not exist on disk.
     let path = crate::fs::get_cwd().join(filename);
-    Ok(is_excluded(&matcher, &path.canonicalize().unwrap_or(path)))
+    Ok(is_excluded(
+        &matcher,
+        &path.canonicalize().unwrap_or(path),
+        false,
+    ))
 }
 
 /// Resolve a list of CLI paths (files and/or directories) into a flat,
@@ -205,24 +218,20 @@ pub fn resolve_files(
         }
     }
 
-    // When force_exclude is enabled, apply exclude patterns to explicitly-passed files too.
-    if config.force_exclude && !files.is_empty() {
+    // When force_exclude is enabled, apply exclude patterns to explicitly-passed paths too.
+    if config.force_exclude {
         let matcher = build_exclude_matcher(config)?;
-        let len_before = files.len();
-        files.retain(|file| {
-            if is_excluded(&matcher, file) {
-                debug!("Force-excluded: {}", file.display());
-                false
-            } else {
-                true
-            }
-        });
-        if files.len() < len_before {
-            debug!(
-                "Force-exclude removed {} explicitly-passed files",
-                len_before - files.len()
-            );
-        }
+        let retain = |paths: &mut Vec<PathBuf>, is_dir: bool| {
+            paths.retain(|path| {
+                let excluded = is_excluded(&matcher, path, is_dir);
+                if excluded {
+                    debug!("Force-excluded: {}", path.display());
+                }
+                !excluded
+            });
+        };
+        retain(&mut files, false);
+        retain(&mut dirs, true);
     }
 
     // Walk all directories with a single parallel WalkBuilder.
@@ -796,20 +805,43 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_force_exclude_keeps_files_outside_project_root() {
-        // Root-anchored patterns can't apply outside the project root: keep the file.
+    fn test_resolve_files_force_exclude_outside_project_root() {
+        // Outside the root, root-anchored patterns can't apply but name ones still do.
         let root = tempdir().unwrap();
         let outside = tempdir().unwrap();
         create_file(outside.path(), ".venv/a.html");
+        create_file(outside.path(), "b.html");
 
         let cli = FileSelectionArgs {
             force_exclude: true,
             ..Default::default()
         };
         let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), root.path());
-        let files = resolve_files(&[outside.path().join(".venv/a.html")], &config).unwrap();
+        let files = resolve_files(
+            &[
+                outside.path().join(".venv/a.html"),
+                outside.path().join("b.html"),
+            ],
+            &config,
+        )
+        .unwrap();
 
-        assert_eq!(files.len(), 1);
+        assert_eq!(file_names(&files), vec!["b.html"]);
+    }
+
+    #[test]
+    fn test_resolve_files_force_exclude_filters_explicit_directories() {
+        let dir = tempdir().unwrap();
+        create_file(dir.path(), ".venv/lib/a.html");
+
+        let cli = FileSelectionArgs {
+            force_exclude: true,
+            ..Default::default()
+        };
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), dir.path());
+        let files = resolve_files(&[dir.path().join(".venv/lib")], &config).unwrap();
+
+        assert!(files.is_empty());
     }
 
     #[test]
