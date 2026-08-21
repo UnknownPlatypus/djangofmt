@@ -1,4 +1,4 @@
-use miette::{Diagnostic, NamedSource, SourceCode, SourceOffset, SourceSpan, SpanContents};
+use miette::{Diagnostic, NamedSource, SourceCode, SourceSpan, SpanContents};
 use std::io;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -35,6 +35,12 @@ fn eof_aware_span(source: &str, pos: usize) -> SourceSpan {
             |(start, _)| djangofmt_lint::span(start, source.len() - start),
         )
     }
+}
+
+/// Where a jinja tag name starts after `{%`, skipping whitespace-trim markers.
+fn jinja_name_pos(source: &str, after_brace: usize) -> usize {
+    let rest = &source[after_brace..];
+    after_brace + (rest.len() - rest.trim_start_matches(['+', '-']).trim_start().len())
 }
 
 #[derive(Debug, Diagnostic, Error)]
@@ -92,26 +98,20 @@ impl ParseError {
             markup_fmt::FormatError::Syntax(syntax_err) => {
                 match &syntax_err.kind {
                     // Point to the opening tag instead of where the error was detected (which is always the end of the file)
-                    markup_fmt::SyntaxErrorKind::ExpectCloseTag {
-                        tag_name,
-                        line,
-                        column,
-                    } => (
+                    markup_fmt::SyntaxErrorKind::ExpectCloseTag { tag_name, pos, .. } => (
                         format!("expected close tag for opening tag <{tag_name}>"),
                         Some(format!(
                             "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag: \
                              https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags"
                         )),
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column), djangofmt_lint::clamp_offset(tag_name.len())),
+                        // `pos` is the `<`; the caret covers the tag name.
+                        djangofmt_lint::span(pos + 1, tag_name.len()),
                     ),
-                    markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd {
-                        tag_name,
-                        line,
-                        column,
-                    } => (
+                    markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd { tag_name, pos, .. } => (
                         format!("unclosed {{% {tag_name} %}} block."),
                         Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
-                        SourceSpan::new(SourceOffset::from_location(&source, *line, *column +1), djangofmt_lint::clamp_offset(tag_name.len())),
+                        // `pos` is just past the `{%`; the caret covers the tag name.
+                        djangofmt_lint::span(jinja_name_pos(&source, *pos), tag_name.len()),
                     ),
                     _ => (
                         syntax_err.kind.to_string(),

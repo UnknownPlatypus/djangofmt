@@ -130,10 +130,10 @@ fn format_file_parse_error_exits_2() {
     ----- stderr -----
 
       × expected close tag for opening tag <div>
-       ╭─[[TMP]/test.html:1:1]
+       ╭─[[TMP]/test.html:1:2]
      1 │ <div   class="foo"  >
-       · ─┬─
-       ·  ╰── here
+       ·  ─┬─
+       ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
             opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
@@ -271,10 +271,10 @@ fn format_stdin_parse_error_exits_2() {
     ----- stderr -----
 
       × expected close tag for opening tag <div>
-       ╭─[<unknown>:1:1]
+       ╭─[<unknown>:1:2]
      1 │ <div   class="foo"  >
-       · ─┬─
-       ·  ╰── here
+       ·  ─┬─
+       ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
             opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
@@ -443,7 +443,7 @@ fn check_concise_output_format() {
     ----- stdout -----
 
     ----- stderr -----
-    [TMP]/unparsable.html:1:1: expected close tag for opening tag <div>
+    [TMP]/unparsable.html:1:2: expected close tag for opening tag <div>
     Couldn't check 1 files!
     [TMP]/test.html:1:15: invalid-attr-value Invalid value 'put' for attribute 'method'.
     [TMP]/test.html:2:3: untrimmed-blocktranslate [*] `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.

@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt/tests/parse_error/main.rs
+---
+  × expected close tag for opening tag <div>
+   ╭─[unclosed_tag_non_ascii.html:1:12]
+ 1 │ Café ☕ <div>
+   ·          ─┬─
+   ·           ╰── here
+ 2 │     unclosed
+   ╰────
+  help: If a `</div>` does exist, it must live in the same block as the opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
