@@ -1,0 +1,24 @@
+[package]
+name = "djangofmt-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[[bin]]
+bench = false
+doc = false
+name = "fmt_idempotency"
+path = "fuzz_targets/fmt_idempotency.rs"
+test = false
+
+[dependencies]
+# default-features = false drops jemalloc, which conflicts with libFuzzer.
+djangofmt = { path = "../crates/djangofmt", default-features = false }
+libfuzzer-sys = "0.4"
+similar-asserts = "2.0.0"
+
+[profile.release]
+debug = 1
