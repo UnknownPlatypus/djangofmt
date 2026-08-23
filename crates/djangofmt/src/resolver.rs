@@ -101,27 +101,49 @@ impl ResolvedDiscoveryConfig {
     }
 }
 
-/// Build the include matcher, matched against a file's full path with ruff's `FilePattern`
-/// semantics: anchored at the project root, plus unanchored for separator-free patterns.
-fn build_include(config: &ResolvedDiscoveryConfig) -> Result<GlobSet, Error> {
-    let escaped_root = escape(&config.project_root.to_string_lossy());
-    let compile = |glob: &str, pattern: &str| {
-        Glob::new(glob)
-            .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))
-    };
-    let mut builder = GlobSetBuilder::new();
-    for pattern in &config.include {
-        builder.add(compile(
-            &crate::fs::anchor_glob(&escaped_root, pattern),
-            pattern,
-        )?);
-        if !pattern.contains('/') {
-            builder.add(compile(pattern, pattern)?);
+/// The resolved `include` patterns, compiled into the two matchers of
+/// [`crate::per_file_ignores`]: a bare pattern matches a file's name at any depth, a path
+/// pattern is anchored at the project root.
+struct IncludeMatcher {
+    basenames: GlobSet,
+    paths: GlobSet,
+}
+
+impl IncludeMatcher {
+    fn new(config: &ResolvedDiscoveryConfig) -> Result<Self, Error> {
+        let escaped_root = escape(&config.project_root.to_string_lossy());
+        let compile = |glob: &str, pattern: &str| {
+            Glob::new(glob)
+                .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))
+        };
+        let mut basenames = GlobSetBuilder::new();
+        let mut paths = GlobSetBuilder::new();
+        for pattern in &config.include {
+            if pattern.contains('/') {
+                paths.add(compile(
+                    &crate::fs::anchor_glob(&escaped_root, pattern),
+                    pattern,
+                )?);
+            } else {
+                basenames.add(compile(pattern, pattern)?);
+            }
         }
+        let build = |builder: GlobSetBuilder| {
+            builder
+                .build()
+                .map_err(|e| Error::Resolve(format!("Failed to build include patterns: {e}")))
+        };
+        Ok(Self {
+            basenames: build(basenames)?,
+            paths: build(paths)?,
+        })
     }
-    builder
-        .build()
-        .map_err(|e| Error::Resolve(format!("Failed to build include patterns: {e}")))
+
+    fn is_match(&self, path: &Path) -> bool {
+        path.file_name()
+            .is_some_and(|name| self.basenames.is_match(name))
+            || self.paths.is_match(path)
+    }
 }
 
 /// Build the exclude `Override` matcher used to prune the directory walk.
@@ -232,7 +254,7 @@ pub fn resolve_files(
 
     // Walk all directories with a single parallel WalkBuilder.
     if let Some((first, rest)) = dirs.split_first() {
-        let include = build_include(config)?;
+        let include = IncludeMatcher::new(config)?;
         let overrides = build_overrides(config)?;
 
         let mut builder = WalkBuilder::new(first);
@@ -245,6 +267,10 @@ pub fn resolve_files(
             .hidden(false)
             .follow_links(true)
             .overrides(overrides)
+            .filter_entry(move |entry| {
+                // Prune non-template files here so they never reach a visitor.
+                !entry.file_type().is_some_and(|ft| ft.is_file()) || include.is_match(entry.path())
+            })
             .threads(
                 std::thread::available_parallelism()
                     .map_or(1, std::num::NonZeroUsize::get)
@@ -252,7 +278,7 @@ pub fn resolve_files(
             );
 
         let state = WalkFilesState::new();
-        let mut visitor_builder = FileVisitorBuilder::new(&state, &include);
+        let mut visitor_builder = FileVisitorBuilder::new(&state);
         builder.build_parallel().visit(&mut visitor_builder);
         files.extend(state.finish()?);
     }
@@ -287,12 +313,11 @@ impl WalkFilesState {
 
 struct FileVisitorBuilder<'s> {
     state: &'s WalkFilesState,
-    include: &'s GlobSet,
 }
 
 impl<'s> FileVisitorBuilder<'s> {
-    const fn new(state: &'s WalkFilesState, include: &'s GlobSet) -> Self {
-        Self { state, include }
+    const fn new(state: &'s WalkFilesState) -> Self {
+        Self { state }
     }
 }
 
@@ -302,7 +327,7 @@ impl<'s> ignore::ParallelVisitorBuilder<'s> for FileVisitorBuilder<'s> {
             local_files: vec![],
             local_error: None,
             global: self.state,
-            include: self.include,
+            canonical_parent: None,
         })
     }
 }
@@ -311,17 +336,39 @@ struct FileVisitor<'s> {
     local_files: Vec<PathBuf>,
     local_error: Option<Error>,
     global: &'s WalkFilesState,
-    include: &'s GlobSet,
+    /// Last `(directory, canonical directory)` pair, reused across the entries of a
+    /// directory since the walker hands them to a single visitor.
+    canonical_parent: Option<(PathBuf, PathBuf)>,
+}
+
+impl FileVisitor<'_> {
+    /// Canonicalize a walked file path, resolving its parent directory at most once per
+    /// directory. Walk roots are already canonical, so only symlinks need resolving.
+    fn canonicalize(&mut self, entry: &ignore::DirEntry) -> std::io::Result<PathBuf> {
+        let path = entry.path();
+        let (Some(parent), Some(name)) = (path.parent(), path.file_name()) else {
+            return std::fs::canonicalize(path);
+        };
+        if entry.path_is_symlink() {
+            return std::fs::canonicalize(path);
+        }
+        if self
+            .canonical_parent
+            .as_ref()
+            .is_none_or(|(dir, _)| dir != parent)
+        {
+            self.canonical_parent = Some((parent.to_path_buf(), std::fs::canonicalize(parent)?));
+        }
+        let (_, canonical_parent) = self.canonical_parent.as_ref().expect("just inserted");
+        Ok(canonical_parent.join(name))
+    }
 }
 
 impl ignore::ParallelVisitor for FileVisitor<'_> {
     fn visit(&mut self, result: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
         match result {
             Ok(entry) if entry.file_type().is_some_and(|ft| ft.is_file()) => {
-                if !self.include.is_match(entry.path()) {
-                    return ignore::WalkState::Continue;
-                }
-                match std::fs::canonicalize(entry.path()) {
+                match self.canonicalize(&entry) {
                     Ok(canonical) => {
                         debug!("Discovered: {}", canonical.display());
                         self.local_files.push(canonical);
@@ -672,6 +719,7 @@ mod tests {
             "root.html",
             "templates/page.html",
             "templates/deep/page.html",
+            "templates/rnested.html",
             "other/page.html",
         ] {
             create_file(dir.path(), path);
@@ -693,25 +741,29 @@ mod tests {
             found
         };
 
-        // Bare pattern: any depth.
+        // Bare pattern: matches the file name at any depth.
         assert_eq!(
             matched("*.html"),
             [
                 "other/page.html",
                 "root.html",
                 "templates/deep/page.html",
-                "templates/page.html"
+                "templates/page.html",
+                "templates/rnested.html"
             ]
         );
-        // Anchored at the root, and `*` crosses `/` so nested files match too.
+        assert_eq!(matched("r*.html"), ["root.html", "templates/rnested.html"]);
+        // Path pattern: anchored at the root, and `*` crosses `/` so nested files match too.
         assert_eq!(
             matched("templates/*.html"),
-            ["templates/deep/page.html", "templates/page.html"]
+            [
+                "templates/deep/page.html",
+                "templates/page.html",
+                "templates/rnested.html"
+            ]
         );
         // `**/` still spans directories.
         assert_eq!(matched("**/deep/*.html"), ["templates/deep/page.html"]);
-        // A bare pattern is anchored at neither end, unlike a path one.
-        assert_eq!(matched("r*.html"), ["root.html"]);
     }
 
     #[test]
@@ -863,17 +915,15 @@ mod tests {
     fn test_resolve_files_follows_symlinks() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "real_dir/template.html");
+        let target = dir.path().join("real_dir/template.html");
         std::os::unix::fs::symlink(dir.path().join("real_dir"), dir.path().join("link_dir"))
             .unwrap();
+        std::os::unix::fs::symlink(&target, dir.path().join("link_template.html")).unwrap();
 
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        assert!(
-            files
-                .iter()
-                .map(|p| p.file_name().unwrap().to_string_lossy().to_string())
-                .any(|x| x == "template.html")
-        );
+        // Both links resolve to the single real file.
+        assert_eq!(files, vec![target.canonicalize().unwrap()]);
     }
 }
