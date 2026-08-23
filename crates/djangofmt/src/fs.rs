@@ -21,6 +21,17 @@ pub fn relativize_path<P: AsRef<Path>>(path: P) -> String {
     path.display().to_string()
 }
 
+/// Anchor a ruff-style glob at the (already glob-escaped) project root; absolute
+/// patterns pass through unchanged. Shared by include discovery and per-file-ignores.
+#[must_use]
+pub fn anchor_glob(escaped_root: &str, pattern: &str) -> String {
+    if Path::new(pattern).is_absolute() {
+        pattern.to_string()
+    } else {
+        format!("{escaped_root}/{pattern}")
+    }
+}
+
 /// Finds the nearest `file_name` by traversing directories upward from `start_path`.
 pub fn find_nearest_ancestor_file<P: AsRef<Path>>(
     start_path: P,

@@ -45,13 +45,11 @@ impl PerFileIgnores {
         let mut absolutes = GlobSetBuilder::new();
         let mut ignored = Vec::with_capacity(patterns.len());
         for (pattern, selectors) in patterns {
-            let anchored = if Path::new(pattern).is_absolute() {
-                pattern.clone()
-            } else {
-                format!("{escaped_root}/{pattern}")
-            };
             basenames.add(compile(pattern, pattern)?);
-            absolutes.add(compile(&anchored, pattern)?);
+            absolutes.add(compile(
+                &crate::fs::anchor_glob(&escaped_root, pattern),
+                pattern,
+            )?);
             ignored.push(selectors.iter().flat_map(|s| s.all_rules()).collect());
         }
         Ok(Self {
