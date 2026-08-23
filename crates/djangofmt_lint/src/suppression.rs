@@ -20,6 +20,7 @@ use std::ops::Range;
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
 
 use crate::registry::Rule;
+use crate::rules::style::redirected_ignore;
 use crate::rules::suspicious::{invalid_ignore_comment, unknown_ignore_code};
 use crate::{Checker, LintDiagnostic};
 
@@ -127,9 +128,12 @@ fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str
 /// Runs its own walk rather than piggybacking on [`filter_suppressed`], which
 /// bails out early when a file produced no diagnostics.
 pub fn check_directives(root: &Root<'_>, checker: &Checker<'_>) {
-    if !checker.any_rule_enabled(&[Rule::InvalidIgnoreComment, Rule::UnknownIgnoreCode])
-        || !checker.context().source().contains("djangofmt:")
-    {
+    let rules = [
+        Rule::InvalidIgnoreComment,
+        Rule::UnknownIgnoreCode,
+        Rule::RedirectedIgnore,
+    ];
+    if !checker.any_rule_enabled(&rules) || !checker.context().source().contains("djangofmt:") {
         return;
     }
     let file_head = root.children.iter().find(|node| !is_whitespace_text(node));
@@ -143,6 +147,9 @@ fn walk_directives<'s>(nodes: &[Node<'s>], file_head: Option<&Node<'s>>, checker
             check_directive_comment(node, body, is_file_head, checker);
         } else {
             match &node.kind {
+                NodeKind::Comment(comment) => {
+                    redirected_ignore::check(comment.raw, node.raw, checker);
+                }
                 NodeKind::Element(element) => {
                     walk_directives(&element.children, file_head, checker);
                 }
@@ -415,12 +422,13 @@ mod tests {
 
     #[test]
     fn html_comments_are_not_directives() {
-        // HTML comments survive in rendered output, so they never suppress.
+        // HTML comments survive in rendered output, so they never suppress:
+        // the rule still fires, plus a `redirected-ignore` on the comment.
         assert_eq!(
             count_diagnostics(
                 "<!-- djangofmt: ignore[invalid-attr-value] -->\n<form method=\"yes\"></form>"
             ),
-            1
+            2
         );
         // They are still skipped when looking for the directive's target.
         assert_eq!(
