@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{% if outer %}
+    {# djangofmt:ignore #}
+    {% verbatim %}
+        <p     class="unformatted"      >{{s|signature}}</p>
+    {% endverbatim %}
+    {# djangofmt:ignore #}
+    {% if inner %}
+        <p     class="unformatted"      >a</p>
+    {% endif %}
+{% endif %}
