@@ -10,11 +10,11 @@ use crate::{Checker, span};
 /// name any rule.
 ///
 /// ## Why is this bad?
-/// An unknown code suppresses nothing: the diagnostic the comment was meant to silence keeps
-/// firing. It is usually a typo in a rule name, or a leftover from a rule that was renamed.
+/// An unknown code suppresses nothing, so the diagnostic the comment was meant to silence keeps
+/// firing. It is usually a typo, or a leftover from a rule that was renamed.
 ///
-/// Besides rule names, `file-ignore[...]` accepts the special codes `format` (skip formatting the
-/// file) and `invalid-syntax` (skip a file that does not parse).
+/// Besides rule names, `file-ignore[...]` accepts the codes `format` (skip formatting the file) and
+/// `invalid-syntax` (skip a file that does not parse).
 ///
 /// ## Example
 /// ```html
@@ -43,11 +43,11 @@ impl Violation for UnknownIgnoreCode {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Fix the typo or remove the code; valid codes are the rule names listed in the documentation.".into())
+        Some("Fix the typo or remove the code: valid codes are the documented rule names.".into())
     }
 }
 
-/// Report every code that names neither a rule nor a reserved code (`format`, `invalid-syntax`).
+/// Report every code naming neither a rule nor a reserved code.
 pub fn check(codes: &[&str], checker: &Checker<'_>) {
     for code in codes {
         if *code == FORMAT || *code == INVALID_SYNTAX || code.parse::<Rule>().is_ok() {

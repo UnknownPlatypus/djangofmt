@@ -21,11 +21,12 @@ pub enum IgnoreCommentViolation {
 /// Checks for `djangofmt:` suppression comments that are malformed or misplaced.
 ///
 /// ## Why is this bad?
-/// A suppression comment djangofmt does not recognize is silently skipped, so the diagnostics it
-/// was meant to silence keep firing — or the author believes something is suppressed when nothing
-/// is. This covers directives with a syntax error (missing brackets, an empty rule list, trailing
-/// text), a `file-ignore[...]` that is not the first comment in the file, and codes that only make
-/// sense file-wide (`invalid-syntax`, `format`) listed in a node-level `ignore[...]`.
+/// A directive djangofmt does not recognize is skipped silently, so the diagnostics it was meant to
+/// silence keep firing while the author believes they are suppressed.
+///
+/// This covers a syntax error in the directive (missing bracket, empty rule list, trailing text), a
+/// `file-ignore[...]` that is not the file's first comment, and the file-wide codes `invalid-syntax`
+/// and `format` listed in a node-level `ignore[...]`.
 ///
 /// ## Example
 /// ```html
@@ -65,13 +66,13 @@ impl Violation for InvalidIgnoreComment {
     fn help(&self) -> Option<Cow<'static, str>> {
         Some(match self.kind {
             IgnoreCommentViolation::Malformed => {
-                "Write `{# djangofmt: ignore[rule1, rule2] #}` before a node, or `{# djangofmt: file-ignore[...] #}` at the top of the file.".into()
+                "Write `{# djangofmt: ignore[rule] #}` before a node, or `{# djangofmt: file-ignore[rule] #}` at the top of the file.".into()
             }
             IgnoreCommentViolation::MisplacedFileIgnore => {
-                "Move the comment to the very top of the file, or use `ignore[...]` to target the next node.".into()
+                "Move the comment to the top of the file, or use `ignore[...]` to target the next node.".into()
             }
             IgnoreCommentViolation::InvalidSyntaxOnNode => {
-                "A file that does not parse has no nodes to attach to; use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.".into()
+                "An unparsable file has no nodes to attach to: use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.".into()
             }
             IgnoreCommentViolation::FormatOnNode => {
                 "Use a bare `{# djangofmt:ignore #}` comment to skip formatting the next node.".into()
@@ -80,8 +81,7 @@ impl Violation for InvalidIgnoreComment {
     }
 }
 
-/// Lint one directive comment. The caller guarantees the comment body starts with `djangofmt:`
-/// and is not the formatter's bare legacy directive; `directive` is its parse outcome.
+/// Lint one directive comment; `directive` is its parse outcome.
 pub fn check(
     directive: Option<&Directive<'_>>,
     comment_raw: &str,

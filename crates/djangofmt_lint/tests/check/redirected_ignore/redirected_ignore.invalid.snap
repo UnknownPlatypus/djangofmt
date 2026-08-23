@@ -9,7 +9,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·             ╰── here
  3 │ <div   class="kept"  ></div>
    ╰────
-  help: Directives belong in a `{# #}` template comment: it is not rendered to the client, and it is the only style lint suppressions are read from.
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.
 
   × djangofmt directive in an HTML comment.
    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:6:1]
@@ -19,7 +19,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                        ╰── here
  7 │ <form method="yes"></form>
    ╰────
-  help: Directives belong in a `{# #}` template comment: it is not rendered to the client, and it is the only style lint suppressions are read from.
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.
 
   × djangofmt directive in an HTML comment.
     ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:10:1]
@@ -29,7 +29,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·            ╰── here
  11 │ <div></div>
     ╰────
-  help: Directives belong in a `{# #}` template comment: it is not rendered to the client, and it is the only style lint suppressions are read from.
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.
 
   × djangofmt directive in an HTML comment.
     ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:15:3]
@@ -39,4 +39,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·               ╰── here
  16 │   <p     class="kept"  >hi</p>
     ╰────
-  help: Directives belong in a `{# #}` template comment: it is not rendered to the client, and it is the only style lint suppressions are read from.
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.

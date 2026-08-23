@@ -49,27 +49,20 @@ Every pattern is matched both against the file name and against the path relativ
 
 ## Suppressing diagnostics
 
-Silence rules on a specific node with a `{# djangofmt: ignore[<rule>] #}` comment placed **immediately before** it. Anchoring to the following node (rather than a line) keeps the suppression attached to the right markup even after reformatting.
-
-```jinja
-{# djangofmt: ignore[invalid-attr-value] #}
-<form method="yes">Submit</form>
-```
-
-Suppress several rules at once with a comma-separated list:
+A `{# djangofmt: ignore[...] #}` comment silences the listed rules on the node that follows it. Anchoring to a node rather than a line keeps the suppression on the right markup across reformatting.
 
 ```jinja
 {# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
 <form method="yes" id=""></form>
 ```
 
-Silence rules for a whole file with a `{# djangofmt: file-ignore[<rule>] #}` comment at the very top of the file. Two special codes go beyond lint rules: `invalid-syntax` makes both commands skip a file they cannot parse, and `format` makes the formatter skip the file:
+A `{# djangofmt: file-ignore[...] #}` comment as the **first comment of the file** covers the whole file. It also accepts two codes that are not rules: `invalid-syntax` skips a file neither command can parse, and `format` skips the formatter.
 
 ```jinja
 {# djangofmt: file-ignore[invalid-syntax] #}
 ```
 
-Rules must always be listed explicitly: there is no blanket form, and only `{# #}` template comments carry directives — HTML comments survive in rendered output, so they are never a suppression. Node-level suppression never affects formatting — skip formatting a node with the formatter's `{# djangofmt:ignore #}` directive.
+Rules are always listed explicitly — there is no blanket form. Only `{# #}` comments carry directives, since HTML comments survive in rendered output. Suppression never affects formatting: skip formatting a node with the formatter's own `{# djangofmt:ignore #}` directive.
 "#;
 
 fn render() -> String {

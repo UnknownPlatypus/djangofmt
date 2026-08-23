@@ -6,7 +6,7 @@
 {# djangofmt: ignore[invalid-attr-value #}
 <div></div>
 
-<!-- Malformed: trailing text after the bracket -->
+<!-- Malformed: trailing text -->
 {# djangofmt: ignore[invalid-attr-value] because reasons #}
 <div></div>
 
@@ -18,20 +18,20 @@
 {# djangofmt: silence[invalid-attr-value] #}
 <div></div>
 
-<!-- Misplaced: file-ignore is only honored as the first comment of the file -->
+<!-- Misplaced: `file-ignore` is only honored as the file's first comment -->
 {# djangofmt: file-ignore[invalid-attr-value] #}
 <div></div>
 
-<!-- Misplaced: nested file-ignore -->
+<!-- Misplaced: nested `file-ignore` -->
 <div>
   {# djangofmt: file-ignore[empty-attr-value] #}
   <p>hi</p>
 </div>
 
-<!-- invalid-syntax cannot be scoped to a node -->
+<!-- `invalid-syntax` cannot be scoped to a node -->
 {# djangofmt: ignore[invalid-syntax] #}
 <div></div>
 
-<!-- format cannot be scoped to a node -->
+<!-- `format` cannot be scoped to a node -->
 {# djangofmt: ignore[format, invalid-attr-value] #}
 <div></div>

@@ -9,10 +9,9 @@ use crate::{Checker, span};
 /// Checks for djangofmt directives written in HTML comments, like `<!-- djangofmt:ignore -->`.
 ///
 /// ## Why is this bad?
-/// HTML comments are shipped to the client, so the directive ends up in every rendered page.
-/// Worse, only `{# #}` template comments carry suppression directives: an HTML comment like
-/// `<!-- djangofmt: ignore[some-rule] -->` suppresses nothing. The template comment style works
-/// everywhere and is stripped at render time.
+/// HTML comments are shipped to the client, so the directive ends up in every rendered page. And
+/// only `{# #}` template comments carry suppression directives: `<!-- djangofmt: ignore[rule] -->`
+/// silences nothing.
 ///
 /// ## Example
 /// ```html
@@ -27,8 +26,8 @@ use crate::{Checker, span};
 /// ```
 ///
 /// ## Fix safety
-/// Marked as safe: djangofmt treats both comment styles the same, and the directive no longer
-/// leaks into rendered HTML.
+/// Marked as safe: the formatter treats both comment styles the same, and the directive stops
+/// leaking into rendered HTML.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct RedirectedIgnore;
@@ -44,7 +43,7 @@ impl Violation for RedirectedIgnore {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Directives belong in a `{# #}` template comment: it is not rendered to the client, and it is the only style lint suppressions are read from.".into())
+        Some("Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.".into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {
@@ -52,7 +51,7 @@ impl Violation for RedirectedIgnore {
     }
 }
 
-/// Lint one HTML comment; `body` is its inner text and `comment_raw` the whole `<!-- -->` slice.
+/// Lint one HTML comment; `body` is its inner text, `comment_raw` the whole `<!-- -->` slice.
 pub fn check(body: &str, comment_raw: &str, checker: &Checker<'_>) {
     if !body.trim_start().starts_with("djangofmt:") {
         return;

@@ -1,22 +1,23 @@
 {# djangofmt: file-ignore[missing-img-alt, empty-attr-value] #}
-{# The file-ignore above is the first comment, exactly where it belongs #}
+{# The file-ignore above is the first comment, where it belongs #}
 
 {# djangofmt: ignore[invalid-attr-value] #}
 <form method="yes"></form>
 
-{# Unknown codes are unknown-ignore-code's concern, not a malformed directive #}
+{# Unknown codes are unknown-ignore-code's concern #}
 {# djangofmt: ignore[not-a-real-rule] #}
 <div></div>
 
-{# The formatter's bare directive is valid, with or without an explanation #}
+{# The formatter's bare directive, with and without an explanation #}
 {# djangofmt:ignore #}
-<div   class="kept"  ></div>
+<div></div>
 {# djangofmt:ignore this table is generated #}
 <div></div>
 
-{# A comment merely mentioning djangofmt: something is not a directive #}
+{# Merely mentioning djangofmt: is not a directive #}
 {# See djangofmt: https://unknownplatypus.github.io/djangofmt/ #}
 <div></div>
 
-<!-- HTML comments never carry directives: <!-- djangofmt: ignore[] --> is redirected-ignore's concern -->
+{# A directive in an HTML comment is redirected-ignore's concern #}
+<!-- djangofmt: ignore[] -->
 <div></div>

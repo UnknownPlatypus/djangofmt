@@ -9,7 +9,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                               ╰── here
  3 │ <form method="yes"></form>
    ╰────
-  help: Fix the typo or remove the code; valid codes are the rule names listed in the documentation.
+  help: Fix the typo or remove the code: valid codes are the documented rule names.
 
   × Unknown rule code `not-a-rule` in suppression comment.
    ╭─[tests/check/unknown_ignore_code/unknown_ignore_code.invalid.html:6:42]
@@ -19,7 +19,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                                               ╰── here
  7 │ <div></div>
    ╰────
-  help: Fix the typo or remove the code; valid codes are the rule names listed in the documentation.
+  help: Fix the typo or remove the code: valid codes are the documented rule names.
 
   × Unknown rule code `nonexistent-rule` in suppression comment.
     ╭─[tests/check/unknown_ignore_code/unknown_ignore_code.invalid.html:10:27]
@@ -29,4 +29,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                                   ╰── here
  11 │ <div></div>
     ╰────
-  help: Fix the typo or remove the code; valid codes are the rule names listed in the documentation.
+  help: Fix the typo or remove the code: valid codes are the documented rule names.

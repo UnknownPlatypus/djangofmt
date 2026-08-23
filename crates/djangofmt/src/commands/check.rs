@@ -281,8 +281,7 @@ fn print_summary(
     }
 }
 
-/// Surface files quarantined via `file-ignore[invalid-syntax]`, mirroring
-/// the format command's skip counter.
+/// Mirror the format command's skip counter for quarantined files.
 fn print_skipped(results: &[CheckResult]) {
     let skipped = results.iter().filter(|result| result.skipped).count();
     if skipped > 0 {
@@ -401,9 +400,8 @@ fn check_path(
     })
 }
 
-/// Handle a parse failure: a top-level `{# djangofmt: file-ignore[invalid-syntax] #}`
-/// directive skips the file entirely, otherwise the error is reported with a
-/// hint pointing at the available escape hatches.
+/// Skip the file if it is quarantined with `file-ignore[invalid-syntax]`,
+/// otherwise report the error with a hint at the escape hatches.
 fn parse_failure(
     path: &Path,
     source: String,

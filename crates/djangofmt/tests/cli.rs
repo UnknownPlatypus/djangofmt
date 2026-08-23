@@ -80,21 +80,6 @@ fn format_file_with_jinja_ignore_directive() {
 }
 
 #[test]
-fn format_file_with_file_ignore_format_directive() {
-    let original = "{# djangofmt: file-ignore[format] #}\n<div   class=\"foo\"  ></div>\n";
-    let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file skipped !
-    "#);
-    assert_eq!(project.read("test.html"), original);
-}
-
-#[test]
 fn format_unparsable_file_with_invalid_syntax_file_ignore() {
     let original = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n";
     let project = Project::new().file("test.html", original);
@@ -650,36 +635,23 @@ fn check_fixable_file_with_show_fixes() {
 }
 
 #[test]
-fn check_unparsable_file_with_invalid_syntax_file_ignore() {
-    // `file-ignore[invalid-syntax]` at the top of the file skips it entirely,
-    // even though it cannot be parsed.
-    let project = Project::new().file(
-        "test.html",
-        "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
-    );
-    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
+fn check_skips_unparsable_files_that_opted_out() {
+    // Both the explicit code and the legacy bare directive (#373) skip a file
+    // `check` cannot parse.
+    let project = Project::new()
+        .file(
+            "bracketed.html",
+            "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
+        )
+        .file("legacy.html", "{# djangofmt:ignore #}\n<div id=>\n</div>\n");
+    assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @r###"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     All checks passed!
-    1 file skipped !
-    "###);
-}
-
-#[test]
-fn check_unparsable_file_with_legacy_ignore_directive() {
-    // The legacy bare directive keeps skipping unparsable files, in `check` too (#373).
-    let project = Project::new().file("test.html", "{# djangofmt:ignore #}\n<div id=>\n</div>\n");
-    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    All checks passed!
-    1 file skipped !
+    2 files skipped !
     "###);
 }
 

@@ -372,8 +372,7 @@ pub fn format_text(
         },
     );
     match result {
-        // A file quarantined with `file-ignore[invalid-syntax]` is skipped
-        // rather than reported when it indeed fails to parse.
+        // `file-ignore[invalid-syntax]` quarantines the file instead of reporting.
         Err(markup_fmt::FormatError::Syntax(_)) if ignores.invalid_syntax => Ok(None),
         other => other.map(Some),
     }

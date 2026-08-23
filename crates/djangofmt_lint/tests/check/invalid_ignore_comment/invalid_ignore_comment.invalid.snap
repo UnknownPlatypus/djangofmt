@@ -9,7 +9,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·             ╰── here
  3 │ <form method="yes"></form>
    ╰────
-  help: Write `{# djangofmt: ignore[rule1, rule2] #}` before a node, or `{# djangofmt: file-ignore[...] #}` at the top of the file.
+  help: Write `{# djangofmt: ignore[rule] #}` before a node, or `{# djangofmt: file-ignore[rule] #}` at the top of the file.
 
   × Malformed `djangofmt:` directive comment.
    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:6:1]
@@ -19,17 +19,17 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                      ╰── here
  7 │ <div></div>
    ╰────
-  help: Write `{# djangofmt: ignore[rule1, rule2] #}` before a node, or `{# djangofmt: file-ignore[...] #}` at the top of the file.
+  help: Write `{# djangofmt: ignore[rule] #}` before a node, or `{# djangofmt: file-ignore[rule] #}` at the top of the file.
 
   × Malformed `djangofmt:` directive comment.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:10:1]
-  9 │ <!-- Malformed: trailing text after the bracket -->
+  9 │ <!-- Malformed: trailing text -->
  10 │ {# djangofmt: ignore[invalid-attr-value] because reasons #}
     · ─────────────────────────────┬─────────────────────────────
     ·                              ╰── here
  11 │ <div></div>
     ╰────
-  help: Write `{# djangofmt: ignore[rule1, rule2] #}` before a node, or `{# djangofmt: file-ignore[...] #}` at the top of the file.
+  help: Write `{# djangofmt: ignore[rule] #}` before a node, or `{# djangofmt: file-ignore[rule] #}` at the top of the file.
 
   × Malformed `djangofmt:` directive comment.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:14:1]
@@ -39,7 +39,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·            ╰── here
  15 │ <div></div>
     ╰────
-  help: Write `{# djangofmt: ignore[rule1, rule2] #}` before a node, or `{# djangofmt: file-ignore[...] #}` at the top of the file.
+  help: Write `{# djangofmt: ignore[rule] #}` before a node, or `{# djangofmt: file-ignore[rule] #}` at the top of the file.
 
   × Malformed `djangofmt:` directive comment.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:18:1]
@@ -49,17 +49,17 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                       ╰── here
  19 │ <div></div>
     ╰────
-  help: Write `{# djangofmt: ignore[rule1, rule2] #}` before a node, or `{# djangofmt: file-ignore[...] #}` at the top of the file.
+  help: Write `{# djangofmt: ignore[rule] #}` before a node, or `{# djangofmt: file-ignore[rule] #}` at the top of the file.
 
   × `file-ignore[...]` must be the first comment in the file.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:22:1]
- 21 │ <!-- Misplaced: file-ignore is only honored as the first comment of the file -->
+ 21 │ <!-- Misplaced: `file-ignore` is only honored as the file's first comment -->
  22 │ {# djangofmt: file-ignore[invalid-attr-value] #}
     · ────────────────────────┬───────────────────────
     ·                         ╰── here
  23 │ <div></div>
     ╰────
-  help: Move the comment to the very top of the file, or use `ignore[...]` to target the next node.
+  help: Move the comment to the top of the file, or use `ignore[...]` to target the next node.
 
   × `file-ignore[...]` must be the first comment in the file.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:27:3]
@@ -69,21 +69,21 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                          ╰── here
  28 │   <p>hi</p>
     ╰────
-  help: Move the comment to the very top of the file, or use `ignore[...]` to target the next node.
+  help: Move the comment to the top of the file, or use `ignore[...]` to target the next node.
 
   × `invalid-syntax` cannot be scoped to a node.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:32:22]
- 31 │ <!-- invalid-syntax cannot be scoped to a node -->
+ 31 │ <!-- `invalid-syntax` cannot be scoped to a node -->
  32 │ {# djangofmt: ignore[invalid-syntax] #}
     ·                      ───────┬──────
     ·                             ╰── here
  33 │ <div></div>
     ╰────
-  help: A file that does not parse has no nodes to attach to; use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.
+  help: An unparsable file has no nodes to attach to: use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.
 
   × `format` cannot be scoped to a node.
     ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:36:22]
- 35 │ <!-- format cannot be scoped to a node -->
+ 35 │ <!-- `format` cannot be scoped to a node -->
  36 │ {# djangofmt: ignore[format, invalid-attr-value] #}
     ·                      ───┬──
     ·                         ╰── here

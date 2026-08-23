@@ -78,10 +78,9 @@ To disable formatting for a specific node, prefix it with a `{# djangofmt:ignore
 <div class="this-will-be-formatted">Content</div>
 ```
 
-A file that djangofmt cannot parse at all can be quarantined with `{# djangofmt: file-ignore[invalid-syntax] #}`
-at the very top: both `format` and `check` then skip it instead of reporting a parse error.
+A file djangofmt cannot parse at all can be quarantined with `{# djangofmt: file-ignore[invalid-syntax] #}`
+at the very top: both `format` and `check` skip it instead of reporting a parse error.
 
-For backward compatibility, a bare `{# djangofmt:ignore #}` (or `<!-- djangofmt:ignore -->`) at the
-very top of a file still skips it entirely, parse errors included. Prefer the explicit
-`file-ignore[...]` form: it says what is being opted out of, and the `{# #}` comment style isn't
-rendered to the client.
+A bare `{# djangofmt:ignore #}` (or `<!-- djangofmt:ignore -->`) at the very top still skips the
+whole file, parse errors included, for backward compatibility. Prefer `file-ignore[...]`: it states
+what is opted out of, and `{# #}` comments aren't rendered to the client.
