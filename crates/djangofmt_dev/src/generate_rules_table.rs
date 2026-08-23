@@ -46,6 +46,30 @@ To turn rules off for some files only, map a glob to the selectors to ignore the
 ```
 
 Every pattern is matched both against the file name and against the path relative to the directory holding `pyproject.toml`: `"*.jinja"` covers that extension at any depth, while `"emails/*.html"` is anchored at the project root (and, since `*` crosses `/`, covers nested files under `emails/` too). These are ruff's `per-file-ignores` semantics, so a block can be copied over unchanged.
+
+## Suppressing diagnostics
+
+Silence rules on a specific node with a `{# djangofmt: ignore[<rule>] #}` comment placed **immediately before** it. Anchoring to the following node (rather than a line) keeps the suppression attached to the right markup even after reformatting.
+
+```jinja
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes">Submit</form>
+```
+
+Suppress several rules at once with a comma-separated list:
+
+```jinja
+{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
+<form method="yes" id=""></form>
+```
+
+Silence rules for a whole file with a `{# djangofmt: file-ignore[<rule>] #}` comment at the very top of the file:
+
+```jinja
+{# djangofmt: file-ignore[missing-img-alt] #}
+```
+
+Rules must always be listed explicitly: there is no blanket form, and only `{# #}` template comments carry directives — HTML comments survive in rendered output, so they are never a suppression. Lint suppression never affects formatting — the formatter has its own `{# djangofmt:ignore #}` directive.
 "#;
 
 fn render() -> String {
