@@ -21,6 +21,43 @@ pub fn relativize_path<P: AsRef<Path>>(path: P) -> String {
     path.display().to_string()
 }
 
+/// Convert a path to absolute against `root`, resolving `.` and `..` lexically without
+/// touching the filesystem. Mirrors ruff's `fs::normalize_path_to`.
+pub fn normalize_path_to<P: AsRef<Path>, R: AsRef<Path>>(path: P, root: R) -> PathBuf {
+    let path = path.as_ref();
+    let mut normalized = if path.is_absolute() {
+        PathBuf::new()
+    } else {
+        root.as_ref().to_path_buf()
+    };
+    for component in path.components() {
+        match component {
+            std::path::Component::CurDir => {}
+            std::path::Component::ParentDir => {
+                normalized.pop();
+            }
+            component => normalized.push(component),
+        }
+    }
+    normalized
+}
+
+/// Convert a path to an absolute path, based on the cwd. Mirrors ruff's `fs::normalize_path`.
+pub fn normalize_path<P: AsRef<Path>>(path: P) -> PathBuf {
+    normalize_path_to(path, get_cwd())
+}
+
+/// Anchor a ruff-style glob at the (already glob-escaped) project root.
+///
+/// Resolves `.` and `..` lexically; absolute patterns are cleaned but kept as-is.
+/// Mirrors ruff's `GlobPath::normalize`. Shared by file discovery and per-file-ignores.
+#[must_use]
+pub fn normalize_glob(escaped_root: &str, pattern: &str) -> String {
+    normalize_path_to(pattern, escaped_root)
+        .to_string_lossy()
+        .into_owned()
+}
+
 /// Finds the nearest `file_name` by traversing directories upward from `start_path`.
 pub fn find_nearest_ancestor_file<P: AsRef<Path>>(
     start_path: P,
