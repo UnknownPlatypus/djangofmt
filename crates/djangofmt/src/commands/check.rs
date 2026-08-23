@@ -20,7 +20,7 @@ use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::LintSettings;
 
-use super::format::merge_custom_blocks;
+use super::format::{is_file_ignored, merge_custom_blocks};
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
 #[derive(Debug, PartialEq, Eq)]
@@ -346,11 +346,7 @@ fn check_path(
                 });
             }
             Err(FixerError::InitialParse(err)) => {
-                return Err(Box::new(CommandError::Parse(ParseError::new(
-                    Some(path.to_path_buf()),
-                    source,
-                    &FormatError::Syntax(err),
-                ))));
+                return parse_failure(path, source, err);
             }
             Err(FixerError::SyntaxRegression {
                 iteration,
@@ -369,11 +365,7 @@ fn check_path(
         match lint_source(&source, profile.into(), custom_blocks, settings, Some(path)) {
             Ok(diagnostics) => diagnostics,
             Err(err) => {
-                return Err(Box::new(CommandError::Parse(ParseError::new(
-                    Some(path.to_path_buf()),
-                    source,
-                    &FormatError::Syntax(err),
-                ))));
+                return parse_failure(path, source, err);
             }
         };
     let file_diagnostics = if diagnostics.is_empty() {
@@ -388,6 +380,29 @@ fn check_path(
         applied_count: 0,
         fixes_by_rule: FxHashMap::default(),
     })
+}
+
+/// Report a parse error, unless the file opts out with a leading `djangofmt:ignore`
+/// comment — `format` already skips those, so `check` must too.
+fn parse_failure(
+    path: &Path,
+    source: String,
+    err: markup_fmt::SyntaxError,
+) -> std::result::Result<CheckResult, Box<CommandError>> {
+    if is_file_ignored(&source) {
+        debug!("Skipping unparsable {} (djangofmt:ignore)", path.display());
+        return Ok(CheckResult {
+            path: path.to_path_buf(),
+            file_diagnostics: FileDiagnostics::empty(),
+            applied_count: 0,
+            fixes_by_rule: FxHashMap::default(),
+        });
+    }
+    Err(Box::new(CommandError::Parse(ParseError::new(
+        Some(path.to_path_buf()),
+        source,
+        &FormatError::Syntax(err),
+    ))))
 }
 
 #[cfg(test)]

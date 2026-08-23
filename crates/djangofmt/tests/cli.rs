@@ -52,6 +52,19 @@ fn format_file_with_ignore_directive() {
 }
 
 #[test]
+fn check_unparsable_file_with_ignore_directive() {
+    let project = Project::new().file("test.html", "{# djangofmt:ignore #}\n<div>\n");
+    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    ");
+}
+
+#[test]
 fn format_nonexistent_file() {
     assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @r#"
     success: false
