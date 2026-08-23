@@ -63,10 +63,10 @@ Suppress several rules at once with a comma-separated list:
 <form method="yes" id=""></form>
 ```
 
-Silence rules for a whole file with a `{# djangofmt: file-ignore[<rule>] #}` comment at the very top of the file:
+Silence rules for a whole file with a `{# djangofmt: file-ignore[<rule>] #}` comment at the very top of the file. The special `invalid-syntax` rule suppresses parse errors, letting `djangofmt check` skip files it cannot parse:
 
 ```jinja
-{# djangofmt: file-ignore[missing-img-alt] #}
+{# djangofmt: file-ignore[invalid-syntax] #}
 ```
 
 Rules must always be listed explicitly: there is no blanket form, and only `{# #}` template comments carry directives — HTML comments survive in rendered output, so they are never a suppression. Lint suppression never affects formatting — the formatter has its own `{# djangofmt:ignore #}` directive.

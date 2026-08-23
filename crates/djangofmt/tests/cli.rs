@@ -616,9 +616,52 @@ fn check_fixable_file_with_show_fixes() {
 }
 
 #[test]
+fn check_unparsable_file_with_invalid_syntax_file_ignore() {
+    // `file-ignore[invalid-syntax]` at the top of the file skips it entirely,
+    // even though it cannot be parsed.
+    let project = Project::new().file(
+        "test.html",
+        "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
+    );
+    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    1 file skipped !
+    "###);
+}
+
+#[test]
+fn check_unparsable_file_reports_error_with_hint() {
+    let project = Project::new().file("test.html", "<div id=>\n</div>\n");
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r##"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+
+      × expected attribute value
+       ╭─[[TMP]/test.html:1:9]
+     1 │ <div id=>
+       ·         ▲
+       ·         ╰── here
+     2 │ </div>
+       ╰────
+      help: Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
+
+    Couldn't check 1 files!
+    "##);
+}
+
+#[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
-    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r##"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -634,9 +677,11 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
        ╰────
       help: Check for invalid HTML syntax inside the block that might prevent
             finding the end tag.
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't check 1 files!
-    "###);
+    "##);
 }
 
 #[test]
@@ -649,7 +694,7 @@ fn check_respects_pyproject_custom_blocks() {
             "[tool.djangofmt]\ncustom-blocks = [\"stage\"]\n",
         )
         .file("test.html", "{% stage %}\n<p>hi</p>\n");
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r###"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r##"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -665,9 +710,11 @@ fn check_respects_pyproject_custom_blocks() {
        ╰────
       help: Check for invalid HTML syntax inside the block that might prevent
             finding the end tag.
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't check 1 files!
-    "###);
+    "##);
 }
 
 #[test]
