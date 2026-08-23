@@ -1,0 +1,42 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × djangofmt directive in an HTML comment.
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:2:1]
+ 1 │ <!-- Legacy formatter directive in an HTML comment -->
+ 2 │ <!-- djangofmt:ignore -->
+   · ────────────┬────────────
+   ·             ╰── here
+ 3 │ <div   class="kept"  ></div>
+   ╰────
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.
+
+  × djangofmt directive in an HTML comment.
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:6:1]
+ 5 │ <!-- A suppression in an HTML comment silently does nothing -->
+ 6 │ <!-- djangofmt: ignore[invalid-attr-value] -->
+   · ───────────────────────┬──────────────────────
+   ·                        ╰── here
+ 7 │ <form method="yes"></form>
+   ╰────
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.
+
+  × djangofmt directive in an HTML comment.
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:10:1]
+  9 │ <!-- No spaces around the directive -->
+ 10 │ <!--djangofmt:ignore-->
+    · ───────────┬───────────
+    ·            ╰── here
+ 11 │ <div></div>
+    ╰────
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.
+
+  × djangofmt directive in an HTML comment.
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:15:3]
+ 14 │ <div>
+ 15 │   <!-- djangofmt:ignore -->
+    ·   ────────────┬────────────
+    ·               ╰── here
+ 16 │   <p     class="kept"  >hi</p>
+    ╰────
+  help: Move the directive into a `{# #}` template comment: it is stripped at render time, and it is the only style suppressions are read from.

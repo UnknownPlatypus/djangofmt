@@ -510,6 +510,7 @@ mod tests {
 
     #[test]
     fn html_comments_never_suppress() {
+        // The rule still fires, plus a `redirected-ignore` on the comment.
         assert!(
             codes("<!-- djangofmt: ignore[invalid-attr-value] -->\n<form method=\"yes\"></form>")
                 .contains(&"invalid-attr-value")
