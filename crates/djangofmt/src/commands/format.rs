@@ -118,6 +118,13 @@ const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
 const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
 const DJANGOFMT_IGNORE_COMMENT_JINJA: &str = concat!("{# ", ignore_directive!(), " #}");
 
+/// Whether the file opts out of djangofmt entirely with a leading ignore comment.
+#[must_use]
+pub(crate) fn is_file_ignored(source: &str) -> bool {
+    source.starts_with(DJANGOFMT_IGNORE_COMMENT)
+        || source.starts_with(DJANGOFMT_IGNORE_COMMENT_JINJA)
+}
+
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
 pub fn build_markup_options(
@@ -317,9 +324,7 @@ pub fn format_text(
     config: &FormatterConfig,
     profile: Profile,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
-    if source.starts_with(DJANGOFMT_IGNORE_COMMENT)
-        || source.starts_with(DJANGOFMT_IGNORE_COMMENT_JINJA)
-    {
+    if is_file_ignored(source) {
         return Ok(None);
     }
     markup_fmt::format_text(
