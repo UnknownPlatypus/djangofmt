@@ -11,6 +11,8 @@ use djangofmt::pyproject::PyprojectSettings;
 use crate::generate_all::{AUTOGEN_HEADER, Args, apply};
 use crate::root_dir;
 
+const INTRO: &str = include_str!("../docs/settings-intro.md");
+
 pub fn main(args: &Args) -> Result<()> {
     let path = root_dir().join("docs").join("settings.md");
     apply(args.mode, &path, &render())
@@ -19,11 +21,8 @@ pub fn main(args: &Args) -> Result<()> {
 fn render() -> String {
     let mut output = String::new();
     output.push_str(AUTOGEN_HEADER);
-    output.push_str(
-        "# Settings\n\n\
-         djangofmt reads its configuration from the `[tool.djangofmt]` table of the closest \
-         `pyproject.toml`; command-line arguments take precedence over it.\n\n",
-    );
+    output.push_str(INTRO);
+    output.push('\n');
     render_set(&mut output, "", PyprojectSettings::metadata());
     output
 }
