@@ -70,8 +70,11 @@ and benchmark templates.
 When a crash is found (an input file lands in `fuzz/artifacts/fmt_idempotency/`):
 
 1. Minimize it: `just fuzz-min fuzz/artifacts/fmt_idempotency/crash-...`
-2. Reproduce and fix the bug in the [markup_fmt fork](https://github.com/UnknownPlatypus/markup_fmt),
-   then bump the pinned `rev` in the root `Cargo.toml`.
+2. Read the backtrace to find the owning crate. Besides the
+   [markup_fmt fork](https://github.com/UnknownPlatypus/markup_fmt), the target
+   reaches `djangofmt` itself (`format_text`, `ParseError`) and the embedded
+   `malva` and `dprint-plugin-json` formatters. Fix the bug where it lives, and
+   bump the pinned `rev` in the root `Cargo.toml` only for `markup_fmt` fixes.
 3. Keep the minimized case as a fixture in `crates/djangofmt/tests/fmt/`
    or `crates/djangofmt/tests/parse_error/`.
 
