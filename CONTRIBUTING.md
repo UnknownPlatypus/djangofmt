@@ -62,9 +62,10 @@ just fuzz     # run until interrupted
 just fuzz 60  # run for 60 seconds
 ```
 
-The `fmt_idempotency` target formats arbitrary inputs twice and panics on any
-panic inside `markup_fmt`, non-idempotent output, or output that no longer parses.
-It is seeded with the in-repo test fixtures and benchmark templates.
+The `fmt_idempotency` target formats arbitrary inputs twice under both the Django
+and the Jinja profile, and panics on any panic inside the formatter, non-idempotent
+output, or output that no longer parses. It is seeded with the in-repo test fixtures
+and benchmark templates.
 
 When a crash is found (an input file lands in `fuzz/artifacts/fmt_idempotency/`):
 
