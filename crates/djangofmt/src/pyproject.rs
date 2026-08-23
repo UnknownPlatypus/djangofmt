@@ -83,8 +83,8 @@ pub struct PyprojectSettings {
 
     /// File patterns to format and lint, replacing the default includes.
     ///
-    /// Same glob semantics as `exclude`: a pattern without `/` matches file names at any
-    /// depth, a pattern with `/` is anchored at the project root.
+    /// Globs are anchored at the project root like `exclude` and matched against a file's
+    /// full path, where `*` also crosses `/` (so `*.html` matches at any depth).
     #[option(
         default = r#"["*.html", "*.jinja", "*.jinja2", "*.j2"]"#,
         value_type = "list[str]",

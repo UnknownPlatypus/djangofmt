@@ -91,19 +91,16 @@ impl ResolvedDiscoveryConfig {
             force_exclude: resolve_bool_arg(cli.force_exclude, cli.no_force_exclude)
                 .or(pyproject.force_exclude)
                 .unwrap_or(false),
-            project_root: project_root
-                .canonicalize()
-                .unwrap_or_else(|_| project_root.to_path_buf()),
+            project_root: crate::fs::normalize_path(project_root),
         }
     }
 }
 
-/// Include or exclude patterns compiled into the two matchers of
-/// [`crate::per_file_ignores`]: a bare pattern matches a path's name at any depth, a path
-/// pattern is anchored at the project root.
+/// Include or exclude patterns compiled the way ruff builds `FilePattern`s: every pattern
+/// anchored at the project root, and separator-free patterns also added bare so they match
+/// any basename (or, since `*` crosses `/`, any path for globs like `*.html`).
 struct PathMatcher {
-    basenames: GlobSet,
-    paths: GlobSet,
+    set: GlobSet,
 }
 
 impl PathMatcher {
@@ -113,41 +110,31 @@ impl PathMatcher {
             Glob::new(glob)
                 .map_err(|e| Error::Resolve(format!("Invalid {kind} pattern '{pattern}': {e}")))
         };
-        let mut basenames = GlobSetBuilder::new();
-        let mut paths = GlobSetBuilder::new();
+        let mut builder = GlobSetBuilder::new();
         for pattern in patterns {
-            if pattern.starts_with('!') {
-                return Err(Error::Resolve(format!(
-                    "Negated {kind} pattern '{pattern}' is not supported"
-                )));
-            }
-            // A trailing slash means "directory only" in gitignore; directories are matched
-            // either way here, so drop it rather than let the pattern match nothing.
-            let glob = pattern.trim_end_matches('/');
-            if glob.contains('/') {
-                paths.add(compile(
-                    &crate::fs::anchor_glob(&escaped_root, glob),
-                    pattern,
-                )?);
-            } else {
-                basenames.add(compile(glob, pattern)?);
+            builder.add(compile(
+                &crate::fs::normalize_glob(&escaped_root, pattern),
+                pattern,
+            )?);
+            if !pattern.contains(std::path::MAIN_SEPARATOR) {
+                builder.add(compile(pattern, pattern)?);
             }
         }
-        let build = |builder: GlobSetBuilder| {
-            builder
-                .build()
-                .map_err(|e| Error::Resolve(format!("Failed to build {kind} patterns: {e}")))
-        };
         Ok(Self {
-            basenames: build(basenames)?,
-            paths: build(paths)?,
+            set: builder
+                .build()
+                .map_err(|e| Error::Resolve(format!("Failed to build {kind} patterns: {e}")))?,
         })
     }
 
+    /// How ruff matches `include`: the full path against the set.
     fn is_match(&self, path: &Path) -> bool {
-        path.file_name()
-            .is_some_and(|name| self.basenames.is_match(name))
-            || self.paths.is_match(path)
+        self.set.is_match(path)
+    }
+
+    /// How ruff matches `exclude` (its `match_exclusion`): the full path or its basename.
+    fn is_match_or_basename(&self, path: &Path) -> bool {
+        self.set.is_match(path) || path.file_name().is_some_and(|name| self.set.is_match(name))
     }
 
     /// Whether `path` or any ancestor up to `project_root` matches. The walk prunes excluded
@@ -155,7 +142,7 @@ impl PathMatcher {
     /// Mirrors ruff's `is_file_excluded`.
     fn matches_ancestor(&self, path: &Path, project_root: &Path) -> bool {
         for ancestor in path.ancestors() {
-            if self.is_match(ancestor) {
+            if self.is_match_or_basename(ancestor) {
                 return true;
             }
             if ancestor == project_root {
@@ -174,8 +161,8 @@ pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> R
     }
     let exclude = PathMatcher::new(&config.exclude, &config.project_root, "exclude")?;
     // Stdin filenames may be relative to the cwd and may not exist on disk.
-    let path = crate::fs::get_cwd().join(filename);
-    Ok(exclude.matches_ancestor(&path.canonicalize().unwrap_or(path), &config.project_root))
+    let path = crate::fs::normalize_path(filename);
+    Ok(exclude.matches_ancestor(&path, &config.project_root))
 }
 
 /// Resolve a list of CLI paths (files and/or directories) into a flat,
@@ -188,7 +175,8 @@ pub fn resolve_files(
     let mut dirs: Vec<PathBuf> = vec![];
 
     // Process the provided paths, collecting directories for later recursive processing.
-    // Paths are canonicalized so they match patterns anchored at the canonical project root.
+    // Like ruff, paths are normalized lexically (absolute, `.`/`..` resolved, symlinks
+    // untouched) so they line up with the patterns anchored at the project root.
     for path in paths {
         if !path.exists() {
             return Err(Error::Resolve(format!(
@@ -196,13 +184,11 @@ pub fn resolve_files(
                 path.display()
             )));
         }
-        let canonical = std::fs::canonicalize(path).map_err(|e| {
-            Error::Resolve(format!("Failed to canonicalize {}: {e}", path.display()))
-        })?;
-        if canonical.is_file() {
-            files.push(canonical);
-        } else if canonical.is_dir() {
-            dirs.push(canonical);
+        let path = crate::fs::normalize_path(path);
+        if path.is_file() {
+            files.push(path);
+        } else if path.is_dir() {
+            dirs.push(path);
         }
     }
 
@@ -235,15 +221,15 @@ pub fn resolve_files(
         builder
             .standard_filters(config.respect_gitignore)
             .hidden(false)
-            .follow_links(true)
             .filter_entry(move |entry| {
                 // Roots come from the command line, so only the walk's own entries are excluded.
-                if entry.depth() > 0 && exclude.is_match(entry.path()) {
+                if entry.depth() > 0 && exclude.is_match_or_basename(entry.path()) {
                     debug!("Excluded: {}", entry.path().display());
                     return false;
                 }
-                // Prune non-template files here so they never reach a visitor.
-                !entry.file_type().is_some_and(|ft| ft.is_file()) || include.is_match(entry.path())
+                // Directories descend; like ruff, everything else (symlinks included) is a
+                // file candidate and must match the include set.
+                entry.file_type().is_none_or(|ft| ft.is_dir()) || include.is_match(entry.path())
             })
             .threads(
                 std::thread::available_parallelism()
@@ -254,7 +240,7 @@ pub fn resolve_files(
         let state = WalkFilesState::new();
         let mut visitor_builder = FileVisitorBuilder::new(&state);
         builder.build_parallel().visit(&mut visitor_builder);
-        files.extend(state.finish()?);
+        files.extend(state.finish());
     }
 
     files.sort();
@@ -266,22 +252,18 @@ pub fn resolve_files(
 
 /// Shared state across all parallel walk visitors.
 struct WalkFilesState {
-    files: Mutex<(Vec<PathBuf>, Option<Error>)>,
+    files: Mutex<Vec<PathBuf>>,
 }
 
 impl WalkFilesState {
     const fn new() -> Self {
         Self {
-            files: Mutex::new((vec![], None)),
+            files: Mutex::new(vec![]),
         }
     }
 
-    fn finish(self) -> Result<Vec<PathBuf>, Error> {
-        let (files, error) = self.files.into_inner().expect("walk visitor panicked");
-        if let Some(err) = error {
-            return Err(err);
-        }
-        Ok(files)
+    fn finish(self) -> Vec<PathBuf> {
+        self.files.into_inner().expect("walk visitor panicked")
     }
 }
 
@@ -299,62 +281,23 @@ impl<'s> ignore::ParallelVisitorBuilder<'s> for FileVisitorBuilder<'s> {
     fn build(&mut self) -> Box<dyn ignore::ParallelVisitor + 's> {
         Box::new(FileVisitor {
             local_files: vec![],
-            local_error: None,
             global: self.state,
-            canonical_parent: None,
         })
     }
 }
 
 struct FileVisitor<'s> {
     local_files: Vec<PathBuf>,
-    local_error: Option<Error>,
     global: &'s WalkFilesState,
-    /// Last `(directory, canonical directory)` pair, reused across the entries of a
-    /// directory since the walker hands them to a single visitor.
-    canonical_parent: Option<(PathBuf, PathBuf)>,
-}
-
-impl FileVisitor<'_> {
-    /// Canonicalize a walked file path, resolving its parent directory at most once per
-    /// directory. Walk roots are already canonical, so only symlinks need resolving.
-    fn canonicalize(&mut self, entry: &ignore::DirEntry) -> std::io::Result<PathBuf> {
-        let path = entry.path();
-        let (Some(parent), Some(name)) = (path.parent(), path.file_name()) else {
-            return std::fs::canonicalize(path);
-        };
-        if entry.path_is_symlink() {
-            return std::fs::canonicalize(path);
-        }
-        if self
-            .canonical_parent
-            .as_ref()
-            .is_none_or(|(dir, _)| dir != parent)
-        {
-            self.canonical_parent = Some((parent.to_path_buf(), std::fs::canonicalize(parent)?));
-        }
-        let (_, canonical_parent) = self.canonical_parent.as_ref().expect("just inserted");
-        Ok(canonical_parent.join(name))
-    }
 }
 
 impl ignore::ParallelVisitor for FileVisitor<'_> {
     fn visit(&mut self, result: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
         match result {
-            Ok(entry) if entry.file_type().is_some_and(|ft| ft.is_file()) => {
-                match self.canonicalize(&entry) {
-                    Ok(canonical) => {
-                        debug!("Discovered: {}", canonical.display());
-                        self.local_files.push(canonical);
-                    }
-                    Err(e) => {
-                        self.local_error = Some(Error::Resolve(format!(
-                            "Failed to canonicalize {}: {e}",
-                            entry.path().display()
-                        )));
-                        return ignore::WalkState::Quit;
-                    }
-                }
+            // `filter_entry` already matched non-directories against the include set.
+            Ok(entry) if entry.file_type().is_some_and(|ft| !ft.is_dir()) => {
+                debug!("Discovered: {}", entry.path().display());
+                self.local_files.push(entry.into_path());
             }
             Ok(_) => {}
             Err(err) => {
@@ -367,16 +310,12 @@ impl ignore::ParallelVisitor for FileVisitor<'_> {
 
 impl Drop for FileVisitor<'_> {
     fn drop(&mut self) {
-        let (files, error) = &mut *self.global.files.lock().expect("walk visitor panicked");
+        let files = &mut *self.global.files.lock().expect("walk visitor panicked");
 
         if files.is_empty() {
             *files = std::mem::take(&mut self.local_files);
         } else {
             files.append(&mut self.local_files);
-        }
-
-        if error.is_none() {
-            *error = self.local_error.take();
         }
     }
 }
@@ -715,7 +654,7 @@ mod tests {
             found
         };
 
-        // Bare pattern: matches the file name at any depth.
+        // Bare pattern: matches at any depth since `*` crosses `/`.
         assert_eq!(
             matched("*.html"),
             [
@@ -726,7 +665,9 @@ mod tests {
                 "templates/rnested.html"
             ]
         );
-        assert_eq!(matched("r*.html"), ["root.html", "templates/rnested.html"]);
+        // Like ruff, includes match the full path only, so a bare pattern that pins a
+        // leading literal is effectively anchored at the root.
+        assert_eq!(matched("r*.html"), ["root.html"]);
         // Path pattern: anchored at the root, and `*` crosses `/` so nested files match too.
         assert_eq!(
             matched("templates/*.html"),
@@ -771,8 +712,11 @@ mod tests {
 
         // Bare pattern: matches the name at any depth, directories included.
         assert_eq!(kept("sub"), ["other/page.html", "root.html"]);
-        // A trailing slash keeps that meaning instead of matching nothing.
-        assert_eq!(kept("sub/"), ["other/page.html", "root.html"]);
+        // Like ruff, a trailing slash makes it a path pattern anchored at the root.
+        assert_eq!(
+            kept("sub/"),
+            ["other/page.html", "other/sub/page.html", "root.html"]
+        );
         // Path pattern: anchored at the root, and `*` crosses `/` so nested files match too.
         assert_eq!(
             kept("sub/*.html"),
@@ -811,23 +755,20 @@ mod tests {
         );
     }
 
+    /// Like ruff, `!` is not negation: the pattern is a literal glob that matches nothing.
     #[test]
-    fn test_resolve_files_negated_exclude_pattern_errors() {
+    fn test_resolve_files_negated_exclude_pattern_is_literal() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "keep.html");
 
         let pyproject = PyprojectSettings {
-            exclude: Some(vec!["*.html".to_string(), "!keep.html".to_string()]),
+            exclude: Some(vec!["!keep.html".to_string()]),
             ..Default::default()
         };
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
-        let err = resolve_files(&[dir.path().to_path_buf()], &config).unwrap_err();
+        let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        assert!(
-            err.to_string()
-                .contains("Negated exclude pattern '!keep.html' is not supported"),
-            "{err}"
-        );
+        assert_eq!(file_names(&files), ["keep.html"]);
     }
 
     #[test]
@@ -974,20 +915,24 @@ mod tests {
         assert_eq!(files.len(), 2);
     }
 
+    /// Like ruff: symlinked directories are not followed, while symlinked files are
+    /// discovered under their own (lexical) path.
     #[cfg(unix)]
     #[test]
-    fn test_resolve_files_follows_symlinks() {
+    fn test_resolve_files_symlinks() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "real_dir/template.html");
-        let target = dir.path().join("real_dir/template.html");
         std::os::unix::fs::symlink(dir.path().join("real_dir"), dir.path().join("link_dir"))
             .unwrap();
-        std::os::unix::fs::symlink(&target, dir.path().join("link_template.html")).unwrap();
+        std::os::unix::fs::symlink(
+            dir.path().join("real_dir/template.html"),
+            dir.path().join("link.html"),
+        )
+        .unwrap();
 
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
 
-        // Both links resolve to the single real file.
-        assert_eq!(files, vec![target.canonicalize().unwrap()]);
+        assert_eq!(file_names(&files), ["link.html", "template.html"]);
     }
 }
