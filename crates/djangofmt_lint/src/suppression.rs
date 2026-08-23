@@ -88,7 +88,7 @@ fn walk<'s>(
                 match directive {
                     Some(Directive::Ignore(codes)) => {
                         unknown_ignore_code::check(&codes, checker);
-                        if let Some(range) = following_node(source, &nodes[index + 1..]) {
+                        if let Some(range) = following_node(checker, &nodes[index + 1..]) {
                             out.push(Suppression { range, codes });
                         }
                     }
@@ -119,12 +119,21 @@ fn walk<'s>(
 }
 
 /// Byte range of the first node a directive comment can guard.
-fn following_node(source: &str, rest: &[Node<'_>]) -> Option<Range<usize>> {
+fn following_node(checker: &Checker<'_>, rest: &[Node<'_>]) -> Option<Range<usize>> {
     let target = rest
         .iter()
         .find(|node| !is_whitespace_text(node) && !is_comment(node))?;
-    let start = offset_of(source, target.raw);
+    let start = checker.source_offset(target.raw);
     Some(start..start + target.raw.len())
+}
+
+/// A comment body stripped of Jinja's whitespace-control markers (`{#- ... -#}`),
+/// which are part of the delimiter rather than of the directive.
+fn directive_body(raw: &str) -> &str {
+    raw.trim()
+        .trim_start_matches(['-', '+'])
+        .trim_end_matches('-')
+        .trim()
 }
 
 /// Whether a comment body claims to be a lint directive.
@@ -132,7 +141,7 @@ fn following_node(source: &str, rest: &[Node<'_>]) -> Option<Range<usize>> {
 /// The bare `djangofmt:ignore`, optionally followed by an explanation, is the
 /// formatter's own directive and never a lint suppression.
 fn is_lint_directive(body: &str) -> bool {
-    let Some(after) = body.trim().strip_prefix("djangofmt:") else {
+    let Some(after) = directive_body(body).strip_prefix("djangofmt:") else {
         return false;
     };
     !after
@@ -146,7 +155,7 @@ fn is_lint_directive(body: &str) -> bool {
 /// `file-ignore[...]` with a non-empty comma-separated rule list and nothing
 /// after the closing bracket.
 fn parse_directive(raw: &str) -> Option<Directive<'_>> {
-    let rest = raw.trim().strip_prefix("djangofmt:")?.trim_start();
+    let rest = directive_body(raw).strip_prefix("djangofmt:")?.trim_start();
     let (file_level, rest) = match rest.strip_prefix("file-ignore[") {
         Some(rest) => (true, rest),
         None => (false, rest.strip_prefix("ignore[")?),
@@ -190,7 +199,7 @@ pub fn file_ignores(source: &str) -> FileIgnores {
         .trim_start();
     let jinja_body = leading_comment(trimmed, "{#", "#}");
     if let Some(body) = jinja_body.or_else(|| leading_comment(trimmed, "<!--", "-->"))
-        && body.trim() == "djangofmt:ignore"
+        && directive_body(body) == "djangofmt:ignore"
     {
         return FileIgnores {
             format: true,
@@ -216,13 +225,13 @@ const fn is_comment(node: &Node<'_>) -> bool {
     matches!(node.kind, NodeKind::JinjaComment(_) | NodeKind::Comment(_))
 }
 
+/// A BOM is not Rust whitespace, but it does not displace the file's first comment.
 fn is_whitespace_text(node: &Node<'_>) -> bool {
-    matches!(node.kind, NodeKind::Text(_)) && node.raw.trim().is_empty()
-}
-
-/// Byte offset of `slice` within `source` (both must share the same allocation).
-fn offset_of(source: &str, slice: &str) -> usize {
-    slice.as_ptr() as usize - source.as_ptr() as usize
+    matches!(node.kind, NodeKind::Text(_))
+        && node
+            .raw
+            .chars()
+            .all(|char| char.is_whitespace() || char == '\u{feff}')
 }
 
 #[cfg(test)]
@@ -312,6 +321,31 @@ mod tests {
             "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>";
         assert!(codes(&format!("<div>\n{GUARDED}\n</div>")).is_empty());
         assert!(codes(&format!("{{% if x %}}\n{GUARDED}\n{{% endif %}}")).is_empty());
+    }
+
+    #[test]
+    fn jinja_whitespace_control_markers_are_not_part_of_the_directive() {
+        assert!(
+            codes("{#- djangofmt: ignore[invalid-attr-value] -#}\n<form method=\"yes\"></form>")
+                .is_empty()
+        );
+        assert_eq!(
+            file_ignores("{#- djangofmt: file-ignore[format] -#}"),
+            FileIgnores {
+                format: true,
+                invalid_syntax: false,
+            }
+        );
+    }
+
+    #[test]
+    fn a_bom_does_not_displace_the_first_comment() {
+        assert!(
+            codes(
+                "\u{feff}{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
+            )
+            .is_empty()
+        );
     }
 
     #[test]
