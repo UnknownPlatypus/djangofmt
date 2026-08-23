@@ -62,6 +62,10 @@ pub struct PyprojectSettings {
     pub preserve_unquoted_attrs: Option<bool>,
 
     /// File and directory patterns to exclude from discovery, replacing the default excludes.
+    ///
+    /// A pattern without `/` (e.g. `node_modules`) excludes any file or directory with that
+    /// name at any depth; a pattern with `/` (e.g. `templates/vendor`) is a glob anchored at
+    /// the project root (the `pyproject.toml` directory), where `*` also crosses `/`.
     #[option(
         default = r#"[".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache", ".nox", ".pants.d", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__", "_build", "buck-out", "dist", "node_modules", "venv"]"#,
         value_type = "list[str]",
@@ -78,6 +82,9 @@ pub struct PyprojectSettings {
     pub extend_exclude: Option<Vec<String>>,
 
     /// File patterns to format and lint, replacing the default includes.
+    ///
+    /// Same glob semantics as `exclude`: a pattern without `/` matches file names at any
+    /// depth, a pattern with `/` is anchored at the project root.
     #[option(
         default = r#"["*.html", "*.jinja", "*.jinja2", "*.j2"]"#,
         value_type = "list[str]",

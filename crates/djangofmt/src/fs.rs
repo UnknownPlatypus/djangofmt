@@ -22,7 +22,7 @@ pub fn relativize_path<P: AsRef<Path>>(path: P) -> String {
 }
 
 /// Anchor a ruff-style glob at the (already glob-escaped) project root; absolute
-/// patterns pass through unchanged. Shared by include discovery and per-file-ignores.
+/// patterns pass through unchanged. Shared by file discovery and per-file-ignores.
 #[must_use]
 pub fn anchor_glob(escaped_root: &str, pattern: &str) -> String {
     if Path::new(pattern).is_absolute() {

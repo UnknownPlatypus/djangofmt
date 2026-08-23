@@ -1,11 +1,8 @@
-use std::borrow::Cow;
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use globset::{Glob, GlobSet, GlobSetBuilder, escape};
 use ignore::WalkBuilder;
-use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use ignore::overrides::OverrideBuilder;
 use tracing::{debug, warn};
 
 use crate::args::FileSelectionArgs;
@@ -101,37 +98,45 @@ impl ResolvedDiscoveryConfig {
     }
 }
 
-/// The resolved `include` patterns, compiled into the two matchers of
-/// [`crate::per_file_ignores`]: a bare pattern matches a file's name at any depth, a path
+/// Include or exclude patterns compiled into the two matchers of
+/// [`crate::per_file_ignores`]: a bare pattern matches a path's name at any depth, a path
 /// pattern is anchored at the project root.
-struct IncludeMatcher {
+struct PathMatcher {
     basenames: GlobSet,
     paths: GlobSet,
 }
 
-impl IncludeMatcher {
-    fn new(config: &ResolvedDiscoveryConfig) -> Result<Self, Error> {
-        let escaped_root = escape(&config.project_root.to_string_lossy());
+impl PathMatcher {
+    fn new(patterns: &[String], project_root: &Path, kind: &str) -> Result<Self, Error> {
+        let escaped_root = escape(&project_root.to_string_lossy());
         let compile = |glob: &str, pattern: &str| {
             Glob::new(glob)
-                .map_err(|e| Error::Resolve(format!("Invalid include pattern '{pattern}': {e}")))
+                .map_err(|e| Error::Resolve(format!("Invalid {kind} pattern '{pattern}': {e}")))
         };
         let mut basenames = GlobSetBuilder::new();
         let mut paths = GlobSetBuilder::new();
-        for pattern in &config.include {
-            if pattern.contains('/') {
+        for pattern in patterns {
+            if pattern.starts_with('!') {
+                return Err(Error::Resolve(format!(
+                    "Negated {kind} pattern '{pattern}' is not supported"
+                )));
+            }
+            // A trailing slash means "directory only" in gitignore; directories are matched
+            // either way here, so drop it rather than let the pattern match nothing.
+            let glob = pattern.trim_end_matches('/');
+            if glob.contains('/') {
                 paths.add(compile(
-                    &crate::fs::anchor_glob(&escaped_root, pattern),
+                    &crate::fs::anchor_glob(&escaped_root, glob),
                     pattern,
                 )?);
             } else {
-                basenames.add(compile(pattern, pattern)?);
+                basenames.add(compile(glob, pattern)?);
             }
         }
         let build = |builder: GlobSetBuilder| {
             builder
                 .build()
-                .map_err(|e| Error::Resolve(format!("Failed to build include patterns: {e}")))
+                .map_err(|e| Error::Resolve(format!("Failed to build {kind} patterns: {e}")))
         };
         Ok(Self {
             basenames: build(basenames)?,
@@ -144,52 +149,21 @@ impl IncludeMatcher {
             .is_some_and(|name| self.basenames.is_match(name))
             || self.paths.is_match(path)
     }
-}
 
-/// Build the exclude `Override` matcher used to prune the directory walk.
-fn build_overrides(config: &ResolvedDiscoveryConfig) -> Result<ignore::overrides::Override, Error> {
-    let mut override_builder = OverrideBuilder::new(&config.project_root);
-    for pattern in &config.exclude {
-        override_builder
-            .add(&format!("!{pattern}"))
-            .map_err(|e| Error::Resolve(format!("Invalid exclude pattern '{pattern}': {e}")))?;
+    /// Whether `path` or any ancestor up to `project_root` matches. The walk prunes excluded
+    /// directories, but explicitly-passed paths never reach it, so they check parents here.
+    /// Mirrors ruff's `is_file_excluded`.
+    fn matches_ancestor(&self, path: &Path, project_root: &Path) -> bool {
+        for ancestor in path.ancestors() {
+            if self.is_match(ancestor) {
+                return true;
+            }
+            if ancestor == project_root {
+                break;
+            }
+        }
+        false
     }
-    override_builder
-        .build()
-        .map_err(|e| Error::Resolve(format!("Failed to build exclude overrides: {e}")))
-}
-
-/// Build the exclude matcher for explicitly-passed paths, which (unlike the walk,
-/// where excluded directories are pruned) must also match via parent directories.
-fn build_exclude_matcher(config: &ResolvedDiscoveryConfig) -> Result<Gitignore, Error> {
-    let mut builder = GitignoreBuilder::new(&config.project_root);
-    for pattern in &config.exclude {
-        builder
-            .add_line(None, pattern)
-            .map_err(|e| Error::Resolve(format!("Invalid exclude pattern '{pattern}': {e}")))?;
-    }
-    builder
-        .build()
-        .map_err(|e| Error::Resolve(format!("Failed to build exclude matcher: {e}")))
-}
-
-/// Return whether `path` or any of its parent directories (up to the project root)
-/// matches an exclude pattern, mirroring ruff's `is_file_excluded`.
-fn is_excluded(matcher: &Gitignore, path: &Path, is_dir: bool) -> bool {
-    let candidate: Cow<Path> = if path.starts_with(matcher.path()) {
-        Cow::Borrowed(path)
-    } else {
-        // Outside the root only name patterns like `.venv` can match, so keep
-        // the named components (the matcher rejects rooted paths it can't strip).
-        Cow::Owned(
-            path.components()
-                .filter(|c| matches!(c, Component::Normal(_)))
-                .collect(),
-        )
-    };
-    matcher
-        .matched_path_or_any_parents(candidate, is_dir)
-        .is_ignore()
 }
 
 /// Return `true` if the given filename should be force-excluded based on the resolved configuration.
@@ -198,14 +172,10 @@ pub fn is_force_excluded(filename: &Path, config: &ResolvedDiscoveryConfig) -> R
     if !config.force_exclude {
         return Ok(false);
     }
-    let matcher = build_exclude_matcher(config)?;
+    let exclude = PathMatcher::new(&config.exclude, &config.project_root, "exclude")?;
     // Stdin filenames may be relative to the cwd and may not exist on disk.
     let path = crate::fs::get_cwd().join(filename);
-    Ok(is_excluded(
-        &matcher,
-        &path.canonicalize().unwrap_or(path),
-        false,
-    ))
+    Ok(exclude.matches_ancestor(&path.canonicalize().unwrap_or(path), &config.project_root))
 }
 
 /// Resolve a list of CLI paths (files and/or directories) into a flat,
@@ -236,26 +206,26 @@ pub fn resolve_files(
         }
     }
 
+    let exclude = PathMatcher::new(&config.exclude, &config.project_root, "exclude")?;
+
     // When force_exclude is enabled, apply exclude patterns to explicitly-passed paths too.
     if config.force_exclude {
-        let matcher = build_exclude_matcher(config)?;
-        let retain = |paths: &mut Vec<PathBuf>, is_dir: bool| {
+        let retain = |paths: &mut Vec<PathBuf>| {
             paths.retain(|path| {
-                let excluded = is_excluded(&matcher, path, is_dir);
+                let excluded = exclude.matches_ancestor(path, &config.project_root);
                 if excluded {
                     debug!("Force-excluded: {}", path.display());
                 }
                 !excluded
             });
         };
-        retain(&mut files, false);
-        retain(&mut dirs, true);
+        retain(&mut files);
+        retain(&mut dirs);
     }
 
     // Walk all directories with a single parallel WalkBuilder.
     if let Some((first, rest)) = dirs.split_first() {
-        let include = IncludeMatcher::new(config)?;
-        let overrides = build_overrides(config)?;
+        let include = PathMatcher::new(&config.include, &config.project_root, "include")?;
 
         let mut builder = WalkBuilder::new(first);
         for dir in rest {
@@ -266,8 +236,12 @@ pub fn resolve_files(
             .standard_filters(config.respect_gitignore)
             .hidden(false)
             .follow_links(true)
-            .overrides(overrides)
             .filter_entry(move |entry| {
+                // Roots come from the command line, so only the walk's own entries are excluded.
+                if entry.depth() > 0 && exclude.is_match(entry.path()) {
+                    debug!("Excluded: {}", entry.path().display());
+                    return false;
+                }
                 // Prune non-template files here so they never reach a visitor.
                 !entry.file_type().is_some_and(|ft| ft.is_file()) || include.is_match(entry.path())
             })
@@ -764,6 +738,96 @@ mod tests {
         );
         // `**/` still spans directories.
         assert_eq!(matched("**/deep/*.html"), ["templates/deep/page.html"]);
+    }
+
+    #[test]
+    fn test_resolve_files_exclude_glob_semantics() {
+        let dir = tempdir().unwrap();
+        for path in [
+            "root.html",
+            "sub/page.html",
+            "sub/deep/page.html",
+            "other/sub/page.html",
+            "other/page.html",
+        ] {
+            create_file(dir.path(), path);
+        }
+        let root = dir.path().canonicalize().unwrap();
+
+        let kept = |pattern: &str| {
+            let pyproject = PyprojectSettings {
+                exclude: Some(vec![pattern.to_string()]),
+                ..Default::default()
+            };
+            let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
+            let mut found: Vec<String> = resolve_files(&[dir.path().to_path_buf()], &config)
+                .unwrap()
+                .iter()
+                .map(|p| p.strip_prefix(&root).unwrap().display().to_string())
+                .collect();
+            found.sort();
+            found
+        };
+
+        // Bare pattern: matches the name at any depth, directories included.
+        assert_eq!(kept("sub"), ["other/page.html", "root.html"]);
+        // A trailing slash keeps that meaning instead of matching nothing.
+        assert_eq!(kept("sub/"), ["other/page.html", "root.html"]);
+        // Path pattern: anchored at the root, and `*` crosses `/` so nested files match too.
+        assert_eq!(
+            kept("sub/*.html"),
+            ["other/page.html", "other/sub/page.html", "root.html"]
+        );
+        // Absolute patterns are matched as-is.
+        assert_eq!(
+            kept(&root.join("sub").display().to_string()),
+            ["other/page.html", "other/sub/page.html", "root.html"]
+        );
+    }
+
+    /// The walk and explicitly-passed paths share one matcher, so a pattern must not
+    /// select differently depending on how the file was reached.
+    #[test]
+    fn test_resolve_files_exclude_agrees_across_walk_and_explicit_paths() {
+        let dir = tempdir().unwrap();
+        create_file(dir.path(), "sub/deep/page.html");
+
+        let cli = FileSelectionArgs {
+            force_exclude: true,
+            exclude: Some(vec!["sub/*.html".to_string()]),
+            ..Default::default()
+        };
+        let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), dir.path());
+
+        assert!(
+            resolve_files(&[dir.path().to_path_buf()], &config)
+                .unwrap()
+                .is_empty()
+        );
+        assert!(
+            resolve_files(&[dir.path().join("sub/deep/page.html")], &config)
+                .unwrap()
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn test_resolve_files_negated_exclude_pattern_errors() {
+        let dir = tempdir().unwrap();
+        create_file(dir.path(), "keep.html");
+
+        let pyproject = PyprojectSettings {
+            exclude: Some(vec!["*.html".to_string(), "!keep.html".to_string()]),
+            ..Default::default()
+        };
+        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
+        let err = resolve_files(&[dir.path().to_path_buf()], &config).unwrap_err();
+
+        assert!(
+            err.to_string()
+                .contains("Negated exclude pattern '!keep.html' is not supported"),
+            "{err}"
+        );
     }
 
     #[test]
