@@ -173,15 +173,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         nb_parse_errors,
     );
 
-    // Surface files quarantined via `file-ignore[invalid-syntax]`, mirroring
-    // the format command's skip counter.
-    let skipped_count = results.iter().filter(|result| result.skipped).count();
-    if skipped_count > 0 {
-        info!(
-            "{skipped_count} file{} skipped !",
-            if skipped_count == 1 { "" } else { "s" }
-        );
-    }
+    print_skipped(&results);
 
     if config.show_fixes && total_applied > 0 {
         print_show_fixes(&results, total_applied);
@@ -286,6 +278,18 @@ fn print_summary(
         info!("Found {total} errors. ({hidden} hidden fixes can be enabled with --unsafe-fixes)");
     } else {
         info!("Found {total} errors.");
+    }
+}
+
+/// Surface files quarantined via `file-ignore[invalid-syntax]`, mirroring
+/// the format command's skip counter.
+fn print_skipped(results: &[CheckResult]) {
+    let skipped = results.iter().filter(|result| result.skipped).count();
+    if skipped > 0 {
+        info!(
+            "{skipped} file{} skipped !",
+            if skipped == 1 { "" } else { "s" }
+        );
     }
 }
 

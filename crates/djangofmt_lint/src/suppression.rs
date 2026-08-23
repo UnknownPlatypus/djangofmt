@@ -19,7 +19,9 @@ use std::ops::Range;
 
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
 
-use crate::LintDiagnostic;
+use crate::registry::Rule;
+use crate::rules::suspicious::{invalid_ignore_comment, unknown_ignore_code};
+use crate::{Checker, LintDiagnostic};
 
 /// Code accepted by `file-ignore[...]` to suppress parse errors.
 pub const INVALID_SYNTAX: &str = "invalid-syntax";
@@ -28,8 +30,8 @@ pub const INVALID_SYNTAX: &str = "invalid-syntax";
 pub const FORMAT: &str = "format";
 
 /// A parsed suppression directive.
-#[derive(Debug, PartialEq)]
-enum Directive<'s> {
+#[derive(Debug, PartialEq, Eq)]
+pub enum Directive<'s> {
     /// `djangofmt: ignore[...]` — suppress on the following node.
     Ignore(Vec<&'s str>),
     /// `djangofmt: file-ignore[...]` — suppress for the whole file.
@@ -118,6 +120,66 @@ pub fn file_ignores(source: &str) -> FileIgnores {
 fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str> {
     let body = text.strip_prefix(open)?;
     Some(&body[..body.find(close)?])
+}
+
+/// Lint every `djangofmt:` comment for misuse (the `*-ignore-*` rules).
+///
+/// Runs its own walk rather than piggybacking on [`filter_suppressed`], which
+/// bails out early when a file produced no diagnostics.
+pub fn check_directives(root: &Root<'_>, checker: &Checker<'_>) {
+    if !checker.any_rule_enabled(&[Rule::InvalidIgnoreComment, Rule::UnknownIgnoreCode])
+        || !checker.context().source().contains("djangofmt:")
+    {
+        return;
+    }
+    let file_head = root.children.iter().find(|node| !is_whitespace_text(node));
+    walk_directives(&root.children, file_head, checker);
+}
+
+fn walk_directives<'s>(nodes: &[Node<'s>], file_head: Option<&Node<'s>>, checker: &Checker<'_>) {
+    for node in nodes {
+        if let Some(body) = comment_body(node) {
+            let is_file_head = file_head.is_some_and(|head| std::ptr::eq(head, node));
+            check_directive_comment(node, body, is_file_head, checker);
+        } else {
+            match &node.kind {
+                NodeKind::Element(element) => {
+                    walk_directives(&element.children, file_head, checker);
+                }
+                NodeKind::JinjaBlock(block) => {
+                    for item in &block.body {
+                        if let JinjaTagOrChildren::Children(children) = item {
+                            walk_directives(children, file_head, checker);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+fn check_directive_comment<'s>(
+    node: &Node<'s>,
+    body: &'s str,
+    is_file_head: bool,
+    checker: &Checker<'_>,
+) {
+    let Some(after) = body.trim().strip_prefix("djangofmt:") else {
+        return;
+    };
+    // The formatter's bare legacy directive, optionally followed by an
+    // explanation, is valid and handled by markup_fmt.
+    if let Some(rest) = after.strip_prefix("ignore")
+        && rest.chars().next().is_none_or(char::is_whitespace)
+    {
+        return;
+    }
+    let directive = parse_directive(body);
+    invalid_ignore_comment::check(directive.as_ref(), node.raw, is_file_head, checker);
+    if let Some(Directive::Ignore(codes) | Directive::FileIgnore(codes)) = &directive {
+        unknown_ignore_code::check(codes, checker);
+    }
 }
 
 /// Codes of a `file-ignore[...]` directive on the first non-whitespace node.
@@ -375,12 +437,13 @@ mod tests {
                       <form method=\"yes\"></form>\n\
                       <div><form method=\"put\"></form></div>";
         assert_eq!(count_diagnostics(source), 0);
-        // Only honored at the top of the file.
+        // Only honored at the top of the file: the rule still fires, and the
+        // misplaced directive earns an `invalid-ignore-comment` of its own.
         assert_eq!(
             count_diagnostics(
                 "<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
             ),
-            1
+            2
         );
     }
 

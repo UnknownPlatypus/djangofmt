@@ -1,0 +1,11 @@
+<!-- Typo in a rule name -->
+{# djangofmt: ignore[invalid-attr-values] #}
+<form method="yes"></form>
+
+<!-- Unknown code hiding among valid ones -->
+{# djangofmt: ignore[invalid-attr-value, not-a-rule] #}
+<div></div>
+
+<!-- file-ignore codes are checked too -->
+{# djangofmt: file-ignore[nonexistent-rule] #}
+<div></div>
