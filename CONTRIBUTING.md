@@ -52,6 +52,32 @@ just ecosystem-check-dev
 
 See the [README](./python/ecosystem-check/README.md).
 
+## Fuzzing
+
+The formatter can be fuzzed with [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz)
+(requires `rustup toolchain install nightly` and `cargo install cargo-fuzz`):
+
+```shell
+just fuzz     # run until interrupted
+just fuzz 60  # run for 60 seconds
+```
+
+The `fmt_idempotency` target formats arbitrary inputs twice under both the Django
+and the Jinja profile, and panics on any panic inside the formatter, non-idempotent
+output, or output that no longer parses. It is seeded with the in-repo test fixtures
+and benchmark templates.
+
+When a crash is found (an input file lands in `fuzz/artifacts/fmt_idempotency/`):
+
+1. Minimize it: `just fuzz-min fuzz/artifacts/fmt_idempotency/crash-...`
+2. Read the backtrace to find the owning crate. Besides the
+   [markup_fmt fork](https://github.com/UnknownPlatypus/markup_fmt), the target
+   reaches `djangofmt` itself (`format_text`, `ParseError`) and the embedded
+   `malva` and `dprint-plugin-json` formatters. Fix the bug where it lives, and
+   bump the pinned `rev` in the root `Cargo.toml` only for `markup_fmt` fixes.
+3. Keep the minimized case as a fixture in `crates/djangofmt/tests/fmt/`
+   or `crates/djangofmt/tests/parse_error/`.
+
 ## Use of AI
 
 > [!NOTE]

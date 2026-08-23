@@ -87,6 +87,23 @@ coverage:
 coverage-lcov:
     cargo llvm-cov --workspace --exclude djangofmt_dev --lcov --output-path lcov.info
 
+# Fuzz the formatter (requires: rustup toolchain install nightly; cargo install cargo-fuzz)
+[group('dev')]
+fuzz time="0" *args="":
+    @mkdir -p fuzz/corpus/fmt_idempotency
+    cargo +nightly fuzz run -s none fmt_idempotency \
+        fuzz/corpus/fmt_idempotency \
+        crates/djangofmt/tests/fmt \
+        crates/djangofmt/tests/parse_error \
+        crates/djangofmt_lint/tests/check \
+        crates/djangofmt_benchmark/resources \
+        -- -dict=fuzz/django.dict -timeout=2 -max_total_time={{time}} {{args}}
+
+# Minimize a fuzz crash artifact from fuzz/artifacts/fmt_idempotency/
+[group('dev')]
+fuzz-min artifact:
+    cargo +nightly fuzz tmin -s none fmt_idempotency {{artifact}}
+
 # Run rust micro-benchmarks
 [group('bench')]
 bench-rs:

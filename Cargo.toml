@@ -1,6 +1,8 @@
 [workspace]
 resolver = "3"
 members = ["crates/*"]
+# The fuzz crate needs nightly and panics by design, keep it out of normal builds.
+exclude = ["fuzz"]
 
 [workspace.package]
 version = "0.2.12"
