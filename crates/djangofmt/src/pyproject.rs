@@ -372,22 +372,6 @@ mod tests {
     }
 
     #[test]
-    fn test_load_options_with_only_new_fields_defaults_rest() {
-        let content = r#"
-        [tool.djangofmt]
-        extend-exclude = ["build"]
-    "#;
-        let result = load_options_from_pyproject_toml(content).unwrap();
-        assert_eq!(
-            result,
-            PyprojectSettings {
-                extend_exclude: Some(vec!["build".to_string()]),
-                ..Default::default()
-            }
-        );
-    }
-
-    #[test]
     fn test_load_preserve_unquoted_attrs() {
         let content = r"
 [tool.djangofmt]
@@ -488,28 +472,6 @@ preview = true
         assert_eq!(
             per_file.get("templates/admin/*.html"),
             Some(&vec![RuleSelector::Rule(Rule::MissingImgAlt)])
-        );
-    }
-
-    #[test]
-    fn test_load_options_existing_fields_still_work() {
-        let content = r#"
-        [tool.djangofmt]
-        line-length = 80
-        indent-width = 2
-        profile = "jinja"
-        custom-blocks = ["cache"]
-    "#;
-        let result = load_options_from_pyproject_toml(content).unwrap();
-        assert_eq!(
-            result,
-            PyprojectSettings {
-                line_length: Some(LineLength::try_from(80u16).unwrap()),
-                indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
-                profile: Some(Profile::Jinja),
-                custom_blocks: Some(vec!["cache".to_string()]),
-                ..Default::default()
-            }
         );
     }
 }

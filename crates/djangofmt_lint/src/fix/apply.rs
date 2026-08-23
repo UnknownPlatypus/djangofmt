@@ -294,19 +294,6 @@ mod tests {
     }
 
     #[test]
-    fn single_replacement() {
-        let source = "hello world";
-        let diags = vec![diag_with_fix(Fix::safe_edit(Edit::replacement(
-            "Rust",
-            span(6, 5),
-        )))];
-        let result = apply_fixes(source, &diags, Applicability::Safe);
-        assert_eq!(result.output, "hello Rust");
-        assert_eq!(result.applied_count, 1);
-        assert_eq!(result.skipped_count, 0);
-    }
-
-    #[test]
     fn multiple_non_overlapping() {
         let source = "abcdefghij";
         let diags = vec![

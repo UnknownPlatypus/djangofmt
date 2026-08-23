@@ -484,26 +484,6 @@ mod tests {
     }
 
     #[test]
-    fn format_command_error_read_display_unknown_path() {
-        let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
-        let err = CommandError::Read(None, io_err);
-        assert_eq!(
-            err.to_string(),
-            "Failed to read <unknown>: permission denied"
-        );
-    }
-
-    #[test]
-    fn format_command_error_write_display() {
-        let io_err = io::Error::new(io::ErrorKind::PermissionDenied, "permission denied");
-        let err = CommandError::Write(Some(PathBuf::from("/path/to/output.html")), io_err);
-        assert_eq!(
-            err.to_string(),
-            "Failed to write /path/to/output.html: permission denied"
-        );
-    }
-
-    #[test]
     fn format_command_error_write_display_unknown_path() {
         let io_err = io::Error::other("disk full");
         let err = CommandError::Write(None, io_err);

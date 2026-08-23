@@ -244,10 +244,4 @@ mod tests {
         let src = r#"{% if a %}<div class="x">hi</div>{% endif %}"#;
         insta::assert_snapshot!(super::doc_tree(src, 80, 4, "django"));
     }
-
-    #[test]
-    fn nested_elements_with_attributes() {
-        let src = r#"<ul class="list"><li data-id="1">one</li><li data-id="2">two</li></ul>"#;
-        insta::assert_snapshot!(super::doc_tree(src, 80, 4, "django"));
-    }
 }

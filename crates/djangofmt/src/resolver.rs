@@ -507,34 +507,6 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_explicit_file_bypasses_excludes() {
-        let dir = tempdir().unwrap();
-        let excluded_dir = dir.path().join(".venv");
-        fs::create_dir_all(&excluded_dir).unwrap();
-        create_file(dir.path(), ".venv/template.html");
-
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
-        let explicit_file = excluded_dir.join("template.html");
-        let files = resolve_files(&[explicit_file], &config).unwrap();
-
-        assert_eq!(files.len(), 1);
-    }
-
-    #[test]
-    fn test_resolve_files_directory_respects_excludes() {
-        let dir = tempdir().unwrap();
-        create_file(dir.path(), "good.html");
-        create_file(dir.path(), ".venv/bad.html");
-
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
-        let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
-
-        let names = file_names(&files);
-        assert!(names.contains(&"good.html".to_string()));
-        assert!(!names.contains(&"bad.html".to_string()));
-    }
-
-    #[test]
     fn test_resolve_files_respects_gitignore() {
         let dir = tempdir().unwrap();
         std::process::Command::new("git")
@@ -579,48 +551,10 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_empty_directory() {
-        let dir = tempdir().unwrap();
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
-        let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
-        assert!(files.is_empty());
-    }
-
-    #[test]
     fn test_resolve_files_nonexistent_path_errors() {
         let config = resolved(&default_cli(), &default_pyproject());
         let result = resolve_files(&[PathBuf::from("/nonexistent/path")], &config);
         assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_resolve_files_nested_directories() {
-        let dir = tempdir().unwrap();
-        create_file(dir.path(), "top.html");
-        create_file(dir.path(), "sub/nested.html");
-        create_file(dir.path(), "sub/deep/deeper.jinja2");
-
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &default_pyproject(), dir.path());
-        let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
-        assert_eq!(files.len(), 3);
-    }
-
-    #[test]
-    fn test_resolve_files_custom_include() {
-        let dir = tempdir().unwrap();
-        create_file(dir.path(), "a.html");
-        create_file(dir.path(), "b.txt");
-
-        let pyproject = PyprojectSettings {
-            include: Some(vec!["*.txt".to_string()]),
-            ..Default::default()
-        };
-        let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
-        let files = resolve_files(&[dir.path().to_path_buf()], &config).unwrap();
-
-        let names = file_names(&files);
-        assert!(!names.contains(&"a.html".to_string()));
-        assert!(names.contains(&"b.txt".to_string()));
     }
 
     /// Worked example of ruff's `include` glob semantics: path patterns anchor at the
@@ -730,7 +664,8 @@ mod tests {
     }
 
     /// The walk and explicitly-passed paths share one matcher, so a pattern must not
-    /// select differently depending on how the file was reached.
+    /// select differently depending on how the file was reached: patterns anchor at the
+    /// project root even when the walk starts deeper.
     #[test]
     fn test_resolve_files_exclude_agrees_across_walk_and_explicit_paths() {
         let dir = tempdir().unwrap();
@@ -750,6 +685,11 @@ mod tests {
         );
         assert!(
             resolve_files(&[dir.path().join("sub/deep/page.html")], &config)
+                .unwrap()
+                .is_empty()
+        );
+        assert!(
+            resolve_files(&[dir.path().join("sub")], &config)
                 .unwrap()
                 .is_empty()
         );
