@@ -1,0 +1,20 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Legacy formatter directive in an HTML comment -->
+{# djangofmt:ignore #}
+<div   class="kept"  ></div>
+
+<!-- A suppression in an HTML comment silently does nothing -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
+<!-- No spaces around the directive -->
+{#djangofmt:ignore#}
+<div></div>
+
+<!-- Nested inside an element -->
+<div>
+  {# djangofmt:ignore #}
+  <p     class="kept"  >hi</p>
+</div>
