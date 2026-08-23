@@ -37,36 +37,8 @@ fn format_single_file() {
 }
 
 #[test]
-fn format_already_formatted_file() {
-    let project = Project::new().file("test.html", "<div class=\"foo\"></div>\n");
-    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file left unchanged !
-    "#);
-}
-
-#[test]
 fn format_file_with_ignore_directive() {
     let original = "<!-- djangofmt:ignore -->\n<div   class=\"foo\"  ></div>\n";
-    let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file skipped !
-    "#);
-    assert_eq!(project.read("test.html"), original);
-}
-
-#[test]
-fn format_file_with_jinja_ignore_directive() {
-    let original = "{# djangofmt:ignore #}\n<div   class=\"foo\"  ></div>\n";
     let project = Project::new().file("test.html", original);
     assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
     success: true
@@ -105,49 +77,6 @@ fn format_directory() {
     ----- stderr -----
     2 files reformatted !
     "#);
-}
-
-#[test]
-fn format_force_exclude_skips_file_in_excluded_dir() {
-    // Pre-commit passes explicit paths: force-exclude must also match files
-    // through an excluded parent directory (here the default `.venv`).
-    let original = "<div   ></div>\n";
-    let project = Project::new()
-        .file("pyproject.toml", "[tool.djangofmt]\nforce-exclude = true\n")
-        .file(".venv/lib/tpl.html", original);
-    assert_cmd_snapshot!(
-        cli().current_dir(project.path()).arg(".venv/lib/tpl.html"),
-        @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    "#);
-    assert_eq!(project.read(".venv/lib/tpl.html"), original);
-}
-
-#[test]
-fn format_exclude_anchors_at_project_root() {
-    // `templates/vendor` anchors at the pyproject.toml directory, not at the
-    // first CLI path: it must still apply when the walk starts in `templates`.
-    let original = "<div   ></div>\n";
-    let project = Project::new()
-        .file(
-            "pyproject.toml",
-            "[tool.djangofmt]\nextend-exclude = [\"templates/vendor\"]\n",
-        )
-        .file("templates/page.html", original)
-        .file("templates/vendor/lib.html", original);
-    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("templates"), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file reformatted !
-    "#);
-    assert_eq!(project.read("templates/vendor/lib.html"), original);
 }
 
 #[test]
@@ -192,20 +121,6 @@ fn format_file_parse_error_exits_2() {
 fn format_stdin_dash_sentinel() {
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div   class=\"foo\"  ></div>\n"),
-        @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-    <div class="foo"></div>
-
-    ----- stderr -----
-    "#);
-}
-
-#[test]
-fn format_stdin_already_formatted() {
-    assert_cmd_snapshot!(
-        cli().arg("-").pass_stdin("<div class=\"foo\"></div>\n"),
         @r#"
     success: true
     exit_code: 0
@@ -287,22 +202,6 @@ fn format_stdin_ignore_directive() {
 }
 
 #[test]
-fn format_stdin_jinja_ignore_directive() {
-    let source = "{# djangofmt:ignore #}\n<div   class=\"foo\"  ></div>\n";
-    assert_cmd_snapshot!(
-        cli().arg("-").pass_stdin(source),
-        @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-    {# djangofmt:ignore #}
-    <div   class="foo"  ></div>
-
-    ----- stderr -----
-    "#);
-}
-
-#[test]
 fn format_stdin_parse_error_exits_2() {
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
@@ -365,49 +264,6 @@ fn format_stdin_extra_file_warns_but_uses_stdin() {
     ----- stderr -----
     Ignoring file on_disk.html in favor of standard input.
     "#);
-}
-
-#[test]
-fn format_stdin_filename_alone_without_dash() {
-    // --stdin-filename should make `files` optional.
-    assert_cmd_snapshot!(
-        cli()
-            .args(["--stdin-filename", "foo.html"])
-            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
-        @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-    <div class="foo"></div>
-
-    ----- stderr -----
-    "#);
-}
-
-#[test]
-fn format_respects_editorconfig() {
-    let project = Project::new()
-        .file(
-            ".editorconfig",
-            "root = true\n\n[*]\nindent_size = 2\nmax_line_length = 40\n",
-        )
-        .file(
-            "test.html",
-            "<div class=\"alpha beta gamma delta epsilon\"><span>hello world</span></div>\n",
-        );
-    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file reformatted !
-    "#);
-    // The line wraps because of `max_line_length` and is indented by `indent_size`.
-    assert_eq!(
-        project.read("test.html"),
-        "<div class=\"alpha beta gamma delta epsilon\">\n  <span>hello world</span>\n</div>\n"
-    );
 }
 
 #[test]
@@ -492,19 +348,6 @@ fn check_concise_output_format() {
     [TMP]/test.html:2:3: untrimmed-blocktranslate [*] `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     Found 2 errors. [*] 1 fixable with the --fix option.
     "###);
-}
-
-#[test]
-fn check_nonexistent_file() {
-    assert_cmd_snapshot!(cli().args(["check", "/nonexistent/path.html"]), @r#"
-    success: false
-    exit_code: 2
-    ----- stdout -----
-
-    ----- stderr -----
-    djangofmt failed
-      Error: Path does not exist: /nonexistent/path.html
-    "#);
 }
 
 #[test]

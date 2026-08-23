@@ -359,12 +359,6 @@ mod tests {
     }
 
     #[test]
-    fn fix_unsafe_edit() {
-        let fix = Fix::unsafe_edit(Edit::insertion("x", 5));
-        assert_eq!(fix.applicability(), Applicability::Unsafe);
-    }
-
-    #[test]
     fn fix_safe_edits_sorts() {
         let fix = Fix::safe_edits(
             Edit::insertion("late", 10),

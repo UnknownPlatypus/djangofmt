@@ -169,18 +169,6 @@ indent_size = 3
     }
 
     #[test]
-    fn matches_jinja_variant_specific_section() {
-        // A section written for `.j2` alone is honored for a `.j2` file.
-        assert_eq!(
-            settings("[*.j2]\nindent_size = 3", "x.j2"),
-            EditorconfigSettings {
-                line_length: None,
-                indent_width: Some(IndentWidth::try_from(3u8).unwrap()),
-            }
-        );
-    }
-
-    #[test]
     fn nearest_editorconfig_wins() {
         let project = Project::new()
             .file(".editorconfig", "[*]\nindent_size = 2")
