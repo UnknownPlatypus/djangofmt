@@ -1,6 +1,6 @@
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings,
-    file_ignores_invalid_syntax, lint_fix, lint_source,
+    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, file_ignores, lint_fix,
+    lint_source,
 };
 use markup_fmt::FormatError;
 use miette::{SourceCode, SpanContents};
@@ -16,7 +16,7 @@ use tracing::{debug, error, info, warn};
 use crate::ExitStatus;
 use crate::args::{CheckCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_profile, resolve_rule_selection};
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::LintSettings;
@@ -397,8 +397,6 @@ fn check_path(
     })
 }
 
-const PARSE_ERROR_HINT: &str = "Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.";
-
 /// Handle a parse failure: a top-level `{# djangofmt: file-ignore[invalid-syntax] #}`
 /// directive skips the file entirely, otherwise the error is reported with a
 /// hint pointing at the available escape hatches.
@@ -407,7 +405,7 @@ fn parse_failure(
     source: String,
     err: markup_fmt::SyntaxError,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
-    if file_ignores_invalid_syntax(&source) {
+    if file_ignores(&source).invalid_syntax {
         debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
         return Ok(CheckResult {
             path: path.to_path_buf(),
@@ -419,7 +417,7 @@ fn parse_failure(
     }
     Err(Box::new(CommandError::Parse(
         ParseError::new(Some(path.to_path_buf()), source, &FormatError::Syntax(err))
-            .with_hint(PARSE_ERROR_HINT),
+            .with_hint(SKIP_FILE_HINT),
     )))
 }
 

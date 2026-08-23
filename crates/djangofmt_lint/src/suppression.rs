@@ -8,7 +8,7 @@
 //!
 //! A `{# djangofmt: file-ignore[rule1, rule2] #}` comment at the top of the
 //! file silences the listed rules for the whole file. The special
-//! `invalid-syntax` code suppresses parse errors ([`file_ignores_invalid_syntax`]).
+//! `invalid-syntax` code suppresses parse errors ([`file_ignores`]).
 //!
 //! Rules must always be listed explicitly: there is no blanket form, and the
 //! formatter's bare `djangofmt:ignore` directive is unrelated to lint
@@ -23,6 +23,9 @@ use crate::LintDiagnostic;
 
 /// Code accepted by `file-ignore[...]` to suppress parse errors.
 pub const INVALID_SYNTAX: &str = "invalid-syntax";
+
+/// Code accepted by `file-ignore[...]` to skip formatting.
+pub const FORMAT: &str = "format";
 
 /// A parsed suppression directive.
 #[derive(Debug, PartialEq)]
@@ -71,27 +74,50 @@ pub fn filter_suppressed<'s>(
     diagnostics
 }
 
-/// Whether the file opens with a `file-ignore[...]` directive listing `invalid-syntax`.
+/// File-wide opt-outs declared by the leading comment of a file.
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct FileIgnores {
+    /// The formatter skips the whole file (`file-ignore[format]`).
+    pub format: bool,
+    /// Parse errors are suppressed and the file skipped (`file-ignore[invalid-syntax]`).
+    pub invalid_syntax: bool,
+}
+
+/// Opt-outs from the file's leading comment, read straight from the raw
+/// source so they can be honored even when the file fails to parse.
 ///
-/// Reads the leading comment straight from the raw source so `check` can honor
-/// the directive even when the file fails to parse.
+/// The bare legacy `djangofmt:ignore` (in either comment style) predates rule
+/// codes and opted the file out of everything: it maps to both flags.
 #[must_use]
-pub fn file_ignores_invalid_syntax(source: &str) -> bool {
+pub fn file_ignores(source: &str) -> FileIgnores {
     // A UTF-8 BOM is not Rust whitespace; strip it so the directive still
     // matches on BOM-prefixed files.
     let trimmed = source
         .strip_prefix('\u{feff}')
         .unwrap_or(source)
         .trim_start();
-    [("{#", "#}"), ("<!--", "-->")]
-        .iter()
-        .find_map(|(open, close)| {
-            let body = trimmed.strip_prefix(open)?;
-            Some(&body[..body.find(close)?])
-        })
-        .is_some_and(|raw| {
-            matches!(parse_directive(raw), Some(Directive::FileIgnore(codes)) if codes.contains(&INVALID_SYNTAX))
-        })
+    let jinja_body = leading_comment(trimmed, "{#", "#}");
+    if let Some(body) = jinja_body.or_else(|| leading_comment(trimmed, "<!--", "-->"))
+        && body.trim() == "djangofmt:ignore"
+    {
+        return FileIgnores {
+            format: true,
+            invalid_syntax: true,
+        };
+    }
+    match jinja_body.map(parse_directive) {
+        Some(Some(Directive::FileIgnore(codes))) => FileIgnores {
+            format: codes.contains(&FORMAT),
+            invalid_syntax: codes.contains(&INVALID_SYNTAX),
+        },
+        _ => FileIgnores::default(),
+    }
+}
+
+/// The body of a leading `open`..`close` comment, if the text starts with one.
+fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str> {
+    let body = text.strip_prefix(open)?;
+    Some(&body[..body.find(close)?])
 }
 
 /// Codes of a `file-ignore[...]` directive on the first non-whitespace node.
@@ -359,26 +385,61 @@ mod tests {
     }
 
     #[test]
-    fn detect_file_level_invalid_syntax() {
-        assert!(file_ignores_invalid_syntax(
-            "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>"
-        ));
-        assert!(file_ignores_invalid_syntax(
-            "\n  <!-- djangofmt: file-ignore[foo, invalid-syntax] -->\n<div id=>"
-        ));
-        // A UTF-8 BOM before the directive is tolerated.
-        assert!(file_ignores_invalid_syntax(
-            "\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>"
-        ));
-        assert!(!file_ignores_invalid_syntax(
-            "{# djangofmt: file-ignore[missing-img-alt] #}\n<div id=>"
-        ));
-        assert!(!file_ignores_invalid_syntax(
-            "{# djangofmt: ignore[invalid-syntax] #}\n<div id=>"
-        ));
-        assert!(!file_ignores_invalid_syntax(
-            "{# djangofmt:ignore #}\n<div id=>"
-        ));
-        assert!(!file_ignores_invalid_syntax("<div id=>"));
+    fn detect_file_level_opt_outs() {
+        let all = FileIgnores {
+            format: true,
+            invalid_syntax: true,
+        };
+        let syntax_only = FileIgnores {
+            format: false,
+            invalid_syntax: true,
+        };
+        let format_only = FileIgnores {
+            format: true,
+            invalid_syntax: false,
+        };
+
+        assert_eq!(
+            file_ignores("{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>"),
+            syntax_only
+        );
+        assert_eq!(
+            file_ignores("{# djangofmt: file-ignore[format] #}\n<div></div>"),
+            format_only
+        );
+        assert_eq!(
+            file_ignores("{# djangofmt: file-ignore[format, invalid-syntax] #}"),
+            all
+        );
+        // A UTF-8 BOM or leading whitespace before the directive is tolerated.
+        assert_eq!(
+            file_ignores("\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>"),
+            syntax_only
+        );
+        assert_eq!(
+            file_ignores("\n  {# djangofmt: file-ignore[foo, invalid-syntax] #}\n<div id=>"),
+            syntax_only
+        );
+
+        // The bare legacy directive opts out of everything, in both styles.
+        assert_eq!(file_ignores("{# djangofmt:ignore #}\n<div id=>"), all);
+        assert_eq!(file_ignores("<!-- djangofmt:ignore -->\n<div id=>"), all);
+        assert_eq!(file_ignores("{#  djangofmt:ignore  #}\n<div id=>"), all);
+
+        // Bracketed directives only count in `{# #}` comments.
+        assert_eq!(
+            file_ignores("<!-- djangofmt: file-ignore[invalid-syntax] -->\n<div id=>"),
+            FileIgnores::default()
+        );
+        // Lint codes, node-level directives and plain markup are not opt-outs.
+        assert_eq!(
+            file_ignores("{# djangofmt: file-ignore[missing-img-alt] #}\n<div id=>"),
+            FileIgnores::default()
+        );
+        assert_eq!(
+            file_ignores("{# djangofmt: ignore[invalid-syntax] #}\n<div id=>"),
+            FileIgnores::default()
+        );
+        assert_eq!(file_ignores("<div id=>"), FileIgnores::default());
     }
 }

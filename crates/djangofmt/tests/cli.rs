@@ -80,6 +80,36 @@ fn format_file_with_jinja_ignore_directive() {
 }
 
 #[test]
+fn format_file_with_file_ignore_format_directive() {
+    let original = "{# djangofmt: file-ignore[format] #}\n<div   class=\"foo\"  ></div>\n";
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file skipped !
+    "#);
+    assert_eq!(project.read("test.html"), original);
+}
+
+#[test]
+fn format_unparsable_file_with_invalid_syntax_file_ignore() {
+    let original = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n";
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file skipped !
+    "#);
+    assert_eq!(project.read("test.html"), original);
+}
+
+#[test]
 fn format_nonexistent_file() {
     assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @r#"
     success: false
@@ -165,7 +195,7 @@ fn format_quiet() {
 #[test]
 fn format_file_parse_error_exits_2() {
     let project = Project::new().file("test.html", "<div   class=\"foo\"  >");
-    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r##"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -181,9 +211,11 @@ fn format_file_parse_error_exits_2() {
       help: If a `</div>` does exist, it must live in the same block as the
             opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
             limitations/#conditional-openclose-tags
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't format 1 files!
-    "###);
+    "##);
 }
 
 // ── Format from stdin ────────────────────────────────────────────────
@@ -306,7 +338,7 @@ fn format_stdin_jinja_ignore_directive() {
 fn format_stdin_parse_error_exits_2() {
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
-        @r###"
+        @r##"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -322,7 +354,9 @@ fn format_stdin_parse_error_exits_2() {
       help: If a `</div>` does exist, it must live in the same block as the
             opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
             limitations/#conditional-openclose-tags
-    "###);
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
+    "##);
 }
 
 #[test]
@@ -623,6 +657,21 @@ fn check_unparsable_file_with_invalid_syntax_file_ignore() {
         "test.html",
         "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
     );
+    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    1 file skipped !
+    "###);
+}
+
+#[test]
+fn check_unparsable_file_with_legacy_ignore_directive() {
+    // The legacy bare directive keeps skipping unparsable files, in `check` too (#373).
+    let project = Project::new().file("test.html", "{# djangofmt:ignore #}\n<div id=>\n</div>\n");
     assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
     success: true
     exit_code: 0

@@ -91,6 +91,9 @@ impl CommandError {
     }
 }
 
+/// Escape hatches suggested when a file cannot be parsed.
+pub const SKIP_FILE_HINT: &str = "Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.";
+
 impl ParseError {
     #[must_use]
     pub fn new(path: Option<PathBuf>, source: String, err: &markup_fmt::FormatError) -> Self {
