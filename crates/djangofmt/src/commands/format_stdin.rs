@@ -8,7 +8,7 @@ use crate::args::{FormatCommand, Profile};
 use crate::commands::format::{FormatterConfig, format_text};
 use crate::config::resolve_profile;
 use crate::editorconfig;
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
 use crate::pyproject::load_pyproject_from_cwd;
 use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
 
@@ -59,11 +59,10 @@ fn format_source_code(
     let formatted = match format_text(&source, config, profile, path) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                path.map(Path::to_path_buf),
-                source,
-                &err,
-            ))));
+            return Err(Box::new(CommandError::Parse(
+                ParseError::new(path.map(Path::to_path_buf), source, &err)
+                    .with_hint(SKIP_FILE_HINT),
+            )));
         }
     };
 

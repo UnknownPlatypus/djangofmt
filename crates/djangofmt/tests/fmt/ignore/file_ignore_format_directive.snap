@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{# djangofmt: file-ignore[format] #}
+<div>
+    <p     class="unformatted"      >This entire file should not be formatted</p>
+</div>
+
+{# Broken code doesn't crash djangofmt either: file-ignore[format] skips before parsing #}
+<div id=>
+</div>

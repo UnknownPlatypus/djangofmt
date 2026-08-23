@@ -52,16 +52,18 @@ fn format_file_with_ignore_directive() {
 }
 
 #[test]
-fn check_unparsable_file_with_ignore_directive() {
-    let project = Project::new().file("test.html", "{# djangofmt:   ignore #}\n<div>\n");
-    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r"
+fn format_unparsable_file_with_invalid_syntax_file_ignore() {
+    let original = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n";
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    All checks passed!
-    ");
+    1 file skipped !
+    "#);
+    assert_eq!(project.read("test.html"), original);
 }
 
 #[test]
@@ -121,8 +123,10 @@ fn format_file_parse_error_exits_2() {
        ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
-            opening tag.
-            https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
+            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
+            limitations/#conditional-openclose-tags
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't format 1 files!
     "##);
@@ -232,9 +236,11 @@ fn format_stdin_parse_error_exits_2() {
        ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
-            opening tag.
-            https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
-    "##);
+            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
+            limitations/#conditional-openclose-tags
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
+    "###);
 }
 
 #[test]
@@ -472,6 +478,27 @@ fn check_fixable_file_with_show_fixes() {
 }
 
 #[test]
+fn check_skips_unparsable_files_that_opted_out() {
+    // Both the explicit code and the legacy bare directive (#373) skip a file
+    // `check` cannot parse.
+    let project = Project::new()
+        .file(
+            "bracketed.html",
+            "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
+        )
+        .file("legacy.html", "{# djangofmt: ignore #}\n<div id=>\n</div>\n");
+    assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    2 files skipped !
+    ");
+}
+
+#[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
     assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r###"
@@ -490,6 +517,8 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
        ╰────
       help: Check for invalid HTML syntax inside the block that might prevent
             finding the end tag.
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't check 1 files!
     "###);
@@ -521,6 +550,8 @@ fn check_respects_pyproject_custom_blocks() {
        ╰────
       help: Check for invalid HTML syntax inside the block that might prevent
             finding the end tag.
+            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't check 1 files!
     "###);

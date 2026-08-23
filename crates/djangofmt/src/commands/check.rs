@@ -1,5 +1,6 @@
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, lint_fix, lint_source,
+    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, file_ignores, lint_fix,
+    lint_source,
 };
 use markup_fmt::FormatError;
 use miette::{SourceCode, SpanContents};
@@ -15,12 +16,12 @@ use tracing::{debug, error, info, warn};
 use crate::ExitStatus;
 use crate::args::{CheckCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_profile, resolve_rule_selection};
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::LintSettings;
 
-use super::format::{is_file_ignored, merge_custom_blocks};
+use super::format::merge_custom_blocks;
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
 #[derive(Debug, PartialEq, Eq)]
@@ -67,6 +68,8 @@ struct CheckResult {
     applied_count: usize,
     /// Per-rule applied summaries, for `--show-fixes`.
     fixes_by_rule: FxHashMap<&'static str, RuleFixSummary>,
+    /// Whether the file was skipped via `file-ignore[invalid-syntax]`.
+    skipped: bool,
 }
 
 /// Check the given source code for linting errors.
@@ -171,6 +174,8 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         config.unsafe_fixes,
         nb_errors,
     );
+
+    print_skipped(&results);
 
     if config.show_fixes && total_applied > 0 {
         print_show_fixes(&results, total_applied);
@@ -278,6 +283,17 @@ fn print_summary(
     }
 }
 
+/// Mirror the format command's skip counter for quarantined files.
+fn print_skipped(results: &[CheckResult]) {
+    let skipped = results.iter().filter(|result| result.skipped).count();
+    if skipped > 0 {
+        info!(
+            "{skipped} file{} skipped !",
+            if skipped == 1 { "" } else { "s" }
+        );
+    }
+}
+
 fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
     info!("Fixed {total_applied} errors:");
     for result in results {
@@ -345,6 +361,7 @@ fn check_path(
                     file_diagnostics,
                     applied_count: result.applied_count,
                     fixes_by_rule: result.applied_by_rule,
+                    skipped: false,
                 });
             }
             Err(FixerError::InitialParse(err)) => {
@@ -381,30 +398,31 @@ fn check_path(
         file_diagnostics,
         applied_count: 0,
         fixes_by_rule: FxHashMap::default(),
+        skipped: false,
     })
 }
 
-/// Report a parse error, unless the file opts out with a leading `djangofmt:ignore`
-/// comment — `format` already skips those, so `check` must too.
+/// Skip the file if it is quarantined with `file-ignore[invalid-syntax]`,
+/// otherwise report the error with a hint at the escape hatches.
 fn parse_failure(
     path: &Path,
     source: String,
     err: markup_fmt::SyntaxError,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
-    if is_file_ignored(&source) {
-        debug!("Skipping unparsable {} (djangofmt:ignore)", path.display());
+    if file_ignores(&source).invalid_syntax {
+        debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
         return Ok(CheckResult {
             path: path.to_path_buf(),
             file_diagnostics: FileDiagnostics::empty(),
             applied_count: 0,
             fixes_by_rule: FxHashMap::default(),
+            skipped: true,
         });
     }
-    Err(Box::new(CommandError::Parse(ParseError::new(
-        Some(path.to_path_buf()),
-        source,
-        &FormatError::Syntax(err),
-    ))))
+    Err(Box::new(CommandError::Parse(
+        ParseError::new(Some(path.to_path_buf()), source, &FormatError::Syntax(err))
+            .with_hint(SKIP_FILE_HINT),
+    )))
 }
 
 #[cfg(test)]
