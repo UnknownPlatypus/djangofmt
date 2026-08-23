@@ -38,7 +38,9 @@ fn do_fuzz(case: &[u8]) -> Corpus {
     };
 
     match format_text(&formatted, &CONFIG, Profile::Django) {
-        Ok(Some(reformatted)) => similar_asserts::assert_eq!(formatted, reformatted),
+        Ok(Some(reformatted)) => {
+            similar_asserts::assert_eq!(formatted, reformatted, "input: {code:?}");
+        }
         // Formatting can hoist an ignore directive to the start, turning the second pass into a skip.
         Ok(None) => return Corpus::Reject,
         Err(err) => panic!(

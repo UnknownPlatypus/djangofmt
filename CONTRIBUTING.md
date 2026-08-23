@@ -68,7 +68,7 @@ It is seeded with the in-repo test fixtures and benchmark templates.
 
 When a crash is found (an input file lands in `fuzz/artifacts/fmt_idempotency/`):
 
-1. Minimize it: `cargo +nightly fuzz tmin -s none fmt_idempotency fuzz/artifacts/fmt_idempotency/crash-...`
+1. Minimize it: `just fuzz-min fuzz/artifacts/fmt_idempotency/crash-...`
 2. Reproduce and fix the bug in the [markup_fmt fork](https://github.com/UnknownPlatypus/markup_fmt),
    then bump the pinned `rev` in the root `Cargo.toml`.
 3. Keep the minimized case as a fixture in `crates/djangofmt/tests/fmt/`
