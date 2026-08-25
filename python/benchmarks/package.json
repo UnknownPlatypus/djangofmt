@@ -1,6 +1,6 @@
 {
   "devDependencies": {
     "prettier": "3.9.6",
-    "rustywind": "0.27.0"
+    "rustywind": "0.28.0"
   }
 }
