@@ -1,13 +1,16 @@
 //! File-wide opt-outs declared by `{# djangofmt: file-ignore[...] #}` comments.
-//!
-//! Rules are always listed explicitly, and only `{# #}` comments carry
-//! directives: HTML comments survive in rendered output.
 
-/// `file-ignore[...]` code suppressing parse errors.
-pub const INVALID_SYNTAX: &str = "invalid-syntax";
+use std::str::FromStr;
 
-/// `file-ignore[...]` code skipping the formatter.
-pub const FORMAT: &str = "format";
+/// A code accepted in `file-ignore[...]`; unknown codes are ignored.
+#[derive(Debug, PartialEq, Eq, strum::EnumString)]
+#[strum(serialize_all = "kebab-case")]
+enum FileIgnoreCode {
+    /// Suppress parse errors: both commands skip the file.
+    InvalidSyntax,
+    /// Skip the formatter.
+    Format,
+}
 
 /// A parsed suppression directive.
 #[derive(Debug, PartialEq, Eq)]
@@ -92,10 +95,16 @@ pub fn file_ignores(source: &str) -> FileIgnores {
     }
     // `file-ignore[...]` is unambiguously file-level: leading whitespace is fine.
     match leading_comment(source.trim_start(), "{#", "#}").map(parse_directive) {
-        Some(Some(Directive::FileIgnore(codes))) => FileIgnores {
-            format: codes.contains(&FORMAT),
-            invalid_syntax: codes.contains(&INVALID_SYNTAX),
-        },
+        Some(Some(Directive::FileIgnore(codes))) => {
+            let codes: Vec<_> = codes
+                .iter()
+                .filter_map(|code| FileIgnoreCode::from_str(code).ok())
+                .collect();
+            FileIgnores {
+                format: codes.contains(&FileIgnoreCode::Format),
+                invalid_syntax: codes.contains(&FileIgnoreCode::InvalidSyntax),
+            }
+        }
         _ => FileIgnores::default(),
     }
 }
