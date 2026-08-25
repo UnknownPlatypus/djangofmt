@@ -176,7 +176,7 @@ jobs:
             if [[ "${{ matrix.platform.target }}" == "riscv64gc-unknown-linux-gnu" ]] && command -v apt-get &> /dev/null; then
               apt-get update && apt-get install -y libatomic1
             fi
-      - uses: uraimo/run-on-arch-action@f9b26e3a1a408d5fd530d20c17b9f3f4428ff8d9 # v3.1.0
+      - uses: uraimo/run-on-arch-action@460cb8e6d9f726a588fc9b5e681c8a6cab09ae41 # v3.2.0
         if: ${{ matrix.platform.arch != 'ppc64le' && matrix.platform.arch != 'riscv64' }}
         name: "Test wheels"
         with:
@@ -302,7 +302,7 @@ jobs:
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
           docker-options: ${{ matrix.platform.maturin_docker_options }}
-      - uses: uraimo/run-on-arch-action@f9b26e3a1a408d5fd530d20c17b9f3f4428ff8d9 # v3.1.0
+      - uses: uraimo/run-on-arch-action@460cb8e6d9f726a588fc9b5e681c8a6cab09ae41 # v3.2.0
         name: "Test wheels"
         with:
           arch: ${{ matrix.platform.arch }}

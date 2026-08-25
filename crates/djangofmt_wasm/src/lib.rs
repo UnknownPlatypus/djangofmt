@@ -166,7 +166,6 @@ fn nest_children(wrapper: &DocNode) -> &[DocNode] {
 }
 
 #[derive(Serialize, Tsify)]
-#[tsify(into_wasm_abi)]
 struct LintResult {
     error_count: usize,
     output: String,
