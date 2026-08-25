@@ -419,10 +419,11 @@ fn parse_failure(
             skipped: true,
         });
     }
-    Err(Box::new(CommandError::Parse(
+    Err(
         ParseError::new(Some(path.to_path_buf()), source, &FormatError::Syntax(err))
-            .with_hint(SKIP_FILE_HINT),
-    )))
+            .with_fallback_hint(SKIP_FILE_HINT)
+            .into(),
+    )
 }
 
 #[cfg(test)]

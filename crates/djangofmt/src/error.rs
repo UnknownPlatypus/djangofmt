@@ -78,6 +78,12 @@ pub enum CommandError {
     Panic(Option<PathBuf>, Box<PanicError>),
 }
 
+impl From<ParseError> for Box<CommandError> {
+    fn from(err: ParseError) -> Self {
+        Self::new(CommandError::Parse(err))
+    }
+}
+
 impl CommandError {
     #[must_use]
     pub fn path(&self) -> Option<&Path> {
@@ -157,13 +163,10 @@ impl ParseError {
         }
     }
 
-    /// Append a help line to the error, keeping any existing hint.
+    /// Help text used only when the error carries no more specific hint.
     #[must_use]
-    pub fn with_hint(mut self, hint: &str) -> Self {
-        self.hint = Some(self.hint.take().map_or_else(
-            || hint.to_string(),
-            |existing| format!("{existing}\n{hint}"),
-        ));
+    pub fn with_fallback_hint(mut self, hint: &str) -> Self {
+        self.hint.get_or_insert_with(|| hint.to_string());
         self
     }
 

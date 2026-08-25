@@ -422,10 +422,9 @@ fn format_path(
     let formatted = match format_text(&unformatted, &config, profile, Some(path)) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(
-                ParseError::new(Some(path.to_path_buf()), unformatted, &err)
-                    .with_hint(SKIP_FILE_HINT),
-            )));
+            return Err(ParseError::new(Some(path.to_path_buf()), unformatted, &err)
+                .with_fallback_hint(SKIP_FILE_HINT)
+                .into());
         }
     };
 

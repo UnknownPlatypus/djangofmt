@@ -109,7 +109,7 @@ fn format_quiet() {
 #[test]
 fn format_file_parse_error_exits_2() {
     let project = Project::new().file("test.html", "<div   class=\"foo\"  >");
-    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r##"
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -123,13 +123,11 @@ fn format_file_parse_error_exits_2() {
        ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
-            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
-            limitations/#conditional-openclose-tags
-            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
-            this file, or list it in `extend-exclude`, to skip it.
+            opening tag.
+            https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
 
     Couldn't format 1 files!
-    "##);
+    "###);
 }
 
 // ── Format from stdin ────────────────────────────────────────────────
@@ -220,8 +218,9 @@ fn format_stdin_ignore_directive() {
 
 #[test]
 fn format_stdin_parse_error_exits_2() {
+    // A generic parse error has no specific hint: the skip-file one shows instead.
     assert_cmd_snapshot!(
-        cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
+        cli().arg("-").pass_stdin("<div id=></div>"),
         @r##"
     success: false
     exit_code: 2
@@ -229,18 +228,15 @@ fn format_stdin_parse_error_exits_2() {
 
     ----- stderr -----
 
-      × expected close tag for opening tag <div>
-       ╭─[<unknown>:1:2]
-     1 │ <div   class="foo"  >
-       ·  ─┬─
-       ·   ╰── here
+      × expected attribute value
+       ╭─[<unknown>:1:9]
+     1 │ <div id=></div>
+       ·         ▲
+       ·         ╰── here
        ╰────
-      help: If a `</div>` does exist, it must live in the same block as the
-            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
-            limitations/#conditional-openclose-tags
-            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+      help: Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
             this file, or list it in `extend-exclude`, to skip it.
-    "###);
+    "##);
 }
 
 #[test]
@@ -504,7 +500,7 @@ fn check_skips_unparsable_files_that_opted_out() {
 #[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
-    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -520,11 +516,9 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
        ╰────
       help: Check for invalid HTML syntax inside the block that might prevent
             finding the end tag.
-            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
-            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't check 1 files!
-    "###);
+    "#);
 }
 
 #[test]
@@ -537,7 +531,7 @@ fn check_respects_pyproject_custom_blocks() {
             "[tool.djangofmt]\ncustom-blocks = [\"stage\"]\n",
         )
         .file("test.html", "{% stage %}\n<p>hi</p>\n");
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r###"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r#"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -553,11 +547,9 @@ fn check_respects_pyproject_custom_blocks() {
        ╰────
       help: Check for invalid HTML syntax inside the block that might prevent
             finding the end tag.
-            Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
-            this file, or list it in `extend-exclude`, to skip it.
 
     Couldn't check 1 files!
-    "###);
+    "#);
 }
 
 #[test]
