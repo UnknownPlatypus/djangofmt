@@ -109,20 +109,17 @@ pub(crate) fn merge_custom_blocks(
     }
 }
 
-macro_rules! ignore_directive {
-    () => {
-        "djangofmt:ignore"
-    };
-}
-const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = ignore_directive!();
-const DJANGOFMT_IGNORE_COMMENT: &str = concat!("<!-- ", ignore_directive!(), " -->");
-const DJANGOFMT_IGNORE_COMMENT_JINJA: &str = concat!("{# ", ignore_directive!(), " #}");
+const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = "djangofmt:ignore";
 
 /// Whether the file opts out of djangofmt entirely with a leading ignore comment.
 #[must_use]
 pub(crate) fn is_file_ignored(source: &str) -> bool {
-    source.starts_with(DJANGOFMT_IGNORE_COMMENT)
-        || source.starts_with(DJANGOFMT_IGNORE_COMMENT_JINJA)
+    source
+        .strip_prefix("<!--")
+        .or_else(|| source.strip_prefix("{#"))
+        .is_some_and(|comment| {
+            markup_fmt::starts_with_directive(comment, DJANGOFMT_IGNORE_COMMENT_DIRECTIVE)
+        })
 }
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
