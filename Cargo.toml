@@ -37,8 +37,7 @@ rayon = { version = "1.12.0" }
 rstest = { version = "=0.26.1" }
 rustc-hash = { version = "2.1.2" }
 rustywind_core = {
-  git = "https://github.com/UnknownPlatypus/rustywind",
-  rev = "06299d79569ee97075bd6350d074483b57bf1d74",
+  version = "0.7.0",
   # No `runtime-rng`: its getrandom dependency doesn't build for the wasm playground.
   default-features = false
 }
