@@ -201,7 +201,8 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     }
 
     let file_diagnostics = FileDiagnostics::new("", source, diagnostics);
-    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode());
+    // No hyperlinked rule names: the playground renders ANSI, not OSC 8 links.
+    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode()).with_urls(false);
     let mut output = String::new();
     file_diagnostics
         .render(&handler, &mut output)

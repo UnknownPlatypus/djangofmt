@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Empty `<div>` tag pair.
+  × empty-tag-pair: Empty `<div>` tag pair.
    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:2:2]
  1 │ <!-- Plain empty pair -->
  2 │ <div></div>
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<span>` tag pair.
+  × empty-tag-pair: Empty `<span>` tag pair.
    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:5:2]
  4 │ <!-- Whitespace-only content (newlines + indent) is still empty -->
  5 │ <span>
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<p>` tag pair.
+  × empty-tag-pair: Empty `<p>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:9:2]
   8 │ <!-- Tab/space-only content -->
   9 │ <p>   </p>
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<DIV>` tag pair.
+  × empty-tag-pair: Empty `<DIV>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:12:2]
  11 │ <!-- Case-insensitive tag name -->
  12 │ <DIV></DIV>
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<header>` tag pair.
+  × empty-tag-pair: Empty `<header>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:16:6]
  15 │ <article>
  16 │     <header></header>
@@ -51,7 +51,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<script>` tag pair.
+  × empty-tag-pair: Empty `<script>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:21:2]
  20 │ <!-- Empty inline `<script>`/`<style>` with no attribute do nothing -->
  21 │ <script></script>
@@ -61,7 +61,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<style>` tag pair.
+  × empty-tag-pair: Empty `<style>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:22:2]
  21 │ <script></script>
  22 │ <style></style>
@@ -71,7 +71,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<button>` tag pair.
+  × empty-tag-pair: Empty `<button>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:25:2]
  24 │ <!-- Form controls without an accessible name -->
  25 │ <button></button>
@@ -81,7 +81,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<section>` tag pair.
+  × empty-tag-pair: Empty `<section>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:28:2]
  27 │ <!-- Generic containers without identifying attributes -->
  28 │ <section></section>
@@ -91,7 +91,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the empty tag pair or add content.
 
-  × Empty `<aside>` tag pair.
+  × empty-tag-pair: Empty `<aside>` tag pair.
     ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:29:2]
  28 │ <section></section>
  29 │ <aside></aside>

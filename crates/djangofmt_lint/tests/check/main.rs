@@ -139,7 +139,8 @@ fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {
     let mut output = String::new();
     diagnostics
         .render(
-            &GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor()),
+            // Hyperlinked rule names would put terminal escapes in the snapshots.
+            &GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor()).with_urls(false),
             &mut output,
         )
         .expect("Failed to render diagnostics");

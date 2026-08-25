@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:2:10]
  1 │ <!-- a/href: hardcoded absolute path -->
  2 │ <a href="/profile/">Profile</a>
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:3:10]
  2 │ <a href="/profile/">Profile</a>
  3 │ <a href="/accounts/login/">Login</a>
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:6:10]
  5 │ <!-- a/href: query string still counts as an internal URL -->
  6 │ <a href="/Collections?handler=RemoveAgreement&id=42">Link</a>
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:7:10]
  6 │ <a href="/Collections?handler=RemoveAgreement&id=42">Link</a>
  7 │ <a href="/path?param=value">Link</a>
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:10:10]
   9 │ <!-- a/href: a trailing fragment identifier does not exempt the hardcoded path -->
  10 │ <a href="/profile/#section">Link</a>
@@ -51,7 +51,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:13:10]
  12 │ <!-- a/href: hardcoded relative path (no leading slash) -->
  13 │ <a href="profile/">Profile</a>
@@ -61,7 +61,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:16:15]
  15 │ <!-- form/action: hardcoded absolute path -->
  16 │ <form action="/submit/"></form>
@@ -71,7 +71,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:17:15]
  16 │ <form action="/submit/"></form>
  17 │ <form action="/login/"></form>
@@ -81,7 +81,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `data-src`.
+  × django-url-pattern: Hardcoded internal URL in `data-src`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:20:16]
  19 │ <!-- div/span/input data-url and data-src -->
  20 │ <div data-src="/table/task/log/"></div>
@@ -91,7 +91,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `data-url`.
+  × django-url-pattern: Hardcoded internal URL in `data-url`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:21:16]
  20 │ <div data-src="/table/task/log/"></div>
  21 │ <div data-url="/api/items/"></div>
@@ -101,7 +101,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `data-url`.
+  × django-url-pattern: Hardcoded internal URL in `data-url`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:22:17]
  21 │ <div data-url="/api/items/"></div>
  22 │ <span data-url="/api/widgets/"></span>
@@ -111,7 +111,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `data-url`.
+  × django-url-pattern: Hardcoded internal URL in `data-url`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:23:18]
  22 │ <span data-url="/api/widgets/"></span>
  23 │ <input data-url="/api/things/">
@@ -121,7 +121,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:26:12]
  25 │ <!-- href on div/span/input is in scope -->
  26 │ <div href="/page/">Link</div>
@@ -131,7 +131,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:27:13]
  26 │ <div href="/page/">Link</div>
  27 │ <span href="/page/">Link</span>
@@ -141,7 +141,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:28:14]
  27 │ <span href="/page/">Link</span>
  28 │ <input href="/page/">
@@ -151,7 +151,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:31:12]
  30 │ <!-- action on a/div/span/input is in scope -->
  31 │ <a action="/submit/">Link</a>
@@ -161,7 +161,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:32:14]
  31 │ <a action="/submit/">Link</a>
  32 │ <div action="/submit/">Link</div>
@@ -171,7 +171,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:35:10]
  34 │ <!-- Case-insensitive on tag and attribute names -->
  35 │ <A HREF="/page/">Link</A>
@@ -181,7 +181,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:39:14]
  38 │ {% if show_link %}
  39 │     <a href="/page/">Link</a>
@@ -191,7 +191,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:45:15]
  44 │      Django templates (e.g. wireguard_webadmin, hydroshare, trunk-player, Webolith). -->
  45 │ <form action="/accounts/login/" method="post"></form>
@@ -201,7 +201,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:46:15]
  45 │ <form action="/accounts/login/" method="post"></form>
  46 │ <form action="/accounts/signup/" method="post"></form>
@@ -211,7 +211,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:51:10]
  50 │      carries a query string. Each should resolve a named pattern through `{% url %}`. -->
  51 │ <a href="/gaz-propane-en-citerne/">Propane</a>
@@ -221,7 +221,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:52:10]
  51 │ <a href="/gaz-propane-en-citerne/">Propane</a>
  52 │ <a href="/devenir-partenaire">Become a partner</a>
@@ -231,7 +231,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `action`.
+  × django-url-pattern: Hardcoded internal URL in `action`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:53:29]
  52 │ <a href="/devenir-partenaire">Become a partner</a>
  53 │ <form method="post" action="/widgetform?form_type=keyword_city"></form>
@@ -241,7 +241,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% url 'view_name' %}` to reference a named URL pattern.
 
-  × Hardcoded internal URL in `href`.
+  × django-url-pattern: Hardcoded internal URL in `href`.
     ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:56:10]
  55 │ <!-- Browsers strip surrounding whitespace, so a padded value still resolves the internal path -->
  56 │ <a href=" /profile/ ">Profile</a>

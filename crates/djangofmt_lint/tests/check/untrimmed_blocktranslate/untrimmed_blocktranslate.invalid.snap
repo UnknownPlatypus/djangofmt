@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:2:3]
  1 │ <!-- Simple interpolation -->
  2 │ {% blocktranslate %}This string will have {{ value }} inside.{% endblocktranslate %}
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:5:3]
  4 │ <!-- with clause -->
  5 │ {% blocktranslate with amount=article.price %}
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:10:3]
   9 │ <!-- multiple with -->
  10 │ {% blocktranslate with book_t=book|title author_t=author|title %}
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:15:3]
  14 │ <!-- count + plural -->
  15 │ {% blocktranslate count counter=list|length %}
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:22:3]
  21 │ <!-- with + count + plural -->
  22 │ {% blocktranslate with amount=article.price count years=i.length %}
@@ -51,7 +51,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:29:3]
  28 │ <!-- asvar -->
  29 │ {% blocktranslate asvar the_title %}The title is {{ title }}.{% endblocktranslate %}
@@ -61,7 +61,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:32:3]
  31 │ <!-- context (with literal) -->
  32 │ {% blocktranslate with name=user.username context "greeting" %}Hi {{ name }}{% endblocktranslate %}
@@ -71,7 +71,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:35:3]
  34 │ <!-- Django test: context-only with literal -->
  35 │ {% blocktranslate context "month name" %}May{% endblocktranslate %}
@@ -81,7 +81,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:38:3]
  37 │ <!-- Django test: context with runtime variable -->
  38 │ {% blocktranslate context message_context %}May{% endblocktranslate %}
@@ -91,7 +91,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:41:3]
  40 │ <!-- Django test: count + context (count first, no `with`) -->
  41 │ {% blocktranslate count number=1 context "super search" %}
@@ -101,7 +101,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:48:3]
  47 │ <!-- Legacy `count ... as` syntax -->
  48 │ {% blocktranslate count number as counter %}
@@ -111,7 +111,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:55:3]
  54 │ <!-- Legacy `with ... as` + `and` (multi-binding) -->
  55 │ {% blocktranslate with anton as a and berta as b %}{{ a }} + {{ b }}{% endblocktranslate %}
@@ -121,7 +121,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:58:3]
  57 │ <!-- Legacy blocktrans -->
  58 │ {% blocktrans %}Some text{% endblocktrans %}
@@ -131,7 +131,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:61:3]
  60 │ <!-- Whitespace control -->
  61 │ {%- blocktranslate %}Some text{% endblocktranslate %}
@@ -141,7 +141,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:65:7]
  64 │ {% if show %}
  65 │     {% blocktranslate %}Nested text{% endblocktranslate %}
@@ -151,7 +151,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:69:6]
  68 │ <!-- Article: HTML-wrapped multi-line content (leaks indentation) -->
  69 │ <p>{% blocktranslate %}
@@ -161,7 +161,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+  × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:75:8]
  74 │ <div>
  75 │   <p>{% blocktranslate %}

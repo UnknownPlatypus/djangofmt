@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
    ╭─[tests/check/missing_title/missing_title.invalid.html:3:6]
  2 │ <html lang="en">
  3 │     <head>
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:9:6]
   8 │ <html lang="en">
   9 │     <head>
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:17:6]
  16 │ <HTML LANG="en">
  17 │     <HEAD>
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:23:2]
  22 │ <!-- <head> without an enclosing <html> -->
  23 │ <head>
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:29:6]
  28 │ {% if base_template %}
  29 │     <head>
@@ -51,7 +51,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:36:6]
  35 │ <html lang="en">
  36 │     <head>
@@ -61,7 +61,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Fill the existing `<title>` element with descriptive text.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:43:6]
  42 │ <html lang="en">
  43 │     <head>
@@ -71,7 +71,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Fill the existing `<title>` element with descriptive text.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:50:6]
  49 │ <html lang="en">
  50 │     <head>
@@ -81,7 +81,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `<title>` element with descriptive text inside `<head>`.
 
-  × Missing or empty `<title>` in `<head>`.
+  × missing-title: Missing or empty `<title>` in `<head>`.
     ╭─[tests/check/missing_title/missing_title.invalid.html:61:6]
  60 │ <html amp lang="en">
  61 │     <head>

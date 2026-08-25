@@ -321,13 +321,13 @@ fn check_clean_file() {
 #[test]
 fn check_file_with_lint_error() {
     let project = Project::new().file("test.html", "<form method=\"put\"></form>\n");
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-      × Invalid value 'put' for attribute 'method'.
+      × invalid-attr-value: Invalid value 'put' for attribute 'method'.
        ╭─[[TMP]/test.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─
@@ -336,7 +336,7 @@ fn check_file_with_lint_error() {
       help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "###);
+    "#);
 }
 
 #[test]
@@ -367,14 +367,14 @@ fn check_concise_output_format() {
 fn check_fixable_file_without_fix() {
     let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
     let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-      × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
-      │ indentation into translation strings.
+      × untrimmed-blocktranslate: `{% blocktranslate %}` should declare `trimmed`
+      │ to avoid leaking indentation into translation strings.
        ╭─[[TMP]/test.html:1:3]
      1 │ {% blocktranslate %}Hello{% endblocktranslate %}
        ·   ────────┬───────
@@ -384,7 +384,7 @@ fn check_fixable_file_without_fix() {
             %}...{% endblocktranslate %}`.
 
     Found 1 errors. [*] 1 fixable with the --fix option.
-    "###);
+    "#);
     // Ensure we didn't apply anything without --fix.
     assert_eq!(project.read("test.html"), original);
 }
@@ -537,13 +537,13 @@ fn check_respects_pyproject_per_file_ignores() {
         )
         .file("legacy/old.html", violation)
         .file("new.html", violation);
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "."]), @r###"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "."]), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-      × Invalid value 'put' for attribute 'method'.
+      × invalid-attr-value: Invalid value 'put' for attribute 'method'.
        ╭─[new.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─
@@ -552,17 +552,17 @@ fn check_respects_pyproject_per_file_ignores() {
       help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "###);
+    "#);
 
     // Globs anchor at the `pyproject.toml` directory, not the cwd: `legacy/*` keeps
     // matching when djangofmt runs from inside `legacy/`.
-    assert_cmd_snapshot_tmpdir!(cli().current_dir(project.join("legacy")).args(["check", ".."]), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().current_dir(project.join("legacy")).args(["check", ".."]), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-      × Invalid value 'put' for attribute 'method'.
+      × invalid-attr-value: Invalid value 'put' for attribute 'method'.
        ╭─[[TMP]/new.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─
@@ -571,5 +571,5 @@ fn check_respects_pyproject_per_file_ignores() {
       help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "###);
+    "#);
 }

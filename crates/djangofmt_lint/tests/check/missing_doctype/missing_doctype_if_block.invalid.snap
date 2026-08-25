@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Missing `<!DOCTYPE html>` declaration.
+  × missing-doctype: Missing `<!DOCTYPE html>` declaration.
    ╭─[tests/check/missing_doctype/missing_doctype_if_block.invalid.html:4:2]
  3 │ {% if debug %}<meta name="x">{% endif %}
  4 │ <html lang="en">

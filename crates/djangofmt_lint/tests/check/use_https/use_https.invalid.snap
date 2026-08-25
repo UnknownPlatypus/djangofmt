@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
    ╭─[tests/check/use_https/use_https.invalid.html:2:10]
  1 │ <!-- a/href -->
  2 │ <a href="http://example.com">Link</a>
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
    ╭─[tests/check/use_https/use_https.invalid.html:3:10]
  2 │ <a href="http://example.com">Link</a>
  3 │ <a href="http://">Link</a>
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
    ╭─[tests/check/use_https/use_https.invalid.html:4:10]
  3 │ <a href="http://">Link</a>
  4 │ <a href='http://example.com'>Link</a>
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
    ╭─[tests/check/use_https/use_https.invalid.html:7:11]
  6 │ <!-- img/src -->
  7 │ <img src="http://example.com/logo.png" alt="" width="0" height="0">
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `action`.
+  × use-https: Avoid `http://` URLs in `action`.
     ╭─[tests/check/use_https/use_https.invalid.html:10:15]
   9 │ <!-- form/action -->
  10 │ <form action="http://example.com/submit"></form>
@@ -51,7 +51,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `data-url`.
+  × use-https: Avoid `http://` URLs in `data-url`.
     ╭─[tests/check/use_https/use_https.invalid.html:13:16]
  12 │ <!-- data-url, url, srcset -->
  13 │ <div data-url="http://example.com"></div>
@@ -61,7 +61,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `url`.
+  × use-https: Avoid `http://` URLs in `url`.
     ╭─[tests/check/use_https/use_https.invalid.html:14:9]
  13 │ <div data-url="http://example.com"></div>
  14 │ <a url="http://example.com">Link</a>
@@ -71,7 +71,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `srcset`.
+  × use-https: Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:15:14]
  14 │ <a url="http://example.com">Link</a>
  15 │ <img srcset="http://example.com/a.png 1x" alt="" width="0" height="0">
@@ -81,7 +81,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:18:14]
  17 │ <!-- script/src and link/href -->
  18 │ <script src="http://cdn.example.com/lib.js"></script>
@@ -91,7 +91,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:19:13]
  18 │ <script src="http://cdn.example.com/lib.js"></script>
  19 │ <link href="http://cdn.example.com/style.css" rel="stylesheet">
@@ -101,7 +101,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:22:10]
  21 │ <!-- Case-insensitive scheme -->
  22 │ <a href="HTTP://example.com">Link</a>
@@ -111,7 +111,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:23:10]
  22 │ <a href="HTTP://example.com">Link</a>
  23 │ <a href="Http://example.com">Link</a>
@@ -121,7 +121,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:26:10]
  25 │ <!-- Case-insensitive attribute name -->
  26 │ <a HREF="http://example.com">Link</a>
@@ -131,7 +131,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:27:11]
  26 │ <a HREF="http://example.com">Link</a>
  27 │ <IMG SrC="http://example.com/logo.png" alt="" width="0" height="0">
@@ -141,7 +141,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:30:12]
  29 │ <!-- Leading whitespace before scheme -->
  30 │ <a href="  http://example.com">Link</a>
@@ -151,7 +151,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:33:10]
  32 │ <!-- Multi-attr element with mixed http/https — only the http one is flagged -->
  33 │ <a href="http://example.com" data-url="https://example.com">Link</a>
@@ -161,7 +161,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:36:10]
  35 │ <!-- Multiple flagged attributes on the same element -->
  36 │ <a href="http://example.com" data-url="http://example.com">Link</a>
@@ -171,7 +171,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `data-url`.
+  × use-https: Avoid `http://` URLs in `data-url`.
     ╭─[tests/check/use_https/use_https.invalid.html:36:40]
  35 │ <!-- Multiple flagged attributes on the same element -->
  36 │ <a href="http://example.com" data-url="http://example.com">Link</a>
@@ -181,7 +181,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `srcset`.
+  × use-https: Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:39:14]
  38 │ <!-- srcset candidates are checked independently: every http:// entry is flagged -->
  39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
@@ -191,7 +191,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `srcset`.
+  × use-https: Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:39:43]
  38 │ <!-- srcset candidates are checked independently: every http:// entry is flagged -->
  39 │ <img srcset="http://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
@@ -201,7 +201,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `srcset`.
+  × use-https: Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:42:44]
  41 │ <!-- srcset insecure candidate after a secure one — must still be flagged -->
  42 │ <img srcset="https://example.com/a.png 1x, http://example.com/b.png 2x" alt="" width="0" height="0">
@@ -211,7 +211,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `srcset`.
+  × use-https: Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:45:14]
  44 │ <!-- srcset without descriptors, comma-separated -->
  45 │ <img srcset="http://example.com/a.png, http://example.com/b.png" alt="" width="0" height="0">
@@ -221,7 +221,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `srcset`.
+  × use-https: Avoid `http://` URLs in `srcset`.
     ╭─[tests/check/use_https/use_https.invalid.html:45:40]
  44 │ <!-- srcset without descriptors, comma-separated -->
  45 │ <img srcset="http://example.com/a.png, http://example.com/b.png" alt="" width="0" height="0">
@@ -231,7 +231,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:48:10]
  47 │ <!-- Literal `http://` prefix followed by interpolation in the body is unambiguously insecure -->
  48 │ <a href="http://{{ host }}/page">Link</a>
@@ -241,7 +241,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:52:14]
  51 │ {% if show_link %}
  52 │     <a href="http://example.com">Link</a>
@@ -251,7 +251,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:56:14]
  55 │ <!-- Real world example -->
  56 │ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
@@ -261,7 +261,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:57:24]
  56 │ <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
  57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
@@ -271,7 +271,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:58:11]
  57 │ <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/3.0/"></a>
  58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
@@ -281,7 +281,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:59:51]
  58 │ <img src="http://i.creativecommons.org/l/by-nc-nd/3.0/88x31.png" alt="" width="0" height="0">
  59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
@@ -291,7 +291,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:60:14]
  59 │ <script type="text/javascript" async="async" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>
  60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
@@ -301,7 +301,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `src`.
+  × use-https: Avoid `http://` URLs in `src`.
     ╭─[tests/check/use_https/use_https.invalid.html:61:11]
  60 │ <script src="http://d3js.org/d3.v3.min.js"></script>
  61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1" alt="" width="0" height="0">
@@ -311,7 +311,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:62:10]
  61 │ <img src="http://stats.amusecode.org/piwik.php?idsite=1" alt="" width="0" height="0">
  62 │ <a href="http://stackoverflow.com/questions/tagged/django">Django questions</a>
@@ -321,7 +321,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:65:10]
  64 │ <!-- Loopback look-alike are still flagged: the host only resembles localhost -->
  65 │ <a href="http://localhost.evil.com/admin">Phishing</a>
@@ -331,7 +331,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `https://` instead.
 
-  × Avoid `http://` URLs in `href`.
+  × use-https: Avoid `http://` URLs in `href`.
     ╭─[tests/check/use_https/use_https.invalid.html:66:10]
  65 │ <a href="http://localhost.evil.com/admin">Phishing</a>
  66 │ <a href="http://127.0.0.1.evil.com/">Spoof</a>

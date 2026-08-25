@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Duplicate `{% block %}` name `title`.
+  × duplicate-block-name: Duplicate `{% block %}` name `title`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:3:10]
  2 │ {% block title %}Title 1{% endblock %}
  3 │ {% block title %}Title 2{% endblock %}
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Rename or remove one of the `{% block title %}` tags; Django requires block names to be unique within a template.
 
-  × Duplicate `{% block %}` name `header`.
+  × duplicate-block-name: Duplicate `{% block %}` name `header`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:7:10]
  6 │ {% block header %}a{% endblock %}
  7 │ {% block header %}b{% endblock %}
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Rename or remove one of the `{% block header %}` tags; Django requires block names to be unique within a template.
 
-  × Duplicate `{% block %}` name `header`.
+  × duplicate-block-name: Duplicate `{% block %}` name `header`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:8:10]
  7 │ {% block header %}b{% endblock %}
  8 │ {% block header %}c{% endblock %}
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Rename or remove one of the `{% block header %}` tags; Django requires block names to be unique within a template.
 
-  × Duplicate `{% block %}` name `content`.
+  × duplicate-block-name: Duplicate `{% block %}` name `content`.
     ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:12:14]
  11 │ {% block content %}
  12 │     {% block content %}inner{% endblock %}
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Rename or remove one of the `{% block content %}` tags; Django requires block names to be unique within a template.
 
-  × Duplicate `{% block %}` name `sidebar`.
+  × duplicate-block-name: Duplicate `{% block %}` name `sidebar`.
     ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:19:14]
  18 │ {% else %}
  19 │     {% block sidebar %}off{% endblock %}

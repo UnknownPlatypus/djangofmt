@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:2:15]
  1 │ <!-- Redundant type on script -->
  2 │ <script type="text/javascript" src="app.js"></script>
@@ -11,7 +11,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/css" on <style> tag.
+  × redundant-type-attr: Redundant type="text/css" on <style> tag.
    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:5:14]
  4 │ <!-- Redundant type on style -->
  5 │ <style type="text/css">.foo { color: red; }</style>
@@ -21,7 +21,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Remove the `type` attribute. `<style>` defaults to `type="text/css"`.
 
-  × Redundant type="text/javascript" on <SCRIPT> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <SCRIPT> tag.
    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:8:15]
  7 │ <!-- Case-insensitive tag name -->
  8 │ <SCRIPT type="text/javascript"></SCRIPT>
@@ -31,7 +31,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Remove the `type` attribute. `<SCRIPT>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/css" on <STYLE> tag.
+  × redundant-type-attr: Redundant type="text/css" on <STYLE> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:9:14]
   8 │ <SCRIPT type="text/javascript"></SCRIPT>
   9 │ <STYLE type="text/css"></STYLE>
@@ -41,7 +41,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<STYLE>` defaults to `type="text/css"`.
 
-  × Redundant type="Text/JavaScript" on <script> tag.
+  × redundant-type-attr: Redundant type="Text/JavaScript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:12:15]
  11 │ <!-- Case-insensitive type value -->
  12 │ <script type="Text/JavaScript"></script>
@@ -51,7 +51,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="Text/CSS" on <style> tag.
+  × redundant-type-attr: Redundant type="Text/CSS" on <style> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:13:14]
  12 │ <script type="Text/JavaScript"></script>
  13 │ <style type="Text/CSS"></style>
@@ -61,7 +61,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<style>` defaults to `type="text/css"`.
 
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:16:15]
  15 │ <!-- Case-insensitive attribute name -->
  16 │ <script TYPE="text/javascript"></script>
@@ -71,7 +71,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/css" on <style> tag.
+  × redundant-type-attr: Redundant type="text/css" on <style> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:17:14]
  16 │ <script TYPE="text/javascript"></script>
  17 │ <style TYPE="text/css"></style>
@@ -81,7 +81,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<style>` defaults to `type="text/css"`.
 
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:20:28]
  19 │ <!-- Type attribute with other attributes -->
  20 │ <script src="app.js" type="text/javascript" defer></script>
@@ -91,7 +91,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:25:11]
  24 │     src="app.js"
  25 │     type="text/javascript"
@@ -101,7 +101,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:29:15]
  28 │ <!-- Single-quoted attribute -->
  29 │ <script type='text/javascript'></script>
@@ -111,7 +111,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:32:14]
  31 │ <!-- Unquoted attribute -->
  32 │ <script type=text/javascript></script>
@@ -121,7 +121,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<script>` defaults to `type="text/javascript"`.
 
-  × Redundant type="text/css" on <style> tag.
+  × redundant-type-attr: Redundant type="text/css" on <style> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:33:13]
  32 │ <script type=text/javascript></script>
  33 │ <style type=text/css></style>
@@ -131,7 +131,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Remove the `type` attribute. `<style>` defaults to `type="text/css"`.
 
-  × Redundant type="text/javascript" on <script> tag.
+  × redundant-type-attr: Redundant type="text/javascript" on <script> tag.
     ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:37:19]
  36 │ {% if include_script %}
  37 │     <script type="text/javascript" src="app.js"></script>

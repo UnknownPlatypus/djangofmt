@@ -43,7 +43,9 @@ use std::path::Path;
 use markup_fmt::ast::Root;
 use markup_fmt::parser::Parser;
 use markup_fmt::{Language, SyntaxError};
-use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
+use miette::{
+    Diagnostic, GraphicalReportHandler, LabeledSpan, Labels, NamedSource, Report, SourceSpan,
+};
 use std::fmt;
 use std::sync::{Arc, LazyLock};
 
@@ -55,6 +57,10 @@ pub fn clamp_offset(value: usize) -> u32 {
     u32::try_from(value).unwrap_or(u32::MAX)
 }
 
+/// Base URL of the generated per-rule documentation pages, which terminals
+/// that support hyperlinks reach through the rule name of a diagnostic.
+const DOCS_RULES_URL: &str = "https://unknownplatypus.github.io/djangofmt/docs/rules/";
+
 /// Build a [`SourceSpan`] from `usize` byte offsets.
 #[must_use]
 pub fn span(start: usize, len: usize) -> SourceSpan {
@@ -64,19 +70,16 @@ pub fn span(start: usize, len: usize) -> SourceSpan {
 /// A single lint diagnostic without source code.
 ///
 /// Source code is attached at render time by [`FileDiagnostics::reports`].
-#[derive(Debug, Clone, Diagnostic, thiserror::Error)]
+#[derive(Debug, Clone, thiserror::Error)]
 #[error("{message}")]
 pub struct LintDiagnostic {
     /// Rule code (e.g., "invalid-attr-value").
-    #[diagnostic(code)]
     pub code: &'static str,
     /// Human-readable error message.
     pub message: Cow<'static, str>,
     /// Source span where the error occurred.
-    #[label("here")]
     pub span: SourceSpan,
     /// Optional help text with suggestions.
-    #[help]
     pub help: Option<Cow<'static, str>>,
     /// Optional fix attached to the diagnostic.
     ///
@@ -87,6 +90,29 @@ pub struct LintDiagnostic {
     /// Stored separately from `help` so the renderer can mark it as fix-related
     /// (and so a rule's `help()` and `fix_title()` don't fight for the same field).
     pub fix_title: Option<&'static str>,
+}
+
+/// Written by hand rather than derived: the derive only accepts a literal
+/// code, while ours is the rule name the diagnostic carries.
+impl Diagnostic for LintDiagnostic {
+    fn code(&self) -> Option<Cow<'_, str>> {
+        Some(Cow::Borrowed(self.code))
+    }
+
+    fn help(&self) -> Option<Cow<'_, str>> {
+        self.help.as_deref().map(Cow::Borrowed)
+    }
+
+    fn url(&self) -> Option<Cow<'_, str>> {
+        Some(Cow::Owned(format!("{DOCS_RULES_URL}{}/", self.code)))
+    }
+
+    fn labels(&self) -> Labels {
+        Labels::One([LabeledSpan::new_with_span(
+            Some("here".to_string()),
+            self.span,
+        )])
+    }
 }
 
 /// A collection of lint diagnostics for a single file.
@@ -195,4 +221,40 @@ pub fn lint_source(
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
     let ast = parse(source, language, custom_blocks)?;
     Ok(check_ast(source, &ast, settings, path))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use strum::IntoEnumIterator;
+
+    /// The docs generator only writes a page for rules that have a doc comment,
+    /// so an undocumented rule would render a link to a missing page.
+    #[test]
+    fn every_rule_has_a_docs_page() {
+        let undocumented: Vec<_> = Rule::iter()
+            .filter(|rule| rule.explanation().is_none())
+            .map(|rule| rule.to_string())
+            .collect();
+        assert!(
+            undocumented.is_empty(),
+            "rules missing a doc comment: {undocumented:?}"
+        );
+    }
+
+    #[test]
+    fn diagnostic_links_to_its_rule_page() {
+        let diagnostic = LintDiagnostic {
+            code: Rule::MissingImgAlt.into(),
+            message: Cow::Borrowed("Missing `alt` attribute"),
+            span: span(0, 0),
+            help: None,
+            fix: None,
+            fix_title: None,
+        };
+        assert_eq!(
+            diagnostic.url().unwrap().as_ref(),
+            "https://unknownplatypus.github.io/djangofmt/docs/rules/missing-img-alt/"
+        );
+    }
 }
