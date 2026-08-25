@@ -1277,7 +1277,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "rustywind_core"
 version = "0.6.0"
-source = "git+https://github.com/UnknownPlatypus/rustywind?rev=622997957725aab3767a7b6c49dc1ccabb046fd2#622997957725aab3767a7b6c49dc1ccabb046fd2"
+source = "git+https://github.com/UnknownPlatypus/rustywind?rev=82b4edd0bf82dae10da97f2ea05b4342b9677cba#82b4edd0bf82dae10da97f2ea05b4342b9677cba"
 dependencies = [
  "ahash",
  "aho-corasick",
