@@ -1,0 +1,19 @@
+<div>
+    <script>
+        const   x = {a:1,b:2};
+        function hello( name ){
+        console.log('hello '+name)
+        }
+    </script>
+    <script type="module">
+        import {foo} from './foo.js';
+        foo( );
+    </script>
+    <script>
+        // Template syntax is not valid JS, formatting is skipped entirely.
+        {% if debug %}console.log( 'debug' );{% endif %}
+    </script>
+    <script type="text/template" id="tpl">
+        <p><%= count %> items</p>
+    </script>
+</div>
