@@ -63,7 +63,7 @@ attribute values to pass non-string types (booleans, numbers, template variables
 
 ## Disabling formatting
 
-To disable formatting for an entire file, add `<!-- djangofmt:ignore -->` at the very top of the file.
+To disable formatting for an entire file, add `<!-- djangofmt: ignore -->` at the very top of the file.
 
 A file ignored this way is also skipped by `djangofmt check` when it cannot be parsed,
 so templates that break the parser can be quarantined from both commands.
@@ -71,7 +71,7 @@ so templates that break the parser can be quarantined from both commands.
 To disable formatting for a specific node, prefix it with the same comment:
 
 ```html
-<!-- djangofmt:ignore -->
+<!-- djangofmt: ignore -->
 <div   class="keep-this-unformatted"   >Content</div>
 <div class="this-will-be-formatted">Content</div>
 ```
@@ -80,6 +80,6 @@ A Django/Jinja comment works the same way, both inline and at the top of a file.
 Unlike an HTML comment, it isn't rendered to the client:
 
 ```html
-{# djangofmt:ignore #}
+{# djangofmt: ignore #}
 <div   class="keep-this-unformatted"   >Content</div>
 ```

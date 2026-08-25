@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt/tests/fmt/main.rs
 ---
-{# djangofmt:ignore #}
+{# djangofmt: ignore #}
 <div>
     <p     class="unformatted"      >This entire file should not be formatted</p>
 </div>
