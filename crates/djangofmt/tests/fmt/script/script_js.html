@@ -16,4 +16,11 @@
     <script type="text/template" id="tpl">
         <p><%= count %> items</p>
     </script>
+    {% if enabled %}
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+            console.log('nested in a template block')
+            });
+        </script>
+    {% endif %}
 </div>
