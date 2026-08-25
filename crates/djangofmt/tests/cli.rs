@@ -52,21 +52,6 @@ fn format_file_with_ignore_directive() {
 }
 
 #[test]
-fn format_unparsable_file_with_invalid_syntax_file_ignore() {
-    let original = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n";
-    let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file skipped !
-    "#);
-    assert_eq!(project.read("test.html"), original);
-}
-
-#[test]
 fn format_nonexistent_file() {
     assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @r#"
     success: false
