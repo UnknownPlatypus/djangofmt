@@ -486,7 +486,10 @@ fn check_skips_unparsable_files_that_opted_out() {
             "bracketed.html",
             "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
         )
-        .file("legacy.html", "{# djangofmt: ignore #}\n<div id=>\n</div>\n");
+        .file(
+            "legacy.html",
+            "{# djangofmt: ignore #}\n<div id=>\n</div>\n",
+        );
     assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @r"
     success: true
     exit_code: 0

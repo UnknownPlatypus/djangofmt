@@ -71,16 +71,18 @@ pub struct FileIgnores {
 /// so they can be honored even when the file fails to parse.
 ///
 /// The bare legacy `djangofmt:ignore` (in either comment style) predates rule
-/// codes and opted the file out of everything: it maps to both flags.
+/// codes and opted the file out of everything: it maps to both flags, but only
+/// at the very start of the file since it also serves as a node-level directive.
 #[must_use]
 pub fn file_ignores(source: &str) -> FileIgnores {
     // A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-    let trimmed = source
-        .strip_prefix('\u{feff}')
-        .unwrap_or(source)
-        .trim_start();
-    let jinja_body = leading_comment(trimmed, "{#", "#}");
-    if let Some(body) = jinja_body.or_else(|| leading_comment(trimmed, "<!--", "-->"))
+    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
+
+    // The bare legacy directive doubles as a node-level formatter directive,
+    // so it is only file-level when nothing (not even whitespace) precedes it.
+    let legacy_body =
+        leading_comment(source, "{#", "#}").or_else(|| leading_comment(source, "<!--", "-->"));
+    if let Some(body) = legacy_body
         && markup_fmt::starts_with_directive(directive_body(body), "djangofmt:ignore")
     {
         return FileIgnores {
@@ -88,7 +90,8 @@ pub fn file_ignores(source: &str) -> FileIgnores {
             invalid_syntax: true,
         };
     }
-    match jinja_body.map(parse_directive) {
+    // `file-ignore[...]` is unambiguously file-level: leading whitespace is fine.
+    match leading_comment(source.trim_start(), "{#", "#}").map(parse_directive) {
         Some(Some(Directive::FileIgnore(codes))) => FileIgnores {
             format: codes.contains(&FORMAT),
             invalid_syntax: codes.contains(&INVALID_SYNTAX),
@@ -179,6 +182,19 @@ mod tests {
         assert_eq!(file_ignores("{# djangofmt:ignore #}\n<div id=>"), all);
         assert_eq!(file_ignores("<!-- djangofmt:ignore -->\n<div id=>"), all);
         assert_eq!(file_ignores("{# djangofmt : ignore #}\n<div id=>"), all);
+        assert_eq!(
+            file_ignores("\u{feff}{# djangofmt:ignore #}\n<div id=>"),
+            all
+        );
+        // Preceded by whitespace, the bare directive is node-level, not file-level.
+        assert_eq!(
+            file_ignores("\n  {# djangofmt:ignore #}\n<div id=>"),
+            FileIgnores::default()
+        );
+        assert_eq!(
+            file_ignores(" <!-- djangofmt:ignore -->\n<div id=>"),
+            FileIgnores::default()
+        );
 
         // Bracketed directives only count in `{# #}` comments.
         assert_eq!(
