@@ -476,6 +476,7 @@ dependencies = [
  "insta",
  "markup_fmt",
  "oxc-miette",
+ "rstest",
  "rustc-hash",
  "rustywind_core",
  "serde",

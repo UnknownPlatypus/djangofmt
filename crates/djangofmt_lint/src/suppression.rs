@@ -118,107 +118,78 @@ fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn parse_directives() {
-        assert_eq!(
-            parse_directive(" djangofmt: ignore[a, b ,c] "),
-            Some(Directive::Ignore(vec!["a", "b", "c"]))
-        );
-        assert_eq!(
-            parse_directive("djangofmt:file-ignore[invalid-syntax]"),
-            Some(Directive::FileIgnore(vec!["invalid-syntax"]))
-        );
-        assert_eq!(
-            parse_directive("djangofmt : file-ignore[invalid-syntax]"),
-            Some(Directive::FileIgnore(vec!["invalid-syntax"]))
-        );
+    const ALL: FileIgnores = FileIgnores {
+        format: true,
+        invalid_syntax: true,
+    };
+    const SYNTAX_ONLY: FileIgnores = FileIgnores {
+        format: false,
+        invalid_syntax: true,
+    };
+    const FORMAT_ONLY: FileIgnores = FileIgnores {
+        format: true,
+        invalid_syntax: false,
+    };
+    const NONE: FileIgnores = FileIgnores {
+        format: false,
+        invalid_syntax: false,
+    };
+
+    #[rstest]
+    #[case::node(" djangofmt: ignore[a, b ,c] ", Directive::Ignore(vec!["a", "b", "c"]))]
+    #[case::file("djangofmt:file-ignore[invalid-syntax]", Directive::FileIgnore(vec!["invalid-syntax"]))]
+    #[case::spaced_colon("djangofmt : file-ignore[invalid-syntax]", Directive::FileIgnore(vec!["invalid-syntax"]))]
+    fn parse_directives(#[case] comment: &str, #[case] expected: Directive) {
+        assert_eq!(parse_directive(comment), Some(expected));
     }
 
-    #[test]
-    fn reject_non_directives() {
-        assert_eq!(parse_directive(" djangofmt:ignore "), None); // formatter directive
-        assert_eq!(parse_directive("djangofmt: ignore[]"), None); // explicit rules only
-        assert_eq!(parse_directive("djangofmt: ignore[ , ]"), None); // only separators
-        assert_eq!(parse_directive("djangofmt: ignore[a] trailing"), None); // nothing after bracket
-        assert_eq!(parse_directive("ignore[a]"), None); // must start with djangofmt:
+    #[rstest]
+    fn reject_non_directives(
+        #[values(
+            " djangofmt:ignore ",            // formatter directive
+            "djangofmt: ignore[]",           // explicit rules only
+            "djangofmt: ignore[ , ]",        // only separators
+            "djangofmt: ignore[a] trailing", // nothing after bracket
+            "ignore[a]"                      // must start with djangofmt:
+        )]
+        comment: &str,
+    ) {
+        assert_eq!(parse_directive(comment), None);
     }
 
-    #[test]
-    fn detect_file_level_opt_outs() {
-        let all = FileIgnores {
-            format: true,
-            invalid_syntax: true,
-        };
-        let syntax_only = FileIgnores {
-            format: false,
-            invalid_syntax: true,
-        };
-        let format_only = FileIgnores {
-            format: true,
-            invalid_syntax: false,
-        };
-
-        assert_eq!(
-            file_ignores("{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>"),
-            syntax_only
-        );
-        assert_eq!(
-            file_ignores("{# djangofmt: file-ignore[format] #}\n<div></div>"),
-            format_only
-        );
-        assert_eq!(
-            file_ignores("{# djangofmt: file-ignore[format, invalid-syntax] #}"),
-            all
-        );
-        // Jinja whitespace-control markers are part of the delimiter.
-        assert_eq!(
-            file_ignores("{#- djangofmt: file-ignore[format] -#}"),
-            format_only
-        );
-        // A UTF-8 BOM or leading whitespace before the directive is tolerated.
-        assert_eq!(
-            file_ignores("\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>"),
-            syntax_only
-        );
-        assert_eq!(
-            file_ignores("\n  {# djangofmt: file-ignore[foo, invalid-syntax] #}\n<div id=>"),
-            syntax_only
-        );
-
-        // The bare legacy directive opts out of everything, in both styles,
-        // with whitespace tolerated around the colon.
-        assert_eq!(file_ignores("{# djangofmt:ignore #}\n<div id=>"), all);
-        assert_eq!(file_ignores("<!-- djangofmt:ignore -->\n<div id=>"), all);
-        assert_eq!(file_ignores("{# djangofmt : ignore #}\n<div id=>"), all);
-        assert_eq!(
-            file_ignores("\u{feff}{# djangofmt:ignore #}\n<div id=>"),
-            all
-        );
-        // Preceded by whitespace, the bare directive is node-level, not file-level.
-        assert_eq!(
-            file_ignores("\n  {# djangofmt:ignore #}\n<div id=>"),
-            FileIgnores::default()
-        );
-        assert_eq!(
-            file_ignores(" <!-- djangofmt:ignore -->\n<div id=>"),
-            FileIgnores::default()
-        );
-
-        // Bracketed directives only count in `{# #}` comments.
-        assert_eq!(
-            file_ignores("<!-- djangofmt: file-ignore[invalid-syntax] -->\n<div id=>"),
-            FileIgnores::default()
-        );
-        // Lint codes, node-level directives and plain markup are not opt-outs.
-        assert_eq!(
-            file_ignores("{# djangofmt: file-ignore[missing-img-alt] #}\n<div id=>"),
-            FileIgnores::default()
-        );
-        assert_eq!(
-            file_ignores("{# djangofmt: ignore[invalid-syntax] #}\n<div id=>"),
-            FileIgnores::default()
-        );
-        assert_eq!(file_ignores("<div id=>"), FileIgnores::default());
+    #[rstest]
+    #[case::invalid_syntax("{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>", SYNTAX_ONLY)]
+    #[case::format("{# djangofmt: file-ignore[format] #}\n<div></div>", FORMAT_ONLY)]
+    #[case::both_codes("{# djangofmt: file-ignore[format, invalid-syntax] #}", ALL)]
+    // Jinja whitespace-control markers are part of the delimiter.
+    #[case::whitespace_control("{#- djangofmt: file-ignore[format] -#}", FORMAT_ONLY)]
+    // A UTF-8 BOM or leading whitespace before the directive is tolerated.
+    #[case::bom(
+        "\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>",
+        SYNTAX_ONLY
+    )]
+    #[case::leading_whitespace(
+        "\n  {# djangofmt: file-ignore[foo, invalid-syntax] #}\n<div id=>",
+        SYNTAX_ONLY
+    )]
+    // The bare legacy directive opts out of everything, in both styles,
+    // with whitespace tolerated around the colon.
+    #[case::legacy_jinja("{# djangofmt:ignore #}\n<div id=>", ALL)]
+    #[case::legacy_html("<!-- djangofmt:ignore -->\n<div id=>", ALL)]
+    #[case::legacy_spaced_colon("{# djangofmt : ignore #}\n<div id=>", ALL)]
+    #[case::legacy_bom("\u{feff}{# djangofmt:ignore #}\n<div id=>", ALL)]
+    // Preceded by whitespace, the bare directive is node-level, not file-level.
+    #[case::legacy_after_newline("\n  {# djangofmt:ignore #}\n<div id=>", NONE)]
+    #[case::legacy_after_space(" <!-- djangofmt:ignore -->\n<div id=>", NONE)]
+    // Bracketed directives only count in `{# #}` comments.
+    #[case::html_comment("<!-- djangofmt: file-ignore[invalid-syntax] -->\n<div id=>", NONE)]
+    // Lint codes, node-level directives and plain markup are not opt-outs.
+    #[case::lint_code("{# djangofmt: file-ignore[missing-img-alt] #}\n<div id=>", NONE)]
+    #[case::node_level("{# djangofmt: ignore[invalid-syntax] #}\n<div id=>", NONE)]
+    #[case::plain_markup("<div id=>", NONE)]
+    fn detect_file_level_opt_outs(#[case] source: &str, #[case] expected: FileIgnores) {
+        assert_eq!(file_ignores(source), expected);
     }
 }

@@ -21,6 +21,7 @@ tracing = { workspace = true }
 
 [dev-dependencies]
 insta = { workspace = true }
+rstest = { workspace = true }
 strum = { workspace = true }
 
 [lints]
