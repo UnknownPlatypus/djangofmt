@@ -77,6 +77,13 @@ setup-bench-py:
 bench-py dir: setup-bench-py
     uv run ./run_formatter.sh {{dir}}
 
+# Render the benchmark chart from chart.vl.json (light + dark SVG)
+[working-directory: 'python/benchmarks']
+[group('bench')]
+bench-chart:
+    npm ci --prefix .
+    ./render_chart.sh
+
 # Generate HTML coverage report and open in browser
 [group('dev')]
 coverage:

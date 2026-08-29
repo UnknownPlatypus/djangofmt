@@ -21,9 +21,25 @@ A setup step will discover every html files inside and then run the various tool
 > [!IMPORTANT]
 > This will cause destructive operations, be sure to target a safe directory (tracked with git or temporary)
 
-## Color Palette for charts
+## Regenerating the chart
 
-Built using [vega playground](https://vega.github.io/editor/#/url/vega-lite/N4IgJAzgxgFgpgWwIYgFwhgF0wBwqgegIDc4BzJAOjIEtMYBXAI0poHsDp5kTykBaADZ04JAKyUAVhDYA7EABoQAEySYUqUMSSCGcCGgDaoTGzaC0IACKSkssmwBmCTIpCYaCOGgAMlHwCMAJxKHl4AYmwATsiu6H6BQQYAvgomZhboNkjK3qGe3qgJAOwATPkR0bGWJaUpae4ZljZYCBYVhQGUACw+ABwdkTFqll299enmzZLCsq4daKWUAMxixYNVI+hLqxONU+gAClFw2DRwUW5hhcuUAQPuBUPV6Lf3KQC6qSBQco40ZDQoBwSCiSAQBlQxhAsnBhRUcEcSAYgkwkTmbm0unh-CQOBwgjg-AgAE8IJhEAoAEKzADWAFkkFAAMpkikIdGYBQAHRAzPIbDgAAIAKoASV5CgAEnBBKQPFAkAoAIJRGg6BQQOwQYkXGiOHkgZX4wlCgDC5miQoAogg2JIaJLefyHMLxTa7Q7eSBUqBYV5LIIkExZRbBNFMTo9JYAMRQILKALKII+hr++FMUFhiNKLHR9Ax+7FRxiPo+j5KJAADxokNAQZDgmzl00IDgVZwLZADdDlsu3x7gk5QLbHa7uSRKLRclcyW+xHOAHcR+SomxaYVZCjBN9M1BaWQ1wxZMpLJgwbIICCThjd0yD0eT2eL1fQXAMUp379lDR7COSSO-yyqe6CmFMoQkjg8KyGwCC-jobjVrWI6HjQIFIoIEBwPkmCEmgW6CIISiDpyzI0AAXp05SPPukIYVhxHBrKhw5D+f6oAEPhKMosFIL+aD0dh3ZMUOM4AOpwACWAjr8J50Ow8ithS5KWKomAMAglB5sKAC8elCgA5Nk9hOC4BmRtilhMOYp7zlG0GbBY3weLhcDNiO7adoGInuXOSgyFEcQETuShVoB5yCCBjwBhBUGWAAjgwdguWoNCkIhNZ1o8rn4dujGNtaY6qWoGlafZQoANSGRA5n5PuFrHnEyx1bSZGUb4+XMaxv6AqgABsnWCMqwhkIpPzvhSlyDaRFFUS17noFEZCZgAFAEpTrOtm0bQofilGIACUbiocoC0gEtq1bQoV1XXth1uDxyD8agglzt88BSXE61cSAi5ofQliyeov4XG4QYkqDUKgMgUS0lZoJuF+bBsb1oAQLNI7aWgATdN8vzhi2Wj2R5RXoJmUS+W9DTntqjhVEYoD-KikMqCVmlgYIQoAIT6UZtgmc4mDmckFYgDDcNKZB8IUlW8wgDoAJjYSjhy5mWGzPCcHKMoeHcWF-VKHTcxtVR3xIyjI4y3EjMRVF1zPCMeN9pjxOtp5XaDpTfkmC+dMxAzIBM5NxXqezGRCnpOmGcZDiC8Lovi5bUtnu2csK6NgaIqrSDqyDlhazreQqPrDxG5gJvY9RZcSZ9Vk2ambayN+PWW6n4XAWeTybLOSj4xGrZY27pPCY2Xsi8kQA).
+The bar chart in [`docs/benchmarks.md`](../../docs/benchmarks.md) is a Vega-Lite spec
+rendered to SVG. [`chart.vl.json`](./chart.vl.json) is the source of truth: update the
+`data.values` entries with the new hyperfine means, then render both color schemes with
+
+```bash
+just bench-chart
+```
+
+This writes `benchmark-light.svg` and `benchmark-dark.svg`, which differ only by the
+`labelColor` config param. Both are gitignored: GitHub hosts them, not the repo.
+
+To publish them, drag both files into any GitHub comment box (an issue, a PR, or a
+draft you never submit). GitHub uploads them and rewrites the markdown to
+`https://github.com/user-attachments/assets/<uuid>` — permanent URLs that survive
+discarding the comment. Paste those two URLs into the `<picture>` block of both
+`README.md` and `docs/benchmarks.md` (dark first, light as both the second `<source>`
+and the fallback `<img>`).
 
 Color palette:
 
