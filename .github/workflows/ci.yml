@@ -85,6 +85,9 @@ jobs:
           echo "$PWD/python/benchmarks/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: Run `djangofmt` ecosystem check
+        env:
+          # djangofmt was built above, don't rebuild it via project install and maturin
+          UV_NO_PROJECT: 1
         run: |
           # Set pipefail to avoid hiding errors with tee
           set -eo pipefail
