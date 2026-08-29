@@ -2,9 +2,9 @@
 
 <p align="center">
   <picture align="center">
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3b09a8a2-b5cb-4f1b-a0bc-5f4e3ca169db">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
-    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/806ad1c2-a2c7-4177-9651-1857b43aff0d">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/7e132145-7738-4cd1-8cdc-dab6e87175b4">
+    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/7e132145-7738-4cd1-8cdc-dab6e87175b4">
   </picture>
 </p>
 
@@ -21,50 +21,50 @@ Results on my machine will differ from yours, especially if you have many CPU co
 But at least it was fun to build thanks to the wonderful [hyperfine](https://github.com/sharkdp/hyperfine) tool.
 
 <details>
-  <summary>Benchmark details (2025-02-28)</summary>
+  <summary>Benchmark details (2026-08-29)</summary>
 
 This was run on my AMD Ryzen 9 7950X (32) @ 5.881GHz.
 
 Tools versions:
 
-- djangofmt: v0.1.0
-- prettier: v3.5.2
-- djlint: v1.36.4
-- djade: v1.3.2
-- djhtml: v3.0.7
+- djangofmt: v0.2.12
+- prettier: v3.9.6
+- djlint: v1.44.2
+- djade: v1.9.0
+- djhtml: v3.0.11
 
-<pre><code>Benchmark 1: cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --quiet
-  Time (mean ± σ):      19.8 ms ±   0.9 ms    [User: 179.6 ms, System: 73.7 ms]
-  Range (min … max):    18.3 ms …  23.3 ms    73 runs
-
-  Warning: Ignoring non-zero exit code.
-
-Benchmark 2: cat /tmp/test-files | xargs --max-procs=0 djade --target-version 5.1
-  Time (mean ± σ):      72.0 ms ±   1.0 ms    [User: 63.2 ms, System: 9.3 ms]
-  Range (min … max):    70.5 ms …  73.4 ms    18 runs
-
-Benchmark 3: cat /tmp/test-files | xargs --max-procs=0 djhtml
-  Time (mean ± σ):      1.401 s ±  0.026 s    [User: 1.322 s, System: 0.079 s]
-  Range (min … max):    1.373 s …  1.453 s    10 runs
-
-Benchmark 4: cat /tmp/test-files | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
-  Time (mean ± σ):      2.343 s ±  0.026 s    [User: 64.944 s, System: 1.176 s]
-  Range (min … max):    2.297 s …  2.377 s    10 runs
+<pre><code>Benchmark 1: cat /tmp/files-list | xargs --max-procs=0 ../../target/release/djangofmt --profile django --line-length 120 --quiet
+  Time (mean ± σ):      19.4 ms ±   1.3 ms    [User: 118.5 ms, System: 49.0 ms]
+  Range (min … max):    16.5 ms …  23.1 ms    70 runs
 
   Warning: Ignoring non-zero exit code.
 
-Benchmark 5: cat /tmp/test-files | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
-  Time (mean ± σ):      3.226 s ±  0.062 s    [User: 4.481 s, System: 0.261 s]
-  Range (min … max):    3.092 s …  3.292 s    10 runs
+Benchmark 2: cat /tmp/files-list | xargs --max-procs=0 djade --target-version 5.1
+  Time (mean ± σ):      74.1 ms ±   1.2 ms    [User: 64.2 ms, System: 10.6 ms]
+  Range (min … max):    72.7 ms …  76.9 ms    17 runs
+
+Benchmark 3: cat /tmp/files-list | xargs --max-procs=0 djhtml
+  Time (mean ± σ):      1.468 s ±  0.013 s    [User: 1.366 s, System: 0.102 s]
+  Range (min … max):    1.454 s …  1.496 s    10 runs
+
+Benchmark 4: cat /tmp/files-list | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
+  Time (mean ± σ):      2.155 s ±  0.056 s    [User: 54.558 s, System: 1.608 s]
+  Range (min … max):    2.084 s …  2.277 s    10 runs
+
+  Warning: Ignoring non-zero exit code.
+
+Benchmark 5: cat /tmp/files-list | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
+  Time (mean ± σ):      3.625 s ±  0.101 s    [User: 5.044 s, System: 0.264 s]
+  Range (min … max):    3.515 s …  3.850 s    10 runs
 
   Warning: Ignoring non-zero exit code.
 
 Summary
-  cat /tmp/test-files | xargs --max-procs=0 ../../target/release/djangofmt format --profile django --line-length 120 --quiet ran
-    3.63 ± 0.17 times faster than cat /tmp/test-files | xargs --max-procs=0 djade --target-version 5.1
-   70.71 ± 3.45 times faster than cat /tmp/test-files | xargs --max-procs=0 djhtml
-  118.28 ± 5.48 times faster than cat /tmp/test-files | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
-  162.80 ± 7.96 times faster than cat /tmp/test-files | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
+  cat /tmp/files-list | xargs --max-procs=0 ../../target/release/djangofmt --profile django --line-length 120 --quiet ran
+    3.82 ± 0.26 times faster than cat /tmp/files-list | xargs --max-procs=0 djade --target-version 5.1
+   75.55 ± 5.06 times faster than cat /tmp/files-list | xargs --max-procs=0 djhtml
+  110.96 ± 7.90 times faster than cat /tmp/files-list | xargs --max-procs=0 djlint --reformat --profile=django --max-line-length 120
+  186.64 ± 13.43 times faster than cat /tmp/files-list | xargs --max-procs=0 ./node_modules/.bin/prettier --ignore-unknown --write --print-width 120 --log-level silent
 </code></pre>
 </details>
 
