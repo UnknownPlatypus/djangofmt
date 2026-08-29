@@ -81,8 +81,22 @@ bench-py dir: setup-bench-py
 [working-directory: 'python/benchmarks']
 [group('bench')]
 bench-chart:
-    npm ci --prefix .
-    ./render_chart.sh
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    # Both schemes share one spec and differ only by the `labelColor` config param.
+    rendered=()
+    for scheme in "light:#333333" "dark:#c9d1d9"; do
+        svg="benchmark-${scheme%%:*}.svg"
+        deno eval --quiet '
+            const spec = JSON.parse(Deno.readTextFileSync("chart.vl.json"));
+            spec.config.params.find((p) => p.name === "labelColor").value = Deno.args[0];
+            console.log(JSON.stringify(spec));
+        ' "${scheme#*:}" | deno run --allow-env npm:vega-lite@6.4.3/vl2svg >"$svg"
+        rendered+=("$PWD/$svg")
+    done
+
+    echo "Preview with: firefox ${rendered[*]}"
 
 # Generate HTML coverage report and open in browser
 [group('dev')]

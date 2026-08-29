@@ -1,7 +1,6 @@
 {
   "devDependencies": {
     "prettier": "3.9.6",
-    "rustywind": "0.28.0",
-    "vega-lite": "6.4.3"
+    "rustywind": "0.28.0"
   }
 }
