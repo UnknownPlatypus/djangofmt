@@ -27,6 +27,14 @@ A fast, HTML aware, Django template formatter, written in Rust.
 
 Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) with some additions to support Django fully.
 
+- ⚡️ **70-120x faster** than existing Django template formatters
+- 🐍 **Installable via `pip`, `uv` or `pipx`**
+- 🛡️ **A strict HTML aware parser**: invalid HTML is reported as an error instead of being silently mangled
+- 🎨 **Formats `<style>`/`<script>` tags and attributes** with dedicated formatters
+- 🔧 **[Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) with autofix**, for automatic error correction (e.g., automatically sort Tailwind classes)
+- 🛠️ **`pyproject.toml` and `.editorconfig` support**
+- ⌨️ **Editor integrations**, a **pre-commit hook** and a **browser playground**
+
 ## Table of contents
 
 - [Installation](#installation)
