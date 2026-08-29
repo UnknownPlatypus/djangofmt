@@ -15,9 +15,9 @@ enum FileIgnoreCode {
 /// A parsed suppression directive.
 #[derive(Debug, PartialEq, Eq)]
 enum Directive<'s> {
-    /// `djangofmt: ignore[...]` — suppress on the following node.
+    /// `djangofmt: ignore[...]` suppress on the following node.
     Ignore(Vec<&'s str>),
-    /// `djangofmt: file-ignore[...]` — suppress for the whole file.
+    /// `djangofmt: file-ignore[...]` suppress for the whole file.
     FileIgnore(Vec<&'s str>),
 }
 
@@ -32,9 +32,8 @@ fn directive_body(raw: &str) -> &str {
 
 /// Parse a comment body into a suppression directive.
 ///
-/// Grammar: `djangofmt:` (whitespace allowed around the colon), then
-/// `ignore[...]` or `file-ignore[...]` with a non-empty comma-separated rule
-/// list and nothing after the closing bracket.
+/// Grammar: `djangofmt:` (whitespace allowed around the colon),
+/// then `ignore[...]` or `file-ignore[...]` with a non-empty comma-separated rule list
 fn parse_directive(raw: &str) -> Option<Directive<'_>> {
     let rest = directive_body(raw)
         .strip_prefix("djangofmt")?
@@ -72,10 +71,6 @@ pub struct FileIgnores {
 
 /// Opt-outs from the file's leading comment, read straight from the raw source
 /// so they can be honored even when the file fails to parse.
-///
-/// The bare legacy `djangofmt:ignore` (in either comment style) predates rule
-/// codes and opted the file out of everything: it maps to both flags, but only
-/// at the very start of the file since it also serves as a node-level directive.
 #[must_use]
 pub fn file_ignores(source: &str) -> FileIgnores {
     // A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
