@@ -33,8 +33,9 @@ just bench-chart
 This writes `benchmark-light.svg` and `benchmark-dark.svg`, which differ only by the `labelColor` config param.
 Both are gitignored: GitHub hosts them, not the repo.
 
-To publish them, drag both files into any GitHub comment box (an issue, a PR, or a draft you never submit).
-GitHub uploads them and rewrites the markdown to permanent URLs like `https://github.com/user-attachments/assets/<uuid>` that survive discarding the comment.
+To publish them, drag both files into a GitHub comment box on a public repo and **submit** the comment.
+GitHub rewrites the markdown to `https://github.com/user-attachments/assets/<uuid>` URLs, but they only resolve for anyone other than you once the comment is actually posted.
+Once posted the URLs are permanent, so the comment can be deleted afterwards.
 Paste those two URLs into the `<picture>` block of both `README.md` and `docs/benchmarks.md` (dark first, light as both the second `<source>` and the fallback `<img>`).
 
 Color palette (inspired from Django theme):

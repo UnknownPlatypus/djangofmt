@@ -15,9 +15,9 @@ A fast, HTML aware, Django template formatter, written in Rust.
 
 <p align="center">
   <picture align="center">
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/3b09a8a2-b5cb-4f1b-a0bc-5f4e3ca169db">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95">
-    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/88dda91e-cfdd-45a7-a3b4-1f3cc2d0fe95" style="max-width: 75%;">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/806ad1c2-a2c7-4177-9651-1857b43aff0d">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/7e132145-7738-4cd1-8cdc-dab6e87175b4">
+    <img alt="Shows a bar chart with benchmark results." src="https://github.com/user-attachments/assets/7e132145-7738-4cd1-8cdc-dab6e87175b4" style="max-width: 75%;">
   </picture>
 </p>
 
