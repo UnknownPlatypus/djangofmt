@@ -96,7 +96,9 @@ bench-chart:
         rendered+=("$PWD/$svg")
     done
 
-    echo "Preview with: firefox ${rendered[*]}"
+    echo "Generated light/dark benchmark svgs!"
+    echo "${rendered[*]}"
+    firefox-nightly ${rendered[*]}
 
 # Generate HTML coverage report and open in browser
 [group('dev')]
