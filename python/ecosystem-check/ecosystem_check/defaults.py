@@ -201,6 +201,7 @@ DEFAULT_TARGETS = [
                 ExcludeReason.DYNAMIC_TAG_NAME: (
                     "src/unfold/templates/unfold/components/button.html",
                     "src/unfold/templates/unfold/components/card.html",
+                    "src/unfold/templates/unfold/helpers/avatar.html",
                     "src/unfold/templates/unfold/helpers/change_list_filter_vertical.html",
                     "src/unfold/templates/unfold/helpers/display_dropdown.html",
                     "src/unfold/templates/unfold/helpers/edit_inline/inline_delete.html",
