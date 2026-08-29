@@ -14,7 +14,7 @@ DJLINT_CMD="$_XARGS_FILES djlint --reformat --profile=django --max-line-length $
 DJADE_CMD="$_XARGS_FILES djade --target-version 5.1"
 DJHTML_CMD="$_XARGS_FILES djhtml"
 
-printf "Running benchmark on %s files (%s LoC)...\n\nTool versions:\n" "$(wc -l /tmp/files-list | cut -d " " -f1)" "$(xargs wc -l <"$TARGET_DIR" | grep "\d* total" | cut -d " " -f2)"
+printf "Running benchmark on %s files (%s LoC)...\n\nTool versions:\n" "$(wc -l </tmp/files-list)" "$(xargs cat </tmp/files-list | wc -l)"
 printf "  - django-fmt: v%s\n" "$(../../target/release/djangofmt --version | cut -d" " -f2)"
 printf "  - prettier: v%s\n" "$(./node_modules/.bin/prettier --version)"
 printf "  - djlint: v%s\n" "$(djlint --version | cut -d" " -f3)"
