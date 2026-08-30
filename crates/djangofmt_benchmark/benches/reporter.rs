@@ -4,8 +4,8 @@
 use djangofmt_benchmark::{
     DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, TestFile,
 };
-use djangofmt_lint::{FileDiagnostics, Settings, lint_source};
-use miette::{GraphicalReportHandler, GraphicalTheme};
+use djangofmt_lint::{FileDiagnostics, Settings, graphical_handler, lint_source};
+use miette::GraphicalTheme;
 
 fn main() {
     divan::main();
@@ -34,7 +34,7 @@ fn render(bencher: divan::Bencher, template: &'static TestFile) {
 
     // Pinned to what an interactive `check` renders, so the terminal the
     // benchmark happens to run in can't change the result.
-    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode()).with_width(120);
+    let handler = graphical_handler(GraphicalTheme::unicode()).with_width(120);
 
     bencher.counter(file_diagnostics.len()).bench(|| {
         let mut out = String::new();

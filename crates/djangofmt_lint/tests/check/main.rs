@@ -3,13 +3,13 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, fix_ast, lint_source,
-    parse,
+    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, fix_ast,
+    graphical_handler, lint_source, parse,
 };
 
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
-use miette::{GraphicalReportHandler, GraphicalTheme};
+use miette::GraphicalTheme;
 use std::fs;
 use std::path::Path;
 use strum::IntoEnumIterator;
@@ -139,7 +139,7 @@ fn render_diagnostics(diagnostics: &FileDiagnostics) -> String {
     let mut output = String::new();
     diagnostics
         .render(
-            &GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor()),
+            &graphical_handler(GraphicalTheme::unicode_nocolor()),
             &mut output,
         )
         .expect("Failed to render diagnostics");

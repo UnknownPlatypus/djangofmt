@@ -15,6 +15,7 @@ rustywind_core = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 smallvec = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
+textwrap = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 

@@ -107,7 +107,7 @@ fn format_quiet() {
 #[test]
 fn format_file_parse_error_exits_2() {
     let project = Project::new().file("test.html", "<div   class=\"foo\"  >");
-    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r##"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -121,11 +121,11 @@ fn format_file_parse_error_exits_2() {
        ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
-            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
-            limitations/#conditional-openclose-tags
+            opening tag.
+            https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
 
     Couldn't format 1 files!
-    "###);
+    "##);
 }
 
 // ── Format from stdin ────────────────────────────────────────────────
@@ -218,7 +218,7 @@ fn format_stdin_ignore_directive() {
 fn format_stdin_parse_error_exits_2() {
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
-        @r###"
+        @r##"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -232,9 +232,9 @@ fn format_stdin_parse_error_exits_2() {
        ·   ╰── here
        ╰────
       help: If a `</div>` does exist, it must live in the same block as the
-            opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-
-            limitations/#conditional-openclose-tags
-    "###);
+            opening tag.
+            https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
+    "##);
 }
 
 #[test]
