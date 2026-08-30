@@ -99,7 +99,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     .unwrap_or_default();
 
     let start = Instant::now();
-    let (results, parse_errors): (Vec<_>, Vec<_>) = resolved
+    let (results, errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
         .map(|path| {
@@ -114,14 +114,16 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
                 resolved.pyproject.profile,
                 Some(path),
             );
-            check_path(
-                path,
-                profile,
-                settings,
-                &custom_blocks,
-                config.fix,
-                threshold,
-            )
+            super::catch_file_panic(path, || {
+                check_path(
+                    path,
+                    profile,
+                    settings,
+                    &custom_blocks,
+                    config.fix,
+                    threshold,
+                )
+            })
         })
         .partition_map(|result| match result {
             Ok(r) => Left(r),
@@ -131,7 +133,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let duration = start.elapsed();
     debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
-    let nb_parse_errors = super::report_parse_errors(parse_errors, "check", config.output_format);
+    let nb_errors = super::report_errors(errors, "check", config.output_format);
 
     let mut total_diagnostics = 0usize;
     let mut total_applied = 0usize;
@@ -167,15 +169,15 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         total_unsafe_fixable,
         config.fix,
         config.unsafe_fixes,
-        nb_parse_errors,
+        nb_errors,
     );
 
     if config.show_fixes && total_applied > 0 {
         print_show_fixes(&results, total_applied);
     }
 
-    // I/O and parse errors take precedence over lint violations in the exit code.
-    if nb_parse_errors > 0 {
+    // I/O, parse and panic errors take precedence over lint violations in the exit code.
+    if nb_errors > 0 {
         return Ok(ExitStatus::Error);
     }
     if total_diagnostics > 0 {

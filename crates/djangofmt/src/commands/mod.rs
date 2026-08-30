@@ -1,4 +1,5 @@
-use std::path::PathBuf;
+use std::panic::UnwindSafe;
+use std::path::{Path, PathBuf};
 
 use tracing::error;
 
@@ -33,16 +34,29 @@ pub(crate) fn resolve_command(
     })
 }
 
-/// Sort parse errors by path, log each as a report, and return the count.
+/// Run a per-file task, converting a panic into a [`CommandError::Panic`] so the run survives it.
+pub(crate) fn catch_file_panic<T>(
+    path: &Path,
+    f: impl FnOnce() -> std::result::Result<T, Box<CommandError>> + UnwindSafe,
+) -> std::result::Result<T, Box<CommandError>> {
+    crate::panic::catch_unwind(f).unwrap_or_else(|error| {
+        Err(Box::new(CommandError::Panic(
+            Some(path.to_path_buf()),
+            Box::new(error),
+        )))
+    })
+}
+
+/// Sort errors by path, log each as a report, and return the count.
 /// `verb` fills the summary line, e.g. "Couldn't format N files!".
-pub(crate) fn report_parse_errors(
-    mut parse_errors: Vec<CommandError>,
+pub(crate) fn report_errors(
+    mut errors: Vec<CommandError>,
     verb: &str,
     output_format: OutputFormat,
 ) -> usize {
-    parse_errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
-    let count = parse_errors.len();
-    for err in parse_errors {
+    errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
+    let count = errors.len();
+    for err in errors {
         match output_format {
             OutputFormat::Full => error!("{:?}", miette::Report::new(err)),
             OutputFormat::Concise => error!("{}", err.concise()),
