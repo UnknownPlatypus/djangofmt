@@ -56,9 +56,7 @@ pub fn clamp_offset(value: usize) -> u32 {
 }
 
 /// Wrap help and note text without splitting URLs.
-///
-/// `textwrap`'s Unicode line-breaking treats `/` and `-` as break opportunities,
-/// so a URL is not one word and gets a hard newline that defeats terminal linkification.
+/// `textwrap` treats `/` and `-` as break opportunities, so a URL is not one word.
 #[must_use]
 pub fn graphical_handler(theme: GraphicalTheme) -> GraphicalReportHandler {
     GraphicalReportHandler::new_themed(theme)
