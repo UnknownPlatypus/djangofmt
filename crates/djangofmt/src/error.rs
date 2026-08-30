@@ -116,7 +116,7 @@ impl ParseError {
                     markup_fmt::SyntaxErrorKind::ExpectCloseTag { tag_name, pos, .. } => (
                         format!("expected close tag for opening tag <{tag_name}>"),
                         Some(format!(
-                            "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag: \
+                            "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag.\n\
                              https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags"
                         )),
                         // `pos` is the `<`; the caret covers the tag name.

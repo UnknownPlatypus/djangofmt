@@ -13,10 +13,11 @@ use std::{fs, path};
 use djangofmt::args::Profile;
 use djangofmt::commands::format::build_markup_options;
 use djangofmt::error::ParseError;
+use djangofmt_lint::graphical_handler;
 use insta::{assert_snapshot, glob};
 use markup_fmt::config::FormatOptions;
 use markup_fmt::{Language, format_text};
-use miette::{GraphicalReportHandler, GraphicalTheme};
+use miette::GraphicalTheme;
 
 #[test]
 fn parse_error_snapshot() {
@@ -66,7 +67,7 @@ fn format_str(
 
 fn render_miette_error(error: &dyn miette::Diagnostic) -> String {
     let mut output = String::new();
-    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
+    let handler = graphical_handler(GraphicalTheme::unicode_nocolor());
     handler
         .render_report(&mut output, error)
         .expect("Failed to render report");

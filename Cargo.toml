@@ -48,6 +48,7 @@ smallvec = { version = "1.15.1", features = ["const_new"] }
 strum = { version = "0.28.0", features = ["derive"] }
 syn = { version = "3.0" }
 tempfile = { version = "3.27.0" }
+textwrap = { version = "0.16.2" }
 thiserror = { version = "2.0.18" }
 # This has to be kept in sync with src/main.rs where the allocator for the program is set.
 tikv-jemallocator = { version = "0.7.0" }

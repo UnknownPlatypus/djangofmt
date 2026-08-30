@@ -43,7 +43,7 @@ use std::path::Path;
 use markup_fmt::ast::Root;
 use markup_fmt::parser::Parser;
 use markup_fmt::{Language, SyntaxError};
-use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
+use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, NamedSource, Report, SourceSpan};
 use std::fmt;
 use std::sync::{Arc, LazyLock};
 
@@ -53,6 +53,16 @@ use std::sync::{Arc, LazyLock};
 #[must_use]
 pub fn clamp_offset(value: usize) -> u32 {
     u32::try_from(value).unwrap_or(u32::MAX)
+}
+
+/// Wrap help and note text without splitting URLs.
+/// `textwrap` treats `/` and `-` as break opportunities, so a URL is not one word.
+#[must_use]
+pub fn graphical_handler(theme: GraphicalTheme) -> GraphicalReportHandler {
+    GraphicalReportHandler::new_themed(theme)
+        .with_word_separator(textwrap::WordSeparator::AsciiSpace)
+        .with_word_splitter(textwrap::WordSplitter::NoHyphenation)
+        .with_break_words(false)
 }
 
 /// Build a [`SourceSpan`] from `usize` byte offsets.

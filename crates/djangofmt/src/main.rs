@@ -25,6 +25,17 @@ use djangofmt::{ExitStatus, run};
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[must_use]
 pub fn main() -> ExitCode {
+    // Match the wrap policy of `djangofmt_lint::graphical_handler`, keeping URLs unbroken.
+    let _ = miette::set_hook(Box::new(|_| {
+        Box::new(
+            miette::MietteHandlerOpts::new()
+                .word_separator(textwrap::WordSeparator::AsciiSpace)
+                .word_splitter(textwrap::WordSplitter::NoHyphenation)
+                .break_words(false)
+                .build(),
+        )
+    }));
+
     let args = Args::parse();
 
     match run(args) {

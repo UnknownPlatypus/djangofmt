@@ -2,8 +2,8 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, Settings, lint_source};
-use miette::{GraphicalReportHandler, GraphicalTheme};
+use djangofmt_lint::{FileDiagnostics, Settings, graphical_handler, lint_source};
+use miette::GraphicalTheme;
 use serde::Serialize;
 use std::path::PathBuf;
 use tsify::Tsify;
@@ -201,7 +201,7 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     }
 
     let file_diagnostics = FileDiagnostics::new("", source, diagnostics);
-    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode());
+    let handler = graphical_handler(GraphicalTheme::unicode());
     let mut output = String::new();
     file_diagnostics
         .render(&handler, &mut output)
@@ -228,7 +228,7 @@ fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
         source.to_string(),
         err,
     );
-    let handler = GraphicalReportHandler::new_themed(GraphicalTheme::unicode_nocolor());
+    let handler = graphical_handler(GraphicalTheme::unicode_nocolor());
     let mut output = String::new();
     match handler.render_report(&mut output, &diagnostic) {
         Ok(()) => output,

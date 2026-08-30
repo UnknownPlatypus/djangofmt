@@ -437,6 +437,7 @@ dependencies = [
  "serde",
  "similar-asserts",
  "tempfile",
+ "textwrap",
  "thiserror",
  "tikv-jemallocator",
  "toml",
@@ -480,6 +481,7 @@ dependencies = [
  "serde",
  "smallvec",
  "strum",
+ "textwrap",
  "thiserror",
  "tracing",
 ]

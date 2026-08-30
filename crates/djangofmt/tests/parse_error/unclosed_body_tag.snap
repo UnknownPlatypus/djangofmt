@@ -9,4 +9,5 @@ source: crates/djangofmt/tests/parse_error/main.rs
    ·    ╰── here
  6 │ <head>
    ╰────
-  help: If a `</html>` does exist, it must live in the same block as the opening tag: https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
+  help: If a `</html>` does exist, it must live in the same block as the opening tag.
+        https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
