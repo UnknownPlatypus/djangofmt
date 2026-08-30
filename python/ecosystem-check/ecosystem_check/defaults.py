@@ -201,14 +201,10 @@ DEFAULT_TARGETS = [
                 ExcludeReason.DYNAMIC_TAG_NAME: (
                     "src/unfold/templates/unfold/components/button.html",
                     "src/unfold/templates/unfold/components/card.html",
-                    "src/unfold/templates/unfold/helpers/avatar.html",
                     "src/unfold/templates/unfold/helpers/change_list_filter_vertical.html",
-                    "src/unfold/templates/unfold/helpers/display_dropdown.html",
-                    "src/unfold/templates/unfold/helpers/edit_inline/inline_delete.html",
                     "src/unfold/templates/unfold/helpers/header_title.html",
                     "src/unfold/templates/unfold/helpers/label.html",
                     "src/unfold/templates/unfold/helpers/site_icon.html",
-                    "src/unfold/templates/unfold_crispy/field.html",
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "src/unfold/templates/unfold/helpers/display_header.html",  # </div> closing a <span>
