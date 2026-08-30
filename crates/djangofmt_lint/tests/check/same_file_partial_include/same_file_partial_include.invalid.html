@@ -3,7 +3,6 @@
 {% partialdef card %}<span>A card</span>{% endpartialdef %}
 {% partialdef header %}<h1>A header</h1>{% endpartialdef %}
 {% partialdef menu %}<li>A menu entry</li>{% endpartialdef %}
-{% partialdef footer %}<small>A footer</small>{% endpartialdef %}
 {% partialdef attrs %}class="highlight"{% endpartialdef %}
 {% partialdef sidebar inline %}<aside>A sidebar</aside>{% endpartialdef %}
 
@@ -15,9 +14,6 @@
 
 <!-- Single-quoted template string -->
 {% include 'same_file_partial_include.invalid.html#header' %}
-
-<!-- Whitespace-control markers are carried over to the fix -->
-{%- include "same_file_partial_include.invalid.html#footer" -%}
 
 <!-- `inline` partialdefs are matched too -->
 {% include "same_file_partial_include.invalid.html#sidebar" %}

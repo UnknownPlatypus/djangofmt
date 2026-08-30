@@ -6,7 +6,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
 {% partialdef card %}<span>A card</span>{% endpartialdef %}
 {% partialdef header %}<h1>A header</h1>{% endpartialdef %}
 {% partialdef menu %}<li>A menu entry</li>{% endpartialdef %}
-{% partialdef footer %}<small>A footer</small>{% endpartialdef %}
 {% partialdef attrs %}class="highlight"{% endpartialdef %}
 {% partialdef sidebar inline %}<aside>A sidebar</aside>{% endpartialdef %}
 
@@ -18,9 +17,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- Single-quoted template string -->
 {% partial header %}
-
-<!-- Whitespace-control markers are carried over to the fix -->
-{%- partial footer -%}
 
 <!-- `inline` partialdefs are matched too -->
 {% partial sidebar %}

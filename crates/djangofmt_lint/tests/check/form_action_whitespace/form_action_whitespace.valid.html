@@ -18,10 +18,6 @@
 </form>
 
 <!-- Interpolated values are skipped (template tags may legitimately have surrounding padding) -->
-<!-- Regression: djLint #216 — multiline jinja interpolation in action must not flag -->
-<form method="post"
-      action="{%- if connection -%} {{ url_for('connection_bp.edit_connection', connection_id=connection.id) }} {%- else -%} {{ url_for('connection_bp.new_connection') }} {%- endif -%} ">
-</form>
 <form action=" {% url 'foo:bar' %} "></form>
 <form action="{{ submit_url }}"></form>
 <form action=" {{ url }} "></form>

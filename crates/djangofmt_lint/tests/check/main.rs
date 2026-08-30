@@ -17,7 +17,7 @@ use strum::IntoEnumIterator;
 /// Asserts every `*.valid.html` fixture produces zero diagnostics.
 #[test]
 fn check_valid() {
-    glob!("**/*.valid.html", |path| {
+    glob!("**/*.valid.{html,jinja}", |path| {
         build_settings(path).bind(|| {
             let input = fs::read_to_string(path).unwrap();
             let diagnostics = collect_diagnostics(path, &input);
@@ -35,7 +35,7 @@ fn check_valid() {
 /// Snapshots the rendered diagnostics produced for each `*.invalid.html` fixture.
 #[test]
 fn check_invalid() {
-    glob!("**/*.invalid.html", |path| {
+    glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
         let file_diagnostics = collect_diagnostics(path, &input);
         assert!(
@@ -56,9 +56,9 @@ fn check_invalid() {
 /// Unsafe fixes are snapshot as `{stem}.unsafe-fixed`;
 #[test]
 fn fix_snapshot() {
-    glob!("**/*.invalid.html", |path| {
+    glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let ast = parse(&input, Language::Django, &[])
+        let ast = parse(&input, language_for(path), &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
@@ -118,12 +118,21 @@ fn settings_for(path: &Path) -> Settings {
 fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
     lint_source(
         input,
-        Language::Django,
+        language_for(path),
         &[],
         &settings_for(path),
         Some(path),
     )
     .expect("Failed to parse AST in test")
+}
+
+/// Mirror the CLI's extension inference (`Profile::from_path`).
+/// `.jinja` fixtures run under Jinja, the only profile allowing whitespace-control markers.
+fn language_for(path: &Path) -> Language {
+    match path.extension().and_then(|ext| ext.to_str()) {
+        Some("jinja") => Language::Jinja,
+        _ => Language::Django,
+    }
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {

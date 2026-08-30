@@ -1,0 +1,7 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+{% partialdef footer %}<small>A footer</small>{% endpartialdef %}
+
+<!-- Whitespace-control markers are carried over to the fix -->
+{%- partial footer -%}

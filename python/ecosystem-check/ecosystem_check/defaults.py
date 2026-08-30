@@ -69,6 +69,11 @@ DEFAULT_TARGETS = [
                     "tests/template_backends/templates/template_backends/syntax_error.html",
                     "tests/test_client_regress/bad_templates/404.html",
                 ),
+                ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
+                    "django/forms/jinja2/django/forms/widgets/multiwidget.html",
+                    "docs/_theme/djangodocs/layout.html",
+                    "docs/_theme/djangodocs-epub/epub-cover.html",
+                ),
             },
         ),
     ),
