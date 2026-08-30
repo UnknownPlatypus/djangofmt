@@ -3,16 +3,19 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
 use std::fs::File;
 use std::io::Write;
+use std::panic::UnwindSafe;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_profile};
 use crate::editorconfig::{self, EditorconfigSettings};
 use crate::error::{CommandError, ParseError, Result};
+use crate::fs::relativize_path;
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
+use crate::panic::catch_unwind;
 use crate::pyproject::PyprojectSettings;
 use editorconfig_parser::EditorConfig;
 
@@ -285,10 +288,10 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     // Format files in parallel
     let start = Instant::now();
-    let (results, parse_errors): (Vec<_>, Vec<_>) = resolved
+    let (results, errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|entry| format_path(entry, &context))
+        .map(|entry| super::catch_file_panic(entry, || format_path(entry, &context)))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(*err),
@@ -300,7 +303,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         start.elapsed()
     );
 
-    let nb_parse_errors = super::report_parse_errors(parse_errors, "format", OutputFormat::Full);
+    let nb_errors = super::report_errors(errors, "format", OutputFormat::Full);
 
     // Report on the formatting changes.
     let summary = build_summary(results.as_ref());
@@ -308,7 +311,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         info!("{} !", summary);
     }
 
-    if nb_parse_errors == 0 {
+    if nb_errors == 0 {
         Ok(ExitStatus::Success)
     } else {
         Ok(ExitStatus::Error)
@@ -316,10 +319,13 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 }
 
 /// Format the given source code.
+///
+/// `path` only labels diagnostics, pass `None` when the source has no file behind it.
 pub fn format_text(
     source: &str,
     config: &FormatterConfig,
     profile: Profile,
+    path: Option<&Path>,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
     if is_file_ignored(source) {
         return Ok(None);
@@ -334,24 +340,26 @@ pub fn format_text(
                     let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
                     let mut json_config = config.json.clone();
                     json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
-                    match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
-                        Ok(Some(formatted)) => Ok(formatted.into()),
-                        Ok(None) => Ok(code.into()),
-                        Err(error) => {
-                            debug!(
-                                "Failed to format JSON, falling back to original code. Error: {:?}",
-                                error
-                            );
-                            Ok(code.into())
+                    Ok(format_or_fallback(code, "JSON", path, || {
+                        match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
+                            Ok(Some(formatted)) => formatted.into(),
+                            Ok(None) => code.into(),
+                            Err(error) => {
+                                debug!(
+                                    "Failed to format JSON, falling back to original code. Error: {:?}",
+                                    error
+                                );
+                                code.into()
+                            }
                         }
-                    }
+                    }))
                 }
                 "css" | "scss" | "sass" | "less" => {
                     let mut malva_config = config.malva.clone();
                     malva_config.layout.print_width = hints.print_width;
 
-                    let formatted_css = malva::format_text(code, malva::Syntax::Css, &malva_config)
-                        .map_or_else(
+                    let formatted_css = format_or_fallback(code, "CSS", path, || {
+                        malva::format_text(code, malva::Syntax::Css, &malva_config).map_or_else(
                             |error| {
                                 debug!(
                                     "Failed to format CSS, falling back to original code. Error: {:?}",
@@ -360,7 +368,8 @@ pub fn format_text(
                                 code.into()
                             },
                             Cow::from,
-                        );
+                        )
+                    });
 
                     // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
                     // Tries to keep on formatting style attr on a single line like expected with
@@ -383,6 +392,27 @@ pub fn format_text(
     .map(Some)
 }
 
+/// Run an embedded formatter, falling back to the original `code` if it panics.
+fn format_or_fallback<'a>(
+    code: &'a str,
+    language: &str,
+    path: Option<&Path>,
+    format: impl FnOnce() -> Cow<'a, str> + UnwindSafe,
+) -> Cow<'a, str> {
+    catch_unwind(format).unwrap_or_else(|err| {
+        let location = err
+            .location
+            .map_or_else(String::new, |location| format!(" at {location}"));
+        warn!(
+            "{}: the embedded {language} formatter panicked{location} ({}), leaving that snippet unformatted. Please report it at {}/issues",
+            path.map_or_else(|| "<unknown>".to_string(), relativize_path),
+            err.payload,
+            env!("CARGO_PKG_REPOSITORY"),
+        );
+        Cow::Borrowed(code)
+    })
+}
+
 /// Format the file at the given [`Path`].
 #[tracing::instrument(level="debug", skip_all, fields(path = %path.display()))]
 fn format_path(
@@ -394,7 +424,7 @@ fn format_path(
     let unformatted = std::fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
-    let formatted = match format_text(&unformatted, &config, profile) {
+    let formatted = match format_text(&unformatted, &config, profile, Some(path)) {
         Ok(f) => f,
         Err(err) => {
             return Err(Box::new(CommandError::Parse(ParseError::new(
@@ -490,6 +520,27 @@ mod tests {
         let io_err = io::Error::other("disk full");
         let err = CommandError::Write(None, io_err);
         assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
+    }
+
+    #[test]
+    fn format_or_fallback_returns_original_code_on_panic() {
+        let code = "color: red";
+        assert_eq!(
+            format_or_fallback(code, "CSS", None, || panic!("boom")),
+            code
+        );
+    }
+
+    #[test]
+    fn format_command_error_panic_display() {
+        let panic_error = catch_unwind(|| panic!("boom")).unwrap_err();
+        let err = CommandError::Panic(Some(PathBuf::from("a.html")), Box::new(panic_error));
+
+        let full = err.to_string();
+        assert!(full.contains("Panicked while processing a.html"), "{full}");
+        assert!(full.contains("boom"), "{full}");
+        assert!(full.contains("issues/new"), "{full}");
+        assert!(err.concise().contains("a.html: Panicked: boom"));
     }
 
     #[test]

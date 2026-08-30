@@ -56,7 +56,7 @@ fn format_source_code(
         .read_to_string(&mut source)
         .map_err(|err| Box::new(CommandError::Read(path.map(Path::to_path_buf), err)))?;
 
-    let formatted = match format_text(&source, config, profile) {
+    let formatted = match format_text(&source, config, profile, path) {
         Ok(f) => f,
         Err(err) => {
             return Err(Box::new(CommandError::Parse(ParseError::new(

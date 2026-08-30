@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use thiserror::Error;
 
 use crate::fs::relativize_path;
+use crate::panic::PanicError;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -66,6 +67,15 @@ pub enum CommandError {
     Parse(ParseError),
     #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
     Write(Option<PathBuf>, #[source] io::Error),
+    #[error(
+        "Panicked while processing {path}: This indicates a bug in djangofmt. \
+         If you could open an issue at {repo}/issues/new?title=%5BPanic%5D \
+         with the file contents and the trace below, we'd be very appreciative!\n{err}",
+        path = path_display(.0.as_ref()),
+        repo = env!("CARGO_PKG_REPOSITORY"),
+        err = .1
+    )]
+    Panic(Option<PathBuf>, Box<PanicError>),
 }
 
 impl CommandError {
@@ -73,7 +83,7 @@ impl CommandError {
     pub fn path(&self) -> Option<&Path> {
         match self {
             Self::Parse(err) => err.path.as_deref(),
-            Self::Read(path, _) | Self::Write(path, _) => path.as_deref(),
+            Self::Read(path, _) | Self::Write(path, _) | Self::Panic(path, _) => path.as_deref(),
         }
     }
 
@@ -87,6 +97,11 @@ impl CommandError {
                 format!("{path}:{line}:{column}: {}", err.message)
             }
             Self::Read(..) | Self::Write(..) => self.to_string(),
+            Self::Panic(path, err) => format!(
+                "{path}: Panicked: {payload}",
+                path = path_display(path.as_ref()),
+                payload = err.payload
+            ),
         }
     }
 }

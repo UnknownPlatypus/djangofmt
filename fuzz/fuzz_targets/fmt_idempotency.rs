@@ -22,7 +22,7 @@ static CONFIG: LazyLock<FormatterConfig> = LazyLock::new(|| {
 });
 
 fn do_fuzz_profile(code: &str, profile: Profile) -> Corpus {
-    let formatted = match format_text(code, &CONFIG, profile) {
+    let formatted = match format_text(code, &CONFIG, profile, None) {
         Ok(Some(formatted)) => formatted,
         // Skipped via a djangofmt:ignore directive.
         Ok(None) => return Corpus::Reject,
@@ -33,7 +33,7 @@ fn do_fuzz_profile(code: &str, profile: Profile) -> Corpus {
         }
     };
 
-    match format_text(&formatted, &CONFIG, profile) {
+    match format_text(&formatted, &CONFIG, profile, None) {
         Ok(Some(reformatted)) => {
             similar_asserts::assert_eq!(
                 formatted,

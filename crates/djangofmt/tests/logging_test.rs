@@ -22,7 +22,7 @@ invalid-css-property;
     );
     let profile = Profile::Django;
 
-    format_text(input, &config, profile).unwrap();
+    format_text(input, &config, profile, None).unwrap();
     assert!(logs_contain(
         "Failed to format CSS, falling back to original code"
     ));

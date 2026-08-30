@@ -15,6 +15,7 @@ pub mod fs;
 pub mod line_width;
 mod logging;
 pub mod options_metadata;
+pub mod panic;
 pub mod per_file_ignores;
 pub mod pyproject;
 pub mod resolver;

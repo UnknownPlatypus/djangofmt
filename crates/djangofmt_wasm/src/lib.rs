@@ -22,7 +22,7 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
         false,
     );
 
-    match format_text(source, &config, profile) {
+    match format_text(source, &config, profile, None) {
         Ok(opt) => opt.unwrap_or_else(|| source.to_string()),
         Err(err) => render_parse_error(source, &err),
     }
