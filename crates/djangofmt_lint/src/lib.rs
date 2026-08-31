@@ -36,7 +36,7 @@ pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use rule_selector::{RuleSelector, SelectionWarning, SelectorParseError};
 pub use rule_set::RuleSet;
 pub use settings::{LintConfiguration, Settings};
-pub use suppression::{FileIgnores, file_ignores};
+pub use suppression::FileIgnores;
 pub use violation::{Violation, ViolationMetadata};
 
 use std::borrow::Cow;

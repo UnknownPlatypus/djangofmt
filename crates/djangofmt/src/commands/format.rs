@@ -1,4 +1,4 @@
-use djangofmt_lint::file_ignores;
+use djangofmt_lint::FileIgnores;
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
@@ -317,7 +317,7 @@ pub fn format_text(
     profile: Profile,
     path: Option<&Path>,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
-    let ignores = file_ignores(source);
+    let ignores = FileIgnores::parse(source);
     if ignores.format {
         return Ok(None);
     }

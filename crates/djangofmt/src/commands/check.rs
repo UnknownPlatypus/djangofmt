@@ -1,5 +1,5 @@
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, FixerError, RuleFixSummary, Settings, file_ignores, lint_fix,
+    Applicability, FileDiagnostics, FileIgnores, FixerError, RuleFixSummary, Settings, lint_fix,
     lint_source,
 };
 use markup_fmt::FormatError;
@@ -409,7 +409,7 @@ fn parse_failure(
     source: String,
     err: markup_fmt::SyntaxError,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
-    if file_ignores(&source).invalid_syntax {
+    if FileIgnores::parse(&source).invalid_syntax {
         debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
         return Ok(CheckResult {
             path: path.to_path_buf(),

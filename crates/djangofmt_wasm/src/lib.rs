@@ -2,7 +2,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, Settings, file_ignores, graphical_handler, lint_source};
+use djangofmt_lint::{FileDiagnostics, FileIgnores, Settings, graphical_handler, lint_source};
 use miette::GraphicalTheme;
 use serde::Serialize;
 use std::path::PathBuf;
@@ -190,7 +190,7 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         Ok(diagnostics) => diagnostics,
         Err(e) => {
             // Match the CLI: `file-ignore[invalid-syntax]` skips the file.
-            if file_ignores(source).invalid_syntax {
+            if FileIgnores::parse(source).invalid_syntax {
                 return Ok(LintResult::new(0, String::new()));
             }
             let err = markup_fmt::FormatError::Syntax(e);

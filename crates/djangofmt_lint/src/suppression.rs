@@ -71,38 +71,40 @@ pub struct FileIgnores {
     pub invalid_syntax: bool,
 }
 
-/// Opt-outs from the file's leading comment, read straight from the raw source
-/// so they can be honored even when the file fails to parse.
-#[must_use]
-pub fn file_ignores(source: &str) -> FileIgnores {
-    // A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
+impl FileIgnores {
+    /// Opt-outs from the file's leading comment, read straight from the raw source
+    /// so they can be honored even when the file fails to parse.
+    #[must_use]
+    pub fn parse(source: &str) -> Self {
+        // A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
+        let source = source.strip_prefix('\u{feff}').unwrap_or(source);
 
-    // The bare legacy directive doubles as a node-level formatter directive,
-    // so it is only file-level when nothing (not even whitespace) precedes it.
-    let legacy_body =
-        leading_comment(source, "{#", "#}").or_else(|| leading_comment(source, "<!--", "-->"));
-    if let Some(body) = legacy_body
-        && markup_fmt::starts_with_directive(directive_body(body), "djangofmt:ignore")
-    {
-        return FileIgnores {
-            format: true,
-            invalid_syntax: true,
-        };
-    }
-    // `file-ignore[...]` is unambiguously file-level: leading whitespace is fine.
-    match leading_comment(source.trim_start(), "{#", "#}").map(parse_directive) {
-        Some(Some(Directive::FileIgnore(codes))) => {
-            let codes: Vec<_> = codes
+        // The bare legacy directive doubles as a node-level formatter directive,
+        // so it is only file-level when nothing (not even whitespace) precedes it.
+        let legacy_body =
+            leading_comment(source, "{#", "#}").or_else(|| leading_comment(source, "<!--", "-->"));
+        if let Some(body) = legacy_body
+            && markup_fmt::starts_with_directive(directive_body(body), "djangofmt:ignore")
+        {
+            return Self {
+                format: true,
+                invalid_syntax: true,
+            };
+        }
+        // `file-ignore[...]` is unambiguously file-level: leading whitespace is fine.
+        match leading_comment(source.trim_start(), "{#", "#}").map(parse_directive) {
+            Some(Some(Directive::FileIgnore(codes))) => codes
                 .iter()
                 .filter_map(|code| FileIgnoreCode::from_str(code).ok())
-                .collect();
-            FileIgnores {
-                format: codes.contains(&FileIgnoreCode::Format),
-                invalid_syntax: codes.contains(&FileIgnoreCode::InvalidSyntax),
-            }
+                .fold(Self::default(), |mut ignores, code| {
+                    match code {
+                        FileIgnoreCode::Format => ignores.format = true,
+                        FileIgnoreCode::InvalidSyntax => ignores.invalid_syntax = true,
+                    }
+                    ignores
+                }),
+            _ => Self::default(),
         }
-        _ => FileIgnores::default(),
     }
 }
 
@@ -146,8 +148,8 @@ mod tests {
     #[rstest]
     fn reject_non_directives(
         #[values(
-            " djangofmt:ignore ",            // formatter directive
-            "djangofmt: ignore[]",           // explicit rules only
+            " djangofmt:ignore ",     // formatter directive
+            "djangofmt: ignore[]",    // explicit rules only
             "djangofmt: ignore[ , ]", // only separators
             "ignore[a]"               // must start with djangofmt:
         )]
@@ -189,6 +191,6 @@ mod tests {
     #[case::node_level("{# djangofmt: ignore[invalid-syntax] #}\n<div id=>", NONE)]
     #[case::plain_markup("<div id=>", NONE)]
     fn detect_file_level_opt_outs(#[case] source: &str, #[case] expected: FileIgnores) {
-        assert_eq!(file_ignores(source), expected);
+        assert_eq!(FileIgnores::parse(source), expected);
     }
 }
