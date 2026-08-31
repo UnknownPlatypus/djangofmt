@@ -62,6 +62,18 @@ pub static ALL_TEMPLATES: [&TestFile; 9] = [
     &JINJA_TEMPLATE_LARGE,
 ];
 
+/// Unmeasured runs before the measured one, mirroring `codspeed::codspeed::WARMUP_RUNS`.
+/// `codspeed-criterion-compat` applies these natively; `codspeed-divan-compat` does not.
+const WARMUP_RUNS: usize = 5;
+
+/// Fills process-global caches (rustywind's class-sort LRU, `LazyLock` tables) before the
+/// measured call, which `codspeed-divan-compat` instruments as a single cold iteration.
+pub fn warmup<T>(f: impl Fn() -> T) {
+    for _ in 0..WARMUP_RUNS {
+        std::hint::black_box(f());
+    }
+}
+
 #[derive(Clone)]
 pub struct TestFile {
     pub name: &'static str,

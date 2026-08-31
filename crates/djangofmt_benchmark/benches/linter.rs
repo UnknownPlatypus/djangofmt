@@ -1,4 +1,4 @@
-use djangofmt_benchmark::{ALL_TEMPLATES, TestFile};
+use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
 use djangofmt_lint::settings::unsorted_tailwind_classes;
 use djangofmt_lint::{RuleSet, Settings, check_ast, parse};
 
@@ -38,14 +38,17 @@ fn check_all_rules(bencher: divan::Bencher, template: &'static TestFile) {
 fn bench_check(bencher: divan::Bencher, template: &TestFile, settings: &Settings) {
     let ast = parse(template.code, template.profile.into(), &[]).expect("Parsing to succeed");
 
+    let run = || {
+        check_ast(
+            divan::black_box(template.code),
+            divan::black_box(&ast),
+            divan::black_box(settings),
+            divan::black_box(None),
+        )
+    };
+    warmup(run);
+
     bencher
         .counter(divan::counter::BytesCount::of_str(template.code))
-        .bench(|| {
-            check_ast(
-                divan::black_box(template.code),
-                divan::black_box(&ast),
-                divan::black_box(settings),
-                divan::black_box(None),
-            )
-        });
+        .bench(run);
 }
