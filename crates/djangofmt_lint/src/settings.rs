@@ -240,11 +240,16 @@ mod tests {
     }
 
     #[test]
-    fn no_rule_name_collides_with_a_group() {
-        for group in std::iter::once("all").chain(RuleCategory::VARIANTS.iter().copied()) {
+    fn no_rule_name_collides_with_a_reserved_word() {
+        // `format`/`invalid-syntax` are `file-ignore[...]` codes; `lint` is kept free for group suppression.
+        let reserved = ["all", "lint", "format", "invalid-syntax"];
+        for word in reserved
+            .into_iter()
+            .chain(RuleCategory::VARIANTS.iter().copied())
+        {
             assert!(
-                Rule::from_str(group).is_err(),
-                "category/group `{group}` collides with a rule name"
+                Rule::from_str(word).is_err(),
+                "reserved word `{word}` collides with a rule name"
             );
         }
     }
