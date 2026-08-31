@@ -70,10 +70,10 @@ To disable formatting for an entire file, add `{# djangofmt: file-ignore[format]
 <div   class="keep-this-unformatted"   >Content</div>
 ```
 
-To disable formatting for a specific node, prefix it with a `{# djangofmt: ignore #}` comment:
+To disable formatting for a specific node, prefix it with a `{# djangofmt: ignore[format] #}` comment:
 
 ```html
-{# djangofmt: ignore #}
+{# djangofmt: ignore[format] #}
 <div   class="keep-this-unformatted"   >Content</div>
 <div class="this-will-be-formatted">Content</div>
 ```
@@ -88,4 +88,5 @@ Anything after the closing bracket is a free-text reason:
 ```
 
 A bare `{# djangofmt:ignore #}` (or `<!-- djangofmt:ignore -->`) at the very top still skips the whole file, parse errors included, for backward compatibility.
+
 Prefer `file-ignore[...]`: it states what is opted out of, and `{# #}` comments aren't rendered to the client.
