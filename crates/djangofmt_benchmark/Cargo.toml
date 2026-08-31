@@ -42,5 +42,9 @@ divan = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 miette = { workspace = true }
 
+# Keep the cfg in sync with `src/lib.rs`, which declares the global allocator.
+[target.'cfg(all(not(target_os = "macos"), not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "aix"), not(target_os = "android"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64", target_arch = "riscv64")))'.dependencies]
+tikv-jemallocator = { workspace = true }
+
 [lints]
 workspace = true

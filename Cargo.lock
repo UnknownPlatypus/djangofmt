@@ -455,6 +455,7 @@ dependencies = [
  "djangofmt",
  "djangofmt_lint",
  "oxc-miette",
+ "tikv-jemallocator",
 ]
 
 [[package]]
