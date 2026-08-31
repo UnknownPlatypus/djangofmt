@@ -1,0 +1,5 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<div data-json='{% trans "Page's settings" %}'></div>
+<div data-json="{% trans 'Say "hi"' %}"></div>
