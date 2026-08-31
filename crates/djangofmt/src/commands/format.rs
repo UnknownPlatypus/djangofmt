@@ -1,3 +1,4 @@
+use djangofmt_lint::FileIgnores;
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
@@ -12,7 +13,7 @@ use crate::ExitStatus;
 use crate::args::{FormatCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_profile};
 use crate::editorconfig::{self, EditorconfigSettings};
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
 use crate::fs::relativize_path;
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::panic::catch_unwind;
@@ -113,17 +114,6 @@ pub(crate) fn merge_custom_blocks(
 }
 
 const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = "djangofmt:ignore";
-
-/// Whether the file opts out of djangofmt entirely with a leading ignore comment.
-#[must_use]
-pub(crate) fn is_file_ignored(source: &str) -> bool {
-    source
-        .strip_prefix("<!--")
-        .or_else(|| source.strip_prefix("{#"))
-        .is_some_and(|comment| {
-            markup_fmt::starts_with_directive(comment, DJANGOFMT_IGNORE_COMMENT_DIRECTIVE)
-        })
-}
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
@@ -327,10 +317,11 @@ pub fn format_text(
     profile: Profile,
     path: Option<&Path>,
 ) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
-    if is_file_ignored(source) {
+    let ignores = FileIgnores::parse(source);
+    if ignores.format {
         return Ok(None);
     }
-    markup_fmt::format_text(
+    let result = markup_fmt::format_text(
         source,
         markup_fmt::Language::from(profile),
         &config.markup,
@@ -388,8 +379,12 @@ pub fn format_text(
                 _ => Ok(code.into()),
             }
         },
-    )
-    .map(Some)
+    );
+    match result {
+        // `file-ignore[invalid-syntax]` quarantines the file instead of reporting.
+        Err(markup_fmt::FormatError::Syntax(_)) if ignores.invalid_syntax => Ok(None),
+        other => other.map(Some),
+    }
 }
 
 /// Run an embedded formatter, falling back to the original `code` if it panics.
@@ -427,11 +422,9 @@ fn format_path(
     let formatted = match format_text(&unformatted, &config, profile, Some(path)) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                Some(path.to_path_buf()),
-                unformatted,
-                &err,
-            ))));
+            return Err(ParseError::new(Some(path.to_path_buf()), unformatted, &err)
+                .with_fallback_hint(SKIP_FILE_HINT)
+                .into());
         }
     };
 

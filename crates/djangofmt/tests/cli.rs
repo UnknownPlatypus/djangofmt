@@ -52,19 +52,6 @@ fn format_file_with_ignore_directive() {
 }
 
 #[test]
-fn check_unparsable_file_with_ignore_directive() {
-    let project = Project::new().file("test.html", "{# djangofmt:   ignore #}\n<div>\n");
-    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    All checks passed!
-    ");
-}
-
-#[test]
 fn format_nonexistent_file() {
     assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @r#"
     success: false
@@ -107,7 +94,7 @@ fn format_quiet() {
 #[test]
 fn format_file_parse_error_exits_2() {
     let project = Project::new().file("test.html", "<div   class=\"foo\"  >");
-    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r##"
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -125,7 +112,7 @@ fn format_file_parse_error_exits_2() {
             https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
 
     Couldn't format 1 files!
-    "##);
+    "###);
 }
 
 // ── Format from stdin ────────────────────────────────────────────────
@@ -216,8 +203,9 @@ fn format_stdin_ignore_directive() {
 
 #[test]
 fn format_stdin_parse_error_exits_2() {
+    // A generic parse error has no specific hint: the skip-file one shows instead.
     assert_cmd_snapshot!(
-        cli().arg("-").pass_stdin("<div   class=\"foo\"  >"),
+        cli().arg("-").pass_stdin("<div id=></div>"),
         @r##"
     success: false
     exit_code: 2
@@ -225,15 +213,14 @@ fn format_stdin_parse_error_exits_2() {
 
     ----- stderr -----
 
-      × expected close tag for opening tag <div>
-       ╭─[<unknown>:1:2]
-     1 │ <div   class="foo"  >
-       ·  ─┬─
-       ·   ╰── here
+      × expected attribute value
+       ╭─[<unknown>:1:9]
+     1 │ <div id=></div>
+       ·         ▲
+       ·         ╰── here
        ╰────
-      help: If a `</div>` does exist, it must live in the same block as the
-            opening tag.
-            https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
+      help: Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
+            this file, or list it in `extend-exclude`, to skip it.
     "##);
 }
 
@@ -472,9 +459,33 @@ fn check_fixable_file_with_show_fixes() {
 }
 
 #[test]
+fn check_skips_unparsable_files_that_opted_out() {
+    // Both the explicit code and the legacy bare directive (#373) skip a file
+    // `check` cannot parse.
+    let project = Project::new()
+        .file(
+            "bracketed.html",
+            "{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>\n</div>\n",
+        )
+        .file(
+            "legacy.html",
+            "{# djangofmt: ignore #}\n<div id=>\n</div>\n",
+        );
+    assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @r"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    2 files skipped !
+    ");
+}
+
+#[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
-    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -492,7 +503,7 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
             finding the end tag.
 
     Couldn't check 1 files!
-    "###);
+    "#);
 }
 
 #[test]
@@ -505,7 +516,7 @@ fn check_respects_pyproject_custom_blocks() {
             "[tool.djangofmt]\ncustom-blocks = [\"stage\"]\n",
         )
         .file("test.html", "{% stage %}\n<p>hi</p>\n");
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r###"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r#"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -523,7 +534,7 @@ fn check_respects_pyproject_custom_blocks() {
             finding the end tag.
 
     Couldn't check 1 files!
-    "###);
+    "#);
 }
 
 #[test]

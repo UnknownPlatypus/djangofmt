@@ -1,0 +1,5 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{# djangofmt: file-ignore[invalid-syntax] #}
+<p class="reformatted">Parsable content is still formatted, the directive only quarantines parse errors</p>

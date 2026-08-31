@@ -8,7 +8,7 @@ use crate::args::{FormatCommand, Profile};
 use crate::commands::format::{FormatterConfig, format_text};
 use crate::config::resolve_profile;
 use crate::editorconfig;
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
 use crate::pyproject::load_pyproject_from_cwd;
 use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
 
@@ -54,16 +54,14 @@ fn format_source_code(
     stdin()
         .lock()
         .read_to_string(&mut source)
-        .map_err(|err| Box::new(CommandError::Read(path.map(Path::to_path_buf), err)))?;
+        .map_err(|err| CommandError::Read(path.map(Path::to_path_buf), err))?;
 
     let formatted = match format_text(&source, config, profile, path) {
         Ok(f) => f,
         Err(err) => {
-            return Err(Box::new(CommandError::Parse(ParseError::new(
-                path.map(Path::to_path_buf),
-                source,
-                &err,
-            ))));
+            return Err(ParseError::new(path.map(Path::to_path_buf), source, &err)
+                .with_fallback_hint(SKIP_FILE_HINT)
+                .into());
         }
     };
 
@@ -71,6 +69,6 @@ fn format_source_code(
     stdout()
         .lock()
         .write_all(output.as_bytes())
-        .map_err(|err| Box::new(CommandError::Write(path.map(Path::to_path_buf), err)))?;
+        .map_err(|err| CommandError::Write(path.map(Path::to_path_buf), err))?;
     Ok(())
 }

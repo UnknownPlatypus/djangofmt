@@ -78,6 +78,12 @@ pub enum CommandError {
     Panic(Option<PathBuf>, Box<PanicError>),
 }
 
+impl From<ParseError> for Box<CommandError> {
+    fn from(err: ParseError) -> Self {
+        Self::new(CommandError::Parse(err))
+    }
+}
+
 impl CommandError {
     #[must_use]
     pub fn path(&self) -> Option<&Path> {
@@ -105,6 +111,9 @@ impl CommandError {
         }
     }
 }
+
+/// Escape hatches suggested when a file cannot be parsed.
+pub const SKIP_FILE_HINT: &str = "Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.";
 
 impl ParseError {
     #[must_use]
@@ -152,6 +161,13 @@ impl ParseError {
             span,
             hint,
         }
+    }
+
+    /// Help text used only when the error carries no more specific hint.
+    #[must_use]
+    pub fn with_fallback_hint(mut self, hint: &str) -> Self {
+        self.hint.get_or_insert_with(|| hint.to_string());
+        self
     }
 
     /// 1-based line and column the error points at.
