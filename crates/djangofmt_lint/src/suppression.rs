@@ -33,7 +33,8 @@ fn directive_body(raw: &str) -> &str {
 /// Parse a comment body into a suppression directive.
 ///
 /// Grammar: `djangofmt:` (whitespace allowed around the colon),
-/// then `ignore[...]` or `file-ignore[...]` with a non-empty comma-separated rule list
+/// then `ignore[...]` or `file-ignore[...]` with a non-empty comma-separated rule list.
+/// Anything after the closing bracket is a free-text reason, ignored.
 fn parse_directive(raw: &str) -> Option<Directive<'_>> {
     let rest = directive_body(raw)
         .strip_prefix("djangofmt")?
@@ -45,7 +46,8 @@ fn parse_directive(raw: &str) -> Option<Directive<'_>> {
         None => (false, rest.strip_prefix("ignore[")?),
     };
     let codes: Vec<&str> = rest
-        .strip_suffix(']')?
+        .split_once(']')?
+        .0
         .split(',')
         .map(str::trim)
         .filter(|code| !code.is_empty())
@@ -136,6 +138,7 @@ mod tests {
     #[case::node(" djangofmt: ignore[a, b ,c] ", Directive::Ignore(vec!["a", "b", "c"]))]
     #[case::file("djangofmt:file-ignore[invalid-syntax]", Directive::FileIgnore(vec!["invalid-syntax"]))]
     #[case::spaced_colon("djangofmt : file-ignore[invalid-syntax]", Directive::FileIgnore(vec!["invalid-syntax"]))]
+    #[case::reason("djangofmt: ignore[a]: free-text reason", Directive::Ignore(vec!["a"]))]
     fn parse_directives(#[case] comment: &str, #[case] expected: Directive) {
         assert_eq!(parse_directive(comment), Some(expected));
     }
@@ -145,9 +148,8 @@ mod tests {
         #[values(
             " djangofmt:ignore ",            // formatter directive
             "djangofmt: ignore[]",           // explicit rules only
-            "djangofmt: ignore[ , ]",        // only separators
-            "djangofmt: ignore[a] trailing", // nothing after bracket
-            "ignore[a]"                      // must start with djangofmt:
+            "djangofmt: ignore[ , ]", // only separators
+            "ignore[a]"               // must start with djangofmt:
         )]
         comment: &str,
     ) {
@@ -160,6 +162,8 @@ mod tests {
     #[case::both_codes("{# djangofmt: file-ignore[format, invalid-syntax] #}", ALL)]
     // Jinja whitespace-control markers are part of the delimiter.
     #[case::whitespace_control("{#- djangofmt: file-ignore[format] -#}", FORMAT_ONLY)]
+    // Anything after the closing bracket is a free-text reason.
+    #[case::reason("{# djangofmt: file-ignore[format]: vendored file #}", FORMAT_ONLY)]
     // A UTF-8 BOM or leading whitespace before the directive is tolerated.
     #[case::bom(
         "\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>",
