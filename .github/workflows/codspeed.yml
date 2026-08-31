@@ -39,7 +39,8 @@ jobs:
       - name: Setup rust toolchain, cache and cargo-codspeed binary
         uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
         with:
-          channel: stable
+          # No `channel`: read the pin from rust-toolchain.toml, so a new stable
+          # release can't silently re-baseline every benchmark.
           cache-target: release
           bins: cargo-codspeed
 

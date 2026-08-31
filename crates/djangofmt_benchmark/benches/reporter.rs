@@ -2,7 +2,7 @@
 //! the dominant cost of `djangofmt check` on a dirty codebase.
 
 use djangofmt_benchmark::{
-    DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, TestFile,
+    DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, TestFile, warmup,
 };
 use djangofmt_lint::{FileDiagnostics, Settings, graphical_handler, lint_source};
 use miette::GraphicalTheme;
@@ -36,11 +36,14 @@ fn render(bencher: divan::Bencher, template: &'static TestFile) {
     // benchmark happens to run in can't change the result.
     let handler = graphical_handler(GraphicalTheme::unicode()).with_width(120);
 
-    bencher.counter(file_diagnostics.len()).bench(|| {
+    let run = || {
         let mut out = String::new();
         divan::black_box(&file_diagnostics)
             .render(&handler, &mut out)
             .expect("rendering to a String cannot fail");
         out
-    });
+    };
+    warmup(run);
+
+    bencher.counter(file_diagnostics.len()).bench(run);
 }

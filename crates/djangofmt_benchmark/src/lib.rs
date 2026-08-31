@@ -1,6 +1,29 @@
 use djangofmt::args::Profile;
 use std::fmt;
 
+// Benchmark the allocator the CLI ships with, and stop jemalloc returning pages to the OS:
+// background purging shows up as random slow allocations mid-run.
+#[cfg(all(
+    not(target_os = "macos"),
+    not(target_os = "windows"),
+    not(target_os = "openbsd"),
+    not(target_os = "aix"),
+    not(target_os = "android"),
+    any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "powerpc64",
+        target_arch = "riscv64"
+    )
+))]
+mod allocator {
+    #[global_allocator]
+    static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
+    #[unsafe(export_name = "_rjem_malloc_conf")]
+    pub static MALLOC_CONF: &[u8] = b"dirty_decay_ms:-1,muzzy_decay_ms:-1\0";
+}
+
 pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {
     name: "small/404.html",
     code: include_str!("../resources/django/404.html"),
@@ -61,6 +84,18 @@ pub static ALL_TEMPLATES: [&TestFile; 9] = [
     &JINJA_TEMPLATE_FORM_HEAVY,
     &JINJA_TEMPLATE_LARGE,
 ];
+
+/// Unmeasured runs before the measured one, mirroring `codspeed::codspeed::WARMUP_RUNS`.
+/// `codspeed-criterion-compat` applies these natively; `codspeed-divan-compat` does not.
+const WARMUP_RUNS: usize = 5;
+
+/// Fills process-global caches (rustywind's class-sort LRU, `LazyLock` tables) before the
+/// measured call, which `codspeed-divan-compat` instruments as a single cold iteration.
+pub fn warmup<T>(f: impl Fn() -> T) {
+    for _ in 0..WARMUP_RUNS {
+        std::hint::black_box(f());
+    }
+}
 
 #[derive(Clone)]
 pub struct TestFile {
