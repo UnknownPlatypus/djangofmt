@@ -54,3 +54,9 @@ You can almost always write it another way that is much more readable. For examp
 ```
 
 See upstream tracking issue: https://github.com/g-plane/markup_fmt/issues/97
+
+## Output is always LF
+
+Line endings are always normalized to `\n`: CRLF input is converted, and `.editorconfig`'s `end_of_line` is ignored.
+
+Making this configurable is skipped for now, but will be added if there is demand.
