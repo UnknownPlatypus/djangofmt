@@ -30,11 +30,8 @@ fn directive_body(raw: &str) -> &str {
         .trim()
 }
 
-/// Parse a comment body into a suppression directive.
-///
-/// Grammar: `djangofmt:` (whitespace allowed around the colon),
-/// then `ignore[...]` or `file-ignore[...]` with a non-empty comma-separated rule list.
-/// Anything after the closing bracket is a free-text reason, ignored.
+/// Parse a comment body into a suppression directive: `djangofmt:` then `ignore[...]` or
+/// `file-ignore[...]` with a non-empty code list; text after the `]` is an ignored reason.
 fn parse_directive(raw: &str) -> Option<Directive<'_>> {
     let rest = directive_body(raw)
         .strip_prefix("djangofmt")?
