@@ -69,6 +69,11 @@ DEFAULT_TARGETS = [
                     "tests/template_backends/templates/template_backends/syntax_error.html",
                     "tests/test_client_regress/bad_templates/404.html",
                 ),
+                ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
+                    "django/forms/jinja2/django/forms/widgets/multiwidget.html",
+                    "docs/_theme/djangodocs/layout.html",
+                    "docs/_theme/djangodocs-epub/epub-cover.html",
+                ),
             },
         ),
     ),
@@ -201,14 +206,10 @@ DEFAULT_TARGETS = [
                 ExcludeReason.DYNAMIC_TAG_NAME: (
                     "src/unfold/templates/unfold/components/button.html",
                     "src/unfold/templates/unfold/components/card.html",
-                    "src/unfold/templates/unfold/helpers/avatar.html",
                     "src/unfold/templates/unfold/helpers/change_list_filter_vertical.html",
-                    "src/unfold/templates/unfold/helpers/display_dropdown.html",
-                    "src/unfold/templates/unfold/helpers/edit_inline/inline_delete.html",
                     "src/unfold/templates/unfold/helpers/header_title.html",
                     "src/unfold/templates/unfold/helpers/label.html",
                     "src/unfold/templates/unfold/helpers/site_icon.html",
-                    "src/unfold/templates/unfold_crispy/field.html",
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "src/unfold/templates/unfold/helpers/display_header.html",  # </div> closing a <span>

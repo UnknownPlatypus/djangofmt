@@ -33,11 +33,6 @@ There are {{ counter }} objects.
   {{ number }} super results
 {% endblocktranslate %}
 
-<!-- Whitespace control on both ends + trimmed -->
-<p>{%- blocktranslate trimmed -%}
-  Whitespace stripped on both sides.
-{%- endblocktranslate -%}</p>
-
 <!-- Nested in HTML, with trimmed (article example) -->
 <div>
   <p>{% blocktranslate trimmed %}

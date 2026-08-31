@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:2:3]
  1 │ <!-- Simple interpolation -->
@@ -132,41 +133,31 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
-    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:61:3]
- 60 │ <!-- Whitespace control -->
- 61 │ {%- blocktranslate %}Some text{% endblocktranslate %}
-    ·   ────────┬────────
-    ·           ╰── here
- 62 │ 
-    ╰────
-  help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
-
-  × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
-    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:65:7]
- 64 │ {% if show %}
- 65 │     {% blocktranslate %}Nested text{% endblocktranslate %}
+    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:62:7]
+ 61 │ {% if show %}
+ 62 │     {% blocktranslate %}Nested text{% endblocktranslate %}
     ·       ────────┬───────
     ·               ╰── here
- 66 │ {% endif %}
+ 63 │ {% endif %}
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
-    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:69:6]
- 68 │ <!-- Article: HTML-wrapped multi-line content (leaks indentation) -->
- 69 │ <p>{% blocktranslate %}
+    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:66:6]
+ 65 │ <!-- Article: HTML-wrapped multi-line content (leaks indentation) -->
+ 66 │ <p>{% blocktranslate %}
     ·      ────────┬───────
     ·              ╰── here
- 70 │   With leading and trailing whitespace.
+ 67 │   With leading and trailing whitespace.
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.
 
   × `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
-    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:75:8]
- 74 │ <div>
- 75 │   <p>{% blocktranslate %}
+    ╭─[tests/check/untrimmed_blocktranslate/untrimmed_blocktranslate.invalid.html:72:8]
+ 71 │ <div>
+ 72 │   <p>{% blocktranslate %}
     ·        ────────┬───────
     ·                ╰── here
- 76 │     Nested indentation problem.
+ 73 │     Nested indentation problem.
     ╰────
   help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed %}...{% endblocktranslate %}`.

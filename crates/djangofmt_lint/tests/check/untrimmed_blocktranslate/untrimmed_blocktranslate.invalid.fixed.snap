@@ -60,9 +60,6 @@ That will cost $ {{ amount }} per {{ years }} years.
 <!-- Legacy blocktrans -->
 {% blocktrans trimmed %}Some text{% endblocktrans %}
 
-<!-- Whitespace control -->
-{%- blocktranslate trimmed %}Some text{% endblocktranslate %}
-
 <!-- Nested in if block -->
 {% if show %}
     {% blocktranslate trimmed %}Nested text{% endblocktranslate %}

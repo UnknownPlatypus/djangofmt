@@ -80,6 +80,10 @@ class ExcludeReason(enum.StrEnum):
     # Upstream fixture that is deliberately unparsable.
     INTENTIONALLY_INVALID = enum.auto()
 
+    # A Jinja/Sphinx template living in a project checked under the Django profile,
+    # using syntax Django has no equivalent for (`{%- -%}` whitespace control).
+    FOREIGN_TEMPLATE_ENGINE = enum.auto()
+
     # Parses fine but formatting never converges.
     UNSTABLE_FORMATTING = enum.auto()
 
