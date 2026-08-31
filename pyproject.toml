@@ -82,6 +82,11 @@ body = """
     ## [unreleased]
 {% endif %}
 [**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
+{% if version == "v1.0.0" %}
+> 🎉 **djangofmt 1.0 is here!**
+> The formatter is now stable, hardened by extensive fuzzing, ecosystem check and bug fixing.
+> The preview `check` command also gained automatic Tailwind CSS class sorting, powered by [rustywind](https://github.com/avencera/rustywind).
+{% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
     {% for commit in commits
