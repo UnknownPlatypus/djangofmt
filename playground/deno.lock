@@ -1,10 +1,10 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@tailwindcss/vite@4.2.2": "4.2.2_vite@8.2.2__esbuild@0.28.1",
+    "npm:@tailwindcss/vite@4.2.2": "4.2.2_vite@8.2.2",
     "npm:ansi-to-html@~0.7.2": "0.7.2",
     "npm:astro@7": "7.1.3_@emnapi+core@1.11.3_@emnapi+runtime@1.11.3",
-    "npm:daisyui@5.7.20": "5.7.20",
+    "npm:daisyui@5.7.22": "5.7.22",
     "npm:diff@9": "9.0.0",
     "npm:lz-string@^1.5.0": "1.5.0",
     "npm:monaco-editor@0.56": "0.56.0",
@@ -172,7 +172,7 @@
       "integrity": "sha512-zauAuMwfPnKPUkd4AFixRFpXdgKwP2mKgxrIIo2gJzW0/ZneF9dbHnLkojSpaBnCCp7VUL1hIi5WWZvB1CqmAQ==",
       "dependencies": [
         "@emnapi/core",
-        "@emnapi/runtime@1.11.1",
+        "@emnapi/runtime",
         "@napi-rs/wasm-runtime"
       ],
       "cpu": ["wasm32"]
@@ -218,12 +218,6 @@
     },
     "@emnapi/runtime@1.11.1": {
       "integrity": "sha512-vgj7R3y3Wgx24IQaGPA/R6YFXLHVMOZ0uVEyIQPaWs+rd1AzfEMXlAC22FYwO1XkKR6NPsq7mUandH8oIRdZFw==",
-      "dependencies": [
-        "tslib"
-      ]
-    },
-    "@emnapi/runtime@1.11.3": {
-      "integrity": "sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==",
       "dependencies": [
         "tslib"
       ]
@@ -507,7 +501,7 @@
     "@img/sharp-wasm32@0.35.3": {
       "integrity": "sha512-cZ0XkcYGpHZkqW6iCkqTcmUC0CD9DhD5d/qeZlZkfRBn6GnHniZXLUo5+9xw8Iv76YE6LQFN9YNBlKREcCG76w==",
       "dependencies": [
-        "@emnapi/runtime@1.11.3"
+        "@emnapi/runtime"
       ]
     },
     "@img/sharp-webcontainers-wasm32@0.35.3": {
@@ -563,7 +557,7 @@
       "integrity": "sha512-JfB4kuJQjaoHuCTseIINHtHWeJnvgEcxjwA5t/Y00ZgaOO1Crz3fjT/p8kT28zA/Caz7oiUMn3d6H2yOVCVwuw==",
       "dependencies": [
         "@emnapi/core",
-        "@emnapi/runtime@1.11.1",
+        "@emnapi/runtime",
         "@tybys/wasm-util"
       ]
     },
@@ -802,7 +796,7 @@
         "@tailwindcss/oxide-win32-x64-msvc"
       ]
     },
-    "@tailwindcss/vite@4.2.2_vite@8.2.2__esbuild@0.28.1": {
+    "@tailwindcss/vite@4.2.2_vite@8.2.2": {
       "integrity": "sha512-mEiF5HO1QqCLXoNEfXVA1Tzo+cYsrqV7w9Juj2wdUFyW07JRenqMG225MvPwr3ZD9N1bFQj46X7r33iHxLUW0w==",
       "dependencies": [
         "@tailwindcss/node",
@@ -1126,8 +1120,8 @@
         "css-tree@2.2.1"
       ]
     },
-    "daisyui@5.7.20": {
-      "integrity": "sha512-qoL9qXXo/K/MzcteD1SvZOSeBaL8F9qBJvwX3KEpiVHQLzIEtGkNl/ZznSI7J0d+qnQJa2dAAFzTFDAx9df1rw=="
+    "daisyui@5.7.22": {
+      "integrity": "sha512-pYii+2NCN0+OIL6Lpuc054LK0QJeNv+GRK9UzN1GRmjdYhYO6WFl0QLoj5oPcitPD7o+okiiI0SKFkn641TxmA=="
     },
     "defu@6.1.7": {
       "integrity": "sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ=="
@@ -2085,7 +2079,7 @@
       ],
       "bin": true
     },
-    "vitefu@1.1.3_vite@8.2.0__esbuild@0.28.1_esbuild@0.28.1": {
+    "vitefu@1.1.3_vite@8.2.0_esbuild@0.28.1": {
       "integrity": "sha512-ub4okH7Z5KLjb6hDyjqrGXqWtWvoYdU3IGm/NorpgHncKoLTCfRIbvlhBm7r0YstIaQRYlp4yEbFqDcKSzXSSg=="
     },
     "web-namespaces@2.0.1": {
@@ -2113,7 +2107,7 @@
         "npm:@tailwindcss/vite@4.2.2",
         "npm:ansi-to-html@~0.7.2",
         "npm:astro@7",
-        "npm:daisyui@5.7.20",
+        "npm:daisyui@5.7.22",
         "npm:diff@9",
         "npm:lz-string@^1.5.0",
         "npm:monaco-editor@0.56",
