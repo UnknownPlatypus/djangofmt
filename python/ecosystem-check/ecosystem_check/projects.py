@@ -77,6 +77,9 @@ class ExcludeReason(enum.StrEnum):
     # Malformed markup in the upstream project.
     INVALID_SOURCE_HTML = enum.auto()
 
+    # The file is not valid UTF-8, so it can't be read at all.
+    INVALID_ENCODING = enum.auto()
+
     # Upstream fixture that is deliberately unparsable.
     INTENTIONALLY_INVALID = enum.auto()
 

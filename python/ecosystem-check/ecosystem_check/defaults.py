@@ -42,6 +42,28 @@ DEFAULT_TARGETS = [
             },
         ),
     ),
+    Project(
+        repo=Repository(owner="mozilla", name="addons-server", ref="master"),
+        cli_options=CliOptions(
+            profile=Profile.JINJA,
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "src/olympia/devhub/templates/devhub/addons/listing/macros.html",
+                    # <details> opened inside a {% if %}
+                    "src/olympia/scanners/templates/admin/scanners/scannerresult/formatted_matched_rules_with_files.html",
+                    "src/olympia/scanners/templates/admin/scanners/scannerresult/formatted_matching_files_and_data.html",
+                ),
+                ExcludeReason.TEMPLATE_TAG_AS_ATTRIBUTE: (
+                    # <p{{ ...|locale_html }}>, an interpolation standing for attributes
+                    "src/olympia/reviewers/templates/reviewers/addon_details_box.html",
+                    "src/olympia/versions/templates/versions/update_info.html",
+                ),
+                ExcludeReason.DYNAMIC_TAG_NAME: (
+                    "src/olympia/templates/includes/forms.html",
+                ),
+            },
+        ),
+    ),
     # Django templates
     Project(
         repo=Repository(owner="django", name="django", ref="main"),
@@ -359,6 +381,255 @@ DEFAULT_TARGETS = [
                     "djadmin-classy-doc/djadmin_classy_doc/templates/djadmin_classy_doc/view_detail.html",
                     # <li> opened inside {% if use_list_items %}
                     "djadmin/templates/djadmin/includes/_action_buttons.html",
+                ),
+            },
+        ),
+    ),
+    # `pretalx` formats its templates with djangofmt, so any diff here is a regression.
+    Project(
+        repo=Repository(owner="pretalx", name="pretalx", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
+                    "doc/_templates/index.html",  # Sphinx template using {% set %}
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="openstack", name="horizon", ref="master"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <div> opened in the {% if logout_status %} branches
+                    "horizon/templates/auth/_login_form.html",
+                    "horizon/templates/auth/_password_form.html",
+                    "horizon/templates/auth/_totp_form.html",
+                    # <div> opened in a {% block %}, closed in the parent template
+                    "horizon/templates/auth/_login_modal.html",
+                    "horizon/templates/auth/_login_page.html",
+                    "horizon/templates/auth/_password_page.html",
+                    "horizon/templates/auth/_totp_page.html",
+                    "horizon/templates/bootstrap/progress_bar.html",
+                    "horizon/templates/horizon/_messages.html",
+                    "horizon/templates/horizon/_sidebar.html",
+                    "horizon/templates/horizon/common/_breadcrumb.html",
+                    "horizon/templates/horizon/common/_data_table.html",
+                    # The `>` ending the <button> start tag sits in both {% if %} branches
+                    "horizon/templates/horizon/common/_data_table_action.html",
+                    "horizon/templates/horizon/common/_data_table_row_actions_dropdown.html",
+                    "horizon/templates/horizon/common/_formset_table_row.html",
+                    "horizon/templates/horizon/common/_limit_summary.html",
+                    "openstack_dashboard/dashboards/admin/backups/templates/backups/_detail_overview.html",
+                    "openstack_dashboard/dashboards/project/backups/templates/backups/_detail_overview.html",
+                    "openstack_dashboard/dashboards/project/instances/templates/instances/_instance_ips.html",
+                    "openstack_dashboard/dashboards/project/network_topology/templates/network_topology/_actions_list.html",
+                    "openstack_dashboard/dashboards/project/routers/templates/routers/_detail_overview.html",
+                    "openstack_dashboard/templates/header/_user_menu.html",
+                    "openstack_dashboard/themes/material/templates/horizon/_sidebar.html",
+                ),
+                ExcludeReason.TEMPLATE_TAG_AS_ATTRIBUTE: (
+                    # <td{{ cell.attr_string|safe }}>, an interpolation standing for attributes
+                    "horizon/templates/horizon/common/_data_table_cell.html",
+                    "horizon/templates/horizon/common/_data_table_row.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "openstack_dashboard/dashboards/project/key_pairs/templates/key_pairs/detail.html",  # </dt>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "horizon/test/templates/base.html",  # Stray quote in a script src
+                    "openstack_dashboard/templates/angular.html",  # <ngdetails> never closed
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="rafalp", name="Misago", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # One element per {% if %}/{% elif %} branch, closed once afterwards
+                    "misago/admin/templates/misago/admin/login.html",
+                    "misago/admin/templates/misago/admin/messages.html",
+                    "misago/templates/misago/account/settings/download_data_form.html",
+                    "misago/templates/misago/messages.html",
+                    "misago/templates/misago/post_edits/edit_diff.html",
+                    "misago/templates/misago/post_feed/post.html",
+                    "misago/templates/misago/profile/feed.html",
+                    "misago/templates/misago/profile/header.html",
+                    "misago/templates/misago/snackbars.html",
+                    "misago/templates/misago/userslists/usercard.html",
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "misago/admin/templates/misago/admin/attachments/list.html",  # Doubled quote
+                    "misago/templates/misago/admin/users/ban.html",  # Missing closing div
+                    "misago/templates/misago/mark_as_read/page.html",  # Doubled quote
+                    "misago/templates/misago/profile/follows.html",  # </div> closing an <h3>
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="bookwyrm-social", name="bookwyrm", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <form> opened in {% block modal-form-open %}, closed in a later block
+                    "bookwyrm/templates/author/sync_modal.html",
+                    "bookwyrm/templates/book/cover_add_modal.html",
+                    "bookwyrm/templates/book/file_links/add_link_modal.html",
+                    "bookwyrm/templates/book/sync_modal.html",
+                    "bookwyrm/templates/confirm_email/resend_modal.html",
+                    "bookwyrm/templates/lists/add_item_modal.html",
+                    "bookwyrm/templates/lists/create_list_modal.html",
+                    "bookwyrm/templates/readthrough/readthrough_modal.html",
+                    "bookwyrm/templates/settings/link_domains/edit_domain_modal.html",
+                    "bookwyrm/templates/snippets/create_status/layout.html",
+                    "bookwyrm/templates/snippets/reading_modals/finish_reading_modal.html",
+                    "bookwyrm/templates/snippets/reading_modals/progress_update_modal.html",
+                    "bookwyrm/templates/snippets/reading_modals/start_reading_modal.html",
+                    "bookwyrm/templates/snippets/reading_modals/stop_reading_modal.html",
+                    "bookwyrm/templates/snippets/reading_modals/want_to_read_modal.html",
+                    "bookwyrm/templates/snippets/report_modal.html",
+                    "bookwyrm/templates/snippets/toggle/toggle_button.html",
+                    # <a>/<optgroup> opened inside an {% if %}
+                    "bookwyrm/templates/book/edit/edit_book.html",
+                    "bookwyrm/templates/book/sections/description.html",
+                    "bookwyrm/templates/widgets/select.html",
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="DjangoCRM", name="django-crm", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "crm/templates/admin/crm/crmemail/includes/fieldset.html",
+                    "crm/templates/admin/crm/crmemail/includes/fieldset_for_inline.html",
+                    "crm/templates/admin/crm/crmemail/stacked.html",
+                    "crm/templates/admin/crm/inline_emails.html",
+                    "crm/templates/admin/crm/payment/change_list.html",
+                    "quality/templates/admin/quality/transactionqualityevent/stacked.html",
+                    "tasks/templates/admin/tasks/memo/change_list_object_tools.html",
+                    # <ul> opened before the {% with %} that holds its </ul>
+                    "templates/admin/crm_date_filter.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    # <p> where </p> was intended
+                    "analytics/templates/admin/analytics/closingreasonstat/closingreasons_summary_change_list.html",
+                    "analytics/templates/admin/analytics/leadsourcestat/leadsource_summary_change_list.html",
+                    "analytics/templates/analytics/bar_chart.html",
+                    "analytics/templates/analytics/bar_chart_.html",
+                    "common/templates/common/select_emails.html",  # </tr>
+                    "crm/templates/admin/crm/contact/change_form_object_tools.html",  # </li>
+                ),
+                ExcludeReason.INVALID_ENCODING: (
+                    # Truncated UTF-8 sequence in a class attribute
+                    "analytics/templates/analytics/data_table.html",
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="sehmaschine", name="django-grappelli", ref="master"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "grappelli/dashboard/templates/grappelli/dashboard/module.html",
+                    "grappelli/templates/admin/includes/fieldset.html",
+                    "grappelli/templates/admin/includes/fieldset_inline.html",
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "grappelli/templates/grp_doc/change_list.html",  # Unclosed <section>
+                    "grappelli/templates/grp_doc/fieldsets.html",  # Unclosed <small>
+                    "grappelli/templates/grp_doc/filter.html",  # Stray </div>
+                    "grappelli/templates/grp_doc/groups.html",  # Stray </div>
+                    "grappelli/templates/grp_doc/tables.html",  # <th> closed by </td>
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="django-helpdesk", name="django-helpdesk", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <ul>/<a> opened inside an {% if %}, closed in a later one
+                    "src/helpdesk/templates/helpdesk/public_view_ticket.html",
+                    "src/helpdesk/templates/helpdesk/report_index.html",
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "src/helpdesk/templates/helpdesk/debug.html",  # </col> on a void element
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="readthedocs", name="readthedocs.org", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
+                    "docs/_templates/breadcrumbs.html",  # Sphinx template using {{ super() }}
+                ),
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "readthedocs/templates/search/elastic_search.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "readthedocs/templates/projects/project_notifications.html",  # </p>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    # <b> where </b> was intended
+                    "readthedocs/subscriptions/templates/subscriptions/notifications/organization_disabled_email.html",
+                    "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_ended_email.html",
+                    "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_required_email.html",
+                    "readthedocs/templates/projects/legend.html",  # Stray </em>
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="djangopackages", name="djangopackages", ref="main"),
+        cli_options=CliOptions(custom_blocks="flag,switch"),
+    ),
+    Project(
+        repo=Repository(owner="wger-project", name="wger", ref="master"),
+        cli_options=CliOptions(
+            custom_blocks="slot",
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # {% endwith %} placed inside the <p> the {% with %} opened before
+                    "wger/core/templates/user/delete_account.html",
+                    # <s> opened inside an {% if %}, closed in a later one
+                    "wger/trophies/templates/trophies/overview.html",
+                ),
+                ExcludeReason.DYNAMIC_TAG_NAME: (
+                    "wger/core/templates/allauth/elements/button.html",
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "wger/core/templates/template.html",  # </hr> on a void element
+                    "wger/nutrition/templates/ingredient/view.html",  # Dangling </a>
+                    "wger/software/templates/features.html",  # </hr> on a void element
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="farridav", name="django-jazzmin", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "jazzmin/templates/admin/includes/fieldset.html",
+                    "jazzmin/templates/admin/index.html",
+                    "jazzmin/templates/jazzmin/widgets/select.html",
+                ),
+                ExcludeReason.MISSING_END_TAG: (
+                    "jazzmin/templates/admin/filer/breadcrumbs.html",  # </li>
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    # Attribute quote left open across a conditional placeholder
+                    "jazzmin/templates/admin/change_list.html",
+                    "jazzmin/templates/admin_doc/view_index.html",  # Missing closing div
                 ),
             },
         ),
