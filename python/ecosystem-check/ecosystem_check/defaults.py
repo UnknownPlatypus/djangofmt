@@ -360,10 +360,6 @@ DEFAULT_TARGETS = [
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "netbox/templates/extras/inc/configcontext_data.html",  # Unterminated id attribute
                 ),
-                ExcludeReason.UNSTABLE_FORMATTING: (
-                    # Code after a multiline template literal is re-indented on every pass
-                    "netbox/templates/graphql/graphiql.html",
-                ),
             },
         ),
     ),
