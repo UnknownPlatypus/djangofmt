@@ -1,0 +1,29 @@
+{# djangofmt: file-ignore[missing-img-alt, empty-attr-value] #}
+{# The file-ignore above is the first comment, where it belongs #}
+
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
+{# Text after the closing bracket is a free-text reason #}
+{# djangofmt: ignore[invalid-attr-value]: because reasons #}
+<form method="yes"></form>
+
+{# Unknown codes are unknown-ignore-code's concern #}
+{# djangofmt: ignore[not-a-real-rule] #}
+<div></div>
+
+{# The formatter's bare directive: spaced, with and without an explanation #}
+{# djangofmt:ignore #}
+<div></div>
+{# djangofmt: ignore #}
+<div></div>
+{# djangofmt:ignore this table is generated #}
+<div></div>
+
+{# Merely mentioning djangofmt: is not a directive #}
+{# See djangofmt: https://unknownplatypus.github.io/djangofmt/ #}
+<div></div>
+
+{# A directive in an HTML comment is redirected-ignore's concern #}
+<!-- djangofmt: ignore[] -->
+<div></div>

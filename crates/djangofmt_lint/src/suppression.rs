@@ -12,6 +12,7 @@ use smallvec::SmallVec;
 
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
+use crate::rules::suspicious::{invalid_ignore_comment, unknown_ignore_code};
 use crate::{Checker, LintDiagnostic};
 
 /// The code that opts a node or file out of the formatter.
@@ -24,9 +25,9 @@ pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
 const FILE_IGNORE_DIRECTIVE: &str = "djangofmt:file-ignore";
 
 /// A code accepted in `file-ignore[...]`; unknown codes are ignored.
-#[derive(Debug, PartialEq, Eq, strum::EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumString)]
 #[strum(serialize_all = "kebab-case")]
-enum FileIgnoreCode {
+pub enum FileIgnoreCode {
     /// Suppress parse errors: both commands skip the file.
     InvalidSyntax,
     /// Skip the formatter.
@@ -41,32 +42,85 @@ fn directive_codes<'s>(raw: &'s str, directive: &str) -> Option<Vec<&'s str>> {
     (!codes.is_empty()).then_some(codes)
 }
 
+/// A parsed lint directive.
+#[derive(Debug, PartialEq, Eq)]
+pub enum Directive<'s> {
+    /// `djangofmt: ignore[...]`, guarding the following node.
+    Ignore(Vec<&'s str>),
+    /// `djangofmt: file-ignore[...]`, covering the whole file.
+    FileIgnore(Vec<&'s str>),
+}
+
+impl<'s> Directive<'s> {
+    fn codes(&self) -> &[&'s str] {
+        match self {
+            Self::Ignore(codes) | Self::FileIgnore(codes) => codes,
+        }
+    }
+}
+
+/// Parse a comment that claims to be a lint directive; `None` means it is malformed.
+fn parse_directive(raw: &str) -> Option<Directive<'_>> {
+    directive_codes(raw, FILE_IGNORE_DIRECTIVE)
+        .map(Directive::FileIgnore)
+        .or_else(|| directive_codes(raw, IGNORE_DIRECTIVE).map(Directive::Ignore))
+}
+
+/// Whether a comment body claims to be a lint directive: `djangofmt:` followed by anything but
+/// the formatter's bare `ignore`, which carries no lint codes.
+fn is_lint_directive(raw: &str) -> bool {
+    let claims = raw
+        .trim_start()
+        .trim_start_matches(['-', '+'])
+        .trim_start()
+        .strip_prefix("djangofmt")
+        .is_some_and(|rest| rest.trim_start().starts_with(':'));
+    claims && !markup_fmt::starts_with_directive(raw, IGNORE_DIRECTIVE)
+}
+
+/// Whether `raw` is the body of the file's leading comment, the only place `file-ignore` counts.
+fn is_leading_comment(source: &str, raw: &str) -> bool {
+    leading_comment(strip_bom(source).trim_start(), "{#", "#}")
+        .is_some_and(|body| body.as_ptr() == raw.as_ptr())
+}
+
 /// Rule codes suppressed over byte ranges of the source.
 pub struct Suppression<'s> {
     ranges: SmallVec<[Range<usize>; 2]>,
     codes: Vec<&'s str>,
 }
 
-/// Collect what each node-level `ignore[...]` comment suppresses.
+/// Collect what each node-level `ignore[...]` comment suppresses, linting misuse on the way.
 #[must_use]
 pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'_>) -> Vec<Suppression<'s>> {
     root.jinja_comments
         .iter()
         .filter_map(|raw| {
-            let codes = directive_codes(raw, IGNORE_DIRECTIVE)?;
-            let rest = siblings_after(&root.children, checker.source_offset(raw), checker)?;
+            if !is_lint_directive(raw) {
+                return None;
+            }
+            // An attribute-position comment is no node: it neither guards nor gets linted.
+            let (comment, rest) = locate(&root.children, checker.source_offset(raw), checker)?;
+            let directive = parse_directive(raw);
+            let is_head = is_leading_comment(checker.context().source(), raw);
+            invalid_ignore_comment::check(directive.as_ref(), comment.raw, is_head, checker);
+            let directive = directive?;
+            unknown_ignore_code::check(directive.codes(), checker);
+            let Directive::Ignore(codes) = directive else {
+                return None;
+            };
             let ranges = guarded_ranges(checker, rest)?;
             Some(Suppression { ranges, codes })
         })
         .collect()
 }
 
-/// The siblings following the `{# djangofmt:ignore[rule] #}` comment at `offset`.
-fn siblings_after<'n, 's>(
+/// The `{# #}` comment node whose body sits at `offset`, and the siblings following it.
+fn locate<'n, 's>(
     mut nodes: &'n [Node<'s>],
     offset: usize,
     checker: &Checker<'_>,
-) -> Option<&'n [Node<'s>]> {
+) -> Option<(&'n Node<'s>, &'n [Node<'s>])> {
     let start = |node: &Node<'_>| checker.source_offset(node.raw);
     let end = |node: &Node<'_>| checker.source_offset(node.raw) + node.raw.len();
     loop {
@@ -74,7 +128,7 @@ fn siblings_after<'n, 's>(
         let index = nodes.partition_point(|node| end(node) <= offset);
         let node = nodes.get(index).filter(|node| start(node) <= offset)?;
         if matches!(node.kind, NodeKind::JinjaComment(_)) {
-            return Some(&nodes[index + 1..]);
+            return Some((node, &nodes[index + 1..]));
         }
         nodes = child_slices(node).find(|children| {
             children
