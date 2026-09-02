@@ -2,6 +2,9 @@
 
 use std::str::FromStr;
 
+use crate::registry::Rule;
+use crate::rule_set::RuleSet;
+
 /// A code accepted in `file-ignore[...]`; unknown codes are ignored.
 #[derive(Debug, PartialEq, Eq, strum::EnumString)]
 #[strum(serialize_all = "kebab-case")]
@@ -88,9 +91,8 @@ impl FileIgnores {
                 invalid_syntax: true,
             };
         }
-        // `file-ignore[...]` is unambiguously file-level: leading whitespace is fine.
-        match leading_comment(source.trim_start(), "{#", "#}").map(parse_directive) {
-            Some(Some(Directive::FileIgnore(codes))) => codes
+        match leading_directive(source) {
+            Some(Directive::FileIgnore(codes)) => codes
                 .iter()
                 .filter_map(|code| FileIgnoreCode::from_str(code).ok())
                 .fold(Self::default(), |mut ignores, code| {
@@ -105,6 +107,24 @@ impl FileIgnores {
     }
 }
 
+/// The directive of the file's leading `{# #}` comment, BOM and leading whitespace tolerated.
+fn leading_directive(source: &str) -> Option<Directive<'_>> {
+    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
+    leading_comment(source.trim_start(), "{#", "#}").and_then(parse_directive)
+}
+
+/// Rules the file's leading `file-ignore[...]` comment turns off, so they never run at all.
+#[must_use]
+pub fn file_ignored_rules(source: &str) -> RuleSet {
+    let mut rules = RuleSet::empty();
+    if let Some(Directive::FileIgnore(codes)) = leading_directive(source) {
+        for rule in codes.iter().filter_map(|code| Rule::from_str(code).ok()) {
+            rules.insert(rule);
+        }
+    }
+    rules
+}
+
 /// The body of a leading `open`..`close` comment, if the text starts with one.
 fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str> {
     let body = text.strip_prefix(open)?;
@@ -114,6 +134,8 @@ fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{Settings, lint_source};
+    use markup_fmt::Language;
     use rstest::rstest;
 
     const ALL: FileIgnores = FileIgnores {
@@ -189,5 +211,35 @@ mod tests {
     #[case::plain_markup("<div id=>", NONE)]
     fn detect_file_level_opt_outs(#[case] source: &str, #[case] expected: FileIgnores) {
         assert_eq!(FileIgnores::parse(source), expected);
+    }
+
+    /// Codes that name no rule, `format` and `invalid-syntax` included, narrow nothing.
+    #[test]
+    fn file_ignore_narrows_the_rule_set() {
+        assert_eq!(
+            file_ignored_rules("{# djangofmt: file-ignore[invalid-attr-value, format] #}"),
+            RuleSet::from_rule(Rule::InvalidAttrValue)
+        );
+        // Below the file's top it narrows nothing.
+        assert_eq!(
+            file_ignored_rules("<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}"),
+            RuleSet::empty()
+        );
+    }
+
+    /// End to end: a narrowed rule never runs, anywhere in the file.
+    #[test]
+    fn file_ignored_rules_never_run() {
+        let diagnostics = lint_source(
+            "{# djangofmt: file-ignore[invalid-attr-value] #}\n\
+             <form method=\"yes\"></form>\n\
+             <div><form method=\"put\"></form></div>",
+            Language::Django,
+            &[],
+            &Settings::all(),
+            None,
+        )
+        .expect("parse");
+        assert!(diagnostics.is_empty(), "{diagnostics:?}");
     }
 }

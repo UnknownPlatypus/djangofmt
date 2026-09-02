@@ -63,12 +63,36 @@ impl RuleSet {
         self.0[index] & (1u64 << shift) != 0
     }
 
+    /// Whether any of `rules` is in the set.
+    #[must_use]
+    #[inline]
+    pub const fn contains_any(&self, rules: &[Rule]) -> bool {
+        let mut i = 0;
+        while i < rules.len() {
+            if self.contains(rules[i]) {
+                return true;
+            }
+            i += 1;
+        }
+        false
+    }
+
     /// Union `other` into this set in place.
     #[inline]
     pub const fn union(&mut self, other: &Self) {
         let mut i = 0;
         while i < RULESET_SIZE {
             self.0[i] |= other.0[i];
+            i += 1;
+        }
+    }
+
+    /// Remove every rule of `other` from the set.
+    #[inline]
+    pub const fn remove_all(&mut self, other: &Self) {
+        let mut i = 0;
+        while i < RULESET_SIZE {
+            self.0[i] &= !other.0[i];
             i += 1;
         }
     }
