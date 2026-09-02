@@ -159,10 +159,6 @@ DEFAULT_TARGETS = [
                     # Comment that looks like a broken tag: <--noplaceholder-->
                     "cms/test_utils/project/sampleapp/templates/sampleapp/home.html",
                 ),
-                ExcludeReason.UNKNOWN: (
-                    # Breaks somewhere inside the multiline data-json='{...}' attribute
-                    "cms/templates/admin/cms/page/tree/base.html",
-                ),
             },
         ),
     ),

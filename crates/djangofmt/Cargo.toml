@@ -9,6 +9,7 @@ repository.workspace = true
 license.workspace = true
 exclude = ["/tests"]
 publish = true
+default-run = "djangofmt"
 
 [lib]
 doctest = false

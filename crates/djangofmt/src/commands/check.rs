@@ -72,6 +72,38 @@ struct CheckResult {
     skipped: bool,
 }
 
+/// Aggregate counts behind the run summary.
+#[derive(Default)]
+struct Totals {
+    diagnostics: usize,
+    applied: usize,
+    safe_fixable: usize,
+    unsafe_fixable: usize,
+    skipped: usize,
+}
+
+impl Totals {
+    fn of(results: &[CheckResult]) -> Self {
+        let mut totals = Self::default();
+        for result in results {
+            totals.diagnostics += result.file_diagnostics.len();
+            totals.applied += result.applied_count;
+            totals.skipped += usize::from(result.skipped);
+            for diag in &result.file_diagnostics.diagnostics {
+                let Some(fix) = diag.fix.as_ref() else {
+                    continue;
+                };
+                if fix.applies(Applicability::Safe) {
+                    totals.safe_fixable += 1;
+                } else if fix.applies(Applicability::Unsafe) {
+                    totals.unsafe_fixable += 1;
+                }
+            }
+        }
+        totals
+    }
+}
+
 /// Check the given source code for linting errors.
 pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, &args.file_selection)?;
@@ -138,26 +170,9 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
 
     let nb_errors = super::report_errors(errors, "check", config.output_format);
 
-    let mut total_diagnostics = 0usize;
-    let mut total_applied = 0usize;
-    let mut total_safe_fixable = 0usize;
-    let mut total_unsafe_fixable = 0usize;
-    for result in &results {
-        total_diagnostics += result.file_diagnostics.len();
-        total_applied += result.applied_count;
-        for diag in &result.file_diagnostics.diagnostics {
-            let Some(fix) = diag.fix.as_ref() else {
-                continue;
-            };
-            if fix.applies(Applicability::Safe) {
-                total_safe_fixable += 1;
-            } else if fix.applies(Applicability::Unsafe) {
-                total_unsafe_fixable += 1;
-            }
-        }
-    }
+    let mut totals = Totals::of(&results);
     if config.fix && config.unsafe_fixes {
-        total_unsafe_fixable = 0;
+        totals.unsafe_fixable = 0;
     }
 
     match config.output_format {
@@ -166,26 +181,26 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     }
 
     print_summary(
-        total_diagnostics,
-        total_applied,
-        total_safe_fixable,
-        total_unsafe_fixable,
+        totals.diagnostics,
+        totals.applied,
+        totals.safe_fixable,
+        totals.unsafe_fixable,
         config.fix,
         config.unsafe_fixes,
         nb_errors,
     );
 
-    print_skipped(&results);
+    print_skipped(totals.skipped);
 
-    if config.show_fixes && total_applied > 0 {
-        print_show_fixes(&results, total_applied);
+    if config.show_fixes && totals.applied > 0 {
+        print_show_fixes(&results, totals.applied);
     }
 
     // I/O, parse and panic errors take precedence over lint violations in the exit code.
     if nb_errors > 0 {
         return Ok(ExitStatus::Error);
     }
-    if total_diagnostics > 0 {
+    if totals.diagnostics > 0 {
         return Ok(ExitStatus::Failure);
     }
     Ok(ExitStatus::Success)
@@ -284,12 +299,11 @@ fn print_summary(
 }
 
 /// Mirror the format command's skip counter for quarantined files.
-fn print_skipped(results: &[CheckResult]) {
-    let skipped = results.iter().filter(|result| result.skipped).count();
-    if skipped > 0 {
+fn print_skipped(count: usize) {
+    if count > 0 {
         info!(
-            "{skipped} file{} skipped !",
-            if skipped == 1 { "" } else { "s" }
+            "{count} file{} skipped !",
+            if count == 1 { "" } else { "s" }
         );
     }
 }
