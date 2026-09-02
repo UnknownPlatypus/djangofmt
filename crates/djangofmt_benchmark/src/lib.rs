@@ -85,6 +85,17 @@ pub static ALL_TEMPLATES: [&TestFile; 9] = [
     &JINJA_TEMPLATE_LARGE,
 ];
 
+/// Directives no corpus template carries: the bare *formatter* one, and a bracketed lint code
+/// list. Both are inert for the linter today, so these baseline what suppression would cost.
+pub const FORMATTER_DIRECTIVE: &str = "{# djangofmt:ignore #}";
+pub const LINT_DIRECTIVE: &str = "{# djangofmt: ignore[empty-attr-value] #}";
+
+/// A corpus template with `directive` in front of its body, ahead of the node that follows.
+#[must_use]
+pub fn with_directive(template: &TestFile, directive: &str) -> String {
+    format!("<p>head</p>\n{directive}\n{}", template.code)
+}
+
 /// Unmeasured runs before the measured one, mirroring `codspeed::codspeed::WARMUP_RUNS`.
 /// `codspeed-criterion-compat` applies these natively; `codspeed-divan-compat` does not.
 const WARMUP_RUNS: usize = 5;
