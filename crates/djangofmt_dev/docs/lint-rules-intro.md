@@ -27,3 +27,21 @@ To turn rules off for some files only, map a glob to the selectors to ignore the
 ```
 
 Every pattern is matched both against the file name and against the path relative to the directory holding `pyproject.toml`: `"*.jinja"` covers that extension at any depth, while `"emails/*.html"` is anchored at the project root (and, since `*` crosses `/`, covers nested files under `emails/` too). These are ruff's `per-file-ignores` semantics, so a block can be copied over unchanged.
+
+## Suppressing diagnostics
+
+A `{# djangofmt: ignore[...] #}` comment silences the listed rules on the next node. Whitespace and other comments between the directive and its target are skipped, so directives can stack.
+
+```jinja
+{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
+<form method="yes" id=""></form>
+```
+
+A `{# djangofmt: file-ignore[...] #}` comment as the **first comment of the file** covers the whole file. It also accepts two codes that are not rules:
+
+- `invalid-syntax` skips a file neither command can parse
+- `format` skips the formatter (see [Disabling formatting](formatting.md#disabling-formatting) for more details)
+
+```jinja
+{# djangofmt: file-ignore[invalid-syntax] #}
+```

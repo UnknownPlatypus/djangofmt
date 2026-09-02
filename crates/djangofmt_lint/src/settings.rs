@@ -52,14 +52,7 @@ impl Settings {
     #[must_use]
     #[inline]
     pub const fn any_rule_enabled(&self, rules: &[Rule]) -> bool {
-        let mut i = 0;
-        while i < rules.len() {
-            if self.is_enabled(rules[i]) {
-                return true;
-            }
-            i += 1;
-        }
-        false
+        self.rules.contains_any(rules)
     }
 }
 

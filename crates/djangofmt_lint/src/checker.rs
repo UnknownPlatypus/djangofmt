@@ -25,7 +25,7 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub const fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
+    pub fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
         Self {
             context: LintContext::new(source, settings, path),
             block_names: SmallVec::new_const(),
