@@ -5,6 +5,12 @@ use std::str::FromStr;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
 
+/// The node-level directive, also the formatter's own opt-out.
+const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
+
+/// Its file-wide sibling.
+const FILE_IGNORE_DIRECTIVE: &str = "djangofmt:file-ignore";
+
 /// A code accepted in `file-ignore[...]`; unknown codes are ignored.
 #[derive(Debug, PartialEq, Eq, strum::EnumString)]
 #[strum(serialize_all = "kebab-case")]
@@ -24,34 +30,14 @@ enum Directive<'s> {
     FileIgnore(Vec<&'s str>),
 }
 
-/// A comment body stripped of Jinja's whitespace-control markers (`{#- ... -#}`),
-/// which are part of the delimiter rather than of the directive.
-fn directive_body(raw: &str) -> &str {
-    raw.trim()
-        .trim_start_matches(['-', '+'])
-        .trim_end_matches('-')
-        .trim()
-}
-
-/// Parse a comment body into a suppression directive: `djangofmt:` then `ignore[...]` or
-/// `file-ignore[...]` with a non-empty code list; text after the `]` is an ignored reason.
+/// Parse a comment body into a suppression directive: `ignore[...]` or `file-ignore[...]`
+/// with a non-empty code list. A bare directive carries no codes and is the formatter's.
 fn parse_directive(raw: &str) -> Option<Directive<'_>> {
-    let rest = directive_body(raw)
-        .strip_prefix("djangofmt")?
-        .trim_start()
-        .strip_prefix(':')?
-        .trim_start();
-    let (file_level, rest) = match rest.strip_prefix("file-ignore[") {
-        Some(rest) => (true, rest),
-        None => (false, rest.strip_prefix("ignore[")?),
+    let (file_level, matched) = match markup_fmt::match_directive(raw, FILE_IGNORE_DIRECTIVE) {
+        Some(matched) => (true, matched),
+        None => (false, markup_fmt::match_directive(raw, IGNORE_DIRECTIVE)?),
     };
-    let codes: Vec<&str> = rest
-        .split_once(']')?
-        .0
-        .split(',')
-        .map(str::trim)
-        .filter(|code| !code.is_empty())
-        .collect();
+    let codes: Vec<&str> = matched.codes().collect();
     if codes.is_empty() {
         return None;
     }
@@ -76,15 +62,14 @@ impl FileIgnores {
     /// so they can be honored even when the file fails to parse.
     #[must_use]
     pub fn parse(source: &str) -> Self {
-        // A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-        let source = source.strip_prefix('\u{feff}').unwrap_or(source);
+        let source = strip_bom(source);
 
         // The bare legacy directive doubles as a node-level formatter directive,
         // so it is only file-level when nothing (not even whitespace) precedes it.
         let legacy_body =
             leading_comment(source, "{#", "#}").or_else(|| leading_comment(source, "<!--", "-->"));
         if let Some(body) = legacy_body
-            && markup_fmt::starts_with_directive(directive_body(body), "djangofmt:ignore")
+            && markup_fmt::starts_with_directive(body, IGNORE_DIRECTIVE)
         {
             return Self {
                 format: true,
@@ -109,8 +94,7 @@ impl FileIgnores {
 
 /// The directive of the file's leading `{# #}` comment, BOM and leading whitespace tolerated.
 fn leading_directive(source: &str) -> Option<Directive<'_>> {
-    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
-    leading_comment(source.trim_start(), "{#", "#}").and_then(parse_directive)
+    leading_comment(strip_bom(source).trim_start(), "{#", "#}").and_then(parse_directive)
 }
 
 /// Rules the file's leading `file-ignore[...]` comment turns off, so they never run at all.
@@ -123,6 +107,11 @@ pub fn file_ignored_rules(source: &str) -> RuleSet {
         }
     }
     rules
+}
+
+/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
+fn strip_bom(source: &str) -> &str {
+    source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 
 /// The body of a leading `open`..`close` comment, if the text starts with one.
