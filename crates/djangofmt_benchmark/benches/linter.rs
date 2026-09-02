@@ -1,4 +1,7 @@
-use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
+use djangofmt_benchmark::{
+    ALL_TEMPLATES, DJANGO_TEMPLATE_LARGE, FORMATTER_DIRECTIVE, LINT_DIRECTIVE, TestFile, warmup,
+    with_directive,
+};
 use djangofmt_lint::settings::unsorted_tailwind_classes;
 use djangofmt_lint::{RuleSet, Settings, check_ast, parse};
 
@@ -30,6 +33,40 @@ fn check_default_rules(bencher: divan::Bencher, template: &'static TestFile) {
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_all_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(bencher, template, &Settings::all());
+}
+
+/// The bare formatter directive: it carries no lint codes, yet it does start with `djangofmt`
+/// and real codebases are full of it, so it must stay free for the linter.
+#[divan::bench]
+fn check_formatter_directive(bencher: divan::Bencher) {
+    bench_directive(bencher, FORMATTER_DIRECTIVE);
+}
+
+/// A bracketed lint code list, the shape suppression has to act on.
+#[divan::bench]
+fn check_lint_directive(bencher: divan::Bencher) {
+    bench_directive(bencher, LINT_DIRECTIVE);
+}
+
+fn bench_directive(bencher: divan::Bencher, directive: &str) {
+    let settings = Settings::default();
+    let source = with_directive(&DJANGO_TEMPLATE_LARGE, directive);
+    let ast =
+        parse(&source, DJANGO_TEMPLATE_LARGE.profile.into(), &[]).expect("Parsing to succeed");
+
+    let run = || {
+        check_ast(
+            divan::black_box(source.as_str()),
+            divan::black_box(&ast),
+            divan::black_box(&settings),
+            divan::black_box(None),
+        )
+    };
+    warmup(run);
+
+    bencher
+        .counter(divan::counter::BytesCount::of_str(&source))
+        .bench(run);
 }
 
 /// Time `check_ast` only: the AST is parsed once, outside the timed region, so
