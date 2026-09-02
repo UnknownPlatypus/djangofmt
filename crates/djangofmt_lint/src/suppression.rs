@@ -1,9 +1,18 @@
-//! File-wide opt-outs declared by `{# djangofmt: file-ignore[...] #}` comments.
+//! Diagnostic suppression via `{# djangofmt: ignore[...] #}` comments.
+//!
+//! - A directive guards the node that follows it.
+//! - `file-ignore[...]` as the file's first comment covers the whole file.
+//! - Only `{# #}` comments carry directives: HTML comments reach the client.
 
+use std::ops::Range;
 use std::str::FromStr;
+
+use markup_fmt::ast::{JinjaTagOrChildren, Node, NodeKind, Root};
+use smallvec::SmallVec;
 
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
+use crate::{Checker, LintDiagnostic};
 
 /// The code that opts a node or file out of the formatter.
 pub const FORMAT_CODE: &str = "format";
@@ -49,6 +58,108 @@ fn parse_directive(raw: &str) -> Option<Directive<'_>> {
     } else {
         Directive::Ignore(codes)
     })
+}
+
+/// Rule codes suppressed over byte ranges of the source.
+pub struct Suppression<'s> {
+    ranges: SmallVec<[Range<usize>; 2]>,
+    codes: Vec<&'s str>,
+}
+
+/// Collect what each node-level `ignore[...]` comment suppresses.
+#[must_use]
+pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'_>) -> Vec<Suppression<'s>> {
+    let mut suppressions = Vec::new();
+    // Node-level directives are rare, so let the parser's comment index skip the walk entirely.
+    if !root
+        .jinja_comments
+        .iter()
+        .any(|body| matches!(parse_directive(body), Some(Directive::Ignore(_))))
+    {
+        return suppressions;
+    }
+    walk(&root.children, checker, &mut suppressions);
+    suppressions
+}
+
+/// Drop the diagnostics silenced by `suppressions`.
+#[must_use]
+pub fn filter(
+    suppressions: &[Suppression<'_>],
+    mut diagnostics: Vec<LintDiagnostic>,
+) -> Vec<LintDiagnostic> {
+    if suppressions.is_empty() {
+        return diagnostics;
+    }
+    diagnostics.retain(|diagnostic| {
+        let offset = diagnostic.span.offset() as usize;
+        !suppressions.iter().any(|suppression| {
+            suppression.codes.contains(&diagnostic.code)
+                && suppression
+                    .ranges
+                    .iter()
+                    .any(|range| range.contains(&offset))
+        })
+    });
+    diagnostics
+}
+
+fn walk<'s>(nodes: &[Node<'s>], checker: &Checker<'_>, out: &mut Vec<Suppression<'s>>) {
+    for (index, node) in nodes.iter().enumerate() {
+        if let NodeKind::JinjaComment(comment) = &node.kind
+            && let Some(Directive::Ignore(codes)) = parse_directive(comment.raw)
+            && let Some(ranges) = guarded_ranges(checker, &nodes[index + 1..])
+        {
+            out.push(Suppression { ranges, codes });
+        }
+        for children in child_slices(node) {
+            walk(children, checker, out);
+        }
+    }
+}
+
+/// Byte ranges a directive comment guards: the first node after it, minus that node's children.
+/// For an element that is its opening and closing tags; for a block, its `{% %}` tags.
+fn guarded_ranges(checker: &Checker<'_>, rest: &[Node<'_>]) -> Option<SmallVec<[Range<usize>; 2]>> {
+    let target = rest.iter().find(|node| {
+        !is_whitespace_text(node)
+            && !matches!(node.kind, NodeKind::JinjaComment(_) | NodeKind::Comment(_))
+    })?;
+    let start = checker.source_offset(target.raw);
+    let end = start + target.raw.len();
+    let mut ranges = SmallVec::new();
+    let mut cursor = start;
+    for child in child_slices(target).flatten() {
+        let child_start = checker.source_offset(child.raw);
+        if child_start > cursor {
+            ranges.push(cursor..child_start);
+        }
+        cursor = child_start + child.raw.len();
+    }
+    if cursor < end {
+        ranges.push(cursor..end);
+    }
+    Some(ranges)
+}
+
+/// The child slices of a node: an element's children, or each branch of a block.
+fn child_slices<'n, 's>(node: &'n Node<'s>) -> impl Iterator<Item = &'n [Node<'s>]> {
+    let (children, body) = match &node.kind {
+        NodeKind::Element(element) => (Some(element.children.as_slice()), None),
+        NodeKind::JinjaBlock(block) => (None, Some(block.body.as_slice())),
+        _ => (None, None),
+    };
+    children
+        .into_iter()
+        .chain(body.into_iter().flatten().filter_map(|item| match item {
+            JinjaTagOrChildren::Children(children) => Some(children.as_slice()),
+            JinjaTagOrChildren::Tag(_) => None,
+        }))
+}
+
+/// Whitespace between a directive and its target does not displace the target.
+fn is_whitespace_text(node: &Node<'_>) -> bool {
+    matches!(node.kind, NodeKind::Text(_)) && node.raw.trim().is_empty()
 }
 
 /// File-wide opt-outs declared by the leading comment of a file.
@@ -231,16 +342,126 @@ mod tests {
     /// End to end: a narrowed rule never runs, anywhere in the file.
     #[test]
     fn file_ignored_rules_never_run() {
-        let diagnostics = lint_source(
-            "{# djangofmt: file-ignore[invalid-attr-value] #}\n\
-             <form method=\"yes\"></form>\n\
-             <div><form method=\"put\"></form></div>",
-            Language::Django,
-            &[],
-            &Settings::all(),
-            None,
-        )
-        .expect("parse");
-        assert!(diagnostics.is_empty(), "{diagnostics:?}");
+        assert!(
+            codes(
+                "{# djangofmt: file-ignore[invalid-attr-value] #}\n\
+                 <form method=\"yes\"></form>\n\
+                 <div><form method=\"put\"></form></div>"
+            )
+            .is_empty()
+        );
+    }
+
+    /// `<form method="yes">` trips `invalid-attr-value`, `id=""` trips `empty-attr-value`.
+    fn codes(source: &str) -> Vec<&'static str> {
+        diagnostics(source)
+            .iter()
+            .map(|diagnostic| diagnostic.code)
+            .collect()
+    }
+
+    /// Diagnostics by message, to tell apart two that share a code.
+    fn messages(source: &str) -> Vec<String> {
+        diagnostics(source)
+            .into_iter()
+            .map(|diagnostic| diagnostic.message.into_owned())
+            .collect()
+    }
+
+    fn diagnostics(source: &str) -> Vec<LintDiagnostic> {
+        lint_source(source, Language::Django, &[], &Settings::all(), None).expect("parse")
+    }
+
+    #[test]
+    fn ignore_binds_to_the_following_node() {
+        assert_eq!(
+            codes("<form method=\"yes\"></form>"),
+            ["invalid-attr-value"]
+        );
+        assert!(
+            codes("{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>")
+                .is_empty()
+        );
+        // A non-matching code, a directive placed after the node, and a later
+        // sibling all keep their diagnostic.
+        assert_eq!(
+            codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
+            ["invalid-attr-value"]
+        );
+        assert_eq!(
+            codes("<form method=\"yes\"></form>\n{# djangofmt: ignore[invalid-attr-value] #}"),
+            ["invalid-attr-value"]
+        );
+        assert_eq!(
+            messages(
+                "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>\n<form method=\"put\"></form>"
+            ),
+            ["Invalid value 'put' for attribute 'method'."]
+        );
+    }
+
+    #[test]
+    fn ignore_reaches_past_intervening_comments() {
+        for filler in ["{# TODO: fix this legacy form #}", "<!-- legacy form -->"] {
+            let source = format!(
+                "{{# djangofmt: ignore[invalid-attr-value] #}}\n{filler}\n<form method=\"yes\"></form>"
+            );
+            assert!(!codes(&source).contains(&"invalid-attr-value"), "{filler}");
+        }
+        // Stacked directives all reach the same target.
+        assert!(
+            codes(
+                "{# djangofmt: ignore[invalid-attr-value] #}\n{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\" id=\"\"></form>"
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn ignore_applies_inside_nested_nodes() {
+        const GUARDED: &str =
+            "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>";
+        assert!(codes(&format!("<div>\n{GUARDED}\n</div>")).is_empty());
+        assert!(codes(&format!("{{% if x %}}\n{GUARDED}\n{{% endif %}}")).is_empty());
+    }
+
+    #[test]
+    fn ignore_guards_the_node_but_not_its_children() {
+        // The directive guards the `<div>` tags, not the `<span>` nested inside them.
+        assert_eq!(
+            messages(
+                "{# djangofmt: ignore[empty-attr-value] #}\n<div id=\"\"><span class=\"\">x</span></div>"
+            ),
+            ["Empty `class` attribute can be removed."]
+        );
+        // Likewise a block guards its own tags but not its body.
+        assert!(
+            codes(
+                "{# djangofmt: ignore[untrimmed-blocktranslate] #}\n{% blocktranslate %}x{% endblocktranslate %}"
+            )
+            .is_empty()
+        );
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[invalid-attr-value] #}\n{% if x %}<form method=\"yes\"></form>{% endif %}"
+            ),
+            ["invalid-attr-value"]
+        );
+    }
+
+    #[test]
+    fn whitespace_control_markers_do_not_break_suppression() {
+        assert!(
+            codes("{#- djangofmt: ignore[invalid-attr-value] -#}\n<form method=\"yes\"></form>")
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn html_comments_never_suppress() {
+        assert!(
+            codes("<!-- djangofmt: ignore[invalid-attr-value] -->\n<form method=\"yes\"></form>")
+                .contains(&"invalid-attr-value")
+        );
     }
 }

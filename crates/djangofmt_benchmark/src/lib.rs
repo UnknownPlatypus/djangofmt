@@ -85,12 +85,12 @@ pub static ALL_TEMPLATES: [&TestFile; 9] = [
     &JINJA_TEMPLATE_LARGE,
 ];
 
-/// Directives no corpus template carries: the bare *formatter* one, and a bracketed lint code
-/// list. Both are inert for the linter today, so these baseline what suppression would cost.
+/// Directives no corpus template carries: the bare *formatter* one, which the linter must
+/// leave free, and a bracketed lint code list, which it must resolve to a guarded node.
 pub const FORMATTER_DIRECTIVE: &str = "{# djangofmt:ignore #}";
 pub const LINT_DIRECTIVE: &str = "{# djangofmt: ignore[empty-attr-value] #}";
 
-/// A corpus template with `directive` in front of its body, ahead of the node that follows.
+/// A corpus template with `directive` in front of its body, guarding the node that follows.
 #[must_use]
 pub fn with_directive(template: &TestFile, directive: &str) -> String {
     format!("<p>head</p>\n{directive}\n{}", template.code)

@@ -35,14 +35,14 @@ fn check_all_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(bencher, template, &Settings::all());
 }
 
-/// The bare formatter directive: it carries no lint codes, yet it does start with `djangofmt`
-/// and real codebases are full of it, so it must stay free for the linter.
+/// The formatter directive must stay free for the linter: it carries no lint codes, but it
+/// does start with `djangofmt`, and real codebases are full of it.
 #[divan::bench]
 fn check_formatter_directive(bencher: divan::Bencher) {
     bench_directive(bencher, FORMATTER_DIRECTIVE);
 }
 
-/// A bracketed lint code list, the shape suppression has to act on.
+/// A real suppression: the linter has to locate the guarded node and filter its diagnostics.
 #[divan::bench]
 fn check_lint_directive(bencher: divan::Bencher) {
     bench_directive(bencher, LINT_DIRECTIVE);
