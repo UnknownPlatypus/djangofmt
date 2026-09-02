@@ -5,8 +5,11 @@ use std::str::FromStr;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
 
+/// The code that opts a node or file out of the formatter.
+pub const FORMAT_CODE: &str = "format";
+
 /// The node-level directive, also the formatter's own opt-out.
-const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
+pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
 
 /// Its file-wide sibling.
 const FILE_IGNORE_DIRECTIVE: &str = "djangofmt:file-ignore";
@@ -143,6 +146,15 @@ mod tests {
         format: false,
         invalid_syntax: false,
     };
+
+    /// The CLI builds the formatter's `ignore[format]` entry from `FORMAT_CODE`.
+    #[test]
+    fn format_code_matches_the_enum() {
+        assert_eq!(
+            FileIgnoreCode::from_str(FORMAT_CODE),
+            Ok(FileIgnoreCode::Format)
+        );
+    }
 
     #[rstest]
     #[case::node(" djangofmt: ignore[a, b ,c] ", Directive::Ignore(vec!["a", "b", "c"]))]

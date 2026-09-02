@@ -1,4 +1,4 @@
-use djangofmt_lint::FileIgnores;
+use djangofmt_lint::{FORMAT_CODE, FileIgnores, IGNORE_DIRECTIVE};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
@@ -113,8 +113,6 @@ pub(crate) fn merge_custom_blocks(
     }
 }
 
-const DJANGOFMT_IGNORE_COMMENT_DIRECTIVE: &str = "djangofmt:ignore";
-
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
 #[must_use]
 pub fn build_markup_options(
@@ -165,10 +163,13 @@ pub fn build_markup_options(
             // <c-button editable=True /> -> stays as editable=True
             preserve_unquoted_attrs,
             // Ignore formatting with comment directive:
-            // <!-- djangofmt:ignore -->
+            // {# djangofmt: ignore[format] #}
             // <div>unformatted</div>
-            ignore_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
-            ignore_file_comment_directive: vec![DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into()],
+            ignore_comment_directive: vec![
+                IGNORE_DIRECTIVE.into(),
+                format!("{IGNORE_DIRECTIVE}[{FORMAT_CODE}]"),
+            ],
+            ignore_file_comment_directive: vec![IGNORE_DIRECTIVE.into()],
             // Indent style tags content:
             // <style>
             //     body { color: red }
@@ -205,8 +206,8 @@ fn build_malva_config(
             keyframe_selector_notation: Some(malva::config::KeyframeSelectorNotation::Percentage),
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
-            ignore_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
-            ignore_file_comment_directive: DJANGOFMT_IGNORE_COMMENT_DIRECTIVE.into(),
+            ignore_comment_directive: IGNORE_DIRECTIVE.into(),
+            ignore_file_comment_directive: IGNORE_DIRECTIVE.into(),
             ..malva::config::LanguageOptions::default()
         },
     }
