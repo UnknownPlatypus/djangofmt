@@ -275,7 +275,7 @@ impl Fix {
         self.edits.first().map(Edit::start)
     }
 
-    /// True iff this fix's applicability meets `threshold`.
+    /// True if this fix's applicability meets `threshold`.
     #[must_use]
     pub fn applies(&self, threshold: Applicability) -> bool {
         self.applicability >= threshold
