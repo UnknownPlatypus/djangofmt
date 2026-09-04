@@ -66,55 +66,46 @@ pub struct Suppression<'s> {
     codes: Vec<&'s str>,
 }
 
-/// Collect what each node-level `ignore[...]` comment suppresses.
+/// Collect what each node-level `ignore[...]` comment suppresses. The parser's comment index
+/// names the directives, and each is then located by descending only through its ancestors,
+/// so a file without directives costs one matcher call per comment and never walks the tree.
 #[must_use]
 pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'_>) -> Vec<Suppression<'s>> {
-    let mut suppressions = Vec::new();
-    // Node-level directives are rare, so let the parser's comment index skip the walk entirely.
-    if !root
-        .jinja_comments
+    root.jinja_comments
         .iter()
-        .any(|body| matches!(parse_directive(body), Some(Directive::Ignore(_))))
-    {
-        return suppressions;
-    }
-    walk(&root.children, checker, &mut suppressions);
-    suppressions
-}
-
-/// Drop the diagnostics silenced by `suppressions`.
-#[must_use]
-pub fn filter(
-    suppressions: &[Suppression<'_>],
-    mut diagnostics: Vec<LintDiagnostic>,
-) -> Vec<LintDiagnostic> {
-    if suppressions.is_empty() {
-        return diagnostics;
-    }
-    diagnostics.retain(|diagnostic| {
-        let offset = diagnostic.span.offset() as usize;
-        !suppressions.iter().any(|suppression| {
-            suppression.codes.contains(&diagnostic.code)
-                && suppression
-                    .ranges
-                    .iter()
-                    .any(|range| range.contains(&offset))
+        .filter_map(|raw| {
+            let Directive::Ignore(codes) = parse_directive(raw)? else {
+                return None;
+            };
+            let rest = siblings_after(&root.children, checker.source_offset(raw), checker)?;
+            let ranges = guarded_ranges(checker, rest)?;
+            Some(Suppression { ranges, codes })
         })
-    });
-    diagnostics
+        .collect()
 }
 
-fn walk<'s>(nodes: &[Node<'s>], checker: &Checker<'_>, out: &mut Vec<Suppression<'s>>) {
-    for (index, node) in nodes.iter().enumerate() {
-        if let NodeKind::JinjaComment(comment) = &node.kind
-            && let Some(Directive::Ignore(codes)) = parse_directive(comment.raw)
-            && let Some(ranges) = guarded_ranges(checker, &nodes[index + 1..])
-        {
-            out.push(Suppression { ranges, codes });
+/// The siblings following the `{# #}` comment at `offset`, reached by descending through the
+/// one child that contains it at each level. An attribute-position comment is no node: `None`.
+fn siblings_after<'n, 's>(
+    mut nodes: &'n [Node<'s>],
+    offset: usize,
+    checker: &Checker<'_>,
+) -> Option<&'n [Node<'s>]> {
+    let start = |node: &Node<'_>| checker.source_offset(node.raw);
+    let end = |node: &Node<'_>| checker.source_offset(node.raw) + node.raw.len();
+    loop {
+        // Siblings are ordered and disjoint: the container is the first one ending past `offset`.
+        let index = nodes.partition_point(|node| end(node) <= offset);
+        let node = nodes.get(index).filter(|node| start(node) <= offset)?;
+        if matches!(node.kind, NodeKind::JinjaComment(_)) {
+            return Some(&nodes[index + 1..]);
         }
-        for children in child_slices(node) {
-            walk(children, checker, out);
-        }
+        nodes = child_slices(node).find(|children| {
+            children
+                .first()
+                .zip(children.last())
+                .is_some_and(|(first, last)| start(first) <= offset && offset < end(last))
+        })?;
     }
 }
 
@@ -160,6 +151,28 @@ fn child_slices<'n, 's>(node: &'n Node<'s>) -> impl Iterator<Item = &'n [Node<'s
 /// Whitespace between a directive and its target does not displace the target.
 fn is_whitespace_text(node: &Node<'_>) -> bool {
     matches!(node.kind, NodeKind::Text(_)) && node.raw.trim().is_empty()
+}
+
+/// Drop the diagnostics silenced by `suppressions`.
+#[must_use]
+pub fn filter(
+    suppressions: &[Suppression<'_>],
+    mut diagnostics: Vec<LintDiagnostic>,
+) -> Vec<LintDiagnostic> {
+    if suppressions.is_empty() {
+        return diagnostics;
+    }
+    diagnostics.retain(|diagnostic| {
+        let offset = diagnostic.span.offset() as usize;
+        !suppressions.iter().any(|suppression| {
+            suppression.codes.contains(&diagnostic.code)
+                && suppression
+                    .ranges
+                    .iter()
+                    .any(|range| range.contains(&offset))
+        })
+    });
+    diagnostics
 }
 
 /// File-wide opt-outs declared by the leading comment of a file.
@@ -462,6 +475,15 @@ mod tests {
         assert!(
             codes("<!-- djangofmt: ignore[invalid-attr-value] -->\n<form method=\"yes\"></form>")
                 .contains(&"invalid-attr-value")
+        );
+    }
+
+    /// An attribute-position comment is indexed by the parser but is no node, so it has no target.
+    #[test]
+    fn attribute_position_comments_never_suppress() {
+        assert_eq!(
+            codes("<form {# djangofmt: ignore[invalid-attr-value] #} method=\"yes\"></form>"),
+            ["invalid-attr-value"]
         );
     }
 }
