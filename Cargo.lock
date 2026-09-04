@@ -916,7 +916,7 @@ dependencies = [
 [[package]]
 name = "markup_fmt"
 version = "0.27.3"
-source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=35d607085eea6a9c3a549f3a724054ca97da622b#35d607085eea6a9c3a549f3a724054ca97da622b"
+source = "git+https://github.com/UnknownPlatypus/markup_fmt?rev=16cfde41dec2aa19645c5c60981a9ad8b274c0f3#16cfde41dec2aa19645c5c60981a9ad8b274c0f3"
 dependencies = [
  "aho-corasick",
  "anyhow",

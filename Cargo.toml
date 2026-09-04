@@ -32,7 +32,7 @@ malva = {
 }
 markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
-  rev = "35d607085eea6a9c3a549f3a724054ca97da622b"
+  rev = "16cfde41dec2aa19645c5c60981a9ad8b274c0f3"
 }
 miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
 proc-macro2 = { version = "1.0" }
