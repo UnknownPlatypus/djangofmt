@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Form method `POST` should be lowercase.
    ╭─[tests/check/uppercase_form_method/uppercase_form_method.invalid.html:2:15]
  1 │ <!-- Uppercase method -->

@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × `<img>` tag should declare an `alt` attribute.
    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:2:2]
  1 │ <!-- No attributes at all -->

@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Missing or empty `scope` attribute on `<th>`.
    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:3:10]
  2 │ <table>

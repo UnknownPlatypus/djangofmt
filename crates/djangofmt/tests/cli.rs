@@ -25,14 +25,14 @@ macro_rules! assert_cmd_snapshot_tmpdir {
 #[test]
 fn format_single_file() {
     let project = Project::new().file("test.html", "<div   class=\"foo\"  >\n</div>\n");
-    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     1 file reformatted !
-    "#);
+    ");
     assert_eq!(project.read("test.html"), "<div class=\"foo\"></div>\n");
 }
 
@@ -40,20 +40,20 @@ fn format_single_file() {
 fn format_file_with_ignore_directive() {
     let original = "<!-- djangofmt:ignore -->\n<div   class=\"foo\"  ></div>\n";
     let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot!(cli().arg(project.join("test.html")), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     1 file skipped !
-    "#);
+    ");
     assert_eq!(project.read("test.html"), original);
 }
 
 #[test]
 fn format_nonexistent_file() {
-    assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @r#"
+    assert_cmd_snapshot!(cli().arg("/nonexistent/path.html"), @"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -61,7 +61,7 @@ fn format_nonexistent_file() {
     ----- stderr -----
     djangofmt failed
       Error: Path does not exist: /nonexistent/path.html
-    "#);
+    ");
 }
 
 #[test]
@@ -69,32 +69,32 @@ fn format_directory() {
     let project = Project::new()
         .file("a.html", "<div   ></div>\n")
         .file("b.html", "<span   ></span>\n");
-    assert_cmd_snapshot!(cli().arg(project.path()), @r#"
+    assert_cmd_snapshot!(cli().arg(project.path()), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     2 files reformatted !
-    "#);
+    ");
 }
 
 #[test]
 fn format_quiet() {
     let project = Project::new().file("test.html", "<div   ></div>\n");
-    assert_cmd_snapshot!(cli().arg("-q").arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot!(cli().arg("-q").arg(project.join("test.html")), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
-    "#);
+    ");
 }
 
 #[test]
 fn format_file_parse_error_exits_2() {
     let project = Project::new().file("test.html", "<div   class=\"foo\"  >");
-    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg(project.join("test.html")), @r#"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -112,7 +112,7 @@ fn format_file_parse_error_exits_2() {
             https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags
 
     Couldn't format 1 files!
-    "###);
+    "#);
 }
 
 // ── Format from stdin ────────────────────────────────────────────────
@@ -157,14 +157,14 @@ fn format_stdin_pyproject_profile_beats_extension() {
             .current_dir(project.path())
             .args(["--stdin-filename", "foo.jinja"])
             .pass_stdin("{% verbatim %}{{   x   }}{% endverbatim %}\n"),
-        @r#"
+        @"
     success: true
     exit_code: 0
     ----- stdout -----
     {% verbatim %}{{   x   }}{% endverbatim %}
 
     ----- stderr -----
-    "#);
+    ");
 }
 
 #[test]
@@ -175,14 +175,14 @@ fn format_stdin_with_filename_infers_jinja_profile() {
         cli()
             .args(["--stdin-filename", "foo.jinja"])
             .pass_stdin("{% verbatim %}{{   x   }}{% endverbatim %}\n"),
-        @r#"
+        @"
     success: true
     exit_code: 0
     ----- stdout -----
     {% verbatim %}{{ x }}{% endverbatim %}
 
     ----- stderr -----
-    "#);
+    ");
 }
 
 #[test]
@@ -206,7 +206,7 @@ fn format_stdin_parse_error_exits_2() {
     // A generic parse error has no specific hint: the skip-file one shows instead.
     assert_cmd_snapshot!(
         cli().arg("-").pass_stdin("<div id=></div>"),
-        @r##"
+        @"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -221,7 +221,7 @@ fn format_stdin_parse_error_exits_2() {
        ╰────
       help: Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of
             this file, or list it in `extend-exclude`, to skip it.
-    "##);
+    ");
 }
 
 #[test]
@@ -278,14 +278,14 @@ fn format_pyproject_overrides_editorconfig() {
             "test.html",
             "<div class=\"alpha beta gamma delta epsilon\"><span>hello world</span></div>\n",
         );
-    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @r#"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     1 file reformatted !
-    "#);
+    ");
     assert_eq!(
         project.read("test.html"),
         "<div class=\"alpha beta gamma delta epsilon\">\n        <span>hello world</span>\n</div>\n"
@@ -295,20 +295,20 @@ fn format_pyproject_overrides_editorconfig() {
 #[test]
 fn check_clean_file() {
     let project = Project::new().file("test.html", "<form method=\"post\"></form>\n");
-    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     All checks passed!
-    "###);
+    ");
 }
 
 #[test]
 fn check_file_with_lint_error() {
     let project = Project::new().file("test.html", "<form method=\"put\"></form>\n");
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -323,7 +323,7 @@ fn check_file_with_lint_error() {
       help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "###);
+    "#);
 }
 
 #[test]
@@ -336,7 +336,7 @@ fn check_concise_output_format() {
         .file("unparsable.html", "<div>\n");
     assert_cmd_snapshot_tmpdir!(
         cli().args(["check", "--output-format", "concise"]).arg(project.path()),
-        @r###"
+        @"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -347,14 +347,14 @@ fn check_concise_output_format() {
     [TMP]/test.html:1:15: invalid-attr-value Invalid value 'put' for attribute 'method'.
     [TMP]/test.html:2:3: untrimmed-blocktranslate [*] `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
     Found 2 errors. [*] 1 fixable with the --fix option.
-    "###);
+    ");
 }
 
 #[test]
 fn check_fixable_file_without_fix() {
     let original = "{% blocktranslate %}Hello{% endblocktranslate %}\n";
     let project = Project::new().file("test.html", original);
-    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.join("test.html")), @"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -371,7 +371,7 @@ fn check_fixable_file_without_fix() {
             %}...{% endblocktranslate %}`.
 
     Found 1 errors. [*] 1 fixable with the --fix option.
-    "###);
+    ");
     // Ensure we didn't apply anything without --fix.
     assert_eq!(project.read("test.html"), original);
 }
@@ -382,14 +382,14 @@ fn check_fixable_file_with_fix() {
         "test.html",
         "{% blocktranslate %}Hello{% endblocktranslate %}\n",
     );
-    assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Found 1 errors (1 fixed, 0 remaining).
-    "#);
+    ");
     // Ensure file was mutated.
     assert_eq!(
         project.read("test.html"),
@@ -413,7 +413,7 @@ fn check_passes_file_path_to_path_aware_rules() {
     ];
     assert_cmd_snapshot_tmpdir!(
         cli().args(args).args(["--output-format", "concise"]).arg(project.join("app/page.html")),
-        @r###"
+        @"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -421,16 +421,16 @@ fn check_passes_file_path_to_path_aware_rules() {
     ----- stderr -----
     [TMP]/page.html:2:1: same-file-partial-include [*] Same-file partial `nav` rendered via `{% include %}`.
     Found 1 errors. [*] 1 fixable with the --fix option.
-    "###
+    "
     );
-    assert_cmd_snapshot!(cli().args(args).arg("--fix").arg(project.join("app/page.html")), @r###"
+    assert_cmd_snapshot!(cli().args(args).arg("--fix").arg(project.join("app/page.html")), @"
     success: true
     exit_code: 0
     ----- stdout -----
 
     ----- stderr -----
     Found 1 errors (1 fixed, 0 remaining).
-    "###);
+    ");
     assert_eq!(
         project.read("app/page.html"),
         "{% partialdef nav %}<a>Home</a>{% endpartialdef %}\n{% partial nav %}\n"
@@ -445,7 +445,7 @@ fn check_fixable_file_with_show_fixes() {
     );
     assert_cmd_snapshot_tmpdir!(
         cli().args(["check", "--fix", "--show-fixes"]).arg(project.join("test.html")),
-        @r#"
+        @"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -455,7 +455,7 @@ fn check_fixable_file_with_show_fixes() {
     Fixed 1 errors:
     - [TMP]/test.html:
         1 × untrimmed-blocktranslate (Add trimmed)
-    "#);
+    ");
 }
 
 #[test]
@@ -471,7 +471,7 @@ fn check_skips_unparsable_files_that_opted_out() {
             "legacy.html",
             "{# djangofmt: ignore #}\n<div id=>\n</div>\n",
         );
-    assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @r"
+    assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -485,7 +485,7 @@ fn check_skips_unparsable_files_that_opted_out() {
 #[test]
 fn check_malformed_file_with_fix_surfaces_parse_error() {
     let project = Project::new().file("test.html", "{% if x %}\n  unclosed\n");
-    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @r#"
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--fix"]).arg(project.join("test.html")), @"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -503,7 +503,7 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
             finding the end tag.
 
     Couldn't check 1 files!
-    "#);
+    ");
 }
 
 #[test]
@@ -516,7 +516,7 @@ fn check_respects_pyproject_custom_blocks() {
             "[tool.djangofmt]\ncustom-blocks = [\"stage\"]\n",
         )
         .file("test.html", "{% stage %}\n<p>hi</p>\n");
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @r#"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @"
     success: false
     exit_code: 2
     ----- stdout -----
@@ -534,7 +534,7 @@ fn check_respects_pyproject_custom_blocks() {
             finding the end tag.
 
     Couldn't check 1 files!
-    "#);
+    ");
 }
 
 #[test]
@@ -548,7 +548,7 @@ fn check_respects_pyproject_per_file_ignores() {
         )
         .file("legacy/old.html", violation)
         .file("new.html", violation);
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "."]), @r###"
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "."]), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -563,11 +563,11 @@ fn check_respects_pyproject_per_file_ignores() {
       help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "###);
+    "#);
 
     // Globs anchor at the `pyproject.toml` directory, not the cwd: `legacy/*` keeps
     // matching when djangofmt runs from inside `legacy/`.
-    assert_cmd_snapshot_tmpdir!(cli().current_dir(project.join("legacy")).args(["check", ".."]), @r###"
+    assert_cmd_snapshot_tmpdir!(cli().current_dir(project.join("legacy")).args(["check", ".."]), @r#"
     success: false
     exit_code: 1
     ----- stdout -----
@@ -582,5 +582,5 @@ fn check_respects_pyproject_per_file_ignores() {
       help: Use one of: get, post, dialog
 
     Found 1 errors.
-    "###);
+    "#);
 }

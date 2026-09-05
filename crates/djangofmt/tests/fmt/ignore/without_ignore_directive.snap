@@ -1,5 +1,5 @@
 ---
-source: tests/fmt.rs
+source: crates/djangofmt/tests/fmt/main.rs
 ---
 <div>
     <p class="should-format">This should be formatted</p>

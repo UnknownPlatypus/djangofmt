@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Duplicate `{% block %}` name `title`.
    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:3:10]
  2 │ {% block title %}Title 1{% endblock %}

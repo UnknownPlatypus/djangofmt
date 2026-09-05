@@ -295,7 +295,7 @@ mod tests {
 
     #[test]
     fn test_cli_help() {
-        assert_cmd_snapshot!(cli().arg("--help"), @r###"
+        assert_cmd_snapshot!(cli().arg("--help"), @"
         success: true
         exit_code: 0
         ----- stdout -----
@@ -372,23 +372,23 @@ mod tests {
                   Disable all logging
 
         ----- stderr -----
-        "###);
+        ");
     }
     #[test]
     fn test_cli_version() {
-        assert_cmd_snapshot!(cli().arg("--version"), @r###"
+        assert_cmd_snapshot!(cli().arg("--version"), @"
         success: true
         exit_code: 0
         ----- stdout -----
         djangofmt 0.2.12
 
         ----- stderr -----
-        "###);
+        ");
     }
 
     #[test]
     fn test_cli_invalid_line_length() {
-        assert_cmd_snapshot!(cli().args(["--line-length", "321", "test.html"]), @r###"
+        assert_cmd_snapshot!(cli().args(["--line-length", "321", "test.html"]), @"
         success: false
         exit_code: 2
         ----- stdout -----
@@ -397,12 +397,12 @@ mod tests {
         error: invalid value '321' for '--line-length <LINE_LENGTH>': line-length must be between 1 and 320 (got 321)
 
         For more information, try '--help'.
-        "###);
+        ");
     }
 
     #[test]
     fn test_cli_invalid_indent_width() {
-        assert_cmd_snapshot!(cli().args(["--indent-width", "17", "test.html"]), @r###"
+        assert_cmd_snapshot!(cli().args(["--indent-width", "17", "test.html"]), @"
         success: false
         exit_code: 2
         ----- stdout -----
@@ -411,6 +411,6 @@ mod tests {
         error: invalid value '17' for '--indent-width <INDENT_WIDTH>': indent-width must be between 1 and 16 (got 17)
 
         For more information, try '--help'.
-        "###);
+        ");
     }
 }

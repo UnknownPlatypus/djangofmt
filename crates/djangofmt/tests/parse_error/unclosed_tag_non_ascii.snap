@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt/tests/parse_error/main.rs
 ---
+
   × expected close tag for opening tag <div>
    ╭─[unclosed_tag_non_ascii.html:1:12]
  1 │ Café ☕ <div>

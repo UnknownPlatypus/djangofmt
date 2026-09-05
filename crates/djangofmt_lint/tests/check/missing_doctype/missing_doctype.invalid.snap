@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Missing `<!DOCTYPE html>` declaration.
    ╭─[tests/check/missing_doctype/missing_doctype.invalid.html:2:2]
  1 │ <!-- `<html>` with no DOCTYPE declaration -->

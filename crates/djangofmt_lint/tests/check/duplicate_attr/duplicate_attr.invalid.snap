@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Duplicate attribute `class`.
    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:2:25]
  1 │ <!-- Plain duplicate -->

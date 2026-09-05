@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Invalid value 'put' for attribute 'method'.
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:2:15]
  1 │ <!-- Invalid methods -->
