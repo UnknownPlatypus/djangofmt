@@ -12,7 +12,6 @@ bootstrap:
     pre-commit install
     uv sync
     rustup component add llvm-tools-preview
-    cargo install cargo-llvm-cov --locked
 
 # Run clippy on all targets and features
 [group('dev')]
@@ -103,12 +102,12 @@ bench-chart:
 # Generate HTML coverage report and open in browser
 [group('dev')]
 coverage:
-    cargo llvm-cov --workspace --exclude djangofmt_dev --html --open
+    uv run --only-dev cargo llvm-cov --workspace --exclude djangofmt_dev --html --open
 
 # Generate LCOV coverage report
 [group('dev')]
 coverage-lcov:
-    cargo llvm-cov --workspace --exclude djangofmt_dev --lcov --output-path lcov.info
+    uv run --only-dev cargo llvm-cov --workspace --exclude djangofmt_dev --lcov --output-path lcov.info
 
 # Report the largest functions and crates in the release binary
 [group('dev')]

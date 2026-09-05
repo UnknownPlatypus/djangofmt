@@ -33,6 +33,9 @@ Repository = "https://github.com/UnknownPlatypus/djangofmt"
 
 [dependency-groups]
 dev = [
+  "astral-dev-toolchain-cargo-insta>=1.48.0",
+  "astral-dev-toolchain-cargo-llvm-cov>=0.9.0",
+  "astral-dev-toolchain-cargo-shear>=1.13.4",
   "djangofmt-benchmarks",
   "djangofmt-ecosystem-check",
   "maturin[patchelf]",

@@ -14,7 +14,7 @@ cargo test --workspace --all-targets --all-features  # Run all tests
 cargo test -p djangofmt --test cli <test_name>       # Run a specific CLI integration test
 cargo test -p djangofmt --test fmt                   # Run all formatting snapshot tests
 cargo clippy --all-targets --all-features            # Lint
-cargo insta review                                   # Accept/reject snapshot mismatches after a formatter change
+uv run --only-dev cargo insta review                 # Accept/reject snapshot mismatches after a formatter change
 just coverage                                        # HTML coverage report
 just bench-rs                                        # Rust micro-benchmarks
 ```
