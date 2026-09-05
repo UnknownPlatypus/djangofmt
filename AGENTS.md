@@ -37,7 +37,7 @@ This is a Rust workspace with six crates in `crates/`:
 
 ### Key external dependencies
 
-- **`markup_fmt`** — the HTML/Jinja2 parser and formatter that provides the AST. An upstream dependency (not vendored), pinned to a git rev of the `UnknownPlatypus/markup_fmt` fork in the root `Cargo.toml`.
+- **`markup_fmt`** — the HTML/Jinja2 parser and formatter that provides the AST. An upstream dependency (not vendored), pinned to a git rev of the `UnknownPlatypus/markup_fmt` fork in the root `Cargo.toml`. Fixes to it go in the fork checkout at `~/workspace/markup_fmt` as two branches: one on top of `django/baseline`, which djangofmt then pins, and a cherry-pick of the same commits on top of `g-plane/main` for the upstream PR.
 - **`malva`** — formats inline CSS in `<style>` tags/attributes.
 - **`dprint-plugin-json`** — formats `<script type="application/json">` content.
 - **`insta`** / **`insta-cmd`** — snapshot testing for formatter output and CLI behavior respectively.

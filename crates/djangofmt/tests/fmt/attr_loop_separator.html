@@ -1,0 +1,3 @@
+<div {% for k, v in attrs.items %} {{ k }}="{{ v }}"{% endfor %}></div>
+<div {% for k, v in attrs.items %}{{ k }}="{{ v }}" {% endfor %}></div>
+<div {% for k, v in attrs.items %}{% if v %} {{ k }}="{{ v }}"{% endif %}{% endfor %}></div>
