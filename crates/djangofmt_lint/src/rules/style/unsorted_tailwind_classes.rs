@@ -17,6 +17,8 @@ use crate::{Checker, span};
 /// appears the same way in the source. Sorting them automatically removes the effort of arranging
 /// classes by hand and keeps diffs focused on real changes instead of reordering churn.
 ///
+/// The fix also removes duplicate classes.
+///
 /// ## Example
 /// ```html
 /// <button class="sm:py-3 text-white px-4 py-2 bg-sky-700 hover:bg-sky-800 sm:px-8">...</button>
@@ -26,9 +28,6 @@ use crate::{Checker, span};
 /// ```html
 /// <button class="bg-sky-700 px-4 py-2 text-white hover:bg-sky-800 sm:px-8 sm:py-3">...</button>
 /// ```
-///
-/// ## Fix safety
-/// In addition to sorting classes, this rule will also remove duplicated ones.
 ///
 /// ## Options
 /// - `lint.unsorted-tailwind-classes.prefix`
@@ -46,7 +45,7 @@ impl Violation for UnsortedTailwindClasses {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "CSS classes are not sorted in the canonical Tailwind order.".into()
+        "Unsorted Tailwind CSS classes".into()
     }
 
     fn fix_title(&self) -> Option<&'static str> {

@@ -2,7 +2,7 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × Missing `<!DOCTYPE html>` declaration.
+  × Missing `<!DOCTYPE html>` declaration
    ╭─[tests/check/missing_doctype/missing_doctype_load_tag.invalid.html:4:2]
  3 │ {% load static %}
  4 │ <html lang="en">
@@ -10,4 +10,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·    ╰── here
  5 │     <head><title>Page</title></head>
    ╰────
-  help: Add `<!DOCTYPE html>` before the `<html>` tag.
+  help: Add `<!DOCTYPE html>` before the `<html>` tag

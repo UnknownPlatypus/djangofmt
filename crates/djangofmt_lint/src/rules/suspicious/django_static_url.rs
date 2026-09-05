@@ -44,11 +44,11 @@ impl Violation for DjangoStaticUrl {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Hardcoded static path in `{}`.", self.attribute).into()
+        format!("Hardcoded static path in `{}`", self.attribute).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Use `{% static 'path/to/file' %}` instead.".into())
+        Some("Use `{% static 'path/to/file' %}` instead".into())
     }
 }
 

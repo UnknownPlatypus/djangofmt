@@ -25,12 +25,6 @@ use crate::{Checker, span};
 /// ```html
 /// <div>content</div>
 /// ```
-///
-/// ## Fix safety
-/// The fix is marked as safe. In practice, removing an empty `id`/`class` preserves rendering
-/// in every realistic template. The DOM technically distinguishes `<div id="">` from
-/// `<div>` (`hasAttribute("id")`, the attribute selector `[id=""]`), but author code relying
-/// on those forms is vanishingly rare.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "0.2.9")]
 pub struct EmptyAttrValue<'a> {
@@ -44,7 +38,7 @@ impl Violation for EmptyAttrValue<'_> {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Empty `{}` attribute can be removed.", self.attr).into()
+        format!("Empty `{}` attribute", self.attr).into()
     }
 
     fn fix_title(&self) -> Option<&'static str> {

@@ -314,7 +314,7 @@ fn check_file_with_lint_error() {
     ----- stdout -----
 
     ----- stderr -----
-      × Invalid value 'put' for attribute 'method'.
+      × Invalid value `put` for attribute `method`
        ╭─[[TMP]/test.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─
@@ -344,8 +344,8 @@ fn check_concise_output_format() {
     ----- stderr -----
     [TMP]/unparsable.html:1:2: expected close tag for opening tag <div>
     Couldn't check 1 files!
-    [TMP]/test.html:1:15: invalid-attr-value Invalid value 'put' for attribute 'method'.
-    [TMP]/test.html:2:3: untrimmed-blocktranslate [*] `{% blocktranslate %}` should declare `trimmed` to avoid leaking indentation into translation strings.
+    [TMP]/test.html:1:15: invalid-attr-value Invalid value `put` for attribute `method`
+    [TMP]/test.html:2:3: untrimmed-blocktranslate [*] Missing `trimmed` on `{% blocktranslate %}`
     Found 2 errors. [*] 1 fixable with the --fix option.
     ");
 }
@@ -360,15 +360,13 @@ fn check_fixable_file_without_fix() {
     ----- stdout -----
 
     ----- stderr -----
-      × `{% blocktranslate %}` should declare `trimmed` to avoid leaking
-      │ indentation into translation strings.
+      × Missing `trimmed` on `{% blocktranslate %}`
        ╭─[[TMP]/test.html:1:3]
      1 │ {% blocktranslate %}Hello{% endblocktranslate %}
        ·   ────────┬───────
        ·           ╰── here
        ╰────
-      help: Add `trimmed` to the opening tag, e.g. `{% blocktranslate trimmed
-            %}...{% endblocktranslate %}`.
+      help: Add `trimmed` to the opening tag
 
     Found 1 errors. [*] 1 fixable with the --fix option.
     ");
@@ -419,7 +417,7 @@ fn check_passes_file_path_to_path_aware_rules() {
     ----- stdout -----
 
     ----- stderr -----
-    [TMP]/page.html:2:1: same-file-partial-include [*] Same-file partial `nav` rendered via `{% include %}`.
+    [TMP]/page.html:2:1: same-file-partial-include [*] Same-file partial `nav` rendered via `{% include %}`
     Found 1 errors. [*] 1 fixable with the --fix option.
     "
     );
@@ -554,7 +552,7 @@ fn check_respects_pyproject_per_file_ignores() {
     ----- stdout -----
 
     ----- stderr -----
-      × Invalid value 'put' for attribute 'method'.
+      × Invalid value `put` for attribute `method`
        ╭─[new.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─
@@ -573,7 +571,7 @@ fn check_respects_pyproject_per_file_ignores() {
     ----- stdout -----
 
     ----- stderr -----
-      × Invalid value 'put' for attribute 'method'.
+      × Invalid value `put` for attribute `method`
        ╭─[[TMP]/new.html:1:15]
      1 │ <form method="put"></form>
        ·               ─┬─

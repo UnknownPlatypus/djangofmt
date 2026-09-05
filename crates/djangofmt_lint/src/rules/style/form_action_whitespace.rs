@@ -31,14 +31,6 @@ use crate::{Checker, span};
 /// <form action="/submit/"></form>
 /// ```
 ///
-/// ## Fix safety
-/// This rule's fix is marked as safe: the URL parser strips leading and trailing ASCII
-/// whitespace from URL attribute values, so trimming the literal source preserves runtime
-/// semantics. Author code reading the raw attribute (e.g. `form.getAttribute("action")`,
-/// strict-equality dispatch, HTMX or web-component integrations that observe the literal
-/// string) would see the trimmed value, but relying on the surrounding whitespace is
-/// vanishingly rare.
-///
 /// ## References
 /// - [URL Standard: basic URL parser](https://url.spec.whatwg.org/#concept-basic-url-parser)
 /// - [HTML spec: the form element](https://html.spec.whatwg.org/multipage/forms.html#the-form-element)
@@ -53,11 +45,11 @@ impl Violation for FormActionWhitespace {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "Extra whitespace found in form `action`.".into()
+        "Extra whitespace in form `action`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Remove leading and trailing whitespace from the `action` value.".into())
+        Some("Trim the `action` value".into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {

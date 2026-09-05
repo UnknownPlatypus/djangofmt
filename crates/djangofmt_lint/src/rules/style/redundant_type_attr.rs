@@ -31,10 +31,6 @@ use crate::{Checker, span};
 /// <style>.foo { color: red; }</style>
 /// ```
 ///
-/// ## Fix safety
-/// This rule's fix is marked as safe: removing a `type` attribute whose value
-/// matches the HTML5 default for the tag preserves runtime semantics.
-///
 /// ## References
 /// - [Google HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html#type_Attributes)
 /// - [HTML spec: the script element](https://html.spec.whatwg.org/multipage/scripting.html#the-script-element)
@@ -53,21 +49,14 @@ impl Violation for RedundantTypeAttr {
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
         format!(
-            "Redundant type=\"{}\" on <{}> tag.",
+            "Redundant `type=\"{}\"` on `<{}>`",
             self.type_value, self.tag
         )
         .into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(
-            format!(
-                "Remove the `type` attribute. `<{}>` defaults to `type=\"{}\"`.",
-                self.tag,
-                self.type_value.to_ascii_lowercase()
-            )
-            .into(),
-        )
+        Some("Remove the `type` attribute".into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {

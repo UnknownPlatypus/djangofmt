@@ -53,7 +53,7 @@ impl Violation for InvalidAttrValue {
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
         format!(
-            "Invalid value '{}' for attribute '{}'.",
+            "Invalid value `{}` for attribute `{}`",
             self.value, self.attribute,
         )
         .into()

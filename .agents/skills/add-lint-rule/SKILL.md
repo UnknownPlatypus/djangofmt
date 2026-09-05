@@ -1,6 +1,6 @@
 ---
 name: add-lint-rule
-description: End-to-end process for a lint rule in djangofmt_lint — scoping, implementation, fixtures, real-template smoke test, single-commit landing. Use when adding, completing, or porting a lint rule.
+description: End-to-end process for a djangofmt_lint rule, from scoping to the single landing commit. Use when adding or porting a lint rule.
 ---
 
 # Add Lint Rule
@@ -18,17 +18,17 @@ Both porting research and grounding fixtures in real code have exact mechanics �
 
 Create `crates/djangofmt_lint/src/rules/{category}/{rule_name}.rs`.
 
-Categories map to `RuleCategory`: `correctness`, `suspicious`, `style`, `complexity`, `accessibility`, `nursery`.
+Categories map to `RuleCategory`: `correctness`, `suspicious`, `style`, `complexity`, `accessibility`.
 
 The file must contain:
 
 ### 1a. The violation struct with doc comment
 
-The doc comment on the struct **is** the rule's documentation and its single source of truth. It MUST be one `///` doc comment attached directly to the struct — not a `//!` module-level comment, and not a second `///` block elsewhere in the file. The `#[derive(ViolationMetadata)]` macro (step 1b) reads it from the struct to populate `docs/rules/{name}.md`.
+The rule's documentation lives in exactly one place: a single `///` doc comment attached directly to the struct. `#[derive(ViolationMetadata)]` (step 1b) reads it from there to populate `docs/rules/{name}.md`, so prose written anywhere else in the file reaches no reader.
 
 Write it for the template author reading the rendered docs: **what** the rule flags and why, NEVER **how** the implementation detects it. Detection mechanics — path matching, gates, skip conditions — live in the code; in the docs they are noise that goes stale.
 
-Mirror the structure of `RedundantTypeAttr` exactly:
+`RedundantTypeAttr` is the canonical model — mirror its structure exactly:
 
 ````rust
 /// ## What it does
@@ -51,9 +51,9 @@ Mirror the structure of `RedundantTypeAttr` exactly:
 /// ```
 ///
 /// ## Fix safety
-/// (Only for rules that produce a fix.) State whether the fix is safe or
-/// unsafe and why — e.g. "marked as safe: removing the attribute preserves
-/// runtime semantics."
+/// (Only when the fix is unsafe.) State what makes it unsafe — e.g. "marked
+/// as unsafe: rewriting the scheme changes which endpoint the browser
+/// requests."
 ///
 /// ## Options
 /// - `lint.my-rule.some-option`
@@ -66,13 +66,13 @@ pub struct MyRule {
 }
 ````
 
-Formatting rules (these match `RedundantTypeAttr` exactly — diverging is an error):
+Formatting rules:
 
-- **Line width**: wrap prose at column 100 (the workspace `rustfmt` width), counting the `///` prefix. Do not wrap earlier — short 60–80 column lines waste vertical space and produce noisy diffs when neighbouring text is edited.
+- **Line width**: fill each line to column 100 (the workspace `rustfmt` width), counting the `///` prefix; wrapping earlier wastes vertical space and churns diffs when neighbouring text is edited.
 - `## What it does` — one sentence, starts with "Checks for". Content on the line **immediately after** the heading, no blank `///` line in between.
 - `## Why is this bad?` — content immediately after the heading. Add follow-up paragraphs (separated by blank `///`) for exclusions or non-obvious behaviour. Keep the voice declarative and plain ("`eval()` is insecure as it enables arbitrary code execution"). Avoid editorial flair like "classic X sink" or "brittle across browsers", filler adjectives, and second-person ("you").
 - `## Example` — code fence on the line **immediately after** the heading. No blank `///` between heading and `` ```html ``. After the closing fence, blank line, then plain text `Use instead:` (NOT a sub-heading, no `##`), then the corrected code fence immediately on the next line. Use HTML/Jinja, not Python.
-- `## Fix safety` — include only when the rule registers a fix. One short paragraph documenting the safety classification and why.
+- `## Fix safety` — include only when the fix is unsafe or conditionally unsafe. One short paragraph on what makes it unsafe. A safe fix carries no section; the `Fix` column of the rules table already reports that the rule is fixable.
 - `## Options` — include only when the rule reads settings from `pyproject.toml`. Bullet list of dotted option paths in backticks, nothing else: the generator turns each into a link to `docs/settings.md` and fails on unknown options. Document the option itself (doc comment, default, type, example) on its field in `pyproject.rs`, never in the rule.
 - `## References` — include when there is a relevant spec, framework doc, or upstream issue to link. Bullet list, one link per line. Link primary sources only (WHATWG/W3C specs, MDN, framework documentation, CWE/OWASP). Do **not** link other linters' rule pages; the cross-reference belongs in the PR description, not in the user-facing docs.
 
@@ -88,7 +88,7 @@ pub struct MyRule {
 }
 ```
 
-**Always use the `NEXT_DJANGOFMT_VERSION` placeholder for the version — never a hardcoded number.** `release.sh` rewrites every `NEXT_DJANGOFMT_VERSION` occurrence under `crates/djangofmt_lint/src/rules` to the real version at release time, so a new rule cannot know which release it will ship in. Hardcoding a version (e.g. `"0.2.9"`) is wrong and bypasses the release tooling — the existing rules show literal versions only because a past release already stamped them.
+**The version is always the `NEXT_DJANGOFMT_VERSION` placeholder.** `release.sh` rewrites every occurrence under `crates/djangofmt_lint/src/rules` to the real version at release time, so a new rule cannot know which release it ships in. Existing rules show literal versions only because a past release already stamped them.
 
 Pick the lifecycle keyword for the rule:
 
@@ -129,7 +129,9 @@ impl Violation for MyRule {
 }
 ```
 
-`FIX_AVAILABILITY` defaults to `FixAvailability::None`; omit it for fixless rules. Use `FixAvailability::Always` when every diagnostic carries a fix, `FixAvailability::Sometimes` when the fix is conditional.
+`FIX_AVAILABILITY` defaults to `FixAvailability::None`; omit it for fixless rules. Use `FixAvailability::Always` when every diagnostic carries a fix, `FixAvailability::Sometimes` when the fix is conditional. A fix that preserves runtime semantics is a `Fix::safe_edit`; one that can change what the page does is a `Fix::unsafe_edit`, and it is the unsafe case that earns the `## Fix safety` section in the docstring.
+
+Diagnostic wording: `message()` names the problem in a short phrase that echoes the rule name; `help()` is one imperative clause naming the action. Keep both under a dozen words and end on the last word rather than a period — the reasoning belongs in `## Why is this bad?`, not in the diagnostic.
 
 **More than one failure mode?** When a rule flags several distinct problems — a `scope` that is *missing* vs. one with an *invalid value* — keep it a single rule and store the modes as an inner enum on the struct; `message()` and `help()` then `match` on the variant. `#[derive_message_formats]` supports `match` arms, so each mode gets its own message and help:
 
@@ -162,7 +164,7 @@ Key points:
 - The `Checker` is passed as `&Checker<'_>`, **not** `&mut` — diagnostics are buffered through interior mutability (`RefCell`).
 - `checker.report_diagnostic(&violation, span)` returns a `DiagnosticGuard`. On `Drop` the guard pushes the diagnostic into the context's buffer. Hold the guard in a `let mut guard = ...` binding only if you need to attach a fix or override fields; otherwise let the temporary drop immediately.
 - If the rule is **not** gated upfront in `checker.rs` (Step 4), call `checker.report_diagnostic_if_enabled(...)` instead — it returns `Option<DiagnosticGuard>` and short-circuits when disabled.
-- For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`.
+- For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`), wrap it with the `Fix` constructor chosen in 1c, then call `guard.set_fix(fix)`.
 - Rules that need the raw source offset of an AST slice use `checker.source_offset(slice)`.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_offset(value)` for a bad value, `source_offset(attr.name)` for a bad attribute, `source_offset(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
@@ -186,8 +188,6 @@ define_rules! {
     (MyRule, rules::style::my_rule::MyRule),  // <-- add here
 }
 ```
-
-The compiler verifies the violation struct exists and its `RULE` constant matches.
 
 ## Step 4: Wire it in the checker
 
@@ -229,32 +229,31 @@ Contains cases that must produce **zero** diagnostics. This file is critical —
 
 ### Porting or grounding in real code
 
-Adapt the issue-derived and Sourcegraph cases from **[research.md](research.md)** into HTML/Jinja, each with its inline citation comment. Don't drop edge cases — if the original tests something, there's a reason.
+Adapt every issue-derived and Sourcegraph case from **[research.md](research.md)** into HTML/Jinja, keeping its inline citation comment. Every edge case the original tests exists for a reason.
 
 ## Step 6: Run tests and accept snapshots
 
 ```bash
-cargo test -p djangofmt_lint
-cargo insta accept
-cargo test -p djangofmt_lint  # verify everything passes
+uv run --only-dev cargo insta test --accept -p djangofmt_lint
 ```
 
 Snapshots auto-generated by the test runner in `tests/check/main.rs`:
 
 - `{rule_name}.invalid.snap` — rendered diagnostics for the invalid fixture.
-- `{rule_name}.invalid.fixed.snap` — post-fix source, generated only when the rule attaches a safe `Fix`.
+- `{rule_name}.invalid.fixed.snap` — post-fix source, written when the rule attaches a safe `Fix`.
+- `{rule_name}.invalid.unsafe-fixed.snap` — post-fix source under `--unsafe-fixes`, written when the rule attaches an unsafe `Fix`.
 
-Review both. The diagnostic messages, spans, help text, and the fixed source should all make sense; in particular check that the fix doesn't leave orphan whitespace or break surrounding markup.
+Read every diagnostic in every snapshot before moving on: each span underlines the offending value rather than the whole element, each message and help follows the wording rules in 1c, and the fixed source is markup you would have written by hand — whitespace intact, surrounding tags untouched.
 
 ## Step 7: Smoke-test against real templates
 
-Run the new rule over `~/greenday`, a large real-world template corpus, and scan the output for false positives:
+Run the new rule over `~/greenday`, a large real-world template corpus:
 
 ```bash
 cargo run -p djangofmt -- check --select {rule-slug} ~/greenday
 ```
 
-Add `--preview` if the rule is `preview_since`. If a real template surfaces a legitimate pattern the rule shouldn't flag, move it into `{rule_name}.valid.html` and teach the rule to skip it.
+Add `--preview` if the rule is `preview_since`. Account for every diagnostic the run produces: each one is either a true positive, or a legitimate pattern that moves into `{rule_name}.valid.html` with the rule taught to skip it. The step is done when every remaining diagnostic is a true positive.
 
 ## Step 8: Generate and proofread the rule documentation
 
@@ -268,7 +267,7 @@ This refreshes `docs/rules.md` and writes `docs/rules/{rule_name}.md` from the v
 
 Run `just pre-mr-check` and get it green first.
 
-A new rule lands as **one** commit on a branch, not a stack of "add", "fix tests", "simplify", "doc tweak" commits. Squash any review follow-ups into that single commit before pushing.
+A new rule lands as **one** commit on a branch. Squash review follow-ups into it before pushing.
 
 **Title**: ``feat(lint): Add `{rule-slug}` lint rule`` — the `feat(lint):` conventional-commit prefix, then backticks around the kebab-case slug (e.g. ``feat(lint): Add `javascript-url` lint rule``).
 
@@ -277,6 +276,7 @@ A new rule lands as **one** commit on a branch, not a stack of "add", "fix tests
 ## Reference files
 
 - Reference rule with safe fix (doc layout, `DiagnosticGuard`, `Fix::safe_edit`): `crates/djangofmt_lint/src/rules/style/redundant_type_attr.rs`
+- Reference rule with unsafe fix (`## Fix safety` section, `Fix::unsafe_edit`): `crates/djangofmt_lint/src/rules/suspicious/use_https.rs`
 - Reference rule without fix: `crates/djangofmt_lint/src/rules/correctness/invalid_attr_value.rs`
 - Multi-variant (enum) violation with `match` in `message()`/`help()`: `crates/djangofmt_lint/src/rules/accessibility/missing_title.rs`
 - Full-technique rule (WCAG H63) — multi-variant, per-variant spans, case-insensitive value validation: `crates/djangofmt_lint/src/rules/accessibility/table_header_missing_scope.rs`

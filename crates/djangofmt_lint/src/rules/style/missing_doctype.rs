@@ -48,11 +48,11 @@ impl Violation for MissingDoctype {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "Missing `<!DOCTYPE html>` declaration.".into()
+        "Missing `<!DOCTYPE html>` declaration".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Add `<!DOCTYPE html>` before the `<html>` tag.".into())
+        Some("Add `<!DOCTYPE html>` before the `<html>` tag".into())
     }
 }
 

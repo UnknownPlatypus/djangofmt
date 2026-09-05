@@ -2,7 +2,7 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × Invalid value 'put' for attribute 'method'.
+  × Invalid value `put` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:2:15]
  1 │ <!-- Invalid methods -->
  2 │ <form method="put">Submit</form>
@@ -12,7 +12,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use one of: get, post, dialog
 
-  × Invalid value 'delete' for attribute 'method'.
+  × Invalid value `delete` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:3:15]
  2 │ <form method="put">Submit</form>
  3 │ <form method="delete">Submit</form>
@@ -22,7 +22,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use one of: get, post, dialog
 
-  × Invalid value 'patch' for attribute 'method'.
+  × Invalid value `patch` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:4:15]
  3 │ <form method="delete">Submit</form>
  4 │ <form method="patch">Submit</form>
@@ -32,7 +32,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use one of: get, post, dialog
 
-  × Invalid value 'invalid' for attribute 'method'.
+  × Invalid value `invalid` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:8:19]
  7 │ {% if show_form %}
  8 │     <form method="invalid">Submit</form>
@@ -42,7 +42,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Use one of: get, post, dialog
 
-  × Invalid value 'patch' for attribute 'method'.
+  × Invalid value `patch` for attribute `method`
     ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:13:19]
  12 │ <div>
  13 │     <form method="patch">Submit</form>
@@ -52,7 +52,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use one of: get, post, dialog
 
-  × Invalid value 'delete' for attribute 'method'.
+  × Invalid value `delete` for attribute `method`
     ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:17:28]
  16 │ <!-- Jinja block as attribute -->
  17 │ <form {% if show %}method="delete"{% endif %}>Submit</form>

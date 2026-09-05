@@ -44,11 +44,11 @@ impl Violation for DjangoUrlPattern {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Hardcoded internal URL in `{}`.", self.attribute).into()
+        format!("Hardcoded internal URL in `{}`", self.attribute).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Use `{% url 'view_name' %}` to reference a named URL pattern.".into())
+        Some("Use `{% url 'view_name' %}` instead".into())
     }
 }
 

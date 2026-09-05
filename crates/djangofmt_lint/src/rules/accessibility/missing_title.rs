@@ -53,17 +53,13 @@ impl Violation for MissingTitle {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "Missing or empty `<title>` in `<head>`.".into()
+        "Missing or empty `<title>` in `<head>`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
         Some(match self.kind {
-            TitleViolation::Absent => {
-                "Add a `<title>` element with descriptive text inside `<head>`.".into()
-            }
-            TitleViolation::Empty => {
-                "Fill the existing `<title>` element with descriptive text.".into()
-            }
+            TitleViolation::Absent => "Add a `<title>` element to `<head>`".into(),
+            TitleViolation::Empty => "Add descriptive text to `<title>`".into(),
         })
     }
 }

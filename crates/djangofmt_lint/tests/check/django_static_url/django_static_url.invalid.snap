@@ -2,7 +2,7 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × Hardcoded static path in `href`.
+  × Hardcoded static path in `href`
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:2:30]
  1 │ <!-- link/href -->
  2 │ <link rel="stylesheet" href="/static/css/app.css">
@@ -10,9 +10,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                                       ╰── here
  3 │ <link rel="stylesheet" href='/static/css/app.css'>
    ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `href`.
+  × Hardcoded static path in `href`
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:3:30]
  2 │ <link rel="stylesheet" href="/static/css/app.css">
  3 │ <link rel="stylesheet" href='/static/css/app.css'>
@@ -20,9 +20,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                                       ╰── here
  4 │ <link rel="stylesheet" href="static/css/app.css">
    ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `href`.
+  × Hardcoded static path in `href`
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:4:30]
  3 │ <link rel="stylesheet" href='/static/css/app.css'>
  4 │ <link rel="stylesheet" href="static/css/app.css">
@@ -30,9 +30,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                                       ╰── here
  5 │ 
    ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:7:11]
  6 │ <!-- img/src -->
  7 │ <img src="/static/img/logo.png" alt="" width="0" height="0">
@@ -40,9 +40,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                     ╰── here
  8 │ <img src='/static/img/logo.png' alt="" width="0" height="0">
    ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:8:11]
  7 │ <img src="/static/img/logo.png" alt="" width="0" height="0">
  8 │ <img src='/static/img/logo.png' alt="" width="0" height="0">
@@ -50,9 +50,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                     ╰── here
  9 │ <img src="static/img/logo.png" alt="" width="0" height="0">
    ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:9:11]
   8 │ <img src='/static/img/logo.png' alt="" width="0" height="0">
   9 │ <img src="static/img/logo.png" alt="" width="0" height="0">
@@ -60,9 +60,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                    ╰── here
  10 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:12:14]
  11 │ <!-- script/src -->
  12 │ <script src="/static/js/app.js"></script>
@@ -70,9 +70,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                      ╰── here
  13 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:15:14]
  14 │ <!-- source/src and source/srcset -->
  15 │ <source src="/static/audio/clip.mp3">
@@ -80,9 +80,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                         ╰── here
  16 │ <source srcset="/static/img/picture.webp">
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `srcset`.
+  × Hardcoded static path in `srcset`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:16:17]
  15 │ <source src="/static/audio/clip.mp3">
  16 │ <source srcset="/static/img/picture.webp">
@@ -90,9 +90,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                             ╰── here
  17 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `srcset`.
+  × Hardcoded static path in `srcset`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:19:51]
  18 │ <!-- srcset: each candidate is scanned, even when the hardcoded path is not first -->
  19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
@@ -100,9 +100,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                                                              ╰── here
  20 │ <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `srcset`.
+  × Hardcoded static path in `srcset`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:20:17]
  19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
  20 │ <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
@@ -110,9 +110,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                           ╰── here
  21 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `srcset`.
+  × Hardcoded static path in `srcset`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:20:45]
  19 │ <img srcset="https://cdn.example.com/logo.png 1x, /static/img/logo@2x.png 2x" alt="" width="0" height="0">
  20 │ <source srcset="static/img/small.webp 480w, static/img/large.webp 1024w">
@@ -120,9 +120,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                                                       ╰── here
  21 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:23:11]
  22 │ <!-- Case-insensitive tag name -->
  23 │ <IMG src="/static/img/logo.png" alt="" width="0" height="0">
@@ -130,9 +130,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                     ╰── here
  24 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:26:11]
  25 │ <!-- Case-insensitive attribute name -->
  26 │ <img SRC="/static/img/logo.png" alt="" width="0" height="0">
@@ -140,9 +140,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                     ╰── here
  27 │ 
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:30:15]
  29 │ {% if show_logo %}
  30 │     <img src="/static/img/logo.png" alt="" width="0" height="0">
@@ -150,13 +150,13 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                         ╰── here
  31 │ {% endif %}
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead
 
-  × Hardcoded static path in `src`.
+  × Hardcoded static path in `src`
     ╭─[tests/check/django_static_url/django_static_url.invalid.html:34:11]
  33 │ <!-- Browsers strip surrounding whitespace, so a padded value still resolves the static path -->
  34 │ <img src=" /static/img/logo.png " alt="" width="0" height="0">
     ·           ───────────┬──────────
     ·                      ╰── here
     ╰────
-  help: Use `{% static 'path/to/file' %}` instead.
+  help: Use `{% static 'path/to/file' %}` instead

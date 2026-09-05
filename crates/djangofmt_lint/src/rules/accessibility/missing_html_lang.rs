@@ -43,11 +43,11 @@ impl Violation for MissingHtmlLang {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "`<html>` tag should declare a `lang` attribute.".into()
+        "Missing `lang` attribute on `<html>`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Add `lang=\"en\"` (or the appropriate language code).".into())
+        Some("Add a `lang` attribute, e.g. `lang=\"en\"`".into())
     }
 }
 

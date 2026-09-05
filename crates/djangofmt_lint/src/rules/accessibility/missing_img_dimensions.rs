@@ -39,11 +39,11 @@ impl Violation for MissingImgDimensions {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "`<img>` tag should declare both `height` and `width` attributes.".into()
+        "Missing `height` or `width` attribute on `<img>`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Add explicit `height` and `width` to avoid layout shifts as the image loads.".into())
+        Some("Add `height` and `width` attributes".into())
     }
 }
 
