@@ -65,7 +65,7 @@ jobs:
           ref: main
           persist-credentials: false
       - name: Build main version
-        run: cargo build -p djangofmt --release --verbose && mv target/release/djangofmt ./main_djangofmt
+        run: cargo build --locked -p djangofmt --release --verbose && mv target/release/djangofmt ./main_djangofmt
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -73,7 +73,7 @@ jobs:
           clean: false
 
       - name: Build PR version
-        run: cargo build -p djangofmt --release --verbose && mv target/release/djangofmt ./pr_djangofmt
+        run: cargo build --locked -p djangofmt --release --verbose && mv target/release/djangofmt ./pr_djangofmt
 
       - name: Setup uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
@@ -167,7 +167,7 @@ jobs:
       - name: Install Rust toolchain
         run: rustup component add clippy
       - name: Run Clippy
-        run: cargo clippy --all-targets --all-features
+        run: cargo clippy --locked --all-targets --all-features
 
   cargo-shear:
     name: "cargo shear"
@@ -198,7 +198,7 @@ jobs:
       - uses: taiki-e/install-action@b6ff580856c41316412a0b9b60540fbc6f8c82cc # v2.86.7
         with:
           tool: cargo-llvm-cov
-      - run: cargo llvm-cov --workspace --exclude djangofmt_dev --all-targets --all-features --fail-under-lines 85
+      - run: cargo llvm-cov --locked --workspace --exclude djangofmt_dev --all-targets --all-features --fail-under-lines 85
 
   msrv_check:
     name: "cargo build (msrv)"
@@ -223,7 +223,7 @@ jobs:
       - name: Build tests with MSRV
         env:
           MSRV: ${{ steps.msrv.outputs.value }}
-        run: cargo "+${MSRV}" test --no-run --workspace --all-targets --all-features
+        run: cargo "+${MSRV}" test --locked --no-run --workspace --all-targets --all-features
 
   docs_check:
     name: "rule docs up to date"
@@ -234,7 +234,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: cargo run -p djangofmt_dev -- generate-all
+      - run: cargo run --locked -p djangofmt_dev -- generate-all
       - name: Verify rule docs are up to date
         run: |
           git add --intent-to-add docs/
