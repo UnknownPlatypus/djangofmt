@@ -111,3 +111,13 @@ source: crates/djangofmt_lint/tests/check/main.rs
  44 │ <div></div>
     ╰────
   help: Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead
+
+  × Invalid suppression comment: `invalid-syntax` cannot be scoped to a node
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:47:1]
+ 46 │ <!-- Repeated, every occurrence goes -->
+ 47 │ {# djangofmt: ignore[invalid-syntax, invalid-attr-value, invalid-syntax] #}
+    · ─────────────────────────────────────┬─────────────────────────────────────
+    ·                                      ╰── here
+ 48 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead

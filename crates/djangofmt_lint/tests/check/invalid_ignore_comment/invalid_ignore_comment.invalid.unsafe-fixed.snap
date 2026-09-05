@@ -14,7 +14,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <div></div>
 
 <!-- Malformed, at attribute position: no node to guard, still a comment to report -->
-<form method="yes"></form>
+<form  method="yes"></form>
 
 <!-- Malformed: unknown keyword -->
 <div></div>
@@ -34,5 +34,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <div></div>
 
 <!-- Among several codes, the span points at the offending one -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<div></div>
+
+<!-- Repeated, every occurrence goes -->
 {# djangofmt: ignore[invalid-attr-value] #}
 <div></div>

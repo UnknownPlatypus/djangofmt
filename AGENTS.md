@@ -1,6 +1,6 @@
 ## Conventions
 
-- Use comments sparingly — only when they explain hidden behavior — and keep them to 1-2 lines.
+- Use comments sparingly — only when they explain hidden behavior — and keep them to 1-2 lines. Rule doc comments (`## What it does` …) are the generated docs and exempt.
 - Every new CLI flag must also be readable from `pyproject.toml`: add it to `PyprojectSettings`/`LintSettings` in `pyproject.rs` and resolve it with CLI args taking precedence.
 - Keep tests lean: cover the highest-value cases and refactor them to a high standard.
 - Only the final commit of a branch needs a conventional-commit `type(scope):` prefix, e.g. `feat(lint):`, `fix(format):`, `chore(deps):` — branches are squash-merged and that title becomes the changelog entry. Earlier commits are for review only: give them plain descriptive titles.

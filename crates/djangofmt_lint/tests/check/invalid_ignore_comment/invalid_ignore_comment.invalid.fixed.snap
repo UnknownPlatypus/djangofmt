@@ -44,3 +44,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- Among several codes, the span points at the offending one -->
 {# djangofmt: ignore[invalid-attr-value] #}
 <div></div>
+
+<!-- Repeated, every occurrence goes -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<div></div>

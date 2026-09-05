@@ -21,13 +21,8 @@ pub const FORMAT_CODE: &str = "format";
 /// The code that suppresses parse errors; only `file-ignore[...]` may carry it.
 pub const INVALID_SYNTAX_CODE: &str = "invalid-syntax";
 
-/// The namespace every directive opens with, followed by a colon and a keyword.
 const NAMESPACE: &str = "djangofmt";
-
-/// The node-level keyword, also the formatter's own opt-out.
 const IGNORE: &str = "ignore";
-
-/// Its file-wide sibling.
 const FILE_IGNORE: &str = "file-ignore";
 
 /// The formatter's directive, `NAMESPACE:IGNORE` spelled out for `markup_fmt` to match.

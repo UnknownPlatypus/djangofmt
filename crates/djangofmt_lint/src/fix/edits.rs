@@ -18,8 +18,8 @@ pub fn delete_attr_fix(ctx: &LintContext<'_>, name: &str, value_str: &str, quote
     Fix::safe_edit(Edit::deletion(span(fix_start, attr_end - fix_start)))
 }
 
-/// An edit deleting a whole comment, taking the line with it when the comment has it to
-/// itself, so no blank line is left behind.
+/// An edit deleting a comment, and its line when it has the line to itself. Sharing a line,
+/// only the comment goes: `{# #}` renders to nothing, but the whitespace around it is kept.
 pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
     let source = ctx.source();
     let start = ctx.source_offset(comment);
@@ -32,20 +32,13 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
     let (start, end) = if before.trim_ascii().is_empty() && after.trim_ascii().is_empty() {
         (line_start, line_end)
     } else {
-        // Whitespace is absorbed within the line only, so the fix never joins two lines.
-        (line_start + before.trim_ascii_end().len(), end)
+        (start, end)
     };
     Edit::deletion(span(start, end - start))
 }
 
-/// The span to report and the edit dropping `remove` from a directive's `codes`.
-///
-/// A single code is spanned and taken out with its separator; the comment goes once no code
-/// would be left; several codes among others rewrite the list in place and span the comment.
-///
-/// # Panics
-///
-/// Panics if a code in `remove` is not listed in `codes`.
+/// The span to report and the edit dropping `remove` from a directive's `codes`: one code is
+/// cut out with its separator, several are rewritten, and the comment goes once none is left.
 pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
     comment: &str,
@@ -58,13 +51,11 @@ pub fn delete_codes_or_comment(
     if let [only] = codes {
         return (span_of(only), delete_comment(ctx, comment));
     }
-    if let [code] = remove {
-        // Offsets come from the listed slice: `remove` may hold an equal string from elsewhere.
-        let index = codes
-            .iter()
-            .position(|listed| listed == code)
-            .expect("a code to remove is listed");
-        let code = codes[index];
+    let mut listed = codes
+        .iter()
+        .enumerate()
+        .filter(|(_, listed)| remove.contains(listed));
+    if let (Some((index, code)), None) = (listed.next(), listed.next()) {
         let (start, end) = codes.get(index + 1).map_or_else(
             || (end_of(codes[index - 1]), end_of(code)),
             |next| (start_of(code), start_of(next)),
