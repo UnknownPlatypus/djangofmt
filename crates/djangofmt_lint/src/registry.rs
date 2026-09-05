@@ -266,4 +266,5 @@ define_rules! {
     (UnsortedTailwindClasses, rules::style::unsorted_tailwind_classes::UnsortedTailwindClasses),
     (InvalidIgnoreComment, rules::suspicious::invalid_ignore_comment::InvalidIgnoreComment),
     (UnknownIgnoreCode, rules::suspicious::unknown_ignore_code::UnknownIgnoreCode),
+    (RedirectedIgnore, rules::style::redirected_ignore::RedirectedIgnore),
 }
