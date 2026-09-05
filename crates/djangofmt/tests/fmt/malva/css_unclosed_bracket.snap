@@ -1,0 +1,5 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<!-- raffia 0.13 loops forever on an unclosed `[` at end of input, growing until the process is killed -->
+<div style="a:["></div>
