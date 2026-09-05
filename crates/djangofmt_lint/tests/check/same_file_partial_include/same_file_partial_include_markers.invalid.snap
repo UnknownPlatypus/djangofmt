@@ -2,11 +2,11 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × Same-file partial `footer` rendered via `{% include %}`.
+  × Same-file partial `footer` rendered via `{% include %}`
    ╭─[tests/check/same_file_partial_include/same_file_partial_include_markers.invalid.jinja:4:1]
  3 │ <!-- Whitespace-control markers are carried over to the fix -->
  4 │ {%- include "same_file_partial_include_markers.invalid.jinja#footer" -%}
    · ────────────────────────────────────┬───────────────────────────────────
    ·                                     ╰── here
    ╰────
-  help: Render it with `{% partial footer %}` to avoid reloading the template from disk.
+  help: Use `{% partial footer %}` instead

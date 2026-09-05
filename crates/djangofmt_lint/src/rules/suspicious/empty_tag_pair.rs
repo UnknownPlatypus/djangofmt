@@ -42,11 +42,11 @@ impl Violation for EmptyTagPair {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Empty `<{}>` tag pair.", self.tag).into()
+        format!("Empty `<{}>` tag pair", self.tag).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Remove the empty tag pair or add content.".into())
+        Some("Remove the empty tag pair or add content".into())
     }
 }
 

@@ -29,11 +29,6 @@ use crate::{Checker, span};
 /// {% partial item-list %}
 /// ```
 ///
-/// ## Fix safety
-/// This rule's fix is marked as safe: it only fires when the include's template path matches the
-/// file being linted and the partial is defined in it, so `{% partial %}` renders the same partial
-/// `{% include %}` would load.
-///
 /// ## References
 /// - [django-template-partials](https://github.com/carltongibson/django-template-partials)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
@@ -50,20 +45,14 @@ impl Violation for SameFilePartialInclude<'_> {
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
         format!(
-            "Same-file partial `{}` rendered via `{{% include %}}`.",
+            "Same-file partial `{}` rendered via `{{% include %}}`",
             self.name
         )
         .into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(
-            format!(
-                "Render it with `{{% partial {} %}}` to avoid reloading the template from disk.",
-                self.name
-            )
-            .into(),
-        )
+        Some(format!("Use `{{% partial {} %}}` instead", self.name).into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {

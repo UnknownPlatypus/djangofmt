@@ -393,7 +393,7 @@ mod tests {
             messages(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>\n<form method=\"put\"></form>"
             ),
-            ["Invalid value 'put' for attribute 'method'."]
+            ["Invalid value `put` for attribute `method`"]
         );
     }
 
@@ -429,7 +429,7 @@ mod tests {
             messages(
                 "{# djangofmt: ignore[empty-attr-value] #}\n<div id=\"\"><span class=\"\">x</span></div>"
             ),
-            ["Empty `class` attribute can be removed."]
+            ["Empty `class` attribute"]
         );
         // Likewise a block guards its own tags but not its body.
         assert!(

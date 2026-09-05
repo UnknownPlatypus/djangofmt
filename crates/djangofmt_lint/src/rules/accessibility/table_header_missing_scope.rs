@@ -60,23 +60,18 @@ impl Violation for TableHeaderMissingScope {
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
         match &self.kind {
-            ScopeViolation::MissingOrEmpty => {
-                "Missing or empty `scope` attribute on `<th>`.".into()
-            }
+            ScopeViolation::MissingOrEmpty => "Missing or empty `scope` attribute on `<th>`".into(),
             ScopeViolation::InvalidValue { value } => {
-                format!("Invalid `scope` value `{value}` on `<th>`.").into()
+                format!("Invalid `scope` value `{value}` on `<th>`").into()
             }
         }
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
         Some(match &self.kind {
-            ScopeViolation::MissingOrEmpty => {
-                "Add `scope=\"col\"` or `scope=\"row\"` to associate the header with its data."
-                    .into()
-            }
+            ScopeViolation::MissingOrEmpty => "Add `scope=\"col\"` or `scope=\"row\"`".into(),
             ScopeViolation::InvalidValue { .. } => {
-                "Change `scope` to one of `row`, `col`, `rowgroup`, or `colgroup`.".into()
+                "Use one of `row`, `col`, `rowgroup`, or `colgroup`".into()
             }
         })
     }

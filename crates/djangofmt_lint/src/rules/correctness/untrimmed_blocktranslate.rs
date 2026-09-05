@@ -30,10 +30,6 @@ use crate::{Checker, span};
 /// {% blocktranslate trimmed %}This string will have {{ value }} inside.{% endblocktranslate %}
 /// ```
 ///
-/// ## Fix safety
-/// This rule's fix is marked as safe: it inserts `trimmed` immediately after
-/// the tag name in the opening tag without altering the translatable content.
-///
 /// ## References
 /// - [Django documentation: `blocktranslate`](https://docs.djangoproject.com/en/stable/topics/i18n/translation/#std-templatetag-blocktranslate)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
@@ -47,17 +43,11 @@ impl Violation for UntrimmedBlocktranslate {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "`{% blocktranslate %}` should declare `trimmed` to avoid leaking \
-         indentation into translation strings."
-            .into()
+        "Missing `trimmed` on `{% blocktranslate %}`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(
-            "Add `trimmed` to the opening tag, e.g. \
-             `{% blocktranslate trimmed %}...{% endblocktranslate %}`."
-                .into(),
-        )
+        Some("Add `trimmed` to the opening tag".into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {

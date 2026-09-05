@@ -28,11 +28,6 @@ use crate::{Checker, span};
 /// <form method="post"></form>
 /// ```
 ///
-/// ## Fix safety
-/// This rule's fix is marked as safe: the HTML spec defines form `method` as a
-/// case-insensitive enumerated attribute, so lowercasing preserves runtime
-/// semantics.
-///
 /// ## References
 /// - [HTML spec: form submission method](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
@@ -48,11 +43,11 @@ impl Violation for UppercaseFormMethod<'_> {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Form method `{}` should be lowercase.", self.value).into()
+        format!("Form method `{}` should be lowercase", self.value).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(format!("Use `{}` instead.", self.value.to_ascii_lowercase()).into())
+        Some(format!("Use `{}` instead", self.value.to_ascii_lowercase()).into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {

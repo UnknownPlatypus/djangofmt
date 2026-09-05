@@ -41,15 +41,17 @@ impl Violation for DuplicateBlockName<'_> {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Duplicate `{{% block %}}` name `{}`.", self.name).into()
+        format!("Duplicate `{{% block %}}` name `{}`", self.name).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(format!(
-            "Rename or remove one of the `{{% block {} %}}` tags; Django requires block names to be \
-             unique within a template.",
-            self.name
-        ).into())
+        Some(
+            format!(
+                "Rename or remove one of the `{{% block {} %}}` tags",
+                self.name
+            )
+            .into(),
+        )
     }
 }
 

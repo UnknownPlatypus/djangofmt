@@ -2,7 +2,7 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:2:2]
  1 │ <!-- No attributes at all -->
  2 │ <img>
@@ -10,9 +10,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·   ╰── here
  3 │ 
    ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:5:2]
  4 │ <!-- Self-closing without alt -->
  5 │ <img src="photo.jpg" />
@@ -20,9 +20,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·   ╰── here
  6 │ 
    ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
    ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:8:2]
  7 │ <!-- Multiple attributes but no alt -->
  8 │ <img src="photo.jpg" class="hero" id="main-image" loading="lazy" />
@@ -30,9 +30,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·   ╰── here
  9 │ 
    ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:11:2]
  10 │ <!-- Case-insensitive tag name -->
  11 │ <IMG src="photo.jpg" />
@@ -40,9 +40,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·   ╰── here
  12 │ 
     ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:14:2]
  13 │ <!-- Multi-line opening tag with no alt -->
  14 │ <img
@@ -50,9 +50,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·   ╰── here
  15 │     src="photo.jpg"
     ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:22:6]
  21 │ {% if show_image %}
  22 │     <img src="photo.jpg" />
@@ -60,9 +60,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·       ╰── here
  23 │ {% endif %}
     ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:28:6]
  27 │     <source srcset="photo.avif" type="image/avif" />
  28 │     <img src="photo.jpg" />
@@ -70,9 +70,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·       ╰── here
  29 │ </picture>
     ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:32:2]
  31 │ <!-- `aria-hidden`/`role="presentation"` do not substitute for alt -->
  32 │ <img src="decorative.png" aria-hidden="true" />
@@ -80,13 +80,13 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·   ╰── here
  33 │ <img src="decorative.png" role="presentation" />
     ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative
 
-  × `<img>` tag should declare an `alt` attribute.
+  × Missing `alt` attribute on `<img>`
     ╭─[tests/check/missing_img_alt/missing_img_alt.invalid.html:33:2]
  32 │ <img src="decorative.png" aria-hidden="true" />
  33 │ <img src="decorative.png" role="presentation" />
     ·  ─┬─
     ·   ╰── here
     ╰────
-  help: Add `alt=""` for decorative images, or a short description otherwise.
+  help: Add an `alt` attribute, or `alt=""` if decorative

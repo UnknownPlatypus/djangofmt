@@ -38,14 +38,11 @@ impl Violation for DuplicateAttr<'_> {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Duplicate attribute `{}`.", self.name).into()
+        format!("Duplicate attribute `{}`", self.name).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(format!(
-            "Remove the duplicate `{}` attribute, or merge its value into the first occurrence (browsers keep the first one).",
-            self.name
-        ).into())
+        Some(format!("Remove the duplicate `{}` attribute", self.name).into())
     }
 }
 

@@ -2,7 +2,7 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × Missing `<!DOCTYPE html>` declaration.
+  × Missing `<!DOCTYPE html>` declaration
    ╭─[tests/check/missing_doctype/missing_doctype_extends_lookalike.invalid.html:3:2]
  2 │ {% extendsfoo "base.html" %}
  3 │ <html lang="en">
@@ -10,4 +10,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·    ╰── here
  4 │     <body></body>
    ╰────
-  help: Add `<!DOCTYPE html>` before the `<html>` tag.
+  help: Add `<!DOCTYPE html>` before the `<html>` tag

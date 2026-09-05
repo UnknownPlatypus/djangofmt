@@ -51,11 +51,11 @@ impl Violation for UseHttps {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Avoid `http://` URLs in `{}`.", self.attribute).into()
+        format!("Avoid `http://` URLs in `{}`", self.attribute).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Use `https://` instead.".into())
+        Some("Use `https://` instead".into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {

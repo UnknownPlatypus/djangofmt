@@ -46,11 +46,11 @@ impl Violation for JavascriptUrl {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Avoid `javascript:` URLs in `{}`.", self.attribute).into()
+        format!("Avoid `javascript:` URLs in `{}`", self.attribute).into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Use an event handler and a real URL instead.".into())
+        Some("Use an event handler instead".into())
     }
 }
 

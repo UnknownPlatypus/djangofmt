@@ -39,11 +39,11 @@ impl Violation for MissingImgAlt {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "`<img>` tag should declare an `alt` attribute.".into()
+        "Missing `alt` attribute on `<img>`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Add `alt=\"\"` for decorative images, or a short description otherwise.".into())
+        Some("Add an `alt` attribute, or `alt=\"\"` if decorative".into())
     }
 }
 
