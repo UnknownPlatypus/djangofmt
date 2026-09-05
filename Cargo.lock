@@ -894,7 +894,7 @@ checksum = "113b30b4cd05f7c06868fdb2854f66a7b9fece9a48425351cd532e810d74024f"
 [[package]]
 name = "malva"
 version = "0.16.0"
-source = "git+https://github.com/UnknownPlatypus/malva?rev=1d7b2e48a5cb14810a3e41bd9b9748103d48f20d#1d7b2e48a5cb14810a3e41bd9b9748103d48f20d"
+source = "git+https://github.com/UnknownPlatypus/malva?rev=9a7ee71bfad747490ebe0428d07d1f82467f0c3f#9a7ee71bfad747490ebe0428d07d1f82467f0c3f"
 dependencies = [
  "aho-corasick",
  "itertools",

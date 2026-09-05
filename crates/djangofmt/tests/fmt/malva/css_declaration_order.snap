@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<style>
+    .a {
+        margin-top: 5px;
+        margin: 0;
+    }
+    .b {
+        display: block;
+        color: red;
+    }
+</style>
