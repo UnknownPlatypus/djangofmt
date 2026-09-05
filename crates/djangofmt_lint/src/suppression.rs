@@ -33,31 +33,13 @@ enum FileIgnoreCode {
     Format,
 }
 
-/// A parsed suppression directive.
-#[derive(Debug, PartialEq, Eq)]
-enum Directive<'s> {
-    /// `djangofmt: ignore[...]` suppress on the following node.
-    Ignore(Vec<&'s str>),
-    /// `djangofmt: file-ignore[...]` suppress for the whole file.
-    FileIgnore(Vec<&'s str>),
-}
-
-/// Parse a comment body into a suppression directive: `ignore[...]` or `file-ignore[...]`
-/// with a non-empty code list. A bare directive carries no codes and is the formatter's.
-fn parse_directive(raw: &str) -> Option<Directive<'_>> {
-    let (file_level, matched) = match markup_fmt::match_directive(raw, FILE_IGNORE_DIRECTIVE) {
-        Some(matched) => (true, matched),
-        None => (false, markup_fmt::match_directive(raw, IGNORE_DIRECTIVE)?),
-    };
-    let codes: Vec<&str> = matched.codes().collect();
-    if codes.is_empty() {
-        return None;
-    }
-    Some(if file_level {
-        Directive::FileIgnore(codes)
-    } else {
-        Directive::Ignore(codes)
-    })
+/// The codes of a `directive[...]` comment body. `None` for prose, for the other directive,
+/// and for a bare directive: that one carries no codes and is the formatter's.
+fn directive_codes<'s>(raw: &'s str, directive: &str) -> Option<Vec<&'s str>> {
+    let codes: Vec<&str> = markup_fmt::match_directive(raw, directive)?
+        .codes()
+        .collect();
+    (!codes.is_empty()).then_some(codes)
 }
 
 /// Rule codes suppressed over byte ranges of the source.
@@ -74,9 +56,7 @@ pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'_>) -> Vec<Suppression<'s
     root.jinja_comments
         .iter()
         .filter_map(|raw| {
-            let Directive::Ignore(codes) = parse_directive(raw)? else {
-                return None;
-            };
+            let codes = directive_codes(raw, IGNORE_DIRECTIVE)?;
             let rest = siblings_after(&root.children, checker.source_offset(raw), checker)?;
             let ranges = guarded_ranges(checker, rest)?;
             Some(Suppression { ranges, codes })
@@ -203,32 +183,32 @@ impl FileIgnores {
                 invalid_syntax: true,
             };
         }
-        match leading_directive(source) {
-            Some(Directive::FileIgnore(codes)) => codes
-                .iter()
-                .filter_map(|code| FileIgnoreCode::from_str(code).ok())
-                .fold(Self::default(), |mut ignores, code| {
-                    match code {
-                        FileIgnoreCode::Format => ignores.format = true,
-                        FileIgnoreCode::InvalidSyntax => ignores.invalid_syntax = true,
-                    }
-                    ignores
-                }),
-            _ => Self::default(),
-        }
+        leading_file_ignore_codes(source)
+            .unwrap_or_default()
+            .iter()
+            .filter_map(|code| FileIgnoreCode::from_str(code).ok())
+            .fold(Self::default(), |mut ignores, code| {
+                match code {
+                    FileIgnoreCode::Format => ignores.format = true,
+                    FileIgnoreCode::InvalidSyntax => ignores.invalid_syntax = true,
+                }
+                ignores
+            })
     }
 }
 
-/// The directive of the file's leading `{# #}` comment, BOM and leading whitespace tolerated.
-fn leading_directive(source: &str) -> Option<Directive<'_>> {
-    leading_comment(strip_bom(source).trim_start(), "{#", "#}").and_then(parse_directive)
+/// The codes of the file's leading `{# djangofmt: file-ignore[...] #}` comment,
+/// BOM and leading whitespace tolerated.
+fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
+    leading_comment(strip_bom(source).trim_start(), "{#", "#}")
+        .and_then(|body| directive_codes(body, FILE_IGNORE_DIRECTIVE))
 }
 
 /// Rules the file's leading `file-ignore[...]` comment turns off, so they never run at all.
 #[must_use]
 pub fn file_ignored_rules(source: &str) -> RuleSet {
     let mut rules = RuleSet::empty();
-    if let Some(Directive::FileIgnore(codes)) = leading_directive(source) {
+    if let Some(codes) = leading_file_ignore_codes(source) {
         for rule in codes.iter().filter_map(|code| Rule::from_str(code).ok()) {
             rules.insert(rule);
         }
@@ -281,25 +261,33 @@ mod tests {
     }
 
     #[rstest]
-    #[case::node(" djangofmt: ignore[a, b ,c] ", Directive::Ignore(vec!["a", "b", "c"]))]
-    #[case::file("djangofmt:file-ignore[invalid-syntax]", Directive::FileIgnore(vec!["invalid-syntax"]))]
-    #[case::spaced_colon("djangofmt : file-ignore[invalid-syntax]", Directive::FileIgnore(vec!["invalid-syntax"]))]
-    #[case::reason("djangofmt: ignore[a]: free-text reason", Directive::Ignore(vec!["a"]))]
-    fn parse_directives(#[case] comment: &str, #[case] expected: Directive) {
-        assert_eq!(parse_directive(comment), Some(expected));
+    #[case::node(" djangofmt: ignore[a, b ,c] ", IGNORE_DIRECTIVE, &["a", "b", "c"])]
+    #[case::file("djangofmt:file-ignore[invalid-syntax]", FILE_IGNORE_DIRECTIVE, &["invalid-syntax"])]
+    #[case::spaced_colon("djangofmt : file-ignore[invalid-syntax]", FILE_IGNORE_DIRECTIVE, &["invalid-syntax"])]
+    #[case::reason("djangofmt: ignore[a]: free-text reason", IGNORE_DIRECTIVE, &["a"])]
+    fn parse_directive_codes(
+        #[case] comment: &str,
+        #[case] directive: &str,
+        #[case] expected: &[&str],
+    ) {
+        assert_eq!(
+            directive_codes(comment, directive).as_deref(),
+            Some(expected)
+        );
     }
 
     #[rstest]
     fn reject_non_directives(
         #[values(
-            " djangofmt:ignore ",     // formatter directive
-            "djangofmt: ignore[]",    // explicit rules only
-            "djangofmt: ignore[ , ]", // only separators
-            "ignore[a]"               // must start with djangofmt:
+            " djangofmt:ignore ",       // formatter directive
+            "djangofmt: ignore[]",      // explicit rules only
+            "djangofmt: ignore[ , ]",   // only separators
+            "ignore[a]",                // must start with djangofmt:
+            "djangofmt: file-ignore[a]" // the file-level sibling is not `ignore`
         )]
         comment: &str,
     ) {
-        assert_eq!(parse_directive(comment), None);
+        assert_eq!(directive_codes(comment, IGNORE_DIRECTIVE), None);
     }
 
     #[rstest]
