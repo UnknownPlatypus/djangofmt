@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Unknown rule code `invalid-attr-values` in suppression comment.
    ╭─[tests/check/unknown_ignore_code/unknown_ignore_code.invalid.html:2:22]
  1 │ <!-- Typo in a rule name -->
@@ -23,10 +24,20 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
   × Unknown rule code `nonexistent-rule` in suppression comment.
     ╭─[tests/check/unknown_ignore_code/unknown_ignore_code.invalid.html:10:27]
-  9 │ <!-- file-ignore codes are checked too -->
- 10 │ {# djangofmt: file-ignore[nonexistent-rule] #}
+  9 │ <!-- file-ignore codes are checked too, every one of them -->
+ 10 │ {# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
     ·                           ────────┬───────
     ·                                   ╰── here
+ 11 │ <div></div>
+    ╰────
+  help: Fix the typo or remove the code: valid codes are the documented rule names.
+
+  × Unknown rule code `also-not-a-rule` in suppression comment.
+    ╭─[tests/check/unknown_ignore_code/unknown_ignore_code.invalid.html:10:45]
+  9 │ <!-- file-ignore codes are checked too, every one of them -->
+ 10 │ {# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
+    ·                                             ───────┬───────
+    ·                                                    ╰── here
  11 │ <div></div>
     ╰────
   help: Fix the typo or remove the code: valid codes are the documented rule names.

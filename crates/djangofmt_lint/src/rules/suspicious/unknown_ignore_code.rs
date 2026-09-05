@@ -14,8 +14,8 @@ use crate::{Checker, span};
 /// An unknown code suppresses nothing, so the diagnostic the comment was meant to silence keeps
 /// firing. It is usually a typo, or a leftover from a rule that was renamed.
 ///
-/// Besides rule names, `file-ignore[...]` accepts the codes `format` (skip formatting the file) and
-/// `invalid-syntax` (skip a file that does not parse).
+/// Besides rule names, both directives accept `format` (skip the formatter), and `file-ignore[...]`
+/// also accepts `invalid-syntax` (skip a file that does not parse).
 ///
 /// ## Example
 /// ```html
@@ -51,7 +51,7 @@ impl Violation for UnknownIgnoreCode {
 /// Report every code naming neither a rule nor a reserved code.
 pub fn check(codes: &[&str], checker: &Checker<'_>) {
     for code in codes {
-        if FileIgnoreCode::from_str(code).is_ok() || code.parse::<Rule>().is_ok() {
+        if FileIgnoreCode::from_str(code).is_ok() || Rule::from_str(code).is_ok() {
             continue;
         }
         let offset = checker.source_offset(code);

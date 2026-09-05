@@ -25,7 +25,7 @@ pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
 const FILE_IGNORE_DIRECTIVE: &str = "djangofmt:file-ignore";
 
 /// A code accepted in `file-ignore[...]`; unknown codes are ignored.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, strum::EnumString)]
+#[derive(Debug, PartialEq, Eq, strum::EnumString)]
 #[strum(serialize_all = "kebab-case")]
 pub enum FileIgnoreCode {
     /// Suppress parse errors: both commands skip the file.

@@ -14,8 +14,6 @@ pub enum IgnoreCommentViolation {
     MisplacedFileIgnore,
     /// `invalid-syntax` listed in a node-level `ignore[...]`.
     InvalidSyntaxOnNode,
-    /// `format` listed in a node-level `ignore[...]`.
-    FormatOnNode,
 }
 
 /// ## What it does
@@ -26,8 +24,8 @@ pub enum IgnoreCommentViolation {
 /// silence keep firing while the author believes they are suppressed.
 ///
 /// This covers a syntax error in the directive (missing bracket, empty rule list), a
-/// `file-ignore[...]` that is not the file's first comment, and the file-wide codes `invalid-syntax`
-/// and `format` listed in a node-level `ignore[...]`.
+/// `file-ignore[...]` that is not the file's first comment, and `invalid-syntax` — a code only a
+/// whole file can opt out of — listed in a node-level `ignore[...]`.
 ///
 /// ## Example
 /// ```html
@@ -60,7 +58,6 @@ impl Violation for InvalidIgnoreComment {
             IgnoreCommentViolation::InvalidSyntaxOnNode => {
                 "`invalid-syntax` cannot be scoped to a node.".into()
             }
-            IgnoreCommentViolation::FormatOnNode => "`format` cannot be scoped to a node.".into(),
         }
     }
 
@@ -74,9 +71,6 @@ impl Violation for InvalidIgnoreComment {
             }
             IgnoreCommentViolation::InvalidSyntaxOnNode => {
                 "An unparsable file has no nodes to attach to: use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.".into()
-            }
-            IgnoreCommentViolation::FormatOnNode => {
-                "Node-level `ignore[format]` is not honored yet: use a bare `{# djangofmt:ignore #}` comment for now.".into()
             }
         })
     }
@@ -96,18 +90,13 @@ pub fn check(
             (IgnoreCommentViolation::MisplacedFileIgnore, comment_raw)
         }
         Some(Directive::Ignore(codes)) => {
-            let find = |target: FileIgnoreCode| {
-                codes
-                    .iter()
-                    .find(|code| FileIgnoreCode::from_str(code) == Ok(target))
-            };
-            if let Some(code) = find(FileIgnoreCode::InvalidSyntax) {
-                (IgnoreCommentViolation::InvalidSyntaxOnNode, *code)
-            } else if let Some(code) = find(FileIgnoreCode::Format) {
-                (IgnoreCommentViolation::FormatOnNode, *code)
-            } else {
+            let Some(code) = codes
+                .iter()
+                .find(|code| FileIgnoreCode::from_str(code) == Ok(FileIgnoreCode::InvalidSyntax))
+            else {
                 return;
-            }
+            };
+            (IgnoreCommentViolation::InvalidSyntaxOnNode, *code)
         }
         Some(Directive::FileIgnore(_)) => return,
     };

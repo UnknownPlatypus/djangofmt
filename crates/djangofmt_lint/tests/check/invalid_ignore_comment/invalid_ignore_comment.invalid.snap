@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Malformed `djangofmt:` directive comment.
    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:2:1]
  1 │ <!-- Malformed: empty rule list -->
@@ -61,12 +62,12 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: An unparsable file has no nodes to attach to: use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.
 
-  × `format` cannot be scoped to a node.
-    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:28:22]
- 27 │ <!-- `format` cannot be scoped to a node -->
- 28 │ {# djangofmt: ignore[format, invalid-attr-value] #}
-    ·                      ───┬──
-    ·                         ╰── here
+  × `invalid-syntax` cannot be scoped to a node.
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:28:42]
+ 27 │ <!-- Among several codes, the span points at the offending one -->
+ 28 │ {# djangofmt: ignore[invalid-attr-value, invalid-syntax] #}
+    ·                                          ───────┬──────
+    ·                                                 ╰── here
  29 │ <div></div>
     ╰────
-  help: Node-level `ignore[format]` is not honored yet: use a bare `{# djangofmt:ignore #}` comment for now.
+  help: An unparsable file has no nodes to attach to: use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file.
