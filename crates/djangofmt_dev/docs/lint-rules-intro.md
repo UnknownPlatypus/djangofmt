@@ -37,7 +37,7 @@ A `{# djangofmt: ignore[...] #}` comment silences the listed rules on the next n
 <form method="yes" id=""></form>
 ```
 
-A `{# djangofmt: file-ignore[...] #}` comment as the **first comment of the file** covers the whole file. It also accepts two codes that are not rules:
+A `{# djangofmt: file-ignore[...] #}` comment at the **very top of the file**, before any markup, covers the whole file. It also accepts two codes that are not rules:
 
 - `invalid-syntax` skips a file neither command can parse
 - `format` skips the formatter (see [Disabling formatting](formatting.md#disabling-formatting) for more details)

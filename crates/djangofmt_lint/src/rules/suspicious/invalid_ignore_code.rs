@@ -1,10 +1,12 @@
 use std::borrow::Cow;
 use std::str::FromStr;
 
+use crate::Checker;
+use crate::fix::edits::delete_codes_or_comment;
+use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::FileIgnoreCode;
+use crate::suppression::{DirectiveComment, FORMAT_CODE, INVALID_SYNTAX_CODE};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `ignore[...]` / `file-ignore[...]` suppression comments listing an invalid code.
@@ -24,37 +26,63 @@ use crate::{Checker, span};
 /// {# djangofmt: ignore[invalid-attr-value] #}
 /// <form method="yes">Submit</form>
 /// ```
+///
+/// ## Fix safety
+/// The fix is marked as safe: a code naming no rule suppresses nothing, so dropping it cannot
+/// change which diagnostics are reported. A comment left with no code at all goes with it.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct InvalidIgnoreCode {
-    pub code: String,
+    /// The invalid codes, comma-separated.
+    pub codes: String,
+    /// Whether every listed code is invalid, so the fix removes the whole comment.
+    pub whole_comment: bool,
 }
 
 impl Violation for InvalidIgnoreCode {
     const RULE: Rule = Rule::InvalidIgnoreCode;
     const CATEGORY: RuleCategory = RuleCategory::Suspicious;
+    const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Invalid rule code in suppression: `{}`", self.code).into()
+        format!("Invalid rule code in suppression: {}", self.codes).into()
     }
 
-    fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Remove unused suppression".into())
+    fn fix_title(&self) -> Option<&'static str> {
+        Some(if self.whole_comment {
+            "Remove suppression comment"
+        } else {
+            "Remove invalid rule code"
+        })
     }
 }
 
-/// Report every code naming neither a rule nor a reserved code.
-pub fn check(codes: &[&str], checker: &Checker<'_>) {
-    for code in codes {
-        if Rule::from_str(code).is_ok() || FileIgnoreCode::from_str(code).is_ok() {
-            continue;
-        }
-        checker.report_diagnostic(
-            &InvalidIgnoreCode {
-                code: (*code).to_string(),
-            },
-            span(checker.source_offset(code), code.len()),
-        );
+/// Whether `code` names a rule or one of the reserved codes.
+fn is_known(code: &str) -> bool {
+    Rule::from_str(code).is_ok() || matches!(code, FORMAT_CODE | INVALID_SYNTAX_CODE)
+}
+
+/// Report the codes naming neither a rule nor a reserved code, once per comment.
+pub fn check(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
+    let codes = comment.directive.codes();
+    let invalid: Vec<&str> = codes
+        .iter()
+        .copied()
+        .filter(|code| !is_known(code))
+        .collect();
+    if invalid.is_empty() {
+        return;
     }
+    let (span, edit) = delete_codes_or_comment(checker.context(), comment.raw, codes, &invalid);
+    let violation = InvalidIgnoreCode {
+        codes: invalid
+            .iter()
+            .map(|code| format!("`{code}`"))
+            .collect::<Vec<_>>()
+            .join(", "),
+        whole_comment: invalid.len() == codes.len(),
+    };
+    let mut guard = checker.report_diagnostic(&violation, span);
+    guard.set_fix(Fix::safe_edit(edit));
 }

@@ -12,6 +12,7 @@ use crate::Settings;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
+use crate::suppression::DirectiveComment;
 use crate::violation::Violation;
 
 /// AST visitor that collects lint diagnostics.
@@ -130,6 +131,18 @@ impl<'a> Checker<'a> {
         // Cross-node finalize: now that every `{% block %}` has been recorded, flag duplicates.
         if self.is_rule_enabled(Rule::DuplicateBlockName) {
             rules::correctness::duplicate_block_name::check(self);
+        }
+    }
+
+    /// Visit the suppression comments, once the suppression they ask for has been applied.
+    pub fn visit_directives(&self, directives: &[DirectiveComment<'_>]) {
+        for comment in directives {
+            if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
+                rules::suspicious::invalid_ignore_comment::check(comment, self);
+            }
+            if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
+                rules::suspicious::invalid_ignore_code::check(comment, self);
+            }
         }
     }
 

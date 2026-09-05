@@ -1,3 +1,6 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
 <!-- Malformed: empty rule list -->
 {# djangofmt: ignore[] #}
 <form method="yes"></form>
@@ -33,9 +36,8 @@
 </div>
 
 <!-- `invalid-syntax` cannot be scoped to a node -->
-{# djangofmt: ignore[invalid-syntax] #}
 <div></div>
 
 <!-- Among several codes, the span points at the offending one -->
-{# djangofmt: ignore[invalid-attr-value, invalid-syntax] #}
+{# djangofmt: ignore[invalid-attr-value] #}
 <div></div>

@@ -1,3 +1,5 @@
+use miette::SourceSpan;
+
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
 use crate::span;
@@ -12,16 +14,74 @@ use crate::span;
 pub fn delete_attr_fix(ctx: &LintContext<'_>, name: &str, value_str: &str, quoted: bool) -> Fix {
     let name_start = ctx.source_offset(name);
     let attr_end = ctx.source_end(value_str) + usize::from(quoted);
-    let fix_start = reverse_consume_ws(ctx.source().as_bytes(), name_start);
+    let fix_start = ctx.source()[..name_start].trim_ascii_end().len();
     Fix::safe_edit(Edit::deletion(span(fix_start, attr_end - fix_start)))
 }
 
-/// Walk backwards from `offset` over ASCII whitespace bytes in `source`,
-/// returning the offset of the first non-whitespace byte.
-#[inline]
-fn reverse_consume_ws(source: &[u8], offset: usize) -> usize {
-    source[..offset]
-        .iter()
-        .rposition(|b| !b.is_ascii_whitespace())
-        .map_or(0, |i| i + 1)
+/// An edit deleting a whole comment, taking the line with it when the comment has it to
+/// itself, so no blank line is left behind.
+pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
+    let source = ctx.source();
+    let start = ctx.source_offset(comment);
+    let end = start + comment.len();
+    let line_start = source[..start].rfind('\n').map_or(0, |i| i + 1);
+    let line_end = source[end..]
+        .find('\n')
+        .map_or(source.len(), |i| end + i + 1);
+    let (before, after) = (&source[line_start..start], &source[end..line_end]);
+    let (start, end) = if before.trim_ascii().is_empty() && after.trim_ascii().is_empty() {
+        (line_start, line_end)
+    } else {
+        // Whitespace is absorbed within the line only, so the fix never joins two lines.
+        (line_start + before.trim_ascii_end().len(), end)
+    };
+    Edit::deletion(span(start, end - start))
+}
+
+/// The span to report and the edit dropping `remove` from a directive's `codes`.
+///
+/// A single code is spanned and taken out with its separator; the comment goes once no code
+/// would be left; several codes among others rewrite the list in place and span the comment.
+///
+/// # Panics
+///
+/// Panics if a code in `remove` is not listed in `codes`.
+pub fn delete_codes_or_comment(
+    ctx: &LintContext<'_>,
+    comment: &str,
+    codes: &[&str],
+    remove: &[&str],
+) -> (SourceSpan, Edit) {
+    let start_of = |slice: &str| ctx.source_offset(slice);
+    let end_of = |slice: &str| ctx.source_offset(slice) + slice.len();
+    let span_of = |slice: &str| span(start_of(slice), slice.len());
+    if let [only] = codes {
+        return (span_of(only), delete_comment(ctx, comment));
+    }
+    if let [code] = remove {
+        // Offsets come from the listed slice: `remove` may hold an equal string from elsewhere.
+        let index = codes
+            .iter()
+            .position(|listed| listed == code)
+            .expect("a code to remove is listed");
+        let code = codes[index];
+        let (start, end) = codes.get(index + 1).map_or_else(
+            || (end_of(codes[index - 1]), end_of(code)),
+            |next| (start_of(code), start_of(next)),
+        );
+        return (span_of(code), Edit::deletion(span(start, end - start)));
+    }
+    let mut remaining: Vec<&str> = Vec::new();
+    for code in codes {
+        if !remove.contains(code) && !remaining.contains(code) {
+            remaining.push(code);
+        }
+    }
+    let edit = if remaining.is_empty() {
+        delete_comment(ctx, comment)
+    } else {
+        let (start, end) = (start_of(codes[0]), end_of(codes[codes.len() - 1]));
+        Edit::replacement(remaining.join(", "), span(start, end - start))
+    };
+    (span_of(comment), edit)
 }

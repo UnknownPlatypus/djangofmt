@@ -149,6 +149,11 @@ impl<'a> LintContext<'a> {
         }
     }
 
+    /// Drop every diagnostic `keep` rejects: suppression applies once all rules have run.
+    pub fn retain_diagnostics(&self, keep: impl FnMut(&LintDiagnostic) -> bool) {
+        self.diagnostics.borrow_mut().retain(keep);
+    }
+
     /// Consume the context and return the collected diagnostics.
     #[must_use]
     pub fn into_diagnostics(self) -> Vec<LintDiagnostic> {

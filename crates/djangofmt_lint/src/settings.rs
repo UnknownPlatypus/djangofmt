@@ -133,6 +133,7 @@ mod tests {
     use crate::registry::{Rule, RuleCategory};
     use crate::rule_selector::{RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
+    use crate::suppression::{FORMAT_CODE, INVALID_SYNTAX_CODE};
 
     #[test]
     fn any_rule_enabled_reflects_membership() {
@@ -235,7 +236,7 @@ mod tests {
     #[test]
     fn no_rule_name_collides_with_a_reserved_word() {
         // `format`/`invalid-syntax` are `file-ignore[...]` codes; `lint` is kept free for group suppression.
-        let reserved = ["all", "lint", "format", "invalid-syntax"];
+        let reserved = ["all", "lint", FORMAT_CODE, INVALID_SYNTAX_CODE];
         for word in reserved
             .into_iter()
             .chain(RuleCategory::VARIANTS.iter().copied())

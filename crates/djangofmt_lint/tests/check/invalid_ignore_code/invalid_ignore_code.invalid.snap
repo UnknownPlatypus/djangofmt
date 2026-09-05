@@ -10,7 +10,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                               ╰── here
  3 │ <form method="yes"></form>
    ╰────
-  help: Remove unused suppression
 
   × Invalid rule code in suppression: `not-a-rule`
    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:6:42]
@@ -20,24 +19,38 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                                               ╰── here
  7 │ <div></div>
    ╰────
-  help: Remove unused suppression
 
-  × Invalid rule code in suppression: `nonexistent-rule`
-    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:10:27]
-  9 │ <!-- file-ignore codes are checked too, every one of them -->
+  × Invalid rule code in suppression: `nonexistent-rule`, `also-not-a-rule`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:10:1]
+  9 │ <!-- All codes unknown: one diagnostic for the comment, which goes as a whole -->
  10 │ {# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
-    ·                           ────────┬───────
-    ·                                   ╰── here
+    · ───────────────────────────────┬───────────────────────────────
+    ·                                ╰── here
  11 │ <div></div>
     ╰────
-  help: Remove unused suppression
 
-  × Invalid rule code in suppression: `also-not-a-rule`
-    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:10:45]
-  9 │ <!-- file-ignore codes are checked too, every one of them -->
- 10 │ {# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
-    ·                                             ───────┬───────
-    ·                                                    ╰── here
- 11 │ <div></div>
+  × Invalid rule code in suppression: `not-a-rule-either`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:14:22]
+ 13 │ <!-- Unknown code first: the separator that follows it goes too -->
+ 14 │ {# djangofmt: ignore[not-a-rule-either, invalid-attr-value] #}
+    ·                      ────────┬────────
+    ·                              ╰── here
+ 15 │ <form method="yes"></form>
     ╰────
-  help: Remove unused suppression
+
+  × Invalid rule code in suppression: `not-a-rule`, `nor-this`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:18:1]
+ 17 │ <!-- Several unknown codes among valid ones: the list is rewritten -->
+ 18 │ {# djangofmt: ignore[not-a-rule, invalid-attr-value, nor-this, empty-attr-value] #}
+    · ─────────────────────────────────────────┬─────────────────────────────────────────
+    ·                                          ╰── here
+ 19 │ <form method="yes"></form>
+    ╰────
+
+  × Invalid rule code in suppression: `gone-rule`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:22:27]
+ 21 │ <!-- A comment sharing its line keeps the line -->
+ 22 │ <div>{# djangofmt: ignore[gone-rule] #}<p>hi</p></div>
+    ·                           ────┬────
+    ·                               ╰── here
+    ╰────

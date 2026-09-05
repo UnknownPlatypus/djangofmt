@@ -1,22 +1,23 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
 <!-- Typo in a rule name -->
-{# djangofmt: ignore[invalid-attr-values] #}
 <form method="yes"></form>
 
 <!-- Unknown code hiding among valid ones -->
-{# djangofmt: ignore[invalid-attr-value, not-a-rule] #}
+{# djangofmt: ignore[invalid-attr-value] #}
 <div></div>
 
 <!-- All codes unknown: one diagnostic for the comment, which goes as a whole -->
-{# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
 <div></div>
 
 <!-- Unknown code first: the separator that follows it goes too -->
-{# djangofmt: ignore[not-a-rule-either, invalid-attr-value] #}
+{# djangofmt: ignore[invalid-attr-value] #}
 <form method="yes"></form>
 
 <!-- Several unknown codes among valid ones: the list is rewritten -->
-{# djangofmt: ignore[not-a-rule, invalid-attr-value, nor-this, empty-attr-value] #}
+{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
 <form method="yes"></form>
 
 <!-- A comment sharing its line keeps the line -->
-<div>{# djangofmt: ignore[gone-rule] #}<p>hi</p></div>
+<div><p>hi</p></div>
