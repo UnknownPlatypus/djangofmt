@@ -45,3 +45,7 @@ A `{# djangofmt: file-ignore[...] #}` comment as the **first comment of the file
 ```jinja
 {# djangofmt: file-ignore[invalid-syntax] #}
 ```
+
+A directive djangofmt cannot honor is reported rather than skipped silently:
+- [`invalid-ignore-comment`](rules/invalid-ignore-comment.md) for a malformed or misplaced one
+- [`invalid-ignore-code`](rules/invalid-ignore-code.md) for a code naming no rule.

@@ -264,4 +264,6 @@ define_rules! {
     (TableHeaderMissingScope, rules::accessibility::table_header_missing_scope::TableHeaderMissingScope),
     (SameFilePartialInclude, rules::style::same_file_partial_include::SameFilePartialInclude),
     (UnsortedTailwindClasses, rules::style::unsorted_tailwind_classes::UnsortedTailwindClasses),
+    (InvalidIgnoreComment, rules::suspicious::invalid_ignore_comment::InvalidIgnoreComment),
+    (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
 }

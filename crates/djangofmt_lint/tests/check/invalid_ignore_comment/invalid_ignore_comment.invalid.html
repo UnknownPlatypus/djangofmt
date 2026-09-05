@@ -1,0 +1,29 @@
+<!-- Malformed: empty rule list -->
+{# djangofmt: ignore[] #}
+<form method="yes"></form>
+
+<!-- Malformed: missing closing bracket -->
+{# djangofmt: ignore[invalid-attr-value #}
+<div></div>
+
+<!-- Malformed: unknown keyword -->
+{# djangofmt: silence[invalid-attr-value] #}
+<div></div>
+
+<!-- Misplaced: `file-ignore` is only honored as the file's first comment -->
+{# djangofmt: file-ignore[invalid-attr-value] #}
+<div></div>
+
+<!-- Misplaced: nested `file-ignore` -->
+<div>
+  {# djangofmt: file-ignore[empty-attr-value] #}
+  <p>hi</p>
+</div>
+
+<!-- `invalid-syntax` cannot be scoped to a node -->
+{# djangofmt: ignore[invalid-syntax] #}
+<div></div>
+
+<!-- Among several codes, the span points at the offending one -->
+{# djangofmt: ignore[invalid-attr-value, invalid-syntax] #}
+<div></div>
