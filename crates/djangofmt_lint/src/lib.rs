@@ -179,7 +179,8 @@ pub fn check_ast<'a>(
 ) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings, path);
     checker.visit_root(ast);
-    checker.into_diagnostics()
+    let suppressions = suppression::collect(ast, &checker);
+    suppression::filter(&suppressions, checker.into_diagnostics())
 }
 
 /// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block.
