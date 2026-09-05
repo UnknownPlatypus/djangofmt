@@ -33,8 +33,7 @@ enum FileIgnoreCode {
     Format,
 }
 
-/// The codes of a `directive[...]` comment body. `None` for prose, for the other directive,
-/// and for a bare directive: that one carries no codes and is the formatter's.
+/// The codes of a `ignore[...]` / `file-ignore[...]` comment body.
 fn directive_codes<'s>(raw: &'s str, directive: &str) -> Option<Vec<&'s str>> {
     let codes: Vec<&str> = markup_fmt::match_directive(raw, directive)?
         .codes()
@@ -48,9 +47,7 @@ pub struct Suppression<'s> {
     codes: Vec<&'s str>,
 }
 
-/// Collect what each node-level `ignore[...]` comment suppresses. The parser's comment index
-/// names the directives, and each is then located by descending only through its ancestors,
-/// so a file without directives costs one matcher call per comment and never walks the tree.
+/// Collect what each node-level `ignore[...]` comment suppresses.
 #[must_use]
 pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'_>) -> Vec<Suppression<'s>> {
     root.jinja_comments
@@ -64,8 +61,7 @@ pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'_>) -> Vec<Suppression<'s
         .collect()
 }
 
-/// The siblings following the `{# #}` comment at `offset`, reached by descending through the
-/// one child that contains it at each level. An attribute-position comment is no node: `None`.
+/// The siblings following the `{# djangofmt:ignore[rule] #}` comment at `offset`.
 fn siblings_after<'n, 's>(
     mut nodes: &'n [Node<'s>],
     offset: usize,
