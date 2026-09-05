@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Avoid `http://` URLs in `href`.
    ╭─[tests/check/use_https/use_https.invalid.html:2:10]
  1 │ <!-- a/href -->

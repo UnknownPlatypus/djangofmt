@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Extra whitespace found in form `action`.
    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:2:15]
  1 │ <!-- Leading whitespace -->

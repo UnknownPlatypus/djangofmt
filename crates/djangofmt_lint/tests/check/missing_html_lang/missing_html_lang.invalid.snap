@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × `<html>` tag should declare a `lang` attribute.
    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:3:2]
  2 │ <!-- No attributes at all -->

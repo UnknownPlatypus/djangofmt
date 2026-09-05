@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Empty `id` attribute can be removed.
    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:2:10]
  1 │ <!-- Empty id -->

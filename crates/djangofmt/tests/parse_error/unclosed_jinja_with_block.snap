@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt/tests/parse_error/main.rs
 ---
+
   × unclosed {% with %} block.
    ╭─[unclosed_jinja_with_block.html:1:4]
  1 │ {% with foo="bar" %}

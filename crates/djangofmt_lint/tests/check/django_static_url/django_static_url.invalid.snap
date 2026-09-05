@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Hardcoded static path in `href`.
    ╭─[tests/check/django_static_url/django_static_url.invalid.html:2:30]
  1 │ <!-- link/href -->

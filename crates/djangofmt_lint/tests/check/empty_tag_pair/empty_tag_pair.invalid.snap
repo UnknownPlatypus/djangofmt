@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Empty `<div>` tag pair.
    ╭─[tests/check/empty_tag_pair/empty_tag_pair.invalid.html:2:2]
  1 │ <!-- Plain empty pair -->

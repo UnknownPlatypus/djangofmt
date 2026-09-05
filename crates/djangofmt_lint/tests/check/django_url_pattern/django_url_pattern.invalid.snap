@@ -1,6 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
+
   × Hardcoded internal URL in `href`.
    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:2:10]
  1 │ <!-- a/href: hardcoded absolute path -->
