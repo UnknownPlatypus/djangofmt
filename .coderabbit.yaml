@@ -9,6 +9,9 @@ reviews:
   sequence_diagrams: false
   poem: false
   review_status: false
+  # Snapshots are ignored by default, which makes the reviewer flag fixtures as missing their `.snap`.
+  path_filters:
+    - "**/*.snap"
   tools:
     htmlhint:
       enabled: false
