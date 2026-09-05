@@ -11,6 +11,9 @@ on:
         required: true
         type: string
 
+# The dispatch is authenticated with a PAT, `GITHUB_TOKEN` is never used.
+permissions: {}
+
 # Release artifacts must not be built from caches that other workflows can write.
 env:
   ACTIONS_CACHE_MODE: none
