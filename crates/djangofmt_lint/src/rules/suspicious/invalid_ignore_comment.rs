@@ -94,8 +94,14 @@ impl Violation for InvalidIgnoreComment {
     }
 }
 
-/// Lint one directive comment.
-pub fn check(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
+/// Lint every directive comment of the file.
+pub fn check(directives: &[DirectiveComment<'_>], checker: &Checker<'_>) {
+    for comment in directives {
+        check_comment(comment, checker);
+    }
+}
+
+fn check_comment(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
     let ctx = checker.context();
     let remove_comment = |kind| {
         let span = span(ctx.source_offset(comment.raw), comment.raw.len());

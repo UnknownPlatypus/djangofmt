@@ -13,6 +13,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- Malformed: a code must start with a letter -->
 <div></div>
 
+<!-- Malformed, at attribute position: no node to guard, still a comment to report -->
+<form method="yes"></form>
+
 <!-- Malformed: unknown keyword -->
 <div></div>
 

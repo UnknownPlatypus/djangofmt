@@ -136,13 +136,11 @@ impl<'a> Checker<'a> {
 
     /// Visit the suppression comments, once the suppression they ask for has been applied.
     pub fn visit_directives(&self, directives: &[DirectiveComment<'_>]) {
-        for comment in directives {
-            if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
-                rules::suspicious::invalid_ignore_comment::check(comment, self);
-            }
-            if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
-                rules::suspicious::invalid_ignore_code::check(comment, self);
-            }
+        if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
+            rules::suspicious::invalid_ignore_comment::check(directives, self);
+        }
+        if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
+            rules::suspicious::invalid_ignore_code::check(directives, self);
         }
     }
 

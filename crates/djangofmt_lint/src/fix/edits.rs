@@ -71,12 +71,11 @@ pub fn delete_codes_or_comment(
         );
         return (span_of(code), Edit::deletion(span(start, end - start)));
     }
-    let mut remaining: Vec<&str> = Vec::new();
-    for code in codes {
-        if !remove.contains(code) && !remaining.contains(code) {
-            remaining.push(code);
-        }
-    }
+    let remaining: Vec<&str> = codes
+        .iter()
+        .copied()
+        .filter(|code| !remove.contains(code))
+        .collect();
     let edit = if remaining.is_empty() {
         delete_comment(ctx, comment)
     } else {

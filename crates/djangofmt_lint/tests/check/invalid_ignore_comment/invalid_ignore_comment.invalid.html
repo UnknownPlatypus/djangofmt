@@ -14,6 +14,9 @@
 {# djangofmt: ignore[invalid-attr-value, , 404] #}
 <div></div>
 
+<!-- Malformed, at attribute position: no node to guard, still a comment to report -->
+<form {# djangofmt: ignore[] #} method="yes"></form>
+
 <!-- Malformed: unknown keyword -->
 {# djangofmt: silence[invalid-attr-value] #}
 <div></div>

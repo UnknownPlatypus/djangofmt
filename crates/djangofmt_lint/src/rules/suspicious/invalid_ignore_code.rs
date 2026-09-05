@@ -64,7 +64,13 @@ fn is_known(code: &str) -> bool {
 }
 
 /// Report the codes naming neither a rule nor a reserved code, once per comment.
-pub fn check(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
+pub fn check(directives: &[DirectiveComment<'_>], checker: &Checker<'_>) {
+    for comment in directives {
+        check_comment(comment, checker);
+    }
+}
+
+fn check_comment(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
     let codes = comment.directive.codes();
     let invalid: Vec<&str> = codes
         .iter()
