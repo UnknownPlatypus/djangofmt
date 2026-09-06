@@ -1,0 +1,142 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+   ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:2:1]
+ 1 │ <!-- Malformed: empty rule list -->
+ 2 │ {# djangofmt: ignore[] #}
+   · ────────────┬────────────
+   ·             ╰── here
+ 3 │ <form method="yes"></form>
+   ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: missing closing bracket
+   ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:6:1]
+ 5 │ <!-- Malformed: missing closing bracket -->
+ 6 │ {# djangofmt: ignore[invalid-attr-value #}
+   · ─────────────────────┬────────────────────
+   ·                      ╰── here
+ 7 │ <div></div>
+   ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: missing comma between codes
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:10:1]
+  9 │ <!-- Malformed: missing comma between codes -->
+ 10 │ {# djangofmt: ignore[invalid-attr-value empty-attr-value] #}
+    · ──────────────────────────────┬─────────────────────────────
+    ·                               ╰── here
+ 11 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: invalid code
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:14:1]
+ 13 │ <!-- Malformed: a code must start with a letter -->
+ 14 │ {# djangofmt: ignore[invalid-attr-value, , 404] #}
+    · ─────────────────────────┬────────────────────────
+    ·                          ╰── here
+ 15 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:18:7]
+ 17 │ <!-- Malformed, at attribute position: no node to guard, still a comment to report -->
+ 18 │ <form {# djangofmt: ignore[] #} method="yes"></form>
+    ·       ────────────┬────────────
+    ·                   ╰── here
+ 19 │ 
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: unknown directive
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:21:1]
+ 20 │ <!-- Malformed: unknown keyword -->
+ 21 │ {# djangofmt: silence[invalid-attr-value] #}
+    · ──────────────────────┬─────────────────────
+    ·                       ╰── here
+ 22 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:25:1]
+ 24 │ <!-- Malformed: `file-ignore` without codes -->
+ 25 │ {# djangofmt: file-ignore #}
+    · ──────────────┬─────────────
+    ·               ╰── here
+ 26 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: file-level suppressions must be at the top of the file
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:29:1]
+ 28 │ <!-- Misplaced: `file-ignore` is only honored at the top of the file -->
+ 29 │ {# djangofmt: file-ignore[invalid-attr-value] #}
+    · ────────────────────────┬───────────────────────
+    ·                         ╰── here
+ 30 │ <div></div>
+    ╰────
+  help: Move the comment to the top of the file, or use `ignore[...]`
+
+  × Invalid suppression comment: file-level suppressions must be at the top of the file
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:34:3]
+ 33 │ <div>
+ 34 │   {# djangofmt: file-ignore[empty-attr-value] #}
+    ·   ───────────────────────┬──────────────────────
+    ·                          ╰── here
+ 35 │   <p>hi</p>
+    ╰────
+  help: Move the comment to the top of the file, or use `ignore[...]`
+
+  × Invalid suppression comment: `invalid-syntax` cannot be scoped to a node
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:39:22]
+ 38 │ <!-- `invalid-syntax` cannot be scoped to a node -->
+ 39 │ {# djangofmt: ignore[invalid-syntax] #}
+    ·                      ───────┬──────
+    ·                             ╰── here
+ 40 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead
+
+  × Invalid suppression comment: `invalid-syntax` cannot be scoped to a node
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:43:42]
+ 42 │ <!-- Among several codes, the span points at the offending one -->
+ 43 │ {# djangofmt: ignore[invalid-attr-value, invalid-syntax] #}
+    ·                                          ───────┬──────
+    ·                                                 ╰── here
+ 44 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead
+
+  × Invalid suppression comment: `invalid-syntax` cannot be scoped to a node
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:47:1]
+ 46 │ <!-- Repeated, every occurrence goes -->
+ 47 │ {# djangofmt: ignore[invalid-syntax, invalid-attr-value, invalid-syntax] #}
+    · ─────────────────────────────────────┬─────────────────────────────────────
+    ·                                      ╰── here
+ 48 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:51:1]
+ 50 │ <!-- Malformed, with whitespace control: the trimming markers go with the comment -->
+ 51 │ {#- djangofmt: ignore[] -#}
+    · ─────────────┬─────────────
+    ·              ╰── here
+ 52 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:55:1]
+ 54 │ <!-- Malformed and unterminated at the end of the file -->
+ 55 │ {# djangofmt: ignore[]
+    · ───────────┬───────────
+    ·            ╰── here
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`

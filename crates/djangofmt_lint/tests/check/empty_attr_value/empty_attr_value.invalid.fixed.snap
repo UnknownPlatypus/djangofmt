@@ -31,8 +31,14 @@ source: crates/djangofmt_lint/tests/check/main.rs
     role="banner"
 ></div>
 
+<!-- Solo attribute: the space before `>` goes with it -->
+<div></div>
+
 <!-- Self-closing void element -->
 <input name="email" />
+
+<!-- Solo attribute on a self-closing element: the space before `/>` stays -->
+<input />
 
 <!-- Nested in Jinja block -->
 {% if show %}

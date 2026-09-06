@@ -1,0 +1,55 @@
+<!-- Malformed: empty rule list -->
+{# djangofmt: ignore[] #}
+<form method="yes"></form>
+
+<!-- Malformed: missing closing bracket -->
+{# djangofmt: ignore[invalid-attr-value #}
+<div></div>
+
+<!-- Malformed: missing comma between codes -->
+{# djangofmt: ignore[invalid-attr-value empty-attr-value] #}
+<div></div>
+
+<!-- Malformed: a code must start with a letter -->
+{# djangofmt: ignore[invalid-attr-value, , 404] #}
+<div></div>
+
+<!-- Malformed, at attribute position: no node to guard, still a comment to report -->
+<form {# djangofmt: ignore[] #} method="yes"></form>
+
+<!-- Malformed: unknown keyword -->
+{# djangofmt: silence[invalid-attr-value] #}
+<div></div>
+
+<!-- Malformed: `file-ignore` without codes -->
+{# djangofmt: file-ignore #}
+<div></div>
+
+<!-- Misplaced: `file-ignore` is only honored at the top of the file -->
+{# djangofmt: file-ignore[invalid-attr-value] #}
+<div></div>
+
+<!-- Misplaced: nested `file-ignore` -->
+<div>
+  {# djangofmt: file-ignore[empty-attr-value] #}
+  <p>hi</p>
+</div>
+
+<!-- `invalid-syntax` cannot be scoped to a node -->
+{# djangofmt: ignore[invalid-syntax] #}
+<div></div>
+
+<!-- Among several codes, the span points at the offending one -->
+{# djangofmt: ignore[invalid-attr-value, invalid-syntax] #}
+<div></div>
+
+<!-- Repeated, every occurrence goes -->
+{# djangofmt: ignore[invalid-syntax, invalid-attr-value, invalid-syntax] #}
+<div></div>
+
+<!-- Malformed, with whitespace control: the trimming markers go with the comment -->
+{#- djangofmt: ignore[] -#}
+<div></div>
+
+<!-- Malformed and unterminated at the end of the file -->
+{# djangofmt: ignore[]

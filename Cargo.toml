@@ -32,7 +32,7 @@ malva = {
 }
 markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
-  rev = "3d4a8bec4cbdf2875a8f64b4c8ab648e3bcbb4e6"
+  rev = "857ceb19c5b31ab44568ed533f3da9076c1d69d1"
 }
 miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
 proc-macro2 = { version = "1.0" }
@@ -49,6 +49,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde-wasm-bindgen = { version = "0.6.5" }
 similar-asserts = { version = "2.0.0" }
 smallvec = { version = "1.15.1", features = ["const_new"] }
+strsim = { version = "0.11.1" }
 strum = { version = "0.28.0", features = ["derive"] }
 syn = { version = "3.0" }
 tempfile = { version = "3.27.0" }

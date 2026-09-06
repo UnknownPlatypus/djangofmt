@@ -1,0 +1,47 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Malformed: empty rule list -->
+<form method="yes"></form>
+
+<!-- Malformed: missing closing bracket -->
+<div></div>
+
+<!-- Malformed: missing comma between codes -->
+<div></div>
+
+<!-- Malformed: a code must start with a letter -->
+<div></div>
+
+<!-- Malformed, at attribute position: no node to guard, still a comment to report -->
+<form  method="yes"></form>
+
+<!-- Malformed: unknown keyword -->
+<div></div>
+
+<!-- Malformed: `file-ignore` without codes -->
+<div></div>
+
+<!-- Misplaced: `file-ignore` is only honored at the top of the file -->
+<div></div>
+
+<!-- Misplaced: nested `file-ignore` -->
+<div>
+  <p>hi</p>
+</div>
+
+<!-- `invalid-syntax` cannot be scoped to a node -->
+<div></div>
+
+<!-- Among several codes, the span points at the offending one -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<div></div>
+
+<!-- Repeated, every occurrence goes -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<div></div>
+
+<!-- Malformed, with whitespace control: the trimming markers go with the comment -->
+<div></div>
+
+<!-- Malformed and unterminated at the end of the file -->

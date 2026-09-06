@@ -1,0 +1,32 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Typo in a rule name -->
+<form method="yes"></form>
+
+<!-- Unknown code hiding among valid ones -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<div></div>
+
+<!-- All codes unknown: one diagnostic for the comment, which goes as a whole -->
+<div></div>
+
+<!-- Unknown code first: the separator that follows it goes too -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
+<!-- Several unknown codes among valid ones: the list is rewritten -->
+{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
+<form method="yes"></form>
+
+<!-- A comment sharing its line keeps the line -->
+<div><p>hi</p></div>
+
+<!-- Selector words are no ignore codes: neither `all` nor a rule category names a rule -->
+<div></div>
+
+<!-- The same code listed twice is one mistake -->
+<div></div>
+
+<!-- Deleting the comment takes its free-text reason along, so that fix is unsafe -->
+<div></div>

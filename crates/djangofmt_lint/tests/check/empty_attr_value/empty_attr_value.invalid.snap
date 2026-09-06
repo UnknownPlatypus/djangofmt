@@ -93,19 +93,37 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
 
   × Empty `id` attribute
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:34:12]
- 33 │ <!-- Self-closing void element -->
- 34 │ <input id="" name="email" />
-    ·            ▲
-    ·            ╰── here
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:34:10]
+ 33 │ <!-- Solo attribute: the space before `>` goes with it -->
+ 34 │ <div id="" ></div>
+    ·          ▲
+    ·          ╰── here
  35 │ 
     ╰────
 
   × Empty `id` attribute
-    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:38:15]
- 37 │ {% if show %}
- 38 │     <span id=""></span>
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:37:12]
+ 36 │ <!-- Self-closing void element -->
+ 37 │ <input id="" name="email" />
+    ·            ▲
+    ·            ╰── here
+ 38 │ 
+    ╰────
+
+  × Empty `class` attribute
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:40:15]
+ 39 │ <!-- Solo attribute on a self-closing element: the space before `/>` stays -->
+ 40 │ <input class="" />
     ·               ▲
     ·               ╰── here
- 39 │ {% endif %}
+ 41 │ 
+    ╰────
+
+  × Empty `id` attribute
+    ╭─[tests/check/empty_attr_value/empty_attr_value.invalid.html:44:15]
+ 43 │ {% if show %}
+ 44 │     <span id=""></span>
+    ·               ▲
+    ·               ╰── here
+ 45 │ {% endif %}
     ╰────

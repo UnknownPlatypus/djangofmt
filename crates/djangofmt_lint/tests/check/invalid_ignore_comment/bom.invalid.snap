@@ -1,0 +1,12 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+   ╭─[tests/check/invalid_ignore_comment/bom.invalid.html:1:4]
+ 1 │ ﻿{# djangofmt: ignore[] #}
+   · ────────────┬────────────
+   ·             ╰── here
+ 2 │ <div></div>
+   ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`

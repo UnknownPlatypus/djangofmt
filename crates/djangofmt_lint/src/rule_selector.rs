@@ -18,6 +18,9 @@ use crate::registry::{Rule, RuleCategory};
 /// Prefix that marks a group (a category, or `all`) selector.
 const CATEGORY_PREFIX: &str = "category:";
 
+/// The group name that selects every rule (`category:all`).
+pub(crate) const ALL_GROUP: &str = "all";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RuleSelector {
     /// Select all rules (includes rules in preview if enabled)
@@ -76,7 +79,7 @@ impl RuleSelector {
 impl fmt::Display for RuleSelector {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::All => write!(f, "{CATEGORY_PREFIX}all"),
+            Self::All => write!(f, "{CATEGORY_PREFIX}{ALL_GROUP}"),
             Self::Category(category) => write!(f, "{CATEGORY_PREFIX}{category}"),
             Self::Rule(rule) => write!(f, "{rule}"),
         }
@@ -89,7 +92,7 @@ impl FromStr for RuleSelector {
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         if let Some(group) = value.strip_prefix(CATEGORY_PREFIX) {
             return match group {
-                "all" => Ok(Self::All),
+                ALL_GROUP => Ok(Self::All),
                 _ => RuleCategory::from_str(group)
                     .map(Self::Category)
                     .map_err(|_| SelectorParseError::unknown_category(group)),
@@ -97,7 +100,7 @@ impl FromStr for RuleSelector {
         }
         // A bare token is a rule name.
         Rule::from_str(value).map(Self::Rule).map_err(|_| {
-            if value == "all" || RuleCategory::from_str(value).is_ok() {
+            if value == ALL_GROUP || RuleCategory::from_str(value).is_ok() {
                 // The common mistake is forgetting the `category:` prefix,
                 // so detect a bare category name and suggest the fix.
                 SelectorParseError::missing_category_prefix(value)
@@ -162,7 +165,7 @@ impl std::error::Error for SelectorParseError {}
 /// Comma-joined list of valid group names (`all` plus the categories), for error messages.
 #[must_use]
 pub fn category_list() -> String {
-    std::iter::once("all")
+    std::iter::once(ALL_GROUP)
         .chain(RuleCategory::VARIANTS.iter().copied())
         .collect::<Vec<_>>()
         .join(", ")

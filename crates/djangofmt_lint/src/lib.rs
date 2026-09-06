@@ -36,7 +36,7 @@ pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use rule_selector::{RuleSelector, SelectionWarning, SelectorParseError};
 pub use rule_set::RuleSet;
 pub use settings::{LintConfiguration, Settings};
-pub use suppression::{FORMAT_CODE, FileIgnores, IGNORE_DIRECTIVE};
+pub use suppression::{FileIgnores, IGNORE_DIRECTIVE, ReservedCode};
 pub use violation::{Violation, ViolationMetadata};
 
 use std::borrow::Cow;
@@ -55,6 +55,12 @@ use std::sync::{Arc, LazyLock};
 #[must_use]
 pub fn clamp_offset(value: usize) -> u32 {
     u32::try_from(value).unwrap_or(u32::MAX)
+}
+
+/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
+#[must_use]
+pub(crate) fn strip_bom(source: &str) -> &str {
+    source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 
 /// Wrap help and note text without splitting URLs.
@@ -180,9 +186,16 @@ pub fn check_ast<'a>(
     path: Option<&'a Path>,
 ) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings, path);
+    // Walk the ast and collect diagnostics.
     checker.visit_root(ast);
-    let suppressions = suppression::collect(ast, &checker);
-    suppression::filter(&suppressions, checker.into_diagnostics())
+
+    // Collect ignore comments and drop the ignored diagnostics.
+    let ignore_comments = suppression::collect_ignore_comments(ast, &checker);
+    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
+
+    // Run linter rules on the ignore comments.
+    checker.visit_ignore_comments(&ignore_comments);
+    checker.into_diagnostics()
 }
 
 /// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block.

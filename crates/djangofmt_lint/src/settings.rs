@@ -131,8 +131,9 @@ mod tests {
 
     use super::{LintConfiguration, Settings, unsorted_tailwind_classes};
     use crate::registry::{Rule, RuleCategory};
-    use crate::rule_selector::{RuleSelector, SelectionWarning};
+    use crate::rule_selector::{ALL_GROUP, RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
+    use crate::suppression::ReservedCode;
 
     #[test]
     fn any_rule_enabled_reflects_membership() {
@@ -234,10 +235,8 @@ mod tests {
 
     #[test]
     fn no_rule_name_collides_with_a_reserved_word() {
-        // `format`/`invalid-syntax` are `file-ignore[...]` codes; `lint` is kept free for group suppression.
-        let reserved = ["all", "lint", "format", "invalid-syntax"];
-        for word in reserved
-            .into_iter()
+        for word in std::iter::once(ALL_GROUP)
+            .chain(ReservedCode::VARIANTS.iter().copied())
             .chain(RuleCategory::VARIANTS.iter().copied())
         {
             assert!(
