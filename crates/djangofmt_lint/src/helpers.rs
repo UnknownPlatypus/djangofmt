@@ -12,20 +12,25 @@ pub const HTML_COMMENT_CLOSE: &str = "-->";
 
 /// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
 #[must_use]
+#[inline]
 pub fn strip_bom(source: &str) -> &str {
     source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 
 /// The body of a leading `{# #}` comment, if `text` starts with one.
+#[inline]
 pub fn leading_template_comment(text: &str) -> Option<&str> {
     leading_comment(text, TEMPLATE_COMMENT_OPEN, TEMPLATE_COMMENT_CLOSE)
 }
 
 /// The body of a leading `<!-- -->` comment, if `text` starts with one.
+#[inline]
 pub fn leading_html_comment(text: &str) -> Option<&str> {
     leading_comment(text, HTML_COMMENT_OPEN, HTML_COMMENT_CLOSE)
 }
 
+// Inlined so the constant delimiters fold into one compare instead of a `memcmp` per `check_ast`.
+#[inline]
 fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str> {
     let body = text.strip_prefix(open)?;
     Some(&body[..body.find(close)?])
