@@ -13,9 +13,7 @@ use crate::LintDiagnostic;
 use crate::Settings;
 use crate::fix::Fix;
 use crate::registry::Rule;
-use crate::rule_set::RuleSet;
 use crate::span;
-use crate::suppression;
 use crate::violation::Violation;
 
 /// A type for collecting diagnostics in a given file.
@@ -27,20 +25,15 @@ pub struct LintContext<'a> {
     source: &'a str,
     settings: &'a Settings,
     path: Option<&'a Path>,
-    /// The run's rules minus the file's own `file-ignore[...]` opt-outs.
-    rules: RuleSet,
 }
 
 impl<'a> LintContext<'a> {
     #[must_use]
-    pub fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
-        let mut rules = settings.rules;
-        rules.remove_all(&suppression::file_ignored_rules(source));
+    pub const fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
         Self {
             source,
             settings,
             path,
-            rules,
             diagnostics: RefCell::new(Vec::new()),
         }
     }
@@ -67,14 +60,14 @@ impl<'a> LintContext<'a> {
     #[must_use]
     #[inline]
     pub const fn is_rule_enabled(&self, rule: Rule) -> bool {
-        self.rules.contains(rule)
+        self.settings.rules.contains(rule)
     }
 
     /// Returns whether any of the given rules should be checked.
     #[must_use]
     #[inline]
     pub const fn any_rule_enabled(&self, rules: &[Rule]) -> bool {
-        self.rules.contains_any(rules)
+        self.settings.rules.contains_any(rules)
     }
 
     /// Compute the byte offset of `slice` within the source.

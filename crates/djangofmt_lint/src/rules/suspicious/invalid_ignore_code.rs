@@ -4,7 +4,7 @@ use std::str::FromStr;
 use strum::{IntoEnumIterator, VariantNames};
 
 use crate::Checker;
-use crate::fix::edits::delete_codes_or_comment;
+use crate::fix::edits::{delete_codes_or_comment, positions};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::suppression::{IgnoreComment, ReservedCode};
@@ -88,7 +88,8 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &invalid);
+    let remove = positions(codes, |code| invalid.contains(&code));
+    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
     let violation = InvalidIgnoreCode {
         codes: invalid
             .iter()
