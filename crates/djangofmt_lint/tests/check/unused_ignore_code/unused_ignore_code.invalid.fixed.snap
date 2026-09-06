@@ -1,0 +1,39 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+{# djangofmt: file-ignore[invalid-syntax] #}
+<!-- The leading `invalid-syntax` above is unused: the file parses -->
+
+<!-- Only this rule runs on fixtures, so a rule code is unused as non-enabled -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
+<!-- The repeat of a used code goes, the first occurrence stays -->
+{# djangofmt: ignore[format] #}
+<div   class="x"   ></div>
+
+<!-- Unused code among used ones: only that entry and its comma go -->
+{# djangofmt: ignore[format] #}
+<div   id=""   ></div>
+
+<!-- Several unused codes among used ones: the list is rewritten -->
+{# djangofmt: ignore[format] #}
+<form method="yes"></form>
+
+<!-- An unknown code is left to `invalid-ignore-code`; the unused one still goes -->
+{# djangofmt: ignore[not-a-rule] #}
+<form method="yes"></form>
+
+<!-- Every code unused: one diagnostic for the comment, which goes as a whole -->
+{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
+<form method="yes" id=""></form>
+
+<!-- A comment sharing its line keeps the line -->
+<div>{# djangofmt: ignore[empty-attr-value] #}<p id="">hi</p></div>
+
+<!-- Deleting the comment takes its free-text reason along, so that fix is unsafe -->
+{# djangofmt: ignore[invalid-attr-value]: kept from before the form was fixed #}
+<form method="post"></form>
+
+<!-- Nothing follows the comment, so it guards nothing whatever it lists -->
+{# djangofmt: ignore[invalid-attr-value] #}

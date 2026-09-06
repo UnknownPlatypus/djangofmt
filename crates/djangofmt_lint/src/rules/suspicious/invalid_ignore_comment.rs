@@ -121,11 +121,13 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
         }
         IgnoreDirective::FileIgnore(_) => return,
         IgnoreDirective::Ignore(codes) => {
-            let invalid_syntax = ReservedCode::InvalidSyntax.as_str();
-            if !codes.contains(&invalid_syntax) {
+            let invalid_syntax: Vec<usize> = (0..codes.len())
+                .filter(|&index| codes[index] == ReservedCode::InvalidSyntax.as_str())
+                .collect();
+            if invalid_syntax.is_empty() {
                 return;
             }
-            let deletion = delete_codes_or_comment(ctx, comment.raw, codes, &[invalid_syntax]);
+            let deletion = delete_codes_or_comment(ctx, comment.raw, codes, &invalid_syntax);
             (
                 IgnoreCommentViolation::InvalidSyntaxOnNode {
                     whole_comment: deletion.whole_comment,

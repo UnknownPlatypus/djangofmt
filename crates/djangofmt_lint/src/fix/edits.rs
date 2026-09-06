@@ -73,7 +73,7 @@ pub struct CodesDeletion {
     pub whole_comment: bool,
 }
 
-/// Drops `remove` from a directive's `codes`.
+/// Drops the codes at the `remove` indices from a directive's `codes`.
 ///
 /// When one code is dropped, only that entry and its comma are removed:
 ///
@@ -99,16 +99,17 @@ pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
     comment: &str,
     codes: &[&str],
-    remove: &[&str],
+    remove: &[usize],
 ) -> CodesDeletion {
     debug_assert!(
-        !remove.is_empty() && remove.iter().all(|code| codes.contains(code)),
-        "`remove` must be a non-empty subset of `codes`"
+        !remove.is_empty() && remove.iter().all(|&index| index < codes.len()),
+        "`remove` must be non-empty indices into `codes`"
     );
     let remaining: Vec<&str> = codes
         .iter()
-        .copied()
-        .filter(|code| !remove.contains(code))
+        .enumerate()
+        .filter(|(index, _)| !remove.contains(index))
+        .map(|(_, code)| *code)
         .collect();
     if remaining.is_empty() {
         // A lone code is reported on the code itself, a list on the whole comment.
@@ -122,11 +123,8 @@ pub fn delete_codes_or_comment(
             whole_comment: true,
         };
     }
-    let mut listed = codes
-        .iter()
-        .enumerate()
-        .filter(|(_, listed)| remove.contains(listed));
-    if let (Some((index, code)), None) = (listed.next(), listed.next()) {
+    if let &[index] = remove {
+        let code = codes[index];
         let (start, end) = codes.get(index + 1).map_or_else(
             || (ctx.source_end(codes[index - 1]), ctx.source_end(code)),
             |next| (ctx.source_offset(code), ctx.source_offset(next)),

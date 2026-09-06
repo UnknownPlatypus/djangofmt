@@ -88,7 +88,10 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &invalid);
+    let remove: Vec<usize> = (0..codes.len())
+        .filter(|&index| invalid.contains(&codes[index]))
+        .collect();
+    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
     let violation = InvalidIgnoreCode {
         codes: invalid
             .iter()

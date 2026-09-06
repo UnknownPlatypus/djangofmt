@@ -5,4 +5,5 @@ pub mod empty_tag_pair;
 pub mod invalid_ignore_code;
 pub mod invalid_ignore_comment;
 pub mod javascript_url;
+pub mod unused_ignore_code;
 pub mod use_https;
