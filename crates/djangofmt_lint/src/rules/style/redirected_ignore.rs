@@ -59,7 +59,7 @@ impl Violation for RedirectedIgnore {
 
 pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
     let body = comment.raw;
-    if !IgnoreDirective::is_addressed(body) {
+    if !IgnoreDirective::has_prefix(body) {
         return;
     }
     let raw = enclosing_comment(checker, body, HTML_COMMENT_OPEN, HTML_COMMENT_CLOSE);

@@ -83,9 +83,11 @@ impl<'s> IgnoreDirective<'s> {
         })
     }
 
-    /// Whether a comment body is addressed to djangofmt at all, whatever it asks for:
-    /// everything [`Self::parse`] accepts, plus the formatter's bare `ignore`.
-    pub fn is_addressed(body: &str) -> bool {
+    /// Whether `body` starts with the `djangofmt:` prefix, valid or not.
+    ///
+    /// Unlike [`Self::parse`], this also accepts the formatter's bare `ignore`,
+    /// so the HTML-comment rule can flag every legacy `<!-- djangofmt:... -->`.
+    pub fn has_prefix(body: &str) -> bool {
         markup_fmt::parse_directive(body, NAMESPACE, &[IGNORE, FILE_IGNORE]).is_some()
     }
 
