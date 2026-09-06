@@ -54,11 +54,6 @@ impl Violation for InvalidIgnoreCode {
     }
 }
 
-/// Whether `code` names a rule or one of the reserved codes.
-fn is_known(code: &str) -> bool {
-    Rule::from_str(code).is_ok() || ReservedCode::from_str(code).is_ok()
-}
-
 /// Report the codes naming neither a rule nor a reserved code, once per comment.
 pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
     for comment in comments {
@@ -71,7 +66,7 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     let invalid: Vec<&str> = codes
         .iter()
         .copied()
-        .filter(|code| !is_known(code))
+        .filter(|code| Rule::from_str(code).is_err() && ReservedCode::from_str(code).is_err())
         .collect();
     if invalid.is_empty() {
         return;
