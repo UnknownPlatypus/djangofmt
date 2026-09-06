@@ -3,10 +3,10 @@ use std::borrow::Cow;
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
 use markup_fmt::parser::parse_jinja_tag_name;
 
+use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `{% blocktranslate %}` / `{% blocktrans %}` blocks that omit
@@ -75,16 +75,14 @@ pub fn check(block: &JinjaBlock<'_, Node<'_>>, checker: &Checker<'_>) {
         return;
     }
 
-    let span = span(open_tag.start, open_tag.content.len());
+    let span = checker.source_span(open_tag.content);
     let Some(mut guard) = checker.report_diagnostic_if_enabled(&UntrimmedBlocktranslate, span)
     else {
         return;
     };
 
-    let local_offset = open_tag
-        .content
-        .find(tag_name)
-        .expect("tag_name was extracted from tag.content by parse_jinja_tag_name");
-    let insertion_at = open_tag.start + local_offset + tag_name.len();
-    guard.set_fix(Fix::safe_edit(Edit::insertion(" trimmed", insertion_at)));
+    guard.set_fix(Fix::safe_edit(Edit::insertion(
+        " trimmed",
+        checker.source_end(tag_name),
+    )));
 }

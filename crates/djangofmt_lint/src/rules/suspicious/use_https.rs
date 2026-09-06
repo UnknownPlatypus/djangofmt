@@ -4,11 +4,11 @@ use std::net::IpAddr;
 
 use markup_fmt::ast::NativeAttribute;
 
+use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::srcset_candidates;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `http://` URLs in HTML attributes that load or link external resources.
@@ -69,7 +69,7 @@ const HTTPS_SCHEME: &str = "https://";
 pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     let NativeAttribute {
         name,
-        value: Some((value_str, offset)),
+        value: Some((value_str, _)),
         ..
     } = attr
     else {
@@ -83,11 +83,11 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     // `srcset` is a comma-separated candidate list; every other attribute
     // holds a single URL.
     if canonical == "srcset" {
-        for (url, at) in srcset_candidates(value_str, *offset) {
-            report_http_scheme(url, at, canonical, checker);
+        for url in srcset_candidates(value_str) {
+            report_http_scheme(url, canonical, checker);
         }
     } else {
-        report_http_scheme(value_str, *offset, canonical, checker);
+        report_http_scheme(value_str, canonical, checker);
     }
 }
 
@@ -108,16 +108,15 @@ fn canonical_url_attr(name: &str) -> Option<&'static str> {
 }
 
 /// Reports (and offers a fix for) a URL that uses the insecure `http://` scheme.
-/// `offset` is the byte offset of `url` in the source.
-fn report_http_scheme(url: &str, offset: usize, attribute: &'static str, checker: &Checker<'_>) {
+fn report_http_scheme(url: &str, attribute: &'static str, checker: &Checker<'_>) {
     let trimmed = url.trim_start_matches(|c: char| c.is_ascii_whitespace());
-    let Some(rest) = trimmed.get(HTTP_SCHEME.len()..) else {
+    let Some((scheme, rest)) = trimmed.split_at_checked(HTTP_SCHEME.len()) else {
         return;
     };
-    if !trimmed[..HTTP_SCHEME.len()].eq_ignore_ascii_case(HTTP_SCHEME) || is_local_host(rest) {
+    if !scheme.eq_ignore_ascii_case(HTTP_SCHEME) || is_local_host(rest) {
         return;
     }
-    let scheme_span = span(offset + url.len() - trimmed.len(), HTTP_SCHEME.len());
+    let scheme_span = checker.source_span(scheme);
     let mut guard = checker.report_diagnostic(&UseHttps { attribute }, scheme_span);
     guard.set_fix(Fix::unsafe_edit(Edit::replacement(
         HTTPS_SCHEME,

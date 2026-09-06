@@ -2,10 +2,10 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::{Element, NativeAttribute};
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::{contains_interpolation, srcset_candidates};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for asset URLs in `<link>`, `<img>`, `<script>`, and `<source>` elements that point at a
@@ -79,7 +79,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
 
     let NativeAttribute {
         name,
-        value: Some((value_str, offset)),
+        value: Some((value_str, _)),
         ..
     } = attr
     else {
@@ -96,22 +96,21 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
     // `srcset` is a comma-separated candidate list; every other attribute
     // holds a single URL.
     if *canonical == "srcset" {
-        for (url, at) in srcset_candidates(value_str, *offset) {
-            report_static_path(url, at, canonical, checker);
+        for url in srcset_candidates(value_str) {
+            report_static_path(url, canonical, checker);
         }
     } else {
-        report_static_path(value_str, *offset, canonical, checker);
+        report_static_path(value_str, canonical, checker);
     }
 }
 
 /// Reports a URL that points at a hardcoded `static/` path.
-/// `offset` is the byte offset of `url` in the source.
-fn report_static_path(url: &str, offset: usize, attribute: &'static str, checker: &Checker<'_>) {
+fn report_static_path(url: &str, attribute: &'static str, checker: &Checker<'_>) {
     if contains_interpolation(url) {
         return;
     }
     // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
     if starts_with_static_path(url.trim_ascii()) {
-        checker.report_diagnostic(&DjangoStaticUrl { attribute }, span(offset, url.len()));
+        checker.report_diagnostic(&DjangoStaticUrl { attribute }, checker.source_span(url));
     }
 }

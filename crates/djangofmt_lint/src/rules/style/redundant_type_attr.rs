@@ -2,12 +2,12 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::{Element, NativeAttribute};
 
+use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for redundant `type` attributes on `<script>` and `<style>` tags.
@@ -77,7 +77,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
 
     let NativeAttribute {
         name,
-        value: Some((value_str, offset)),
+        value: Some((value_str, _)),
         quote,
     } = attr
     else {
@@ -101,14 +101,13 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
             tag: tag.into(),
             type_value: (*value_str).into(),
         },
-        span(*offset, value_str.len()),
+        checker.source_span(value_str),
     );
 
     guard.set_fix(delete_attr_fix(
         checker.context(),
         name,
         value_str,
-        *offset,
         quote.is_some(),
     ));
 }
