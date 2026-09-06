@@ -329,6 +329,13 @@ pub fn format_text(
         |code, hints| {
             match hints.ext {
                 "json" | "jsonc" => {
+                    // dprint mangles such a snippet instead of rejecting it, leaving a string that gains indentation on every pass -> https://github.com/dprint/dprint-plugin-json/issues/63
+                    if json_has_raw_control_char(code) {
+                        debug!(
+                            "JSON string holds a raw control character, leaving it unformatted."
+                        );
+                        return Ok(code.into());
+                    }
                     let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
                     let mut json_config = config.json.clone();
                     json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
@@ -386,6 +393,34 @@ pub fn format_text(
         Err(markup_fmt::FormatError::Syntax(_)) if ignores.invalid_syntax => Ok(None),
         other => other.map(Some),
     }
+}
+
+/// Whether a string literal in `code` holds a raw control character (U+0000-U+001F).
+///
+/// JSON forbids those ([RFC 8259 §7]), so a hit means the snippet is invalid and dprint can't be
+/// trusted with it.
+///
+/// [RFC 8259 §7]: https://www.rfc-editor.org/info/rfc8259/#section-7:~:text=All%20Unicode%20characters%20may%20be%20placed%20within%20the%20quotation%20marks%2C%20except%20for%20the%20characters%20that%20MUST%20be%20escaped%3A%20quotation%20mark%2C%20reverse%20solidus%2C%20and%20the%20control%20characters%20%28U%2B0000%20through%20U%2B001F%29%2E
+fn json_has_raw_control_char(code: &str) -> bool {
+    let mut escaped = false;
+    let mut quote = None;
+    for byte in code.bytes() {
+        let Some(quote_byte) = quote else {
+            // jsonc-parser also accepts single quotes, and dprint mangles those the same way.
+            quote = matches!(byte, b'"' | b'\'').then_some(byte);
+            continue;
+        };
+        if escaped {
+            escaped = false;
+        } else if byte == b'\\' {
+            escaped = true;
+        } else if byte == quote_byte {
+            quote = None;
+        } else if byte < b' ' {
+            return true;
+        }
+    }
+    false
 }
 
 /// Run an embedded formatter, falling back to the original `code` if it panics.
@@ -523,6 +558,16 @@ mod tests {
             format_or_fallback(code, "CSS", None, || panic!("boom")),
             code
         );
+    }
+
+    #[rstest]
+    #[case::raw_newline_in_string("{\"a\": \"b\nc\"}", true)]
+    #[case::raw_newline_in_single_quoted_string("{'a': 'b\nc'}", true)]
+    #[case::escaped_newline_in_string(r#"{"a": "b\nc"}"#, false)]
+    #[case::newline_between_tokens("{\n\"a\": \"b\"\n}", false)]
+    #[case::escaped_quote_in_string("{\"a\": \"b\\\"c\",\n\"d\": 1}", false)]
+    fn json_has_raw_control_char_cases(#[case] code: &str, #[case] expected: bool) {
+        assert_eq!(json_has_raw_control_char(code), expected);
     }
 
     #[test]
