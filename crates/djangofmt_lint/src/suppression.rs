@@ -61,6 +61,11 @@ pub enum IgnoreDirective<'s> {
 }
 
 impl<'s> IgnoreDirective<'s> {
+    /// Whether the directive scopes to the node that follows it, rather than to the whole file.
+    const fn guards_next_node(&self) -> bool {
+        matches!(self, Self::Ignore(_))
+    }
+
     /// The codes listed, none for a malformed directive.
     pub fn codes(&self) -> &[&'s str] {
         match self {
@@ -96,13 +101,15 @@ pub struct IgnoreComment<'s> {
     /// Whether it is the file's leading comment, the only place `file-ignore` counts.
     pub is_leading: bool,
     /// Byte ranges an `ignore[...]` guards; empty when nothing follows it.
-    ranges: SmallVec<[Range<usize>; 2]>,
+    guarded_ranges: SmallVec<[Range<usize>; 2]>,
 }
 
 impl IgnoreComment<'_> {
     /// Whether the directive silences `code` reported at `offset`.
     fn suppresses(&self, code: &str, offset: usize) -> bool {
-        self.ranges.iter().any(|range| range.contains(&offset))
+        self.guarded_ranges
+            .iter()
+            .any(|range| range.contains(&offset))
             && self.directive.codes().contains(&code)
     }
 }
@@ -119,15 +126,16 @@ pub fn collect_ignore_comments<'s>(
         .filter_map(|body| {
             let directive = parse(body)?;
             let offset = checker.source_offset(body);
+
+            let ranges = if directive.guards_next_node() {
+                guarded_ranges(root, offset, checker)
+            } else {
+                SmallVec::new()
+            };
+
             // The body sits between `{#` and `#}`; an unterminated comment runs to the end.
             let start = offset - "{#".len();
             let end = (checker.source_end(body) + "#}".len()).min(source.len());
-            let ranges = match directive {
-                // At attribute position the comment is no node, so it guards nothing.
-                IgnoreDirective::Ignore(_) => siblings_after(&root.children, offset, checker)
-                    .map_or_else(SmallVec::new, |rest| guarded_ranges(checker, rest)),
-                IgnoreDirective::FileIgnore(_) | IgnoreDirective::Malformed(_) => SmallVec::new(),
-            };
             Some(IgnoreComment {
                 raw: &source[start..end],
                 directive,
@@ -135,7 +143,7 @@ pub fn collect_ignore_comments<'s>(
                     .trim_start_matches('\u{feff}')
                     .trim_start()
                     .is_empty(),
-                ranges,
+                guarded_ranges: ranges,
             })
         })
         .collect()
@@ -178,11 +186,19 @@ fn siblings_after<'n, 's>(
     }
 }
 
-/// Byte ranges a directive comment guards: the first node after it, minus that node's children.
+/// Byte ranges the comment at `offset` guards: the first node after it, minus that node's children.
 /// For an element that is its opening and closing tags; for a block, its `{% %}` tags.
-fn guarded_ranges(checker: &Checker<'_>, rest: &[Node<'_>]) -> SmallVec<[Range<usize>; 2]> {
+fn guarded_ranges(
+    root: &Root<'_>,
+    offset: usize,
+    checker: &Checker<'_>,
+) -> SmallVec<[Range<usize>; 2]> {
     let mut ranges = SmallVec::new();
-    let Some(target) = rest.iter().find(|node| {
+    // At attribute position the comment is no node, so it has no siblings and guards nothing.
+    let Some(siblings) = siblings_after(&root.children, offset, checker) else {
+        return ranges;
+    };
+    let Some(target) = siblings.iter().find(|node| {
         !is_whitespace_text(node)
             && !matches!(node.kind, NodeKind::JinjaComment(_) | NodeKind::Comment(_))
     }) else {
