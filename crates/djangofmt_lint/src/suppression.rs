@@ -42,6 +42,14 @@ impl ReservedCode {
     }
 }
 
+/// Delimiters of a template comment, the only kind that carries a directive.
+const TEMPLATE_COMMENT_OPEN: &str = "{#";
+const TEMPLATE_COMMENT_CLOSE: &str = "#}";
+
+/// Delimiters of an HTML comment, which only the legacy bare directive is read from.
+const HTML_COMMENT_OPEN: &str = "<!--";
+const HTML_COMMENT_CLOSE: &str = "-->";
+
 const NAMESPACE: &str = "djangofmt";
 const IGNORE: &str = "ignore";
 const FILE_IGNORE: &str = "file-ignore";
@@ -133,9 +141,9 @@ pub fn collect_ignore_comments<'s>(
                 SmallVec::new()
             };
 
-            // The body sits between `{#` and `#}`; an unterminated comment runs to the end.
-            let start = offset - "{#".len();
-            let end = (checker.source_end(body) + "#}".len()).min(source.len());
+            // The body sits between the delimiters; an unterminated comment runs to the end.
+            let start = offset - TEMPLATE_COMMENT_OPEN.len();
+            let end = (checker.source_end(body) + TEMPLATE_COMMENT_CLOSE.len()).min(source.len());
             Some(IgnoreComment {
                 raw: &source[start..end],
                 directive,
@@ -255,8 +263,7 @@ impl FileIgnores {
 
         // The bare legacy directive doubles as a node-level formatter directive,
         // so it is only file-level when nothing (not even whitespace) precedes it.
-        let legacy_body =
-            leading_comment(source, "{#", "#}").or_else(|| leading_comment(source, "<!--", "-->"));
+        let legacy_body = leading_template_comment(source).or_else(|| leading_html_comment(source));
         if let Some(body) = legacy_body
             && markup_fmt::matches_directive(body, IGNORE_DIRECTIVE)
         {
@@ -279,9 +286,10 @@ impl FileIgnores {
     }
 }
 
-/// The codes of the file's leading `{# djangofmt: file-ignore[...] #}` comment.
+/// The codes of the file's leading `{# djangofmt: file-ignore[...] #}` comment,
+/// a BOM and whitespace before it tolerated.
 fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
-    match parse(leading_jinja_comment(source)?)? {
+    match parse(leading_template_comment(strip_bom(source).trim_start())?)? {
         IgnoreDirective::FileIgnore(codes) => Some(codes),
         IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => None,
     }
@@ -299,17 +307,22 @@ pub fn file_ignored_rules(source: &str) -> RuleSet {
     rules
 }
 
-/// The body of the file's leading `{# #}` comment, BOM and whitespace before it tolerated.
-fn leading_jinja_comment(source: &str) -> Option<&str> {
-    leading_comment(strip_bom(source).trim_start(), "{#", "#}")
-}
-
 /// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
 fn strip_bom(source: &str) -> &str {
     source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 
-/// The body of a leading `open`..`close` comment, if the text starts with one.
+/// The body of a leading `{# #}` comment, if `text` starts with one.
+fn leading_template_comment(text: &str) -> Option<&str> {
+    leading_comment(text, TEMPLATE_COMMENT_OPEN, TEMPLATE_COMMENT_CLOSE)
+}
+
+/// The body of a leading `<!-- -->` comment, if `text` starts with one.
+fn leading_html_comment(text: &str) -> Option<&str> {
+    leading_comment(text, HTML_COMMENT_OPEN, HTML_COMMENT_CLOSE)
+}
+
+/// The body of a leading comment with the given delimiters, if `text` starts with one.
 fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str> {
     let body = text.strip_prefix(open)?;
     Some(&body[..body.find(close)?])
