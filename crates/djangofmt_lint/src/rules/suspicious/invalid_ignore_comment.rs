@@ -36,11 +36,6 @@ pub enum IgnoreCommentViolation {
 /// ```
 ///
 /// Or delete the invalid suppression comment.
-///
-/// ## Fix safety
-/// Dropping a node-level `invalid-syntax` code is a safe fix: the code suppresses nothing where
-/// it stands. Removing a malformed or misplaced comment is an unsafe fix: the rules its author
-/// meant to silence cannot be recovered, so the comment is deleted rather than repaired.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct InvalidIgnoreComment {

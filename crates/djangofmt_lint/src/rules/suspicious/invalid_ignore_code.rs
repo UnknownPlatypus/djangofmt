@@ -26,10 +26,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// {# djangofmt: ignore[invalid-attr-value] #}
 /// <form method="yes">Submit</form>
 /// ```
-///
-/// ## Fix safety
-/// The fix is marked as safe: a code naming no rule suppresses nothing, so dropping it cannot
-/// change which diagnostics are reported. A comment left with no code at all goes with it.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct InvalidIgnoreCode {
