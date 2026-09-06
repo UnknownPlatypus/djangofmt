@@ -139,10 +139,7 @@ pub fn collect_ignore_comments<'s>(
             Some(IgnoreComment {
                 raw: &source[start..end],
                 directive,
-                is_leading: source[..start]
-                    .trim_start_matches('\u{feff}')
-                    .trim_start()
-                    .is_empty(),
+                is_leading: strip_bom(&source[..start]).trim_start().is_empty(),
                 guarded_ranges: ranges,
             })
         })
