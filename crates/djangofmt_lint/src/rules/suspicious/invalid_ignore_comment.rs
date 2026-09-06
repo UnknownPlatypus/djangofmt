@@ -1,11 +1,11 @@
 use std::borrow::Cow;
 
+use crate::Checker;
 use crate::fix::edits::{delete_codes_or_comment, delete_comment};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::suppression::{Directive, DirectiveComment, INVALID_SYNTAX_CODE, ParseErrorKind};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreCommentViolation {
@@ -99,10 +99,9 @@ pub fn check(directives: &[DirectiveComment<'_>], checker: &Checker<'_>) {
 fn check_comment(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
     let ctx = checker.context();
     let remove_comment = |kind| {
-        let span = span(ctx.source_offset(comment.raw), comment.raw.len());
         (
             kind,
-            span,
+            ctx.source_span(comment.raw),
             Fix::unsafe_edit(delete_comment(ctx, comment.raw)),
         )
     };

@@ -97,7 +97,7 @@ pub fn collect<'s>(root: &Root<'s>, checker: &Checker<'s>) -> Vec<DirectiveComme
             let offset = checker.source_offset(body);
             // The body sits between `{#` and `#}`; an unterminated comment runs to the end.
             let start = offset - "{#".len();
-            let end = (offset + body.len() + "#}".len()).min(source.len());
+            let end = (checker.source_end(body) + "#}".len()).min(source.len());
             let ranges = match directive {
                 // At attribute position the comment is no node, so it guards nothing.
                 Directive::Ignore(_) => siblings_after(&root.children, offset, checker)

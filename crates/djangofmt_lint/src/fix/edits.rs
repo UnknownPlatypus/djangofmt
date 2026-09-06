@@ -34,7 +34,7 @@ pub fn delete_attr_fix(ctx: &LintContext<'_>, name: &str, value_str: &str, quote
 pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
     let source = ctx.source();
     let start = ctx.source_offset(comment);
-    let end = start + comment.len();
+    let end = ctx.source_end(comment);
 
     let line_start = source[..start].rfind('\n').map_or(0, |i| i + 1);
     let line_end = source[end..]
@@ -79,11 +79,8 @@ pub fn delete_codes_or_comment(
     codes: &[&str],
     remove: &[&str],
 ) -> (SourceSpan, Edit) {
-    let start_of = |slice: &str| ctx.source_offset(slice);
-    let end_of = |slice: &str| ctx.source_offset(slice) + slice.len();
-    let span_of = |slice: &str| span(start_of(slice), slice.len());
     if let [only] = codes {
-        return (span_of(only), delete_comment(ctx, comment));
+        return (ctx.source_span(only), delete_comment(ctx, comment));
     }
     let mut listed = codes
         .iter()
@@ -91,10 +88,13 @@ pub fn delete_codes_or_comment(
         .filter(|(_, listed)| remove.contains(listed));
     if let (Some((index, code)), None) = (listed.next(), listed.next()) {
         let (start, end) = codes.get(index + 1).map_or_else(
-            || (end_of(codes[index - 1]), end_of(code)),
-            |next| (start_of(code), start_of(next)),
+            || (ctx.source_end(codes[index - 1]), ctx.source_end(code)),
+            |next| (ctx.source_offset(code), ctx.source_offset(next)),
         );
-        return (span_of(code), Edit::deletion(span(start, end - start)));
+        return (
+            ctx.source_span(code),
+            Edit::deletion(span(start, end - start)),
+        );
     }
     let remaining: Vec<&str> = codes
         .iter()
@@ -104,8 +104,11 @@ pub fn delete_codes_or_comment(
     let edit = if remaining.is_empty() {
         delete_comment(ctx, comment)
     } else {
-        let (start, end) = (start_of(codes[0]), end_of(codes[codes.len() - 1]));
+        let (start, end) = (
+            ctx.source_offset(codes[0]),
+            ctx.source_end(codes[codes.len() - 1]),
+        );
         Edit::replacement(remaining.join(", "), span(start, end - start))
     };
-    (span_of(comment), edit)
+    (ctx.source_span(comment), edit)
 }
