@@ -14,7 +14,8 @@ pub enum IgnoreCommentViolation {
     /// A `file-ignore[...]` directive that does not lead the file.
     MisplacedFileIgnore,
     /// `invalid-syntax` listed in a node-level `ignore[...]`.
-    InvalidSyntaxOnNode,
+    /// `whole_comment` tells whether dropping it leaves no code behind.
+    InvalidSyntaxOnNode { whole_comment: bool },
 }
 
 /// ## What it does
@@ -57,7 +58,7 @@ impl Violation for InvalidIgnoreComment {
                 "Invalid suppression comment: file-level suppressions must be at the top of the file"
                     .into()
             }
-            IgnoreCommentViolation::InvalidSyntaxOnNode => {
+            IgnoreCommentViolation::InvalidSyntaxOnNode { .. } => {
                 "Invalid suppression comment: `invalid-syntax` cannot be scoped to a node".into()
             }
         }
@@ -72,7 +73,7 @@ impl Violation for InvalidIgnoreComment {
             IgnoreCommentViolation::MisplacedFileIgnore => {
                 "Move the comment to the top of the file, or use `ignore[...]`".into()
             }
-            IgnoreCommentViolation::InvalidSyntaxOnNode => {
+            IgnoreCommentViolation::InvalidSyntaxOnNode { .. } => {
                 "Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead"
                     .into()
             }
@@ -81,10 +82,12 @@ impl Violation for InvalidIgnoreComment {
 
     fn fix_title(&self) -> Option<&'static str> {
         Some(match self.kind {
-            IgnoreCommentViolation::InvalidSyntaxOnNode => "Remove `invalid-syntax` code",
-            IgnoreCommentViolation::Malformed(_) | IgnoreCommentViolation::MisplacedFileIgnore => {
-                "Remove suppression comment"
-            }
+            IgnoreCommentViolation::InvalidSyntaxOnNode {
+                whole_comment: false,
+            } => "Remove `invalid-syntax` code",
+            IgnoreCommentViolation::InvalidSyntaxOnNode { .. }
+            | IgnoreCommentViolation::Malformed(_)
+            | IgnoreCommentViolation::MisplacedFileIgnore => "Remove suppression comment",
         })
     }
 }
@@ -120,7 +123,9 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
             }
             let (span, edit) = delete_codes_or_comment(ctx, comment.raw, codes, &[invalid_syntax]);
             (
-                IgnoreCommentViolation::InvalidSyntaxOnNode,
+                IgnoreCommentViolation::InvalidSyntaxOnNode {
+                    whole_comment: codes.iter().all(|code| *code == invalid_syntax),
+                },
                 span,
                 Fix::safe_edit(edit),
             )
