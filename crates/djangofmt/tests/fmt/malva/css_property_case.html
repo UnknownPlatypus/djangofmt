@@ -1,0 +1,11 @@
+<!-- Lowercasing property names is intentional.
+     The `Margin` Outlook.com email hack doesn't warrant an option, `djangofmt:ignore` covers it. -->
+<style>
+  .a { Margin: 0; margin: 0; }
+  .b {
+    /* djangofmt:ignore */
+    Margin: 0;
+    margin: 0;
+  }
+</style>
+<td style="Margin:0;margin:0">x</td>
