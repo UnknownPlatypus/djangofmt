@@ -2,9 +2,9 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::{Element, Node, NodeKind};
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for non-void elements with no attributes whose open and close tags wrap no content.
@@ -86,11 +86,10 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    let offset = checker.source_offset(element.tag_name);
     checker.report_diagnostic(
         &EmptyTagPair {
             tag: element.tag_name.into(),
         },
-        span(offset, element.tag_name.len()),
+        checker.source_span(element.tag_name),
     );
 }

@@ -56,6 +56,26 @@ impl<'a> Checker<'a> {
         self.context.source_offset(slice)
     }
 
+    /// The byte offset just past `slice` within the source.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `slice` is not fully contained within the source.
+    #[must_use]
+    pub fn source_end(&self, slice: &str) -> usize {
+        self.context.source_end(slice)
+    }
+
+    /// The span of `slice` within the source.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `slice` is not fully contained within the source.
+    #[must_use]
+    pub fn source_span(&self, slice: &str) -> SourceSpan {
+        self.context.source_span(slice)
+    }
+
     /// Returns whether the given rule should be checked.
     #[must_use]
     #[inline]

@@ -68,6 +68,8 @@ pub fn graphical_handler(theme: GraphicalTheme) -> GraphicalReportHandler {
 }
 
 /// Build a [`SourceSpan`] from `usize` byte offsets.
+///
+/// For a span covering a slice of the source, use [`LintContext::source_span`] instead:
 #[must_use]
 pub fn span(start: usize, len: usize) -> SourceSpan {
     SourceSpan::new(clamp_offset(start).into(), clamp_offset(len))

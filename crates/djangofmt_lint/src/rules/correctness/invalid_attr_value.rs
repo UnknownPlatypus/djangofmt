@@ -2,10 +2,10 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::{Element, NativeAttribute};
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for HTML attributes whose value is not in the set allowed by the
@@ -78,7 +78,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
 
     let NativeAttribute {
         name,
-        value: Some((value_str, offset)),
+        value: Some((value_str, _)),
         ..
     } = attr
     else {
@@ -102,7 +102,7 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
                 attribute: "method",
                 allowed,
             },
-            span(*offset, value_str.len()),
+            checker.source_span(value_str),
         );
     }
 }

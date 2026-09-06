@@ -2,10 +2,10 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::{Attribute, Element};
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::{contains_interpolation, declares_native_attr};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// The keywords a `scope` attribute may take (HTML spec / WCAG H63).
 const VALID_SCOPE_VALUES: [&str; 4] = ["row", "col", "rowgroup", "colgroup"];
@@ -93,18 +93,17 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         {
             return;
         }
-        let offset = checker.source_offset(element.tag_name);
         checker.report_diagnostic(
             &TableHeaderMissingScope {
                 kind: ScopeViolation::MissingOrEmpty,
             },
-            span(offset, element.tag_name.len()),
+            checker.source_span(element.tag_name),
         );
         return;
     };
 
     match scope.value {
-        Some((value, offset)) if !value.is_empty() => {
+        Some((value, _)) if !value.is_empty() => {
             if contains_interpolation(value)
                 || VALID_SCOPE_VALUES
                     .iter()
@@ -118,17 +117,16 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
                         value: value.into(),
                     },
                 },
-                span(offset, value.len()),
+                checker.source_span(value),
             );
         }
         // `scope=""` or a valueless `scope`: present but with no usable value.
         _ => {
-            let offset = checker.source_offset(scope.name);
             checker.report_diagnostic(
                 &TableHeaderMissingScope {
                     kind: ScopeViolation::MissingOrEmpty,
                 },
-                span(offset, scope.name.len()),
+                checker.source_span(scope.name),
             );
         }
     }

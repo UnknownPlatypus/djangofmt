@@ -153,6 +153,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
     // Guard: return early if element/attr doesn't match
     // Skip interpolated values with helpers::contains_interpolation()
+    let span = checker.source_span(value_str);
     let mut guard = checker.report_diagnostic(&violation, span);
     // For rules with fixes, attach via the guard before it drops:
     guard.set_fix(Fix::safe_edit(Edit::deletion(span)));
@@ -164,11 +165,11 @@ Key points:
 - The `Checker` is passed as `&Checker<'_>`, **not** `&mut` — diagnostics are buffered through interior mutability (`RefCell`).
 - `checker.report_diagnostic(&violation, span)` returns a `DiagnosticGuard`. On `Drop` the guard pushes the diagnostic into the context's buffer. Hold the guard in a `let mut guard = ...` binding only if you need to attach a fix or override fields; otherwise let the temporary drop immediately.
 - If the rule is **not** gated upfront in `checker.rs` (Step 4), call `checker.report_diagnostic_if_enabled(...)` instead — it returns `Option<DiagnosticGuard>` and short-circuits when disabled.
-- For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`), wrap it with the `Fix` constructor chosen in 1c, then call `guard.set_fix(fix)`.
-- Rules that need the raw source offset of an AST slice use `checker.source_offset(slice)`.
-- **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_offset(value)` for a bad value, `source_offset(attr.name)` for a bad attribute, `source_offset(element.tag_name)` when the element itself is at fault.
+- For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`.
+- **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic such as widening a deletion over surrounding whitespace; the free `span(start, len)` is for offsets no slice provides.
+- **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
-- For attribute rules, fold the value match into the `let…else` that destructures the attribute rather than unwrapping it in a separate step: `let Attribute::Native(NativeAttribute { name, value: Some((value_str, offset)), .. }) = attr else { continue; };`.
+- For attribute rules, fold the value match into the `let…else` that destructures the attribute rather than unwrapping it in a separate step: `let Attribute::Native(NativeAttribute { name, value: Some((value_str, _)), .. }) = attr else { continue; };` (the paired offset is redundant with `source_span(value_str)`).
 
 The function signature depends on what AST node the rule inspects. Element-level rules take `&Element<'_>`; Jinja block rules take `&JinjaBlock<'_, Node<'_>>`.
 

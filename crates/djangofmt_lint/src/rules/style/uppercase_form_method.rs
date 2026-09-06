@@ -2,11 +2,11 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::NativeAttribute;
 
+use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for non-lowercase `method` attribute values on `<form>` elements.
@@ -59,7 +59,7 @@ impl Violation for UppercaseFormMethod<'_> {
 pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     let NativeAttribute {
         name,
-        value: Some((value_str, offset)),
+        value: Some((value_str, _)),
         ..
     } = attr
     else {
@@ -80,11 +80,11 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
 
     let mut guard = checker.report_diagnostic(
         &UppercaseFormMethod { value: value_str },
-        span(*offset, value_str.len()),
+        checker.source_span(value_str),
     );
 
     guard.set_fix(Fix::safe_edit(Edit::replacement(
         value_str.to_ascii_lowercase(),
-        span(*offset, value_str.len()),
+        checker.source_span(value_str),
     )));
 }

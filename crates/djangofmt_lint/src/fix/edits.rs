@@ -2,24 +2,16 @@ use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
 use crate::span;
 
-/// Builds a safe fix that deletes a whole native attribute.
+/// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
 ///
-/// Removes the attribute's name, `=`, and quoted value, absorbing the leading
-/// whitespace that separates it from the previous token so deleting the only
-/// attribute leaves `<div>` rather than `<div >`.
+/// Removes the full attribute name, `=` and value, absorbing the leading whitespace that
+/// separates it from the previous token to avoid leaving `<div >` for solo attribute and have `<div>` instead.
 ///
-/// `name` is the attribute-name slice; `value_str` and `value_offset` locate the
-/// value in the source; `quoted` indicates whether the value is wrapped in quotes
-/// (so the closing quote is included in the deletion).
-pub fn delete_attr_fix(
-    ctx: &LintContext<'_>,
-    name: &str,
-    value_str: &str,
-    value_offset: usize,
-    quoted: bool,
-) -> Fix {
+/// `name` and `value_str` are the attribute's name and value slices.
+/// `quoted` indicates whether the value is wrapped in quotes (to include it in the deletion).
+pub fn delete_attr_fix(ctx: &LintContext<'_>, name: &str, value_str: &str, quoted: bool) -> Fix {
     let name_start = ctx.source_offset(name);
-    let attr_end = value_offset + value_str.len() + usize::from(quoted);
+    let attr_end = ctx.source_end(value_str) + usize::from(quoted);
     let fix_start = reverse_consume_ws(ctx.source().as_bytes(), name_start);
     Fix::safe_edit(Edit::deletion(span(fix_start, attr_end - fix_start)))
 }
