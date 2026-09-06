@@ -4,7 +4,7 @@ use crate::Checker;
 use crate::fix::edits::{delete_codes_or_comment, delete_comment};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{Directive, DirectiveComment, INVALID_SYNTAX_CODE, ParseErrorKind};
+use crate::suppression::{INVALID_SYNTAX_CODE, IgnoreComment, IgnoreDirective, ParseErrorKind};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -89,14 +89,14 @@ impl Violation for InvalidIgnoreComment {
     }
 }
 
-/// Lint every directive comment of the file.
-pub fn check(directives: &[DirectiveComment<'_>], checker: &Checker<'_>) {
-    for comment in directives {
+/// Lint every ignore comment of the file.
+pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
+    for comment in comments {
         check_comment(comment, checker);
     }
 }
 
-fn check_comment(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
+fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     let ctx = checker.context();
     let remove_comment = |kind| {
         (
@@ -106,12 +106,14 @@ fn check_comment(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
         )
     };
     let (kind, span, fix) = match &comment.directive {
-        Directive::Malformed(error) => remove_comment(IgnoreCommentViolation::Malformed(*error)),
-        Directive::FileIgnore(_) if !comment.is_leading => {
+        IgnoreDirective::Malformed(error) => {
+            remove_comment(IgnoreCommentViolation::Malformed(*error))
+        }
+        IgnoreDirective::FileIgnore(_) if !comment.is_leading => {
             remove_comment(IgnoreCommentViolation::MisplacedFileIgnore)
         }
-        Directive::FileIgnore(_) => return,
-        Directive::Ignore(codes) => {
+        IgnoreDirective::FileIgnore(_) => return,
+        IgnoreDirective::Ignore(codes) => {
             if !codes.contains(&INVALID_SYNTAX_CODE) {
                 return;
             }

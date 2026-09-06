@@ -180,10 +180,15 @@ pub fn check_ast<'a>(
     path: Option<&'a Path>,
 ) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings, path);
+    // Walk the ast and collect diagnostics.
     checker.visit_root(ast);
-    let directives = suppression::collect(ast, &checker);
-    suppression::apply(&directives, &checker);
-    checker.visit_directives(&directives);
+
+    // Collect ignore comments and drop the ignored diagnostics.
+    let ignore_comments = suppression::collect_ignore_comments(ast, &checker);
+    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
+
+    // Run linter rules on the ignore comments.
+    checker.visit_ignore_comments(&ignore_comments);
     checker.into_diagnostics()
 }
 

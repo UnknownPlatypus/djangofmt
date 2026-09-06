@@ -5,7 +5,7 @@ use crate::Checker;
 use crate::fix::edits::delete_codes_or_comment;
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{DirectiveComment, FORMAT_CODE, INVALID_SYNTAX_CODE};
+use crate::suppression::{FORMAT_CODE, INVALID_SYNTAX_CODE, IgnoreComment};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -60,13 +60,13 @@ fn is_known(code: &str) -> bool {
 }
 
 /// Report the codes naming neither a rule nor a reserved code, once per comment.
-pub fn check(directives: &[DirectiveComment<'_>], checker: &Checker<'_>) {
-    for comment in directives {
+pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
+    for comment in comments {
         check_comment(comment, checker);
     }
 }
 
-fn check_comment(comment: &DirectiveComment<'_>, checker: &Checker<'_>) {
+fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     let codes = comment.directive.codes();
     let invalid: Vec<&str> = codes
         .iter()
