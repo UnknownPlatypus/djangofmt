@@ -52,8 +52,8 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
         .find('\n')
         .map_or(source.len(), |i| end + i + 1);
 
-    // A BOM belongs to the file rather than to the line: it neither keeps the comment from
-    // being standalone, nor goes away with the line.
+    // A BOM belongs to the file rather than to the line.
+    // It neither keeps the comment from being standalone, nor goes away with the line.
     let before = strip_bom(&source[line_start..start]);
     let standalone =
         before.trim_ascii().is_empty() && source[end..line_end].trim_ascii().is_empty();
@@ -87,11 +87,6 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
 /// -{# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
 ///  <form method="yes"></form>
 /// ```
-///
-/// # Panics
-///
-/// In debug builds, unless `remove` is a non-empty subset of `codes`, which both fast paths
-/// assume: a lone code is taken to be a removed one, and `codes` is indexed unchecked.
 pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
     comment: &str,
