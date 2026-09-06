@@ -1,8 +1,5 @@
-//! Diagnostic suppression via `{# djangofmt: ignore[...] #}` ignore comments.
-//!
-//! - An `ignore[...]` comment guards the node that follows it.
-//! - `file-ignore[...]` as the file's first comment covers the whole file.
-//! - Only `{# #}` comments count: HTML comments reach the client.
+//! Diagnostic suppression via `{# djangofmt: ignore[...] #}` and `file-ignore[...]` comments.
+//! Only `{# #}` comments count, except the legacy leading `<!-- djangofmt:ignore -->` opt-out.
 
 use std::ops::Range;
 use std::str::FromStr;
@@ -251,7 +248,8 @@ fn is_whitespace_text(node: &Node<'_>) -> bool {
     matches!(node.kind, NodeKind::Text(_)) && node.raw.trim().is_empty()
 }
 
-/// File-wide opt-outs declared by the leading comment of a file.
+/// File-wide opt-outs declared by the leading comment of a file: `file-ignore[...]` codes,
+/// or the legacy bare `djangofmt:ignore` in `{# #}` or `<!-- -->` form, which sets both.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct FileIgnores {
     /// The formatter skips the whole file (`file-ignore[format]`).
