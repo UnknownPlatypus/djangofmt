@@ -31,9 +31,8 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## Fix safety
-/// This rule's fix is marked as unsafe: rewriting the scheme changes which endpoint the browser use.
-/// The host may not serve HTTPS at all, so the fix can break a link or subresource that
-/// previously worked over HTTP, and even when HTTPS is available it may serve different content .
+/// This rule's fix is marked as unsafe: rewriting the scheme changes which endpoint the browser
+/// requests. The host may not serve HTTPS at all, or may serve different content over it.
 ///
 /// ## References
 /// - [MDN: Mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content)
