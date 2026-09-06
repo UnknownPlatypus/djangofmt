@@ -1,0 +1,4 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<script type="text/template"><div class="x">{{ name }}</div></script>
