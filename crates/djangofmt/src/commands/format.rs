@@ -1,4 +1,4 @@
-use djangofmt_lint::{FORMAT_CODE, FileIgnores, IGNORE_DIRECTIVE};
+use djangofmt_lint::{FileIgnores, IGNORE_DIRECTIVE, ReservedCode};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
@@ -167,7 +167,7 @@ pub fn build_markup_options(
             // <div>unformatted</div>
             ignore_comment_directive: vec![
                 IGNORE_DIRECTIVE.into(),
-                format!("{IGNORE_DIRECTIVE}[{FORMAT_CODE}]"),
+                format!("{IGNORE_DIRECTIVE}[{}]", ReservedCode::Format),
             ],
             ignore_file_comment_directive: vec![IGNORE_DIRECTIVE.into()],
             // Indent style tags content:

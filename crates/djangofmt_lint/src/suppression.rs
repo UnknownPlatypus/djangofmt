@@ -15,11 +15,32 @@ use crate::Checker;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
 
-/// The code that opts a node or file out of the formatter.
-pub const FORMAT_CODE: &str = "format";
+/// An ignore code naming no rule: it opts out of a whole stage rather than one lint.
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    strum::EnumString,
+    strum::Display,
+    strum::IntoStaticStr,
+    strum::VariantNames,
+)]
+#[strum(serialize_all = "kebab-case")]
+pub enum ReservedCode {
+    /// Opts the node or file out of the formatter.
+    Format,
+    /// Suppresses parse errors; only `file-ignore[...]` may carry it.
+    InvalidSyntax,
+}
 
-/// The code that suppresses parse errors; only `file-ignore[...]` may carry it.
-pub const INVALID_SYNTAX_CODE: &str = "invalid-syntax";
+impl ReservedCode {
+    #[must_use]
+    pub fn as_str(self) -> &'static str {
+        self.into()
+    }
+}
 
 const NAMESPACE: &str = "djangofmt";
 const IGNORE: &str = "ignore";
@@ -235,10 +256,10 @@ impl FileIgnores {
             .unwrap_or_default()
             .iter()
             .fold(Self::default(), |mut ignores, code| {
-                match *code {
-                    FORMAT_CODE => ignores.format = true,
-                    INVALID_SYNTAX_CODE => ignores.invalid_syntax = true,
-                    _ => {}
+                match ReservedCode::from_str(code) {
+                    Ok(ReservedCode::Format) => ignores.format = true,
+                    Ok(ReservedCode::InvalidSyntax) => ignores.invalid_syntax = true,
+                    Err(_) => {}
                 }
                 ignores
             })

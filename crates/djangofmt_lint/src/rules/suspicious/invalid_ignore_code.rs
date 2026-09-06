@@ -5,7 +5,7 @@ use crate::Checker;
 use crate::fix::edits::delete_codes_or_comment;
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{FORMAT_CODE, INVALID_SYNTAX_CODE, IgnoreComment};
+use crate::suppression::{IgnoreComment, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -56,7 +56,7 @@ impl Violation for InvalidIgnoreCode {
 
 /// Whether `code` names a rule or one of the reserved codes.
 fn is_known(code: &str) -> bool {
-    Rule::from_str(code).is_ok() || matches!(code, FORMAT_CODE | INVALID_SYNTAX_CODE)
+    Rule::from_str(code).is_ok() || ReservedCode::from_str(code).is_ok()
 }
 
 /// Report the codes naming neither a rule nor a reserved code, once per comment.

@@ -4,7 +4,7 @@ use crate::Checker;
 use crate::fix::edits::{delete_codes_or_comment, delete_comment};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{INVALID_SYNTAX_CODE, IgnoreComment, IgnoreDirective, ParseErrorKind};
+use crate::suppression::{IgnoreComment, IgnoreDirective, ParseErrorKind, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -114,11 +114,11 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
         }
         IgnoreDirective::FileIgnore(_) => return,
         IgnoreDirective::Ignore(codes) => {
-            if !codes.contains(&INVALID_SYNTAX_CODE) {
+            let invalid_syntax = ReservedCode::InvalidSyntax.as_str();
+            if !codes.contains(&invalid_syntax) {
                 return;
             }
-            let (span, edit) =
-                delete_codes_or_comment(ctx, comment.raw, codes, &[INVALID_SYNTAX_CODE]);
+            let (span, edit) = delete_codes_or_comment(ctx, comment.raw, codes, &[invalid_syntax]);
             (
                 IgnoreCommentViolation::InvalidSyntaxOnNode,
                 span,
