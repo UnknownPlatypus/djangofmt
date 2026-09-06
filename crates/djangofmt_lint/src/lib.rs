@@ -57,6 +57,12 @@ pub fn clamp_offset(value: usize) -> u32 {
     u32::try_from(value).unwrap_or(u32::MAX)
 }
 
+/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
+#[must_use]
+pub(crate) fn strip_bom(source: &str) -> &str {
+    source.strip_prefix('\u{feff}').unwrap_or(source)
+}
+
 /// Wrap help and note text without splitting URLs.
 /// `textwrap` treats `/` and `-` as break opportunities, so a URL is not one word.
 #[must_use]

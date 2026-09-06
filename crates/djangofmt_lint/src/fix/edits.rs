@@ -2,8 +2,7 @@ use miette::SourceSpan;
 
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
-use crate::span;
-use crate::suppression::strip_bom;
+use crate::{span, strip_bom};
 
 /// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
 ///

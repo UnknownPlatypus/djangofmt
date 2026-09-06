@@ -11,9 +11,9 @@ pub use markup_fmt::ParseErrorKind;
 use markup_fmt::ast::{JinjaTagOrChildren, Node, NodeKind, Root};
 use smallvec::SmallVec;
 
-use crate::Checker;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
+use crate::{Checker, strip_bom};
 
 /// An ignore code naming no rule: it opts out of a whole stage rather than one lint.
 #[derive(
@@ -305,11 +305,6 @@ pub fn file_ignored_rules(source: &str) -> RuleSet {
         }
     }
     rules
-}
-
-/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-pub fn strip_bom(source: &str) -> &str {
-    source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 
 /// The body of a leading `{# #}` comment, if `text` starts with one.
