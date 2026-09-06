@@ -9,7 +9,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreCommentViolation {
-    /// The comment starts with `djangofmt:` but does not parse as a directive.
+    /// The comment starts with `djangofmt:` but does not parse as an ignore directive.
     Malformed(ParseErrorKind),
     /// A `file-ignore[...]` directive that does not lead the file.
     MisplacedFileIgnore,

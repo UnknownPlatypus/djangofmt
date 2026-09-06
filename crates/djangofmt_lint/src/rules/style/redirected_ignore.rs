@@ -1,19 +1,24 @@
 use std::borrow::Cow;
 
+use markup_fmt::ast::Comment;
+
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
+use crate::helpers::{
+    HTML_COMMENT_CLOSE, HTML_COMMENT_OPEN, TEMPLATE_COMMENT_CLOSE, enclosing_comment,
+};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{TEMPLATE_COMMENT_CLOSE, is_directive};
+use crate::suppression::IgnoreDirective;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for djangofmt directives written in HTML comments, like `<!-- djangofmt:ignore -->`.
+/// Checks for ignore comments written as HTML comments, like `<!-- djangofmt:ignore -->`.
 ///
 /// ## Why is this bad?
-/// HTML comments are shipped to the client, so the directive ends up in every rendered page. And
-/// only `{# #}` template comments carry suppressions: `<!-- djangofmt: ignore[rule] -->` silences
-/// nothing. The formatter reads its own directive from either comment style, so moving it to a
-/// `{# #}` comment changes nothing there.
+/// HTML ignore comments are deprecated: an HTML comment is shipped to the client, so the
+/// directive ends up in every rendered page, and only `{# #}` template comments carry lint
+/// suppressions, so `<!-- djangofmt: ignore[rule] -->` silences nothing. This rule migrates them
+/// to `{# #}` template comments, which the formatter honors the same way.
 ///
 /// No fix is offered for a comment spanning several lines, since Django's `{# #}` comments are
 /// single-line, nor for one containing `#}`, which would end the new comment early.
@@ -40,11 +45,11 @@ impl Violation for RedirectedIgnore {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "djangofmt directive in an HTML comment".into()
+        "Deprecated HTML ignore comment".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some("Write it in a `{# #}` template comment instead".into())
+        Some("Write it as a `{# #}` template comment instead".into())
     }
 
     fn fix_title(&self) -> Option<&'static str> {
@@ -52,12 +57,13 @@ impl Violation for RedirectedIgnore {
     }
 }
 
-/// Lint one HTML comment; `body` is its inner text, `comment_raw` the whole `<!-- -->` slice.
-pub fn check(body: &str, comment_raw: &str, checker: &Checker<'_>) {
-    if !is_directive(body) {
+pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
+    let body = comment.raw;
+    if !IgnoreDirective::is_addressed(body) {
         return;
     }
-    let range = checker.source_span(comment_raw);
+    let raw = enclosing_comment(checker, body, HTML_COMMENT_OPEN, HTML_COMMENT_CLOSE);
+    let range = checker.source_span(raw);
     let mut guard = checker.report_diagnostic(&RedirectedIgnore, range);
     if !body.contains('\n') && !body.contains(TEMPLATE_COMMENT_CLOSE) {
         guard.set_fix(Fix::safe_edit(Edit::replacement(

@@ -1,7 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-<!-- Legacy formatter directive in an HTML comment -->
+<!-- The formatter's bare `ignore` in an HTML comment -->
 {# djangofmt:ignore #}
 <div   class="kept"  ></div>
 
@@ -9,7 +9,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 {# djangofmt: ignore[invalid-attr-value] #}
 <form method="yes"></form>
 
-<!-- No spaces around the directive -->
+<!-- No spaces around the comment body -->
 {#djangofmt:ignore#}
 <div></div>
 
