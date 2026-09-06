@@ -149,7 +149,7 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
-            NodeKind::Comment(comment) => {
+            NodeKind::Comment(comment) if self.is_rule_enabled(Rule::RedirectedIgnore) => {
                 rules::style::redirected_ignore::check(comment.raw, node.raw, self);
             }
             _ => {}

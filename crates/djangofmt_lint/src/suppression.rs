@@ -100,6 +100,11 @@ fn parse(body: &str) -> Option<IgnoreDirective<'_>> {
     })
 }
 
+/// Whether a comment body is addressed to djangofmt at all, whatever it asks for.
+pub fn is_directive(body: &str) -> bool {
+    markup_fmt::parse_directive(body, NAMESPACE, &[IGNORE, FILE_IGNORE]).is_some()
+}
+
 /// A `{# djangofmt: ... #}` comment as the linter reads it.
 pub struct IgnoreComment<'s> {
     /// The whole comment, delimiters included: what a diagnostic points at and a fix deletes.
