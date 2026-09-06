@@ -6,16 +6,26 @@ use crate::span;
 
 /// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
 ///
-/// Removes the full attribute name, `=` and value, absorbing the leading whitespace that
-/// separates it from the previous token to avoid leaving `<div >` for solo attribute and have `<div>` instead.
+/// Removes the full attribute name, `=` and value, absorbing the whitespace that separates it
+/// from the previous token, and the blanks up to a closing `>`, so that deleting the last
+/// attribute leaves `<div>` rather than `<div >`.
+///
+/// Line breaks before the `>` are kept, so a multi-line tag keeps its shape, and so is the
+/// space before a self-closing `/>`, which is idiomatic.
 ///
 /// `name` and `value_str` are the attribute's name and value slices.
 /// `quoted` indicates whether the value is wrapped in quotes (to include it in the deletion).
 pub fn delete_attr_fix(ctx: &LintContext<'_>, name: &str, value_str: &str, quoted: bool) -> Fix {
+    let source = ctx.source();
     let name_start = ctx.source_offset(name);
     let attr_end = ctx.source_end(value_str) + usize::from(quoted);
-    let fix_start = ctx.source()[..name_start].trim_ascii_end().len();
-    Fix::safe_edit(Edit::deletion(span(fix_start, attr_end - fix_start)))
+
+    let fix_start = source[..name_start].trim_ascii_end().len();
+    let fix_end = match source[attr_end..].trim_start_matches([' ', '\t']) {
+        rest if rest.starts_with('>') => source.len() - rest.len(),
+        _ => attr_end,
+    };
+    Fix::safe_edit(Edit::deletion(span(fix_start, fix_end - fix_start)))
 }
 
 /// An edit deleting a comment, and its line when it has the line to itself.
