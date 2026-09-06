@@ -87,12 +87,21 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
 /// -{# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
 ///  <form method="yes"></form>
 /// ```
+///
+/// # Panics
+///
+/// In debug builds, unless `remove` is a non-empty subset of `codes`, which both fast paths
+/// assume: a lone code is taken to be a removed one, and `codes` is indexed unchecked.
 pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
     comment: &str,
     codes: &[&str],
     remove: &[&str],
 ) -> (SourceSpan, Edit) {
+    debug_assert!(
+        !remove.is_empty() && remove.iter().all(|code| codes.contains(code)),
+        "`remove` must be a non-empty subset of `codes`"
+    );
     if let [only] = codes {
         return (ctx.source_span(only), delete_comment(ctx, comment));
     }
