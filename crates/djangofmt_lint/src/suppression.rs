@@ -44,7 +44,7 @@ impl ReservedCode {
 
 /// Delimiters of a template comment, the only kind that carries a directive.
 const TEMPLATE_COMMENT_OPEN: &str = "{#";
-const TEMPLATE_COMMENT_CLOSE: &str = "#}";
+pub const TEMPLATE_COMMENT_CLOSE: &str = "#}";
 
 /// Delimiters of an HTML comment, which only the legacy bare directive is read from.
 const HTML_COMMENT_OPEN: &str = "<!--";

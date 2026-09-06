@@ -22,3 +22,12 @@ source: crates/djangofmt_lint/tests/check/main.rs
   {# djangofmt:ignore #}
   <p     class="kept"  >hi</p>
 </div>
+
+<!-- Reported but left alone: Django's {# #} comments are single-line -->
+<!-- djangofmt: ignore[invalid-attr-value]
+     legacy markup, see #123 -->
+<form method="yes"></form>
+
+<!-- Reported but left alone: `#}` would end the new comment early -->
+<!-- djangofmt:ignore #}{{ expression }} -->
+<div   class="kept"  ></div>

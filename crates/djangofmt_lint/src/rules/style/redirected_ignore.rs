@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::is_directive;
+use crate::suppression::{TEMPLATE_COMMENT_CLOSE, is_directive};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -14,6 +14,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// only `{# #}` template comments carry suppressions: `<!-- djangofmt: ignore[rule] -->` silences
 /// nothing. The formatter reads its own directive from either comment style, so moving it to a
 /// `{# #}` comment changes nothing there.
+///
+/// No fix is offered for a comment spanning several lines, since Django's `{# #}` comments are
+/// single-line, nor for one containing `#}`, which would end the new comment early.
 ///
 /// ## Example
 /// ```html
@@ -33,7 +36,7 @@ pub struct RedirectedIgnore;
 impl Violation for RedirectedIgnore {
     const RULE: Rule = Rule::RedirectedIgnore;
     const CATEGORY: RuleCategory = RuleCategory::Style;
-    const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
+    const FIX_AVAILABILITY: FixAvailability = FixAvailability::Sometimes;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
@@ -56,8 +59,10 @@ pub fn check(body: &str, comment_raw: &str, checker: &Checker<'_>) {
     }
     let range = checker.source_span(comment_raw);
     let mut guard = checker.report_diagnostic(&RedirectedIgnore, range);
-    guard.set_fix(Fix::safe_edit(Edit::replacement(
-        format!("{{#{body}#}}"),
-        range,
-    )));
+    if !body.contains('\n') && !body.contains(TEMPLATE_COMMENT_CLOSE) {
+        guard.set_fix(Fix::safe_edit(Edit::replacement(
+            format!("{{#{body}#}}"),
+            range,
+        )));
+    }
 }

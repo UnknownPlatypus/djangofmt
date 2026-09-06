@@ -51,3 +51,23 @@ source: crates/djangofmt_lint/tests/check/main.rs
  20 │   <p     class="kept"  >hi</p>
     ╰────
   help: Write it in a `{# #}` template comment instead
+
+  × djangofmt directive in an HTML comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:24:1]
+ 23 │     <!-- Reported but left alone: Django's {# #} comments are single-line -->
+ 24 │ ╭─▶ <!-- djangofmt: ignore[invalid-attr-value]
+ 25 │ ├─▶      legacy markup, see #123 -->
+    · ╰──── here
+ 26 │     <form method="yes"></form>
+    ╰────
+  help: Write it in a `{# #}` template comment instead
+
+  × djangofmt directive in an HTML comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:29:1]
+ 28 │ <!-- Reported but left alone: `#}` would end the new comment early -->
+ 29 │ <!-- djangofmt:ignore #}{{ expression }} -->
+    · ──────────────────────┬─────────────────────
+    ·                       ╰── here
+ 30 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it in a `{# #}` template comment instead
