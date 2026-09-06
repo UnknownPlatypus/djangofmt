@@ -16,6 +16,7 @@
 
 mod checker;
 pub mod fix;
+mod helpers;
 pub mod lint_context;
 pub mod registry;
 pub mod rule_selector;
@@ -55,12 +56,6 @@ use std::sync::{Arc, LazyLock};
 #[must_use]
 pub fn clamp_offset(value: usize) -> u32 {
     u32::try_from(value).unwrap_or(u32::MAX)
-}
-
-/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-#[must_use]
-pub(crate) fn strip_bom(source: &str) -> &str {
-    source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 
 /// Wrap help and note text without splitting URLs.

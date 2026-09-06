@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
-    Root,
+    Attribute, Comment, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node,
+    NodeKind, Root,
 };
 use miette::SourceSpan;
 use smallvec::SmallVec;
@@ -149,7 +149,14 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
+            NodeKind::Comment(comment) => self.visit_comment(comment),
             _ => {}
+        }
+    }
+
+    fn visit_comment(&self, comment: &Comment<'_>) {
+        if self.is_rule_enabled(Rule::RedirectedIgnore) {
+            rules::style::redirected_ignore::check(comment, self);
         }
     }
 

@@ -1,8 +1,9 @@
 use miette::SourceSpan;
 
 use crate::fix::{Edit, Fix};
+use crate::helpers::strip_bom;
 use crate::lint_context::LintContext;
-use crate::{span, strip_bom};
+use crate::span;
 
 /// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
 ///
@@ -73,7 +74,7 @@ pub struct CodesDeletion {
     pub whole_comment: bool,
 }
 
-/// Drops `remove` from a directive's `codes`.
+/// Drops `remove` from an ignore comment's `codes`.
 ///
 /// When one code is dropped, only that entry and its comma are removed:
 ///
