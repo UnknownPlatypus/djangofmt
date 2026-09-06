@@ -10,6 +10,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                               ╰── here
  3 │ <form method="yes"></form>
    ╰────
+  help: Did you mean `invalid-attr-value`?
 
   × Invalid rule code in suppression: `not-a-rule`
    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:6:42]
@@ -63,4 +64,22 @@ source: crates/djangofmt_lint/tests/check/main.rs
     · ────────────────────┬────────────────────
     ·                     ╰── here
  26 │ <div></div>
+    ╰────
+
+  × Invalid rule code in suppression: `not-a-rule`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:29:1]
+ 28 │ <!-- The same code listed twice is one mistake -->
+ 29 │ {# djangofmt: ignore[not-a-rule, not-a-rule] #}
+    · ───────────────────────┬───────────────────────
+    ·                        ╰── here
+ 30 │ <div></div>
+    ╰────
+
+  × Invalid rule code in suppression: `stale-rule`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:33:22]
+ 32 │ <!-- Deleting the comment takes its free-text reason along, so that fix is unsafe -->
+ 33 │ {# djangofmt: ignore[stale-rule]: kept until someone checks what replaced it #}
+    ·                      ─────┬────
+    ·                           ╰── here
+ 34 │ <div></div>
     ╰────

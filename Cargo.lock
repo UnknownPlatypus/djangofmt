@@ -482,6 +482,7 @@ dependencies = [
  "rustywind_core",
  "serde",
  "smallvec",
+ "strsim",
  "strum",
  "textwrap",
  "thiserror",

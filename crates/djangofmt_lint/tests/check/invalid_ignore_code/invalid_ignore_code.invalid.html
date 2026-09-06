@@ -24,3 +24,11 @@
 <!-- Selector words are no ignore codes: neither `all` nor a rule category names a rule -->
 {# djangofmt: ignore[all, correctness] #}
 <div></div>
+
+<!-- The same code listed twice is one mistake -->
+{# djangofmt: ignore[not-a-rule, not-a-rule] #}
+<div></div>
+
+<!-- Deleting the comment takes its free-text reason along, so that fix is unsafe -->
+{# djangofmt: ignore[stale-rule]: kept until someone checks what replaced it #}
+<div></div>
