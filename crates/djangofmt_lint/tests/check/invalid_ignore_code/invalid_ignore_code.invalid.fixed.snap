@@ -21,3 +21,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- A comment sharing its line keeps the line -->
 <div><p>hi</p></div>
+
+<!-- Selector words are no ignore codes: neither `all` nor a rule category names a rule -->
+<div></div>

@@ -121,3 +121,22 @@ source: crates/djangofmt_lint/tests/check/main.rs
  48 │ <div></div>
     ╰────
   help: Use `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of the file instead
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:51:1]
+ 50 │ <!-- Malformed, with whitespace control: the trimming markers go with the comment -->
+ 51 │ {#- djangofmt: ignore[] -#}
+    · ─────────────┬─────────────
+    ·              ╰── here
+ 52 │ <div></div>
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
+
+  × Invalid suppression comment: missing suppression codes like `[code, ...]`
+    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:55:1]
+ 54 │ <!-- Malformed and unterminated at the end of the file -->
+ 55 │ {# djangofmt: ignore[]
+    · ───────────┬───────────
+    ·            ╰── here
+    ╰────
+  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`

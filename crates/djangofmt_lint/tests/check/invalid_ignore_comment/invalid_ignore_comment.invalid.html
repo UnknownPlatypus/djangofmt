@@ -46,3 +46,10 @@
 <!-- Repeated, every occurrence goes -->
 {# djangofmt: ignore[invalid-syntax, invalid-attr-value, invalid-syntax] #}
 <div></div>
+
+<!-- Malformed, with whitespace control: the trimming markers go with the comment -->
+{#- djangofmt: ignore[] -#}
+<div></div>
+
+<!-- Malformed and unterminated at the end of the file -->
+{# djangofmt: ignore[]

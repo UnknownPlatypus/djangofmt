@@ -20,3 +20,7 @@
 
 <!-- A comment sharing its line keeps the line -->
 <div>{# djangofmt: ignore[gone-rule] #}<p>hi</p></div>
+
+<!-- Selector words are no ignore codes: neither `all` nor a rule category names a rule -->
+{# djangofmt: ignore[all, correctness] #}
+<div></div>

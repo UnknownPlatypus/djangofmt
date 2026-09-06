@@ -53,4 +53,14 @@ source: crates/djangofmt_lint/tests/check/main.rs
  22 │ <div>{# djangofmt: ignore[gone-rule] #}<p>hi</p></div>
     ·                           ────┬────
     ·                               ╰── here
+ 23 │ 
+    ╰────
+
+  × Invalid rule code in suppression: `all`, `correctness`
+    ╭─[tests/check/invalid_ignore_code/invalid_ignore_code.invalid.html:25:1]
+ 24 │ <!-- Selector words are no ignore codes: neither `all` nor a rule category names a rule -->
+ 25 │ {# djangofmt: ignore[all, correctness] #}
+    · ────────────────────┬────────────────────
+    ·                     ╰── here
+ 26 │ <div></div>
     ╰────

@@ -367,6 +367,10 @@ mod tests {
     #[case::trailing_comma("djangofmt: ignore[a,]", IgnoreDirective::Ignore(vec!["a"]))]
     #[case::reason("djangofmt: ignore[a]: free-text reason", IgnoreDirective::Ignore(vec!["a"]))]
     #[case::whitespace_control("- djangofmt: ignore[a] -", IgnoreDirective::Ignore(vec!["a"]))]
+    #[case::plus_whitespace_control("+ djangofmt: ignore[a]", IgnoreDirective::Ignore(vec!["a"]))]
+    // A comment may wrap over lines, and a code may carry a `:` so `lint:code` reads as one.
+    #[case::multiline("\n  djangofmt: ignore[a,\n  b]\n", IgnoreDirective::Ignore(vec!["a", "b"]))]
+    #[case::namespaced_code("djangofmt: ignore[lint:a]", IgnoreDirective::Ignore(vec!["lint:a"]))]
     #[case::unknown_keyword(
         "djangofmt: silence[a]",
         IgnoreDirective::Malformed(ParseErrorKind::UnknownKeyword)
@@ -402,9 +406,10 @@ mod tests {
     #[rstest]
     fn skip_comments_the_linter_has_no_say_on(
         #[values(
-            " djangofmt:ignore ",                // the formatter's directive
+            " djangofmt:ignore ",                // the formatter's old directive
             "djangofmt:ignore this is generated", // with a reason
             "djangofmt ignore[a]",               // missing colon
+            "djangofmt-lint: ignore[a]",         // a namespace that merely starts the same
             "ignore[a]",                         // not addressed to djangofmt
             "See djangofmt: https://example.com" // merely mentioning it
         )]
