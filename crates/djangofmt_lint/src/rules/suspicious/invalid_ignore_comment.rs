@@ -37,6 +37,10 @@ pub enum IgnoreCommentViolation {
 /// ```
 ///
 /// Or delete the invalid suppression comment.
+///
+/// ## Fix safety
+/// Removing a malformed or misplaced comment is marked as unsafe because it deletes
+/// the whole comment, so any trailing free text is deleted too.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct InvalidIgnoreComment {
