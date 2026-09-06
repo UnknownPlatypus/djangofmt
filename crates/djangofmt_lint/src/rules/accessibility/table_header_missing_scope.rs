@@ -93,12 +93,11 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         {
             return;
         }
-        let offset = checker.source_offset(element.tag_name);
         checker.report_diagnostic(
             &TableHeaderMissingScope {
                 kind: ScopeViolation::MissingOrEmpty,
             },
-            span(offset, element.tag_name.len()),
+            checker.source_span(element.tag_name),
         );
         return;
     };
@@ -123,12 +122,11 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         }
         // `scope=""` or a valueless `scope`: present but with no usable value.
         _ => {
-            let offset = checker.source_offset(scope.name);
             checker.report_diagnostic(
                 &TableHeaderMissingScope {
                     kind: ScopeViolation::MissingOrEmpty,
                 },
-                span(offset, scope.name.len()),
+                checker.source_span(scope.name),
             );
         }
     }

@@ -2,9 +2,9 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for the same attribute name appearing more than once on an HTML element.
@@ -66,8 +66,7 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         });
 
         if is_duplicate {
-            let offset = checker.source_offset(name);
-            checker.report_diagnostic(&DuplicateAttr { name }, span(offset, name.len()));
+            checker.report_diagnostic(&DuplicateAttr { name }, checker.source_span(name));
         }
     }
 }

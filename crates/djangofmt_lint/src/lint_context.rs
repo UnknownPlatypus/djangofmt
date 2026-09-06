@@ -14,6 +14,7 @@ use crate::Settings;
 use crate::fix::Fix;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
+use crate::span;
 use crate::suppression;
 use crate::violation::Violation;
 
@@ -94,6 +95,26 @@ impl<'a> LintContext<'a> {
         );
 
         slice_start - src_start
+    }
+
+    /// The byte offset just past `slice` within the source.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `slice` is not a subslice of the source.
+    #[must_use]
+    pub fn source_end(&self, slice: &str) -> usize {
+        self.source_offset(slice) + slice.len()
+    }
+
+    /// The span of `slice` within the source.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `slice` is not a subslice of the source.
+    #[must_use]
+    pub fn source_span(&self, slice: &str) -> SourceSpan {
+        span(self.source_offset(slice), slice.len())
     }
 
     /// Build a guard for an enabled rule. Returns `None` if the rule is disabled.

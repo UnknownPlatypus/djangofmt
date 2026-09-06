@@ -68,7 +68,7 @@ fn siblings_after<'n, 's>(
     checker: &Checker<'_>,
 ) -> Option<&'n [Node<'s>]> {
     let start = |node: &Node<'_>| checker.source_offset(node.raw);
-    let end = |node: &Node<'_>| checker.source_offset(node.raw) + node.raw.len();
+    let end = |node: &Node<'_>| checker.source_end(node.raw);
     loop {
         // Siblings are ordered and disjoint: the container is the first one ending past `offset`.
         let index = nodes.partition_point(|node| end(node) <= offset);
@@ -93,7 +93,7 @@ fn guarded_ranges(checker: &Checker<'_>, rest: &[Node<'_>]) -> Option<SmallVec<[
             && !matches!(node.kind, NodeKind::JinjaComment(_) | NodeKind::Comment(_))
     })?;
     let start = checker.source_offset(target.raw);
-    let end = start + target.raw.len();
+    let end = checker.source_end(target.raw);
     let mut ranges = SmallVec::new();
     let mut cursor = start;
     for child in child_slices(target).flatten() {

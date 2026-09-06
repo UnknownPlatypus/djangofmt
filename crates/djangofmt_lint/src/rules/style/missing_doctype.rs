@@ -3,9 +3,9 @@ use std::borrow::Cow;
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
 use markup_fmt::parser::parse_jinja_tag_name;
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for HTML documents that contain an `<html>` tag but no `<!DOCTYPE html>` declaration.
@@ -82,8 +82,7 @@ pub fn check(root: &Root<'_>, checker: &Checker<'_>) {
         return;
     };
 
-    let offset = checker.source_offset(html.tag_name);
-    checker.report_diagnostic(&MissingDoctype, span(offset, html.tag_name.len()));
+    checker.report_diagnostic(&MissingDoctype, checker.source_span(html.tag_name));
 }
 
 /// Returns `true` if the block opens with `{% block %}`, marking the file as a partial.

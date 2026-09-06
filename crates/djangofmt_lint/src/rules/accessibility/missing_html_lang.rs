@@ -2,10 +2,10 @@ use std::borrow::Cow;
 
 use markup_fmt::ast::Element;
 
+use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::declares_native_attr;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
 
 /// ## What it does
 /// Checks for `<html>` tags that do not declare a `lang` attribute.
@@ -61,6 +61,5 @@ pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
         return;
     }
 
-    let offset = checker.source_offset(element.tag_name);
-    checker.report_diagnostic(&MissingHtmlLang, span(offset, element.tag_name.len()));
+    checker.report_diagnostic(&MissingHtmlLang, checker.source_span(element.tag_name));
 }
