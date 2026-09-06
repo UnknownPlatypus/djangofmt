@@ -64,7 +64,16 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
     Edit::deletion(span(delete_start, delete_end - delete_start))
 }
 
-/// Drops `remove` from a directive's `codes`, returning the span to report and the edit.
+/// The outcome of [`delete_codes_or_comment`].
+pub struct CodesDeletion {
+    /// The span to report the violation on.
+    pub span: SourceSpan,
+    pub edit: Edit,
+    /// Nothing would remain, so the whole comment goes.
+    pub whole_comment: bool,
+}
+
+/// Drops `remove` from a directive's `codes`.
 ///
 /// When one code is dropped, only that entry and its comma are removed:
 ///
@@ -91,13 +100,27 @@ pub fn delete_codes_or_comment(
     comment: &str,
     codes: &[&str],
     remove: &[&str],
-) -> (SourceSpan, Edit) {
+) -> CodesDeletion {
     debug_assert!(
         !remove.is_empty() && remove.iter().all(|code| codes.contains(code)),
         "`remove` must be a non-empty subset of `codes`"
     );
-    if let [only] = codes {
-        return (ctx.source_span(only), delete_comment(ctx, comment));
+    let remaining: Vec<&str> = codes
+        .iter()
+        .copied()
+        .filter(|code| !remove.contains(code))
+        .collect();
+    if remaining.is_empty() {
+        // A lone code is reported on the code itself, a list on the whole comment.
+        let span = match codes {
+            [only] => ctx.source_span(only),
+            _ => ctx.source_span(comment),
+        };
+        return CodesDeletion {
+            span,
+            edit: delete_comment(ctx, comment),
+            whole_comment: true,
+        };
     }
     let mut listed = codes
         .iter()
@@ -108,24 +131,19 @@ pub fn delete_codes_or_comment(
             || (ctx.source_end(codes[index - 1]), ctx.source_end(code)),
             |next| (ctx.source_offset(code), ctx.source_offset(next)),
         );
-        return (
-            ctx.source_span(code),
-            Edit::deletion(span(start, end - start)),
-        );
+        return CodesDeletion {
+            span: ctx.source_span(code),
+            edit: Edit::deletion(span(start, end - start)),
+            whole_comment: false,
+        };
     }
-    let remaining: Vec<&str> = codes
-        .iter()
-        .copied()
-        .filter(|code| !remove.contains(code))
-        .collect();
-    let edit = if remaining.is_empty() {
-        delete_comment(ctx, comment)
-    } else {
-        let (start, end) = (
-            ctx.source_offset(codes[0]),
-            ctx.source_end(codes[codes.len() - 1]),
-        );
-        Edit::replacement(remaining.join(", "), span(start, end - start))
-    };
-    (ctx.source_span(comment), edit)
+    let (start, end) = (
+        ctx.source_offset(codes[0]),
+        ctx.source_end(codes[codes.len() - 1]),
+    );
+    CodesDeletion {
+        span: ctx.source_span(comment),
+        edit: Edit::replacement(remaining.join(", "), span(start, end - start)),
+        whole_comment: false,
+    }
 }

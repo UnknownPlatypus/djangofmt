@@ -75,15 +75,15 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let (span, edit) = delete_codes_or_comment(checker.context(), comment.raw, codes, &invalid);
+    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &invalid);
     let violation = InvalidIgnoreCode {
         codes: invalid
             .iter()
             .map(|code| format!("`{code}`"))
             .collect::<Vec<_>>()
             .join(", "),
-        whole_comment: invalid.len() == codes.len(),
+        whole_comment: deletion.whole_comment,
     };
-    let mut guard = checker.report_diagnostic(&violation, span);
-    guard.set_fix(Fix::safe_edit(edit));
+    let mut guard = checker.report_diagnostic(&violation, deletion.span);
+    guard.set_fix(Fix::safe_edit(deletion.edit));
 }
