@@ -308,7 +308,7 @@ pub fn file_ignored_rules(source: &str) -> RuleSet {
 }
 
 /// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-fn strip_bom(source: &str) -> &str {
+pub fn strip_bom(source: &str) -> &str {
     source.strip_prefix('\u{feff}').unwrap_or(source)
 }
 

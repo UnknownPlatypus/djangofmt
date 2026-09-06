@@ -3,6 +3,7 @@ use miette::SourceSpan;
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
 use crate::span;
+use crate::suppression::strip_bom;
 
 /// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
 ///
@@ -51,10 +52,13 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
         .find('\n')
         .map_or(source.len(), |i| end + i + 1);
 
-    let standalone = source[line_start..start].trim_ascii().is_empty()
-        && source[end..line_end].trim_ascii().is_empty();
+    // A BOM belongs to the file rather than to the line: it neither keeps the comment from
+    // being standalone, nor goes away with the line.
+    let before = strip_bom(&source[line_start..start]);
+    let standalone =
+        before.trim_ascii().is_empty() && source[end..line_end].trim_ascii().is_empty();
     let (delete_start, delete_end) = if standalone {
-        (line_start, line_end)
+        (start - before.len(), line_end)
     } else {
         (start, end)
     };

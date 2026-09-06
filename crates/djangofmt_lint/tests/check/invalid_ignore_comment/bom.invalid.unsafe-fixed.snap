@@ -1,0 +1,6 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+﻿<div></div>
+
+{# A BOM at the top does not keep the first comment from having its line to itself #}
