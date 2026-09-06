@@ -41,31 +41,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct UnusedIgnoreCode {
-    /// Codes whose rule reported nothing where the comment applies, comma-separated.
-    pub unmatched: String,
-    /// Codes whose rule is not enabled, comma-separated.
-    pub disabled: String,
-    /// Codes repeating an earlier one of the same comment, comma-separated.
-    pub duplicated: String,
+    /// The unused codes, grouped by reason: `` `a`; non-enabled: `b`, `c` ``.
+    pub codes: String,
     /// Whether every listed code is unused, so the fix removes the whole comment.
     pub whole_comment: bool,
-}
-
-impl UnusedIgnoreCode {
-    /// The unused codes grouped by reason; a bare group is the unmatched one.
-    fn reasons(&self) -> String {
-        let mut reasons = Vec::new();
-        if !self.unmatched.is_empty() {
-            reasons.push(self.unmatched.clone());
-        }
-        if !self.disabled.is_empty() {
-            reasons.push(format!("non-enabled: {}", self.disabled));
-        }
-        if !self.duplicated.is_empty() {
-            reasons.push(format!("duplicated: {}", self.duplicated));
-        }
-        reasons.join("; ")
-    }
 }
 
 impl Violation for UnusedIgnoreCode {
@@ -75,7 +54,7 @@ impl Violation for UnusedIgnoreCode {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        format!("Unused rule code in suppression: {}", self.reasons()).into()
+        format!("Unused rule code in suppression: {}", self.codes).into()
     }
 
     fn fix_title(&self) -> Option<&'static str> {
@@ -88,7 +67,7 @@ impl Violation for UnusedIgnoreCode {
 }
 
 /// Why a listed code silences nothing.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum Unused {
     /// The rule is enabled but reported nothing where the comment applies.
     Unmatched,
@@ -96,6 +75,19 @@ enum Unused {
     Disabled,
     /// An earlier code of the same comment already covers it.
     Duplicated,
+}
+
+impl Unused {
+    /// In message order: the unmatched codes lead, unlabeled, as the common case.
+    const ALL: [Self; 3] = [Self::Unmatched, Self::Disabled, Self::Duplicated];
+
+    const fn label(self) -> &'static str {
+        match self {
+            Self::Unmatched => "",
+            Self::Disabled => "non-enabled: ",
+            Self::Duplicated => "duplicated: ",
+        }
+    }
 }
 
 /// Report the unused codes of every comment, once per comment.
@@ -127,24 +119,20 @@ fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<
     }
 
     let mut remove = Vec::new();
-    let mut by_reason: [Vec<&str>; 3] = Default::default();
+    let mut unused = Vec::new();
     for (index, &code) in codes.iter().enumerate() {
-        let Some(reason) = classify(code, &codes[..index], comment, is_file_level, checker) else {
-            continue;
-        };
-        remove.push(index);
-        by_reason[reason as usize].push(code);
+        if let Some(reason) = classify(code, &codes[..index], comment, is_file_level, checker) {
+            remove.push(index);
+            unused.push((reason, code));
+        }
     }
     if remove.is_empty() {
         return;
     }
 
     let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
-    let [unmatched, disabled, duplicated] = by_reason.map(|codes| quote_list(&codes));
     let violation = UnusedIgnoreCode {
-        unmatched,
-        disabled,
-        duplicated,
+        codes: describe(&unused),
         whole_comment: deletion.whole_comment,
     };
     let mut guard = checker.report_diagnostic(&violation, deletion.span);
@@ -184,10 +172,18 @@ fn classify(
     }
 }
 
-fn quote_list(codes: &[&str]) -> String {
-    codes
+/// The unused codes grouped by reason, `; ` between groups: `` `a`; non-enabled: `b`, `c` ``.
+fn describe(unused: &[(Unused, &str)]) -> String {
+    Unused::ALL
         .iter()
-        .map(|code| format!("`{code}`"))
+        .filter_map(|&reason| {
+            let codes = unused
+                .iter()
+                .filter(|(cause, _)| *cause == reason)
+                .map(|(_, code)| format!("`{code}`"))
+                .collect::<Vec<_>>();
+            (!codes.is_empty()).then(|| format!("{}{}", reason.label(), codes.join(", ")))
+        })
         .collect::<Vec<_>>()
-        .join(", ")
+        .join("; ")
 }
