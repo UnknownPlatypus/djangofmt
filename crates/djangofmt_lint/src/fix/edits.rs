@@ -51,15 +51,27 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
     Edit::deletion(span(delete_start, delete_end - delete_start))
 }
 
-/// The span to report and the edit dropping `remove` from a directive's `codes`: one code is
-/// cut out with its separator, several are rewritten, and the comment goes once none is left.
+/// Drops `remove` from a directive's `codes`, returning the span to report and the edit.
 ///
-/// ```text
+/// When one code is dropped, only that entry and its comma are removed:
+///
+/// ```diff
 /// -{# djangofmt: ignore[not-a-rule, invalid-attr-value] #}
 /// +{# djangofmt: ignore[invalid-attr-value] #}
+/// ```
+///
+/// When several codes go but some stay, the list is rewritten:
+///
+/// ```diff
 /// -{# djangofmt: ignore[not-a-rule, invalid-attr-value, nor-this, empty-attr-value] #}
 /// +{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
+/// ```
+///
+/// When nothing remains, the whole comment goes:
+///
+/// ```diff
 /// -{# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
+///  <form method="yes"></form>
 /// ```
 pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
