@@ -17,7 +17,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   # renovate: datasource=github-releases depName=astral-sh/uv
-  UV_VERSION: 0.12.6
+  UV_VERSION: 0.12.9
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
   # Make sure CI fails on all warnings, including Clippy lints
