@@ -1,0 +1,73 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated HTML ignore comment
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:2:1]
+ 1 │ <!-- The formatter's directive in an HTML comment -->
+ 2 │ <!-- djangofmt:ignore -->
+   · ────────────┬────────────
+   ·             ╰── here
+ 3 │ <div   class="kept"  ></div>
+   ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:6:1]
+ 5 │ <!-- No spaces around the comment body -->
+ 6 │ <!--djangofmt:ignore-->
+   · ───────────┬───────────
+   ·            ╰── here
+ 7 │ <div></div>
+   ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:10:1]
+  9 │ <!-- Whitespace around the colon -->
+ 10 │ <!-- djangofmt : ignore -->
+    · ─────────────┬─────────────
+    ·              ╰── here
+ 11 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:14:1]
+ 13 │ <!-- A free-text reason is kept -->
+ 14 │ <!-- djangofmt:ignore legacy markup, see #123 -->
+    · ────────────────────────┬────────────────────────
+    ·                         ╰── here
+ 15 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:19:3]
+ 18 │ <div>
+ 19 │   <!-- djangofmt:ignore -->
+    ·   ────────────┬────────────
+    ·               ╰── here
+ 20 │   <p     class="kept"  >hi</p>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:24:1]
+ 23 │     <!-- Reported but left alone: Django's {# #} comments are single-line -->
+ 24 │ ╭─▶ <!-- djangofmt:ignore
+ 25 │ ├─▶      legacy markup, see #123 -->
+    · ╰──── here
+ 26 │     <div   class="kept"  ></div>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:29:1]
+ 28 │ <!-- Reported but left alone: `#}` would end the new comment early -->
+ 29 │ <!-- djangofmt:ignore #}{{ expression }} -->
+    · ──────────────────────┬─────────────────────
+    ·                       ╰── here
+ 30 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as a `{# #}` template comment instead

@@ -1,0 +1,33 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- The formatter's directive in an HTML comment -->
+{# djangofmt:ignore #}
+<div   class="kept"  ></div>
+
+<!-- No spaces around the comment body -->
+{#djangofmt:ignore#}
+<div></div>
+
+<!-- Whitespace around the colon -->
+{# djangofmt : ignore #}
+<div   class="kept"  ></div>
+
+<!-- A free-text reason is kept -->
+{# djangofmt:ignore legacy markup, see #123 #}
+<div   class="kept"  ></div>
+
+<!-- Nested inside an element -->
+<div>
+  {# djangofmt:ignore #}
+  <p     class="kept"  >hi</p>
+</div>
+
+<!-- Reported but left alone: Django's {# #} comments are single-line -->
+<!-- djangofmt:ignore
+     legacy markup, see #123 -->
+<div   class="kept"  ></div>
+
+<!-- Reported but left alone: `#}` would end the new comment early -->
+<!-- djangofmt:ignore #}{{ expression }} -->
+<div   class="kept"  ></div>

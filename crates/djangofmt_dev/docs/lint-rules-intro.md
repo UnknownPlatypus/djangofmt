@@ -49,3 +49,5 @@ A `{# djangofmt: file-ignore[...] #}` comment at the **very top of the file**, b
 A directive djangofmt cannot honor is reported rather than skipped silently:
 - [`invalid-ignore-comment`](rules/invalid-ignore-comment.md) for a malformed or misplaced one
 - [`invalid-ignore-code`](rules/invalid-ignore-code.md) for a code naming no rule.
+
+The formatter's legacy `<!-- djangofmt:ignore -->` still works, but an HTML comment is rendered to the client: [`redirected-ignore`](rules/redirected-ignore.md) rewrites it as `{# djangofmt:ignore #}`, see [Disabling formatting](formatting.md#disabling-formatting).
