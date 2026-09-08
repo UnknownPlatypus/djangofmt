@@ -43,7 +43,7 @@ targets = [
   "x86_64-pc-windows-msvc",
   "i686-unknown-linux-gnu",
   "i686-unknown-linux-musl",
-  "i686-pc-windows-msvc"
+  "i686-pc-windows-msvc",
 ]
 # Whether to auto-include files like READMEs, LICENSEEs, and CHANGELOGs (default true)
 auto-includes = false
@@ -66,7 +66,7 @@ github-custom-job-permissions = { "publish-playground-and-docs" = { pages = "wri
 # Post-announce jobs to run in CI
 post-announce-jobs = [
   "./release-notify-pre-commit-mirror",
-  "./publish-playground-and-docs"
+  "./publish-playground-and-docs",
 ]
 # Whether to install an updater program
 install-updater = false
