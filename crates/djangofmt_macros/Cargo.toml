@@ -17,7 +17,7 @@ proc-macro2 = { workspace = true }
 quote = { workspace = true }
 syn = {
   workspace = true,
-  features = ["derive", "extra-traits", "full", "parsing"]
+  features = ["derive", "extra-traits", "full", "parsing"],
 }
 
 [lints]

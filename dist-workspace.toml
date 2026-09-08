@@ -11,8 +11,9 @@ aarch64-unknown-linux-gnu = "2.28"
 
 # Config for 'dist'
 [dist]
-# `release.yml` is hand-patched for least-privilege job permissions and to keep the
-# release tag out of shell source, so `dist` must not verify or regenerate it.
+# `release.yml` is hand-patched for least-privilege job permissions, to keep the
+# release tag out of shell source, and to call reusable workflows via `$/` rather
+# than `./`, so `dist` must not verify or regenerate it.
 # Re-apply those patches after any `dist init`.
 allow-dirty = ["ci"]
 # The preferred dist version to use in CI (Cargo.toml SemVer syntax)
@@ -43,7 +44,7 @@ targets = [
   "x86_64-pc-windows-msvc",
   "i686-unknown-linux-gnu",
   "i686-unknown-linux-musl",
-  "i686-pc-windows-msvc"
+  "i686-pc-windows-msvc",
 ]
 # Whether to auto-include files like READMEs, LICENSEEs, and CHANGELOGs (default true)
 auto-includes = false
@@ -66,7 +67,7 @@ github-custom-job-permissions = { "publish-playground-and-docs" = { pages = "wri
 # Post-announce jobs to run in CI
 post-announce-jobs = [
   "./release-notify-pre-commit-mirror",
-  "./publish-playground-and-docs"
+  "./publish-playground-and-docs",
 ]
 # Whether to install an updater program
 install-updater = false
