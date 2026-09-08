@@ -84,6 +84,13 @@ impl<'a> Checker<'a> {
         self.context.is_rule_enabled(rule)
     }
 
+    /// Returns whether `per-file-ignores` turned the rule off for this file.
+    #[must_use]
+    #[inline]
+    pub const fn is_rule_per_file_ignored(&self, rule: Rule) -> bool {
+        self.context.is_rule_per_file_ignored(rule)
+    }
+
     /// Returns whether any of the given rules should be checked.
     #[must_use]
     #[inline]

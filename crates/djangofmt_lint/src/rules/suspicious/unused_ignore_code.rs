@@ -2,25 +2,24 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 use crate::Checker;
+use crate::fix::FixAvailability;
 use crate::fix::edits::delete_codes_or_comment;
-use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{IgnoreComment, IgnoreDirective, ReservedCode};
+use crate::rule_set::RuleSet;
+use crate::suppression::{IgnoreComment, IgnoreScope, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for `ignore[...]` / `file-ignore[...]` suppression comments listing a code that silences
-/// nothing: the rule reported no diagnostic where the comment applies, the rule is not enabled, or
-/// the code is already listed in the same comment.
+/// Checks for `ignore[...]` / `file-ignore[...]` suppression comments listing a rule code that
+/// silences nothing.
 ///
 /// ## Why is this bad?
-/// A suppression that no longer matches any diagnostic is likely a leftover from markup that was
-/// since fixed, and should be removed to avoid confusion. Left in place, it would also hide a new
-/// violation of that rule.
+/// A suppression matching no diagnostic is usually a leftover from markup that was since fixed.
+/// It adds noise, and goes on hiding the next real violation of that rule at the same spot.
 ///
-/// Codes naming no rule are left to `invalid-ignore-code`. `format` is never reported, as whether
-/// the formatter needs it is not the linter's to know. `invalid-syntax` is reported once the file
-/// parses again.
+/// A code naming no rule at all is left to `invalid-ignore-code`. `format` addresses the
+/// formatter, which the linter cannot see, so it counts as used unless the same comment already
+/// lists it. `invalid-syntax` counts as used only while the file fails to parse.
 ///
 /// ## Example
 /// ```html
@@ -41,7 +40,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct UnusedIgnoreCode {
-    /// The unused codes, grouped by reason: `` `a`; non-enabled: `b`, `c` ``.
+    /// The unused codes, grouped by reason: `` `a`; `b`, `c` (non-enabled) ``.
     pub codes: String,
     /// Whether every listed code is unused, so the fix removes the whole comment.
     pub whole_comment: bool,
@@ -84,8 +83,8 @@ impl Unused {
     const fn label(self) -> &'static str {
         match self {
             Self::Unmatched => "",
-            Self::Disabled => "non-enabled: ",
-            Self::Duplicated => "duplicated: ",
+            Self::Disabled => " (non-enabled)",
+            Self::Duplicated => " (duplicated)",
         }
     }
 }
@@ -95,8 +94,7 @@ pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
     let own_code: &str = Rule::UnusedIgnoreCode.into();
     // The rule runs after suppression, so its own file-level opt-out is honored here.
     let file_ignored = comments.iter().any(|comment| {
-        comment.is_leading
-            && matches!(&comment.directive, IgnoreDirective::FileIgnore(codes) if codes.contains(&own_code))
+        matches!(comment.in_force(), Some((codes, IgnoreScope::File)) if codes.contains(&own_code))
     });
     if file_ignored {
         return;
@@ -107,11 +105,9 @@ pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
 }
 
 fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<'_>) {
-    let (codes, is_file_level) = match &comment.directive {
-        IgnoreDirective::Ignore(codes) => (codes.as_slice(), false),
-        IgnoreDirective::FileIgnore(codes) if comment.is_leading => (codes.as_slice(), true),
-        // Malformed and misplaced directives are `invalid-ignore-comment`'s to report.
-        IgnoreDirective::FileIgnore(_) | IgnoreDirective::Malformed(_) => return,
+    // Malformed and misplaced directives are `invalid-ignore-comment`'s to report.
+    let Some((codes, scope)) = comment.in_force() else {
+        return;
     };
     // A comment silencing this very rule is left alone, whatever else it lists.
     if codes.contains(&own_code) {
@@ -121,7 +117,7 @@ fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<
     let mut remove = Vec::new();
     let mut unused = Vec::new();
     for (index, &code) in codes.iter().enumerate() {
-        if let Some(reason) = classify(code, &codes[..index], comment, is_file_level, checker) {
+        if let Some(reason) = classify(code, &codes[..index], comment.matched, scope, checker) {
             remove.push(index);
             unused.push((reason, code));
         }
@@ -132,23 +128,20 @@ fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<
 
     let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
     let violation = UnusedIgnoreCode {
-        codes: describe(&unused),
+        codes: format_by_reason(&unused),
         whole_comment: deletion.whole_comment,
     };
-    let mut guard = checker.report_diagnostic(&violation, deletion.span);
-    guard.set_fix(if deletion.whole_comment {
-        Fix::unsafe_edit(deletion.edit)
-    } else {
-        Fix::safe_edit(deletion.edit)
-    });
+    deletion.report(checker.context(), &violation);
 }
 
 /// Why `code` is unused, `None` when it is used or not this rule's to judge.
+///
+/// `matched` holds the rules the comment silenced, `earlier` the codes it lists before `code`.
 fn classify(
     code: &str,
     earlier: &[&str],
-    comment: &IgnoreComment<'_>,
-    is_file_level: bool,
+    matched: RuleSet,
+    scope: IgnoreScope,
     checker: &Checker<'_>,
 ) -> Option<Unused> {
     let rule = Rule::from_str(code);
@@ -161,19 +154,24 @@ fn classify(
         return Some(Unused::Duplicated);
     }
     match (rule, reserved) {
-        (Ok(rule), _) if comment.matched.contains(rule) => None,
+        (Ok(rule), _) if matched.contains(rule) => None,
         (Ok(rule), _) if checker.is_rule_enabled(rule) => Some(Unused::Unmatched),
+        // `per-file-ignores` turned the rule off for this file, so the comment is what would take
+        // over if that setting is ever narrowed: deleting it would lose the author's intent.
+        (Ok(rule), _) if checker.is_rule_per_file_ignored(rule) => None,
         (Ok(_), _) => Some(Unused::Disabled),
         // The file parsed, so there is no syntax error left to suppress.
         // On a node the code is misplaced, which `invalid-ignore-comment` reports.
-        (Err(_), Ok(ReservedCode::InvalidSyntax)) if is_file_level => Some(Unused::Unmatched),
+        (Err(_), Ok(ReservedCode::InvalidSyntax)) if scope == IgnoreScope::File => {
+            Some(Unused::Unmatched)
+        }
         // `format` speaks to the formatter, which the linter cannot see.
         (Err(_), _) => None,
     }
 }
 
-/// The unused codes grouped by reason, `; ` between groups: `` `a`; non-enabled: `b`, `c` ``.
-fn describe(unused: &[(Unused, &str)]) -> String {
+/// The unused codes grouped by reason, `; ` between groups: `` `a`; `b`, `c` (non-enabled) ``.
+fn format_by_reason(unused: &[(Unused, &str)]) -> String {
     Unused::ALL
         .iter()
         .filter_map(|&reason| {
@@ -182,7 +180,7 @@ fn describe(unused: &[(Unused, &str)]) -> String {
                 .filter(|(cause, _)| *cause == reason)
                 .map(|(_, code)| format!("`{code}`"))
                 .collect::<Vec<_>>();
-            (!codes.is_empty()).then(|| format!("{}{}", reason.label(), codes.join(", ")))
+            (!codes.is_empty()).then(|| format!("{}{}", codes.join(", "), reason.label()))
         })
         .collect::<Vec<_>>()
         .join("; ")

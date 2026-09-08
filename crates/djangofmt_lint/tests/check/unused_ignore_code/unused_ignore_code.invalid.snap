@@ -10,7 +10,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  2 │ <!-- The leading `invalid-syntax` above is unused: the file parses -->
    ╰────
 
-  × Unused rule code in suppression: non-enabled: `invalid-attr-value`
+  × Unused rule code in suppression: `invalid-attr-value` (non-enabled)
    ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:5:22]
  4 │ <!-- Only this rule runs on fixtures, so a rule code is unused as non-enabled -->
  5 │ {# djangofmt: ignore[invalid-attr-value] #}
@@ -19,7 +19,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  6 │ <form method="yes"></form>
    ╰────
 
-  × Unused rule code in suppression: duplicated: `format`
+  × Unused rule code in suppression: `format` (duplicated)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:9:30]
   8 │ <!-- The repeat of a used code goes, the first occurrence stays -->
   9 │ {# djangofmt: ignore[format, format] #}
@@ -28,7 +28,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  10 │ <div   class="x"   ></div>
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `empty-attr-value`
+  × Unused rule code in suppression: `empty-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:13:30]
  12 │ <!-- Unused code among used ones: only that entry and its comma go -->
  13 │ {# djangofmt: ignore[format, empty-attr-value] #}
@@ -37,7 +37,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  14 │ <div   id=""   ></div>
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `invalid-attr-value`, `empty-attr-value`
+  × Unused rule code in suppression: `invalid-attr-value`, `empty-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:17:1]
  16 │ <!-- Several unused codes among used ones: the list is rewritten -->
  17 │ {# djangofmt: ignore[invalid-attr-value, format, empty-attr-value] #}
@@ -46,7 +46,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  18 │ <form method="yes"></form>
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `invalid-attr-value`
+  × Unused rule code in suppression: `invalid-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:21:34]
  20 │ <!-- An unknown code is left to `invalid-ignore-code`; the unused one still goes -->
  21 │ {# djangofmt: ignore[not-a-rule, invalid-attr-value] #}
@@ -55,7 +55,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  22 │ <form method="yes"></form>
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `invalid-attr-value`, `empty-attr-value`
+  × Unused rule code in suppression: `invalid-attr-value`, `empty-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:25:1]
  24 │ <!-- Every code unused: one diagnostic for the comment, which goes as a whole -->
  25 │ {# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
@@ -64,7 +64,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  26 │ <form method="yes" id=""></form>
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `empty-attr-value`
+  × Unused rule code in suppression: `empty-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:29:27]
  28 │ <!-- A comment sharing its line keeps the line -->
  29 │ <div>{# djangofmt: ignore[empty-attr-value] #}<p id="">hi</p></div>
@@ -73,7 +73,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  30 │ 
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `invalid-attr-value`
+  × Unused rule code in suppression: `invalid-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:32:22]
  31 │ <!-- Deleting the comment takes its free-text reason along, so that fix is unsafe -->
  32 │ {# djangofmt: ignore[invalid-attr-value]: kept from before the form was fixed #}
@@ -82,7 +82,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  33 │ <form method="post"></form>
     ╰────
 
-  × Unused rule code in suppression: non-enabled: `invalid-attr-value`
+  × Unused rule code in suppression: `invalid-attr-value` (non-enabled)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:36:22]
  35 │ <!-- Nothing follows the comment, so it guards nothing whatever it lists -->
  36 │ {# djangofmt: ignore[invalid-attr-value] #}

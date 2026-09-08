@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::Checker;
-use crate::fix::edits::{delete_codes_or_comment, delete_comment, positions};
+use crate::fix::edits::{delete_codes_or_comment, delete_comment, matching_indices};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::suppression::{IgnoreComment, IgnoreDirective, ParseErrorKind, ReservedCode};
@@ -122,7 +122,7 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
         IgnoreDirective::FileIgnore(_) => return,
         IgnoreDirective::Ignore(codes) => {
             let invalid_syntax =
-                positions(codes, |code| code == ReservedCode::InvalidSyntax.as_str());
+                matching_indices(codes, |code| code == ReservedCode::InvalidSyntax.as_str());
             if invalid_syntax.is_empty() {
                 return;
             }

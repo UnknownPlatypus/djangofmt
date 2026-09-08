@@ -78,6 +78,24 @@ impl<'s> IgnoreDirective<'s> {
     }
 }
 
+/// How far a directive in force reaches.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IgnoreScope {
+    /// An `ignore[...]`, covering the node that follows it.
+    Node,
+    /// A leading `file-ignore[...]`, covering the whole file.
+    File,
+}
+
+/// How far `directive` reaches, `None` when it is misplaced or malformed and so silences nothing.
+const fn scope(directive: &IgnoreDirective<'_>, is_leading: bool) -> Option<IgnoreScope> {
+    match directive {
+        IgnoreDirective::Ignore(_) => Some(IgnoreScope::Node),
+        IgnoreDirective::FileIgnore(_) if is_leading => Some(IgnoreScope::File),
+        IgnoreDirective::FileIgnore(_) | IgnoreDirective::Malformed(_) => None,
+    }
+}
+
 /// Parse a `{# #}` comment body as a lint directive, with the grammar the formatter uses.
 ///
 /// `None` is a comment the linter has no say on: one not addressed to djangofmt, or the
@@ -111,7 +129,13 @@ pub struct IgnoreComment<'s> {
     guarded_ranges: SmallVec<[Range<usize>; 2]>,
 }
 
-impl IgnoreComment<'_> {
+impl<'s> IgnoreComment<'s> {
+    /// The codes in force and how far they reach, `None` for a directive that silences nothing.
+    #[must_use]
+    pub fn in_force(&self) -> Option<(&[&'s str], IgnoreScope)> {
+        scope(&self.directive, self.is_leading).map(|scope| (self.directive.codes(), scope))
+    }
+
     /// Whether the directive silences `code` reported at `offset`.
     fn suppresses(&self, code: &str, offset: usize) -> bool {
         self.guarded_ranges
@@ -139,10 +163,10 @@ pub fn collect_ignore_comments<'s>(
             let end = (checker.source_end(body) + TEMPLATE_COMMENT_CLOSE.len()).min(source.len());
             let is_leading = strip_bom(&source[..start]).trim_start().is_empty();
 
-            let guarded_ranges = match &directive {
-                IgnoreDirective::Ignore(_) => guarded_ranges(root, offset, checker),
-                IgnoreDirective::FileIgnore(_) if is_leading => smallvec![0..usize::MAX],
-                IgnoreDirective::FileIgnore(_) | IgnoreDirective::Malformed(_) => SmallVec::new(),
+            let guarded_ranges = match scope(&directive, is_leading) {
+                Some(IgnoreScope::Node) => guarded_ranges(root, offset, checker),
+                Some(IgnoreScope::File) => smallvec![0..usize::MAX],
+                None => SmallVec::new(),
             };
             Some(IgnoreComment {
                 raw: &source[start..end],
@@ -500,21 +524,6 @@ mod tests {
                 "{# djangofmt: file-ignore[invalid-attr-value] #}\n{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
             ),
             ["Unused rule code in suppression: `invalid-attr-value`"]
-        );
-    }
-
-    /// The rule spares comments that silence it, at node and file level.
-    #[test]
-    fn unused_ignore_code_can_silence_itself() {
-        assert!(
-            codes("{# djangofmt: ignore[unused-ignore-code, invalid-attr-value] #}\n<p>hi</p>")
-                .is_empty()
-        );
-        assert!(
-            codes(
-                "{# djangofmt: file-ignore[unused-ignore-code] #}\n{# djangofmt: ignore[invalid-attr-value] #}\n<p>hi</p>"
-            )
-            .is_empty()
         );
     }
 

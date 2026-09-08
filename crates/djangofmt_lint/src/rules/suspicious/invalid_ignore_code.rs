@@ -4,8 +4,8 @@ use std::str::FromStr;
 use strum::{IntoEnumIterator, VariantNames};
 
 use crate::Checker;
-use crate::fix::edits::{delete_codes_or_comment, positions};
-use crate::fix::{Fix, FixAvailability};
+use crate::fix::FixAvailability;
+use crate::fix::edits::{delete_codes_or_comment, matching_indices};
 use crate::registry::{Rule, RuleCategory};
 use crate::suppression::{IgnoreComment, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -88,7 +88,7 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let remove = positions(codes, |code| invalid.contains(&code));
+    let remove = matching_indices(codes, |code| invalid.contains(&code));
     let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
     let violation = InvalidIgnoreCode {
         codes: invalid
@@ -104,12 +104,7 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
         },
         whole_comment: deletion.whole_comment,
     };
-    let mut guard = checker.report_diagnostic(&violation, deletion.span);
-    guard.set_fix(if deletion.whole_comment {
-        Fix::unsafe_edit(deletion.edit)
-    } else {
-        Fix::safe_edit(deletion.edit)
-    });
+    deletion.report(checker.context(), &violation);
 }
 
 /// The known code `code` was likely meant to be, when one is close enough to name.

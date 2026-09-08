@@ -19,6 +19,9 @@ pub mod unsorted_tailwind_classes {
 pub struct Settings {
     /// The set of rules that are active for this run.
     pub rules: RuleSet,
+    /// Rules `per-file-ignores` turned off for the file being linted: off by configuration rather
+    /// than by the run's selection, so a suppression comment naming one is not stale.
+    pub per_file_ignored_rules: RuleSet,
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
@@ -37,6 +40,7 @@ impl Settings {
             rules: Rule::iter()
                 .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
                 .collect(),
+            per_file_ignored_rules: RuleSet::empty(),
             unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         }
     }
@@ -117,6 +121,7 @@ impl LintConfiguration {
         (
             Settings {
                 rules,
+                per_file_ignored_rules: RuleSet::empty(),
                 unsorted_tailwind_classes: self.unsorted_tailwind_classes,
             },
             warnings,
@@ -144,13 +149,13 @@ mod tests {
 
         let none = Settings {
             rules: RuleSet::default(),
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
+            ..Settings::default()
         };
         assert!(!none.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
 
         let partial = Settings {
             rules: RuleSet::from_rule(Rule::UseHttps),
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
+            ..Settings::default()
         };
         assert!(partial.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
         assert!(!partial.any_rule_enabled(&[Rule::InvalidAttrValue]));

@@ -2,6 +2,7 @@ use miette::SourceSpan;
 
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
+use crate::violation::Violation;
 use crate::{span, strip_bom};
 
 /// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
@@ -73,8 +74,21 @@ pub struct CodesDeletion {
     pub whole_comment: bool,
 }
 
+impl CodesDeletion {
+    /// Report `violation` on the deletion's span, fixed by the deletion. Deleting the whole
+    /// comment takes any free-text reason with it, so only that fix is unsafe.
+    pub fn report(self, ctx: &LintContext<'_>, violation: &impl Violation) {
+        let mut guard = ctx.report_diagnostic(violation, self.span);
+        guard.set_fix(if self.whole_comment {
+            Fix::unsafe_edit(self.edit)
+        } else {
+            Fix::safe_edit(self.edit)
+        });
+    }
+}
+
 /// Indices in `codes` of the codes `matches` accepts, for [`delete_codes_or_comment`].
-pub fn positions(codes: &[&str], mut matches: impl FnMut(&str) -> bool) -> Vec<usize> {
+pub fn matching_indices(codes: &[&str], mut matches: impl FnMut(&str) -> bool) -> Vec<usize> {
     codes
         .iter()
         .enumerate()
