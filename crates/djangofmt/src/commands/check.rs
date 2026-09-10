@@ -344,17 +344,7 @@ fn check_path(
         fix,
         Some(path),
     ) {
-        Ok(Some(outcome)) => outcome,
-        Ok(None) => {
-            debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
-            return Ok(CheckResult {
-                path: path.to_path_buf(),
-                file_diagnostics: FileDiagnostics::empty(),
-                applied_count: 0,
-                fixes_by_rule: FxHashMap::default(),
-                skipped: true,
-            });
-        }
+        Ok(outcome) => outcome,
         Err(err) => {
             return Err(ParseError::new(
                 Some(path.to_path_buf()),
@@ -364,6 +354,11 @@ fn check_path(
             .into());
         }
     };
+    let skipped = outcome.is_none();
+    if skipped {
+        debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
+    }
+    let outcome = outcome.unwrap_or_default();
 
     if let Some(fixed) = &outcome.fixed {
         fs::write(path, fixed).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
@@ -384,7 +379,7 @@ fn check_path(
         file_diagnostics,
         applied_count: outcome.applied_count,
         fixes_by_rule: outcome.applied_by_rule,
-        skipped: false,
+        skipped,
     })
 }
 

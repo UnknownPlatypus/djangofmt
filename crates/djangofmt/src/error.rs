@@ -54,7 +54,7 @@ pub struct ParseError {
     #[label("here")]
     span: SourceSpan,
     #[help]
-    hint: Option<String>,
+    hint: String,
 }
 
 /// An error that can occur while processing a file in a command (format or check).
@@ -160,7 +160,7 @@ impl ParseError {
             src: NamedSource::new(name, source),
             span,
             // Every parse error offers a way out, unless the kind had something better to say.
-            hint: hint.or_else(|| Some(SKIP_FILE_HINT.to_string())),
+            hint: hint.unwrap_or_else(|| SKIP_FILE_HINT.to_string()),
         }
     }
 

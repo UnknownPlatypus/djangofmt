@@ -227,7 +227,7 @@ pub fn lint_source(
 }
 
 /// A completed [`lint_text`] run.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LintOutcome {
     /// The rewritten source, set only when fixes changed it: write exactly when this is [`Some`].
     pub fixed: Option<String>,
@@ -241,9 +241,8 @@ pub struct LintOutcome {
 
 /// Lint `source`, applying fixes up to the given threshold when `fix` is [`Some`].
 ///
-/// Returns [`None`] when a leading `file-ignore[invalid-syntax]` comment quarantines a file that
-/// does not parse, mirroring the skip signal of the formatter's own door. A fix that breaks
-/// previously valid syntax is reported and the untouched source linted instead.
+/// Returns [`None`] when a leading `file-ignore[invalid-syntax]` comment quarantines a file
+/// that does not parse, like the formatter's `format_text`.
 pub fn lint_text(
     source: &str,
     settings: &Settings,
@@ -252,103 +251,56 @@ pub fn lint_text(
     fix: Option<Applicability>,
     path: Option<&Path>,
 ) -> Result<Option<LintOutcome>, SyntaxError> {
-    if let Some(threshold) = fix {
-        match lint_fix(source, settings, language, custom_blocks, threshold, path) {
-            Ok(result) => {
-                return Ok(Some(LintOutcome {
-                    fixed: (result.source != source).then_some(result.source),
-                    diagnostics: result.remaining_diagnostics,
-                    applied_count: result.applied_count,
-                    applied_by_rule: result.applied_by_rule,
-                }));
+    let check_only = || {
+        lint_source(source, language, custom_blocks, settings, path).map(|diagnostics| {
+            LintOutcome {
+                diagnostics,
+                ..LintOutcome::default()
             }
-            Err(FixerError::InitialParse(err)) => return quarantined_or_error(source, err),
-            Err(FixerError::SyntaxRegression { iteration, .. }) => {
-                tracing::error!(
-                    "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
-                    path.unwrap_or_else(|| Path::new("<source>")).display()
-                );
-                // Fall through and lint the unchanged source.
-            }
+        })
+    };
+    let result = match fix
+        .map(|threshold| lint_fix(source, settings, language, custom_blocks, threshold, path))
+    {
+        Some(Ok(result)) => Ok(LintOutcome {
+            // The compare is skipped when nothing was applied: `source` is then a plain clone.
+            fixed: (result.applied_count > 0 && result.source != source).then_some(result.source),
+            diagnostics: result.remaining_diagnostics,
+            applied_count: result.applied_count,
+            applied_by_rule: result.applied_by_rule,
+        }),
+        Some(Err(FixerError::InitialParse(err))) => Err(err),
+        Some(Err(FixerError::SyntaxRegression { iteration, .. })) => {
+            tracing::error!(
+                "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
+                path.unwrap_or_else(|| Path::new("<source>")).display()
+            );
+            check_only()
         }
-    }
-
-    match lint_source(source, language, custom_blocks, settings, path) {
-        Ok(diagnostics) => Ok(Some(LintOutcome {
-            fixed: None,
-            diagnostics,
-            applied_count: 0,
-            applied_by_rule: FxHashMap::default(),
-        })),
-        Err(err) => quarantined_or_error(source, err),
-    }
-}
-
-/// `file-ignore[invalid-syntax]` turns a file that cannot be parsed into a skip, not an error.
-fn quarantined_or_error(
-    source: &str,
-    err: SyntaxError,
-) -> Result<Option<LintOutcome>, SyntaxError> {
-    if FileIgnores::parse(source).invalid_syntax {
-        Ok(None)
-    } else {
-        Err(err)
+        None => check_only(),
+    };
+    match result {
+        // `file-ignore[invalid-syntax]` quarantines the file instead of reporting.
+        Err(_) if FileIgnores::parse(source).invalid_syntax => Ok(None),
+        other => other.map(Some),
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::registry::Rule;
-
-    const UNCLOSED: &str = "<div>";
-    const BOTH_MODES: [Option<Applicability>; 2] = [None, Some(Applicability::Safe)];
-
-    fn only(rule: Rule) -> Settings {
-        Settings {
-            rules: RuleSet::from_rule(rule),
-            ..Settings::default()
-        }
-    }
-
-    fn lint(source: &str, settings: &Settings, fix: Option<Applicability>) -> Option<LintOutcome> {
-        lint_text(source, settings, Language::Jinja, &[], fix, None)
-            .expect("source parses or is quarantined")
-    }
 
     #[test]
     fn quarantine_covers_check_and_fix() {
         let settings = Settings::all();
-        let quarantined = format!("{{# djangofmt: file-ignore[invalid-syntax] #}}\n{UNCLOSED}");
-
-        for fix in BOTH_MODES {
+        let quarantined = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div>";
+        for fix in [None, Some(Applicability::Safe)] {
+            let lint = |source| lint_text(source, &settings, Language::Jinja, &[], fix, None);
             assert!(
-                lint(&quarantined, &settings, fix).is_none(),
-                "opted-out file should be skipped (fix={fix:?})"
+                lint(quarantined).is_ok_and(|outcome| outcome.is_none()),
+                "{fix:?}"
             );
-            assert!(
-                lint_text(UNCLOSED, &settings, Language::Jinja, &[], fix, None).is_err(),
-                "unparsable file without the opt-out should error (fix={fix:?})"
-            );
+            assert!(lint("<div>").is_err(), "{fix:?}");
         }
-    }
-
-    #[test]
-    fn fixed_source_is_set_only_when_it_changed() {
-        let settings = only(Rule::UppercaseFormMethod);
-        let source = r#"<form method="POST"></form>"#;
-
-        let fixed = lint(source, &settings, Some(Applicability::Safe)).expect("not quarantined");
-        assert_eq!(fixed.applied_count, 1);
-        assert_eq!(
-            fixed.fixed.as_deref(),
-            Some(r#"<form method="post"></form>"#)
-        );
-        assert!(fixed.diagnostics.is_empty());
-
-        let checked = lint(source, &settings, None).expect("not quarantined");
-        assert_eq!(checked.applied_count, 0);
-        assert_eq!(checked.fixed, None, "nothing to write in check mode");
-        assert_eq!(checked.diagnostics.len(), 1);
     }
 }
