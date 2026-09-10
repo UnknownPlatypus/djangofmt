@@ -1,7 +1,4 @@
-use djangofmt_lint::{
-    Applicability, FileDiagnostics, FileIgnores, FixerError, RuleFixSummary, Settings, lint_fix,
-    lint_source,
-};
+use djangofmt_lint::{Applicability, FileDiagnostics, RuleFixSummary, Settings, lint_text};
 use markup_fmt::FormatError;
 use miette::{SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
@@ -16,7 +13,7 @@ use tracing::{debug, error, info, warn};
 use crate::ExitStatus;
 use crate::args::{CheckCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_profile, resolve_rule_selection};
-use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
+use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::LintSettings;
@@ -125,6 +122,8 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     } else {
         Applicability::Safe
     };
+    // One value carries both "should we fix" and "how far", so they can't disagree.
+    let fix = config.fix.then_some(threshold);
 
     // Same custom blocks as `format`, so both commands lint/format the same AST.
     let custom_blocks = merge_custom_blocks(
@@ -149,15 +148,8 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
                 resolved.pyproject.profile,
                 Some(path),
             );
-            super::catch_file_panic(path, || {
-                check_path(
-                    path,
-                    profile,
-                    settings,
-                    &custom_blocks,
-                    config.fix,
-                    threshold,
-                )
+            super::catch_file_panic(Some(path), || {
+                check_path(path, profile, settings, &custom_blocks, fix)
             })
         })
         .partition_map(|result| match result {
@@ -339,105 +331,61 @@ fn check_path(
     profile: Profile,
     settings: &Settings,
     custom_blocks: &[String],
-    fix: bool,
-    threshold: Applicability,
+    fix: Option<Applicability>,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
     let source = fs::read_to_string(path)
         .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
 
-    if fix {
-        match lint_fix(
-            &source,
-            settings,
-            profile.into(),
-            custom_blocks,
-            threshold,
-            Some(path),
-        ) {
-            Ok(result) => {
-                if result.applied_count > 0 && result.source != source {
-                    fs::write(path, &result.source)
-                        .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
-                }
-
-                let file_diagnostics = if result.remaining_diagnostics.is_empty() {
-                    FileDiagnostics::empty()
-                } else {
-                    FileDiagnostics::new(
-                        relativize_path(path),
-                        result.source,
-                        result.remaining_diagnostics,
-                    )
-                };
-
-                return Ok(CheckResult {
-                    path: path.to_path_buf(),
-                    file_diagnostics,
-                    applied_count: result.applied_count,
-                    fixes_by_rule: result.applied_by_rule,
-                    skipped: false,
-                });
-            }
-            Err(FixerError::InitialParse(err)) => {
-                return parse_failure(path, source, err);
-            }
-            Err(FixerError::SyntaxRegression {
-                iteration,
-                error: _,
-            }) => {
-                error!(
-                    "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
-                    path.display()
-                );
-                // Fall through and lint the unchanged source.
-            }
+    let outcome = match lint_text(
+        &source,
+        settings,
+        profile.into(),
+        custom_blocks,
+        fix,
+        Some(path),
+    ) {
+        Ok(Some(outcome)) => outcome,
+        Ok(None) => {
+            debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
+            return Ok(CheckResult {
+                path: path.to_path_buf(),
+                file_diagnostics: FileDiagnostics::empty(),
+                applied_count: 0,
+                fixes_by_rule: FxHashMap::default(),
+                skipped: true,
+            });
         }
+        Err(err) => {
+            return Err(ParseError::new(
+                Some(path.to_path_buf()),
+                source,
+                &FormatError::Syntax(err),
+            )
+            .into());
+        }
+    };
+
+    if let Some(fixed) = &outcome.fixed {
+        fs::write(path, fixed).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
     }
 
-    let diagnostics =
-        match lint_source(&source, profile.into(), custom_blocks, settings, Some(path)) {
-            Ok(diagnostics) => diagnostics,
-            Err(err) => {
-                return parse_failure(path, source, err);
-            }
-        };
-    let file_diagnostics = if diagnostics.is_empty() {
+    let file_diagnostics = if outcome.diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
-        FileDiagnostics::new(relativize_path(path), source, diagnostics)
+        FileDiagnostics::new(
+            relativize_path(path),
+            outcome.fixed.unwrap_or(source),
+            outcome.diagnostics,
+        )
     };
 
     Ok(CheckResult {
         path: path.to_path_buf(),
         file_diagnostics,
-        applied_count: 0,
-        fixes_by_rule: FxHashMap::default(),
+        applied_count: outcome.applied_count,
+        fixes_by_rule: outcome.applied_by_rule,
         skipped: false,
     })
-}
-
-/// Skip the file if it is quarantined with `file-ignore[invalid-syntax]`,
-/// otherwise report the error with a hint at the escape hatches.
-fn parse_failure(
-    path: &Path,
-    source: String,
-    err: markup_fmt::SyntaxError,
-) -> std::result::Result<CheckResult, Box<CommandError>> {
-    if FileIgnores::parse(&source).invalid_syntax {
-        debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
-        return Ok(CheckResult {
-            path: path.to_path_buf(),
-            file_diagnostics: FileDiagnostics::empty(),
-            applied_count: 0,
-            fixes_by_rule: FxHashMap::default(),
-            skipped: true,
-        });
-    }
-    Err(
-        ParseError::new(Some(path.to_path_buf()), source, &FormatError::Syntax(err))
-            .with_fallback_hint(SKIP_FILE_HINT)
-            .into(),
-    )
 }
 
 #[cfg(test)]

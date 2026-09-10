@@ -13,7 +13,7 @@ use crate::ExitStatus;
 use crate::args::{FormatCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_profile};
 use crate::editorconfig::{self, EditorconfigSettings};
-use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
+use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::panic::catch_unwind;
@@ -282,7 +282,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let (results, errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|entry| super::catch_file_panic(entry, || format_path(entry, &context)))
+        .map(|entry| super::catch_file_panic(Some(entry), || format_path(entry, &context)))
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(*err),
@@ -458,9 +458,7 @@ fn format_path(
     let formatted = match format_text(&unformatted, &config, profile, Some(path)) {
         Ok(f) => f,
         Err(err) => {
-            return Err(ParseError::new(Some(path.to_path_buf()), unformatted, &err)
-                .with_fallback_hint(SKIP_FILE_HINT)
-                .into());
+            return Err(ParseError::new(Some(path.to_path_buf()), unformatted, &err).into());
         }
     };
 

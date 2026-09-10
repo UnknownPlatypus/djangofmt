@@ -46,6 +46,7 @@ use markup_fmt::ast::Root;
 use markup_fmt::parser::Parser;
 use markup_fmt::{Language, SyntaxError};
 use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, NamedSource, Report, SourceSpan};
+use rustc_hash::FxHashMap;
 use std::fmt;
 use std::sync::{Arc, LazyLock};
 
@@ -223,4 +224,131 @@ pub fn lint_source(
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
     let ast = parse(source, language, custom_blocks)?;
     Ok(check_ast(source, &ast, settings, path))
+}
+
+/// A completed [`lint_text`] run.
+#[derive(Debug)]
+pub struct LintOutcome {
+    /// The rewritten source, set only when fixes changed it: write exactly when this is [`Some`].
+    pub fixed: Option<String>,
+    /// Diagnostics left over, span-aligned to [`Self::fixed`] when there is one.
+    pub diagnostics: Vec<LintDiagnostic>,
+    /// Fixes applied.
+    pub applied_count: usize,
+    /// Per-rule applied summaries, for `--show-fixes`.
+    pub applied_by_rule: FxHashMap<&'static str, RuleFixSummary>,
+}
+
+/// Lint `source`, applying fixes up to the given threshold when `fix` is [`Some`].
+///
+/// Returns [`None`] when a leading `file-ignore[invalid-syntax]` comment quarantines a file that
+/// does not parse, mirroring the skip signal of the formatter's own door. A fix that breaks
+/// previously valid syntax is reported and the untouched source linted instead.
+pub fn lint_text(
+    source: &str,
+    settings: &Settings,
+    language: Language,
+    custom_blocks: &[String],
+    fix: Option<Applicability>,
+    path: Option<&Path>,
+) -> Result<Option<LintOutcome>, SyntaxError> {
+    if let Some(threshold) = fix {
+        match lint_fix(source, settings, language, custom_blocks, threshold, path) {
+            Ok(result) => {
+                return Ok(Some(LintOutcome {
+                    fixed: (result.source != source).then_some(result.source),
+                    diagnostics: result.remaining_diagnostics,
+                    applied_count: result.applied_count,
+                    applied_by_rule: result.applied_by_rule,
+                }));
+            }
+            Err(FixerError::InitialParse(err)) => return quarantined_or_error(source, err),
+            Err(FixerError::SyntaxRegression { iteration, .. }) => {
+                tracing::error!(
+                    "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
+                    path.unwrap_or_else(|| Path::new("<source>")).display()
+                );
+                // Fall through and lint the unchanged source.
+            }
+        }
+    }
+
+    match lint_source(source, language, custom_blocks, settings, path) {
+        Ok(diagnostics) => Ok(Some(LintOutcome {
+            fixed: None,
+            diagnostics,
+            applied_count: 0,
+            applied_by_rule: FxHashMap::default(),
+        })),
+        Err(err) => quarantined_or_error(source, err),
+    }
+}
+
+/// `file-ignore[invalid-syntax]` turns a file that cannot be parsed into a skip, not an error.
+fn quarantined_or_error(
+    source: &str,
+    err: SyntaxError,
+) -> Result<Option<LintOutcome>, SyntaxError> {
+    if FileIgnores::parse(source).invalid_syntax {
+        Ok(None)
+    } else {
+        Err(err)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::registry::Rule;
+
+    const UNCLOSED: &str = "<div>";
+    const BOTH_MODES: [Option<Applicability>; 2] = [None, Some(Applicability::Safe)];
+
+    fn only(rule: Rule) -> Settings {
+        Settings {
+            rules: RuleSet::from_rule(rule),
+            ..Settings::default()
+        }
+    }
+
+    fn lint(source: &str, settings: &Settings, fix: Option<Applicability>) -> Option<LintOutcome> {
+        lint_text(source, settings, Language::Jinja, &[], fix, None)
+            .expect("source parses or is quarantined")
+    }
+
+    #[test]
+    fn quarantine_covers_check_and_fix() {
+        let settings = Settings::all();
+        let quarantined = format!("{{# djangofmt: file-ignore[invalid-syntax] #}}\n{UNCLOSED}");
+
+        for fix in BOTH_MODES {
+            assert!(
+                lint(&quarantined, &settings, fix).is_none(),
+                "opted-out file should be skipped (fix={fix:?})"
+            );
+            assert!(
+                lint_text(UNCLOSED, &settings, Language::Jinja, &[], fix, None).is_err(),
+                "unparsable file without the opt-out should error (fix={fix:?})"
+            );
+        }
+    }
+
+    #[test]
+    fn fixed_source_is_set_only_when_it_changed() {
+        let settings = only(Rule::UppercaseFormMethod);
+        let source = r#"<form method="POST"></form>"#;
+
+        let fixed = lint(source, &settings, Some(Applicability::Safe)).expect("not quarantined");
+        assert_eq!(fixed.applied_count, 1);
+        assert_eq!(
+            fixed.fixed.as_deref(),
+            Some(r#"<form method="post"></form>"#)
+        );
+        assert!(fixed.diagnostics.is_empty());
+
+        let checked = lint(source, &settings, None).expect("not quarantined");
+        assert_eq!(checked.applied_count, 0);
+        assert_eq!(checked.fixed, None, "nothing to write in check mode");
+        assert_eq!(checked.diagnostics.len(), 1);
+    }
 }

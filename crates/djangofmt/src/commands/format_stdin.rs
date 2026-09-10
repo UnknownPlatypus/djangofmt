@@ -8,7 +8,7 @@ use crate::args::{FormatCommand, Profile};
 use crate::commands::format::{FormatterConfig, format_text};
 use crate::config::resolve_profile;
 use crate::editorconfig;
-use crate::error::{CommandError, ParseError, Result, SKIP_FILE_HINT};
+use crate::error::{CommandError, ParseError, Result};
 use crate::pyproject::load_pyproject_from_cwd;
 use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
 
@@ -36,7 +36,9 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     );
     let config = FormatterConfig::from_args(cli, &pyproject, &settings);
 
-    match format_source_code(stdin_filename, &config, profile) {
+    match super::catch_file_panic(stdin_filename, || {
+        format_source_code(stdin_filename, &config, profile)
+    }) {
         Ok(()) => Ok(ExitStatus::Success),
         Err(err) => {
             error!("{:?}", miette::Report::new(*err));
@@ -59,9 +61,7 @@ fn format_source_code(
     let formatted = match format_text(&source, config, profile, path) {
         Ok(f) => f,
         Err(err) => {
-            return Err(ParseError::new(path.map(Path::to_path_buf), source, &err)
-                .with_fallback_hint(SKIP_FILE_HINT)
-                .into());
+            return Err(ParseError::new(path.map(Path::to_path_buf), source, &err).into());
         }
     };
 
