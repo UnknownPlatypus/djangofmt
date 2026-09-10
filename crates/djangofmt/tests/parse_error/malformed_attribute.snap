@@ -9,3 +9,4 @@ source: crates/djangofmt/tests/parse_error/main.rs
    ·                      ╰── here
  2 │     <p>Malformed attribute with missing value</p>
    ╰────
+  help: Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.

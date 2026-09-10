@@ -35,13 +35,15 @@ pub(crate) fn resolve_command(
 }
 
 /// Run a per-file task, converting a panic into a [`CommandError::Panic`] so the run survives it.
+///
+/// `path` is [`None`] for a source with no backing file, such as stdin.
 pub(crate) fn catch_file_panic<T>(
-    path: &Path,
+    path: Option<&Path>,
     f: impl FnOnce() -> std::result::Result<T, Box<CommandError>> + UnwindSafe,
 ) -> std::result::Result<T, Box<CommandError>> {
     crate::panic::catch_unwind(f).unwrap_or_else(|error| {
         Err(Box::new(CommandError::Panic(
-            Some(path.to_path_buf()),
+            path.map(Path::to_path_buf),
             Box::new(error),
         )))
     })

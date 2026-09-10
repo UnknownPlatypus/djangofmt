@@ -2,7 +2,7 @@ use djangofmt::args::Profile;
 use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::error::ParseError;
 use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, FileIgnores, Settings, graphical_handler, lint_source};
+use djangofmt_lint::{FileDiagnostics, Settings, graphical_handler, lint_text};
 use miette::GraphicalTheme;
 use serde::Serialize;
 use std::path::PathBuf;
@@ -186,25 +186,23 @@ pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
 
 fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let profile = get_profile(profile);
-    let diagnostics = match lint_source(source, profile.into(), &[], &Settings::all(), None) {
-        Ok(diagnostics) => diagnostics,
+    let outcome = match lint_text(source, &Settings::all(), profile.into(), &[], None, None) {
+        Ok(Some(outcome)) => outcome,
+        // A leading `file-ignore[invalid-syntax]` quarantines the file.
+        Ok(None) => return Ok(LintResult::new(0, String::new())),
         Err(e) => {
-            // Match the CLI: `file-ignore[invalid-syntax]` skips the file.
-            if FileIgnores::parse(source).invalid_syntax {
-                return Ok(LintResult::new(0, String::new()));
-            }
             let err = markup_fmt::FormatError::Syntax(e);
             return Ok(LintResult::new(1, render_parse_error(source, &err)));
         }
     };
-    let error_count = diagnostics.len();
+    let error_count = outcome.diagnostics.len();
 
     if error_count == 0 {
         let result = LintResult::new(0, String::new());
         return Ok(result);
     }
 
-    let file_diagnostics = FileDiagnostics::new("", source, diagnostics);
+    let file_diagnostics = FileDiagnostics::new("", source, outcome.diagnostics);
     let handler = graphical_handler(GraphicalTheme::unicode());
     let mut output = String::new();
     file_diagnostics

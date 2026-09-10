@@ -46,6 +46,7 @@ use markup_fmt::ast::Root;
 use markup_fmt::parser::Parser;
 use markup_fmt::{Language, SyntaxError};
 use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, NamedSource, Report, SourceSpan};
+use rustc_hash::FxHashMap;
 use std::fmt;
 use std::sync::{Arc, LazyLock};
 
@@ -223,4 +224,83 @@ pub fn lint_source(
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
     let ast = parse(source, language, custom_blocks)?;
     Ok(check_ast(source, &ast, settings, path))
+}
+
+/// A completed [`lint_text`] run.
+#[derive(Debug, Default)]
+pub struct LintOutcome {
+    /// The rewritten source, set only when fixes changed it: write exactly when this is [`Some`].
+    pub fixed: Option<String>,
+    /// Diagnostics left over, span-aligned to [`Self::fixed`] when there is one.
+    pub diagnostics: Vec<LintDiagnostic>,
+    /// Fixes applied.
+    pub applied_count: usize,
+    /// Per-rule applied summaries, for `--show-fixes`.
+    pub applied_by_rule: FxHashMap<&'static str, RuleFixSummary>,
+}
+
+/// Lint `source`, applying fixes up to the given threshold when `fix` is [`Some`].
+///
+/// Returns [`None`] when a leading `file-ignore[invalid-syntax]` comment quarantines a file
+/// that does not parse, like the formatter's `format_text`.
+pub fn lint_text(
+    source: &str,
+    settings: &Settings,
+    language: Language,
+    custom_blocks: &[String],
+    fix: Option<Applicability>,
+    path: Option<&Path>,
+) -> Result<Option<LintOutcome>, SyntaxError> {
+    let check_only = || {
+        lint_source(source, language, custom_blocks, settings, path).map(|diagnostics| {
+            LintOutcome {
+                diagnostics,
+                ..LintOutcome::default()
+            }
+        })
+    };
+    let result = match fix
+        .map(|threshold| lint_fix(source, settings, language, custom_blocks, threshold, path))
+    {
+        Some(Ok(result)) => Ok(LintOutcome {
+            // The compare is skipped when nothing was applied: `source` is then a plain clone.
+            fixed: (result.applied_count > 0 && result.source != source).then_some(result.source),
+            diagnostics: result.remaining_diagnostics,
+            applied_count: result.applied_count,
+            applied_by_rule: result.applied_by_rule,
+        }),
+        Some(Err(FixerError::InitialParse(err))) => Err(err),
+        Some(Err(FixerError::SyntaxRegression { iteration, .. })) => {
+            tracing::error!(
+                "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
+                path.unwrap_or_else(|| Path::new("<source>")).display()
+            );
+            check_only()
+        }
+        None => check_only(),
+    };
+    match result {
+        // `file-ignore[invalid-syntax]` quarantines the file instead of reporting.
+        Err(_) if FileIgnores::parse(source).invalid_syntax => Ok(None),
+        other => other.map(Some),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quarantine_covers_check_and_fix() {
+        let settings = Settings::all();
+        let quarantined = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div>";
+        for fix in [None, Some(Applicability::Safe)] {
+            let lint = |source| lint_text(source, &settings, Language::Jinja, &[], fix, None);
+            assert!(
+                lint(quarantined).is_ok_and(|outcome| outcome.is_none()),
+                "{fix:?}"
+            );
+            assert!(lint("<div>").is_err(), "{fix:?}");
+        }
+    }
 }
