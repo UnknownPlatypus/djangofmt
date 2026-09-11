@@ -139,15 +139,9 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
         .par_iter()
         .map(|path| {
             // Reuse the global settings unless per-file-ignores narrow them for this path.
-            let file_settings = per_file_ignores.as_ref().map(|pfi| {
-                let rules = pfi.rules_for(path, &settings.rules);
-                let mut per_file_ignored_rules = settings.rules;
-                per_file_ignored_rules.remove_all(&rules);
-                Settings {
-                    rules,
-                    per_file_ignored_rules,
-                    ..settings.clone()
-                }
+            let file_settings = per_file_ignores.as_ref().map(|pfi| Settings {
+                rules: pfi.rules_for(path, &settings.rules),
+                ..settings.clone()
             });
             let settings = file_settings.as_ref().unwrap_or(&settings);
             let profile = resolve_profile(

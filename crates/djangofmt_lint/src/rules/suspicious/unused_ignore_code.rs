@@ -156,9 +156,6 @@ fn classify(
     match (rule, reserved) {
         (Ok(rule), _) if matched.contains(rule) => None,
         (Ok(rule), _) if checker.is_rule_enabled(rule) => Some(Unused::Unmatched),
-        // `per-file-ignores` turned the rule off for this file, so the comment is what would take
-        // over if that setting is ever narrowed: deleting it would lose the author's intent.
-        (Ok(rule), _) if checker.is_rule_per_file_ignored(rule) => None,
         (Ok(_), _) => Some(Unused::Disabled),
         // The file parsed, so there is no syntax error left to suppress.
         // On a node the code is misplaced, which `invalid-ignore-comment` reports.

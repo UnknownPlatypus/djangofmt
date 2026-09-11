@@ -327,42 +327,6 @@ fn check_file_with_lint_error() {
 }
 
 #[test]
-fn check_keeps_suppressions_of_per_file_ignored_rules() {
-    // `legacy/` turns the rule off by configuration, so the comment there silences nothing yet is
-    // not stale: reporting it would let `--fix` delete what the glob relies on.
-    let project = Project::new()
-        .file(
-            "pyproject.toml",
-            "[tool.djangofmt.lint.per-file-ignores]\n\"legacy/*\" = [\"invalid-attr-value\"]\n",
-        )
-        .file(
-            "legacy/old.html",
-            "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"put\"></form>\n",
-        )
-        // A rule that is enabled and still matched nothing stays reported.
-        .file(
-            "new.html",
-            "{# djangofmt: ignore[missing-img-alt] #}\n<p>hi</p>\n",
-        );
-    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "."]), @"
-    success: false
-    exit_code: 1
-    ----- stdout -----
-
-    ----- stderr -----
-      × Unused rule code in suppression: `missing-img-alt`
-       ╭─[new.html:1:22]
-     1 │ {# djangofmt: ignore[missing-img-alt] #}
-       ·                      ───────┬───────
-       ·                             ╰── here
-     2 │ <p>hi</p>
-       ╰────
-
-    Found 1 errors. (1 hidden fixes can be enabled with --unsafe-fixes)
-    ");
-}
-
-#[test]
 fn check_concise_output_format() {
     let project = Project::new()
         .file(
