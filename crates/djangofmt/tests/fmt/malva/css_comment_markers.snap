@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<style>
+    /*! Bootstrap v5.3.0 | MIT License */
+    /*# sourceMappingURL=app.css.map */
+    /**
+     * Block comment.
+     */
+    .a {
+        color: red;
+    }
+</style>
