@@ -200,7 +200,6 @@ fn build_malva_config(
             // Because markup_fmt uses DoubleQuotes
             quotes: malva::config::Quotes::AlwaysSingle,
             operator_linebreak: malva::config::OperatorLineBreak::Before,
-            format_comments: true,
             linebreak_in_pseudo_parens: true,
             declaration_order: Some(malva::config::DeclarationOrder::Smacss),
             keyframe_selector_notation: Some(malva::config::KeyframeSelectorNotation::Percentage),
