@@ -489,6 +489,10 @@ DEFAULT_TARGETS = [
                     "bookwyrm/templates/book/sections/description.html",
                     "bookwyrm/templates/widgets/select.html",
                 ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    # Stray </div> between </tbody> and </form>
+                    "bookwyrm/templates/settings/manage-data/manual-merge.html",
+                ),
             },
         ),
     ),
