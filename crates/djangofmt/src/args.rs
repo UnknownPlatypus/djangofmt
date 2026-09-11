@@ -5,7 +5,7 @@ use clap::builder::styling::{AnsiColor, Effects};
 use serde::Deserialize;
 use std::path::PathBuf;
 
-use djangofmt_lint::RuleSelector;
+use djangofmt_lint::{DjangoVersion, RuleSelector};
 use markup_fmt::Language;
 
 /// All configuration options that can be passed "globally",
@@ -80,7 +80,7 @@ pub struct FileSelectionArgs {
     pub no_force_exclude: bool,
 }
 
-/// CLI arguments controlling how templates are parsed, shared by `format` and `check`.
+/// CLI arguments describing the templates being processed, shared by `format` and `check`.
 #[derive(Clone, Debug, Default, clap::Args)]
 pub struct TemplateArgs {
     /// Template language profile to use [default: django]
@@ -240,6 +240,9 @@ pub struct CheckCommand {
     pub show_fixes: bool,
     #[arg(long, overrides_with("show_fixes"), hide = true)]
     pub no_show_fixes: bool,
+    /// The Django version the templates target, as major.minor (e.g. 5.2)
+    #[arg(long, value_name = "VERSION")]
+    pub target_version: Option<DjangoVersion>,
     #[clap(flatten)]
     pub rule_selection: RuleSelectionArgs,
     #[clap(flatten)]
@@ -398,6 +401,20 @@ mod tests {
 
         For more information, try '--help'.
         ");
+    }
+
+    #[test]
+    fn test_cli_invalid_target_version() {
+        assert_cmd_snapshot!(cli().args(["check", "--target-version", "5", "test.html"]), @r#"
+        success: false
+        exit_code: 2
+        ----- stdout -----
+
+        ----- stderr -----
+        error: invalid value '5' for '--target-version <VERSION>': target-version must be a `major.minor` version (got `5`)
+
+        For more information, try '--help'.
+        "#);
     }
 
     #[test]

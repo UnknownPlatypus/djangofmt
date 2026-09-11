@@ -2,7 +2,6 @@ use djangofmt_benchmark::{
     ALL_TEMPLATES, DJANGO_TEMPLATE_LARGE, FORMATTER_DIRECTIVE, LINT_DIRECTIVE, TestFile, warmup,
     with_directive,
 };
-use djangofmt_lint::settings::unsorted_tailwind_classes;
 use djangofmt_lint::{RuleSet, Settings, check_ast, parse};
 
 fn main() {
@@ -17,7 +16,7 @@ fn check_no_rules(bencher: divan::Bencher, template: &'static TestFile) {
         template,
         &Settings {
             rules: RuleSet::empty(),
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
+            ..Settings::default()
         },
     );
 }

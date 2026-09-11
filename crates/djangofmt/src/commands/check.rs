@@ -12,7 +12,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::ExitStatus;
 use crate::args::{CheckCommand, OutputFormat, Profile};
-use crate::config::{resolve_bool_arg, resolve_profile, resolve_rule_selection};
+use crate::config::{resolve_bool_arg, resolve_lint_configuration, resolve_profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
@@ -107,7 +107,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let lint = resolved.pyproject.lint.as_ref();
     let config = CheckConfig::from_args(args, lint);
 
-    let (settings, warnings) = resolve_rule_selection(&args.rule_selection, lint).into_settings();
+    let (settings, warnings) = resolve_lint_configuration(args, lint).into_settings();
     for warning in &warnings {
         warn!("{warning}");
     }

@@ -15,6 +15,7 @@
 //! ```
 
 mod checker;
+pub mod django_version;
 pub mod fix;
 pub mod lint_context;
 pub mod registry;
@@ -26,6 +27,7 @@ mod suppression;
 mod violation;
 
 pub use checker::Checker;
+pub use django_version::DjangoVersion;
 pub use fix::apply::{
     AppliedFix, ApplyResult, FixerError, FixerResult, MAX_FIX_ITERATIONS, RuleFixSummary,
     apply_fixes, fix_ast, lint_fix,

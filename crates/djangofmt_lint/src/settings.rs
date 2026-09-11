@@ -1,5 +1,6 @@
 use strum::IntoEnumIterator;
 
+use crate::django_version::DjangoVersion;
 use crate::registry::Rule;
 use crate::rule_selector::{RuleSelector, SelectionWarning};
 use crate::rule_set::RuleSet;
@@ -19,6 +20,8 @@ pub mod unsorted_tailwind_classes {
 pub struct Settings {
     /// The set of rules that are active for this run.
     pub rules: RuleSet,
+    /// The Django version the templates target. `None` keeps version-gated rules off.
+    pub target_version: Option<DjangoVersion>,
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
@@ -37,6 +40,7 @@ impl Settings {
             rules: Rule::iter()
                 .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
                 .collect(),
+            target_version: None,
             unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         }
     }
@@ -66,6 +70,8 @@ pub struct LintConfiguration {
     pub ignore: Vec<RuleSelector>,
     /// Whether preview rules are enabled.
     pub preview: bool,
+    /// The Django version the templates target.
+    pub target_version: Option<DjangoVersion>,
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
@@ -117,6 +123,7 @@ impl LintConfiguration {
         (
             Settings {
                 rules,
+                target_version: self.target_version,
                 unsorted_tailwind_classes: self.unsorted_tailwind_classes,
             },
             warnings,
@@ -129,7 +136,7 @@ mod tests {
     use std::str::FromStr;
     use strum::VariantNames;
 
-    use super::{LintConfiguration, Settings, unsorted_tailwind_classes};
+    use super::{LintConfiguration, Settings};
     use crate::registry::{Rule, RuleCategory};
     use crate::rule_selector::{ALL_GROUP, RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
@@ -144,13 +151,13 @@ mod tests {
 
         let none = Settings {
             rules: RuleSet::default(),
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
+            ..Settings::default()
         };
         assert!(!none.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
 
         let partial = Settings {
             rules: RuleSet::from_rule(Rule::UseHttps),
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
+            ..Settings::default()
         };
         assert!(partial.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
         assert!(!partial.any_rule_enabled(&[Rule::InvalidAttrValue]));
@@ -163,7 +170,7 @@ mod tests {
             select: Some(vec![RuleSelector::All, RuleSelector::Rule(Rule::UseHttps)]),
             ignore: vec![RuleSelector::Category(RuleCategory::Suspicious)],
             preview: false,
-            unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
+            ..LintConfiguration::default()
         };
         let (settings, warnings) = selection.into_settings();
         assert!(warnings.is_empty());
