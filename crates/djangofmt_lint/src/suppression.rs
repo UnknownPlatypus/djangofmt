@@ -113,6 +113,13 @@ fn parse(body: &str) -> Option<IgnoreDirective<'_>> {
     })
 }
 
+/// Whether free text follows the code list of a directive `body`; Jinja's trailing
+/// whitespace-control marker (`-#}`) is part of the delimiter, not a reason.
+fn has_reason(body: &str) -> bool {
+    body.split_once(']')
+        .is_some_and(|(_, tail)| !tail.trim().trim_end_matches('-').is_empty())
+}
+
 /// A `{# djangofmt: ... #}` comment as the linter reads it.
 pub struct IgnoreComment<'s> {
     /// The whole comment, delimiters included: what a diagnostic points at and a fix deletes.
@@ -134,6 +141,18 @@ impl<'s> IgnoreComment<'s> {
     #[must_use]
     pub fn in_force(&self) -> Option<(&[&'s str], IgnoreScope)> {
         scope(&self.directive, self.is_leading).map(|scope| (self.directive.codes(), scope))
+    }
+
+    /// Whether free text follows the code list, as in `ignore[x]: why`: a fix deleting the
+    /// whole comment would take it along.
+    #[must_use]
+    pub fn has_reason(&self) -> bool {
+        let body = self
+            .raw
+            .strip_prefix(TEMPLATE_COMMENT_OPEN)
+            .unwrap_or(self.raw);
+        let body = body.strip_suffix(TEMPLATE_COMMENT_CLOSE).unwrap_or(body);
+        has_reason(body)
     }
 
     /// Whether the directive silences `code` reported at `offset`.
@@ -418,6 +437,14 @@ mod tests {
     )]
     fn parse_directives(#[case] comment: &'static str, #[case] expected: IgnoreDirective<'static>) {
         assert_eq!(parse(comment), Some(expected));
+    }
+
+    #[rstest]
+    #[case::reason("djangofmt: ignore[a]: free-text reason", true)]
+    #[case::none(" djangofmt: ignore[a] ", false)]
+    #[case::whitespace_control("- djangofmt: ignore[a] -", false)]
+    fn a_reason_follows_the_code_list(#[case] body: &str, #[case] expected: bool) {
+        assert_eq!(has_reason(body), expected);
     }
 
     #[rstest]

@@ -131,11 +131,7 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
                     whole_comment: deletion.whole_comment,
                 },
                 deletion.span,
-                if deletion.whole_comment {
-                    Fix::unsafe_edit(deletion.edit)
-                } else {
-                    Fix::safe_edit(deletion.edit)
-                },
+                deletion.fix,
             )
         }
     };

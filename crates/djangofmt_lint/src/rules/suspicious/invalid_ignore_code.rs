@@ -30,9 +30,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## Fix safety
-/// The fix is marked as unsafe when every listed code is invalid, because the whole comment is
-/// then deleted, taking any free-text reason with it. Dropping an invalid code from a list that
-/// keeps a valid one is safe.
+/// The fix is marked as unsafe when it deletes a comment along with the free-text reason after
+/// its code list, as in `ignore[...]: reason`. Dropping a code from a list, or a comment carrying
+/// no reason, is safe.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct InvalidIgnoreCode {

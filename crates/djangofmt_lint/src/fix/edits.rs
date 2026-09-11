@@ -70,21 +70,16 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
 pub struct CodesDeletion {
     /// The span to report the violation on.
     pub span: SourceSpan,
-    pub edit: Edit,
+    pub fix: Fix,
     /// Nothing would remain, so the whole comment goes.
     pub whole_comment: bool,
 }
 
 impl CodesDeletion {
-    /// Report `violation` on the deletion's span, fixed by the deletion. Deleting the whole
-    /// comment takes any free-text reason with it, so only that fix is unsafe.
+    /// Report `violation` on the deletion's span, fixed by the deletion.
     pub fn report(self, ctx: &LintContext<'_>, violation: &impl Violation) {
         let mut guard = ctx.report_diagnostic(violation, self.span);
-        guard.set_fix(if self.whole_comment {
-            Fix::unsafe_edit(self.edit)
-        } else {
-            Fix::safe_edit(self.edit)
-        });
+        guard.set_fix(self.fix);
     }
 }
 
@@ -104,7 +99,7 @@ impl CodesDeletion {
 /// +{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
 /// ```
 ///
-/// When nothing remains, the whole comment goes:
+/// When nothing remains, the whole comment goes, an unsafe fix if a reason goes with it:
 ///
 /// ```diff
 /// -{# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
@@ -131,9 +126,16 @@ pub fn delete_codes_or_comment(
             [only] => ctx.source_span(only),
             _ => ctx.source_span(comment.raw),
         };
+        let edit = delete_comment(ctx, comment.raw);
+        // Only the author can tell whether the reason still says something worth keeping.
+        let fix = if comment.has_reason() {
+            Fix::unsafe_edit(edit)
+        } else {
+            Fix::safe_edit(edit)
+        };
         return CodesDeletion {
             span,
-            edit: delete_comment(ctx, comment.raw),
+            fix,
             whole_comment: true,
         };
     }
@@ -144,7 +146,7 @@ pub fn delete_codes_or_comment(
         );
         return CodesDeletion {
             span: ctx.source_span(code),
-            edit: Edit::deletion(span(start, end - start)),
+            fix: Fix::safe_edit(Edit::deletion(span(start, end - start))),
             whole_comment: false,
         };
     }
@@ -155,7 +157,10 @@ pub fn delete_codes_or_comment(
     let remaining: Vec<&str> = remaining.into_iter().map(|(_, code)| code).collect();
     CodesDeletion {
         span: ctx.source_span(comment.raw),
-        edit: Edit::replacement(remaining.join(", "), span(start, end - start)),
+        fix: Fix::safe_edit(Edit::replacement(
+            remaining.join(", "),
+            span(start, end - start),
+        )),
         whole_comment: false,
     }
 }
