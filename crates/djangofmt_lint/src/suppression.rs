@@ -47,6 +47,10 @@ const FILE_IGNORE: &str = "file-ignore";
 /// The formatter's directive, `NAMESPACE:IGNORE` spelled out for `markup_fmt` to match.
 pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
 
+/// Both spellings of the formatter's node-level opt-out, which it reads from `{# #}` and
+/// `<!-- -->` comments alike.
+pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [IGNORE_DIRECTIVE, "djangofmt:ignore[format]"];
+
 /// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
@@ -324,10 +328,14 @@ mod tests {
         invalid_syntax: false,
     };
 
-    /// The formatter matches the spelled-out directive; the linter parses namespace and keyword.
+    /// The formatter matches the spelled-out directives; the linter parses namespace and keyword.
     #[test]
-    fn ignore_directive_spells_the_namespace_and_keyword() {
+    fn ignore_directives_spell_the_namespace_and_keyword() {
         assert_eq!(IGNORE_DIRECTIVE, format!("{NAMESPACE}:{IGNORE}"));
+        assert_eq!(
+            FORMAT_IGNORE_DIRECTIVES[1],
+            format!("{IGNORE_DIRECTIVE}[{}]", ReservedCode::Format)
+        );
     }
 
     #[rstest]

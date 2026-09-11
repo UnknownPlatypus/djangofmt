@@ -14,60 +14,90 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
   × Deprecated HTML ignore comment
    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:6:1]
- 5 │ <!-- No spaces around the comment body -->
- 6 │ <!--djangofmt:ignore-->
-   · ───────────┬───────────
-   ·            ╰── here
- 7 │ <div></div>
+ 5 │ <!-- Its `ignore[format]` spelling, alone or alongside lint codes -->
+ 6 │ <!-- djangofmt: ignore[format] -->
+   · ─────────────────┬────────────────
+   ·                  ╰── here
+ 7 │ <div   class="kept"  ></div>
    ╰────
   help: Write it as a `{# #}` template comment instead
 
   × Deprecated HTML ignore comment
-    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:10:1]
-  9 │ <!-- Whitespace around the colon -->
- 10 │ <!-- djangofmt : ignore -->
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:8:1]
+ 7 │ <div   class="kept"  ></div>
+ 8 │ <!-- djangofmt: ignore[format, invalid-attr-value] -->
+   · ───────────────────────────┬──────────────────────────
+   ·                            ╰── here
+ 9 │ <form   method="yes"  ></form>
+   ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:12:1]
+ 11 │ <!-- No spaces around the comment body -->
+ 12 │ <!--djangofmt:ignore-->
+    · ───────────┬───────────
+    ·            ╰── here
+ 13 │ <div></div>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:16:1]
+ 15 │ <!-- Whitespace around the colon -->
+ 16 │ <!-- djangofmt : ignore -->
     · ─────────────┬─────────────
     ·              ╰── here
- 11 │ <div   class="kept"  ></div>
+ 17 │ <div   class="kept"  ></div>
     ╰────
   help: Write it as a `{# #}` template comment instead
 
   × Deprecated HTML ignore comment
-    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:14:1]
- 13 │ <!-- A free-text reason is kept -->
- 14 │ <!-- djangofmt:ignore legacy markup, see #123 -->
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:20:1]
+ 19 │ <!-- A free-text reason is kept -->
+ 20 │ <!-- djangofmt:ignore legacy markup, see #123 -->
     · ────────────────────────┬────────────────────────
     ·                         ╰── here
- 15 │ <div   class="kept"  ></div>
-    ╰────
-  help: Write it as a `{# #}` template comment instead
-
-  × Deprecated HTML ignore comment
-    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:19:3]
- 18 │ <div>
- 19 │   <!-- djangofmt:ignore -->
-    ·   ────────────┬────────────
-    ·               ╰── here
- 20 │   <p     class="kept"  >hi</p>
+ 21 │ <div   class="kept"  ></div>
     ╰────
   help: Write it as a `{# #}` template comment instead
 
   × Deprecated HTML ignore comment
     ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:24:1]
- 23 │     <!-- Reported but left alone: Django's {# #} comments are single-line -->
- 24 │ ╭─▶ <!-- djangofmt:ignore
- 25 │ ├─▶      legacy markup, see #123 -->
-    · ╰──── here
- 26 │     <div   class="kept"  ></div>
+ 23 │ <!-- Extra dashes are dropped rather than becoming `{#-` / `-#}` whitespace control -->
+ 24 │ <!--- djangofmt:ignore --->
+    · ─────────────┬─────────────
+    ·              ╰── here
+ 25 │ <div   class="kept"  ></div>
     ╰────
   help: Write it as a `{# #}` template comment instead
 
   × Deprecated HTML ignore comment
-    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:29:1]
- 28 │ <!-- Reported but left alone: `#}` would end the new comment early -->
- 29 │ <!-- djangofmt:ignore #}{{ expression }} -->
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:29:3]
+ 28 │ <div>
+ 29 │   <!-- djangofmt:ignore -->
+    ·   ────────────┬────────────
+    ·               ╰── here
+ 30 │   <p     class="kept"  >hi</p>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:34:1]
+ 33 │     <!-- Reported but left alone: Django's {# #} comments are single-line -->
+ 34 │ ╭─▶ <!-- djangofmt:ignore
+ 35 │ ├─▶      legacy markup, see #123 -->
+    · ╰──── here
+ 36 │     <div   class="kept"  ></div>
+    ╰────
+  help: Write it as a `{# #}` template comment instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:39:1]
+ 38 │ <!-- Reported but left alone: `#}` would end the new comment early -->
+ 39 │ <!-- djangofmt:ignore #}{{ expression }} -->
     · ──────────────────────┬─────────────────────
     ·                       ╰── here
- 30 │ <div   class="kept"  ></div>
+ 40 │ <div   class="kept"  ></div>
     ╰────
   help: Write it as a `{# #}` template comment instead

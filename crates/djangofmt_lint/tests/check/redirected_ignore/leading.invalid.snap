@@ -1,0 +1,12 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated HTML ignore comment
+   ╭─[tests/check/redirected_ignore/leading.invalid.html:1:1]
+ 1 │ <!-- djangofmt:ignore -->
+   · ────────────┬────────────
+   ·             ╰── here
+ 2 │ <div   class="kept"  ></div>
+   ╰────
+  help: Write it as a `{# #}` template comment instead

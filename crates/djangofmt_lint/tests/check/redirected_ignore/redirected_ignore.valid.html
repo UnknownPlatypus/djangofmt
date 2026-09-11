@@ -5,9 +5,13 @@
 {# djangofmt: ignore[invalid-attr-value] #}
 <form method="yes"></form>
 
-<!-- Bracketed directives never had an HTML form, so there is nothing to redirect -->
+<!-- Not the formatter's directive: it honors no lint code, and the linter reads no HTML comment -->
 <!-- djangofmt: ignore[invalid-attr-value] -->
 <form method="yes"></form>
+
+<!-- `file-ignore` never had an HTML form either -->
+<!-- djangofmt: file-ignore[format] -->
+<div></div>
 
 <!-- A plain HTML comment is fine -->
 <div></div>

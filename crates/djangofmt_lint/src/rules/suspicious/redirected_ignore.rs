@@ -5,17 +5,21 @@ use markup_fmt::ast::Comment;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT};
-use crate::suppression::IGNORE_DIRECTIVE;
+use crate::suppression::FORMAT_IGNORE_DIRECTIVES;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use crate::{Checker, span};
 
 /// ## What it does
-/// Checks for the formatter's `djangofmt:ignore` directive written as an HTML comment.
+/// Checks for the formatter's ignore directive written as an HTML comment.
 ///
 /// ## Why is this bad?
-/// `<!-- djangofmt:ignore -->` is the deprecated spelling of `{# djangofmt:ignore #}`. An HTML
-/// comment is shipped to the client, so the directive ends up in every rendered page, whereas the
-/// template engine drops a `{# #}` comment.
+/// `<!-- djangofmt:ignore -->` and `<!-- djangofmt: ignore[format] -->` are the deprecated
+/// spellings of the `{# #}` template comment. The formatter still honors them, but where the
+/// template engine drops a `{# #}` comment, an HTML comment is shipped to the client, so the
+/// directive ends up in every rendered page.
+///
+/// The fix rewrites the comment in place, free-text reason included. A comment spanning several
+/// lines is reported but not rewritten: Django's `{# #}` comments are single-line.
 ///
 /// ## Example
 /// ```html
@@ -53,7 +57,10 @@ impl Violation for RedirectedIgnore {
 
 pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
     let body = comment.raw;
-    if !markup_fmt::matches_directive(body, IGNORE_DIRECTIVE) {
+    if !FORMAT_IGNORE_DIRECTIVES
+        .iter()
+        .any(|directive| markup_fmt::matches_directive(body, directive))
+    {
         return;
     }
     let range = HTML_COMMENT.enclosing_range(checker, body);
@@ -61,8 +68,10 @@ pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
     let mut guard = checker.report_diagnostic(&RedirectedIgnore, span);
     // Django `{# #}` comments are single-line, and a `#}` in the body would end the new one early.
     if !body.contains('\n') && !body.contains(TEMPLATE_COMMENT.close) {
+        // Edge dashes of a `<!--- --->` comment would read as `{#-`/`-#}` whitespace control.
+        let body = body.trim_matches(|c: char| c.is_whitespace() || c == '-');
         guard.set_fix(Fix::safe_edit(Edit::replacement(
-            format!("{{#{body}#}}"),
+            format!("{{# {body} #}}"),
             span,
         )));
     }

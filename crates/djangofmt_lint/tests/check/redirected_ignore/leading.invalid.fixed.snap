@@ -1,0 +1,8 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+{# djangofmt:ignore #}
+<div   class="kept"  ></div>
+
+<!-- Leading the file, the bare directive is the legacy whole-file opt-out: the file is still
+     linted, and the rewrite keeps it skipped by the formatter -->

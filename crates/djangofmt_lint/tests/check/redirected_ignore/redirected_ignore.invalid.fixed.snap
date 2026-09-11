@@ -5,8 +5,14 @@ source: crates/djangofmt_lint/tests/check/main.rs
 {# djangofmt:ignore #}
 <div   class="kept"  ></div>
 
+<!-- Its `ignore[format]` spelling, alone or alongside lint codes -->
+{# djangofmt: ignore[format] #}
+<div   class="kept"  ></div>
+{# djangofmt: ignore[format, invalid-attr-value] #}
+<form   method="yes"  ></form>
+
 <!-- No spaces around the comment body -->
-{#djangofmt:ignore#}
+{# djangofmt:ignore #}
 <div></div>
 
 <!-- Whitespace around the colon -->
@@ -15,6 +21,10 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- A free-text reason is kept -->
 {# djangofmt:ignore legacy markup, see #123 #}
+<div   class="kept"  ></div>
+
+<!-- Extra dashes are dropped rather than becoming `{#-` / `-#}` whitespace control -->
+{# djangofmt:ignore #}
 <div   class="kept"  ></div>
 
 <!-- Nested inside an element -->
