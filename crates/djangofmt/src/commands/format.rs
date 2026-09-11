@@ -376,12 +376,18 @@ pub fn format_text(
                     if code.contains('{') {
                         Ok(formatted_css)
                     } else {
-                        Ok(formatted_css
+                        let joined = formatted_css
                             .lines()
                             .map(str::trim)
                             .collect::<Vec<_>>()
-                            .join(" ")
-                            .into())
+                            .join(" ");
+                        // `single_line_top_level_declarations` makes malva drop comments here,
+                        // which empties a comment-only block. Keep the source rather than delete it.
+                        if joined.trim().is_empty() {
+                            Ok(code.into())
+                        } else {
+                            Ok(joined.into())
+                        }
                     }
                 }
                 _ => Ok(code.into()),
