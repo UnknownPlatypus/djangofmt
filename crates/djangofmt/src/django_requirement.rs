@@ -1,14 +1,8 @@
 //! Inference of the targeted Django version from the `django` requirement of a project.
-//!
-//! Requirements are skimmed rather than parsed,
-//! since a PEP 508 parser would still leave the name, extras and marker splitting to us.
 
 use djangofmt_lint::DjangoVersion;
 
 /// The oldest Django version the project may run on, from its `django` requirements.
-///
-/// Entries split by an environment marker each bound a single environment,
-/// and a template has to work on all of them, hence the minimum.
 pub fn infer_target_version<'a>(
     requirements: impl IntoIterator<Item = &'a str>,
 ) -> Option<DjangoVersion> {

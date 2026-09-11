@@ -148,9 +148,8 @@ pub struct LintSettings {
 
     /// The Django version the templates target, as a `major.minor` string.
     ///
-    /// When unset, it is inferred from the lower bound of the `django` requirement,
-    /// e.g. `django>=4.2` in `[project] dependencies` gives `4.2`.
-    /// Without such a bound, the rules that depend on it stay disabled.
+    /// When unset, it comes from the minimum supported Django version in `[project] dependencies`.
+    /// Rules that depend on it stay disabled until it is known.
     #[option(
         default = "null",
         value_type = "str",
@@ -223,8 +222,7 @@ impl UnsortedTailwindClassesOptions {
 #[derive(Deserialize, Debug)]
 struct PyProject {
     tool: Option<Tool>,
-    /// The PEP 621 table, left untyped so that nothing in it can fail the load,
-    /// since validating `[project]` is the packaging tools' job, not ours.
+    /// The PEP 621 table, left untyped because we don't do strong validation and only infer loosely.
     project: Option<toml::Value>,
 }
 
@@ -250,8 +248,7 @@ fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> 
         .map_err(|err| Error::Resolve(format!("Failed to parse pyproject.toml: {err}")))?;
     let mut settings = pyproject.tool.and_then(|t| t.djangofmt).unwrap_or_default();
 
-    // Only materialize the lint table on a hit,
-    // so an undetected version leaves the settings exactly as the file spelled them.
+    // Guarded so a miss never runs `get_or_insert_default` and invents an empty lint table.
     if settings
         .lint
         .as_ref()
