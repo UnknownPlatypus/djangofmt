@@ -5,7 +5,7 @@ use strum::{IntoEnumIterator, VariantNames};
 
 use crate::Checker;
 use crate::fix::FixAvailability;
-use crate::fix::edits::{delete_codes_or_comment, matching_indices};
+use crate::fix::edits::delete_codes_or_comment;
 use crate::registry::{Rule, RuleCategory};
 use crate::suppression::{IgnoreComment, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -88,8 +88,9 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let remove = matching_indices(codes, |code| invalid.contains(&code));
-    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
+    let deletion = delete_codes_or_comment(checker.context(), comment, |_, code| {
+        invalid.contains(&code)
+    });
     let violation = InvalidIgnoreCode {
         codes: invalid
             .iter()

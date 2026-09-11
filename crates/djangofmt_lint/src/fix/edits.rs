@@ -2,6 +2,7 @@ use miette::SourceSpan;
 
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
+use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 use crate::{span, strip_bom};
 
@@ -87,17 +88,7 @@ impl CodesDeletion {
     }
 }
 
-/// Indices in `codes` of the codes `matches` accepts, for [`delete_codes_or_comment`].
-pub fn matching_indices(codes: &[&str], mut matches: impl FnMut(&str) -> bool) -> Vec<usize> {
-    codes
-        .iter()
-        .enumerate()
-        .filter(|(_, code)| matches(code))
-        .map(|(index, _)| index)
-        .collect()
-}
-
-/// Drops the codes at the `remove` indices from a directive's `codes`.
+/// Drops from a directive's codes the ones `remove` accepts, given each code and its index.
 ///
 /// When one code is dropped, only that entry and its comma are removed:
 ///
@@ -121,34 +112,32 @@ pub fn matching_indices(codes: &[&str], mut matches: impl FnMut(&str) -> bool) -
 /// ```
 pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
-    comment: &str,
-    codes: &[&str],
-    remove: &[usize],
+    comment: &IgnoreComment<'_>,
+    mut remove: impl FnMut(usize, &str) -> bool,
 ) -> CodesDeletion {
-    debug_assert!(
-        !remove.is_empty() && remove.iter().all(|&index| index < codes.len()),
-        "`remove` must be non-empty indices into `codes`"
-    );
-    let remaining: Vec<&str> = codes
+    let codes = comment.directive.codes();
+    let (removed, remaining): (Vec<_>, Vec<_>) = codes
         .iter()
+        .copied()
         .enumerate()
-        .filter(|(index, _)| !remove.contains(index))
-        .map(|(_, code)| *code)
-        .collect();
+        .partition(|&(index, code)| remove(index, code));
+    debug_assert!(
+        !removed.is_empty(),
+        "`remove` must accept at least one code"
+    );
     if remaining.is_empty() {
         // A lone code is reported on the code itself, a list on the whole comment.
         let span = match codes {
             [only] => ctx.source_span(only),
-            _ => ctx.source_span(comment),
+            _ => ctx.source_span(comment.raw),
         };
         return CodesDeletion {
             span,
-            edit: delete_comment(ctx, comment),
+            edit: delete_comment(ctx, comment.raw),
             whole_comment: true,
         };
     }
-    if let &[index] = remove {
-        let code = codes[index];
+    if let &[(index, code)] = removed.as_slice() {
         let (start, end) = codes.get(index + 1).map_or_else(
             || (ctx.source_end(codes[index - 1]), ctx.source_end(code)),
             |next| (ctx.source_offset(code), ctx.source_offset(next)),
@@ -163,8 +152,9 @@ pub fn delete_codes_or_comment(
         ctx.source_offset(codes[0]),
         ctx.source_end(codes[codes.len() - 1]),
     );
+    let remaining: Vec<&str> = remaining.into_iter().map(|(_, code)| code).collect();
     CodesDeletion {
-        span: ctx.source_span(comment),
+        span: ctx.source_span(comment.raw),
         edit: Edit::replacement(remaining.join(", "), span(start, end - start)),
         whole_comment: false,
     }

@@ -126,7 +126,9 @@ fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<
         return;
     }
 
-    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &remove);
+    let deletion = delete_codes_or_comment(checker.context(), comment, |index, _| {
+        remove.contains(&index)
+    });
     let violation = UnusedIgnoreCode {
         codes: format_by_reason(&unused),
         whole_comment: deletion.whole_comment,
