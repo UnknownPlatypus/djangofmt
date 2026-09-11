@@ -147,10 +147,6 @@ DEFAULT_TARGETS = [
                     # <div> opened in {% if %}/{% else %} branches, closed once outside
                     "cms/templates/cms/toolbar/toolbar_with_structure.html",
                 ),
-                ExcludeReason.TEMPLATE_TAG_AS_ATTRIBUTE: (
-                    # {{ attr }}="{{ val }}" dynamic attribute name
-                    "cms/templates/cms/widgets/pagesmartlinkwidget.html",
-                ),
                 ExcludeReason.MISSING_END_TAG: (
                     "cms/templates/cms/noapphook.html",  # </html>
                 ),
@@ -292,7 +288,6 @@ DEFAULT_TARGETS = [
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "djangoproject/templates/start.html",  # </span> inside a {% translate %} string
-                    "docs/templates/docs/genindex.html",  # Invalid <br/ > self close
                 ),
             },
         ),
@@ -340,15 +335,6 @@ DEFAULT_TARGETS = [
                     "netbox/templates/django/forms/widgets/select.html",
                     "netbox/utilities/templates/builtins/badge.html",
                     "netbox/utilities/templates/builtins/tag.html",
-                ),
-                ExcludeReason.TEMPLATE_TAG_AS_ATTRIBUTE: (
-                    "netbox/templates/core/buttons/bulk_sync.html",
-                    "netbox/templates/dcim/buttons/bulk_add_components.html",
-                    "netbox/templates/dcim/buttons/bulk_disconnect.html",
-                    "netbox/templates/virtualization/buttons/bulk_add_components.html",
-                    "netbox/utilities/templates/buttons/bulk_delete.html",
-                    "netbox/utilities/templates/buttons/bulk_edit.html",
-                    "netbox/utilities/templates/buttons/bulk_rename.html",
                 ),
                 ExcludeReason.MISSING_END_TAG: (
                     "netbox/templates/core/inc/config_data.html",  # </tr>
