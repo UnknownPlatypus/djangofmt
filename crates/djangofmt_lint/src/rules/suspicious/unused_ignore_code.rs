@@ -146,8 +146,14 @@ fn classify(
 ) -> Option<Unused> {
     let rule = Rule::from_str(code);
     let reserved = ReservedCode::from_str(code);
-    // An unknown code is `invalid-ignore-code`'s, repeated or not.
-    if rule.is_err() && reserved.is_err() {
+    // A code naming no rule is `invalid-ignore-code`'s and `invalid-syntax` on a node is
+    // `invalid-ignore-comment`'s, repeated or not.
+    let theirs = match (rule, reserved) {
+        (Err(_), Err(_)) => true,
+        (Err(_), Ok(ReservedCode::InvalidSyntax)) => scope == IgnoreScope::Node,
+        _ => false,
+    };
+    if theirs {
         return None;
     }
     if earlier.contains(&code) {
@@ -158,10 +164,7 @@ fn classify(
         (Ok(rule), _) if checker.is_rule_enabled(rule) => Some(Unused::Unmatched),
         (Ok(_), _) => Some(Unused::Disabled),
         // The file parsed, so there is no syntax error left to suppress.
-        // On a node the code is misplaced, which `invalid-ignore-comment` reports.
-        (Err(_), Ok(ReservedCode::InvalidSyntax)) if scope == IgnoreScope::File => {
-            Some(Unused::Unmatched)
-        }
+        (Err(_), Ok(ReservedCode::InvalidSyntax)) => Some(Unused::Unmatched),
         // `format` speaks to the formatter, which the linter cannot see.
         (Err(_), _) => None,
     }
