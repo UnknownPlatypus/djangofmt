@@ -17,9 +17,11 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// A suppression matching no diagnostic is usually a leftover from markup that was since fixed.
 /// It adds noise, and goes on hiding the next real violation of that rule at the same spot.
 ///
-/// A code naming no rule at all is left to `invalid-ignore-code`. `format` addresses the
-/// formatter, which the linter cannot see, so it counts as used unless the same comment already
-/// lists it. `invalid-syntax` counts as used only while the file fails to parse.
+/// A code is unused when its rule reported nothing where the comment applies, when the rule is
+/// not enabled, or when the same comment already lists it. `format` addresses the formatter, so
+/// it is only ever unused as a repeat; `invalid-syntax` is unused once the file parses again.
+/// A code naming no rule is `invalid-ignore-code`'s to report, and a node-level `invalid-syntax`
+/// is `invalid-ignore-comment`'s.
 ///
 /// ## Example
 /// ```html
