@@ -49,7 +49,7 @@ def can_format_project(
     )
 
 
-def markdown_format_result(result: Result) -> str:
+def markdown_format_result(result: Result, title: str) -> str:
     """
     Render a `djangofmt` ecosystem check result as markdown.
     """
@@ -61,42 +61,28 @@ def markdown_format_result(result: Result) -> str:
         if isinstance(comp.diff, (Diff, HistoriesForHunks))
     ]
     projects_with_changes = sum(bool(d) for d in diffs)
-    total_lines_added = sum(d.lines_added for d in diffs)
-    total_lines_removed = sum(d.lines_removed for d in diffs)
-    total_files_modified = sum(d.modified_files for d in diffs)
+    if projects_with_changes == 0 and error_count == 0:
+        return f"✅ {title}"
 
-    if total_lines_removed == 0 and total_lines_added == 0 and error_count == 0:
-        return "\u2705 ecosystem check detected no format changes."
-
-    # Summarize the total changes
-    lines: list[str] = []
-    if total_lines_added == 0 and total_lines_added == 0:
-        # Only errors
-        lines.append(
-            f"\u2139\ufe0f ecosystem check **encountered format errors**. "
-            f"(no format changes; {error_count} project error{add_s(error_count)})"
-        )
+    if projects_with_changes == 0:
+        summary = f"no format changes; {error_count} project error{add_s(error_count)}"
     else:
-        changes = (
+        total_lines_added = sum(d.lines_added for d in diffs)
+        total_lines_removed = sum(d.lines_removed for d in diffs)
+        total_files_modified = sum(d.modified_files for d in diffs)
+        summary = (
             f"+{total_lines_added} -{total_lines_removed} lines "
             f"in {total_files_modified} file{add_s(total_files_modified)} in "
-            f"{projects_with_changes} projects"
+            f"{projects_with_changes} project{add_s(projects_with_changes)}"
         )
-
         if error_count:
-            changes += f"; {error_count} project error{add_s(error_count)}"
-
+            summary += f"; {error_count} project error{add_s(error_count)}"
         unchanged_projects = len(result.completed) - projects_with_changes
         if unchanged_projects:
-            changes += (
+            summary += (
                 f"; {unchanged_projects} project{add_s(unchanged_projects)} unchanged"
             )
-
-        lines.append(
-            f"\u2139\ufe0f ecosystem check **detected format changes**. ({changes})"
-        )
-
-    lines.append("")
+    lines = [f"\u2139\ufe0f {title}: {summary}", ""]
 
     # Then per-project changes
     for project, comparison in result.completed:
@@ -105,11 +91,11 @@ def markdown_format_result(result: Result) -> str:
             continue  # Skip empty diffs
 
         files = diff.modified_files
-        title = f"+{diff.lines_added} -{diff.lines_removed} lines across {files} file{add_s(files)}"
+        section_title = f"+{diff.lines_added} -{diff.lines_removed} lines across {files} file{add_s(files)}"
 
         lines.extend(
             markdown_project_section(
-                title=title,
+                title=section_title,
                 content=diff.format_markdown(repo=comparison.repo),
                 options=project.cli_options,
                 project=project,
@@ -325,7 +311,7 @@ async def format(
 
 
 def markdown_stale_exclusions(executable: Path, result: Result) -> str:
-    """Report exclusions that are no longer needed, so they don't linger unnoticed."""
+    """Report exclusions that are no longer needed, so they don't linger unnoticed; empty when none are."""
     lines: list[str] = []
     for project, comparison in result.completed:
         options = project.cli_options
@@ -339,7 +325,7 @@ def markdown_stale_exclusions(executable: Path, result: Result) -> str:
             lines.append(f"- `{project.repo.fullname}`: {' '.join(stale)}")
 
     if not lines:
-        return "✅ every exclusion is still needed."
+        return ""
     return "\n".join(
         [
             "⚠️ these exclusions are stale (file gone, or formats without error "

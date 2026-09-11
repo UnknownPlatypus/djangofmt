@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from ecosystem_check.projects import CliOptions, ClonedRepository
 
 
-def markdown_validate_result(result: Result) -> str:
+def markdown_validate_result(result: Result, title: str) -> str:
     """
     Render a parse check ecosystem result as markdown.
     """
@@ -28,16 +28,19 @@ def markdown_validate_result(result: Result) -> str:
         if isinstance(comparison.diff, ParseRegressions) and comparison.diff
     ]
     if not regressions and not result.errored:
-        return "✅ ecosystem check detected no parse regressions."
+        return f"✅ {title}"
 
     templates = sum(len(diff) for _, _, diff in regressions)
     summary = (
-        f"{templates} template{add_s(templates)} "
+        f"{templates} parse regression{add_s(templates)} "
         f"in {len(regressions)} project{add_s(len(regressions))}"
+        if regressions
+        else "no parse regressions"
     )
     if result.errored:
         summary += f"; {len(result.errored)} project error{add_s(len(result.errored))}"
-    lines = [f"❌ ecosystem check **detected parse regressions**. ({summary})", ""]
+    status = "❌" if regressions else "\u2139\ufe0f"
+    lines = [f"{status} {title}: {summary}", ""]
 
     for project, repo, diff in regressions:
         lines.extend(

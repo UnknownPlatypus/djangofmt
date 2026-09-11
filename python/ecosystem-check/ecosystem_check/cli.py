@@ -86,6 +86,7 @@ async def _run_main(
             targets=DEFAULT_TARGETS,
             output_format=OutputFormat(args.output_format),
             project_dir=Path(cache),
+            title=args.title,
             raise_on_failure=args.pdb,
             format_comparison=(
                 FormatComparison(args.format_comparison)
@@ -136,6 +137,11 @@ def parse_args() -> argparse.Namespace:
         choices=list(FormatComparison),
         default=FormatComparison.BASE_AND_COMP,
         help="Type of comparison to make when checking formatting.",
+    )
+    parser.add_argument(
+        "--title",
+        default="ecosystem check",
+        help="Name of the check, used as the markdown status line",
     )
     parser.add_argument(
         "command",

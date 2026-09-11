@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     )
 
 
-def markdown_check_result(result: Result) -> str:
+def markdown_check_result(result: Result, title: str) -> str:
     """
     Render a `djangofmt check` ecosystem check result as markdown.
     """
@@ -39,60 +39,50 @@ def markdown_check_result(result: Result) -> str:
         comp.diff for _, comp in result.completed if isinstance(comp.diff, CheckDiff)
     ]
     projects_with_changes = sum(bool(d) for d in diffs)
-    total_added = sum(d.diagnostics_added for d in diffs)
-    total_removed = sum(d.diagnostics_removed for d in diffs)
-    total_fixed_added = sum(d.fix_diff.lines_added for d in diffs)
-    total_fixed_removed = sum(d.fix_diff.lines_removed for d in diffs)
-
     if projects_with_changes == 0 and error_count == 0:
-        return "\u2705 ecosystem check detected no check changes."
+        return f"✅ {title}"
 
-    lines: list[str] = []
     if projects_with_changes == 0:
-        lines.append(
-            f"\u2139\ufe0f ecosystem check **encountered check errors**. "
-            f"(no diagnostic changes; {error_count} project error{add_s(error_count)})"
+        summary = (
+            f"no diagnostic changes; {error_count} project error{add_s(error_count)}"
         )
     else:
-        changes = (
+        total_added = sum(d.diagnostics_added for d in diffs)
+        total_removed = sum(d.diagnostics_removed for d in diffs)
+        total_fixed_added = sum(d.fix_diff.lines_added for d in diffs)
+        total_fixed_removed = sum(d.fix_diff.lines_removed for d in diffs)
+        summary = (
             f"+{total_added} -{total_removed} diagnostic lines, "
             f"+{total_fixed_added} -{total_fixed_removed} fixed lines "
             f"in {projects_with_changes} project{add_s(projects_with_changes)}"
         )
-
         if error_count:
-            changes += f"; {error_count} project error{add_s(error_count)}"
-
+            summary += f"; {error_count} project error{add_s(error_count)}"
         unchanged_projects = len(result.completed) - projects_with_changes
         if unchanged_projects:
-            changes += (
+            summary += (
                 f"; {unchanged_projects} project{add_s(unchanged_projects)} unchanged"
             )
-
-        lines.append(
-            f"\u2139\ufe0f ecosystem check **detected check changes**. ({changes})"
-        )
-
-    lines.append("")
+    lines = [f"\u2139\ufe0f {title}: {summary}", ""]
 
     for project, comparison in result.completed:
         diff = comparison.diff
         if not diff or not isinstance(diff, CheckDiff):
             continue
 
-        title = (
+        section_title = (
             f"+{diff.diagnostics_added} -{diff.diagnostics_removed} diagnostic lines"
         )
         if diff.fix_diff:
             files = diff.fix_diff.modified_files
-            title += (
+            section_title += (
                 f", +{diff.fix_diff.lines_added} -{diff.fix_diff.lines_removed} "
                 f"fixed lines across {files} file{add_s(files)}"
             )
 
         lines.extend(
             markdown_project_section(
-                title=title,
+                title=section_title,
                 content=diff.format_markdown(repo=comparison.repo),
                 options=project.cli_options,
                 project=project,

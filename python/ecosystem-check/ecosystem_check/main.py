@@ -45,6 +45,7 @@ async def main(
     project_dir: Path,
     output_format: OutputFormat,
     format_comparison: FormatComparison | None,
+    title: str,
     max_parallelism: int = 50,
     raise_on_failure: bool = False,
 ) -> None:
@@ -108,14 +109,18 @@ async def main(
         case OutputFormat.MARKDOWN:
             match command:
                 case Command.FORMAT:
-                    print(markdown_format_result(result))
-                    if format_comparison is FormatComparison.BASE_AND_COMP:
+                    print(markdown_format_result(result, title))
+                    if format_comparison is FormatComparison.BASE_AND_COMP and (
+                        stale := markdown_stale_exclusions(
+                            comparison_executable, result
+                        )
+                    ):
                         print()
-                        print(markdown_stale_exclusions(comparison_executable, result))
+                        print(stale)
                 case Command.CHECK:
-                    print(markdown_check_result(result))
+                    print(markdown_check_result(result, title))
                 case Command.VALIDATE:
-                    print(markdown_validate_result(result))
+                    print(markdown_validate_result(result, title))
                 case _:
                     raise ValueError(f"Unknown target command {command}")
         case _:
