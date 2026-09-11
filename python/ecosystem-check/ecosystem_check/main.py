@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import dataclasses
 import json
+import sys
 from collections.abc import Awaitable
 from enum import StrEnum
 from pathlib import Path
@@ -25,6 +26,7 @@ from ecosystem_check.projects import (
     Project,
 )
 from ecosystem_check.types import Comparison, Result, Serializable
+from ecosystem_check.validate import markdown_validate_result, validate_project
 
 T = TypeVar("T")
 GITHUB_MAX_COMMENT_LENGTH = 65536
@@ -61,7 +63,7 @@ async def main(
                     baseline_executable, comparison_executable, target
                 )
             ]
-        case Command.CHECK:
+        case Command.CHECK | Command.VALIDATE:
             pass
     logger.debug("Checking %s targets", len(targets))
 
@@ -112,11 +114,16 @@ async def main(
                         print(markdown_stale_exclusions(comparison_executable, result))
                 case Command.CHECK:
                     print(markdown_check_result(result))
+                case Command.VALIDATE:
+                    print(markdown_validate_result(result))
                 case _:
                     raise ValueError(f"Unknown target command {command}")
         case _:
             raise ValueError(f"Unknown output format {format}")
 
+    # The parse check is the only one that gates CI: a regression fails the job.
+    if command is Command.VALIDATE and any(comp.diff for _, comp in result.completed):
+        sys.exit(1)
     return None
 
 
@@ -152,6 +159,10 @@ async def clone_and_compare(
                     comparison_executable,
                     target.cli_options,
                     cloned_repo,
+                )
+            case Command.VALIDATE:
+                return await validate_project(
+                    comparison_executable, target.cli_options, cloned_repo
                 )
             case _:
                 raise ValueError(f"Unknown target command {command}")

@@ -49,7 +49,10 @@ def entrypoint() -> None:
         logging.basicConfig(level=logging.INFO)
 
     baseline_executable = resolve_executable(args.baseline_executable, "baseline")
-    comparison_executable = resolve_executable(args.comparison_executable, "comparison")
+    # `validate` takes a single executable, which fills both slots to keep the pipeline uniform.
+    comparison_executable = resolve_executable(
+        args.comparison_executable or args.baseline_executable, "comparison"
+    )
 
     # Use a temporary directory for caching if no cache is specified
     cache_context = (
@@ -146,10 +149,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "comparison_executable",
         type=Path,
+        nargs="?",
+        help="Not used by `validate`, which checks a single executable",
     )
     # https://docs.python.org/3.14/library/argparse.html#suggest-on-error
     parser.suggest_on_error = True  # type: ignore[attr-defined, unused-ignore]
-    return parser.parse_args()
+    args = parser.parse_args()
+    if (args.command == Command.VALIDATE) != (args.comparison_executable is None):
+        parser.error("`validate` takes one executable, `format` and `check` take two")
+    return args
 
 
 def _get_executable_path(name: str) -> Path | None:

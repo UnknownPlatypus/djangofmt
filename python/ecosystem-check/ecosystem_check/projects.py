@@ -28,6 +28,7 @@ class Project(Serializable):
 class Command(enum.StrEnum):
     FORMAT = enum.auto()
     CHECK = enum.auto()
+    VALIDATE = enum.auto()
 
 
 class GitDomain(enum.StrEnum):

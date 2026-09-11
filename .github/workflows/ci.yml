@@ -87,6 +87,7 @@ jobs:
           echo "$PWD/python/benchmarks/node_modules/.bin" >> "$GITHUB_PATH"
 
       - name: Run `djangofmt` ecosystem check
+        id: ecosystem
         env:
           # djangofmt was built above, don't rebuild it via project install and maturin
           UV_NO_PROJECT: 1
@@ -111,6 +112,12 @@ jobs:
 
           printf "\n---\n\n### \`pr\` vs \`main\` check diff\n" >> ecosystem-result
           uv run ecosystem-check check ./main_djangofmt ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result
+
+          printf "\n---\n\n### \`pr\` parse check\n" >> ecosystem-result
+          # Keep going on failure so the summary, comment and artifacts are still produced.
+          validate_status=0
+          uv run ecosystem-check validate ./pr_djangofmt --cache-dir ./checkouts | tee -a ecosystem-result || validate_status=$?
+          echo "validate_status=${validate_status}" >> "$GITHUB_OUTPUT"
 
           if [ "$(stat -c%s "ecosystem-result")" -gt 1024000 ]; then
             echo -e "\n\n> [!CAUTION]\n> **Summary Truncated:** The original output was $(du -h ecosystem-result | cut -f1), which exceeds GitHub's 1024k limit." >> "$GITHUB_STEP_SUMMARY"
@@ -156,6 +163,10 @@ jobs:
         with:
           name: pr-number
           path: pr-number
+
+      - name: Fail on parse regressions
+        if: steps.ecosystem.outputs.validate_status != '0'
+        run: exit 1
 
   clippy_check:
     name: "cargo clippy"

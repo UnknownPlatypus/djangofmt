@@ -229,6 +229,12 @@ ecosystem-check-lint-dev:
     cargo build -p djangofmt
     uv run ecosystem-check check djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
 
+# Check that formatting keeps ecosystem templates parseable by Django or Jinja
+[group('ecosystem-check')]
+ecosystem-check-validate executable="target/debug/djangofmt" *args:
+    cargo build -p djangofmt
+    uv run ecosystem-check validate {{executable}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+
 # Clean ecosystem check git repos cache
 [group('ecosystem-check')]
 ecosystem-check-clean-cache:
