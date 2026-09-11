@@ -27,6 +27,16 @@ just ecosystem-check djangofmt ./target/debug/djangofmt --format-comparison base
 The default output format is markdown, which includes nice summaries of the changes. You can use `--output-format json` to display the raw data — this is
 particularly useful when making changes to the ecosystem checks.
 
+## Parse check
+
+`validate` takes a single executable and checks that formatting never turns a template Django (or
+Jinja, for `jinja` profile projects) can parse into one it cannot. Unknown tags, filters and libraries
+are accepted, so only the built-in grammar is checked. Any regression makes the command exit with 1.
+
+```shell
+just ecosystem-check-validate
+```
+
 ## Development
 
 When developing, it can be useful to set the `--pdb` flag to drop into a debugger on failure:

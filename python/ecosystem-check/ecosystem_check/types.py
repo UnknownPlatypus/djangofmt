@@ -179,6 +179,16 @@ class HunkDetail:
     length: int
 
 
+class ParseRegressions(dict[str, str]):
+    """Templates that parsed before formatting but not after, mapped to the new parse error."""
+
+    def format_markdown(self, repo: ClonedRepository) -> str:
+        return "\n".join(
+            f"- <a href='{repo.url_for(path)}'>{path}</a>: `{error}`"
+            for path, error in self.items()
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class Result(Serializable):
     """
@@ -195,7 +205,7 @@ class Comparison(Serializable):
     The result of a completed ecosystem comparison for a single project.
     """
 
-    diff: Diff | HistoriesForHunks | CheckDiff
+    diff: Diff | HistoriesForHunks | CheckDiff | ParseRegressions
     repo: ClonedRepository
 
 

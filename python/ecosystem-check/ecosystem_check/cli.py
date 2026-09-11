@@ -49,7 +49,10 @@ def entrypoint() -> None:
         logging.basicConfig(level=logging.INFO)
 
     baseline_executable = resolve_executable(args.baseline_executable, "baseline")
-    comparison_executable = resolve_executable(args.comparison_executable, "comparison")
+    # `validate` takes a single executable, which fills both slots to keep the pipeline uniform.
+    comparison_executable = resolve_executable(
+        args.comparison_executable or args.baseline_executable, "comparison"
+    )
 
     # Use a temporary directory for caching if no cache is specified
     cache_context = (
@@ -83,6 +86,7 @@ async def _run_main(
             targets=DEFAULT_TARGETS,
             output_format=OutputFormat(args.output_format),
             project_dir=Path(cache),
+            title=args.title,
             raise_on_failure=args.pdb,
             format_comparison=(
                 FormatComparison(args.format_comparison)
@@ -135,6 +139,11 @@ def parse_args() -> argparse.Namespace:
         help="Type of comparison to make when checking formatting.",
     )
     parser.add_argument(
+        "--title",
+        default="ecosystem check",
+        help="Name of the check, used as the markdown status line",
+    )
+    parser.add_argument(
         "command",
         choices=list(Command),
         help="The command to test",
@@ -146,10 +155,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "comparison_executable",
         type=Path,
+        nargs="?",
+        help="Not used by `validate`, which checks a single executable",
     )
     # https://docs.python.org/3.14/library/argparse.html#suggest-on-error
     parser.suggest_on_error = True  # type: ignore[attr-defined, unused-ignore]
-    return parser.parse_args()
+    args = parser.parse_args()
+    if (args.command == Command.VALIDATE) != (args.comparison_executable is None):
+        parser.error("`validate` takes one executable, `format` and `check` take two")
+    return args
 
 
 def _get_executable_path(name: str) -> Path | None:
