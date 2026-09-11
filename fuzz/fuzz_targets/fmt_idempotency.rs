@@ -55,6 +55,15 @@ fn do_fuzz(case: &[u8]) -> Corpus {
         return Corpus::Reject;
     };
 
+    // Reject non-whitespace control characters: HTML recovery passes them through, causing
+    // unstable wrapping. Keep this narrow so fuzzing can still find formatting bugs.
+    if code
+        .chars()
+        .any(|c| c.is_control() && !c.is_ascii_whitespace())
+    {
+        return Corpus::Reject;
+    }
+
     // Both profiles share the seed corpus: fixtures are plain templates, not profile-tagged.
     let django = do_fuzz_profile(code, Profile::Django);
     let jinja = do_fuzz_profile(code, Profile::Jinja);
