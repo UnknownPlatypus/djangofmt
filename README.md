@@ -140,6 +140,23 @@ html-void-self-closing = "never"
 preserve-unquoted-attrs = false
 ```
 
+Lint rules, used by the `djangofmt check` command, are configured in the nested `[tool.djangofmt.lint]` section:
+
+```toml
+[tool.djangofmt.lint]
+select = ["category:all"]
+ignore = ["category:style"]
+preview = true
+target-version = "5.2"
+fix = true
+
+[tool.djangofmt.lint.per-file-ignores]
+"templates/admin/*.html" = ["missing-img-alt"]
+```
+
+`target-version` is the Django version your templates target. While it is unset, the rules that depend on it stay disabled.
+See [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) for the available rule names and categories.
+
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
 The first `pyproject.toml` found is used. If no file is found or the file doesn't contain a `[tool.djangofmt]` section, defaults are used.
 

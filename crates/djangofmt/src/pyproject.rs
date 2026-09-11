@@ -1,5 +1,5 @@
-use djangofmt_lint::RuleSelector;
 use djangofmt_lint::settings::unsorted_tailwind_classes;
+use djangofmt_lint::{DjangoVersion, RuleSelector};
 use djangofmt_macros::OptionsMetadata;
 use serde::Deserialize;
 use std::{
@@ -144,6 +144,15 @@ pub struct LintSettings {
     /// Whether to enable rules that are still in preview.
     #[option(default = "false", value_type = "bool", example = "preview = true")]
     pub preview: Option<bool>,
+
+    /// The Django version the templates target, as a `major.minor` string. Unset leaves the
+    /// rules that depend on it disabled.
+    #[option(
+        default = "null",
+        value_type = "str",
+        example = r#"target-version = "5.2""#
+    )]
+    pub target_version: Option<DjangoVersion>,
 
     /// Whether to apply safe fixes automatically.
     #[option(default = "false", value_type = "bool", example = "fix = true")]
@@ -337,6 +346,7 @@ mod tests {
     #[case("[tool.djangofmt]\nline-length = 321")]
     #[case("[tool.djangofmt]\nindent-width = 0")]
     #[case("[tool.djangofmt]\nindent-width = 17")]
+    #[case("[tool.djangofmt.lint]\ntarget-version = \"5\"")]
     #[case("[tool.djangofmt.lint]\nselect = [\"not-a-real-rule\"]")]
     #[case("[tool.djangofmt.lint.unsorted-tailwind-classes]\nunknown-key = 1")]
     fn test_load_options_errors_on_invalid_toml(#[case] content: &str) {
@@ -432,7 +442,7 @@ prefix = "tw-"
     }
 
     #[test]
-    fn test_load_lint_select_ignore_preview() {
+    fn test_load_lint_options() {
         use djangofmt_lint::{Rule, RuleCategory};
 
         let content = r#"
@@ -440,6 +450,7 @@ prefix = "tw-"
 select = ["category:all"]
 ignore = ["category:style", "missing-img-alt"]
 preview = true
+target-version = "5.2"
 "#;
         let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(
@@ -452,6 +463,7 @@ preview = true
                         RuleSelector::Rule(Rule::MissingImgAlt)
                     ]),
                     preview: Some(true),
+                    target_version: Some(DjangoVersion::new(5, 2)),
                     ..Default::default()
                 }),
                 ..Default::default()
