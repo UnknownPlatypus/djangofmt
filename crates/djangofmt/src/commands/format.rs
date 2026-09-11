@@ -301,12 +301,13 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     // In check mode, list what would change instead of writing it.
     // `resolved.files` is sorted and rayon keeps that order, so the listing is deterministic.
+    let mut would_reformat = false;
     if args.check {
-        for (path, _) in results
-            .iter()
-            .filter(|(_, res)| *res == FormatResult::Formatted)
-        {
-            info!("Would reformat: {}", relativize_path(path));
+        for (path, res) in &results {
+            if *res == FormatResult::Formatted {
+                would_reformat = true;
+                info!("Would reformat: {}", relativize_path(path));
+            }
         }
     }
 
@@ -316,13 +317,10 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         info!("{} !", summary);
     }
 
-    let any_formatted = results
-        .iter()
-        .any(|(_, res)| *res == FormatResult::Formatted);
     if nb_errors > 0 {
         return Ok(ExitStatus::Error);
     }
-    if args.check && any_formatted {
+    if would_reformat {
         return Ok(ExitStatus::Failure);
     }
     Ok(ExitStatus::Success)

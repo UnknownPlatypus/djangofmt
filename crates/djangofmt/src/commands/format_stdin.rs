@@ -41,7 +41,7 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     match super::catch_file_panic(stdin_filename, || {
         format_source_code(stdin_filename, &config, profile, cli.check)
     }) {
-        Ok(would_reformat) if cli.check && would_reformat => Ok(ExitStatus::Failure),
+        Ok(true) if cli.check => Ok(ExitStatus::Failure),
         Ok(_) => Ok(ExitStatus::Success),
         Err(err) => {
             error!("{:?}", miette::Report::new(*err));
