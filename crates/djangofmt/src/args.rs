@@ -116,7 +116,7 @@ pub struct FormatCommand {
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
     /// Avoid writing any formatted files back; instead, exit with a non-zero status code if any
-    /// files would be reformatted.
+    /// files would have been modified, and zero otherwise.
     #[arg(long)]
     pub check: bool,
     /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted).
@@ -349,7 +349,7 @@ mod tests {
 
               --check
                   Avoid writing any formatted files back; instead, exit with a non-zero status code if any
-                  files would be reformatted
+                  files would have been modified, and zero otherwise
 
               --preserve-unquoted-attrs
                   Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted). Use
