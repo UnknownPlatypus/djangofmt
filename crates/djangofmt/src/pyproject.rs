@@ -10,6 +10,7 @@ use std::{
 use tracing::debug;
 
 use crate::args::{OutputFormat, Profile};
+use crate::django_requirement::detect_target_version;
 use crate::error::{Error, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
@@ -145,8 +146,11 @@ pub struct LintSettings {
     #[option(default = "false", value_type = "bool", example = "preview = true")]
     pub preview: Option<bool>,
 
-    /// The Django version the templates target, as a `major.minor` string. Unset leaves the
-    /// rules that depend on it disabled.
+    /// The Django version the templates target, as a `major.minor` string.
+    ///
+    /// When unset, it is inferred from the lower bound of the `django` requirement in
+    /// `[project] dependencies`, e.g. `django>=4.2` gives `4.2`. Without such a bound, the
+    /// rules that depend on it stay disabled.
     #[option(
         default = "null",
         value_type = "str",
@@ -219,6 +223,25 @@ impl UnsortedTailwindClassesOptions {
 #[derive(Deserialize, Debug)]
 struct PyProject {
     tool: Option<Tool>,
+    project: Option<Project>,
+}
+
+/// The PEP 621 table. Only `dependencies` is read, and anything that is not a list of
+/// strings is ignored: validating `[project]` is the packaging tools' job, not ours.
+#[derive(Deserialize, Debug)]
+struct Project {
+    dependencies: Option<toml::Value>,
+}
+
+impl Project {
+    fn dependencies(project: Option<&Self>) -> impl Iterator<Item = &str> {
+        project
+            .and_then(|project| project.dependencies.as_ref())
+            .and_then(toml::Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(toml::Value::as_str)
+    }
 }
 
 #[derive(Deserialize, Debug)]
@@ -231,7 +254,21 @@ struct Tool {
 fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> {
     let pyproject = toml::from_str::<PyProject>(content)
         .map_err(|err| Error::Resolve(format!("Failed to parse pyproject.toml: {err}")))?;
-    Ok(pyproject.tool.and_then(|t| t.djangofmt).unwrap_or_default())
+    let mut settings = pyproject.tool.and_then(|t| t.djangofmt).unwrap_or_default();
+
+    // Only materialize the lint table on a hit, so an undetected version stays indistinguishable
+    // from a pyproject.toml without any djangofmt settings.
+    if settings
+        .lint
+        .as_ref()
+        .is_none_or(|lint| lint.target_version.is_none())
+        && let Some(version) =
+            detect_target_version(Project::dependencies(pyproject.project.as_ref()))
+    {
+        debug!("Inferred target-version {version} from the `django` requirement in pyproject.toml");
+        settings.lint.get_or_insert_default().target_version = Some(version);
+    }
+    Ok(settings)
 }
 
 /// Load `pyproject.toml` settings rooted at the current working directory,
@@ -469,6 +506,38 @@ target-version = "5.2"
                 ..Default::default()
             }
         );
+    }
+
+    #[rstest]
+    #[case::inferred_from_dependencies(
+        "[project]\ndependencies = [\"django>=4.2\"]",
+        Some(DjangoVersion::new(4, 2))
+    )]
+    #[case::explicit_key_wins(
+        "[project]\ndependencies = [\"django>=4.2\"]\n[tool.djangofmt.lint]\ntarget-version = \"5.0\"",
+        Some(DjangoVersion::new(5, 0))
+    )]
+    #[case::non_string_entries_are_skipped(
+        "[project]\ndependencies = [{ name = \"django\" }, \"django>=5.1\"]",
+        Some(DjangoVersion::new(5, 1))
+    )]
+    #[case::malformed_dependencies_never_fail_the_load(
+        "[project]\ndependencies = \"django>=4.2\"",
+        None
+    )]
+    fn test_target_version_is_inferred(
+        #[case] content: &str,
+        #[case] expected: Option<DjangoVersion>,
+    ) {
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        assert_eq!(result.lint.and_then(|lint| lint.target_version), expected);
+    }
+
+    #[test]
+    fn test_undetected_target_version_leaves_the_lint_table_unset() {
+        let content = "[project]\ndependencies = [\"requests>=2\"]";
+        let result = load_options_from_pyproject_toml(content).unwrap();
+        assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
