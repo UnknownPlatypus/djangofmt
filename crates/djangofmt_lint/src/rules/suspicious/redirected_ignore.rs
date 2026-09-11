@@ -4,8 +4,8 @@ use markup_fmt::ast::Comment;
 
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT};
-use crate::suppression::FORMAT_IGNORE_DIRECTIVES;
+use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
+use crate::suppression::{FORMAT_IGNORE_DIRECTIVES, IGNORE_DIRECTIVE, canonical_ignore_comment};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use crate::{Checker, span};
 
@@ -13,13 +13,14 @@ use crate::{Checker, span};
 /// Checks for the formatter's ignore directive written as an HTML comment.
 ///
 /// ## Why is this bad?
-/// `<!-- djangofmt:ignore -->` is the deprecated spelling of `{# djangofmt:ignore #}`. The
-/// formatter reads its directive from HTML comments too, but where the template engine drops a
-/// `{# #}` comment, an HTML comment is shipped to the client, so the directive ends up in every
+/// `<!-- djangofmt:ignore -->` is the deprecated spelling of `{# djangofmt: ignore[format] #}`.
+/// The formatter reads its directive from HTML comments too, but where the template engine drops
+/// a `{# #}` comment, an HTML comment is shipped to the client, so the directive ends up in every
 /// rendered page.
 ///
-/// The fix rewrites the comment in place, free-text reason included. A comment spanning several
-/// lines is reported but not rewritten: Django's `{# #}` comments are single-line.
+/// The fix spells the directive out, free-text reason included: `ignore[format]` before a node,
+/// `file-ignore[format]` when the comment leads the file. A comment spanning several lines is
+/// reported but not rewritten: Django's `{# #}` comments are single-line.
 ///
 /// ## Example
 /// ```html
@@ -29,12 +30,14 @@ use crate::{Checker, span};
 ///
 /// Use instead:
 /// ```html
-/// {# djangofmt:ignore #}
+/// {# djangofmt: ignore[format] #}
 /// <div   class="keep-this-unformatted"   >Content</div>
 /// ```
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct RedirectedIgnore {
+    /// Whether the comment is the legacy whole-file opt-out, spelled `file-ignore[format]`.
+    pub file_level: bool,
     /// Why the rewrite is left to the author, when it is.
     pub unfixable: Option<Unfixable>,
 }
@@ -58,19 +61,29 @@ impl Violation for RedirectedIgnore {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        Some(match self.unfixable {
-            None => "Write it as a `{# #}` template comment instead".into(),
-            Some(Unfixable::MultiLine) => {
-                "Write it as a single-line `{# #}` template comment".into()
+        let spelling = if self.file_level {
+            "{# djangofmt: file-ignore[format] #}"
+        } else {
+            "{# djangofmt: ignore[format] #}"
+        };
+        Some(
+            match self.unfixable {
+                None => format!("Write it as `{spelling}` instead"),
+                Some(Unfixable::MultiLine) => format!("Write it as `{spelling}` on a single line"),
+                Some(Unfixable::ClosesEarly) => {
+                    format!("Write it as `{spelling}`, without the `#}}` in its body")
+                }
             }
-            Some(Unfixable::ClosesEarly) => {
-                "Write it as a `{# #}` template comment, without the `#}` in its body".into()
-            }
-        })
+            .into(),
+        )
     }
 
     fn fix_title(&self) -> Option<&'static str> {
-        Some("Rewrite as a `{# #}` template comment")
+        Some(if self.file_level {
+            "Rewrite as `{# djangofmt: file-ignore[format] #}`"
+        } else {
+            "Rewrite as `{# djangofmt: ignore[format] #}`"
+        })
     }
 }
 
@@ -84,6 +97,9 @@ pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
     }
     let range = HTML_COMMENT.enclosing_range(checker, body);
     let span = span(range.start, range.len());
+    // Leading the file, the bare directive is the legacy whole-file opt-out.
+    let file_level = strip_bom(&checker.context().source()[..range.start]).is_empty()
+        && markup_fmt::matches_directive(body, IGNORE_DIRECTIVE);
     let unfixable = if body.contains('\n') {
         Some(Unfixable::MultiLine)
     } else if body.contains(TEMPLATE_COMMENT.close) {
@@ -91,13 +107,14 @@ pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
     } else {
         None
     };
-    let mut guard = checker.report_diagnostic(&RedirectedIgnore { unfixable }, span);
-    if unfixable.is_none() {
-        // Edge dashes of a `<!--- --->` comment would read as `{#-`/`-#}` whitespace control.
-        let body = body.trim_matches(|c: char| c.is_whitespace() || c == '-');
-        guard.set_fix(Fix::safe_edit(Edit::replacement(
-            format!("{{# {body} #}}"),
-            span,
-        )));
+    let violation = RedirectedIgnore {
+        file_level,
+        unfixable,
+    };
+    let mut guard = checker.report_diagnostic(&violation, span);
+    if unfixable.is_none()
+        && let Some(comment) = canonical_ignore_comment(body, file_level)
+    {
+        guard.set_fix(Fix::safe_edit(Edit::replacement(comment, span)));
     }
 }

@@ -9,4 +9,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·             ╰── here
  2 │ <div   class="kept"  ></div>
    ╰────
-  help: Write it as a `{# #}` template comment instead
+  help: Write it as `{# djangofmt: file-ignore[format] #}` instead

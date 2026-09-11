@@ -51,6 +51,37 @@ pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
 /// `<!-- -->` comments alike.
 pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [IGNORE_DIRECTIVE, "djangofmt:ignore[format]"];
 
+/// The `{# #}` spelling of a formatter directive read from an HTML comment body: the bare form
+/// becomes `ignore[format]`, or `file-ignore[format]` for the legacy whole-file opt-out, with any
+/// codes and trailing reason kept.
+#[must_use]
+pub fn canonical_ignore_comment(body: &str, file_level: bool) -> Option<String> {
+    let directive = markup_fmt::parse_directive(body, NAMESPACE, &[IGNORE])?.ok()?;
+    let keyword = if file_level { FILE_IGNORE } else { IGNORE };
+    let codes = if directive.codes.is_empty() {
+        ReservedCode::Format.as_str().to_owned()
+    } else {
+        directive.codes.join(", ")
+    };
+    // The reason follows the code list, or the bare keyword.
+    let after = match body.find(']') {
+        Some(end) if !directive.codes.is_empty() => &body[end + 1..],
+        _ => body
+            .find(IGNORE)
+            .map_or("", |start| &body[start + IGNORE.len()..]),
+    };
+    let reason = after
+        .trim_matches(|c: char| c.is_whitespace() || c == '-')
+        .trim_start_matches(':')
+        .trim();
+    let reason = if reason.is_empty() {
+        String::new()
+    } else {
+        format!(": {reason}")
+    };
+    Some(format!("{{# {NAMESPACE}: {keyword}[{codes}]{reason} #}}"))
+}
+
 /// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
