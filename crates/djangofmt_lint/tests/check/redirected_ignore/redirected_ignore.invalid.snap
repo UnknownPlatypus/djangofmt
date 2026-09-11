@@ -90,7 +90,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     · ╰──── here
  36 │     <div   class="kept"  ></div>
     ╰────
-  help: Write it as a `{# #}` template comment instead
+  help: Write it as a single-line `{# #}` template comment
 
   × Deprecated HTML ignore comment
     ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:39:1]
@@ -100,4 +100,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                       ╰── here
  40 │ <div   class="kept"  ></div>
     ╰────
-  help: Write it as a `{# #}` template comment instead
+  help: Write it as a `{# #}` template comment, without the `#}` in its body
