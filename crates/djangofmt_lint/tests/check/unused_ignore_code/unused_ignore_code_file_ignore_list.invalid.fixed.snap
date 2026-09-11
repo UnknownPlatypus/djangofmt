@@ -1,6 +1,6 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-{# djangofmt: file-ignore[format] #}
-<!-- A file-level list keeps its used code and is rewritten around the unused ones -->
+{# djangofmt: file-ignore[format, invalid-attr-value] #}
+<!-- A file-level list keeps its used codes and is rewritten around the unused ones -->
 <form method="yes"></form>

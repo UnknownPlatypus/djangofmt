@@ -3,6 +3,10 @@
 {# djangofmt: ignore[format] #}
 <div   class="x"   ></div>
 
+<!-- A used code: the rule reported where the comment applies -->
+{# djangofmt: ignore[invalid-attr-value] #}
+<form method="yes"></form>
+
 <!-- A comment silencing this rule is left alone, whatever else it lists -->
 {# djangofmt: ignore[unused-ignore-code, invalid-attr-value] #}
 <form method="post"></form>
@@ -18,7 +22,7 @@
 <!-- Malformed and misplaced directives are `invalid-ignore-comment`'s to report -->
 {# djangofmt: ignore[] #}
 {# djangofmt: file-ignore[invalid-attr-value] #}
-<form method="yes"></form>
+<form method="post"></form>
 
 <!-- The formatter's bare directive lists no code -->
 {# djangofmt:ignore #}
@@ -26,4 +30,4 @@
 
 <!-- HTML comments carry no suppression -->
 <!-- djangofmt: ignore[invalid-attr-value] -->
-<form method="yes"></form>
+<form method="post"></form>
