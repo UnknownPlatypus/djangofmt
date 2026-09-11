@@ -165,7 +165,7 @@ pub fn collect_ignore_comments<'s>(
 
             let guarded_ranges = match scope(&directive, is_leading) {
                 Some(IgnoreScope::Node) => guarded_ranges(root, offset, checker),
-                Some(IgnoreScope::File) => smallvec![0..usize::MAX],
+                Some(IgnoreScope::File) => smallvec![0..source.len()],
                 None => SmallVec::new(),
             };
             Some(IgnoreComment {
