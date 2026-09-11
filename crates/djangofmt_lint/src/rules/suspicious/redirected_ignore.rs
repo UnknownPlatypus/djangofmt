@@ -13,10 +13,10 @@ use crate::{Checker, span};
 /// Checks for the formatter's ignore directive written as an HTML comment.
 ///
 /// ## Why is this bad?
-/// `<!-- djangofmt:ignore -->` and `<!-- djangofmt: ignore[format] -->` are the deprecated
-/// spellings of the `{# #}` template comment. The formatter still honors them, but where the
-/// template engine drops a `{# #}` comment, an HTML comment is shipped to the client, so the
-/// directive ends up in every rendered page.
+/// `<!-- djangofmt:ignore -->` is the deprecated spelling of `{# djangofmt:ignore #}`. The
+/// formatter reads its directive from HTML comments too, but where the template engine drops a
+/// `{# #}` comment, an HTML comment is shipped to the client, so the directive ends up in every
+/// rendered page.
 ///
 /// The fix rewrites the comment in place, free-text reason included. A comment spanning several
 /// lines is reported but not rewritten: Django's `{# #}` comments are single-line.
