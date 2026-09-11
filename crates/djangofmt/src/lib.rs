@@ -9,6 +9,7 @@ use crate::logging::setup_tracing;
 pub mod args;
 pub mod commands;
 pub mod config;
+mod django_requirement;
 pub mod editorconfig;
 pub mod error;
 pub mod fs;

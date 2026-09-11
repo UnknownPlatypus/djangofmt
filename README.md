@@ -154,7 +154,8 @@ fix = true
 "templates/admin/*.html" = ["missing-img-alt"]
 ```
 
-`target-version` is the Django version your templates target. While it is unset, the rules that depend on it stay disabled.
+`target-version` is the Django version your templates target. When unset, it comes from the minimum supported Django version in `[project] dependencies`.
+Rules that depend on it stay disabled until it is known.
 See [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) for the available rule names and categories.
 
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
