@@ -115,6 +115,10 @@ pub struct FormatCommand {
     /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
+    /// Avoid writing any formatted files back; instead, exit with a non-zero status code if any
+    /// files would be reformatted.
+    #[arg(long)]
+    pub check: bool,
     /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted).
     /// Use `--no-preserve-unquoted-attrs` to disable.
     #[arg(long, overrides_with("no_preserve_unquoted_attrs"))]
@@ -342,6 +346,10 @@ mod tests {
                   - never:     Never use self-closing syntax
                   - always:    Always use self-closing syntax
                   - unchanged: Keep existing style as-is
+
+              --check
+                  Avoid writing any formatted files back; instead, exit with a non-zero status code if any
+                  files would be reformatted
 
               --preserve-unquoted-attrs
                   Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted). Use
