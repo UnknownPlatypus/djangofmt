@@ -10,7 +10,7 @@ use std::{
 use tracing::debug;
 
 use crate::args::{OutputFormat, Profile};
-use crate::django_requirement::detect_target_version;
+use crate::django_requirement::infer_target_version;
 use crate::error::{Error, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
@@ -148,9 +148,9 @@ pub struct LintSettings {
 
     /// The Django version the templates target, as a `major.minor` string.
     ///
-    /// When unset, it is inferred from the lower bound of the `django` requirement in
-    /// `[project] dependencies`, e.g. `django>=4.2` gives `4.2`. Without such a bound, the
-    /// rules that depend on it stay disabled.
+    /// When unset, it is inferred from the lower bound of the `django` requirement,
+    /// e.g. `django>=4.2` in `[project] dependencies` gives `4.2`.
+    /// Without such a bound, the rules that depend on it stay disabled.
     #[option(
         default = "null",
         value_type = "str",
@@ -223,25 +223,19 @@ impl UnsortedTailwindClassesOptions {
 #[derive(Deserialize, Debug)]
 struct PyProject {
     tool: Option<Tool>,
-    project: Option<Project>,
+    /// The PEP 621 table, left untyped so that nothing in it can fail the load,
+    /// since validating `[project]` is the packaging tools' job, not ours.
+    project: Option<toml::Value>,
 }
 
-/// The PEP 621 table. Only `dependencies` is read, and anything that is not a list of
-/// strings is ignored: validating `[project]` is the packaging tools' job, not ours.
-#[derive(Deserialize, Debug)]
-struct Project {
-    dependencies: Option<toml::Value>,
-}
-
-impl Project {
-    fn dependencies(project: Option<&Self>) -> impl Iterator<Item = &str> {
-        project
-            .and_then(|project| project.dependencies.as_ref())
-            .and_then(toml::Value::as_array)
-            .into_iter()
-            .flatten()
-            .filter_map(toml::Value::as_str)
-    }
+/// The string entries of `[project] dependencies`, ignoring anything shaped differently.
+fn project_dependencies(project: Option<&toml::Value>) -> impl Iterator<Item = &str> {
+    project
+        .and_then(|project| project.get("dependencies"))
+        .and_then(toml::Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(toml::Value::as_str)
 }
 
 #[derive(Deserialize, Debug)]
@@ -256,14 +250,14 @@ fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> 
         .map_err(|err| Error::Resolve(format!("Failed to parse pyproject.toml: {err}")))?;
     let mut settings = pyproject.tool.and_then(|t| t.djangofmt).unwrap_or_default();
 
-    // Only materialize the lint table on a hit, so an undetected version stays indistinguishable
-    // from a pyproject.toml without any djangofmt settings.
+    // Only materialize the lint table on a hit,
+    // so an undetected version leaves the settings exactly as the file spelled them.
     if settings
         .lint
         .as_ref()
         .is_none_or(|lint| lint.target_version.is_none())
         && let Some(version) =
-            detect_target_version(Project::dependencies(pyproject.project.as_ref()))
+            infer_target_version(project_dependencies(pyproject.project.as_ref()))
     {
         debug!("Inferred target-version {version} from the `django` requirement in pyproject.toml");
         settings.lint.get_or_insert_default().target_version = Some(version);
@@ -521,10 +515,6 @@ target-version = "5.2"
         "[project]\ndependencies = [{ name = \"django\" }, \"django>=5.1\"]",
         Some(DjangoVersion::new(5, 1))
     )]
-    #[case::malformed_dependencies_never_fail_the_load(
-        "[project]\ndependencies = \"django>=4.2\"",
-        None
-    )]
     fn test_target_version_is_inferred(
         #[case] content: &str,
         #[case] expected: Option<DjangoVersion>,
@@ -533,9 +523,11 @@ target-version = "5.2"
         assert_eq!(result.lint.and_then(|lint| lint.target_version), expected);
     }
 
-    #[test]
-    fn test_undetected_target_version_leaves_the_lint_table_unset() {
-        let content = "[project]\ndependencies = [\"requests>=2\"]";
+    #[rstest]
+    #[case::no_django_requirement("[project]\ndependencies = [\"requests>=2\"]")]
+    #[case::dependencies_is_not_a_list("[project]\ndependencies = \"django>=4.2\"")]
+    #[case::project_is_not_a_table("project = \"nonsense\"")]
+    fn test_an_uninferrable_target_version_leaves_the_settings_untouched(#[case] content: &str) {
         let result = load_options_from_pyproject_toml(content).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
