@@ -1,0 +1,8 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<style>
+    /*! license */
+</style>
+<div style="/* only a comment */"></div>
+<div style="color: red"></div>
