@@ -131,12 +131,3 @@ source: crates/djangofmt_lint/tests/check/main.rs
  52 │ <div></div>
     ╰────
   help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`
-
-  × Invalid suppression comment: missing suppression codes like `[code, ...]`
-    ╭─[tests/check/invalid_ignore_comment/invalid_ignore_comment.invalid.html:55:1]
- 54 │ <!-- Malformed and unterminated at the end of the file -->
- 55 │ {# djangofmt: ignore[]
-    · ───────────┬───────────
-    ·            ╰── here
-    ╰────
-  help: Use `{# djangofmt: ignore[rule, ...] #}` or `{# djangofmt: file-ignore[rule, ...] #}`

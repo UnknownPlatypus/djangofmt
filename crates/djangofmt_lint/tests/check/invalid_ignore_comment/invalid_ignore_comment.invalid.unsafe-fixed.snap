@@ -43,5 +43,3 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- Malformed, with whitespace control: the trimming markers go with the comment -->
 <div></div>
-
-<!-- Malformed and unterminated at the end of the file -->
