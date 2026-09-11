@@ -276,7 +276,6 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, &args.file_selection)?;
     let editorconfig = editorconfig::load_editorconfig_from_cwd();
     let context = FormatContext::new(args, &resolved.pyproject, editorconfig.as_ref());
-    let check = args.check;
 
     // Format files in parallel
     let start = Instant::now();
@@ -284,7 +283,7 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
         .files
         .par_iter()
         .map(|entry| {
-            super::catch_file_panic(Some(entry), || format_path(entry, &context, check))
+            super::catch_file_panic(Some(entry), || format_path(entry, &context))
                 .map(|fmt_res| (entry.as_path(), fmt_res))
         })
         .partition_map(|result| match result {
@@ -300,31 +299,30 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     let nb_errors = super::report_errors(errors, "format", OutputFormat::Full);
 
-    // In check mode, report which files would be reformatted.
-    if check {
-        for (path, result) in &results {
-            if *result == FormatResult::Formatted {
-                info!("Would reformat: {}", path.display());
-            }
+    // In check mode, list what would change instead of writing it.
+    // `resolved.files` is sorted and rayon keeps that order, so the listing is deterministic.
+    if args.check {
+        for (path, _) in results
+            .iter()
+            .filter(|(_, res)| *res == FormatResult::Formatted)
+        {
+            info!("Would reformat: {}", relativize_path(path));
         }
     }
 
     // Report on the formatting changes.
-    let format_results: Vec<FormatResult> = results.iter().map(|(_, res)| *res).collect();
-    let summary = build_summary(&format_results, check);
+    let summary = build_summary(results.iter().map(|(_, res)| res), args.check);
     if !summary.is_empty() {
         info!("{} !", summary);
     }
 
-    let nb_would_reformat = format_results
+    let any_formatted = results
         .iter()
-        .filter(|res| **res == FormatResult::Formatted)
-        .count();
-
+        .any(|(_, res)| *res == FormatResult::Formatted);
     if nb_errors > 0 {
         return Ok(ExitStatus::Error);
     }
-    if check && nb_would_reformat > 0 {
+    if args.check && any_formatted {
         return Ok(ExitStatus::Failure);
     }
     Ok(ExitStatus::Success)
@@ -470,7 +468,6 @@ fn format_or_fallback<'a>(
 fn format_path(
     path: &Path,
     context: &FormatContext,
-    check: bool,
 ) -> std::result::Result<FormatResult, Box<CommandError>> {
     let profile = context.profile_for(path);
     let config = context.config_for(path);
@@ -492,7 +489,7 @@ fn format_path(
     if formatted == unformatted {
         Ok(FormatResult::Unchanged)
     } else {
-        if !check {
+        if !context.args.check {
             let mut writer = File::create(path)
                 .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
 
@@ -506,7 +503,7 @@ fn format_path(
 }
 
 /// The result of an individual formatting operation.
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum FormatResult {
     /// The file was formatted.
     Formatted,
@@ -520,7 +517,10 @@ pub enum FormatResult {
 
 /// Write a summary of the formatting results to stdout.
 #[must_use]
-pub fn build_summary(results: &[FormatResult], check: bool) -> String {
+pub fn build_summary<'a>(
+    results: impl IntoIterator<Item = &'a FormatResult>,
+    check: bool,
+) -> String {
     let (mut changed, mut unchanged, mut skipped) = (0usize, 0usize, 0usize);
     for result in results {
         match result {
@@ -530,14 +530,14 @@ pub fn build_summary(results: &[FormatResult], check: bool) -> String {
         }
     }
 
-    let reformatted_label = if check {
-        "would be reformatted"
+    let (changed_label, unchanged_label) = if check {
+        ("would be reformatted", "already formatted")
     } else {
-        "reformatted"
+        ("reformatted", "left unchanged")
     };
     let parts: Vec<String> = [
-        (changed, reformatted_label),
-        (unchanged, "left unchanged"),
+        (changed, changed_label),
+        (unchanged, unchanged_label),
         (skipped, "skipped"),
     ]
     .iter()
@@ -763,11 +763,12 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![], "")]
     #[case(vec![FormatResult::Formatted], "1 file would be reformatted")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Formatted], "2 files would be reformatted")]
-    #[case(vec![FormatResult::Unchanged], "1 file left unchanged")]
-    #[case(vec![FormatResult::Formatted, FormatResult::Unchanged], "1 file would be reformatted, 1 file left unchanged")]
+    #[case(vec![
+        FormatResult::Formatted,
+        FormatResult::Unchanged,
+        FormatResult::Skipped,
+    ], "1 file would be reformatted, 1 file already formatted, 1 file skipped")]
     fn test_write_summary_check_mode(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
         assert_eq!(build_summary(&results, true), expected);
     }

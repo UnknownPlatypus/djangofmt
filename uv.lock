@@ -155,7 +155,6 @@ docs = [
 ]
 
 [package.metadata]
-
 [package.metadata.requires-dev]
 dev = [
   { name = "astral-dev-toolchain-cargo-insta", specifier = ">=1.48.0" },

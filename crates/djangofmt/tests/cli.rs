@@ -80,6 +80,35 @@ fn format_directory() {
 }
 
 #[test]
+fn format_check_reports_without_writing() {
+    let original = "<div   class=\"foo\"  >\n</div>\n";
+    let project = Project::new().file("test.html", original);
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["--check", "."]), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    Would reformat: test.html
+    1 file would be reformatted !
+    ");
+    assert_eq!(project.read("test.html"), original);
+}
+
+#[test]
+fn format_check_formatted_file_exits_zero() {
+    let project = Project::new().file("test.html", "<div class=\"foo\"></div>\n");
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["--check", "."]), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file already formatted !
+    ");
+}
+
+#[test]
 fn format_quiet() {
     let project = Project::new().file("test.html", "<div   ></div>\n");
     assert_cmd_snapshot!(cli().arg("-q").arg(project.join("test.html")), @"
@@ -180,6 +209,21 @@ fn format_stdin_with_filename_infers_jinja_profile() {
     exit_code: 0
     ----- stdout -----
     {% verbatim %}{{ x }}{% endverbatim %}
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn format_stdin_check_reports_through_exit_code() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["--check", "-"])
+            .pass_stdin("<div   class=\"foo\"  ></div>\n"),
+        @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
 
     ----- stderr -----
     ");
