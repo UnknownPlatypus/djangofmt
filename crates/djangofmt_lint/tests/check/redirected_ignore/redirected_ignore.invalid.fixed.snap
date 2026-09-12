@@ -1,0 +1,45 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- The formatter's directive in an HTML comment -->
+{# djangofmt: ignore[format] #}
+<div   class="kept"  ></div>
+
+<!-- Its `ignore[format]` spelling, alone or alongside lint codes -->
+{# djangofmt: ignore[format] #}
+<div   class="kept"  ></div>
+{# djangofmt: ignore[format, invalid-attr-value] #}
+<form   method="yes"  ></form>
+
+<!-- No spaces around the comment body -->
+{# djangofmt: ignore[format] #}
+<div></div>
+
+<!-- Whitespace around the colon -->
+{# djangofmt: ignore[format] #}
+<div   class="kept"  ></div>
+
+<!-- A free-text reason is kept, colon or not -->
+{# djangofmt: ignore[format]: legacy markup, see #123 #}
+<div   class="kept"  ></div>
+{# djangofmt: ignore[format]: vendored widget #}
+<div   class="kept"  ></div>
+
+<!-- Extra dashes are dropped rather than becoming `{#-` / `-#}` whitespace control -->
+{# djangofmt: ignore[format] #}
+<div   class="kept"  ></div>
+
+<!-- Nested inside an element -->
+<div>
+  {# djangofmt: ignore[format] #}
+  <p     class="kept"  >hi</p>
+</div>
+
+<!-- Reported but left alone: Django's {# #} comments are single-line -->
+<!-- djangofmt:ignore
+     legacy markup, see #123 -->
+<div   class="kept"  ></div>
+
+<!-- Reported but left alone: `#}` would end the new comment early -->
+<!-- djangofmt:ignore #}{{ expression }} -->
+<div   class="kept"  ></div>
