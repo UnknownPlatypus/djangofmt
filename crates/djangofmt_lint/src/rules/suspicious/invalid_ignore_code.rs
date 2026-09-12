@@ -4,8 +4,8 @@ use std::str::FromStr;
 use strum::{IntoEnumIterator, VariantNames};
 
 use crate::Checker;
+use crate::fix::FixAvailability;
 use crate::fix::edits::delete_codes_or_comment;
-use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::suppression::{IgnoreComment, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -30,9 +30,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## Fix safety
-/// The fix is marked as unsafe when every listed code is invalid, because the whole comment is
-/// then deleted, taking any free-text reason with it. Dropping an invalid code from a list that
-/// keeps a valid one is safe.
+/// The fix is marked as unsafe when it deletes a comment along with the free-text reason after
+/// its code list, as in `ignore[...]: reason`. Dropping a code from a list, or a comment carrying
+/// no reason, is safe.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct InvalidIgnoreCode {
@@ -88,7 +88,9 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let deletion = delete_codes_or_comment(checker.context(), comment.raw, codes, &invalid);
+    let deletion = delete_codes_or_comment(checker.context(), comment, |_, code| {
+        invalid.contains(&code)
+    });
     let violation = InvalidIgnoreCode {
         codes: invalid
             .iter()
@@ -103,12 +105,7 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
         },
         whole_comment: deletion.whole_comment,
     };
-    let mut guard = checker.report_diagnostic(&violation, deletion.span);
-    guard.set_fix(if deletion.whole_comment {
-        Fix::unsafe_edit(deletion.edit)
-    } else {
-        Fix::safe_edit(deletion.edit)
-    });
+    deletion.report(checker.context(), &violation);
 }
 
 /// The known code `code` was likely meant to be, when one is close enough to name.

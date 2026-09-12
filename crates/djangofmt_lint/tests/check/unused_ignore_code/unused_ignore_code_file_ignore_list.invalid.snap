@@ -1,0 +1,10 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+  × Unused rule code in suppression: `invalid-syntax`; `missing-img-alt` (non-enabled)
+   ╭─[tests/check/unused_ignore_code/unused_ignore_code_file_ignore_list.invalid.html:1:1]
+ 1 │ {# djangofmt: file-ignore[format, invalid-attr-value, missing-img-alt, invalid-syntax] #}
+   · ────────────────────────────────────────────┬────────────────────────────────────────────
+   ·                                             ╰── here
+ 2 │ <!-- A file-level list keeps its used codes and is rewritten around the unused ones -->
+   ╰────

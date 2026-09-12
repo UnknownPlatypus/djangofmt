@@ -2,6 +2,8 @@ use miette::SourceSpan;
 
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
+use crate::suppression::IgnoreComment;
+use crate::violation::Violation;
 use crate::{span, strip_bom};
 
 /// Builds a safe fix that deletes a whole native attribute (e.g. `type="text/javascript"`).
@@ -68,12 +70,20 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
 pub struct CodesDeletion {
     /// The span to report the violation on.
     pub span: SourceSpan,
-    pub edit: Edit,
+    pub fix: Fix,
     /// Nothing would remain, so the whole comment goes.
     pub whole_comment: bool,
 }
 
-/// Drops `remove` from a directive's `codes`.
+impl CodesDeletion {
+    /// Report `violation` on the deletion's span, fixed by the deletion.
+    pub fn report(self, ctx: &LintContext<'_>, violation: &impl Violation) {
+        let mut guard = ctx.report_diagnostic(violation, self.span);
+        guard.set_fix(self.fix);
+    }
+}
+
+/// Drops from a directive's codes the ones `remove` accepts, given each code and its index.
 ///
 /// When one code is dropped, only that entry and its comma are removed:
 ///
@@ -89,7 +99,7 @@ pub struct CodesDeletion {
 /// +{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}
 /// ```
 ///
-/// When nothing remains, the whole comment goes:
+/// When nothing remains, the whole comment goes, an unsafe fix if a reason goes with it:
 ///
 /// ```diff
 /// -{# djangofmt: file-ignore[nonexistent-rule, also-not-a-rule] #}
@@ -97,43 +107,46 @@ pub struct CodesDeletion {
 /// ```
 pub fn delete_codes_or_comment(
     ctx: &LintContext<'_>,
-    comment: &str,
-    codes: &[&str],
-    remove: &[&str],
+    comment: &IgnoreComment<'_>,
+    mut remove: impl FnMut(usize, &str) -> bool,
 ) -> CodesDeletion {
-    debug_assert!(
-        !remove.is_empty() && remove.iter().all(|code| codes.contains(code)),
-        "`remove` must be a non-empty subset of `codes`"
-    );
-    let remaining: Vec<&str> = codes
+    let codes = comment.directive.codes();
+    let (removed, remaining): (Vec<_>, Vec<_>) = codes
         .iter()
         .copied()
-        .filter(|code| !remove.contains(code))
-        .collect();
+        .enumerate()
+        .partition(|&(index, code)| remove(index, code));
+    debug_assert!(
+        !removed.is_empty(),
+        "`remove` must accept at least one code"
+    );
     if remaining.is_empty() {
         // A lone code is reported on the code itself, a list on the whole comment.
         let span = match codes {
             [only] => ctx.source_span(only),
-            _ => ctx.source_span(comment),
+            _ => ctx.source_span(comment.raw),
+        };
+        let edit = delete_comment(ctx, comment.raw);
+        // Only the author can tell whether the reason still says something worth keeping.
+        let fix = if comment.has_reason() {
+            Fix::unsafe_edit(edit)
+        } else {
+            Fix::safe_edit(edit)
         };
         return CodesDeletion {
             span,
-            edit: delete_comment(ctx, comment),
+            fix,
             whole_comment: true,
         };
     }
-    let mut listed = codes
-        .iter()
-        .enumerate()
-        .filter(|(_, listed)| remove.contains(listed));
-    if let (Some((index, code)), None) = (listed.next(), listed.next()) {
+    if let &[(index, code)] = removed.as_slice() {
         let (start, end) = codes.get(index + 1).map_or_else(
             || (ctx.source_end(codes[index - 1]), ctx.source_end(code)),
             |next| (ctx.source_offset(code), ctx.source_offset(next)),
         );
         return CodesDeletion {
             span: ctx.source_span(code),
-            edit: Edit::deletion(span(start, end - start)),
+            fix: Fix::safe_edit(Edit::deletion(span(start, end - start))),
             whole_comment: false,
         };
     }
@@ -141,9 +154,13 @@ pub fn delete_codes_or_comment(
         ctx.source_offset(codes[0]),
         ctx.source_end(codes[codes.len() - 1]),
     );
+    let remaining: Vec<&str> = remaining.into_iter().map(|(_, code)| code).collect();
     CodesDeletion {
-        span: ctx.source_span(comment),
-        edit: Edit::replacement(remaining.join(", "), span(start, end - start)),
+        span: ctx.source_span(comment.raw),
+        fix: Fix::safe_edit(Edit::replacement(
+            remaining.join(", "),
+            span(start, end - start),
+        )),
         whole_comment: false,
     }
 }
