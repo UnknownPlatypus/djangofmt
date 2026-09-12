@@ -24,7 +24,9 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     if let Some(filename) = stdin_filename
         && is_force_excluded(filename, &discovery_config)?
     {
-        std::io::copy(&mut stdin().lock(), &mut stdout().lock())?;
+        if !cli.check {
+            std::io::copy(&mut stdin().lock(), &mut stdout().lock())?;
+        }
         return Ok(ExitStatus::Success);
     }
 
@@ -37,9 +39,10 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     let config = FormatterConfig::from_args(cli, &pyproject, &settings);
 
     match super::catch_file_panic(stdin_filename, || {
-        format_source_code(stdin_filename, &config, profile)
+        format_source_code(stdin_filename, &config, profile, cli.check)
     }) {
-        Ok(()) => Ok(ExitStatus::Success),
+        Ok(true) if cli.check => Ok(ExitStatus::Failure),
+        Ok(_) => Ok(ExitStatus::Success),
         Err(err) => {
             error!("{:?}", miette::Report::new(*err));
             Ok(ExitStatus::Error)
@@ -47,11 +50,13 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     }
 }
 
+/// Returns whether the source would be reformatted.
 fn format_source_code(
     path: Option<&Path>,
     config: &FormatterConfig,
     profile: Profile,
-) -> std::result::Result<(), Box<CommandError>> {
+    check: bool,
+) -> std::result::Result<bool, Box<CommandError>> {
     let mut source = String::new();
     stdin()
         .lock()
@@ -66,9 +71,13 @@ fn format_source_code(
     };
 
     let output = formatted.as_deref().unwrap_or(&source);
-    stdout()
-        .lock()
-        .write_all(output.as_bytes())
-        .map_err(|err| CommandError::Write(path.map(Path::to_path_buf), err))?;
-    Ok(())
+
+    // Check mode answers through the exit code only, so nothing is echoed back.
+    if !check {
+        stdout()
+            .lock()
+            .write_all(output.as_bytes())
+            .map_err(|err| CommandError::Write(path.map(Path::to_path_buf), err))?;
+    }
+    Ok(output != source)
 }

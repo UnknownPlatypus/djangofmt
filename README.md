@@ -86,15 +86,6 @@ djangofmt templates/base.html  # Format individual files
 When given a directory, djangofmt recurses into it and formats all `*.html`, `*.jinja`, `*.jinja2`, and `*.j2` files it finds.
 It also respects `.gitignore` files.
 
-### Looking for a check mode ?
-
-djangofmt intentionally does not provide a built-in check functionality because CI is too late for a code formatter. We strongly recommend using pre-commit or any IDE "format on save" integration. That being said, you can emulate check capability by chaining with a git diff command like so:
-
-```bash
-djangofmt .
-git diff --exit-code -- '*.html' || (echo "HTML templates are not formatted. Run 'djangofmt' to fix." && exit 1)
-```
-
 ## Pre-commit hook
 
 See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions.
@@ -125,6 +116,16 @@ There is a dedicated pre-commit hook for these:
   hooks:
     - id: djangofmt-svg
 ```
+
+### Check mode
+
+`--check` reports the files that would be reformatted without writing anything, exiting with `1` if any would change:
+
+```shell
+djangofmt --check .
+```
+
+CI is usually too late for a code formatter though: prefer the pre-commit hook above or an IDE "format on save" integration.
 
 ## Configuration
 

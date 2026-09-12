@@ -281,7 +281,10 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let (results, errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
-        .map(|entry| super::catch_file_panic(Some(entry), || format_path(entry, &context)))
+        .map(|entry| {
+            super::catch_file_panic(Some(entry), || format_path(entry, &context))
+                .map(|fmt_res| (entry.as_path(), fmt_res))
+        })
         .partition_map(|result| match result {
             Ok(fmt_res) => Left(fmt_res),
             Err(err) => Right(*err),
@@ -295,17 +298,31 @@ pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
 
     let nb_errors = super::report_errors(errors, "format", OutputFormat::Full);
 
+    // In check mode, list what would change instead of writing it.
+    // `resolved.files` is sorted and rayon keeps that order, so the listing is deterministic.
+    let mut would_reformat = false;
+    if args.check {
+        for (path, res) in &results {
+            if *res == FormatResult::Formatted {
+                would_reformat = true;
+                info!("Would reformat: {}", relativize_path(path));
+            }
+        }
+    }
+
     // Report on the formatting changes.
-    let summary = build_summary(results.as_ref());
+    let summary = build_summary(results.iter().map(|(_, res)| res), args.check);
     if !summary.is_empty() {
         info!("{} !", summary);
     }
 
-    if nb_errors == 0 {
-        Ok(ExitStatus::Success)
-    } else {
-        Ok(ExitStatus::Error)
+    if nb_errors > 0 {
+        return Ok(ExitStatus::Error);
     }
+    if would_reformat {
+        return Ok(ExitStatus::Failure);
+    }
+    Ok(ExitStatus::Success)
 }
 
 /// Format the given source code.
@@ -475,12 +492,14 @@ fn format_path(
     if formatted == unformatted {
         Ok(FormatResult::Unchanged)
     } else {
-        let mut writer =
-            File::create(path).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
+        if !context.args.check {
+            let mut writer = File::create(path)
+                .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
 
-        writer
-            .write_all(formatted.as_bytes())
-            .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
+            writer
+                .write_all(formatted.as_bytes())
+                .map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
+        }
 
         Ok(FormatResult::Formatted)
     }
@@ -501,7 +520,10 @@ pub enum FormatResult {
 
 /// Write a summary of the formatting results to stdout.
 #[must_use]
-pub fn build_summary(results: &[FormatResult]) -> String {
+pub fn build_summary<'a>(
+    results: impl IntoIterator<Item = &'a FormatResult>,
+    check: bool,
+) -> String {
     let (mut changed, mut unchanged, mut skipped) = (0usize, 0usize, 0usize);
     for result in results {
         match result {
@@ -511,9 +533,14 @@ pub fn build_summary(results: &[FormatResult]) -> String {
         }
     }
 
+    let (changed_label, unchanged_label) = if check {
+        ("would be reformatted", "already formatted")
+    } else {
+        ("reformatted", "left unchanged")
+    };
     let parts: Vec<String> = [
-        (changed, "reformatted"),
-        (unchanged, "left unchanged"),
+        (changed, changed_label),
+        (unchanged, unchanged_label),
         (skipped, "skipped"),
     ]
     .iter()
@@ -735,6 +762,17 @@ mod tests {
         FormatResult::Skipped,
     ], "2 files reformatted, 1 file left unchanged, 3 files skipped")]
     fn test_write_summary(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
-        assert_eq!(build_summary(&results), expected);
+        assert_eq!(build_summary(&results, false), expected);
+    }
+
+    #[rstest]
+    #[case(vec![FormatResult::Formatted], "1 file would be reformatted")]
+    #[case(vec![
+        FormatResult::Formatted,
+        FormatResult::Unchanged,
+        FormatResult::Skipped,
+    ], "1 file would be reformatted, 1 file already formatted, 1 file skipped")]
+    fn test_write_summary_check_mode(#[case] results: Vec<FormatResult>, #[case] expected: &str) {
+        assert_eq!(build_summary(&results, true), expected);
     }
 }
