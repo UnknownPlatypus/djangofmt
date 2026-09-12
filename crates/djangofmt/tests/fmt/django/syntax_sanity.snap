@@ -1,0 +1,16 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{% load i18n static %}
+{% if breakfast == 'egg  mcmuffin' or lunch %}
+    <p>{{ user.name|upper }}</p>
+    <p>{{ value|default:"n/a"|title }}</p>
+    <p>{{ egg|crack:amount }} {{ log_group.0.datetime|date:"SHORT_DATETIME_FORMAT" }}</p>
+{% endif %}
+{% if a_very_long_variable_name == a_very_long_constant or another_variable_name == another_constant %}
+    <b>{% trans 'hello   world' %}</b>
+{% endif %}
+{% url 'name' arg1 arg2 as var %}
+{% include "x.html" with a=b only %}
+<p>{{ engines[0].name | length }} {{ ?syntax | error }}</p>
+<p>{{ total-1 }}</p>
