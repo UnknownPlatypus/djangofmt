@@ -510,9 +510,10 @@ fn build_pretty_jinja_config(
             // Base dialect; format_text overrides it per profile.
             dialect: pretty_jinja::config::Dialect::Jinja,
             operator_linebreak: pretty_jinja::config::OperatorLineBreak::Before,
-            // A template is not source code: a wrapped call shouldn't gain a comma.
-            trailing_comma: pretty_jinja::config::TrailingComma::Never,
-            args_trailing_comma: None,
+            trailing_comma: pretty_jinja::config::TrailingComma::OnlyMultiLine,
+            // A call wrapped only because its text is long shouldn't gain a comma,
+            // unlike a collection literal the author already laid out over lines.
+            args_trailing_comma: Some(pretty_jinja::config::TrailingComma::Never),
             expr_dict_trailing_comma: None,
             expr_list_trailing_comma: None,
             expr_tuple_trailing_comma: None,

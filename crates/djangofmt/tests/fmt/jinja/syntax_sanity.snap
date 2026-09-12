@@ -26,6 +26,13 @@ source: crates/djangofmt/tests/fmt/main.rs
     )
 %}
 {%
+    set tabs = [
+        (addon.get_dev_url(), _('Edit Product Page')),
+        (addon.get_dev_url('owner'), _('Manage Authors and License')),
+        (addon.get_dev_url('versions'), _('Manage Status and Versions')),
+    ]
+%}
+{%
     if downgrade_at_end_of_free_trial
     or downgrade_at_end_of_cycle
     or complimentary_access_plan
