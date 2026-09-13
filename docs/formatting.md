@@ -87,6 +87,6 @@ Anything after the closing bracket is a free-text reason:
 {# djangofmt: file-ignore[format]: generated file, do not touch #}
 ```
 
-A bare `{# djangofmt:ignore #}` (or `<!-- djangofmt:ignore -->`) at the very top still skips the whole file, parse errors included, for backward compatibility.
+A bare `{# djangofmt:ignore #}` (or `<!-- djangofmt:ignore -->`) at the very top still skips the whole file, parse errors included, for backward compatibility. The [`redirected-ignore`](rules/redirected-ignore.md) rule rewrites the HTML form, which is rendered to the client.
 
 Prefer `file-ignore[...]`: it states what is opted out of, and `{# #}` comments aren't rendered to the client.

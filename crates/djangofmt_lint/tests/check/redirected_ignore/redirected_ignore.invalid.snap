@@ -1,0 +1,113 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated HTML ignore comment
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:2:1]
+ 1 │ <!-- The formatter's directive in an HTML comment -->
+ 2 │ <!-- djangofmt:ignore -->
+   · ────────────┬────────────
+   ·             ╰── here
+ 3 │ <div   class="kept"  ></div>
+   ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:6:1]
+ 5 │ <!-- Its `ignore[format]` spelling, alone or alongside lint codes -->
+ 6 │ <!-- djangofmt: ignore[format] -->
+   · ─────────────────┬────────────────
+   ·                  ╰── here
+ 7 │ <div   class="kept"  ></div>
+   ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+   ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:8:1]
+ 7 │ <div   class="kept"  ></div>
+ 8 │ <!-- djangofmt: ignore[format, invalid-attr-value] -->
+   · ───────────────────────────┬──────────────────────────
+   ·                            ╰── here
+ 9 │ <form   method="yes"  ></form>
+   ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:12:1]
+ 11 │ <!-- No spaces around the comment body -->
+ 12 │ <!--djangofmt:ignore-->
+    · ───────────┬───────────
+    ·            ╰── here
+ 13 │ <div></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:16:1]
+ 15 │ <!-- Whitespace around the colon -->
+ 16 │ <!-- djangofmt : ignore -->
+    · ─────────────┬─────────────
+    ·              ╰── here
+ 17 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:20:1]
+ 19 │ <!-- A free-text reason is kept, colon or not -->
+ 20 │ <!-- djangofmt:ignore legacy markup, see #123 -->
+    · ────────────────────────┬────────────────────────
+    ·                         ╰── here
+ 21 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:22:1]
+ 21 │ <div   class="kept"  ></div>
+ 22 │ <!-- djangofmt: ignore[format]: vendored widget -->
+    · ─────────────────────────┬─────────────────────────
+    ·                          ╰── here
+ 23 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:26:1]
+ 25 │ <!-- Extra dashes are dropped rather than becoming `{#-` / `-#}` whitespace control -->
+ 26 │ <!--- djangofmt:ignore --->
+    · ─────────────┬─────────────
+    ·              ╰── here
+ 27 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:31:3]
+ 30 │ <div>
+ 31 │   <!-- djangofmt:ignore -->
+    ·   ────────────┬────────────
+    ·               ╰── here
+ 32 │   <p     class="kept"  >hi</p>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` instead
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:36:1]
+ 35 │     <!-- Reported but left alone: Django's {# #} comments are single-line -->
+ 36 │ ╭─▶ <!-- djangofmt:ignore
+ 37 │ ├─▶      legacy markup, see #123 -->
+    · ╰──── here
+ 38 │     <div   class="kept"  ></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}` on a single line
+
+  × Deprecated HTML ignore comment
+    ╭─[tests/check/redirected_ignore/redirected_ignore.invalid.html:41:1]
+ 40 │ <!-- Reported but left alone: `#}` would end the new comment early -->
+ 41 │ <!-- djangofmt:ignore #}{{ expression }} -->
+    · ──────────────────────┬─────────────────────
+    ·                       ╰── here
+ 42 │ <div   class="kept"  ></div>
+    ╰────
+  help: Write it as `{# djangofmt: ignore[format] #}`, without the `#}` in its body
