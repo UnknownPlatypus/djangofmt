@@ -20,8 +20,9 @@ pub mod unsorted_tailwind_classes {
 pub struct Settings {
     /// The set of rules that are active for this run.
     pub rules: RuleSet,
-    /// The Django version the templates target. `None` keeps version-gated rules off.
-    pub target_version: Option<DjangoVersion>,
+    /// The Django version the templates target, resolved: an unset option becomes
+    /// [`DjangoVersion::OLDEST_SUPPORTED`].
+    pub target_version: DjangoVersion,
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
@@ -42,7 +43,7 @@ impl Settings {
             rules: Rule::iter()
                 .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
                 .collect(),
-            target_version: Some(DjangoVersion::LATEST),
+            target_version: DjangoVersion::LATEST,
             unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         }
     }
@@ -125,7 +126,7 @@ impl LintConfiguration {
         (
             Settings {
                 rules,
-                target_version: self.target_version,
+                target_version: self.target_version.unwrap_or_default(),
                 unsorted_tailwind_classes: self.unsorted_tailwind_classes,
             },
             warnings,

@@ -18,8 +18,8 @@ use crate::{Checker, span};
 /// They mark the template as one that breaks on upgrade while offering nothing `static` does not
 /// already provide.
 ///
-/// The rule is version-gated: it reports nothing until `lint.target-version` names Django 2.1
-/// or newer.
+/// The rule is version-gated: it reports nothing when `lint.target-version` names a Django older
+/// than 2.1.
 ///
 /// ## Example
 /// ```html
@@ -71,7 +71,7 @@ const STATIC: &str = "static";
 const DEPRECATED_LIBRARIES: [&str; 2] = ["staticfiles", "admin_static"];
 
 pub fn check(tag: &JinjaTag<'_>, checker: &Checker<'_>) {
-    if !checker.targets_django(DEPRECATED_IN) {
+    if !checker.is_django() || checker.target_version() < DEPRECATED_IN {
         return;
     }
 

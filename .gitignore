@@ -32,3 +32,6 @@ site/
 
 # Benchmark chart renders (uploaded to GitHub rather than committed)
 python/benchmarks/benchmark-*.svg
+
+# insta bookkeeping from test runs
+*.pending-snap

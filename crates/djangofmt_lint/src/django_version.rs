@@ -13,6 +13,10 @@ pub struct DjangoVersion {
 }
 
 impl DjangoVersion {
+    /// The oldest Django release still receiving security support, assumed when the project
+    /// states no target. Bump when that release goes end-of-life.
+    pub const OLDEST_SUPPORTED: Self = Self::new(5, 2);
+
     /// The most recent Django release. Bump on each release so that selecting every rule
     /// really does run every rule.
     pub const LATEST: Self = Self::new(6, 1);
@@ -20,6 +24,12 @@ impl DjangoVersion {
     #[must_use]
     pub const fn new(major: u8, minor: u8) -> Self {
         Self { major, minor }
+    }
+}
+
+impl Default for DjangoVersion {
+    fn default() -> Self {
+        Self::OLDEST_SUPPORTED
     }
 }
 

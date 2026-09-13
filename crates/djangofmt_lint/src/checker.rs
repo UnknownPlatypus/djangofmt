@@ -52,18 +52,13 @@ impl<'a> Checker<'a> {
         matches!(self.context.language(), Language::Django)
     }
 
-    /// Whether the run targets Django `minimum` or newer.
+    /// The Django version the templates target.
     ///
-    /// False for Jinja sources and whenever no `target-version` is configured, so a
-    /// version-gated rule stays off until the project states which Django it supports.
+    /// Defaults to [`DjangoVersion::OLDEST_SUPPORTED`] when the project states no target, so a
+    /// version-gated rule always has a concrete version to compare against.
     #[must_use]
-    pub fn targets_django(&self, minimum: DjangoVersion) -> bool {
-        self.is_django()
-            && self
-                .context
-                .settings()
-                .target_version
-                .is_some_and(|version| version >= minimum)
+    pub const fn target_version(&self) -> DjangoVersion {
+        self.context.settings().target_version
     }
 
     /// Block names recorded during the traversal, borrowed from the source.

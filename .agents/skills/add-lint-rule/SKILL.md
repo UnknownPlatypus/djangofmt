@@ -18,7 +18,8 @@ Both porting research and grounding fixtures in real code have exact mechanics �
 
 Create `crates/djangofmt_lint/src/rules/{category}/{rule_name}.rs`.
 
-Categories map to `RuleCategory`: `correctness`, `suspicious`, `style`, `complexity`, `accessibility`.
+Categories map to `RuleCategory`: `correctness`, `suspicious`, `style`, `upgrade`, `complexity`,
+`accessibility`. Use `upgrade` for anything gated on the targeted Django version (see 1e).
 
 The file must contain:
 
@@ -172,6 +173,33 @@ Key points:
 - For attribute rules, fold the value match into the `let…else` that destructures the attribute rather than unwrapping it in a separate step: `let Attribute::Native(NativeAttribute { name, value: Some((value_str, _)), .. }) = attr else { continue; };` (the paired offset is redundant with `source_span(value_str)`).
 
 The function signature depends on what AST node the rule inspects. Element-level rules take `&Element<'_>`; Jinja block rules take `&JinjaBlock<'_, Node<'_>>`.
+
+### 1e. Version-gated rules
+
+A rule that only applies from some Django release onwards belongs in the `upgrade` category and
+gates on the target version, the way ruff's `UP` rules gate on `target-version`:
+
+```rust
+/// The release that made `json_script`'s element id optional.
+const ELEMENT_ID_OPTIONAL_IN: DjangoVersion = DjangoVersion::new(4, 1);
+
+pub fn check(interpolation: &JinjaInterpolation<'_>, checker: &Checker<'_>) {
+    if !checker.is_django() || checker.target_version() < ELEMENT_ID_OPTIONAL_IN {
+        return;
+    }
+```
+
+- `checker.target_version()` always returns a concrete version — never an `Option`. An unset
+  `target-version` resolves to `DjangoVersion::OLDEST_SUPPORTED`, so the rule still runs.
+- Name the floor as a `const` whose doc comment says what changed in that release, and compare
+  with `<` / `>=`. Never hardcode the version inline.
+- Pair it with `checker.is_django()`: a Django release means nothing for a Jinja template.
+- Say so in the docstring ("The rule is version-gated: it reports nothing when
+  `lint.target-version` names a Django older than 4.1") and list `lint.target-version` under
+  `## Options`.
+- Fixtures run at `DjangoVersion::LATEST`, so the gate is always open for them. Cover the closed
+  gate with a CLI test passing `--target-version`, and the Jinja half with a `.valid.jinja`
+  fixture.
 
 ## Step 2: Export the module
 

@@ -126,8 +126,8 @@ fn settings_for(path: &Path) -> Settings {
         .unwrap_or_else(|_| panic!("fixture directory `{dir}` does not name a rule"));
     Settings {
         rules: RuleSet::from_rule(rule),
-        // Version-gated rules are off without a target version.
-        target_version: Some(DjangoVersion::LATEST),
+        // Fixtures assume the newest Django, so version-gated rules all run.
+        target_version: DjangoVersion::LATEST,
         ..Settings::default()
     }
 }

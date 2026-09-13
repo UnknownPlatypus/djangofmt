@@ -16,8 +16,8 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// emits exactly the same `<script>` tag as `json_script` on its own. The argument was mandatory
 /// until Django 4.1 made it optional, and since then only adds noise.
 ///
-/// The rule is version-gated: it reports nothing until `lint.target-version` names Django 4.1 or
-/// newer, because dropping the argument is a template syntax error on older releases.
+/// The rule is version-gated: it reports nothing when `lint.target-version` names a Django older
+/// than 4.1, because dropping the argument is a template syntax error on those releases.
 ///
 /// ## Example
 /// ```html
@@ -65,7 +65,7 @@ const JSON_SCRIPT_FILTER: &str = "|json_script";
 const EMPTY_LITERALS: [&str; 2] = ["\"\"", "''"];
 
 pub fn check(interpolation: &JinjaInterpolation<'_>, checker: &Checker<'_>) {
-    if !checker.targets_django(ELEMENT_ID_OPTIONAL_IN) {
+    if !checker.is_django() || checker.target_version() < ELEMENT_ID_OPTIONAL_IN {
         return;
     }
 
