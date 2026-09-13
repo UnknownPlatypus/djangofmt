@@ -1,4 +1,4 @@
-use djangofmt_lint::{FileIgnores, IGNORE_DIRECTIVE, ReservedCode};
+use djangofmt_lint::{FORMAT_IGNORE_DIRECTIVES, FileIgnores, LEGACY_IGNORE_DIRECTIVE};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
@@ -165,11 +165,11 @@ pub fn build_markup_options(
             // Ignore formatting with comment directive:
             // {# djangofmt: ignore[format] #}
             // <div>unformatted</div>
-            ignore_comment_directive: vec![
-                IGNORE_DIRECTIVE.into(),
-                format!("{IGNORE_DIRECTIVE}[{}]", ReservedCode::Format),
-            ],
-            ignore_file_comment_directive: vec![IGNORE_DIRECTIVE.into()],
+            ignore_comment_directive: FORMAT_IGNORE_DIRECTIVES
+                .iter()
+                .map(ToString::to_string)
+                .collect(),
+            ignore_file_comment_directive: vec![LEGACY_IGNORE_DIRECTIVE.into()],
             // Indent style tags content:
             // <style>
             //     body { color: red }
@@ -206,8 +206,8 @@ fn build_malva_config(
             keyframe_selector_notation: Some(malva::config::KeyframeSelectorNotation::Percentage),
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
-            ignore_comment_directive: IGNORE_DIRECTIVE.into(),
-            ignore_file_comment_directive: IGNORE_DIRECTIVE.into(),
+            ignore_comment_directive: LEGACY_IGNORE_DIRECTIVE.into(),
+            ignore_file_comment_directive: LEGACY_IGNORE_DIRECTIVE.into(),
             ..malva::config::LanguageOptions::default()
         },
     }

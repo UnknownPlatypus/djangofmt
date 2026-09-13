@@ -47,8 +47,13 @@ const NAMESPACE: &str = "djangofmt";
 const IGNORE: &str = "ignore";
 const FILE_IGNORE: &str = "file-ignore";
 
-/// The formatter's directive, `NAMESPACE:IGNORE` spelled out for `markup_fmt` to match.
-pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
+/// The formatter's legacy ignore directive.
+pub const LEGACY_IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
+
+/// The formatter's canonical ignore directive, using unified error codes.
+pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore[format]";
+
+pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [LEGACY_IGNORE_DIRECTIVE, IGNORE_DIRECTIVE];
 
 /// What a `{# djangofmt: ... #}` comment asks for.
 #[derive(Debug, PartialEq, Eq)]
@@ -261,7 +266,7 @@ impl FileIgnores {
             .leading_body(source)
             .or_else(|| HTML_COMMENT.leading_body(source));
         if let Some(body) = legacy_body
-            && markup_fmt::matches_directive(body, IGNORE_DIRECTIVE)
+            && markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE)
         {
             return Self {
                 format: true,
@@ -328,10 +333,14 @@ mod tests {
         invalid_syntax: false,
     };
 
-    /// The formatter matches the spelled-out directive; the linter parses namespace and keyword.
+    /// The formatter matches the spelled-out directives; the linter parses namespace and keyword.
     #[test]
-    fn ignore_directive_spells_the_namespace_and_keyword() {
-        assert_eq!(IGNORE_DIRECTIVE, format!("{NAMESPACE}:{IGNORE}"));
+    fn ignore_directives_spell_the_namespace_and_keyword() {
+        assert_eq!(LEGACY_IGNORE_DIRECTIVE, format!("{NAMESPACE}:{IGNORE}"));
+        assert_eq!(
+            IGNORE_DIRECTIVE,
+            format!("{LEGACY_IGNORE_DIRECTIVE}[{}]", ReservedCode::Format)
+        );
     }
 
     #[rstest]
