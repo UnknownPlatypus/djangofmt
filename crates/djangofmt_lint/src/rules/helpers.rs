@@ -71,9 +71,9 @@ pub const HTML_COMMENT: CommentDelimiters = CommentDelimiters {
 };
 
 impl CommentDelimiters {
-    /// The body of a leading comment, if `text` starts with one.
+    /// The body of a comment, only if `text` starts with one.
     #[inline]
-    pub fn leading_body(self, text: &str) -> Option<&str> {
+    pub fn body(self, text: &str) -> Option<&str> {
         let body = text.strip_prefix(self.open)?;
         Some(&body[..body.find(self.close)?])
     }
