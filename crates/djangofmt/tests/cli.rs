@@ -480,6 +480,50 @@ fn check_passes_file_path_to_path_aware_rules() {
 }
 
 #[test]
+fn check_gates_version_specific_rules_on_target_version() {
+    // `deprecated-static-library` needs Django >= 2.1; without a target version it stays off.
+    let project = Project::new().file("test.html", "{% load staticfiles %}\n");
+    let args = ["check", "--select", "deprecated-static-library"];
+    let run = |extra: &[&str]| {
+        let mut command = cli();
+        command
+            .args(args)
+            .args(extra)
+            .arg(project.join("test.html"));
+        command
+    };
+
+    assert_cmd_snapshot!(run(&[]), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    ");
+    assert_cmd_snapshot!(run(&["--target-version", "2.0"]), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    ");
+    assert_cmd_snapshot_tmpdir!(
+        run(&["--target-version", "2.1", "--output-format", "concise"]),
+        @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    "
+    );
+}
+
+#[test]
 fn check_fixable_file_with_show_fixes() {
     let project = Project::new().file(
         "test.html",

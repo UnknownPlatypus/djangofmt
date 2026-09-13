@@ -184,6 +184,10 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::SameFilePartialInclude) {
             rules::style::same_file_partial_include::check(tag, self);
         }
+
+        if self.is_rule_enabled(Rule::DeprecatedStaticLibrary) {
+            rules::correctness::deprecated_static_library::check(tag, self);
+        }
     }
 
     fn visit_element(&mut self, element: &Element<'a>) {
