@@ -162,14 +162,16 @@ pub fn build_markup_options(
             // Preserve unquoted HTML attribute values:
             // <c-button editable=True /> -> stays as editable=True
             preserve_unquoted_attrs,
-            // Ignore formatting with comment directive:
-            // {# djangofmt: ignore[format] #}
-            // <div>unformatted</div>
+            // Ignore formatting node with comment directive:
+            //  - {# djangofmt: ignore[format] #}
+            //  - {# djangofmt: ignore #} (deprecated)
             ignore_comment_directive: FORMAT_IGNORE_DIRECTIVES
                 .iter()
                 .map(ToString::to_string)
                 .collect(),
-            ignore_file_comment_directive: vec![LEGACY_IGNORE_DIRECTIVE.into()],
+            // Whole-file opt-outs are honored by `FileIgnores::parse` before we get here.
+            // Empty so markup_fmt's own default directive stays off.
+            ignore_file_comment_directive: vec![],
             // Indent style tags content:
             // <style>
             //     body { color: red }
