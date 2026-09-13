@@ -1,9 +1,9 @@
 //! Diagnostic suppression via `{# djangofmt: ignore[...] #}` comments.
 //!
+//! Some details:
 //! - A directive guards the node that follows it.
 //! - `file-ignore[...]` as the file's first comment covers the whole file.
 //! - Only `{# #}` comments carry directives: HTML comments reach the client.
-
 use std::ops::Range;
 use std::str::FromStr;
 
@@ -55,7 +55,7 @@ pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore[format]";
 
 pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [LEGACY_IGNORE_DIRECTIVE, IGNORE_DIRECTIVE];
 
-/// What a `{# djangofmt: ... #}` comment asks for.
+/// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
     /// `ignore[...]`, guarding the following node.
@@ -112,7 +112,7 @@ pub struct IgnoreComment<'s> {
 }
 
 impl IgnoreComment<'_> {
-    /// Whether the directive silences `code` reported at `offset`.
+    /// Whether the comment silences `code` reported at `offset`.
     fn suppresses(&self, code: &str, offset: usize) -> bool {
         self.guarded_ranges
             .iter()
@@ -239,12 +239,13 @@ fn child_slices<'n, 's>(node: &'n Node<'s>) -> impl Iterator<Item = &'n [Node<'s
         }))
 }
 
-/// Whitespace between a directive and its target does not displace the target.
+/// Whitespace between an ignore comment and its target does not displace the target.
 fn is_whitespace_text(node: &Node<'_>) -> bool {
     matches!(node.kind, NodeKind::Text(_)) && node.raw.trim().is_empty()
 }
 
-/// File-wide opt-outs declared by the leading comment of a file.
+/// File-wide opt-outs declared by the leading comment of a file: `file-ignore[...]` codes,
+/// or the legacy bare `djangofmt:ignore` in `{# #}` or `<!-- -->` form, which sets both.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct FileIgnores {
     /// The formatter skips the whole file (`file-ignore[format]`).
@@ -260,7 +261,7 @@ impl FileIgnores {
     pub fn parse(source: &str) -> Self {
         let source = strip_bom(source);
 
-        // The bare legacy directive doubles as a node-level formatter directive,
+        // The formatter's bare `ignore` doubles as its node-level directive,
         // so it is only file-level when nothing (not even whitespace) precedes it.
         let legacy_body = TEMPLATE_COMMENT
             .leading_body(source)
@@ -414,7 +415,7 @@ mod tests {
     #[case::whitespace_control("{#- djangofmt: file-ignore[format] -#}", FORMAT_ONLY)]
     // Anything after the closing bracket is a free-text reason.
     #[case::reason("{# djangofmt: file-ignore[format]: vendored file #}", FORMAT_ONLY)]
-    // A UTF-8 BOM or leading whitespace before the directive is tolerated.
+    // A UTF-8 BOM or leading whitespace before the comment is tolerated.
     #[case::bom(
         "\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>",
         SYNTAX_ONLY
@@ -432,9 +433,9 @@ mod tests {
     // Preceded by whitespace, the bare directive is node-level, not file-level.
     #[case::legacy_after_newline("\n  {# djangofmt:ignore #}\n<div id=>", NONE)]
     #[case::legacy_after_space(" <!-- djangofmt:ignore -->\n<div id=>", NONE)]
-    // Bracketed directives only count in `{# #}` comments.
+    // Bracketed ignore comments only count in `{# #}` comments.
     #[case::html_comment("<!-- djangofmt: file-ignore[invalid-syntax] -->\n<div id=>", NONE)]
-    // Lint codes, node-level directives and plain markup are not opt-outs.
+    // Lint codes, node-level ignore comments and plain markup are not opt-outs.
     #[case::lint_code("{# djangofmt: file-ignore[missing-img-alt] #}\n<div id=>", NONE)]
     #[case::node_level("{# djangofmt: ignore[invalid-syntax] #}\n<div id=>", NONE)]
     #[case::plain_markup("<div id=>", NONE)]
@@ -499,7 +500,7 @@ mod tests {
             codes("{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>")
                 .is_empty()
         );
-        // A non-matching code, a directive placed after the node, and a later
+        // A non-matching code, an ignore comment placed after the node, and a later
         // sibling all keep their diagnostic.
         assert_eq!(
             codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
@@ -525,7 +526,7 @@ mod tests {
             );
             assert!(!codes(&source).contains(&"invalid-attr-value"), "{filler}");
         }
-        // Stacked directives all reach the same target.
+        // Stacked ignore comments all reach the same target.
         assert!(
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\" id=\"\"></form>"
@@ -544,7 +545,7 @@ mod tests {
 
     #[test]
     fn ignore_guards_the_node_but_not_its_children() {
-        // The directive guards the `<div>` tags, not the `<span>` nested inside them.
+        // The comment guards the `<div>` tags, not the `<span>` nested inside them.
         assert_eq!(
             messages(
                 "{# djangofmt: ignore[empty-attr-value] #}\n<div id=\"\"><span class=\"\">x</span></div>"

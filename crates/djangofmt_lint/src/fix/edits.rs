@@ -74,7 +74,7 @@ pub struct CodesDeletion {
     pub whole_comment: bool,
 }
 
-/// Drops `remove` from a directive's `codes`.
+/// Drops `remove` from an ignore comment's `codes`.
 ///
 /// When one code is dropped, only that entry and its comma are removed:
 ///
