@@ -126,14 +126,11 @@ fn settings_for(path: &Path) -> Settings {
         .unwrap_or_else(|_| panic!("fixture directory `{dir}` does not name a rule"));
     Settings {
         rules: RuleSet::from_rule(rule),
-        // Version-gated rules are off without a target version; fixtures assume a recent Django.
-        target_version: Some(FIXTURE_TARGET_VERSION),
+        // Version-gated rules are off without a target version.
+        target_version: Some(DjangoVersion::LATEST),
         ..Settings::default()
     }
 }
-
-/// The Django version every fixture is linted against.
-const FIXTURE_TARGET_VERSION: DjangoVersion = DjangoVersion::new(5, 2);
 
 fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
     lint_source(

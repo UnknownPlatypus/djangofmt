@@ -13,6 +13,10 @@ pub struct DjangoVersion {
 }
 
 impl DjangoVersion {
+    /// The most recent Django release. Bump on each release so that selecting every rule
+    /// really does run every rule.
+    pub const LATEST: Self = Self::new(6, 1);
+
     #[must_use]
     pub const fn new(major: u8, minor: u8) -> Self {
         Self { major, minor }
