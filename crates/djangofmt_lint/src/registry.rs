@@ -63,6 +63,8 @@ pub enum RuleCategory {
     Suspicious,
     /// Code that should be written in a more idiomatic way.
     Style,
+    /// Code that the Django version named by `target-version` spells better.
+    Upgrade,
     /// Code that does something simple but in a complex way.
     Complexity,
     /// Code that creates accessibility (a11y) barriers.
@@ -246,10 +248,8 @@ define_rules! {
     (InvalidAttrValue, rules::correctness::invalid_attr_value::InvalidAttrValue),
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
     (DuplicateBlockName, rules::correctness::duplicate_block_name::DuplicateBlockName),
-    (DeprecatedStaticLibrary, rules::correctness::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (EmptyAttrValue, rules::style::empty_attr_value::EmptyAttrValue<'static>),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
-    (RedundantJsonScriptId, rules::style::redundant_json_script_id::RedundantJsonScriptId),
     (DjangoStaticUrl, rules::suspicious::django_static_url::DjangoStaticUrl),
     (DjangoUrlPattern, rules::suspicious::django_url_pattern::DjangoUrlPattern),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
@@ -268,4 +268,6 @@ define_rules! {
     (UnsortedTailwindClasses, rules::style::unsorted_tailwind_classes::UnsortedTailwindClasses),
     (InvalidIgnoreComment, rules::suspicious::invalid_ignore_comment::InvalidIgnoreComment),
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
+    (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
+    (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
 }

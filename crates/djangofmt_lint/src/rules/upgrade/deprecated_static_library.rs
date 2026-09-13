@@ -47,7 +47,7 @@ pub struct DeprecatedStaticLibrary<'a> {
 
 impl Violation for DeprecatedStaticLibrary<'_> {
     const RULE: Rule = Rule::DeprecatedStaticLibrary;
-    const CATEGORY: RuleCategory = RuleCategory::Correctness;
+    const CATEGORY: RuleCategory = RuleCategory::Upgrade;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]

@@ -187,7 +187,7 @@ impl<'a> Checker<'a> {
     /// `NativeAttribute` value string -- so only node-position interpolations reach here.
     fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
         if self.is_rule_enabled(Rule::RedundantJsonScriptId) {
-            rules::style::redundant_json_script_id::check(interpolation, self);
+            rules::upgrade::redundant_json_script_id::check(interpolation, self);
         }
     }
 
@@ -197,7 +197,7 @@ impl<'a> Checker<'a> {
         }
 
         if self.is_rule_enabled(Rule::DeprecatedStaticLibrary) {
-            rules::correctness::deprecated_static_library::check(tag, self);
+            rules::upgrade::deprecated_static_library::check(tag, self);
         }
     }
 

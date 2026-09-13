@@ -41,7 +41,7 @@ pub struct RedundantJsonScriptId;
 
 impl Violation for RedundantJsonScriptId {
     const RULE: Rule = Rule::RedundantJsonScriptId;
-    const CATEGORY: RuleCategory = RuleCategory::Style;
+    const CATEGORY: RuleCategory = RuleCategory::Upgrade;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
