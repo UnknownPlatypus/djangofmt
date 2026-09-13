@@ -58,6 +58,9 @@ pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [LEGACY_IGNORE_DIRECTIVE, IGNORE
 /// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
+    /// The bare `ignore`, the formatter's legacy directive: it lists no code,
+    /// so it suppresses no lint, and only `deprecated-ignore` has anything to say about it.
+    Legacy,
     /// `ignore[...]`, guarding the following node.
     Ignore(Vec<&'s str>),
     /// `file-ignore[...]`, covering the whole file.
@@ -69,8 +72,7 @@ pub enum IgnoreDirective<'s> {
 impl<'s> IgnoreDirective<'s> {
     /// Parse a comment body with the grammar the formatter uses.
     ///
-    /// `None` is a comment the linter has no say on: one not addressed to djangofmt, or the
-    /// formatter's bare `ignore`, which carries no lint codes.
+    /// `None` is a comment not addressed to djangofmt at all.
     pub fn parse(comment_body: &'s str) -> Option<Self> {
         let directive =
             match markup_fmt::parse_directive(comment_body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
@@ -78,7 +80,7 @@ impl<'s> IgnoreDirective<'s> {
                 Err(error) => return Some(Self::Malformed(error)),
             };
         Some(match (directive.keyword, directive.codes) {
-            (IGNORE, codes) if codes.is_empty() => return None,
+            (IGNORE, codes) if codes.is_empty() => Self::Legacy,
             (IGNORE, codes) => Self::Ignore(codes),
             (_, codes) if codes.is_empty() => Self::Malformed(ParseErrorKind::MissingCodes),
             (_, codes) => Self::FileIgnore(codes),
@@ -90,11 +92,11 @@ impl<'s> IgnoreDirective<'s> {
         matches!(self, Self::Ignore(_))
     }
 
-    /// The codes listed, none for a malformed directive.
+    /// The codes listed, none for a legacy or malformed directive.
     pub fn codes(&self) -> &[&'s str] {
         match self {
             Self::Ignore(codes) | Self::FileIgnore(codes) => codes,
-            Self::Malformed(_) => &[],
+            Self::Legacy | Self::Malformed(_) => &[],
         }
     }
 }
@@ -294,7 +296,9 @@ fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
     let comment_body = TEMPLATE_COMMENT.body(strip_bom(source).trim_start())?;
     match IgnoreDirective::parse(comment_body)? {
         IgnoreDirective::FileIgnore(codes) => Some(codes),
-        IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => None,
+        IgnoreDirective::Legacy | IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => {
+            None
+        }
     }
 }
 
@@ -346,6 +350,8 @@ mod tests {
 
     #[rstest]
     #[case::node(" djangofmt: ignore[a, b ,c] ", IgnoreDirective::Ignore(vec!["a", "b", "c"]))]
+    #[case::legacy(" djangofmt:ignore ", IgnoreDirective::Legacy)]
+    #[case::legacy_reason("djangofmt:ignore this is generated", IgnoreDirective::Legacy)]
     #[case::file("djangofmt:file-ignore[invalid-syntax]", IgnoreDirective::FileIgnore(vec!["invalid-syntax"]))]
     #[case::spaced_colon("djangofmt : file-ignore[a]", IgnoreDirective::FileIgnore(vec!["a"]))]
     #[case::spaced_list("djangofmt: file-ignore [a]", IgnoreDirective::FileIgnore(vec!["a"]))]
@@ -395,12 +401,10 @@ mod tests {
     #[rstest]
     fn skip_comments_the_linter_has_no_say_on(
         #[values(
-            " djangofmt:ignore ",                // the formatter's old directive
-            "djangofmt:ignore this is generated", // with a reason
-            "djangofmt ignore[a]",               // missing colon
-            "djangofmt-lint: ignore[a]",         // a namespace that merely starts the same
-            "ignore[a]",                         // not addressed to djangofmt
-            "See djangofmt: https://example.com" // merely mentioning it
+            "djangofmt ignore[a]",                // missing colon
+            "djangofmt-lint: ignore[a]",          // a namespace that merely starts the same
+            "ignore[a]",                          // not addressed to djangofmt
+            "See djangofmt: https://example.com"  // merely mentioning it
         )]
         comment_body: &str,
     ) {

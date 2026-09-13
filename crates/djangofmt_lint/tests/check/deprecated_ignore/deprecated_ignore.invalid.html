@@ -1,37 +1,34 @@
----
-source: crates/djangofmt_lint/tests/check/main.rs
----
 <!-- The formatter's directive in an HTML comment -->
-{# djangofmt: ignore[format] #}
+<!-- djangofmt:ignore -->
 <div   class="kept"  ></div>
 
-<!-- Its `ignore[format]` spelling, alone or alongside lint codes -->
-{# djangofmt: ignore[format] #}
+<!-- The same directive in a template comment: the right comment style, the legacy spelling -->
+{# djangofmt:ignore #}
 <div   class="kept"  ></div>
-{# djangofmt: ignore[format, invalid-attr-value] #}
-<form   method="yes"  ></form>
+{# djangofmt:ignore third-party snippet #}
+<div   class="kept"  ></div>
 
 <!-- No spaces around the comment body -->
-{# djangofmt: ignore[format] #}
+<!--djangofmt:ignore-->
 <div></div>
 
 <!-- Whitespace around the colon -->
-{# djangofmt: ignore[format] #}
+<!-- djangofmt : ignore -->
 <div   class="kept"  ></div>
 
 <!-- A free-text reason is kept, colon or not -->
-{# djangofmt: ignore[format]: legacy markup, see #123 #}
+<!-- djangofmt:ignore legacy markup, see #123 -->
 <div   class="kept"  ></div>
-{# djangofmt: ignore[format]: vendored widget #}
+<!-- djangofmt:ignore : vendored widget -->
 <div   class="kept"  ></div>
 
 <!-- Extra dashes are dropped rather than becoming `{#-` / `-#}` whitespace control -->
-{# djangofmt: ignore[format] #}
+<!--- djangofmt:ignore --->
 <div   class="kept"  ></div>
 
 <!-- Nested inside an element -->
 <div>
-  {# djangofmt: ignore[format] #}
+  <!-- djangofmt:ignore -->
   <p     class="kept"  >hi</p>
 </div>
 

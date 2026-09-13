@@ -3,7 +3,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
   × Deprecated HTML ignore comment
-   ╭─[tests/check/redirected_ignore/leading.invalid.html:1:1]
+   ╭─[tests/check/deprecated_ignore/leading_html.invalid.html:1:1]
  1 │ <!-- djangofmt:ignore -->
    · ────────────┬────────────
    ·             ╰── here

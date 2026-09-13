@@ -1,13 +1,15 @@
-{# djangofmt:ignore #}
-<div   class="kept"  ></div>
-
-{# Template-comment ignore comments are already the right style #}
+{# A coded directive is already the right spelling #}
 {# djangofmt: ignore[invalid-attr-value] #}
 <form method="yes"></form>
 
 <!-- Not the formatter's directive: it honors no lint code, and the linter reads no HTML comment -->
 <!-- djangofmt: ignore[invalid-attr-value] -->
 <form method="yes"></form>
+
+<!-- The `ignore[...]` spelling never had an HTML form: the formatter honors it here, but
+     nothing documented it, so the rule leaves it alone -->
+<!-- djangofmt: ignore[format] -->
+<div   class="kept"  ></div>
 
 <!-- `file-ignore` never had an HTML form either -->
 <!-- djangofmt: file-ignore[format] -->

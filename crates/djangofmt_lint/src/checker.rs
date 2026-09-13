@@ -142,6 +142,9 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
             rules::suspicious::invalid_ignore_code::check(comments, self);
         }
+        if self.is_rule_enabled(Rule::DeprecatedIgnore) {
+            rules::suspicious::deprecated_ignore::check_ignore_comments(comments, self);
+        }
     }
 
     fn visit_node(&mut self, node: &Node<'a>) {
@@ -155,8 +158,8 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_comment(&self, comment: &Comment<'_>) {
-        if self.is_rule_enabled(Rule::RedirectedIgnore) {
-            rules::suspicious::redirected_ignore::check(comment, self);
+        if self.is_rule_enabled(Rule::DeprecatedIgnore) {
+            rules::suspicious::deprecated_ignore::check(comment, self);
         }
     }
 

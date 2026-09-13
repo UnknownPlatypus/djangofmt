@@ -119,7 +119,8 @@ fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
         IgnoreDirective::FileIgnore(_) if !comment.is_leading => {
             remove_comment(IgnoreCommentViolation::MisplacedFileIgnore)
         }
-        IgnoreDirective::FileIgnore(_) => return,
+        // The legacy directive is `deprecated-ignore`'s to report.
+        IgnoreDirective::FileIgnore(_) | IgnoreDirective::Legacy => return,
         IgnoreDirective::Ignore(codes) => {
             let invalid_syntax = ReservedCode::InvalidSyntax.as_str();
             if !codes.contains(&invalid_syntax) {
