@@ -1,0 +1,20 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Both spellings of the empty literal -->
+{{ user_data|json_script }}
+{{ user_data|json_script }}
+
+<!-- Tight spacing, and whitespace inside the braces -->
+{{user_data|json_script}}
+{{   user_data|json_script   }}
+
+<!-- Chained after and before other filters -->
+{{ user_data|json_script|safe }}
+{{ user_data|default:"{}"|json_script }}
+
+<!-- In element content -->
+<div>{{ user_data|json_script }}</div>
+
+<!-- Two interpolations on one line -->
+{{ a|json_script }} {{ b|json_script }}

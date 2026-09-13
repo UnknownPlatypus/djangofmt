@@ -2,8 +2,8 @@ use std::path::Path;
 
 use markup_fmt::Language;
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
-    Root,
+    Attribute, Element, JinjaBlock, JinjaInterpolation, JinjaTag, JinjaTagOrChildren,
+    NativeAttribute, Node, NodeKind, Root,
 };
 use miette::SourceSpan;
 use smallvec::SmallVec;
@@ -176,7 +176,18 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
+            NodeKind::JinjaInterpolation(interpolation) => {
+                self.visit_jinja_interpolation(interpolation);
+            }
             _ => {}
+        }
+    }
+
+    /// `Attribute` has no interpolation variant -- `{{ }}` in attribute position is part of the
+    /// `NativeAttribute` value string -- so only node-position interpolations reach here.
+    fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
+        if self.is_rule_enabled(Rule::RedundantJsonScriptId) {
+            rules::style::redundant_json_script_id::check(interpolation, self);
         }
     }
 

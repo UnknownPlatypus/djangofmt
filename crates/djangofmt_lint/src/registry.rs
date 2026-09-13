@@ -249,6 +249,7 @@ define_rules! {
     (DeprecatedStaticLibrary, rules::correctness::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (EmptyAttrValue, rules::style::empty_attr_value::EmptyAttrValue<'static>),
     (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
+    (RedundantJsonScriptId, rules::style::redundant_json_script_id::RedundantJsonScriptId),
     (DjangoStaticUrl, rules::suspicious::django_static_url::DjangoStaticUrl),
     (DjangoUrlPattern, rules::suspicious::django_url_pattern::DjangoUrlPattern),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
