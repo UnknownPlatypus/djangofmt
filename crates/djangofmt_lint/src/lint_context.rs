@@ -7,6 +7,7 @@
 use std::cell::RefCell;
 use std::path::Path;
 
+use markup_fmt::Language;
 use miette::SourceSpan;
 
 use crate::LintDiagnostic;
@@ -26,6 +27,7 @@ pub struct LintContext<'a> {
     diagnostics: RefCell<Vec<LintDiagnostic>>,
     source: &'a str,
     settings: &'a Settings,
+    language: Language,
     path: Option<&'a Path>,
     /// The run's rules minus the file's own `file-ignore[...]` opt-outs.
     rules: RuleSet,
@@ -33,12 +35,18 @@ pub struct LintContext<'a> {
 
 impl<'a> LintContext<'a> {
     #[must_use]
-    pub fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
+    pub fn new(
+        source: &'a str,
+        settings: &'a Settings,
+        language: Language,
+        path: Option<&'a Path>,
+    ) -> Self {
         let mut rules = settings.rules;
         rules.remove_all(&suppression::file_ignored_rules(source));
         Self {
             source,
             settings,
+            language,
             path,
             rules,
             diagnostics: RefCell::new(Vec::new()),
@@ -49,6 +57,12 @@ impl<'a> LintContext<'a> {
     #[must_use]
     pub const fn source(&self) -> &'a str {
         self.source
+    }
+
+    /// The template language the source is parsed as.
+    #[must_use]
+    pub const fn language(&self) -> Language {
+        self.language
     }
 
     /// The path of the file being linted, or [`None`] when there is no backing file.

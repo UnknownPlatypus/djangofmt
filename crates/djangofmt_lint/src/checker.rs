@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use markup_fmt::Language;
 use markup_fmt::ast::{
     Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
     Root,
@@ -9,6 +10,7 @@ use smallvec::SmallVec;
 
 use crate::LintDiagnostic;
 use crate::Settings;
+use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
@@ -26,9 +28,14 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
+    pub fn new(
+        source: &'a str,
+        settings: &'a Settings,
+        language: Language,
+        path: Option<&'a Path>,
+    ) -> Self {
         Self {
-            context: LintContext::new(source, settings, path),
+            context: LintContext::new(source, settings, language, path),
             block_names: SmallVec::new_const(),
         }
     }
@@ -37,6 +44,26 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub const fn context(&self) -> &LintContext<'a> {
         &self.context
+    }
+
+    /// Whether the source is parsed as a Django template rather than a Jinja one.
+    #[must_use]
+    pub const fn is_django(&self) -> bool {
+        matches!(self.context.language(), Language::Django)
+    }
+
+    /// Whether the run targets Django `minimum` or newer.
+    ///
+    /// False for Jinja sources and whenever no `target-version` is configured, so a
+    /// version-gated rule stays off until the project states which Django it supports.
+    #[must_use]
+    pub fn targets_django(&self, minimum: DjangoVersion) -> bool {
+        self.is_django()
+            && self
+                .context
+                .settings()
+                .target_version
+                .is_some_and(|version| version >= minimum)
     }
 
     /// Block names recorded during the traversal, borrowed from the source.
