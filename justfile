@@ -217,6 +217,13 @@ ecosystem-check-stability external-formatter:
     cargo build -p djangofmt
     uv run ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}} --format-comparison base-then-comp-converge
 
+# Check whether an external formatter still changes anything after djangofmt ran
+[group('ecosystem-check')]
+[arg('external-formatter', pattern='djade|rustywind')]
+ecosystem-check-parity external-formatter:
+    cargo build -p djangofmt
+    uv run ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}} --format-comparison comp-then-base
+
 # Run linter ecosystem checks
 [group('ecosystem-check')]
 ecosystem-check-lint baseline comparison *args:

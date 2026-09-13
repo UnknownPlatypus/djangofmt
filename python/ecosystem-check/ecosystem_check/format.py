@@ -135,6 +135,10 @@ async def compare_format(
             diff = await format_then_format(*args)
         case FormatComparison.BASE_THEN_COMP_CONVERGE:
             diff = await format_then_format_converge(*args)
+        case FormatComparison.COMP_THEN_BASE:
+            diff = await format_then_format(
+                comparison_executable, baseline_executable, options, cloned_repo
+            )
         case _:
             raise ValueError(f"Unknown format comparison type {format_comparison!r}.")
 
@@ -370,3 +374,8 @@ class FormatComparison(StrEnum):
     # Run baseline executable then comparison executable.
     # Do that multiple time to ensure it converges.
     BASE_THEN_COMP_CONVERGE = "base-then-comp-converge"
+
+    # Run comparison executable then baseline executable.
+    # Checks whether the baseline still has anything to say once the comparison
+    # executable has formatted the code -- an empty diff means full parity.
+    COMP_THEN_BASE = "comp-then-base"
