@@ -38,7 +38,7 @@ miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
 proc-macro2 = { version = "1.0" }
 quote = { version = "1.0" }
 rayon = { version = "1.12.0" }
-rstest = { version = "=0.26.1" }
+rstest = { version = "=0.27.0" }
 rustc-hash = { version = "2.1.2" }
 rustywind_core = {
   version = "0.7.0",
