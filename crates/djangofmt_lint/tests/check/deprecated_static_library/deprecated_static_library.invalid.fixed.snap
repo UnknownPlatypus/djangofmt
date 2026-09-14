@@ -1,0 +1,27 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- The two removed aliases of `static` -->
+{% load static %}
+{% load static %}
+
+<!-- Alongside other libraries, in either position -->
+{% load static i18n %}
+{% load i18n static l10n %}
+
+<!-- The tag already loads `static`, so the alias is dropped rather than renamed -->
+{% load static %}
+{% load static %}
+{% load i18n static l10n %}
+
+<!-- Both aliases in one tag -->
+{% load static %}
+
+<!-- `{% load x from lib %}` names its library last -->
+{% load static from static %}
+
+<!-- Nested inside a block -->
+{% block head %}{% load static %}{% endblock %}
+
+<!-- Tight spacing -->
+{%load static%}

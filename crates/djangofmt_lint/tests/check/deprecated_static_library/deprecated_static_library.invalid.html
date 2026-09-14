@@ -1,0 +1,24 @@
+<!-- The two removed aliases of `static` -->
+{% load staticfiles %}
+{% load admin_static %}
+
+<!-- Alongside other libraries, in either position -->
+{% load staticfiles i18n %}
+{% load i18n admin_static l10n %}
+
+<!-- The tag already loads `static`, so the alias is dropped rather than renamed -->
+{% load static staticfiles %}
+{% load staticfiles static %}
+{% load i18n staticfiles static l10n %}
+
+<!-- Both aliases in one tag -->
+{% load staticfiles admin_static %}
+
+<!-- `{% load x from lib %}` names its library last -->
+{% load static from staticfiles %}
+
+<!-- Nested inside a block -->
+{% block head %}{% load staticfiles %}{% endblock %}
+
+<!-- Tight spacing -->
+{%load staticfiles%}

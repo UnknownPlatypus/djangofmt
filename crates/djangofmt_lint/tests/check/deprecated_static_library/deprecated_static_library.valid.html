@@ -1,0 +1,26 @@
+<!-- The replacement library -->
+{% load static %}
+{% load static i18n l10n %}
+
+<!-- Other libraries are left alone -->
+{% load i18n %}
+{% load humanize cache %}
+
+<!-- A tag name that merely starts with `load` -->
+{% loader staticfiles %}
+
+<!-- `staticfiles` as an imported name, not as the library -->
+{% load staticfiles from mylib %}
+{% load static staticfiles from mylib %}
+
+<!-- Library names are Python module names, so they are case-sensitive -->
+{% load StaticFiles %}
+{% load ADMIN_STATIC %}
+
+<!-- A library that merely embeds the deprecated name -->
+{% load staticfiles_extra %}
+{% load my_staticfiles %}
+
+<!-- Not a `{% load %}` tag at all -->
+{% include "staticfiles" %}
+{% static 'admin_static' %}

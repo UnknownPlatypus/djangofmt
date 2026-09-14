@@ -3,8 +3,8 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, fix_ast,
-    graphical_handler, lint_source, parse,
+    Applicability, DjangoVersion, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings,
+    fix_ast, graphical_handler, lint_source, parse,
 };
 
 use insta::{assert_snapshot, glob};
@@ -58,19 +58,34 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let ast = parse(&input, language_for(path), &[])
+        let language = language_for(path);
+        let ast = parse(&input, language, &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let safe = fix_ast(&input, &ast, &settings, Applicability::Safe, Some(path));
+        let safe = fix_ast(
+            &input,
+            &ast,
+            &settings,
+            language,
+            Applicability::Safe,
+            Some(path),
+        );
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &settings, Applicability::Unsafe, Some(path));
+        let unsafe_fixed = fix_ast(
+            &input,
+            &ast,
+            &settings,
+            language,
+            Applicability::Unsafe,
+            Some(path),
+        );
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
@@ -111,6 +126,8 @@ fn settings_for(path: &Path) -> Settings {
         .unwrap_or_else(|_| panic!("fixture directory `{dir}` does not name a rule"));
     Settings {
         rules: RuleSet::from_rule(rule),
+        // Fixtures assume the newest Django, so version-gated rules all run.
+        target_version: DjangoVersion::LATEST,
         ..Settings::default()
     }
 }

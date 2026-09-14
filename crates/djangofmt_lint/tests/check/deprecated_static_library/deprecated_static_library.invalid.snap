@@ -1,0 +1,122 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:2:9]
+ 1 │ <!-- The two removed aliases of `static` -->
+ 2 │ {% load staticfiles %}
+   ·         ─────┬─────
+   ·              ╰── here
+ 3 │ {% load admin_static %}
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `admin_static`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:3:9]
+ 2 │ {% load staticfiles %}
+ 3 │ {% load admin_static %}
+   ·         ──────┬─────
+   ·               ╰── here
+ 4 │ 
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:6:9]
+ 5 │ <!-- Alongside other libraries, in either position -->
+ 6 │ {% load staticfiles i18n %}
+   ·         ─────┬─────
+   ·              ╰── here
+ 7 │ {% load i18n admin_static l10n %}
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `admin_static`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:7:14]
+ 6 │ {% load staticfiles i18n %}
+ 7 │ {% load i18n admin_static l10n %}
+   ·              ──────┬─────
+   ·                    ╰── here
+ 8 │ 
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:10:16]
+  9 │ <!-- The tag already loads `static`, so the alias is dropped rather than renamed -->
+ 10 │ {% load static staticfiles %}
+    ·                ─────┬─────
+    ·                     ╰── here
+ 11 │ {% load staticfiles static %}
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:11:9]
+ 10 │ {% load static staticfiles %}
+ 11 │ {% load staticfiles static %}
+    ·         ─────┬─────
+    ·              ╰── here
+ 12 │ {% load i18n staticfiles static l10n %}
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:12:14]
+ 11 │ {% load staticfiles static %}
+ 12 │ {% load i18n staticfiles static l10n %}
+    ·              ─────┬─────
+    ·                   ╰── here
+ 13 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:15:9]
+ 14 │ <!-- Both aliases in one tag -->
+ 15 │ {% load staticfiles admin_static %}
+    ·         ─────┬─────
+    ·              ╰── here
+ 16 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `admin_static`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:15:21]
+ 14 │ <!-- Both aliases in one tag -->
+ 15 │ {% load staticfiles admin_static %}
+    ·                     ──────┬─────
+    ·                           ╰── here
+ 16 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:18:21]
+ 17 │ <!-- `{% load x from lib %}` names its library last -->
+ 18 │ {% load static from staticfiles %}
+    ·                     ─────┬─────
+    ·                          ╰── here
+ 19 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:21:25]
+ 20 │ <!-- Nested inside a block -->
+ 21 │ {% block head %}{% load staticfiles %}{% endblock %}
+    ·                         ─────┬─────
+    ·                              ╰── here
+ 22 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:24:8]
+ 23 │ <!-- Tight spacing -->
+ 24 │ {%load staticfiles%}
+    ·        ─────┬─────
+    ·             ╰── here
+    ╰────
+  help: Load `static` instead

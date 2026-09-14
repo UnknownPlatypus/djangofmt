@@ -1,14 +1,16 @@
 use std::path::Path;
 
+use markup_fmt::Language;
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
-    Root,
+    Attribute, Element, JinjaBlock, JinjaInterpolation, JinjaTag, JinjaTagOrChildren,
+    NativeAttribute, Node, NodeKind, Root,
 };
 use miette::SourceSpan;
 use smallvec::SmallVec;
 
 use crate::LintDiagnostic;
 use crate::Settings;
+use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
@@ -26,9 +28,14 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
+    pub fn new(
+        source: &'a str,
+        settings: &'a Settings,
+        language: Language,
+        path: Option<&'a Path>,
+    ) -> Self {
         Self {
-            context: LintContext::new(source, settings, path),
+            context: LintContext::new(source, settings, language, path),
             block_names: SmallVec::new_const(),
         }
     }
@@ -37,6 +44,21 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub const fn context(&self) -> &LintContext<'a> {
         &self.context
+    }
+
+    /// Whether the source is parsed as a Django template rather than a Jinja one.
+    #[must_use]
+    pub const fn is_django(&self) -> bool {
+        matches!(self.context.language(), Language::Django)
+    }
+
+    /// The Django version the templates target.
+    ///
+    /// Defaults to [`DjangoVersion::OLDEST_SUPPORTED`] when the project states no target, so a
+    /// version-gated rule always has a concrete version to compare against.
+    #[must_use]
+    pub const fn target_version(&self) -> DjangoVersion {
+        self.context.settings().target_version
     }
 
     /// Block names recorded during the traversal, borrowed from the source.
@@ -149,13 +171,28 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
+            NodeKind::JinjaInterpolation(interpolation) => {
+                self.visit_jinja_interpolation(interpolation);
+            }
             _ => {}
+        }
+    }
+
+    /// `Attribute` has no interpolation variant -- `{{ }}` in attribute position is part of the
+    /// `NativeAttribute` value string -- so only node-position interpolations reach here.
+    fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
+        if self.is_rule_enabled(Rule::RedundantJsonScriptId) {
+            rules::upgrade::redundant_json_script_id::check(interpolation, self);
         }
     }
 
     fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
         if self.is_rule_enabled(Rule::SameFilePartialInclude) {
             rules::style::same_file_partial_include::check(tag, self);
+        }
+
+        if self.is_rule_enabled(Rule::DeprecatedStaticLibrary) {
+            rules::upgrade::deprecated_static_library::check(tag, self);
         }
     }
 

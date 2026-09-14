@@ -1,0 +1,91 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:2:25]
+ 1 │ <!-- Both spellings of the empty literal -->
+ 2 │ {{ user_data|json_script:"" }}
+   ·                         ─┬─
+   ·                          ╰── here
+ 3 │ {{ user_data|json_script:'' }}
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:3:25]
+ 2 │ {{ user_data|json_script:"" }}
+ 3 │ {{ user_data|json_script:'' }}
+   ·                         ─┬─
+   ·                          ╰── here
+ 4 │ 
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:6:24]
+ 5 │ <!-- Tight spacing, and whitespace inside the braces -->
+ 6 │ {{user_data|json_script:""}}
+   ·                        ─┬─
+   ·                         ╰── here
+ 7 │ {{   user_data|json_script:""   }}
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:7:27]
+ 6 │ {{user_data|json_script:""}}
+ 7 │ {{   user_data|json_script:""   }}
+   ·                           ─┬─
+   ·                            ╰── here
+ 8 │ 
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+    ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:10:25]
+  9 │ <!-- Chained after and before other filters -->
+ 10 │ {{ user_data|json_script:""|safe }}
+    ·                         ─┬─
+    ·                          ╰── here
+ 11 │ {{ user_data|default:"{}"|json_script:"" }}
+    ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+    ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:11:38]
+ 10 │ {{ user_data|json_script:""|safe }}
+ 11 │ {{ user_data|default:"{}"|json_script:"" }}
+    ·                                      ─┬─
+    ·                                       ╰── here
+ 12 │ 
+    ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+    ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:14:30]
+ 13 │ <!-- In element content -->
+ 14 │ <div>{{ user_data|json_script:"" }}</div>
+    ·                              ─┬─
+    ·                               ╰── here
+ 15 │ 
+    ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+    ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:17:17]
+ 16 │ <!-- Two interpolations on one line -->
+ 17 │ {{ a|json_script:"" }} {{ b|json_script:'' }}
+    ·                 ─┬─
+    ·                  ╰── here
+    ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+    ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:17:40]
+ 16 │ <!-- Two interpolations on one line -->
+ 17 │ {{ a|json_script:"" }} {{ b|json_script:'' }}
+    ·                                        ─┬─
+    ·                                         ╰── here
+    ╰────
+  help: Omit the argument

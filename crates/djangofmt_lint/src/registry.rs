@@ -63,6 +63,8 @@ pub enum RuleCategory {
     Suspicious,
     /// Code that should be written in a more idiomatic way.
     Style,
+    /// Code that the Django version named by `target-version` spells better.
+    Upgrade,
     /// Code that does something simple but in a complex way.
     Complexity,
     /// Code that creates accessibility (a11y) barriers.
@@ -266,4 +268,6 @@ define_rules! {
     (UnsortedTailwindClasses, rules::style::unsorted_tailwind_classes::UnsortedTailwindClasses),
     (InvalidIgnoreComment, rules::suspicious::invalid_ignore_comment::InvalidIgnoreComment),
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
+    (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
+    (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
 }

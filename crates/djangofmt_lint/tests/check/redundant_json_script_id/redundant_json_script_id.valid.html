@@ -1,0 +1,23 @@
+<!-- A real element id, and the argument already omitted -->
+{{ user_data|json_script:"config" }}
+{{ user_data|json_script:'config' }}
+{{ user_data|json_script }}
+{{ user_data|json_script|safe }}
+
+<!-- A non-empty id that merely looks blank: Django renders `id=" "` for it -->
+{{ user_data|json_script:" " }}
+
+<!-- The id comes from a variable, so its emptiness is unknown -->
+{{ user_data|json_script:element_id }}
+{{ user_data|json_script:object.slug }}
+
+<!-- Filters whose names only embed `json_script` -->
+{{ user_data|my_json_script:"" }}
+{{ user_data|json_scripts:"" }}
+
+<!-- An empty argument to some other filter -->
+{{ user_data|default:"" }}
+{{ user_data|cut:"" }}
+
+<!-- `json_script` is a filter, never a tag -->
+{% json_script "" %}

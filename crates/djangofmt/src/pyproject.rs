@@ -148,10 +148,11 @@ pub struct LintSettings {
 
     /// The Django version the templates target, as a `major.minor` string.
     ///
-    /// When unset, it comes from the minimum supported Django version in `[project] dependencies`.
-    /// Rules that depend on it stay disabled until it is known.
+    /// When unset, it comes from the minimum supported Django version in `[project] dependencies`,
+    /// falling back to the oldest Django release still under security support. Version-gated rules
+    /// compare against it, so naming an older version turns the newer ones off.
     #[option(
-        default = "null",
+        default = "the oldest supported Django release",
         value_type = "str",
         example = r#"target-version = "5.2""#
     )]

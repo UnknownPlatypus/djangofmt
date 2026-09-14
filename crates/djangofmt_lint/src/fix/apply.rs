@@ -131,10 +131,11 @@ pub fn fix_ast(
     source: &str,
     ast: &Root<'_>,
     settings: &Settings,
+    language: markup_fmt::Language,
     threshold: Applicability,
     path: Option<&Path>,
 ) -> ApplyResult {
-    let diagnostics = check_ast(source, ast, settings, path);
+    let diagnostics = check_ast(source, ast, settings, language, path);
     apply_fixes(source, &diagnostics, threshold)
 }
 
@@ -235,7 +236,7 @@ pub fn lint_fix(
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
-        let diagnostics = check_ast(&current, &ast, settings, path);
+        let diagnostics = check_ast(&current, &ast, settings, profile, path);
         let result = apply_fixes(&current, &diagnostics, threshold);
         total_skipped += result.skipped_count;
         for applied in &result.applied_fixes {
