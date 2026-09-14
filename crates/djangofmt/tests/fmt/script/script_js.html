@@ -1,0 +1,35 @@
+<div>
+    <script>
+        const   x = {a:1,b:2};
+        function hello( name ){
+        console.log('hello '+name)
+        }
+        if (ready) { start() }
+    </script>
+    <script type="module">
+        import {foo} from './foo.js';
+        foo( );
+    </script>
+    <script>
+  // Template syntax is not valid JS, formatting is skipped entirely.
+  // Known limitation: the skipped body keeps its original indentation.
+  {% if debug %}
+  console.log( 'debug' );
+  {% endif %}
+    </script>
+    <script>
+        // A bare tag parses as nested JS blocks and would be rewritten, so this is skipped too.
+        init( );
+        {{ inline_js|safe }}
+    </script>
+    <script type="text/template" id="tpl">
+        <p><%= count %> items</p>
+    </script>
+    {% if enabled %}
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+            console.log('nested in a template block')
+            });
+        </script>
+    {% endif %}
+</div>
