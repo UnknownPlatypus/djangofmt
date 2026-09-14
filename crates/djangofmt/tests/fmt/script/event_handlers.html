@@ -1,0 +1,13 @@
+<div>
+    <a href="#" onclick="window.history.go(-1);return false">statements stay on one line</a>
+    <button onclick='alert( "hi" )'>quotes are kept</button>
+    <input oninvalid="setCustomValidity('l\'URL d\'un ticket')">
+    <button onclick="if (confirm('Delete?')) { form.submit() }">braces are kept</button>
+    <a onclick="toggle('pre{{ frame.id }}', 'post{{ frame.id }}')">tag inside a string</a>
+    <a onclick="window.open('{% url "add" %}?id={{ pk }}','add'); return false">both quote kinds, left alone</a>
+    <button onclick="foo(); {{ extra_js }}">bare tag, left alone</button>
+    <button onclick="
+        foo();
+        bar()
+    ">multi-line, left alone</button>
+</div>

@@ -1,5 +1,5 @@
-//! The formatting engine: `markup_fmt` for the markup, with `malva` and `dprint-plugin-json`
-//! for embedded CSS and JSON.
+//! The formatting engine: `markup_fmt` for the markup, with `malva`, `dprint-plugin-json` and
+//! `dprint-plugin-typescript` for embedded CSS, JSON and JS.
 
 pub mod line_width;
 pub mod panic;
@@ -25,6 +25,8 @@ pub struct FormatterConfig {
     pub malva: malva::config::FormatOptions,
     /// Config for JSON formatter
     pub json: dprint_plugin_json::configuration::Configuration,
+    /// Config for JS/TS formatter used for `<script>` tags
+    pub typescript: dprint_plugin_typescript::configuration::Configuration,
 }
 
 impl FormatterConfig {
@@ -46,6 +48,7 @@ impl FormatterConfig {
             ),
             malva: build_malva_config(print_width, indent_width),
             json: build_json_config(print_width, indent_width),
+            typescript: build_typescript_config(print_width, indent_width),
         }
     }
 }
@@ -115,6 +118,9 @@ pub fn build_markup_options(
             //     console.log("hello");
             // </script>
             script_indent: true,
+            // Delegate script tag content to the external formatter closure.
+            // Should match the formatter used in `FormatterConfig::typescript`
+            script_formatter: Some(markup_fmt::config::ScriptFormatter::Dprint),
             ..markup_fmt::config::LanguageOptions::default()
         },
     }
@@ -154,6 +160,19 @@ fn build_json_config(
     dprint_plugin_json::configuration::ConfigurationBuilder::new()
         .line_width(print_width.value().into())
         .indent_width(indent_width.value())
+        .build()
+}
+
+fn build_typescript_config(
+    print_width: LineLength,
+    indent_width: IndentWidth,
+) -> dprint_plugin_typescript::configuration::Configuration {
+    // The deno preset notably uses `QuoteStyle::PreferDouble`, matching markup_fmt.
+    dprint_plugin_typescript::configuration::ConfigurationBuilder::new()
+        .deno()
+        .line_width(print_width.value().into())
+        .indent_width(indent_width.value())
+        .use_braces(dprint_plugin_typescript::configuration::UseBraces::Maintain)
         .build()
 }
 
@@ -260,6 +279,9 @@ pub fn format_text(
                         },
                     )
                 }
+                "js" | "mjs" | "jsx" | "ts" | "mts" | "tsx" => {
+                    Ok(format_js(code, &hints, config, path))
+                }
                 _ => Ok(code.into()),
             }
         },
@@ -320,6 +342,109 @@ fn json_has_raw_control_char(code: &str) -> bool {
     false
 }
 
+/// Format a `<script>` body, or an event handler attribute value when `hints.attr` is set.
+fn format_js<'a>(
+    code: &'a str,
+    hints: &markup_fmt::Hints,
+    config: &FormatterConfig,
+    path: Option<&Path>,
+) -> Cow<'a, str> {
+    // Handlers are joined back on one line below, which a line comment on a non-final line
+    // would break, so only single-line ones go through.
+    if hints.attr && code.contains('\n') {
+        return code.into();
+    }
+    let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
+    let mut ts_config = config.typescript.clone();
+    ts_config.file_indent_level = u32::from(hints.indent_level);
+    if hints.attr {
+        // markup_fmt wraps the value with the quote kind it lacks and never escapes, so strings
+        // must keep the kind already in use. With both kinds around, either could be the wrapper.
+        use dprint_plugin_typescript::configuration::QuoteStyle;
+        ts_config.quote_style = match (code.contains('\''), code.contains('"')) {
+            (true, true) => return code.into(),
+            (false, true) => QuoteStyle::AlwaysDouble,
+            _ => QuoteStyle::AlwaysSingle,
+        };
+        ts_config.line_width = u32::MAX;
+    } else {
+        ts_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+    }
+
+    let formatted =
+        format_or_fallback(
+            code,
+            "JS/TS",
+            path,
+            || match dprint_plugin_typescript::format_text(
+                dprint_plugin_typescript::FormatTextOptions {
+                    path: &fake_filename,
+                    extension: Some(hints.ext),
+                    text: code.into(),
+                    config: &ts_config,
+                    external_formatter: None,
+                },
+            ) {
+                Ok(Some(formatted)) => formatted.into(),
+                Ok(None) => code.into(),
+                Err(error) => {
+                    debug!(
+                        "Failed to format JS/TS, falling back to original code. Error: {:?}",
+                        error
+                    );
+                    code.into()
+                }
+            },
+        );
+    if !template_tags_preserved(code, &formatted) {
+        debug!("JS/TS formatting altered a template tag, leaving it unformatted.");
+        return code.into();
+    }
+    if hints.attr {
+        // dprint always breaks between statements, join them back for the attribute.
+        formatted
+            .lines()
+            .map(str::trim)
+            .collect::<Vec<_>>()
+            .join(" ")
+            .into()
+    } else {
+        formatted
+    }
+}
+
+/// Whether every `{{ … }}`, `{% … %}` and `{# … #}` in `source` is still there verbatim in `formatted`.
+///
+/// Tags inside JS strings survive formatting, but dprint reads a bare `{{ var }}` as nested blocks
+/// and rewrites it as `{ { var; } }`, which the template engine no longer recognizes.
+fn template_tags_preserved(source: &str, formatted: &str) -> bool {
+    let mut rest = source;
+    // dprint keeps code in order, so each tag is only searched after the previous one.
+    let mut unchecked = formatted;
+    while let Some(start) = rest.find('{') {
+        rest = &rest[start..];
+        let close = match rest.as_bytes().get(1) {
+            Some(b'{') => "}}",
+            Some(b'%') => "%}",
+            Some(b'#') => "#}",
+            _ => {
+                rest = &rest[1..];
+                continue;
+            }
+        };
+        let Some(end) = rest[2..].find(close) else {
+            return true;
+        };
+        let tag = &rest[..end + 4];
+        let Some(pos) = unchecked.find(tag) else {
+            return false;
+        };
+        unchecked = &unchecked[pos + tag.len()..];
+        rest = &rest[end + 4..];
+    }
+    true
+}
+
 /// Run an embedded formatter, falling back to the original `code` if it panics.
 fn format_or_fallback<'a>(
     code: &'a str,
@@ -363,5 +488,18 @@ mod tests {
     #[case::escaped_quote_in_string("{\"a\": \"b\\\"c\",\n\"d\": 1}", false)]
     fn json_has_raw_control_char_cases(#[case] code: &str, #[case] expected: bool) {
         assert_eq!(json_has_raw_control_char(code), expected);
+    }
+
+    #[rstest]
+    #[case::bare_tag_rewritten("foo(); {{ x }}", "foo();\n{\n  {\n    x;\n  }\n}\n", false)]
+    #[case::tag_in_string_kept("a('{{ x }}')", "a(\"{{ x }}\");\n", true)]
+    #[case::block_tag_requoted("a('{% url \"b\" %}')", "a(\"{% url \\\"b\\\" %}\");\n", false)]
+    #[case::no_tag("a({b: 1})", "a({ b: 1 });\n", true)]
+    fn template_tags_preserved_cases(
+        #[case] source: &str,
+        #[case] formatted: &str,
+        #[case] expected: bool,
+    ) {
+        assert_eq!(template_tags_preserved(source, formatted), expected);
     }
 }
