@@ -388,9 +388,9 @@ pub fn format_text(
                         )
                     });
 
-                    // malva drops comments it won't reprint, which can empty the whole snippet.
-                    // Keep the source rather than delete it.
-                    if formatted_css.trim().is_empty() && !code.trim().is_empty() {
+                    // malva can return nothing at all: `single_line_top_level_declarations` drops
+                    // comments, and an unterminated `/*` swallows the sheet. Keep the source.
+                    if formatted_css.trim().is_empty() {
                         return Ok(code.into());
                     }
 
