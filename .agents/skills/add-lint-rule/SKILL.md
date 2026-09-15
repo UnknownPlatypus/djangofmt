@@ -18,7 +18,9 @@ Both porting research and grounding fixtures in real code have exact mechanics â
 
 Create `crates/djangofmt_lint/src/rules/{category}/{rule_name}.rs`.
 
-Categories map to `RuleCategory`: `correctness`, `suspicious`, `style`, `complexity`, `accessibility`.
+Categories map to `RuleCategory`: `correctness`, `suspicious`, `style`, `complexity`, `accessibility`, `pedantic`.
+
+Every category but `pedantic` runs by default. Put a rule in `pedantic` when it is noisy on real templates and has no safe fix, unless it catches something important. Measure noise with `just ecosystem-check-lint-dev` before deciding.
 
 The file must contain:
 

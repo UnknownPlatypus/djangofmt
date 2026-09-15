@@ -67,6 +67,16 @@ pub enum RuleCategory {
     Complexity,
     /// Code that creates accessibility (a11y) barriers.
     Accessibility,
+    /// Rules that are rather strict, noisy, or have occasional false positives. Off by default.
+    Pedantic,
+}
+
+impl RuleCategory {
+    /// Whether the category is part of the default selection (`category:default`).
+    #[must_use]
+    pub const fn enabled_by_default(self) -> bool {
+        !matches!(self, Self::Pedantic)
+    }
 }
 /// The single source of truth for all lint rules.
 ///
@@ -260,10 +270,10 @@ define_rules! {
     (MissingDoctype, rules::style::missing_doctype::MissingDoctype),
     (MissingTitle, rules::accessibility::missing_title::MissingTitle),
     (MissingImgAlt, rules::accessibility::missing_img_alt::MissingImgAlt),
-    (MissingImgDimensions, rules::accessibility::missing_img_dimensions::MissingImgDimensions),
-    (TableHeaderMissingScope, rules::accessibility::table_header_missing_scope::TableHeaderMissingScope),
+    (MissingImgDimensions, rules::pedantic::missing_img_dimensions::MissingImgDimensions),
+    (TableHeaderMissingScope, rules::pedantic::table_header_missing_scope::TableHeaderMissingScope),
     (SameFilePartialInclude, rules::style::same_file_partial_include::SameFilePartialInclude),
-    (UnsortedTailwindClasses, rules::style::unsorted_tailwind_classes::UnsortedTailwindClasses),
+    (UnsortedTailwindClasses, rules::pedantic::unsorted_tailwind_classes::UnsortedTailwindClasses),
     (InvalidIgnoreComment, rules::suspicious::invalid_ignore_comment::InvalidIgnoreComment),
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),

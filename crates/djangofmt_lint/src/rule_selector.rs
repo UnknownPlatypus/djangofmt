@@ -2,7 +2,7 @@
 //!
 //! A selector names either:
 //!  - a single rule (e.g. `invalid-attr-value`)
-//!  - a group via the `category:` prefix (e.g. `category:all`, `category:correctness`, …).
+//!  - a group via the `category:` prefix (e.g. `category:all`, `category:default`, `category:correctness`, …).
 //!
 //! Selectors are parsed from CLI arguments and the `[tool.djangofmt.lint]` config, then resolved
 //! into a [`RuleSet`](crate::rule_set::RuleSet) by [`LintConfiguration`](crate::settings::LintConfiguration).
@@ -21,10 +21,15 @@ const CATEGORY_PREFIX: &str = "category:";
 /// The group name that selects every rule (`category:all`).
 pub(crate) const ALL_GROUP: &str = "all";
 
+/// The group name that selects every category enabled by default (`category:default`).
+pub(crate) const DEFAULT_GROUP: &str = "default";
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RuleSelector {
     /// Select all rules (includes rules in preview if enabled)
     All,
+    /// Select every rule in a category that is enabled by default, i.e. everything but `pedantic`.
+    Default,
     /// Select every rule in one category (`category:<name>`).
     Category(RuleCategory),
     /// Select a single rule by its kebab-case name.
@@ -37,7 +42,7 @@ impl RuleSelector {
     #[must_use]
     pub const fn specificity(self) -> u8 {
         match self {
-            Self::All => 0,
+            Self::All | Self::Default => 0,
             Self::Category(_) => 1,
             Self::Rule(_) => 2,
         }
@@ -47,6 +52,7 @@ impl RuleSelector {
     pub fn all_rules(self) -> impl Iterator<Item = Rule> {
         Rule::iter().filter(move |rule| match self {
             Self::All => true,
+            Self::Default => rule.category().enabled_by_default(),
             Self::Category(category) => rule.category() == category,
             Self::Rule(selected) => *rule == selected,
         })
@@ -80,6 +86,7 @@ impl fmt::Display for RuleSelector {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::All => write!(f, "{CATEGORY_PREFIX}{ALL_GROUP}"),
+            Self::Default => write!(f, "{CATEGORY_PREFIX}{DEFAULT_GROUP}"),
             Self::Category(category) => write!(f, "{CATEGORY_PREFIX}{category}"),
             Self::Rule(rule) => write!(f, "{rule}"),
         }
@@ -93,6 +100,7 @@ impl FromStr for RuleSelector {
         if let Some(group) = value.strip_prefix(CATEGORY_PREFIX) {
             return match group {
                 ALL_GROUP => Ok(Self::All),
+                DEFAULT_GROUP => Ok(Self::Default),
                 _ => RuleCategory::from_str(group)
                     .map(Self::Category)
                     .map_err(|_| SelectorParseError::unknown_category(group)),
@@ -100,7 +108,8 @@ impl FromStr for RuleSelector {
         }
         // A bare token is a rule name.
         Rule::from_str(value).map(Self::Rule).map_err(|_| {
-            if value == ALL_GROUP || RuleCategory::from_str(value).is_ok() {
+            if value == ALL_GROUP || value == DEFAULT_GROUP || RuleCategory::from_str(value).is_ok()
+            {
                 // The common mistake is forgetting the `category:` prefix,
                 // so detect a bare category name and suggest the fix.
                 SelectorParseError::missing_category_prefix(value)
@@ -162,10 +171,11 @@ impl fmt::Display for SelectorParseError {
 
 impl std::error::Error for SelectorParseError {}
 
-/// Comma-joined list of valid group names (`all` plus the categories), for error messages.
+/// Comma-joined list of valid group names (`all`, `default` plus the categories), for error messages.
 #[must_use]
 pub fn category_list() -> String {
-    std::iter::once(ALL_GROUP)
+    [ALL_GROUP, DEFAULT_GROUP]
+        .into_iter()
         .chain(RuleCategory::VARIANTS.iter().copied())
         .collect::<Vec<_>>()
         .join(", ")

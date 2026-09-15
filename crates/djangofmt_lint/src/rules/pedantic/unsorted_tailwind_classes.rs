@@ -40,7 +40,7 @@ pub struct UnsortedTailwindClasses;
 
 impl Violation for UnsortedTailwindClasses {
     const RULE: Rule = Rule::UnsortedTailwindClasses;
-    const CATEGORY: RuleCategory = RuleCategory::Style;
+    const CATEGORY: RuleCategory = RuleCategory::Pedantic;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]

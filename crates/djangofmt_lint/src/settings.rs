@@ -26,7 +26,7 @@ pub struct Settings {
 }
 
 impl Default for Settings {
-    /// The default selection: every stable rule, preview rules disabled.
+    /// The default selection: every stable rule outside `pedantic`, preview rules disabled.
     fn default() -> Self {
         LintConfiguration::default().into_settings().0
     }
@@ -64,7 +64,7 @@ impl Settings {
 /// by [`LintConfiguration::into_settings`].
 #[derive(Debug, Clone, Default)]
 pub struct LintConfiguration {
-    /// Selectors to enable. `None` falls back to the default selection (`category:all`).
+    /// Selectors to enable. `None` falls back to the default selection (`category:default`).
     pub select: Option<Vec<RuleSelector>>,
     /// Selectors to disable.
     pub ignore: Vec<RuleSelector>,
@@ -83,7 +83,7 @@ impl LintConfiguration {
     /// On an equal-specificity tie, `ignore` wins over `select`.
     #[must_use]
     pub fn into_settings(self) -> (Settings, Vec<SelectionWarning>) {
-        let select = self.select.unwrap_or_else(|| vec![RuleSelector::All]);
+        let select = self.select.unwrap_or_else(|| vec![RuleSelector::Default]);
         let preview = self.preview;
 
         let mut items: Vec<(RuleSelector, bool)> = select
@@ -138,7 +138,7 @@ mod tests {
 
     use super::{LintConfiguration, Settings};
     use crate::registry::{Rule, RuleCategory};
-    use crate::rule_selector::{ALL_GROUP, RuleSelector, SelectionWarning};
+    use crate::rule_selector::{ALL_GROUP, DEFAULT_GROUP, RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
     use crate::suppression::ReservedCode;
 
@@ -185,14 +185,26 @@ mod tests {
     }
 
     #[test]
-    fn default_excludes_preview_but_all_includes_it() {
+    fn default_excludes_preview_and_pedantic_but_all_includes_them() {
         let default = Settings::default();
         assert!(!default.is_enabled(Rule::EmptyTagPair)); // preview rule
+        assert!(!default.is_enabled(Rule::TableHeaderMissingScope)); // pedantic rule
         assert!(default.is_enabled(Rule::InvalidAttrValue));
 
         let all = Settings::all();
         assert!(all.is_enabled(Rule::EmptyTagPair));
+        assert!(all.is_enabled(Rule::TableHeaderMissingScope));
         assert!(all.is_enabled(Rule::InvalidAttrValue));
+
+        // `category:all` is the only way back to every stable rule.
+        let select_all = LintConfiguration {
+            select: Some(vec![RuleSelector::All]),
+            ..LintConfiguration::default()
+        }
+        .into_settings()
+        .0;
+        assert!(select_all.is_enabled(Rule::TableHeaderMissingScope));
+        assert!(!select_all.is_enabled(Rule::EmptyTagPair));
     }
 
     #[test]
@@ -242,7 +254,8 @@ mod tests {
 
     #[test]
     fn no_rule_name_collides_with_a_reserved_word() {
-        for word in std::iter::once(ALL_GROUP)
+        for word in [ALL_GROUP, DEFAULT_GROUP]
+            .into_iter()
             .chain(ReservedCode::VARIANTS.iter().copied())
             .chain(RuleCategory::VARIANTS.iter().copied())
         {

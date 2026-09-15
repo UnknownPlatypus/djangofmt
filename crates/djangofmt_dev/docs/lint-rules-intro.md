@@ -1,12 +1,20 @@
 # Lint rules
 
-By default djangofmt runs every stable rule.
+Rules are grouped into categories:
+
+- **correctness**: code that is outright wrong or useless.
+- **suspicious**: code that is most likely wrong or useless.
+- **style**: code that should be written in a more idiomatic way.
+- **accessibility**: code that creates accessibility (a11y) barriers.
+- **pedantic**: rules that are rather strict, noisy, or have occasional false positives. Off by default.
+
+By default djangofmt runs every stable rule outside `pedantic`. A noisy rule earns its place in the default set only when it ships a safe fix or catches something important.
 
 Override that with `select` and `ignore`, either on the command line (`--select`, `--ignore`) or under `[tool.djangofmt.lint]` in `pyproject.toml`.
 
 ```toml
 [tool.djangofmt.lint]
-select = ["category:all"]
+select = ["category:default", "unsorted-tailwind-classes"]
 ignore = ["category:style", "missing-img-alt"]
 preview = true
 ```
@@ -14,7 +22,7 @@ preview = true
 A selector is either:
 
 - single rule name (e.g. `missing-img-alt`)
-- a group prefixed with `category:` (e.g. `category:all`, `category:style`, ...)
+- a group prefixed with `category:` (e.g. `category:default`, `category:all`, `category:style`, ...)
 
 Preview rules are off by default. Enable them with `--preview` or `preview = true`.
 
