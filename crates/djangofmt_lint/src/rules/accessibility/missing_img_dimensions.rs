@@ -48,7 +48,7 @@ impl Violation for MissingImgDimensions {
 }
 
 /// The caller guarantees `element` is an `<img>`.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     let mut has_height = false;
     let mut has_width = false;
     for attr in &element.attrs {

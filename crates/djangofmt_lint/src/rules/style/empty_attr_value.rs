@@ -46,7 +46,7 @@ impl Violation for EmptyAttrValue<'_> {
     }
 }
 
-pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
     let NativeAttribute {
         name,
         value: Some((value_str, _)),

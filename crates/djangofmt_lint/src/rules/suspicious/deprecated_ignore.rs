@@ -127,29 +127,29 @@ fn reason(body: &str) -> &str {
 }
 
 /// Lint the `{# #}` ignore comments of the file, the legacy directive among them.
-pub fn check_ignore_comments(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
+pub fn check_ignore_comments(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     for comment in comments {
         if matches!(comment.directive, IgnoreDirective::Legacy)
             && let Some(comment_body) = TEMPLATE_COMMENT.body(comment.raw)
         {
-            report(comment.raw, comment_body, false, checker);
+            report(checker, comment.raw, comment_body, false);
         }
     }
 }
 
 /// Lint an HTML comment, which carries no directive the linter honors.
-pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, comment: &Comment<'_>) {
     if markup_fmt::matches_directive(comment.raw, LEGACY_IGNORE_DIRECTIVE) {
         let whole_comment = HTML_COMMENT.enclosing_comment(checker, comment.raw);
-        report(whole_comment, comment.raw, true, checker);
+        report(checker, whole_comment, comment.raw, true);
     }
 }
 
 /// Report the whole comment and rewrite it as a coded `{# #}` directive when it fits.
-fn report(comment: &str, comment_body: &str, in_html: bool, checker: &Checker<'_>) {
+fn report(checker: &Checker<'_>, comment: &str, comment_body: &str, in_html: bool) {
     let violation = DeprecatedIgnore {
         in_html,
-        file_level: is_legacy_file_opt_out(comment, checker),
+        file_level: is_legacy_file_opt_out(checker, comment),
         unfixable: Unfixable::in_body(comment_body),
     };
     let span = checker.source_span(comment);
@@ -161,7 +161,7 @@ fn report(comment: &str, comment_body: &str, in_html: bool, checker: &Checker<'_
 }
 
 /// Leading the file, the formatter's bare directive is its legacy whole-file opt-out.
-fn is_legacy_file_opt_out(comment: &str, checker: &Checker<'_>) -> bool {
+fn is_legacy_file_opt_out(checker: &Checker<'_>, comment: &str) -> bool {
     let before = &checker.context().source()[..checker.source_offset(comment)];
     strip_bom(before).is_empty()
 }

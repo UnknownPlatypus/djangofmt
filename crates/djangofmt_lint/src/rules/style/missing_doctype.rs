@@ -56,7 +56,7 @@ impl Violation for MissingDoctype {
     }
 }
 
-pub fn check(root: &Root<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, root: &Root<'_>) {
     let mut html_element = None;
     let mut has_doctype = false;
 

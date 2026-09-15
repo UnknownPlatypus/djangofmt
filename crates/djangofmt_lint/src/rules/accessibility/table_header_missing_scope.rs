@@ -78,7 +78,7 @@ impl Violation for TableHeaderMissingScope {
 }
 
 /// The caller guarantees `element` is a `<th>`.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     let native_scope = element.attrs.iter().find_map(|attr| match attr {
         Attribute::Native(native) if native.name.eq_ignore_ascii_case("scope") => Some(native),
         _ => None,

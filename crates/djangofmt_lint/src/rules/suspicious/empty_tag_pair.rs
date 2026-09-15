@@ -76,7 +76,7 @@ fn has_only_whitespace(children: &[Node<'_>]) -> bool {
     })
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     if element.void_element
         || element.self_closing
         || !element.attrs.is_empty()

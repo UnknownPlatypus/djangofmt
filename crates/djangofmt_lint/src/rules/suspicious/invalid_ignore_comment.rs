@@ -97,13 +97,13 @@ impl Violation for InvalidIgnoreComment {
 }
 
 /// Lint every ignore comment of the file.
-pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     for comment in comments {
-        check_comment(comment, checker);
+        check_comment(checker, comment);
     }
 }
 
-fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
+fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
     let ctx = checker.context();
     let remove_comment = |kind| {
         (

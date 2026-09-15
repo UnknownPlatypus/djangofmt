@@ -71,7 +71,7 @@ fn starts_with_static_path(value: &str) -> bool {
     matches!(after.as_bytes().first(), Some(b'/'))
 }
 
-pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
     // Fast-path to skip processing tag that cannot have a static url.
     if !is_asset_tag(element.tag_name) {
         return;
@@ -97,15 +97,15 @@ pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checke
     // holds a single URL.
     if *canonical == "srcset" {
         for url in srcset_candidates(value_str) {
-            report_static_path(url, canonical, checker);
+            report_static_path(checker, url, canonical);
         }
     } else {
-        report_static_path(value_str, canonical, checker);
+        report_static_path(checker, value_str, canonical);
     }
 }
 
 /// Reports a URL that points at a hardcoded `static/` path.
-fn report_static_path(url: &str, attribute: &'static str, checker: &Checker<'_>) {
+fn report_static_path(checker: &Checker<'_>, url: &str, attribute: &'static str) {
     if contains_interpolation(url) {
         return;
     }

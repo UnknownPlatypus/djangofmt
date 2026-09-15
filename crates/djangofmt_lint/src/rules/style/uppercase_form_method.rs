@@ -56,7 +56,7 @@ impl Violation for UppercaseFormMethod<'_> {
 }
 
 /// The caller guarantees the attribute belongs to a `<form>`.
-pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
     let NativeAttribute {
         name,
         value: Some((value_str, _)),
