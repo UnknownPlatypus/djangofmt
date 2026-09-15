@@ -58,9 +58,6 @@ pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [LEGACY_IGNORE_DIRECTIVE, IGNORE
 /// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
-    /// The bare `ignore`, the formatter's legacy directive: it lists no code,
-    /// so it suppresses no lint, and only `deprecated-ignore` has anything to say about it.
-    Legacy,
     /// `ignore[...]`, guarding the following node.
     Ignore(Vec<&'s str>),
     /// `file-ignore[...]`, covering the whole file.
@@ -72,7 +69,8 @@ pub enum IgnoreDirective<'s> {
 impl<'s> IgnoreDirective<'s> {
     /// Parse a comment body with the grammar the formatter uses.
     ///
-    /// `None` is a comment not addressed to djangofmt at all.
+    /// `None` is a comment not addressed to djangofmt at all, or the formatter's bare `ignore`,
+    /// which lists no code and is `deprecated-ignore`'s to report.
     pub fn parse(comment_body: &'s str) -> Option<Self> {
         let directive =
             match markup_fmt::parse_directive(comment_body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
@@ -80,18 +78,18 @@ impl<'s> IgnoreDirective<'s> {
                 Err(error) => return Some(Self::Malformed(error)),
             };
         Some(match (directive.keyword, directive.codes) {
-            (IGNORE, codes) if codes.is_empty() => Self::Legacy,
+            (IGNORE, codes) if codes.is_empty() => return None,
             (IGNORE, codes) => Self::Ignore(codes),
             (_, codes) if codes.is_empty() => Self::Malformed(ParseErrorKind::MissingCodes),
             (_, codes) => Self::FileIgnore(codes),
         })
     }
 
-    /// The codes listed, none for a legacy or malformed directive.
+    /// The codes listed, none for a malformed directive.
     pub fn codes(&self) -> &[&'s str] {
         match self {
             Self::Ignore(codes) | Self::FileIgnore(codes) => codes,
-            Self::Legacy | Self::Malformed(_) => &[],
+            Self::Malformed(_) => &[],
         }
     }
 }
@@ -110,9 +108,7 @@ const fn scope(directive: &IgnoreDirective<'_>, is_leading: bool) -> Option<Igno
     match directive {
         IgnoreDirective::Ignore(_) => Some(IgnoreScope::Node),
         IgnoreDirective::FileIgnore(_) if is_leading => Some(IgnoreScope::File),
-        IgnoreDirective::FileIgnore(_)
-        | IgnoreDirective::Legacy
-        | IgnoreDirective::Malformed(_) => None,
+        IgnoreDirective::FileIgnore(_) | IgnoreDirective::Malformed(_) => None,
     }
 }
 
@@ -127,6 +123,7 @@ fn has_reason(body: &str) -> bool {
 pub struct IgnoreComment<'s> {
     /// The whole comment, delimiters included: what a diagnostic points at and a fix deletes.
     pub raw: &'s str,
+    body: &'s str,
     /// What the comment asks for.
     pub directive: IgnoreDirective<'s>,
     /// How far the directive reaches, `None` when it silences nothing.
@@ -142,8 +139,7 @@ impl IgnoreComment<'_> {
     /// Whether free text follows the code list, e.g. `ignore[x]: why`.
     #[must_use]
     pub fn has_reason(&self) -> bool {
-        // An unterminated comment has no body to extract; its raw text splits the same way.
-        has_reason(TEMPLATE_COMMENT.body(self.raw).unwrap_or(self.raw))
+        has_reason(self.body)
     }
 
     /// Whether the comment silences `diagnostic`.
@@ -181,6 +177,7 @@ pub fn collect_ignore_comments<'s>(
             };
             Some(IgnoreComment {
                 raw,
+                body: comment_body,
                 directive,
                 scope,
                 matched: RuleSet::empty(),
@@ -190,7 +187,8 @@ pub fn collect_ignore_comments<'s>(
         .collect()
 }
 
-/// Record on each comment the rules of the diagnostics it silences, without dropping any.
+/// Record on each comment the rules of the diagnostics it silences. Dropping them waits for
+/// [`drop_ignored_diagnostics`], once `unused-ignore-code` has reported from these records.
 /// A diagnostic counts for the first comment covering it, so a repeated code is unused.
 pub fn record_matches(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>]) {
     for diagnostic in checker.context().diagnostics().iter() {
@@ -341,9 +339,7 @@ fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
     let comment_body = TEMPLATE_COMMENT.body(strip_bom(source).trim_start())?;
     match IgnoreDirective::parse(comment_body)? {
         IgnoreDirective::FileIgnore(codes) => Some(codes),
-        IgnoreDirective::Legacy | IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => {
-            None
-        }
+        IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => None,
     }
 }
 
@@ -383,8 +379,6 @@ mod tests {
 
     #[rstest]
     #[case::node(" djangofmt: ignore[a, b ,c] ", IgnoreDirective::Ignore(vec!["a", "b", "c"]))]
-    #[case::legacy(" djangofmt:ignore ", IgnoreDirective::Legacy)]
-    #[case::legacy_reason("djangofmt:ignore this is generated", IgnoreDirective::Legacy)]
     #[case::file("djangofmt:file-ignore[invalid-syntax]", IgnoreDirective::FileIgnore(vec!["invalid-syntax"]))]
     #[case::spaced_colon("djangofmt : file-ignore[a]", IgnoreDirective::FileIgnore(vec!["a"]))]
     #[case::spaced_list("djangofmt: file-ignore [a]", IgnoreDirective::FileIgnore(vec!["a"]))]
@@ -444,6 +438,8 @@ mod tests {
     #[rstest]
     fn skip_comments_the_linter_has_no_say_on(
         #[values(
+            " djangofmt:ignore ",                 // the formatter's bare directive
+            "djangofmt:ignore this is generated", // with a reason
             "djangofmt ignore[a]",                // missing colon
             "djangofmt-lint: ignore[a]",          // a namespace that merely starts the same
             "ignore[a]",                          // not addressed to djangofmt
@@ -519,25 +515,9 @@ mod tests {
         );
     }
 
+    /// Of two comments silencing the same diagnostic, the second is the unused one.
     #[test]
-    fn unused_codes_are_reported() {
-        // A used code stays; the unmatched one next to it is reported alone.
-        assert!(
-            codes("{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>")
-                .is_empty()
-        );
-        assert_eq!(
-            messages(
-                "{# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}\n<form method=\"yes\"></form>"
-            ),
-            ["Unused rule code in suppression: `empty-attr-value`"]
-        );
-        // A stale `file-ignore[...]` is reported too, and so is `invalid-syntax` once the file parses.
-        assert_eq!(
-            messages("{# djangofmt: file-ignore[invalid-attr-value, invalid-syntax] #}\n<p>hi</p>"),
-            ["Unused rule code in suppression: `invalid-attr-value`, `invalid-syntax`"]
-        );
-        // Of two comments silencing the same diagnostic, the second is the unused one.
+    fn a_diagnostic_counts_for_its_first_comment_only() {
         assert_eq!(
             messages(
                 "{# djangofmt: file-ignore[invalid-attr-value] #}\n{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"

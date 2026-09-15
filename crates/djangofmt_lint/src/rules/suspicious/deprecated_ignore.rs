@@ -1,15 +1,10 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::Comment;
-
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
-use crate::suppression::{
-    FILE_IGNORE, IGNORE, IgnoreComment, IgnoreDirective, LEGACY_IGNORE_DIRECTIVE, NAMESPACE,
-    ReservedCode,
-};
+use crate::rules::helpers::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
+use crate::suppression::{FILE_IGNORE, IGNORE, LEGACY_IGNORE_DIRECTIVE, NAMESPACE, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -126,22 +121,11 @@ fn reason(body: &str) -> &str {
     })
 }
 
-/// Lint the `{# #}` ignore comments of the file, the legacy directive among them.
-pub fn check_ignore_comments(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
-    for comment in comments {
-        if matches!(comment.directive, IgnoreDirective::Legacy)
-            && let Some(comment_body) = TEMPLATE_COMMENT.body(comment.raw)
-        {
-            report(checker, comment.raw, comment_body, false);
-        }
-    }
-}
-
-/// Lint an HTML comment, which carries no directive the linter honors.
-pub fn check(checker: &Checker<'_>, comment: &Comment<'_>) {
-    if markup_fmt::matches_directive(comment.raw, LEGACY_IGNORE_DIRECTIVE) {
-        let whole_comment = HTML_COMMENT.enclosing_comment(checker, comment.raw);
-        report(checker, whole_comment, comment.raw, true);
+/// Lint a comment of either style, `body` being its text between `delimiters`.
+pub fn check(checker: &Checker<'_>, delimiters: CommentDelimiters, body: &str) {
+    if markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE) {
+        let whole_comment = delimiters.enclosing_comment(checker, body);
+        report(checker, whole_comment, body, delimiters == HTML_COMMENT);
     }
 }
 

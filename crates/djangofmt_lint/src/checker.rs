@@ -1,8 +1,8 @@
 use std::path::Path;
 
 use markup_fmt::ast::{
-    Attribute, Comment, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node,
-    NodeKind, Root,
+    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
+    Root,
 };
 use miette::SourceSpan;
 use smallvec::SmallVec;
@@ -12,6 +12,7 @@ use crate::Settings;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
+use crate::rules::helpers::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 
@@ -142,9 +143,6 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
             rules::suspicious::invalid_ignore_code::check(self, comments);
         }
-        if self.is_rule_enabled(Rule::DeprecatedIgnore) {
-            rules::suspicious::deprecated_ignore::check_ignore_comments(self, comments);
-        }
     }
 
     /// Report the codes that silence nothing, once each comment knows what it matched.
@@ -159,14 +157,15 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
-            NodeKind::Comment(comment) => self.visit_comment(comment),
+            NodeKind::Comment(comment) => self.visit_comment(HTML_COMMENT, comment.raw),
+            NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
             _ => {}
         }
     }
 
-    fn visit_comment(&self, comment: &Comment<'_>) {
+    fn visit_comment(&self, delimiters: CommentDelimiters, body: &str) {
         if self.is_rule_enabled(Rule::DeprecatedIgnore) {
-            rules::suspicious::deprecated_ignore::check(self, comment);
+            rules::suspicious::deprecated_ignore::check(self, delimiters, body);
         }
     }
 
