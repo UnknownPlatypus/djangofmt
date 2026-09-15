@@ -18,7 +18,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  6 │ <form method="post"></form>
    ╰────
 
-  × Unused rule code in suppression: `missing-img-alt` (non-enabled)
+  × Unused rule code in suppression: `missing-img-alt` (disabled rule)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:9:22]
   8 │ <!-- A rule that is not enabled could not have reported anything -->
   9 │ {# djangofmt: ignore[missing-img-alt] #}
@@ -45,7 +45,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
  18 │ <form method="yes"></form>
     ╰────
 
-  × Unused rule code in suppression: `empty-attr-value`; `missing-img-alt` (non-enabled)
+  × Unused rule code in suppression: `empty-attr-value`; `missing-img-alt` (disabled rule)
     ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:21:1]
  20 │ <!-- Several unused codes among used ones: the list is rewritten -->
  21 │ {# djangofmt: ignore[missing-img-alt, invalid-attr-value, empty-attr-value] #}

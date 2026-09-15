@@ -10,18 +10,11 @@ use crate::suppression::{IgnoreComment, IgnoreScope, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for `ignore[...]` / `file-ignore[...]` suppression comments listing a rule code that
-/// silences nothing.
+/// Checks for `ignore[...]` / `file-ignore[...]` suppression that are no longer applicable.
 ///
 /// ## Why is this bad?
-/// A suppression matching no diagnostic is usually a leftover from markup that was since fixed.
-/// It adds noise, and goes on hiding the next real violation of that rule at the same spot.
-///
-/// A code is unused when its rule reported nothing where the comment applies, when the rule is
-/// not enabled, or when the same comment already lists it. `format` addresses the formatter, so
-/// it is only ever unused as a repeat; `invalid-syntax` is unused once the file parses again.
-/// A code naming no rule is `invalid-ignore-code`'s to report, and a node-level `invalid-syntax`
-/// is `invalid-ignore-comment`'s.
+/// A suppression that no longer matches any diagnostic violations is likely included by mistake,
+/// and should be removed to avoid confusion.
 ///
 /// ## Example
 /// ```html
@@ -36,13 +29,12 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## Fix safety
-/// The fix is marked as unsafe when it deletes a comment along with the free-text reason after
-/// its code list, as in `ignore[...]: reason`. Dropping a code from a list, or a comment carrying
-/// no reason, is safe.
+/// The fix is marked as unsafe when it deletes a comment along with the free-text reason after its code list, as in `ignore[...]: reason`.
+/// Dropping a code from a list, or a comment carrying no reason, is safe.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct UnusedIgnoreCode {
-    /// The unused codes, grouped by reason: `` `a`; `b`, `c` (non-enabled) ``.
+    /// The unused codes, grouped by reason: `` `a`; `b`, `c` (disabled rule) ``.
     pub codes: String,
     /// Whether every listed code is unused, so the fix removes the whole comment.
     pub whole_comment: bool,
@@ -85,7 +77,7 @@ impl Unused {
     const fn label(self) -> &'static str {
         match self {
             Self::Unmatched => "",
-            Self::Disabled => " (non-enabled)",
+            Self::Disabled => " (disabled rule)",
             Self::Duplicated => " (duplicated)",
         }
     }
@@ -166,7 +158,7 @@ fn classify(
     }
 }
 
-/// The unused codes grouped by reason, `; ` between groups: `` `a`; `b`, `c` (non-enabled) ``.
+/// The unused codes grouped by reason, `; ` between groups: `` `a`; `b`, `c` (disabled rule) ``.
 fn format_by_reason(codes: &[&str], unused: &[(usize, Unused)]) -> String {
     Unused::ALL
         .iter()

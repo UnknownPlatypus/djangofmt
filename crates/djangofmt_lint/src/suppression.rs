@@ -145,8 +145,7 @@ impl<'s> IgnoreComment<'s> {
         scope(&self.directive, self.is_leading).map(|scope| (self.directive.codes(), scope))
     }
 
-    /// Whether free text follows the code list, as in `ignore[x]: why`: a fix deleting the
-    /// whole comment would take it along.
+    /// Whether free text follows the code list, e.g. `ignore[x]: why`.
     #[must_use]
     pub fn has_reason(&self) -> bool {
         // An unterminated comment has no body to extract; its raw text splits the same way.
