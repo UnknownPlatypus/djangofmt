@@ -131,7 +131,7 @@ pub struct LintSettings {
     #[option(
         default = r#"["category:default"]"#,
         value_type = "list[RuleSelector]",
-        example = r#"select = ["category:correctness", "use-https"]"#
+        example = r#"select = ["category:default", "unsorted-tailwind-classes"]"#
     )]
     pub select: Option<Vec<RuleSelector>>,
 

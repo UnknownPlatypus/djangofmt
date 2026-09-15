@@ -14,7 +14,7 @@ Override that with `select` and `ignore`, either on the command line (`--select`
 
 ```toml
 [tool.djangofmt.lint]
-select = ["category:default", "missing-img-dimensions"]
+select = ["category:default", "unsorted-tailwind-classes"]
 ignore = ["category:style", "missing-img-alt"]
 preview = true
 ```
