@@ -11,7 +11,7 @@
 
 [**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
 
-A fast, HTML aware, Django template formatter, written in Rust.
+A fast, HTML aware, Django template formatter and linter, written in Rust.
 
 <p align="center">
   <picture align="center">
