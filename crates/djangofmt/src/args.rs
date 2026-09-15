@@ -306,7 +306,7 @@ mod tests {
         success: true
         exit_code: 0
         ----- stdout -----
-        A fast, HTML aware, Django template formatter, written in Rust.
+        A fast, HTML aware, Django template formatter and linter, written in Rust.
 
         Usage: djangofmt [OPTIONS] [FILES]...
                djangofmt [OPTIONS] [FILES]... <COMMAND>

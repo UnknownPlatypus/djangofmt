@@ -4,11 +4,11 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-description = "A fast, HTML aware, Django template formatter, written in Rust."
+description = "A fast, HTML aware, Django template formatter and linter, written in Rust."
 repository.workspace = true
 license.workspace = true
 exclude = ["/tests"]
-publish = true
+publish = false
 default-run = "djangofmt"
 
 [lib]

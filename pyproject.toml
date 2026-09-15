@@ -1,7 +1,7 @@
 [project]
 name = "djangofmt"
 version = "0.2.12"
-description = "A fast, HTML aware, Django template formatter, written in Rust."
+description = "A fast, HTML aware, Django template formatter and linter, written in Rust."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
@@ -25,10 +25,15 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Rust",
 ]
 
 [project.urls]
+Changelog = "https://unknownplatypus.github.io/djangofmt/docs/changelog/"
+Documentation = "https://unknownplatypus.github.io/djangofmt/docs/"
+Issues = "https://github.com/UnknownPlatypus/djangofmt/issues"
+Playground = "https://unknownplatypus.github.io/djangofmt/"
 Repository = "https://github.com/UnknownPlatypus/djangofmt"
 
 [dependency-groups]
@@ -142,6 +147,8 @@ split_commits = false
 commit_preprocessors = [
   # Replace issue numbers with link templates to be updated in `changelog.postprocessors`.
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))" },
+  # The rule shipped as `deprecated-ignore` (#443); the squashed commit title kept its pre-review name.
+  { pattern = "redirected-ignore", replace = "deprecated-ignore" },
   # Check spelling of the commit message using https://github.com/crate-ci/typos.
   # If the spelling is incorrect, it will be fixed automatically.
   { pattern = ".*", replace_command = "typos --write-changes -" },
