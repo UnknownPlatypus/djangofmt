@@ -1,9 +1,9 @@
 //! Diagnostic suppression via `{# djangofmt: ignore[...] #}` comments.
 //!
+//! Some details:
 //! - A directive guards the node that follows it.
 //! - `file-ignore[...]` as the file's first comment covers the whole file.
 //! - Only `{# #}` comments carry directives: HTML comments reach the client.
-
 use std::ops::Range;
 use std::str::FromStr;
 
@@ -11,9 +11,10 @@ pub use markup_fmt::ParseErrorKind;
 use markup_fmt::ast::{JinjaTagOrChildren, Node, NodeKind, Root};
 use smallvec::SmallVec;
 
+use crate::Checker;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
-use crate::{Checker, strip_bom};
+use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
 
 /// An ignore code naming no rule: it opts out of a whole stage rather than one lint.
 #[derive(
@@ -42,24 +43,24 @@ impl ReservedCode {
     }
 }
 
-/// Delimiters of a template comment, the only kind that carries a directive.
-const TEMPLATE_COMMENT_OPEN: &str = "{#";
-const TEMPLATE_COMMENT_CLOSE: &str = "#}";
+pub const NAMESPACE: &str = "djangofmt";
+pub const IGNORE: &str = "ignore";
+pub const FILE_IGNORE: &str = "file-ignore";
 
-/// Delimiters of an HTML comment, which only the legacy bare directive is read from.
-const HTML_COMMENT_OPEN: &str = "<!--";
-const HTML_COMMENT_CLOSE: &str = "-->";
+/// The formatter's legacy ignore directive.
+pub const LEGACY_IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
 
-const NAMESPACE: &str = "djangofmt";
-const IGNORE: &str = "ignore";
-const FILE_IGNORE: &str = "file-ignore";
+/// The formatter's canonical ignore directive, using unified error codes.
+pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore[format]";
 
-/// The formatter's directive, `NAMESPACE:IGNORE` spelled out for `markup_fmt` to match.
-pub const IGNORE_DIRECTIVE: &str = "djangofmt:ignore";
+pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [LEGACY_IGNORE_DIRECTIVE, IGNORE_DIRECTIVE];
 
-/// What a `{# djangofmt: ... #}` comment asks for.
+/// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
+    /// The bare `ignore`, the formatter's legacy directive: it lists no code,
+    /// so it suppresses no lint, and only `deprecated-ignore` has anything to say about it.
+    Legacy,
     /// `ignore[...]`, guarding the following node.
     Ignore(Vec<&'s str>),
     /// `file-ignore[...]`, covering the whole file.
@@ -69,35 +70,35 @@ pub enum IgnoreDirective<'s> {
 }
 
 impl<'s> IgnoreDirective<'s> {
+    /// Parse a comment body with the grammar the formatter uses.
+    ///
+    /// `None` is a comment not addressed to djangofmt at all.
+    pub fn parse(comment_body: &'s str) -> Option<Self> {
+        let directive =
+            match markup_fmt::parse_directive(comment_body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
+                Ok(directive) => directive,
+                Err(error) => return Some(Self::Malformed(error)),
+            };
+        Some(match (directive.keyword, directive.codes) {
+            (IGNORE, codes) if codes.is_empty() => Self::Legacy,
+            (IGNORE, codes) => Self::Ignore(codes),
+            (_, codes) if codes.is_empty() => Self::Malformed(ParseErrorKind::MissingCodes),
+            (_, codes) => Self::FileIgnore(codes),
+        })
+    }
+
     /// Whether the directive scopes to the node that follows it, rather than to the whole file.
     const fn guards_next_node(&self) -> bool {
         matches!(self, Self::Ignore(_))
     }
 
-    /// The codes listed, none for a malformed directive.
+    /// The codes listed, none for a legacy or malformed directive.
     pub fn codes(&self) -> &[&'s str] {
         match self {
             Self::Ignore(codes) | Self::FileIgnore(codes) => codes,
-            Self::Malformed(_) => &[],
+            Self::Legacy | Self::Malformed(_) => &[],
         }
     }
-}
-
-/// Parse a `{# #}` comment body as a lint directive, with the grammar the formatter uses.
-///
-/// `None` is a comment the linter has no say on: one not addressed to djangofmt, or the
-/// formatter's bare `ignore`, which carries no lint codes.
-fn parse(body: &str) -> Option<IgnoreDirective<'_>> {
-    let directive = match markup_fmt::parse_directive(body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
-        Ok(directive) => directive,
-        Err(error) => return Some(IgnoreDirective::Malformed(error)),
-    };
-    Some(match (directive.keyword, directive.codes) {
-        (IGNORE, codes) if codes.is_empty() => return None,
-        (IGNORE, codes) => IgnoreDirective::Ignore(codes),
-        (_, codes) if codes.is_empty() => IgnoreDirective::Malformed(ParseErrorKind::MissingCodes),
-        (_, codes) => IgnoreDirective::FileIgnore(codes),
-    })
 }
 
 /// A `{# djangofmt: ... #}` comment as the linter reads it.
@@ -113,7 +114,7 @@ pub struct IgnoreComment<'s> {
 }
 
 impl IgnoreComment<'_> {
-    /// Whether the directive silences `code` reported at `offset`.
+    /// Whether the comment silences `code` reported at `offset`.
     fn suppresses(&self, code: &str, offset: usize) -> bool {
         self.guarded_ranges
             .iter()
@@ -131,9 +132,9 @@ pub fn collect_ignore_comments<'s>(
     let source = checker.context().source();
     root.jinja_comments
         .iter()
-        .filter_map(|body| {
-            let directive = parse(body)?;
-            let offset = checker.source_offset(body);
+        .filter_map(|comment_body| {
+            let directive = IgnoreDirective::parse(comment_body)?;
+            let offset = checker.source_offset(comment_body);
 
             let ranges = if directive.guards_next_node() {
                 guarded_ranges(root, offset, checker)
@@ -141,13 +142,13 @@ pub fn collect_ignore_comments<'s>(
                 SmallVec::new()
             };
 
-            // The body sits between the delimiters; an unterminated comment runs to the end.
-            let start = offset - TEMPLATE_COMMENT_OPEN.len();
-            let end = (checker.source_end(body) + TEMPLATE_COMMENT_CLOSE.len()).min(source.len());
+            let raw = TEMPLATE_COMMENT.enclosing_comment(checker, comment_body);
             Some(IgnoreComment {
-                raw: &source[start..end],
+                raw,
                 directive,
-                is_leading: strip_bom(&source[..start]).trim_start().is_empty(),
+                is_leading: strip_bom(&source[..checker.source_offset(raw)])
+                    .trim_start()
+                    .is_empty(),
                 guarded_ranges: ranges,
             })
         })
@@ -240,12 +241,13 @@ fn child_slices<'n, 's>(node: &'n Node<'s>) -> impl Iterator<Item = &'n [Node<'s
         }))
 }
 
-/// Whitespace between a directive and its target does not displace the target.
+/// Whitespace between an ignore comment and its target does not displace the target.
 fn is_whitespace_text(node: &Node<'_>) -> bool {
     matches!(node.kind, NodeKind::Text(_)) && node.raw.trim().is_empty()
 }
 
-/// File-wide opt-outs declared by the leading comment of a file.
+/// File-wide opt-outs declared by the leading comment of a file: `file-ignore[...]` codes,
+/// or the legacy bare `djangofmt:ignore` in `{# #}` or `<!-- -->` form, which sets both.
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct FileIgnores {
     /// The formatter skips the whole file (`file-ignore[format]`).
@@ -261,11 +263,13 @@ impl FileIgnores {
     pub fn parse(source: &str) -> Self {
         let source = strip_bom(source);
 
-        // The bare legacy directive doubles as a node-level formatter directive,
+        // The formatter's bare `ignore` doubles as its node-level directive,
         // so it is only file-level when nothing (not even whitespace) precedes it.
-        let legacy_body = leading_template_comment(source).or_else(|| leading_html_comment(source));
+        let legacy_body = TEMPLATE_COMMENT
+            .body(source)
+            .or_else(|| HTML_COMMENT.body(source));
         if let Some(body) = legacy_body
-            && markup_fmt::matches_directive(body, IGNORE_DIRECTIVE)
+            && markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE)
         {
             return Self {
                 format: true,
@@ -289,9 +293,12 @@ impl FileIgnores {
 /// The codes of the file's leading `{# djangofmt: file-ignore[...] #}` comment,
 /// a BOM and whitespace before it tolerated.
 fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
-    match parse(leading_template_comment(strip_bom(source).trim_start())?)? {
+    let comment_body = TEMPLATE_COMMENT.body(strip_bom(source).trim_start())?;
+    match IgnoreDirective::parse(comment_body)? {
         IgnoreDirective::FileIgnore(codes) => Some(codes),
-        IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => None,
+        IgnoreDirective::Legacy | IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => {
+            None
+        }
     }
 }
 
@@ -305,22 +312,6 @@ pub fn file_ignored_rules(source: &str) -> RuleSet {
         }
     }
     rules
-}
-
-/// The body of a leading `{# #}` comment, if `text` starts with one.
-fn leading_template_comment(text: &str) -> Option<&str> {
-    leading_comment(text, TEMPLATE_COMMENT_OPEN, TEMPLATE_COMMENT_CLOSE)
-}
-
-/// The body of a leading `<!-- -->` comment, if `text` starts with one.
-fn leading_html_comment(text: &str) -> Option<&str> {
-    leading_comment(text, HTML_COMMENT_OPEN, HTML_COMMENT_CLOSE)
-}
-
-/// The body of a leading comment with the given delimiters, if `text` starts with one.
-fn leading_comment<'s>(text: &'s str, open: &str, close: &str) -> Option<&'s str> {
-    let body = text.strip_prefix(open)?;
-    Some(&body[..body.find(close)?])
 }
 
 #[cfg(test)]
@@ -347,14 +338,20 @@ mod tests {
         invalid_syntax: false,
     };
 
-    /// The formatter matches the spelled-out directive; the linter parses namespace and keyword.
+    /// The formatter matches the spelled-out directives; the linter parses namespace and keyword.
     #[test]
-    fn ignore_directive_spells_the_namespace_and_keyword() {
-        assert_eq!(IGNORE_DIRECTIVE, format!("{NAMESPACE}:{IGNORE}"));
+    fn ignore_directives_spell_the_namespace_and_keyword() {
+        assert_eq!(LEGACY_IGNORE_DIRECTIVE, format!("{NAMESPACE}:{IGNORE}"));
+        assert_eq!(
+            IGNORE_DIRECTIVE,
+            format!("{LEGACY_IGNORE_DIRECTIVE}[{}]", ReservedCode::Format)
+        );
     }
 
     #[rstest]
     #[case::node(" djangofmt: ignore[a, b ,c] ", IgnoreDirective::Ignore(vec!["a", "b", "c"]))]
+    #[case::legacy(" djangofmt:ignore ", IgnoreDirective::Legacy)]
+    #[case::legacy_reason("djangofmt:ignore this is generated", IgnoreDirective::Legacy)]
     #[case::file("djangofmt:file-ignore[invalid-syntax]", IgnoreDirective::FileIgnore(vec!["invalid-syntax"]))]
     #[case::spaced_colon("djangofmt : file-ignore[a]", IgnoreDirective::FileIgnore(vec!["a"]))]
     #[case::spaced_list("djangofmt: file-ignore [a]", IgnoreDirective::FileIgnore(vec!["a"]))]
@@ -394,23 +391,24 @@ mod tests {
         "djangofmt: ignore[1x]",
         IgnoreDirective::Malformed(ParseErrorKind::InvalidCode)
     )]
-    fn parse_directives(#[case] comment: &'static str, #[case] expected: IgnoreDirective<'static>) {
-        assert_eq!(parse(comment), Some(expected));
+    fn parse_directives(
+        #[case] comment_body: &'static str,
+        #[case] expected: IgnoreDirective<'static>,
+    ) {
+        assert_eq!(IgnoreDirective::parse(comment_body), Some(expected));
     }
 
     #[rstest]
     fn skip_comments_the_linter_has_no_say_on(
         #[values(
-            " djangofmt:ignore ",                // the formatter's old directive
-            "djangofmt:ignore this is generated", // with a reason
-            "djangofmt ignore[a]",               // missing colon
-            "djangofmt-lint: ignore[a]",         // a namespace that merely starts the same
-            "ignore[a]",                         // not addressed to djangofmt
-            "See djangofmt: https://example.com" // merely mentioning it
+            "djangofmt ignore[a]",                // missing colon
+            "djangofmt-lint: ignore[a]",          // a namespace that merely starts the same
+            "ignore[a]",                          // not addressed to djangofmt
+            "See djangofmt: https://example.com"  // merely mentioning it
         )]
-        comment: &str,
+        comment_body: &str,
     ) {
-        assert_eq!(parse(comment), None);
+        assert_eq!(IgnoreDirective::parse(comment_body), None);
     }
 
     #[rstest]
@@ -421,7 +419,7 @@ mod tests {
     #[case::whitespace_control("{#- djangofmt: file-ignore[format] -#}", FORMAT_ONLY)]
     // Anything after the closing bracket is a free-text reason.
     #[case::reason("{# djangofmt: file-ignore[format]: vendored file #}", FORMAT_ONLY)]
-    // A UTF-8 BOM or leading whitespace before the directive is tolerated.
+    // A UTF-8 BOM or leading whitespace before the comment is tolerated.
     #[case::bom(
         "\u{feff}{# djangofmt: file-ignore[invalid-syntax] #}\n<div id=>",
         SYNTAX_ONLY
@@ -439,9 +437,9 @@ mod tests {
     // Preceded by whitespace, the bare directive is node-level, not file-level.
     #[case::legacy_after_newline("\n  {# djangofmt:ignore #}\n<div id=>", NONE)]
     #[case::legacy_after_space(" <!-- djangofmt:ignore -->\n<div id=>", NONE)]
-    // Bracketed directives only count in `{# #}` comments.
+    // Bracketed ignore comments only count in `{# #}` comments.
     #[case::html_comment("<!-- djangofmt: file-ignore[invalid-syntax] -->\n<div id=>", NONE)]
-    // Lint codes, node-level directives and plain markup are not opt-outs.
+    // Lint codes, node-level ignore comments and plain markup are not opt-outs.
     #[case::lint_code("{# djangofmt: file-ignore[missing-img-alt] #}\n<div id=>", NONE)]
     #[case::node_level("{# djangofmt: ignore[invalid-syntax] #}\n<div id=>", NONE)]
     #[case::plain_markup("<div id=>", NONE)]
@@ -506,7 +504,7 @@ mod tests {
             codes("{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>")
                 .is_empty()
         );
-        // A non-matching code, a directive placed after the node, and a later
+        // A non-matching code, an ignore comment placed after the node, and a later
         // sibling all keep their diagnostic.
         assert_eq!(
             codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
@@ -532,7 +530,7 @@ mod tests {
             );
             assert!(!codes(&source).contains(&"invalid-attr-value"), "{filler}");
         }
-        // Stacked directives all reach the same target.
+        // Stacked ignore comments all reach the same target.
         assert!(
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\" id=\"\"></form>"
@@ -551,7 +549,7 @@ mod tests {
 
     #[test]
     fn ignore_guards_the_node_but_not_its_children() {
-        // The directive guards the `<div>` tags, not the `<span>` nested inside them.
+        // The comment guards the `<div>` tags, not the `<span>` nested inside them.
         assert_eq!(
             messages(
                 "{# djangofmt: ignore[empty-attr-value] #}\n<div id=\"\"><span class=\"\">x</span></div>"

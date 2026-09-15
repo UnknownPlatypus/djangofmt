@@ -1,5 +1,7 @@
 use markup_fmt::ast::{Attribute, JinjaBlock, JinjaTagOrChildren};
 
+use crate::Checker;
+
 /// Returns true if the value contains Jinja/Django interpolation markers.
 ///
 /// Values with `{{` or `{%` are dynamic and should be skipped by most rules.
@@ -40,4 +42,48 @@ fn jinja_block_declares_native_attr(block: &JinjaBlock<'_, Attribute<'_>>, name:
         }
         JinjaTagOrChildren::Tag(_) => false,
     })
+}
+
+/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
+#[must_use]
+#[inline]
+pub fn strip_bom(source: &str) -> &str {
+    source.strip_prefix('\u{feff}').unwrap_or(source)
+}
+
+/// The delimiters of one comment style.
+#[derive(Debug, Clone, Copy)]
+pub struct CommentDelimiters {
+    pub open: &'static str,
+    pub close: &'static str,
+}
+
+/// A `{# #}` template comment, the only kind that carries a lint suppression.
+pub const TEMPLATE_COMMENT: CommentDelimiters = CommentDelimiters {
+    open: "{#",
+    close: "#}",
+};
+
+/// An `<!-- -->` HTML comment, which is rendered to the client.
+pub const HTML_COMMENT: CommentDelimiters = CommentDelimiters {
+    open: "<!--",
+    close: "-->",
+};
+
+impl CommentDelimiters {
+    /// The body of a comment, only if `text` starts with one.
+    #[inline]
+    pub fn body(self, text: &str) -> Option<&str> {
+        let body = text.strip_prefix(self.open)?;
+        Some(&body[..body.find(self.close)?])
+    }
+
+    /// The whole comment around `comment_body`, delimiters included.
+    /// An unterminated comment runs to the end of the source.
+    pub fn enclosing_comment<'s>(self, checker: &Checker<'s>, comment_body: &str) -> &'s str {
+        let source = checker.context().source();
+        let start = checker.source_offset(comment_body) - self.open.len();
+        let end = checker.source_end(comment_body) + self.close.len();
+        &source[start..end.min(source.len())]
+    }
 }

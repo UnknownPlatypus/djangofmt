@@ -1,3 +1,4 @@
+pub mod deprecated_ignore;
 pub mod django_static_url;
 pub mod django_url_pattern;
 pub mod duplicate_attr;
