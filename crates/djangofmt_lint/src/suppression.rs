@@ -9,12 +9,12 @@ use std::str::FromStr;
 
 pub use markup_fmt::ParseErrorKind;
 use markup_fmt::ast::{JinjaTagOrChildren, Node, NodeKind, Root};
-use smallvec::SmallVec;
+use smallvec::{SmallVec, smallvec};
 
-use crate::Checker;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
 use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
+use crate::{Checker, LintDiagnostic};
 
 /// An ignore code naming no rule: it opts out of a whole stage rather than one lint.
 #[derive(
@@ -58,9 +58,6 @@ pub const FORMAT_IGNORE_DIRECTIVES: [&str; 2] = [LEGACY_IGNORE_DIRECTIVE, IGNORE
 /// What an ignore comment asks for.
 #[derive(Debug, PartialEq, Eq)]
 pub enum IgnoreDirective<'s> {
-    /// The bare `ignore`, the formatter's legacy directive: it lists no code,
-    /// so it suppresses no lint, and only `deprecated-ignore` has anything to say about it.
-    Legacy,
     /// `ignore[...]`, guarding the following node.
     Ignore(Vec<&'s str>),
     /// `file-ignore[...]`, covering the whole file.
@@ -72,7 +69,8 @@ pub enum IgnoreDirective<'s> {
 impl<'s> IgnoreDirective<'s> {
     /// Parse a comment body with the grammar the formatter uses.
     ///
-    /// `None` is a comment not addressed to djangofmt at all.
+    /// `None` is a comment not addressed to djangofmt at all, or the formatter's bare `ignore`,
+    /// which lists no code and is `deprecated-ignore`'s to report.
     pub fn parse(comment_body: &'s str) -> Option<Self> {
         let directive =
             match markup_fmt::parse_directive(comment_body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
@@ -80,46 +78,77 @@ impl<'s> IgnoreDirective<'s> {
                 Err(error) => return Some(Self::Malformed(error)),
             };
         Some(match (directive.keyword, directive.codes) {
-            (IGNORE, codes) if codes.is_empty() => Self::Legacy,
+            (IGNORE, codes) if codes.is_empty() => return None,
             (IGNORE, codes) => Self::Ignore(codes),
             (_, codes) if codes.is_empty() => Self::Malformed(ParseErrorKind::MissingCodes),
             (_, codes) => Self::FileIgnore(codes),
         })
     }
 
-    /// Whether the directive scopes to the node that follows it, rather than to the whole file.
-    const fn guards_next_node(&self) -> bool {
-        matches!(self, Self::Ignore(_))
-    }
-
-    /// The codes listed, none for a legacy or malformed directive.
+    /// The codes listed, none for a malformed directive.
     pub fn codes(&self) -> &[&'s str] {
         match self {
             Self::Ignore(codes) | Self::FileIgnore(codes) => codes,
-            Self::Legacy | Self::Malformed(_) => &[],
+            Self::Malformed(_) => &[],
         }
     }
+}
+
+/// How far a directive in force reaches.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum IgnoreScope {
+    /// An `ignore[...]`, covering the node that follows it.
+    Node,
+    /// A leading `file-ignore[...]`, covering the whole file.
+    File,
+}
+
+/// How far `directive` reaches, `None` when it is misplaced or malformed and so silences nothing.
+const fn scope(directive: &IgnoreDirective<'_>, is_leading: bool) -> Option<IgnoreScope> {
+    match directive {
+        IgnoreDirective::Ignore(_) => Some(IgnoreScope::Node),
+        IgnoreDirective::FileIgnore(_) if is_leading => Some(IgnoreScope::File),
+        IgnoreDirective::FileIgnore(_) | IgnoreDirective::Malformed(_) => None,
+    }
+}
+
+/// Whether free text follows the code list of a directive `body`; Jinja's trailing
+/// whitespace-control marker (`-#}`) is part of the delimiter, not a reason.
+fn has_reason(body: &str) -> bool {
+    body.split_once(']')
+        .is_some_and(|(_, tail)| !tail.strip_suffix('-').unwrap_or(tail).trim().is_empty())
 }
 
 /// A `{# djangofmt: ... #}` comment as the linter reads it.
 pub struct IgnoreComment<'s> {
     /// The whole comment, delimiters included: what a diagnostic points at and a fix deletes.
     pub raw: &'s str,
+    body: &'s str,
     /// What the comment asks for.
     pub directive: IgnoreDirective<'s>,
-    /// Whether it is the file's leading comment, the only place `file-ignore` counts.
-    pub is_leading: bool,
-    /// Byte ranges an `ignore[...]` guards; empty when nothing follows it.
+    /// How far the directive reaches, `None` when it silences nothing.
+    pub scope: Option<IgnoreScope>,
+    /// The rules of the diagnostics this comment silences.
+    pub matched: RuleSet,
+    /// Byte ranges the directive guards: the whole file for a leading `file-ignore[...]`,
+    /// the next node for an `ignore[...]`, nothing when it has no target.
     guarded_ranges: SmallVec<[Range<usize>; 2]>,
 }
 
 impl IgnoreComment<'_> {
-    /// Whether the comment silences `code` reported at `offset`.
-    fn suppresses(&self, code: &str, offset: usize) -> bool {
+    /// Whether free text follows the code list, e.g. `ignore[x]: why`.
+    #[must_use]
+    pub fn has_reason(&self) -> bool {
+        has_reason(self.body)
+    }
+
+    /// Whether the comment silences `diagnostic`.
+    fn suppresses(&self, diagnostic: &LintDiagnostic) -> bool {
+        let offset = diagnostic.span.offset() as usize;
         self.guarded_ranges
             .iter()
             .any(|range| range.contains(&offset))
-            && self.directive.codes().contains(&code)
+            && self.directive.codes().contains(&diagnostic.code)
     }
 }
 
@@ -136,36 +165,50 @@ pub fn collect_ignore_comments<'s>(
             let directive = IgnoreDirective::parse(comment_body)?;
             let offset = checker.source_offset(comment_body);
 
-            let ranges = if directive.guards_next_node() {
-                guarded_ranges(root, offset, checker)
-            } else {
-                SmallVec::new()
-            };
-
             let raw = TEMPLATE_COMMENT.enclosing_comment(checker, comment_body);
+            let is_leading = strip_bom(&source[..checker.source_offset(raw)])
+                .trim_start()
+                .is_empty();
+            let scope = scope(&directive, is_leading);
+            let guarded_ranges = match scope {
+                Some(IgnoreScope::Node) => guarded_ranges(root, offset, checker),
+                Some(IgnoreScope::File) => smallvec![0..source.len()],
+                None => SmallVec::new(),
+            };
             Some(IgnoreComment {
                 raw,
+                body: comment_body,
                 directive,
-                is_leading: strip_bom(&source[..checker.source_offset(raw)])
-                    .trim_start()
-                    .is_empty(),
-                guarded_ranges: ranges,
+                scope,
+                matched: RuleSet::empty(),
+                guarded_ranges,
             })
         })
         .collect()
 }
 
-/// Drop from `checker` the diagnostics an `ignore[...]` comment silences.
+/// Record on each comment the rules of the diagnostics it silences. Dropping them waits for
+/// [`drop_ignored_diagnostics`], once `unused-ignore-code` has reported from these records.
+/// A diagnostic counts for the first comment covering it, so a repeated code is unused.
+pub fn record_matches(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>]) {
+    for diagnostic in checker.context().diagnostics().iter() {
+        if let Ok(rule) = Rule::from_str(diagnostic.code)
+            && let Some(comment) = comments.iter_mut().find(|c| c.suppresses(diagnostic))
+        {
+            comment.matched.insert(rule);
+        }
+    }
+}
+
+/// Drop from `checker` the diagnostics the comments silence, those of the rules on the
+/// comments themselves included.
 pub fn drop_ignored_diagnostics(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     if comments.is_empty() {
         return;
     }
-    checker.context().retain_diagnostics(|diagnostic| {
-        let offset = diagnostic.span.offset() as usize;
-        !comments
-            .iter()
-            .any(|comment| comment.suppresses(diagnostic.code, offset))
-    });
+    checker
+        .context()
+        .retain_diagnostics(|diagnostic| !comments.iter().any(|c| c.suppresses(diagnostic)));
 }
 
 /// The siblings following the `{# #}` comment node whose body sits at `offset`.
@@ -296,22 +339,8 @@ fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
     let comment_body = TEMPLATE_COMMENT.body(strip_bom(source).trim_start())?;
     match IgnoreDirective::parse(comment_body)? {
         IgnoreDirective::FileIgnore(codes) => Some(codes),
-        IgnoreDirective::Legacy | IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => {
-            None
-        }
+        IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => None,
     }
-}
-
-/// Rules the file's leading `file-ignore[...]` comment turns off, so they never run at all.
-#[must_use]
-pub fn file_ignored_rules(source: &str) -> RuleSet {
-    let mut rules = RuleSet::empty();
-    if let Some(codes) = leading_file_ignore_codes(source) {
-        for rule in codes.iter().filter_map(|code| Rule::from_str(code).ok()) {
-            rules.insert(rule);
-        }
-    }
-    rules
 }
 
 #[cfg(test)]
@@ -350,8 +379,6 @@ mod tests {
 
     #[rstest]
     #[case::node(" djangofmt: ignore[a, b ,c] ", IgnoreDirective::Ignore(vec!["a", "b", "c"]))]
-    #[case::legacy(" djangofmt:ignore ", IgnoreDirective::Legacy)]
-    #[case::legacy_reason("djangofmt:ignore this is generated", IgnoreDirective::Legacy)]
     #[case::file("djangofmt:file-ignore[invalid-syntax]", IgnoreDirective::FileIgnore(vec!["invalid-syntax"]))]
     #[case::spaced_colon("djangofmt : file-ignore[a]", IgnoreDirective::FileIgnore(vec!["a"]))]
     #[case::spaced_list("djangofmt: file-ignore [a]", IgnoreDirective::FileIgnore(vec!["a"]))]
@@ -399,8 +426,20 @@ mod tests {
     }
 
     #[rstest]
+    #[case::reason("djangofmt: ignore[a]: free-text reason", true)]
+    #[case::none(" djangofmt: ignore[a] ", false)]
+    #[case::whitespace_control("- djangofmt: ignore[a] -", false)]
+    // Only a hyphen glued to `#}` is whitespace control; spaced out it is free text.
+    #[case::spaced_hyphen(" djangofmt: ignore[a] - ", true)]
+    fn a_reason_follows_the_code_list(#[case] body: &str, #[case] expected: bool) {
+        assert_eq!(has_reason(body), expected);
+    }
+
+    #[rstest]
     fn skip_comments_the_linter_has_no_say_on(
         #[values(
+            " djangofmt:ignore ",                 // the formatter's bare directive
+            "djangofmt:ignore this is generated", // with a reason
             "djangofmt ignore[a]",                // missing colon
             "djangofmt-lint: ignore[a]",          // a namespace that merely starts the same
             "ignore[a]",                          // not addressed to djangofmt
@@ -447,23 +486,9 @@ mod tests {
         assert_eq!(FileIgnores::parse(source), expected);
     }
 
-    /// Codes that name no rule, `format` and `invalid-syntax` included, narrow nothing.
+    /// A leading `file-ignore[...]` covers the whole file, nested nodes included.
     #[test]
-    fn file_ignore_narrows_the_rule_set() {
-        assert_eq!(
-            file_ignored_rules("{# djangofmt: file-ignore[invalid-attr-value, format] #}"),
-            RuleSet::from_rule(Rule::InvalidAttrValue)
-        );
-        // Below the file's top it narrows nothing.
-        assert_eq!(
-            file_ignored_rules("<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}"),
-            RuleSet::empty()
-        );
-    }
-
-    /// End to end: a narrowed rule never runs, anywhere in the file.
-    #[test]
-    fn file_ignored_rules_never_run() {
+    fn file_ignore_covers_the_whole_file() {
         assert!(
             codes(
                 "{# djangofmt: file-ignore[invalid-attr-value] #}\n\
@@ -471,6 +496,33 @@ mod tests {
                  <div><form method=\"put\"></form></div>"
             )
             .is_empty()
+        );
+        // Below the file's top it covers nothing, and is reported as misplaced.
+        assert_eq!(
+            codes(
+                "<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
+            ),
+            ["invalid-attr-value", "invalid-ignore-comment"]
+        );
+    }
+
+    /// The rules on directives are suppressed like any other, by a `file-ignore[...]`.
+    #[test]
+    fn file_ignore_silences_the_directive_rules() {
+        assert!(
+            codes("{# djangofmt: file-ignore[invalid-ignore-code] #}\n{# djangofmt: ignore[not-a-rule] #}\n<p>hi</p>")
+                .is_empty()
+        );
+    }
+
+    /// Of two comments silencing the same diagnostic, the second is the unused one.
+    #[test]
+    fn a_diagnostic_counts_for_its_first_comment_only() {
+        assert_eq!(
+            messages(
+                "{# djangofmt: file-ignore[invalid-attr-value] #}\n{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
+            ),
+            ["Unused rule code in suppression: `invalid-attr-value`"]
         );
     }
 
@@ -505,14 +557,14 @@ mod tests {
                 .is_empty()
         );
         // A non-matching code, an ignore comment placed after the node, and a later
-        // sibling all keep their diagnostic.
+        // sibling all keep their diagnostic; the first two comments are unused on top.
         assert_eq!(
             codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
-            ["invalid-attr-value"]
+            ["invalid-attr-value", "unused-ignore-code"]
         );
         assert_eq!(
             codes("<form method=\"yes\"></form>\n{# djangofmt: ignore[invalid-attr-value] #}"),
-            ["invalid-attr-value"]
+            ["invalid-attr-value", "unused-ignore-code"]
         );
         assert_eq!(
             messages(
@@ -567,7 +619,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{% if x %}<form method=\"yes\"></form>{% endif %}"
             ),
-            ["invalid-attr-value"]
+            ["invalid-attr-value", "unused-ignore-code"]
         );
     }
 
@@ -592,7 +644,7 @@ mod tests {
     fn attribute_position_comments_never_suppress() {
         assert_eq!(
             codes("<form {# djangofmt: ignore[invalid-attr-value] #} method=\"yes\"></form>"),
-            ["invalid-attr-value"]
+            ["invalid-attr-value", "unused-ignore-code"]
         );
     }
 }

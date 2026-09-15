@@ -189,11 +189,11 @@ pub fn check_ast<'a>(
     checker.visit_root(ast);
 
     // Collect ignore comments and drop the ignored diagnostics.
-    let ignore_comments = suppression::collect_ignore_comments(ast, &checker);
-    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
-
-    // Run linter rules on the ignore comments.
+    let mut ignore_comments = suppression::collect_ignore_comments(ast, &checker);
     checker.visit_ignore_comments(&ignore_comments);
+    suppression::record_matches(&checker, &mut ignore_comments);
+    checker.visit_unused_ignore_codes(&ignore_comments);
+    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
     checker.into_diagnostics()
 }
 

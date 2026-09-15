@@ -52,7 +52,7 @@ pub fn strip_bom(source: &str) -> &str {
 }
 
 /// The delimiters of one comment style.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommentDelimiters {
     pub open: &'static str,
     pub close: &'static str,

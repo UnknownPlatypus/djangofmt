@@ -267,4 +267,5 @@ define_rules! {
     (InvalidIgnoreComment, rules::suspicious::invalid_ignore_comment::InvalidIgnoreComment),
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),
+    (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
 }

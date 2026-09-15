@@ -116,27 +116,23 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
         IgnoreDirective::Malformed(error) => {
             remove_comment(IgnoreCommentViolation::Malformed(*error))
         }
-        IgnoreDirective::FileIgnore(_) if !comment.is_leading => {
+        // A `file-ignore` silences nothing unless it leads the file.
+        IgnoreDirective::FileIgnore(_) if comment.scope.is_none() => {
             remove_comment(IgnoreCommentViolation::MisplacedFileIgnore)
         }
-        // The legacy directive is `deprecated-ignore`'s to report.
-        IgnoreDirective::FileIgnore(_) | IgnoreDirective::Legacy => return,
+        IgnoreDirective::FileIgnore(_) => return,
         IgnoreDirective::Ignore(codes) => {
             let invalid_syntax = ReservedCode::InvalidSyntax.as_str();
             if !codes.contains(&invalid_syntax) {
                 return;
             }
-            let deletion = delete_codes_or_comment(ctx, comment.raw, codes, &[invalid_syntax]);
+            let deletion = delete_codes_or_comment(ctx, comment, |_, code| code == invalid_syntax);
             (
                 IgnoreCommentViolation::InvalidSyntaxOnNode {
                     whole_comment: deletion.whole_comment,
                 },
                 deletion.span,
-                if deletion.whole_comment {
-                    Fix::unsafe_edit(deletion.edit)
-                } else {
-                    Fix::safe_edit(deletion.edit)
-                },
+                deletion.fix,
             )
         }
     };
