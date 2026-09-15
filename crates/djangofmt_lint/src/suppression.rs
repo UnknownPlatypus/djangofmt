@@ -150,12 +150,8 @@ impl<'s> IgnoreComment<'s> {
     /// whole comment would take it along.
     #[must_use]
     pub fn has_reason(&self) -> bool {
-        let body = self
-            .raw
-            .strip_prefix(TEMPLATE_COMMENT.open)
-            .unwrap_or(self.raw);
-        let body = body.strip_suffix(TEMPLATE_COMMENT.close).unwrap_or(body);
-        has_reason(body)
+        // An unterminated comment has no body to extract; its raw text splits the same way.
+        has_reason(TEMPLATE_COMMENT.body(self.raw).unwrap_or(self.raw))
     }
 
     /// Whether the comment silences `code` reported at `offset`.
@@ -202,7 +198,7 @@ pub fn collect_ignore_comments<'s>(
 
 /// Drop from `checker` the diagnostics the comments silence, recording on each comment the
 /// rules it silenced. A diagnostic counts for the first comment covering it, so of two
-/// directives listing the same code for the same target only the first is used.
+/// comments listing the same code for the same target only the first is used.
 pub fn drop_ignored_diagnostics(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>]) {
     if comments.is_empty() {
         return;
@@ -544,7 +540,7 @@ mod tests {
             messages("{# djangofmt: file-ignore[invalid-attr-value, invalid-syntax] #}\n<p>hi</p>"),
             ["Unused rule code in suppression: `invalid-attr-value`, `invalid-syntax`"]
         );
-        // Of two directives silencing the same diagnostic, the second is the unused one.
+        // Of two comments silencing the same diagnostic, the second is the unused one.
         assert_eq!(
             messages(
                 "{# djangofmt: file-ignore[invalid-attr-value] #}\n{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"

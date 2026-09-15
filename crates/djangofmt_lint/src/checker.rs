@@ -150,7 +150,7 @@ impl<'a> Checker<'a> {
     /// Report the codes that silenced nothing, once the suppression has been applied.
     pub fn visit_unused_ignore_codes(&self, comments: &[IgnoreComment<'_>]) {
         if self.is_rule_enabled(Rule::UnusedIgnoreCode) {
-            rules::suspicious::unused_ignore_code::check(comments, self);
+            rules::suspicious::unused_ignore_code::check(self, comments);
         }
     }
 

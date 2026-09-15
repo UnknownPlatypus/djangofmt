@@ -92,7 +92,7 @@ impl Unused {
 }
 
 /// Report the unused codes of every comment, once per comment.
-pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     let own_code: &str = Rule::UnusedIgnoreCode.into();
     // The rule runs after suppression, so its own file-level opt-out is honored here.
     let file_ignored = comments.iter().any(|comment| {
@@ -102,11 +102,11 @@ pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
         return;
     }
     for comment in comments {
-        check_comment(comment, own_code, checker);
+        check_comment(checker, comment, own_code);
     }
 }
 
-fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<'_>) {
+fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>, own_code: &str) {
     // Malformed and misplaced directives are `invalid-ignore-comment`'s to report.
     let Some((codes, scope)) = comment.in_force() else {
         return;
@@ -116,23 +116,26 @@ fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<
         return;
     }
 
-    let mut remove = Vec::new();
-    let mut unused = Vec::new();
-    for (index, &code) in codes.iter().enumerate() {
-        if let Some(reason) = classify(code, &codes[..index], comment.matched, scope, checker) {
-            remove.push(index);
-            unused.push((reason, code));
-        }
-    }
-    if remove.is_empty() {
+    // Indexed rather than by code, so of a repeated code only the repeat is dropped.
+    let unused: Vec<(usize, Unused)> = codes
+        .iter()
+        .enumerate()
+        .filter_map(|(index, &code)| {
+            classify(checker, code, &codes[..index], comment.matched, scope)
+                .map(|reason| (index, reason))
+        })
+        .collect();
+    if unused.is_empty() {
         return;
     }
 
     let deletion = delete_codes_or_comment(checker.context(), comment, |index, _| {
-        remove.contains(&index)
+        unused
+            .iter()
+            .any(|&(unused_index, _)| unused_index == index)
     });
     let violation = UnusedIgnoreCode {
-        codes: format_by_reason(&unused),
+        codes: format_by_reason(codes, &unused),
         whole_comment: deletion.whole_comment,
     };
     deletion.report(checker.context(), &violation);
@@ -142,49 +145,46 @@ fn check_comment(comment: &IgnoreComment<'_>, own_code: &str, checker: &Checker<
 ///
 /// `matched` holds the rules the comment silenced, `earlier` the codes it lists before `code`.
 fn classify(
+    checker: &Checker<'_>,
     code: &str,
     earlier: &[&str],
     matched: RuleSet,
     scope: IgnoreScope,
-    checker: &Checker<'_>,
 ) -> Option<Unused> {
-    let rule = Rule::from_str(code);
-    let reserved = ReservedCode::from_str(code);
-    // A code naming no rule is `invalid-ignore-code`'s and `invalid-syntax` on a node is
-    // `invalid-ignore-comment`'s, repeated or not.
-    let theirs = match (rule, reserved) {
-        (Err(_), Err(_)) => true,
-        (Err(_), Ok(ReservedCode::InvalidSyntax)) => scope == IgnoreScope::Node,
-        _ => false,
-    };
-    if theirs {
-        return None;
+    if let Ok(rule) = Rule::from_str(code) {
+        return if earlier.contains(&code) {
+            Some(Unused::Duplicated)
+        } else if matched.contains(rule) {
+            None
+        } else if checker.is_rule_enabled(rule) {
+            Some(Unused::Unmatched)
+        } else {
+            Some(Unused::Disabled)
+        };
     }
-    if earlier.contains(&code) {
-        return Some(Unused::Duplicated);
-    }
-    match (rule, reserved) {
-        (Ok(rule), _) if matched.contains(rule) => None,
-        (Ok(rule), _) if checker.is_rule_enabled(rule) => Some(Unused::Unmatched),
-        (Ok(_), _) => Some(Unused::Disabled),
+    match ReservedCode::from_str(code) {
+        // `invalid-syntax` on a node is `invalid-ignore-comment`'s, repeated or not.
+        Ok(ReservedCode::InvalidSyntax) if scope == IgnoreScope::Node => None,
+        Ok(_) if earlier.contains(&code) => Some(Unused::Duplicated),
         // The file parsed, so there is no syntax error left to suppress.
-        (Err(_), Ok(ReservedCode::InvalidSyntax)) => Some(Unused::Unmatched),
-        // `format` speaks to the formatter, which the linter cannot see.
-        (Err(_), _) => None,
+        Ok(ReservedCode::InvalidSyntax) => Some(Unused::Unmatched),
+        // `format` speaks to the formatter, which the linter cannot see,
+        // and a code naming no rule is `invalid-ignore-code`'s to report.
+        Ok(ReservedCode::Format) | Err(_) => None,
     }
 }
 
 /// The unused codes grouped by reason, `; ` between groups: `` `a`; `b`, `c` (non-enabled) ``.
-fn format_by_reason(unused: &[(Unused, &str)]) -> String {
+fn format_by_reason(codes: &[&str], unused: &[(usize, Unused)]) -> String {
     Unused::ALL
         .iter()
         .filter_map(|&reason| {
-            let codes = unused
+            let group = unused
                 .iter()
-                .filter(|(cause, _)| *cause == reason)
-                .map(|(_, code)| format!("`{code}`"))
+                .filter(|&&(_, cause)| cause == reason)
+                .map(|&(index, _)| format!("`{}`", codes[index]))
                 .collect::<Vec<_>>();
-            (!codes.is_empty()).then(|| format!("{}{}", codes.join(", "), reason.label()))
+            (!group.is_empty()).then(|| format!("{}{}", group.join(", "), reason.label()))
         })
         .collect::<Vec<_>>()
         .join("; ")
