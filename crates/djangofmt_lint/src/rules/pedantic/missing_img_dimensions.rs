@@ -35,7 +35,7 @@ pub struct MissingImgDimensions;
 
 impl Violation for MissingImgDimensions {
     const RULE: Rule = Rule::MissingImgDimensions;
-    const CATEGORY: RuleCategory = RuleCategory::Accessibility;
+    const CATEGORY: RuleCategory = RuleCategory::Pedantic;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {

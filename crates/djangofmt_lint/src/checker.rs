@@ -189,7 +189,7 @@ impl<'a> Checker<'a> {
                 rules::accessibility::missing_img_alt::check(self, element);
             }
             if self.is_rule_enabled(Rule::MissingImgDimensions) {
-                rules::accessibility::missing_img_dimensions::check(self, element);
+                rules::pedantic::missing_img_dimensions::check(self, element);
             }
         } else if element.tag_name.eq_ignore_ascii_case("html")
             && self.is_rule_enabled(Rule::MissingHtmlLang)
@@ -202,7 +202,7 @@ impl<'a> Checker<'a> {
         } else if element.tag_name.eq_ignore_ascii_case("th")
             && self.is_rule_enabled(Rule::TableHeaderMissingScope)
         {
-            rules::accessibility::table_header_missing_scope::check(self, element);
+            rules::pedantic::table_header_missing_scope::check(self, element);
         }
 
         for attr in &element.attrs {
@@ -264,7 +264,7 @@ impl<'a> Checker<'a> {
         if self.is_rule_enabled(Rule::UnsortedTailwindClasses)
             && attr.name.eq_ignore_ascii_case("class")
         {
-            rules::style::unsorted_tailwind_classes::check(self, attr);
+            rules::pedantic::unsorted_tailwind_classes::check(self, attr);
         }
     }
 

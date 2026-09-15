@@ -127,8 +127,9 @@ pub struct PyprojectSettings {
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct LintSettings {
     /// Rules and categories to enable, e.g. `category:all`, `category:correctness` or a rule name.
+    /// `category:default` is every category except `pedantic`.
     #[option(
-        default = r#"["category:all"]"#,
+        default = r#"["category:default"]"#,
         value_type = "list[RuleSelector]",
         example = r#"select = ["category:correctness", "use-https"]"#
     )]

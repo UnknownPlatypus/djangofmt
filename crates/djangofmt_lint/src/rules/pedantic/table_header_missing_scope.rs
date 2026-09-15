@@ -55,7 +55,7 @@ pub struct TableHeaderMissingScope {
 
 impl Violation for TableHeaderMissingScope {
     const RULE: Rule = Rule::TableHeaderMissingScope;
-    const CATEGORY: RuleCategory = RuleCategory::Accessibility;
+    const CATEGORY: RuleCategory = RuleCategory::Pedantic;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {

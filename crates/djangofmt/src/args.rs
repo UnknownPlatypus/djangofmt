@@ -192,7 +192,7 @@ pub enum OutputFormat {
 #[derive(Clone, Debug, Default, clap::Args)]
 #[command(next_help_heading = "Rule selection")]
 pub struct RuleSelectionArgs {
-    /// Comma-separated list of rules or categories to enable (e.g. `category:all`, `category:correctness`, `missing-img-alt`).
+    /// Comma-separated list of rules or categories to enable (e.g. `category:default`, `category:all`, `category:correctness`, `missing-img-alt`).
     #[arg(long, value_delimiter = ',', value_parser = parse_rule_selector, value_name = "RULE")]
     pub select: Option<Vec<RuleSelector>>,
     /// Comma-separated list of rules or categories to disable.
