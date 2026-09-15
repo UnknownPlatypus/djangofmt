@@ -5,7 +5,7 @@ Rules are grouped into categories:
 - **correctness**: code that is outright wrong or useless.
 - **suspicious**: code that is most likely wrong or useless.
 - **style**: code that should be written in a more idiomatic way.
-- **accessibility**: code that creates accessibility (a11y) barriers. A topic rather than a severity, kept as a group so it can be enabled or ignored as a whole.
+- **accessibility**: code that creates accessibility (a11y) barriers.
 - **pedantic**: rules that are rather strict, noisy, or have occasional false positives. Off by default.
 
 By default djangofmt runs every stable rule outside `pedantic`. A noisy rule earns its place in the default set only when it ships a safe fix or catches something important.
