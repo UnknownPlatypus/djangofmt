@@ -11,6 +11,11 @@ exclude = ["/tests"]
 publish = false
 default-run = "djangofmt"
 
+# `publish = false` hides the binary from `dist`, so opt back in explicitly.
+# https://axodotdev.github.io/cargo-dist/book/reference/config.html#dist
+[package.metadata.dist]
+dist = true
+
 [lib]
 doctest = false
 
