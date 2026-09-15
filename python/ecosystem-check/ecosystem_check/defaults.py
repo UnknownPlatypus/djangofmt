@@ -502,10 +502,6 @@ DEFAULT_TARGETS = [
                     "common/templates/common/select_emails.html",  # </tr>
                     "crm/templates/admin/crm/contact/change_form_object_tools.html",  # </li>
                 ),
-                ExcludeReason.INVALID_ENCODING: (
-                    # Truncated UTF-8 sequence in a class attribute
-                    "analytics/templates/analytics/data_table.html",
-                ),
             },
         ),
     ),
