@@ -70,8 +70,9 @@ pub enum IgnoreDirective<'s> {
 }
 
 impl<'s> IgnoreDirective<'s> {
-    /// Parse a comment body with the grammar the formatter uses,
-    /// `None` for a comment not addressed to djangofmt at all.
+    /// Parse a comment body with the grammar the formatter uses.
+    ///
+    /// `None` is a comment not addressed to djangofmt at all.
     pub fn parse(comment_body: &'s str) -> Option<Self> {
         let directive =
             match markup_fmt::parse_directive(comment_body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
@@ -128,23 +129,16 @@ pub struct IgnoreComment<'s> {
     pub raw: &'s str,
     /// What the comment asks for.
     pub directive: IgnoreDirective<'s>,
-    /// Whether it is the file's leading comment, the only place `file-ignore` counts.
-    pub is_leading: bool,
-    /// The rules of the diagnostics this comment silences, filled in by
-    /// [`record_matches`]: a listed code naming none of them is unused.
+    /// How far the directive reaches, `None` when it silences nothing.
+    pub scope: Option<IgnoreScope>,
+    /// The rules of the diagnostics this comment silences.
     pub matched: RuleSet,
     /// Byte ranges the directive guards: the whole file for a leading `file-ignore[...]`,
     /// the next node for an `ignore[...]`, nothing when it has no target.
     guarded_ranges: SmallVec<[Range<usize>; 2]>,
 }
 
-impl<'s> IgnoreComment<'s> {
-    /// The codes in force and how far they reach, `None` for a directive that silences nothing.
-    #[must_use]
-    pub fn in_force(&self) -> Option<(&[&'s str], IgnoreScope)> {
-        scope(&self.directive, self.is_leading).map(|scope| (self.directive.codes(), scope))
-    }
-
+impl IgnoreComment<'_> {
     /// Whether free text follows the code list, e.g. `ignore[x]: why`.
     #[must_use]
     pub fn has_reason(&self) -> bool {
@@ -179,7 +173,8 @@ pub fn collect_ignore_comments<'s>(
             let is_leading = strip_bom(&source[..checker.source_offset(raw)])
                 .trim_start()
                 .is_empty();
-            let guarded_ranges = match scope(&directive, is_leading) {
+            let scope = scope(&directive, is_leading);
+            let guarded_ranges = match scope {
                 Some(IgnoreScope::Node) => guarded_ranges(root, offset, checker),
                 Some(IgnoreScope::File) => smallvec![0..source.len()],
                 None => SmallVec::new(),
@@ -187,7 +182,7 @@ pub fn collect_ignore_comments<'s>(
             Some(IgnoreComment {
                 raw,
                 directive,
-                is_leading,
+                scope,
                 matched: RuleSet::empty(),
                 guarded_ranges,
             })

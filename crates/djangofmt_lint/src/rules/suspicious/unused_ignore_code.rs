@@ -93,9 +93,10 @@ pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
 
 fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>, own_code: &str) {
     // Malformed and misplaced directives are `invalid-ignore-comment`'s to report.
-    let Some((codes, scope)) = comment.in_force() else {
+    let Some(scope) = comment.scope else {
         return;
     };
+    let codes = comment.directive.codes();
     // A comment silencing this very rule is left alone, whatever else it lists.
     if codes.contains(&own_code) {
         return;

@@ -116,7 +116,8 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
         IgnoreDirective::Malformed(error) => {
             remove_comment(IgnoreCommentViolation::Malformed(*error))
         }
-        IgnoreDirective::FileIgnore(_) if !comment.is_leading => {
+        // A `file-ignore` silences nothing unless it leads the file.
+        IgnoreDirective::FileIgnore(_) if comment.scope.is_none() => {
             remove_comment(IgnoreCommentViolation::MisplacedFileIgnore)
         }
         // The legacy directive is `deprecated-ignore`'s to report.

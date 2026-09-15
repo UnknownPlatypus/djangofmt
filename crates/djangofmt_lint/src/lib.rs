@@ -185,10 +185,10 @@ pub fn check_ast<'a>(
     path: Option<&'a Path>,
 ) -> Vec<LintDiagnostic> {
     let mut checker = Checker::new(source, settings, path);
+    // Walk the ast and collect diagnostics.
     checker.visit_root(ast);
 
-    // Every rule runs before suppression drops anything, so a `file-ignore[...]` silences the
-    // rules on the comments too. The unused-code rule needs to know first what each comment silences.
+    // Collect ignore comments and drop the ignored diagnostics.
     let mut ignore_comments = suppression::collect_ignore_comments(ast, &checker);
     checker.visit_ignore_comments(&ignore_comments);
     suppression::record_matches(&checker, &mut ignore_comments);
