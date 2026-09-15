@@ -18,9 +18,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## Why is this bad?
 /// `{# djangofmt:ignore #}` and `<!-- djangofmt:ignore -->` are the deprecated spellings of
 /// `{# djangofmt: ignore[format] #}`, which names what it suppresses and shares its grammar
-/// with every other suppression. Leading the file, they opt the whole file out, which the
-/// `file-ignore[format]` spelling says outright. The HTML form is worse still: it is rendered
-/// to the client.
+/// with every other suppression. The HTML form is also shipped to the client.
 ///
 /// ## Example
 /// ```html
@@ -66,13 +64,16 @@ impl Unfixable {
 }
 
 impl DeprecatedIgnore {
-    /// The `{# #}` comment the directive should be written as.
-    const fn spelling(&self) -> &'static str {
-        if self.file_level {
-            "{# djangofmt: file-ignore[format] #}"
+    /// The `{# #}` comment the directive should be written as, `reason` carried over when any.
+    fn rewrite(&self, reason: &str) -> String {
+        let keyword = if self.file_level { FILE_IGNORE } else { IGNORE };
+        let code = ReservedCode::Format.as_str();
+        let reason = if reason.is_empty() {
+            String::new()
         } else {
-            "{# djangofmt: ignore[format] #}"
-        }
+            format!(": {reason}")
+        };
+        format!("{{# {NAMESPACE}: {keyword}[{code}]{reason} #}}")
     }
 }
 
@@ -91,7 +92,7 @@ impl Violation for DeprecatedIgnore {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        let spelling = self.spelling();
+        let spelling = self.rewrite("");
         Some(
             match self.unfixable {
                 None => format!("Write it as `{spelling}` instead"),
@@ -125,25 +126,13 @@ fn reason(body: &str) -> &str {
     })
 }
 
-/// The `{# #}` comment the directive should be written as, its reason carried over.
-/// `file_level` uses the `file-ignore` keyword.
-fn to_template_comment(body: &str, file_level: bool) -> String {
-    let keyword = if file_level { FILE_IGNORE } else { IGNORE };
-    let code = ReservedCode::Format.as_str();
-    let reason = match reason(body) {
-        "" => String::new(),
-        reason => format!(": {reason}"),
-    };
-    format!("{{# {NAMESPACE}: {keyword}[{code}]{reason} #}}")
-}
-
 /// Lint the `{# #}` ignore comments of the file, the legacy directive among them.
 pub fn check_ignore_comments(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
     for comment in comments {
         if matches!(comment.directive, IgnoreDirective::Legacy)
-            && let Some(body) = TEMPLATE_COMMENT.body(comment.raw)
+            && let Some(comment_body) = TEMPLATE_COMMENT.body(comment.raw)
         {
-            report(comment.raw, body, false, checker);
+            report(comment.raw, comment_body, false, checker);
         }
     }
 }
@@ -151,29 +140,28 @@ pub fn check_ignore_comments(comments: &[IgnoreComment<'_>], checker: &Checker<'
 /// Lint an HTML comment, which carries no directive the linter honors.
 pub fn check(comment: &Comment<'_>, checker: &Checker<'_>) {
     if markup_fmt::matches_directive(comment.raw, LEGACY_IGNORE_DIRECTIVE) {
-        let raw = HTML_COMMENT.enclosing_comment(checker, comment.raw);
-        report(raw, comment.raw, true, checker);
+        let whole_comment = HTML_COMMENT.enclosing_comment(checker, comment.raw);
+        report(whole_comment, comment.raw, true, checker);
     }
 }
 
-/// Report `raw`, the whole comment, and rewrite it as a coded `{# #}` directive when it fits.
-fn report(raw: &str, body: &str, in_html: bool, checker: &Checker<'_>) {
+/// Report the whole comment and rewrite it as a coded `{# #}` directive when it fits.
+fn report(comment: &str, comment_body: &str, in_html: bool, checker: &Checker<'_>) {
     let violation = DeprecatedIgnore {
         in_html,
-        file_level: is_legacy_file_opt_out(raw, checker),
-        unfixable: Unfixable::in_body(body),
+        file_level: is_legacy_file_opt_out(comment, checker),
+        unfixable: Unfixable::in_body(comment_body),
     };
-    let span = checker.source_span(raw);
+    let span = checker.source_span(comment);
     let mut guard = checker.report_diagnostic(&violation, span);
     if violation.unfixable.is_none() {
-        let rewritten = to_template_comment(body, violation.file_level);
+        let rewritten = violation.rewrite(reason(comment_body));
         guard.set_fix(Fix::safe_edit(Edit::replacement(rewritten, span)));
     }
 }
 
 /// Leading the file, the formatter's bare directive is its legacy whole-file opt-out.
-/// Anything before it but a BOM, whitespace included, makes it guard the first node instead.
-fn is_legacy_file_opt_out(html_comment: &str, checker: &Checker<'_>) -> bool {
-    let before = &checker.context().source()[..checker.source_offset(html_comment)];
+fn is_legacy_file_opt_out(comment: &str, checker: &Checker<'_>) -> bool {
+    let before = &checker.context().source()[..checker.source_offset(comment)];
     strip_bom(before).is_empty()
 }
