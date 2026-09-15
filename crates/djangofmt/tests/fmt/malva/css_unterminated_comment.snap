@@ -1,0 +1,10 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<!-- malva swallows the sheet into the unterminated comment and returns nothing -->
+<style>
+    /* unterminated
+    .a { color: red; }
+</style>
+<div style="/* unterminated
+color: red">x</div>

@@ -388,24 +388,24 @@ pub fn format_text(
                         )
                     });
 
+                    // malva drops comments it won't reprint, which can empty the whole snippet.
+                    // Keep the source rather than delete it.
+                    if formatted_css.trim().is_empty() && !code.trim().is_empty() {
+                        return Ok(code.into());
+                    }
+
                     // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
                     // Tries to keep on formatting style attr on a single line like expected with
                     // single_line_top_level_declarations = true
                     if code.contains('{') {
                         Ok(formatted_css)
                     } else {
-                        let joined = formatted_css
+                        Ok(formatted_css
                             .lines()
                             .map(str::trim)
                             .collect::<Vec<_>>()
-                            .join(" ");
-                        // `single_line_top_level_declarations` makes malva drop comments here,
-                        // which empties a comment-only block. Keep the source rather than delete it.
-                        if joined.trim().is_empty() {
-                            Ok(code.into())
-                        } else {
-                            Ok(joined.into())
-                        }
+                            .join(" ")
+                            .into())
                     }
                 }
                 _ => Ok(code.into()),
