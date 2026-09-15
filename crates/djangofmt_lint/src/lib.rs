@@ -187,12 +187,13 @@ pub fn check_ast<'a>(
     let mut checker = Checker::new(source, settings, path);
     checker.visit_root(ast);
 
-    // The directive rules run before suppression so a `file-ignore[...]` silences them too;
-    // the unused-code rule runs after, since it needs to know what was silenced.
+    // Every rule runs before suppression drops anything, so a `file-ignore[...]` silences the
+    // rules on the comments too. The unused-code rule needs to know first what each comment silences.
     let mut ignore_comments = suppression::collect_ignore_comments(ast, &checker);
     checker.visit_ignore_comments(&ignore_comments);
-    suppression::drop_ignored_diagnostics(&checker, &mut ignore_comments);
+    suppression::record_matches(&checker, &mut ignore_comments);
     checker.visit_unused_ignore_codes(&ignore_comments);
+    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
     checker.into_diagnostics()
 }
 

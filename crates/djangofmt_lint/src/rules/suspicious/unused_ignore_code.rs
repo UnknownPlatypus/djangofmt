@@ -94,13 +94,6 @@ impl Unused {
 /// Report the unused codes of every comment, once per comment.
 pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     let own_code: &str = Rule::UnusedIgnoreCode.into();
-    // The rule runs after suppression, so its own file-level opt-out is honored here.
-    let file_ignored = comments.iter().any(|comment| {
-        matches!(comment.in_force(), Some((codes, IgnoreScope::File)) if codes.contains(&own_code))
-    });
-    if file_ignored {
-        return;
-    }
     for comment in comments {
         check_comment(checker, comment, own_code);
     }
@@ -142,7 +135,6 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>, own_code: &
 }
 
 /// Why `code` is unused, `None` when it is used or not this rule's to judge.
-///
 /// `matched` holds the rules the comment silenced, `earlier` the codes it lists before `code`.
 fn classify(
     checker: &Checker<'_>,

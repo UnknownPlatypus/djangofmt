@@ -11,10 +11,10 @@ pub use markup_fmt::ParseErrorKind;
 use markup_fmt::ast::{JinjaTagOrChildren, Node, NodeKind, Root};
 use smallvec::{SmallVec, smallvec};
 
-use crate::Checker;
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
 use crate::rules::helpers::{HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
+use crate::{Checker, LintDiagnostic};
 
 /// An ignore code naming no rule: it opts out of a whole stage rather than one lint.
 #[derive(
@@ -70,9 +70,8 @@ pub enum IgnoreDirective<'s> {
 }
 
 impl<'s> IgnoreDirective<'s> {
-    /// Parse a comment body with the grammar the formatter uses.
-    ///
-    /// `None` is a comment not addressed to djangofmt at all.
+    /// Parse a comment body with the grammar the formatter uses,
+    /// `None` for a comment not addressed to djangofmt at all.
     pub fn parse(comment_body: &'s str) -> Option<Self> {
         let directive =
             match markup_fmt::parse_directive(comment_body, NAMESPACE, &[IGNORE, FILE_IGNORE])? {
@@ -120,7 +119,7 @@ const fn scope(directive: &IgnoreDirective<'_>, is_leading: bool) -> Option<Igno
 /// whitespace-control marker (`-#}`) is part of the delimiter, not a reason.
 fn has_reason(body: &str) -> bool {
     body.split_once(']')
-        .is_some_and(|(_, tail)| !tail.trim().trim_end_matches('-').is_empty())
+        .is_some_and(|(_, tail)| !tail.strip_suffix('-').unwrap_or(tail).trim().is_empty())
 }
 
 /// A `{# djangofmt: ... #}` comment as the linter reads it.
@@ -131,8 +130,8 @@ pub struct IgnoreComment<'s> {
     pub directive: IgnoreDirective<'s>,
     /// Whether it is the file's leading comment, the only place `file-ignore` counts.
     pub is_leading: bool,
-    /// The rules of the diagnostics this comment silenced, filled in by
-    /// [`drop_ignored_diagnostics`]: a listed code naming none of them is unused.
+    /// The rules of the diagnostics this comment silences, filled in by
+    /// [`record_matches`]: a listed code naming none of them is unused.
     pub matched: RuleSet,
     /// Byte ranges the directive guards: the whole file for a leading `file-ignore[...]`,
     /// the next node for an `ignore[...]`, nothing when it has no target.
@@ -154,12 +153,13 @@ impl<'s> IgnoreComment<'s> {
         has_reason(TEMPLATE_COMMENT.body(self.raw).unwrap_or(self.raw))
     }
 
-    /// Whether the comment silences `code` reported at `offset`.
-    fn suppresses(&self, code: &str, offset: usize) -> bool {
+    /// Whether the comment silences `diagnostic`.
+    fn suppresses(&self, diagnostic: &LintDiagnostic) -> bool {
+        let offset = diagnostic.span.offset() as usize;
         self.guarded_ranges
             .iter()
             .any(|range| range.contains(&offset))
-            && self.directive.codes().contains(&code)
+            && self.directive.codes().contains(&diagnostic.code)
     }
 }
 
@@ -196,26 +196,27 @@ pub fn collect_ignore_comments<'s>(
         .collect()
 }
 
-/// Drop from `checker` the diagnostics the comments silence, recording on each comment the
-/// rules it silenced. A diagnostic counts for the first comment covering it, so of two
-/// comments listing the same code for the same target only the first is used.
-pub fn drop_ignored_diagnostics(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>]) {
+/// Record on each comment the rules of the diagnostics it silences, without dropping any.
+/// A diagnostic counts for the first comment covering it, so a repeated code is unused.
+pub fn record_matches(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>]) {
+    for diagnostic in checker.context().diagnostics().iter() {
+        if let Ok(rule) = Rule::from_str(diagnostic.code)
+            && let Some(comment) = comments.iter_mut().find(|c| c.suppresses(diagnostic))
+        {
+            comment.matched.insert(rule);
+        }
+    }
+}
+
+/// Drop from `checker` the diagnostics the comments silence, those of the rules on the
+/// comments themselves included.
+pub fn drop_ignored_diagnostics(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     if comments.is_empty() {
         return;
     }
-    checker.context().retain_diagnostics(|diagnostic| {
-        let offset = diagnostic.span.offset() as usize;
-        let Some(comment) = comments
-            .iter_mut()
-            .find(|comment| comment.suppresses(diagnostic.code, offset))
-        else {
-            return true;
-        };
-        if let Ok(rule) = Rule::from_str(diagnostic.code) {
-            comment.matched.insert(rule);
-        }
-        false
-    });
+    checker
+        .context()
+        .retain_diagnostics(|diagnostic| !comments.iter().any(|c| c.suppresses(diagnostic)));
 }
 
 /// The siblings following the `{# #}` comment node whose body sits at `offset`.
@@ -440,6 +441,8 @@ mod tests {
     #[case::reason("djangofmt: ignore[a]: free-text reason", true)]
     #[case::none(" djangofmt: ignore[a] ", false)]
     #[case::whitespace_control("- djangofmt: ignore[a] -", false)]
+    // Only a hyphen glued to `#}` is whitespace control; spaced out it is free text.
+    #[case::spaced_hyphen(" djangofmt: ignore[a] - ", true)]
     fn a_reason_follows_the_code_list(#[case] body: &str, #[case] expected: bool) {
         assert_eq!(has_reason(body), expected);
     }

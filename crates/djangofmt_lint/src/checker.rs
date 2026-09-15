@@ -134,7 +134,7 @@ impl<'a> Checker<'a> {
         }
     }
 
-    /// Lint the ignore comments themselves, before the suppression they ask for is applied.
+    /// Lint the ignore comments themselves.
     pub fn visit_ignore_comments(&self, comments: &[IgnoreComment<'_>]) {
         if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
             rules::suspicious::invalid_ignore_comment::check(self, comments);
@@ -147,7 +147,7 @@ impl<'a> Checker<'a> {
         }
     }
 
-    /// Report the codes that silenced nothing, once the suppression has been applied.
+    /// Report the codes that silence nothing, once each comment knows what it matched.
     pub fn visit_unused_ignore_codes(&self, comments: &[IgnoreComment<'_>]) {
         if self.is_rule_enabled(Rule::UnusedIgnoreCode) {
             rules::suspicious::unused_ignore_code::check(self, comments);

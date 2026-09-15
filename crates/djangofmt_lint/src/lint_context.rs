@@ -4,7 +4,7 @@
 //! Reporting a diagnostic returns a guard that buffers a partial diagnostic; on Drop the guard
 //! pushes it into the context's buffer.
 
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use std::path::Path;
 
 use miette::SourceSpan;
@@ -140,6 +140,11 @@ impl<'a> LintContext<'a> {
                 fix_title: violation.fix_title(),
             }),
         }
+    }
+
+    /// The diagnostics collected so far.
+    pub fn diagnostics(&self) -> Ref<'_, [LintDiagnostic]> {
+        Ref::map(self.diagnostics.borrow(), Vec::as_slice)
     }
 
     /// Drop every diagnostic `keep` rejects: suppression applies once all rules have run.
