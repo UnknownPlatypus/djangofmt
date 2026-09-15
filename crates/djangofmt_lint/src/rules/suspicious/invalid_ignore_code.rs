@@ -69,13 +69,13 @@ impl Violation for InvalidIgnoreCode {
 }
 
 /// Report the codes naming neither a rule nor a reserved code, once per comment.
-pub fn check(comments: &[IgnoreComment<'_>], checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
     for comment in comments {
-        check_comment(comment, checker);
+        check_comment(checker, comment);
     }
 }
 
-fn check_comment(comment: &IgnoreComment<'_>, checker: &Checker<'_>) {
+fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
     let codes = comment.directive.codes();
     let mut invalid: Vec<&str> = Vec::new();
     for &code in codes {

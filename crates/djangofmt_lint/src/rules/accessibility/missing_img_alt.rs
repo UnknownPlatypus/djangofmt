@@ -48,7 +48,7 @@ impl Violation for MissingImgAlt {
 }
 
 /// The caller guarantees `element` is an `<img>`.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     if element
         .attrs
         .iter()

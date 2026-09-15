@@ -65,7 +65,7 @@ impl Violation for MissingTitle {
 }
 
 /// The caller guarantees `element` is a `<head>`.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     let kind = match classify_title(&element.children) {
         TitleStatus::Present => return,
         TitleStatus::Empty => TitleViolation::Empty,

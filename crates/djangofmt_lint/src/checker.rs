@@ -121,7 +121,7 @@ impl<'a> Checker<'a> {
     /// Visit the root of the AST and run all lint rules.
     pub fn visit_root(&mut self, root: &Root<'a>) {
         if self.is_rule_enabled(Rule::MissingDoctype) {
-            rules::style::missing_doctype::check(root, self);
+            rules::style::missing_doctype::check(self, root);
         }
 
         for node in &root.children {
@@ -137,13 +137,13 @@ impl<'a> Checker<'a> {
     /// Lint the ignore comments themselves, once the suppression they ask for has been applied.
     pub fn visit_ignore_comments(&self, comments: &[IgnoreComment<'_>]) {
         if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
-            rules::suspicious::invalid_ignore_comment::check(comments, self);
+            rules::suspicious::invalid_ignore_comment::check(self, comments);
         }
         if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
-            rules::suspicious::invalid_ignore_code::check(comments, self);
+            rules::suspicious::invalid_ignore_code::check(self, comments);
         }
         if self.is_rule_enabled(Rule::DeprecatedIgnore) {
-            rules::suspicious::deprecated_ignore::check_ignore_comments(comments, self);
+            rules::suspicious::deprecated_ignore::check_ignore_comments(self, comments);
         }
     }
 
@@ -159,44 +159,44 @@ impl<'a> Checker<'a> {
 
     fn visit_comment(&self, comment: &Comment<'_>) {
         if self.is_rule_enabled(Rule::DeprecatedIgnore) {
-            rules::suspicious::deprecated_ignore::check(comment, self);
+            rules::suspicious::deprecated_ignore::check(self, comment);
         }
     }
 
     fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
         if self.is_rule_enabled(Rule::SameFilePartialInclude) {
-            rules::style::same_file_partial_include::check(tag, self);
+            rules::style::same_file_partial_include::check(self, tag);
         }
     }
 
     fn visit_element(&mut self, element: &Element<'a>) {
         if self.is_rule_enabled(Rule::DuplicateAttr) {
-            rules::suspicious::duplicate_attr::check(element, self);
+            rules::suspicious::duplicate_attr::check(self, element);
         }
 
         if self.is_rule_enabled(Rule::EmptyTagPair) {
-            rules::suspicious::empty_tag_pair::check(element, self);
+            rules::suspicious::empty_tag_pair::check(self, element);
         }
 
         if element.tag_name.eq_ignore_ascii_case("img") {
             if self.is_rule_enabled(Rule::MissingImgAlt) {
-                rules::accessibility::missing_img_alt::check(element, self);
+                rules::accessibility::missing_img_alt::check(self, element);
             }
             if self.is_rule_enabled(Rule::MissingImgDimensions) {
-                rules::accessibility::missing_img_dimensions::check(element, self);
+                rules::accessibility::missing_img_dimensions::check(self, element);
             }
         } else if element.tag_name.eq_ignore_ascii_case("html")
             && self.is_rule_enabled(Rule::MissingHtmlLang)
         {
-            rules::accessibility::missing_html_lang::check(element, self);
+            rules::accessibility::missing_html_lang::check(self, element);
         } else if element.tag_name.eq_ignore_ascii_case("head")
             && self.is_rule_enabled(Rule::MissingTitle)
         {
-            rules::accessibility::missing_title::check(element, self);
+            rules::accessibility::missing_title::check(self, element);
         } else if element.tag_name.eq_ignore_ascii_case("th")
             && self.is_rule_enabled(Rule::TableHeaderMissingScope)
         {
-            rules::accessibility::table_header_missing_scope::check(element, self);
+            rules::accessibility::table_header_missing_scope::check(self, element);
         }
 
         for attr in &element.attrs {
@@ -219,52 +219,52 @@ impl<'a> Checker<'a> {
 
     fn visit_native_attribute(&self, attr: &NativeAttribute<'a>, element: &Element<'a>) {
         if self.is_rule_enabled(Rule::InvalidAttrValue) {
-            rules::correctness::invalid_attr_value::check(attr, element, self);
+            rules::correctness::invalid_attr_value::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::EmptyAttrValue) {
-            rules::style::empty_attr_value::check(attr, self);
+            rules::style::empty_attr_value::check(self, attr);
         }
 
         if self.is_rule_enabled(Rule::RedundantTypeAttr) {
-            rules::style::redundant_type_attr::check(attr, element, self);
+            rules::style::redundant_type_attr::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::DjangoStaticUrl) {
-            rules::suspicious::django_static_url::check(attr, element, self);
+            rules::suspicious::django_static_url::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::DjangoUrlPattern) {
-            rules::suspicious::django_url_pattern::check(attr, element, self);
+            rules::suspicious::django_url_pattern::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::JavascriptUrl) {
-            rules::suspicious::javascript_url::check(attr, element, self);
+            rules::suspicious::javascript_url::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::UseHttps) {
-            rules::suspicious::use_https::check(attr, self);
+            rules::suspicious::use_https::check(self, attr);
         }
 
         if element.tag_name.eq_ignore_ascii_case("form") {
             if self.is_rule_enabled(Rule::UppercaseFormMethod) {
-                rules::style::uppercase_form_method::check(attr, self);
+                rules::style::uppercase_form_method::check(self, attr);
             }
             if self.is_rule_enabled(Rule::FormActionWhitespace) {
-                rules::style::form_action_whitespace::check(attr, self);
+                rules::style::form_action_whitespace::check(self, attr);
             }
         }
 
         if self.is_rule_enabled(Rule::UnsortedTailwindClasses)
             && attr.name.eq_ignore_ascii_case("class")
         {
-            rules::style::unsorted_tailwind_classes::check(attr, self);
+            rules::style::unsorted_tailwind_classes::check(self, attr);
         }
     }
 
     fn visit_jinja_block(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
         if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
-            rules::correctness::untrimmed_blocktranslate::check(block, self);
+            rules::correctness::untrimmed_blocktranslate::check(self, block);
         }
 
         if self.is_rule_enabled(Rule::DuplicateBlockName) {

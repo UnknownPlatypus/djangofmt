@@ -52,7 +52,7 @@ impl Violation for MissingHtmlLang {
 }
 
 /// The caller guarantees `element` is an `<html>` element.
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     if element
         .attrs
         .iter()

@@ -65,7 +65,7 @@ impl Violation for UseHttps {
 const HTTP_SCHEME: &str = "http://";
 const HTTPS_SCHEME: &str = "https://";
 
-pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
     let NativeAttribute {
         name,
         value: Some((value_str, _)),
@@ -83,10 +83,10 @@ pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
     // holds a single URL.
     if canonical == "srcset" {
         for url in srcset_candidates(value_str) {
-            report_http_scheme(url, canonical, checker);
+            report_http_scheme(checker, url, canonical);
         }
     } else {
-        report_http_scheme(value_str, canonical, checker);
+        report_http_scheme(checker, value_str, canonical);
     }
 }
 
@@ -107,7 +107,7 @@ fn canonical_url_attr(name: &str) -> Option<&'static str> {
 }
 
 /// Reports (and offers a fix for) a URL that uses the insecure `http://` scheme.
-fn report_http_scheme(url: &str, attribute: &'static str, checker: &Checker<'_>) {
+fn report_http_scheme(checker: &Checker<'_>, url: &str, attribute: &'static str) {
     let trimmed = url.trim_start_matches(|c: char| c.is_ascii_whitespace());
     let Some((scheme, rest)) = trimmed.split_at_checked(HTTP_SCHEME.len()) else {
         return;

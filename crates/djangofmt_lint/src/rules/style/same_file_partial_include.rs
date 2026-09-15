@@ -60,7 +60,7 @@ impl Violation for SameFilePartialInclude<'_> {
     }
 }
 
-pub fn check(tag: &JinjaTag<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>) {
     // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
     let Some(current_path) = checker.context().path() else {
         return;

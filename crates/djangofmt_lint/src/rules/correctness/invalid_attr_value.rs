@@ -69,7 +69,7 @@ impl Violation for InvalidAttrValue {
 }
 
 /// Check a single attribute for an invalid enum value.
-pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
     // Pending implementation of djangofmt_html_spec.
     // Currently only checks for <form method="...">.
     if !element.tag_name.eq_ignore_ascii_case("form") {

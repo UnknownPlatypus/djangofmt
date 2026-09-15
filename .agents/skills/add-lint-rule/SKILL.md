@@ -150,7 +150,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 ### 1d. The check function
 
 ```rust
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     // Guard: return early if element/attr doesn't match
     // Skip interpolated values with helpers::contains_interpolation()
     let span = checker.source_span(value_str);
@@ -197,7 +197,7 @@ Add the rule check call in the appropriate `visit_*` method in `crates/djangofmt
 ```rust
 fn visit_element(&mut self, element: &Element<'_>) {
     if self.is_rule_enabled(Rule::MyRule) {
-        rules::style::my_rule::check(element, self);
+        rules::style::my_rule::check(self, element);
     }
     // ...
 }

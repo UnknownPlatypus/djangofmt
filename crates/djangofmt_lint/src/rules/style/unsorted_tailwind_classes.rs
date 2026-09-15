@@ -54,7 +54,7 @@ impl Violation for UnsortedTailwindClasses {
 }
 
 // The caller gates this on the `class` attribute name.
-pub fn check(attr: &NativeAttribute<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
     let NativeAttribute {
         value: Some((value_str, _)),
         ..

@@ -64,7 +64,7 @@ impl Violation for RedundantTypeAttr {
     }
 }
 
-pub fn check(attr: &NativeAttribute<'_>, element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
     let tag = element.tag_name;
 
     let default_type = if tag.eq_ignore_ascii_case("script") {

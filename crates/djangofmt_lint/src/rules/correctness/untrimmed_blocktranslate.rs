@@ -57,7 +57,7 @@ impl Violation for UntrimmedBlocktranslate {
 
 /// Inspect the opening tag of a Jinja block and report a diagnostic if it
 /// is a `blocktranslate` / `blocktrans` block missing the `trimmed` keyword.
-pub fn check(block: &JinjaBlock<'_, Node<'_>>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, block: &JinjaBlock<'_, Node<'_>>) {
     let Some(JinjaTagOrChildren::Tag(open_tag)) = block.body.first() else {
         return;
     };

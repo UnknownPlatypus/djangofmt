@@ -46,7 +46,7 @@ impl Violation for DuplicateAttr<'_> {
     }
 }
 
-pub fn check(element: &Element<'_>, checker: &Checker<'_>) {
+pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     // Fast path: with fewer than 2 attributes there can be no duplicates.
     if element.attrs.len() < 2 {
         return;
