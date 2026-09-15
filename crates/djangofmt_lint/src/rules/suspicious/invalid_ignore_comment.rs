@@ -126,17 +126,13 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
             if !codes.contains(&invalid_syntax) {
                 return;
             }
-            let deletion = delete_codes_or_comment(ctx, comment.raw, codes, &[invalid_syntax]);
+            let deletion = delete_codes_or_comment(ctx, comment, |_, code| code == invalid_syntax);
             (
                 IgnoreCommentViolation::InvalidSyntaxOnNode {
                     whole_comment: deletion.whole_comment,
                 },
                 deletion.span,
-                if deletion.whole_comment {
-                    Fix::unsafe_edit(deletion.edit)
-                } else {
-                    Fix::safe_edit(deletion.edit)
-                },
+                deletion.fix,
             )
         }
     };

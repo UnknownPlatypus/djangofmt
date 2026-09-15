@@ -26,7 +26,7 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
+    pub const fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
         Self {
             context: LintContext::new(source, settings, path),
             block_names: SmallVec::new_const(),
@@ -134,7 +134,7 @@ impl<'a> Checker<'a> {
         }
     }
 
-    /// Lint the ignore comments themselves, once the suppression they ask for has been applied.
+    /// Lint the ignore comments themselves, before the suppression they ask for is applied.
     pub fn visit_ignore_comments(&self, comments: &[IgnoreComment<'_>]) {
         if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
             rules::suspicious::invalid_ignore_comment::check(self, comments);
@@ -144,6 +144,13 @@ impl<'a> Checker<'a> {
         }
         if self.is_rule_enabled(Rule::DeprecatedIgnore) {
             rules::suspicious::deprecated_ignore::check_ignore_comments(self, comments);
+        }
+    }
+
+    /// Report the codes that silenced nothing, once the suppression has been applied.
+    pub fn visit_unused_ignore_codes(&self, comments: &[IgnoreComment<'_>]) {
+        if self.is_rule_enabled(Rule::UnusedIgnoreCode) {
+            rules::suspicious::unused_ignore_code::check(comments, self);
         }
     }
 

@@ -109,8 +109,15 @@ fn settings_for(path: &Path) -> Settings {
         .replace('_', "-")
         .parse::<Rule>()
         .unwrap_or_else(|_| panic!("fixture directory `{dir}` does not name a rule"));
+    let mut rules = RuleSet::from_rule(rule);
+    // `unused-ignore-code` judges what other rules reported, so its fixtures also run the two
+    // rules their comments list; a comment naming any other rule stands for a non-enabled one.
+    if rule == Rule::UnusedIgnoreCode {
+        rules.insert(Rule::InvalidAttrValue);
+        rules.insert(Rule::EmptyAttrValue);
+    }
     Settings {
-        rules: RuleSet::from_rule(rule),
+        rules,
         ..Settings::default()
     }
 }
