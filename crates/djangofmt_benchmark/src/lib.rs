@@ -1,8 +1,9 @@
 use djangofmt::args::Profile;
 use std::fmt;
 
-// Benchmark the allocator the CLI ships with, and stop jemalloc returning pages to the OS:
-// background purging shows up as random slow allocations mid-run.
+// Benchmark the allocator the CLI ships with, minus its deferred work: page purging, and the
+// tcache GC, whose flush lands inside a random measurement window. 1TiB, not 0, disables the GC:
+// jemalloc clips `tcache_gc_incr_bytes` up to a 1KiB floor, so 0 would fire it 64x more often.
 #[cfg(all(
     not(target_os = "macos"),
     not(target_os = "windows"),
@@ -21,7 +22,8 @@ mod allocator {
     static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
     #[unsafe(export_name = "_rjem_malloc_conf")]
-    pub static MALLOC_CONF: &[u8] = b"dirty_decay_ms:-1,muzzy_decay_ms:-1\0";
+    pub static MALLOC_CONF: &[u8] =
+        b"dirty_decay_ms:-1,muzzy_decay_ms:-1,tcache_gc_incr_bytes:1099511627776\0";
 }
 
 pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {
