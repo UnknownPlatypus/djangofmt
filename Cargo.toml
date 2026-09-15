@@ -20,6 +20,7 @@ clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "*" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
 dprint-plugin-json = { version = "0.23.0" }
+dprint-plugin-typescript = { version = "0.96.1" }
 editorconfig-parser = { version = "0.0.4" }
 globset = { version = "0.4.18" }
 ignore = { version = "0.4.25" }
