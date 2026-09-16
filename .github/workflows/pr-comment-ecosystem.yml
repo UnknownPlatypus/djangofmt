@@ -37,7 +37,15 @@ jobs:
         run: |
           if [[ -f pr-number ]]
           then
-            echo "pr-number=$(<pr-number)" >> "$GITHUB_OUTPUT"
+              # This artifact is built by the fork's own CI run, so anything but a
+              # plain number means it was tampered with.
+              pr_number="$(<pr-number)"
+              if [[ ! "$pr_number" =~ ^[0-9]{1,10}$ ]]
+              then
+                  echo "Error: pr-number must be a plain number"
+                  exit 1
+              fi
+              echo "pr-number=${pr_number}" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
