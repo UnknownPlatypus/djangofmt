@@ -152,8 +152,6 @@ DEFAULT_TARGETS = [
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "cms/templates/admin/cms/page/tree/actions_dropdown.html",  # <span>{% trans "Copy" %}<span>
-                    # Comment that looks like a broken tag: <--noplaceholder-->
-                    "cms/test_utils/project/sampleapp/templates/sampleapp/home.html",
                 ),
             },
         ),
