@@ -115,6 +115,31 @@ impl CommandError {
 /// Escape hatches suggested when a file cannot be parsed.
 pub const SKIP_FILE_HINT: &str = "Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.";
 
+/// Elements whose end tag HTML5 allows omitting, while djangofmt keeps requiring it.
+/// <https://html.spec.whatwg.org/multipage/syntax.html#optional-tags>
+const OPTIONAL_END_TAG_ELEMENTS: [&str; 19] = [
+    "body", "caption", "colgroup", "dd", "dt", "head", "html", "li", "optgroup", "option", "p",
+    "rp", "rt", "tbody", "td", "tfoot", "th", "thead", "tr",
+];
+
+/// A missing close tag has two very different causes, so point each one at its own limitation.
+fn close_tag_hint(tag_name: &str) -> String {
+    if OPTIONAL_END_TAG_ELEMENTS
+        .iter()
+        .any(|element| element.eq_ignore_ascii_case(tag_name))
+    {
+        format!(
+            "HTML5 allows omitting `</{tag_name}>`, but djangofmt requires it. Add the explicit close tag.\n\
+             https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#omitted-end-tags"
+        )
+    } else {
+        format!(
+            "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag.\n\
+             https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags"
+        )
+    }
+}
+
 impl ParseError {
     #[must_use]
     pub fn new(path: Option<PathBuf>, source: String, err: &markup_fmt::FormatError) -> Self {
@@ -124,10 +149,7 @@ impl ParseError {
                     // Point to the opening tag instead of where the error was detected (which is always the end of the file)
                     markup_fmt::SyntaxErrorKind::ExpectCloseTag { tag_name, pos, .. } => (
                         format!("expected close tag for opening tag <{tag_name}>"),
-                        Some(format!(
-                            "If a `</{tag_name}>` does exist, it must live in the same block as the opening tag.\n\
-                             https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#conditional-openclose-tags"
-                        )),
+                        Some(close_tag_hint(tag_name)),
                         // `pos` is the `<`; the caret covers the tag name.
                         djangofmt_lint::span(pos + 1, tag_name.len()),
                     ),

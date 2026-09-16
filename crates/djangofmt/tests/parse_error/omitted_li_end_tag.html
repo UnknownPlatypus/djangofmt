@@ -1,0 +1,6 @@
+{% load i18n %}
+<ol class="breadcrumbs">
+    <li><a href="{% url 'admin:index' %}">{% translate 'Home' %}</a></li>
+    <li><a href="{% url 'admin:docs' %}">{% translate 'Documentation' %}</a>
+    <li aria-current="page">{% translate 'Models' %}</li>
+</ol>

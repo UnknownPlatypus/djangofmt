@@ -1,0 +1,15 @@
+---
+source: crates/djangofmt/tests/parse_error/main.rs
+assertion_line: 30
+---
+
+  × expected close tag for opening tag <li>
+   ╭─[omitted_li_end_tag.html:4:6]
+ 3 │     <li><a href="{% url 'admin:index' %}">{% translate 'Home' %}</a></li>
+ 4 │     <li><a href="{% url 'admin:docs' %}">{% translate 'Documentation' %}</a>
+   ·      ─┬
+   ·       ╰── here
+ 5 │     <li aria-current="page">{% translate 'Models' %}</li>
+   ╰────
+  help: HTML5 allows omitting `</li>`, but djangofmt requires it. Add the explicit close tag.
+        https://unknownplatypus.github.io/djangofmt/docs/known-limitations/#omitted-end-tags
