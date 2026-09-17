@@ -55,6 +55,34 @@ You can almost always write it another way that is much more readable. For examp
 
 See upstream tracking issue: https://github.com/g-plane/markup_fmt/issues/97
 
+## Omitted end tags
+
+HTML5 lets you leave out the end tag of a handful of elements (`</li>`, `</p>`, `</tr>`, `</td>`, `</dt>`, `</dd>`, `</option>`, `</body>`, `</html>`, ...) when the parser can infer it from what follows.
+Djangofmt requires them and reports a parse error instead:
+
+```html
+<ul>
+    <li>Coffee
+    <li>Tea
+</ul>
+```
+
+```
+× expected close tag for opening tag <li>
+```
+
+Write the close tags explicitly:
+
+```html
+<ul>
+    <li>Coffee</li>
+    <li>Tea</li>
+</ul>
+```
+
+The inferred form is legal, but it depends on rules few people know by heart, and interleaving template tags with it makes the intended structure ambiguous.
+Requiring the close tag keeps the document unambiguous for both readers and the formatter.
+
 ## Output is always LF
 
 Line endings are always normalized to `\n`: CRLF input is converted, and `.editorconfig`'s `end_of_line` is ignored.

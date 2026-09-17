@@ -245,10 +245,10 @@ DEFAULT_TARGETS = [
                     "src/sentry/templates/sentry/partial/system-status.html",
                 ),
                 ExcludeReason.MISSING_END_TAG: (
+                    "src/sentry/templates/sentry/debug/error-page-embed.html",  # </html>
                     "src/sentry/templates/sentry/toolbar/iframe.html",  # </body>, left out on purpose
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
-                    "src/sentry/templates/sentry/debug/error-page-embed.html",  # Broken close tag
                     "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
                     "src/sentry/templates/sentry/integrations/notify-disable.html",  # Dangling </a>
                 ),
@@ -366,8 +366,8 @@ DEFAULT_TARGETS = [
         repo=Repository(owner="pretalx", name="pretalx", ref="main"),
         cli_options=CliOptions(
             exclude={
-                ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
-                    "doc/_templates/index.html",  # Sphinx template using {% set %}
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "doc/_templates/index.html",  # Dangling </p>
                 ),
             },
         ),
@@ -591,12 +591,11 @@ DEFAULT_TARGETS = [
         cli_options=CliOptions(
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <li> opened outside a {% if %}, closed inside it
+                    "jazzmin/templates/admin/filer/breadcrumbs.html",
                     "jazzmin/templates/admin/includes/fieldset.html",
                     "jazzmin/templates/admin/index.html",
                     "jazzmin/templates/jazzmin/widgets/select.html",
-                ),
-                ExcludeReason.MISSING_END_TAG: (
-                    "jazzmin/templates/admin/filer/breadcrumbs.html",  # </li>
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     # Attribute quote left open across a conditional placeholder
