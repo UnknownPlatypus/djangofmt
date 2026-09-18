@@ -3,12 +3,11 @@
 <a href="{% url 'profile' %}">Profile</a>
 <form action="{% url 'login' %}"></form>
 
-<!-- Interpolation in href/action is skipped -->
+<!-- A value that starts with a tag or variable may resolve anywhere -->
 <a href="{{ url }}">Link</a>
 <a href="{{ link_target }}">Link</a>
 <a href="{% if x %}/a{% else %}/b{% endif %}">Link</a>
 <form action="{{ form_action }}"></form>
-<div data-url="/items/{{ item.id }}/"></div>
 
 <!-- External URLs are not flagged (http:// is exercised by the use-https fixture instead) -->
 <a href="https://example.com">Link</a>
@@ -118,3 +117,11 @@
 {% if show_link %}
     <a href="{% url 'home' %}">Link</a>
 {% endif %}
+
+<!-- Bare words carry no `/`: opaque tokens and same-directory links, not named routes -->
+<div class="card" data-src="lazy"></div>
+<a href="about">About</a>
+
+<!-- Asset roots are served from STATIC_URL / MEDIA_URL; `{% url %}` cannot express them -->
+<a href="/static/docs/">Docs</a>
+<a href="/media/uploads/">Uploads</a>

@@ -4,7 +4,6 @@ use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -16,6 +15,11 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// silently when a `urls.py` entry is renamed or remounted. The `{% url %}` template tag resolves
 /// paths from named URL patterns at render time, so the template stays correct across refactors
 /// and respects URL namespacing (`app_name`, `instance_namespace`).
+///
+/// Only values that look like a route are reported: they contain a `/` and do not point at a file
+/// (`/favicon.ico`), an asset root (`/static/`, `/media/`), an external host, or a URL scheme.
+/// A literal path prefix followed by interpolation (`/items/{{ pk }}/`) is still a hardcoded
+/// route, while a value that starts with a tag or variable may resolve anywhere and is skipped.
 ///
 /// ## Example
 /// ```html
@@ -92,11 +96,15 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
     else {
         return;
     };
-    if contains_interpolation(value_str) {
-        return;
-    }
+    // Only the literal prefix can be judged: `/items/{{ pk }}/` is still a hardcoded route,
+    // while a value that starts with a tag or variable may resolve anywhere.
+    let literal_end = ["{{", "{%", "{#"]
+        .iter()
+        .filter_map(|marker| value_str.find(marker))
+        .min()
+        .unwrap_or(value_str.len());
     // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
-    if is_hardcoded_internal_path(value_str.trim_ascii()) {
+    if is_hardcoded_internal_path(value_str[..literal_end].trim_ascii()) {
         checker.report_diagnostic(
             &DjangoUrlPattern {
                 attribute: canonical,
@@ -109,8 +117,9 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 /// Returns true if `value` looks like a hardcoded internal path that should use `{% url %}`.
 ///
 /// Matches values whose first character is `/` (root-relative) or an ASCII word character
-/// (relative), after excluding protocol-relative URLs, the bare site root, anything carrying a
-/// URL scheme, file paths (`/favicon.ico`, `logo.png`), and bare hostnames (`www.example.com/…`).
+/// (relative) and that contain a `/`, after excluding protocol-relative URLs, the bare site root,
+/// asset roots (`/static/`, `/media/`), anything carrying a URL scheme, file paths
+/// (`/favicon.ico`, `logo.png`), and bare hostnames (`www.example.com/…`).
 fn is_hardcoded_internal_path(value: &str) -> bool {
     let Some(first) = value.chars().next() else {
         return false;
@@ -121,6 +130,12 @@ fn is_hardcoded_internal_path(value: &str) -> bool {
         return false;
     }
 
+    // A route has at least one `/`: a bare word (`data-src="lazy"`, `href="about"`) is an
+    // opaque token or a same-directory link, not a named URL pattern.
+    if !value.contains('/') {
+        return false;
+    }
+
     // Protocol-relative URLs (`//cdn.example.com/...`).
     if value.starts_with("//") {
         return false;
@@ -128,6 +143,12 @@ fn is_hardcoded_internal_path(value: &str) -> bool {
 
     // Site root: `/` alone is conventionally the home link and shouldn't be flagged.
     if value == "/" {
+        return false;
+    }
+
+    // `/static/` and `/media/` are served from `STATIC_URL` / `MEDIA_URL`, not named routes.
+    let path = value.strip_prefix('/').unwrap_or(value);
+    if path.starts_with("static/") || path.starts_with("media/") {
         return false;
     }
 
