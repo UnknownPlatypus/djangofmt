@@ -5,7 +5,6 @@ use markup_fmt::ast::NativeAttribute;
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -16,10 +15,11 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// attribute, so the spaces are inert at runtime and only add noise to the source. They are
 /// commonly an accidental artefact of inserting a template tag inside the quotes.
 ///
-/// Values containing template interpolation are skipped: the surrounding whitespace is usually
-/// intentional padding around a `{% url %}` tag and cannot be safely trimmed without knowing the
-/// rendered output. Only the `action` attribute is checked; sibling attributes such as
-/// `data-action` may legitimately span multiple lines.
+/// Padding around a template tag is reported too: whatever the tag renders, the browser strips
+/// the edges of the final value, so trimming the source is always safe. Whitespace next to a
+/// whitespace-control marker (`{%-`, `-%}`) is already removed by the template engine and is
+/// left alone. Only the `action` attribute is checked; sibling attributes such as `data-action`
+/// may legitimately span multiple lines.
 ///
 /// ## Example
 /// ```html
@@ -72,12 +72,14 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
         return;
     }
 
-    if contains_interpolation(value_str) {
-        return;
-    }
-
-    let trimmed = value_str.trim_ascii();
-    if trimmed.len() == value_str.len() {
+    let start = value_str.trim_ascii_start();
+    let trimmed = start.trim_ascii_end();
+    // Whitespace-control markers already strip the padding next to them.
+    let leading_inert =
+        start.len() == value_str.len() || start.starts_with("{%-") || start.starts_with("{{-");
+    let trailing_inert =
+        trimmed.len() == start.len() || trimmed.ends_with("-%}") || trimmed.ends_with("-}}");
+    if leading_inert && trailing_inert {
         return;
     }
 
