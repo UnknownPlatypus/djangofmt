@@ -20,6 +20,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 ///
 /// Prefer `https://` for all external links and subresources.
 ///
+/// Loopback, unspecified (`0.0.0.0`) and private-network addresses, and the `localhost`,
+/// `.local` and `.test` names are exempt: no public certificate authority issues certificates
+/// for them, so `https://` is not an option there.
+///
 /// ## Example
 /// ```html
 /// <a href="http://example.com">Link</a>
@@ -123,7 +127,8 @@ fn report_http_scheme(checker: &Checker<'_>, url: &str, attribute: &'static str)
     )));
 }
 
-/// Whether the authority of a URL (the part after `http://`) refers to the local machine.
+/// Whether the authority of a URL (the part after `http://`) refers to the local machine, a
+/// private network, or a special-use name that no public certificate authority serves.
 ///
 /// [spec]: https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy
 fn is_local_host(after_scheme: &str) -> bool {
@@ -141,12 +146,18 @@ fn is_local_host(after_scheme: &str) -> bool {
         |rest| rest.split(']').next().unwrap_or(rest),
     );
 
-    // `IpAddr::is_loopback` covers `127.0.0.0/8` and `::1` in every valid
-    // spelling; fall back to the `localhost` name for non-IP hosts.
+    // `is_loopback` covers `127.0.0.0/8` and `::1` in every valid spelling;
+    // fall back to the reserved names for non-IP hosts.
     if let Ok(ip) = host.parse::<IpAddr>() {
-        return ip.is_loopback();
+        return match ip {
+            IpAddr::V4(v4) => v4.is_loopback() || v4.is_private() || v4.is_unspecified(),
+            IpAddr::V6(v6) => v6.is_loopback() || v6.is_unspecified(),
+        };
     }
-    host.eq_ignore_ascii_case("localhost") || ends_with_ignore_ascii_case(host, ".localhost")
+    host.eq_ignore_ascii_case("localhost")
+        || [".localhost", ".local", ".test"]
+            .iter()
+            .any(|suffix| ends_with_ignore_ascii_case(host, suffix))
 }
 
 fn ends_with_ignore_ascii_case(haystack: &str, suffix: &str) -> bool {
