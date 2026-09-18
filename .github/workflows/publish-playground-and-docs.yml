@@ -14,14 +14,17 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-  # Run build (no deploy) on PRs touching playground, docs, rule sources, or build config
+  # Run build (no deploy) on PRs touching playground, docs, their sources, or build config
   pull_request:
     paths:
       - "playground/**"
       - "docs/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
       - ".mkdocs.yml"
       - "pyproject.toml"
       - "uv.lock"
+      - "crates/djangofmt/src/**"
       - "crates/djangofmt_lint/src/**"
       - "crates/djangofmt_macros/**"
       - "crates/djangofmt_dev/**"
