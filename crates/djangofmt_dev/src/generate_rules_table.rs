@@ -3,7 +3,7 @@
 use std::fmt::Write as _;
 
 use anyhow::Result;
-use strum::IntoEnumIterator;
+use strum::{EnumMessage, IntoEnumIterator};
 
 use djangofmt_lint::{FixAvailability, Rule, RuleCategory, RuleGroup};
 
@@ -43,6 +43,10 @@ fn render() -> String {
             continue;
         }
         let _ = writeln!(&mut out, "## {category:?}\n");
+        // The variant's doc comment doubles as the category blurb.
+        if let Some(doc) = category.get_documentation() {
+            let _ = writeln!(&mut out, "{}\n", doc.trim());
+        }
         out.push_str("| Name | Message | |\n");
         out.push_str("| ---- | ------- | -: |\n");
         for rule in rules {

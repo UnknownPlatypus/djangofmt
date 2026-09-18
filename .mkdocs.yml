@@ -71,9 +71,9 @@ nav:
   - Home: index.md
   - Getting started:
       - formatting.md
+      - linter.md
       - editor-integration.md
       - known-limitations.md
-      - exit-codes.md
       - benchmarks.md
   - Lint rules: rules.md
   - Settings: settings.md
