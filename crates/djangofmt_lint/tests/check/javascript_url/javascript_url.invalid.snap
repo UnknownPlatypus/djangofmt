@@ -161,3 +161,12 @@ source: crates/djangofmt_lint/tests/check/main.rs
  32 │ {% endif %}
     ╰────
   help: Use an event handler instead
+
+  × Avoid `javascript:` URLs in `href`
+    ╭─[tests/check/javascript_url/javascript_url.invalid.html:35:10]
+ 34 │ <!-- A template variable spliced into a `javascript:` URL is the XSS case itself -->
+ 35 │ <a href="javascript:{{ payload }}">Link</a>
+    ·          ────────────┬───────────
+    ·                      ╰── here
+    ╰────
+  help: Use an event handler instead

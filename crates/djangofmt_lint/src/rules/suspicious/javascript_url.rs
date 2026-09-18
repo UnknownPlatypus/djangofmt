@@ -4,7 +4,6 @@ use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -89,9 +88,6 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
     else {
         return;
     };
-    if contains_interpolation(value_str) {
-        return;
-    }
     if value_str
         .trim_start()
         .get(..JS_SCHEME.len())

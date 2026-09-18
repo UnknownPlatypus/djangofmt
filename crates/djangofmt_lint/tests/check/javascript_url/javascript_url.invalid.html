@@ -30,3 +30,6 @@
 {% if show_link %}
     <a href="javascript:doStuff()">Link</a>
 {% endif %}
+
+<!-- A template variable spliced into a `javascript:` URL is the XSS case itself -->
+<a href="javascript:{{ payload }}">Link</a>
