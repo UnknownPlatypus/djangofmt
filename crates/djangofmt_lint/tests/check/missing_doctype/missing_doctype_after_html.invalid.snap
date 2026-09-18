@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Missing `<!DOCTYPE html>` declaration
+   ╭─[tests/check/missing_doctype/missing_doctype_after_html.invalid.html:2:2]
+ 1 │ <!-- A DOCTYPE after the `<html>` tag comes too late: the browser has already picked quirks mode -->
+ 2 │ <html lang="en">
+   ·  ──┬─
+   ·    ╰── here
+ 3 │     <head><title>Page</title></head>
+   ╰────
+  help: Add `<!DOCTYPE html>` before the `<html>` tag

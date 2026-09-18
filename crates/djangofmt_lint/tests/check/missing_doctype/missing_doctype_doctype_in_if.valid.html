@@ -1,0 +1,6 @@
+<!-- A DOCTYPE emitted from a root-level `{% if %}` still precedes the `<html>` tag -->
+{% if not is_fragment %}<!DOCTYPE html>{% endif %}
+<html lang="en">
+    <head><title>Page</title></head>
+    <body>Content</body>
+</html>
