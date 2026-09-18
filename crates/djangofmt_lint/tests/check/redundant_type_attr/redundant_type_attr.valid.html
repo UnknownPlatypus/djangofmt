@@ -20,3 +20,6 @@
 <!-- Interpolation - dynamic values should be skipped -->
 <script type="{{ script_type }}"></script>
 <style type="{% if x %}text/css{% endif %}"></style>
+
+<!-- On any other link relation the type is a hint the browser needs -->
+<link rel="preload" type="text/javascript" href="a.js">
