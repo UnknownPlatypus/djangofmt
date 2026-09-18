@@ -31,7 +31,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [HTML spec: void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements)
 /// - [HTML spec: palpable content](https://html.spec.whatwg.org/multipage/dom.html#palpable-content)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(preview_since = "0.2.10")]
+#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct EmptyTagPair {
     pub tag: String,
 }
@@ -58,14 +58,16 @@ impl Violation for EmptyTagPair {
 /// - `canvas`: a script-rendered drawing surface whose children are fallback content only.
 /// - `slot`: the default slot of a web component.
 /// - `pre`:  a whitespace-only `<pre>` renders meaningful content and is not "empty".
+/// - custom elements (`<my-widget>`): a script fills them in, so empty is their authored state.
 const EXCLUDED_TAGS: &[&str] = &[
     "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
 ];
 
 fn is_excluded_tag(tag: &str) -> bool {
-    EXCLUDED_TAGS
-        .iter()
-        .any(|excluded| tag.eq_ignore_ascii_case(excluded))
+    tag.contains('-')
+        || EXCLUDED_TAGS
+            .iter()
+            .any(|excluded| tag.eq_ignore_ascii_case(excluded))
 }
 
 /// Returns `true` when `children` is either empty or contains only whitespace-only text nodes.

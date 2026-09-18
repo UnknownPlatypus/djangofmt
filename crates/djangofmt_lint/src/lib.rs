@@ -176,15 +176,18 @@ impl FileDiagnostics {
 ///
 /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
 ///
-/// `path` enables path-aware rules; pass [`None`] when linting a buffer without a backing file.
+/// `language` must be the one `ast` was parsed with; rules gate on it to stay off the
+/// profile they do not apply to. `path` enables path-aware rules; pass [`None`] when
+/// linting a buffer without a backing file.
 #[must_use]
 pub fn check_ast<'a>(
     source: &'a str,
     ast: &Root<'a>,
     settings: &'a Settings,
+    language: Language,
     path: Option<&'a Path>,
 ) -> Vec<LintDiagnostic> {
-    let mut checker = Checker::new(source, settings, path);
+    let mut checker = Checker::new(source, settings, language, path);
     // Walk the ast and collect diagnostics.
     checker.visit_root(ast);
 
@@ -221,7 +224,7 @@ pub fn lint_source(
     path: Option<&Path>,
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
     let ast = parse(source, language, custom_blocks)?;
-    Ok(check_ast(source, &ast, settings, path))
+    Ok(check_ast(source, &ast, settings, language, path))
 }
 
 /// A completed [`lint_text`] run.

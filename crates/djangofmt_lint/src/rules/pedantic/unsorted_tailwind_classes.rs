@@ -35,7 +35,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ## References
 /// - [Tailwind CSS: Automatic class sorting](https://tailwindcss.com/blog/automatic-class-sorting-with-prettier)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(preview_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct UnsortedTailwindClasses;
 
 impl Violation for UnsortedTailwindClasses {

@@ -456,7 +456,7 @@ fn format_or_fallback<'a>(
             .map_or_else(String::new, |location| format!(" at {location}"));
         warn!(
             "{}: the embedded {language} formatter panicked{location} ({}), leaving that snippet unformatted. Please report it at {}/issues",
-            path.map_or_else(|| "<unknown>".to_string(), relativize_path),
+            crate::error::path_display(path.map(Path::to_path_buf).as_ref()),
             err.payload,
             env!("CARGO_PKG_REPOSITORY"),
         );
@@ -573,10 +573,10 @@ mod tests {
     }
 
     #[test]
-    fn format_command_error_write_display_unknown_path() {
+    fn format_command_error_write_display_stdin_path() {
         let io_err = io::Error::other("disk full");
         let err = CommandError::Write(None, io_err);
-        assert_eq!(err.to_string(), "Failed to write <unknown>: disk full");
+        assert_eq!(err.to_string(), "Failed to write -: disk full");
     }
 
     #[test]

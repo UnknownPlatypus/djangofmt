@@ -70,6 +70,10 @@ const fn url_attributes_for(tag_name: &str) -> &'static [&'static str] {
 }
 
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
+    // `{% url %}` is a Django tag; Jinja templates have no equivalent to suggest.
+    if !checker.is_django() {
+        return;
+    }
     let attr_names = url_attributes_for(element.tag_name);
     if attr_names.is_empty() {
         return;

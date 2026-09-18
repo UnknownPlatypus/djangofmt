@@ -12,7 +12,6 @@ const RULESET_SIZE: usize = Rule::COUNT.div_ceil(64);
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub struct RuleSet([u64; RULESET_SIZE]);
 
-// Todo: add [`from_rules`](https://github.com/astral-sh/ruff/blob/f414174695c9c2067b04c95b51709c28d27a1d03/crates/ruff_linter/src/registry/rule_set.rs#L54) ?
 impl RuleSet {
     #[expect(
         clippy::cast_possible_truncation,

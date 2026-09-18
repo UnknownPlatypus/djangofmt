@@ -20,9 +20,10 @@ pub enum Error {
     Resolve(String),
 }
 
+/// A missing path means the source came from stdin, which ruff also reports as `-`.
 #[must_use]
 pub fn path_display(path: Option<&PathBuf>) -> String {
-    path.map_or_else(|| "<unknown>".to_string(), relativize_path)
+    path.map_or_else(|| crate::STDIN_SENTINEL.to_string(), relativize_path)
 }
 
 /// Build a span that miette can always draw a caret under.

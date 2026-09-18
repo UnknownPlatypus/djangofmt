@@ -9,6 +9,7 @@ use crate::pyproject::{PyprojectSettings, load_pyproject_from_cwd};
 use crate::resolver::{ResolvedDiscoveryConfig, resolve_files};
 
 pub mod check;
+pub mod check_stdin;
 pub mod format;
 pub mod format_stdin;
 

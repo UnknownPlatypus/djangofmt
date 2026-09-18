@@ -72,8 +72,8 @@ fn starts_with_static_path(value: &str) -> bool {
 }
 
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
-    // Fast-path to skip processing tag that cannot have a static url.
-    if !is_asset_tag(element.tag_name) {
+    // `{% static %}` is a Django tag; Jinja templates have no equivalent to suggest.
+    if !checker.is_django() || !is_asset_tag(element.tag_name) {
         return;
     }
 

@@ -58,19 +58,34 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let ast = parse(&input, language_for(path), &[])
+        let language = language_for(path);
+        let ast = parse(&input, language, &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let safe = fix_ast(&input, &ast, &settings, Applicability::Safe, Some(path));
+        let safe = fix_ast(
+            &input,
+            &ast,
+            &settings,
+            language,
+            Applicability::Safe,
+            Some(path),
+        );
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &settings, Applicability::Unsafe, Some(path));
+        let unsafe_fixed = fix_ast(
+            &input,
+            &ast,
+            &settings,
+            language,
+            Applicability::Unsafe,
+            Some(path),
+        );
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);

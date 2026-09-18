@@ -187,12 +187,12 @@ mod tests {
     #[test]
     fn default_excludes_preview_and_pedantic_but_all_includes_them() {
         let default = Settings::default();
-        assert!(!default.is_enabled(Rule::EmptyTagPair)); // preview rule
+        assert!(!default.is_enabled(Rule::DjangoUrlPattern)); // preview rule
         assert!(!default.is_enabled(Rule::TableHeaderMissingScope)); // pedantic rule
         assert!(default.is_enabled(Rule::InvalidAttrValue));
 
         let all = Settings::all();
-        assert!(all.is_enabled(Rule::EmptyTagPair));
+        assert!(all.is_enabled(Rule::DjangoUrlPattern));
         assert!(all.is_enabled(Rule::TableHeaderMissingScope));
         assert!(all.is_enabled(Rule::InvalidAttrValue));
 
@@ -204,7 +204,7 @@ mod tests {
         .into_settings()
         .0;
         assert!(select_all.is_enabled(Rule::TableHeaderMissingScope));
-        assert!(!select_all.is_enabled(Rule::EmptyTagPair));
+        assert!(!select_all.is_enabled(Rule::DjangoUrlPattern));
     }
 
     #[test]
@@ -216,18 +216,18 @@ mod tests {
         }
         .into_settings()
         .0;
-        assert!(all_rules.is_enabled(Rule::EmptyTagPair));
+        assert!(all_rules.is_enabled(Rule::DjangoUrlPattern));
 
         // Naming a preview rule without preview warns and skips it.
         let (settings, warnings) = LintConfiguration {
-            select: Some(vec![RuleSelector::Rule(Rule::EmptyTagPair)]),
+            select: Some(vec![RuleSelector::Rule(Rule::DjangoUrlPattern)]),
             ..LintConfiguration::default()
         }
         .into_settings();
-        assert!(!settings.is_enabled(Rule::EmptyTagPair));
+        assert!(!settings.is_enabled(Rule::DjangoUrlPattern));
         assert_eq!(
             warnings,
-            vec![SelectionWarning::PreviewRuleSkipped(Rule::EmptyTagPair)]
+            vec![SelectionWarning::PreviewRuleSkipped(Rule::DjangoUrlPattern)]
         );
     }
 
@@ -236,19 +236,19 @@ mod tests {
     fn duplicate_selectors_are_deduped() {
         let (settings, warnings) = LintConfiguration {
             select: Some(vec![
-                RuleSelector::Rule(Rule::EmptyTagPair),
+                RuleSelector::Rule(Rule::DjangoUrlPattern),
                 RuleSelector::Rule(Rule::UseHttps),
-                RuleSelector::Rule(Rule::EmptyTagPair),
+                RuleSelector::Rule(Rule::DjangoUrlPattern),
             ]),
             ..LintConfiguration::default()
         }
         .into_settings();
 
         assert!(settings.is_enabled(Rule::UseHttps));
-        assert!(!settings.is_enabled(Rule::EmptyTagPair));
+        assert!(!settings.is_enabled(Rule::DjangoUrlPattern));
         assert_eq!(
             warnings,
-            vec![SelectionWarning::PreviewRuleSkipped(Rule::EmptyTagPair)]
+            vec![SelectionWarning::PreviewRuleSkipped(Rule::DjangoUrlPattern)]
         );
     }
 

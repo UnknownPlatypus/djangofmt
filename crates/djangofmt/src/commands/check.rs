@@ -4,19 +4,21 @@ use miette::{SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rustc_hash::FxHashMap;
+use std::borrow::Cow;
 use std::fmt::Write;
 use std::fs;
+use std::io::{self, Write as _};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 use tracing::{debug, error, info, warn};
 
-use crate::ExitStatus;
 use crate::args::{CheckCommand, OutputFormat, Profile};
 use crate::config::{resolve_bool_arg, resolve_lint_configuration, resolve_profile};
 use crate::error::{CommandError, ParseError, Result};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
-use crate::pyproject::LintSettings;
+use crate::pyproject::{LintSettings, PyprojectSettings};
+use crate::{ExitStatus, STDIN_SENTINEL};
 
 use super::format::merge_custom_blocks;
 
@@ -55,8 +57,8 @@ impl CheckConfig {
     }
 }
 
-/// Per-file outcome of `check_path`.
-struct CheckResult {
+/// Per-file outcome of `check_source`.
+pub(crate) struct CheckResult {
     /// Owning path for display.
     path: PathBuf,
     /// Diagnostics still present after any fixes were applied.
@@ -101,55 +103,136 @@ impl Totals {
     }
 }
 
-/// Check the given source code for linting errors.
-pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
-    let resolved = super::resolve_command(&args.files, &args.file_selection)?;
-    let lint = resolved.pyproject.lint.as_ref();
-    let config = CheckConfig::from_args(args, lint);
+/// What `check` and `check_stdin` share once the pyproject is loaded.
+pub(crate) struct CheckRun {
+    config: CheckConfig,
+    settings: Settings,
+    per_file_ignores: Option<PerFileIgnores>,
+    /// Same custom blocks as `format`, so both commands lint/format the same AST.
+    pub(crate) custom_blocks: Vec<String>,
+    threshold: Applicability,
+    /// One value carries both "should we fix" and "how far", so they can't disagree.
+    pub(crate) fix: Option<Applicability>,
+}
 
-    let (settings, warnings) = resolve_lint_configuration(args, lint).into_settings();
-    for warning in &warnings {
-        warn!("{warning}");
+impl CheckRun {
+    pub(crate) fn new(
+        args: &CheckCommand,
+        pyproject: &PyprojectSettings,
+        project_root: &Path,
+    ) -> Result<Self> {
+        let lint = pyproject.lint.as_ref();
+        let config = CheckConfig::from_args(args, lint);
+
+        let (settings, warnings) = resolve_lint_configuration(args, lint).into_settings();
+        for warning in &warnings {
+            warn!("{warning}");
+        }
+
+        let per_file_ignores = lint
+            .and_then(|l| l.per_file_ignores.as_ref())
+            .map(|patterns| PerFileIgnores::new(patterns, project_root))
+            .transpose()?;
+
+        let threshold = if config.unsafe_fixes {
+            Applicability::Unsafe
+        } else {
+            Applicability::Safe
+        };
+        let fix = config.fix.then_some(threshold);
+
+        let custom_blocks = merge_custom_blocks(
+            args.template.custom_blocks.clone(),
+            pyproject.custom_blocks.clone(),
+        )
+        .unwrap_or_default();
+
+        Ok(Self {
+            config,
+            settings,
+            per_file_ignores,
+            custom_blocks,
+            threshold,
+            fix,
+        })
     }
 
-    let per_file_ignores = lint
-        .and_then(|l| l.per_file_ignores.as_ref())
-        .map(|patterns| PerFileIgnores::new(patterns, &resolved.project_root))
-        .transpose()?;
+    /// The run's settings, narrowed by `per-file-ignores` when they match `path`.
+    pub(crate) fn settings_for(&self, path: Option<&Path>) -> Cow<'_, Settings> {
+        match (&self.per_file_ignores, path) {
+            (Some(pfi), Some(path)) => Cow::Owned(Settings {
+                rules: pfi.rules_for(path, &self.settings.rules),
+                ..self.settings.clone()
+            }),
+            _ => Cow::Borrowed(&self.settings),
+        }
+    }
 
-    let threshold = if config.unsafe_fixes {
-        Applicability::Unsafe
-    } else {
-        Applicability::Safe
-    };
-    // One value carries both "should we fix" and "how far", so they can't disagree.
-    let fix = config.fix.then_some(threshold);
+    /// Print diagnostics, errors and the summary, then fold them into the exit code.
+    pub(crate) fn report(&self, results: &[CheckResult], errors: Vec<CommandError>) -> ExitStatus {
+        let nb_errors = super::report_errors(errors, "check", self.config.output_format);
 
-    // Same custom blocks as `format`, so both commands lint/format the same AST.
-    let custom_blocks = merge_custom_blocks(
-        args.template.custom_blocks.clone(),
-        resolved.pyproject.custom_blocks.clone(),
-    )
-    .unwrap_or_default();
+        let mut totals = Totals::of(results);
+        if self.config.fix && self.config.unsafe_fixes {
+            totals.unsafe_fixable = 0;
+        }
+
+        match self.config.output_format {
+            OutputFormat::Full => print_full(results),
+            OutputFormat::Concise => print_concise(results, self.threshold),
+        }
+
+        print_summary(
+            totals.diagnostics,
+            totals.applied,
+            totals.safe_fixable,
+            totals.unsafe_fixable,
+            self.config.fix,
+            self.config.unsafe_fixes,
+            nb_errors,
+        );
+
+        print_skipped(totals.skipped);
+
+        if self.config.show_fixes && totals.applied > 0 {
+            print_show_fixes(results, totals.applied);
+        }
+
+        // I/O, parse and panic errors take precedence over lint violations in the exit code.
+        if nb_errors > 0 {
+            return ExitStatus::Error;
+        }
+        if totals.diagnostics > 0 {
+            return ExitStatus::Failure;
+        }
+        ExitStatus::Success
+    }
+}
+
+/// Check the given files for linting errors.
+pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
+    let resolved = super::resolve_command(&args.files, &args.file_selection)?;
+    let run = CheckRun::new(args, &resolved.pyproject, &resolved.project_root)?;
 
     let start = Instant::now();
     let (results, errors): (Vec<_>, Vec<_>) = resolved
         .files
         .par_iter()
         .map(|path| {
-            // Reuse the global settings unless per-file-ignores narrow them for this path.
-            let file_settings = per_file_ignores.as_ref().map(|pfi| Settings {
-                rules: pfi.rules_for(path, &settings.rules),
-                ..settings.clone()
-            });
-            let settings = file_settings.as_ref().unwrap_or(&settings);
+            let settings = run.settings_for(Some(path));
             let profile = resolve_profile(
                 args.template.profile,
                 resolved.pyproject.profile,
                 Some(path),
             );
             super::catch_file_panic(Some(path), || {
-                check_path(path, profile, settings, &custom_blocks, fix)
+                check_source(
+                    Source::File(path),
+                    profile,
+                    &settings,
+                    &run.custom_blocks,
+                    run.fix,
+                )
             })
         })
         .partition_map(|result| match result {
@@ -160,42 +243,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let duration = start.elapsed();
     debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
-    let nb_errors = super::report_errors(errors, "check", config.output_format);
-
-    let mut totals = Totals::of(&results);
-    if config.fix && config.unsafe_fixes {
-        totals.unsafe_fixable = 0;
-    }
-
-    match config.output_format {
-        OutputFormat::Full => print_full(&results),
-        OutputFormat::Concise => print_concise(&results, threshold),
-    }
-
-    print_summary(
-        totals.diagnostics,
-        totals.applied,
-        totals.safe_fixable,
-        totals.unsafe_fixable,
-        config.fix,
-        config.unsafe_fixes,
-        nb_errors,
-    );
-
-    print_skipped(totals.skipped);
-
-    if config.show_fixes && totals.applied > 0 {
-        print_show_fixes(&results, totals.applied);
-    }
-
-    // I/O, parse and panic errors take precedence over lint violations in the exit code.
-    if nb_errors > 0 {
-        return Ok(ExitStatus::Error);
-    }
-    if totals.diagnostics > 0 {
-        return Ok(ExitStatus::Failure);
-    }
-    Ok(ExitStatus::Success)
+    Ok(run.report(&results, errors))
 }
 
 /// Render each diagnostic as its own block, with source snippet and help text.
@@ -320,35 +368,70 @@ fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
     }
 }
 
-/// Check the file at the given [`Path`] for linting issues.
+/// Where a checked template is read from, and where its fixed text is written back to.
+#[derive(Clone, Copy)]
+pub(crate) enum Source<'a> {
+    File(&'a Path),
+    /// Standard input, named through `--stdin-filename` when the editor knows the path.
+    Stdin(Option<&'a Path>),
+}
+
+impl<'a> Source<'a> {
+    const fn path(self) -> Option<&'a Path> {
+        match self {
+            Self::File(path) => Some(path),
+            Self::Stdin(path) => path,
+        }
+    }
+
+    fn read(&self) -> std::result::Result<String, Box<CommandError>> {
+        match self {
+            Self::File(path) => fs::read_to_string(path),
+            Self::Stdin(_) => io::read_to_string(io::stdin().lock()),
+        }
+        .map_err(|err| CommandError::Read(self.path().map(Path::to_path_buf), err).into())
+    }
+}
+
+/// Check one template for linting issues, applying fixes when requested.
 #[tracing::instrument(
     level = "debug",
     skip_all,
-    fields(path = %path.display())
+    fields(path = ?source.path())
 )]
-fn check_path(
-    path: &Path,
+pub(crate) fn check_source(
+    source: Source<'_>,
     profile: Profile,
     settings: &Settings,
     custom_blocks: &[String],
     fix: Option<Applicability>,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
-    let source = fs::read_to_string(path)
-        .map_err(|err| CommandError::Read(Some(path.to_path_buf()), err))?;
+    let path = source.path();
+    let display_path = path.map_or_else(|| STDIN_SENTINEL.to_owned(), relativize_path);
+    let text = source.read()?;
 
-    let outcome = match lint_text(
-        &source,
-        settings,
-        profile.into(),
-        custom_blocks,
-        fix,
-        Some(path),
-    ) {
+    let outcome = lint_text(&text, settings, profile.into(), custom_blocks, fix, path);
+
+    // Like ruff, `--fix` on stdin always echoes the source (fixed, unchanged or even
+    // unparsable) so editors piping it back never end up with an empty buffer.
+    if let (Source::Stdin(_), Some(_)) = (source, fix) {
+        let echoed = outcome
+            .as_ref()
+            .ok()
+            .and_then(|outcome| outcome.as_ref()?.fixed.as_deref())
+            .unwrap_or(&text);
+        io::stdout()
+            .lock()
+            .write_all(echoed.as_bytes())
+            .map_err(|err| CommandError::Write(path.map(Path::to_path_buf), err))?;
+    }
+
+    let outcome = match outcome {
         Ok(outcome) => outcome,
         Err(err) => {
             return Err(ParseError::new(
-                Some(path.to_path_buf()),
-                source,
+                path.map(Path::to_path_buf),
+                text,
                 &FormatError::Syntax(err),
             )
             .into());
@@ -356,26 +439,24 @@ fn check_path(
     };
     let skipped = outcome.is_none();
     if skipped {
-        debug!("Skipping {} (file-ignore[invalid-syntax])", path.display());
+        debug!("Skipping {display_path} (file-ignore[invalid-syntax])");
     }
     let outcome = outcome.unwrap_or_default();
 
-    if let Some(fixed) = &outcome.fixed {
-        fs::write(path, fixed).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
+    let fixed = outcome.fixed.is_some();
+    let text = outcome.fixed.unwrap_or(text);
+    if let (Source::File(path), true) = (source, fixed) {
+        fs::write(path, &text).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
     }
 
     let file_diagnostics = if outcome.diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
-        FileDiagnostics::new(
-            relativize_path(path),
-            outcome.fixed.unwrap_or(source),
-            outcome.diagnostics,
-        )
+        FileDiagnostics::new(display_path, text, outcome.diagnostics)
     };
 
     Ok(CheckResult {
-        path: path.to_path_buf(),
+        path: path.map_or_else(|| PathBuf::from(STDIN_SENTINEL), Path::to_path_buf),
         file_diagnostics,
         applied_count: outcome.applied_count,
         fixes_by_rule: outcome.applied_by_rule,
