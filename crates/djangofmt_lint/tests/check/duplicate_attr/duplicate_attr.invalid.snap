@@ -78,5 +78,35 @@ source: crates/djangofmt_lint/tests/check/main.rs
  20 │ <input disabled disabled>
     ·                 ────┬───
     ·                     ╰── here
+ 21 │ 
     ╰────
   help: Remove the duplicate `disabled` attribute
+
+  × Duplicate attribute `class`
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:23:37]
+ 22 │ <!-- An attribute inside a block duplicates one outside it whenever the block renders -->
+ 23 │ <button class="base" {% if active %}class="extra"{% endif %}></button>
+    ·                                     ──┬──
+    ·                                       ╰── here
+ 24 │ <button class="base" {% for cls in classes %}class="{{ cls }}"{% endfor %}></button>
+    ╰────
+  help: Remove the duplicate `class` attribute
+
+  × Duplicate attribute `class`
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:24:46]
+ 23 │ <button class="base" {% if active %}class="extra"{% endif %}></button>
+ 24 │ <button class="base" {% for cls in classes %}class="{{ cls }}"{% endfor %}></button>
+    ·                                              ──┬──
+    ·                                                ╰── here
+ 25 │ <button {% if a %}class="on"{% else %}id="off"{% endif %} class="always"></button>
+    ╰────
+  help: Remove the duplicate `class` attribute
+
+  × Duplicate attribute `class`
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:25:59]
+ 24 │ <button class="base" {% for cls in classes %}class="{{ cls }}"{% endfor %}></button>
+ 25 │ <button {% if a %}class="on"{% else %}id="off"{% endif %} class="always"></button>
+    ·                                                           ──┬──
+    ·                                                             ╰── here
+    ╰────
+  help: Remove the duplicate `class` attribute
