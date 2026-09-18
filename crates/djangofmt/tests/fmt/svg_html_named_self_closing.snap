@@ -1,0 +1,10 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<svg viewBox="0 0 10 10">
+    <a href="#"></a><title></title>
+    <style></style>
+</svg>
+<math><a></a></math>
+<svg class="icon"></svg>
+<my-widget />

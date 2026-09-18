@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt/tests/parse_error/main.rs
+---
+
+  × non-void HTML element <div> cannot be self-closing
+   ╭─[self_closing_div.html:6:14]
+ 5 │         <div class="preview-image placeholder">
+ 6 │             <div class="img" /></div>
+   ·              ─┬─
+   ·               ╰── here
+ 7 │     {% endif %}
+   ╰────
+  help: Browsers ignore the `/` and read `<div/>` as an opening `<div>`. Write `<div></div>` for an empty element, or `</div>` if this was meant to close one.
