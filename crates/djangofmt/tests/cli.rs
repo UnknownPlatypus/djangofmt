@@ -703,8 +703,7 @@ fn check_respects_pyproject_per_file_ignores() {
     Found 1 errors.
     "#);
 
-    // A relative `--stdin-filename` is normalized like a discovered file, so the same
-    // glob still applies when the template arrives through stdin.
+    // A relative `--stdin-filename` is normalized to project root.
     assert_cmd_snapshot!(
         cli()
             .current_dir(project.path())

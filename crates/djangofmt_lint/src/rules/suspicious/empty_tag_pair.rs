@@ -62,8 +62,8 @@ const EXCLUDED_TAGS: &[&str] = &[
     "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
 ];
 
-/// A hyphen marks a custom element (`<my-widget>`): a script fills it in,
-/// so empty is its authored state.
+/// A hyphen marks a custom element (`<my-widget>`).
+/// See <https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name>
 fn is_excluded_tag(tag: &str) -> bool {
     tag.contains('-')
         || EXCLUDED_TAGS

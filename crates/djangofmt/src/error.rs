@@ -20,7 +20,7 @@ pub enum Error {
     Resolve(String),
 }
 
-/// A missing path means the source came from stdin, which ruff also reports as `-`.
+/// A missing path means the source came from stdin, report it as the stdin sentinel `-`.
 #[must_use]
 pub fn path_display(path: Option<&Path>) -> String {
     path.map_or_else(|| crate::STDIN_SENTINEL.to_string(), relativize_path)

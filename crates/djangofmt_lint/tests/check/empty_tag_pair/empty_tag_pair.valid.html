@@ -10,11 +10,11 @@
 <!-- Void elements have no closing tag -->
 <br>
 <hr>
-<img src="logo.png" alt="Logo" width="100" height="100">
-<input type="text" name="q">
+<img alt="Logo" height="100" src="logo.png" width="100">
+<input name="q" type="text">
 
 <!-- Self-closing tags -->
-<input type="text" name="q" />
+<input name="q" type="text" />
 <br />
 
 <!-- Any attribute signals the empty tag is intentional
@@ -29,7 +29,7 @@
 
 <!-- `<script>` with `src` is an external script and legitimately empty -->
 <script src="app.js"></script>
-<link rel="stylesheet" href="app.css">
+<link href="app.css" rel="stylesheet">
 
 <!-- `<button>` with an accessible name is intentional -->
 <button aria-label="Close"></button>
@@ -74,7 +74,7 @@
 <!-- `<slot>` with no name is a web component's default slot -->
 <slot></slot>
 
-<!-- A custom element is a placeholder its script fills in -->
+<!-- A custom element can be a placeholder its script fills in -->
 <my-widget></my-widget>
 <ng-transclude></ng-transclude>
 

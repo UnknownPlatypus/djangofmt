@@ -177,8 +177,8 @@ impl FileDiagnostics {
 /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
 ///
 /// `language` must be the one `ast` was parsed with; rules gate on it to stay off the
-/// profile they do not apply to. `path` enables path-aware rules; pass [`None`] when
-/// linting a buffer without a backing file.
+/// profile they do not apply to.
+/// `path` enables path-aware rules; pass [`None`] when linting a buffer without a backing file.
 #[must_use]
 pub fn check_ast<'a>(
     source: &'a str,
