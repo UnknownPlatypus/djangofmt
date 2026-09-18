@@ -38,7 +38,7 @@ pub struct EmptyTagPair {
 
 impl Violation for EmptyTagPair {
     const RULE: Rule = Rule::EmptyTagPair;
-    const CATEGORY: RuleCategory = RuleCategory::Suspicious;
+    const CATEGORY: RuleCategory = RuleCategory::Pedantic;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
@@ -50,16 +50,23 @@ impl Violation for EmptyTagPair {
     }
 }
 
-/// Tags whose empty form is legitimate rather than suspicious.
+/// Tags whose empty form is legitimate rather than suspicious, aligned with djlint's `H020`.
 ///
-/// - `td`, `th`, `li`, `dt`, `dd`: kept empty to preserve table or list structure.
+/// - `td`, `th`, `tr`, `li`, `dt`, `dd`, `tbody`, `thead`, `tfoot`, `colgroup`, `optgroup`:
+///   kept empty to preserve table or list structure, or as a script's insertion target.
 /// - `textarea`, `select`, `output`, `option`: form controls whose empty or script-populated
 ///   state is their normal initial state (`<option></option>` is a common blank placeholder).
-/// - `canvas`: a script-rendered drawing surface whose children are fallback content only.
+/// - `canvas`, `template`, `noscript`, `iframe`, `video`, `audio`, `object`, `picture`:
+///   filled in at runtime, or by their own resource rather than by child content.
+/// - `svg` and its container children: drawing surfaces that are empty until drawn.
 /// - `slot`: the default slot of a web component.
+/// - `body`, `head`: a base template's skeleton, filled by the templates extending it.
 /// - `pre`:  a whitespace-only `<pre>` renders meaningful content and is not "empty".
 const EXCLUDED_TAGS: &[&str] = &[
-    "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
+    "td", "th", "tr", "li", "dt", "dd", "tbody", "thead", "tfoot", "colgroup", "optgroup",
+    "textarea", "select", "output", "option", "canvas", "template", "noscript", "iframe", "video",
+    "audio", "object", "picture", "svg", "g", "defs", "mask", "marker", "symbol", "pattern",
+    "clipPath", "slot", "body", "head", "pre",
 ];
 
 /// A hyphen marks a custom element (`<my-widget>`).

@@ -71,6 +71,32 @@
 <!-- `<canvas>` is a script-rendered surface; its children are fallback content only -->
 <canvas></canvas>
 
+<!-- Table sections and `<optgroup>` hold structure or are a script's insertion target -->
+<table>
+    <colgroup></colgroup>
+    <thead></thead>
+    <tbody></tbody>
+    <tfoot></tfoot>
+    <tr></tr>
+</table>
+<select><optgroup></optgroup></select>
+
+<!-- Filled in at runtime or by their own resource -->
+<template></template>
+<noscript></noscript>
+<iframe></iframe>
+<video></video>
+<audio></audio>
+<object></object>
+<picture></picture>
+
+<!-- SVG containers are empty until drawn -->
+<svg></svg>
+<svg><g></g><defs></defs><mask></mask><marker></marker><symbol></symbol><pattern></pattern><clipPath></clipPath></svg>
+
+<!-- A base template's skeleton is filled by the templates extending it -->
+<html lang="en"><head></head><body></body></html>
+
 <!-- `<slot>` with no name is a web component's default slot -->
 <slot></slot>
 

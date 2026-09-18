@@ -193,7 +193,7 @@ impl<'a> Checker<'a> {
         }
 
         if self.is_rule_enabled(Rule::EmptyTagPair) {
-            rules::suspicious::empty_tag_pair::check(self, element);
+            rules::pedantic::empty_tag_pair::check(self, element);
         }
 
         if element.tag_name.eq_ignore_ascii_case("img") {
