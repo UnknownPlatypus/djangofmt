@@ -12,16 +12,23 @@ pub enum TitleViolation {
     Absent,
     /// A `<title>` element exists but has no visible or templated content.
     Empty,
+    /// The `<html>` document has no `<head>` element at all.
+    NoHead,
 }
 
 /// ## What it does
-/// Checks for `<head>` elements that do not contain a non-empty `<title>` child.
+/// Checks for `<head>` elements that do not contain a non-empty `<title>` child, and for `<html>`
+/// documents with no `<head>` at all.
 ///
 /// ## Why is this bad?
 /// The `<title>` element names the document. Browsers display it in tabs, history entries, and
 /// bookmarks; screen readers announce it first when the page loads; and search engines use it as
 /// the default link text in result pages. A page without a title leaves users unable to tell tabs
 /// apart and fails WCAG Success Criterion 2.4.2.
+///
+/// A document that omits `<head>` gets an empty one synthesised by the browser, so it has no
+/// title either. A template tag directly under `<html>` (such as an `{% include %}`) may render
+/// the `<head>`, so such documents are not reported.
 ///
 /// ## Example
 /// ```html
@@ -53,13 +60,19 @@ impl Violation for MissingTitle {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "Missing or empty `<title>` in `<head>`".into()
+        match self.kind {
+            TitleViolation::Absent | TitleViolation::Empty => {
+                "Missing or empty `<title>` in `<head>`".into()
+            }
+            TitleViolation::NoHead => "Missing `<head>` and `<title>` in `<html>`".into(),
+        }
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
         Some(match self.kind {
             TitleViolation::Absent => "Add a `<title>` element to `<head>`".into(),
             TitleViolation::Empty => "Add descriptive text to `<title>`".into(),
+            TitleViolation::NoHead => "Add a `<head>` containing a `<title>` element".into(),
         })
     }
 }
@@ -76,6 +89,33 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
         &MissingTitle { kind },
         checker.source_span(element.tag_name),
     );
+}
+
+/// The caller guarantees `element` is an `<html>`.
+pub fn check_html(checker: &Checker<'_>, element: &Element<'_>) {
+    if may_have_head(&element.children) {
+        return;
+    }
+
+    checker.report_diagnostic(
+        &MissingTitle {
+            kind: TitleViolation::NoHead,
+        },
+        checker.source_span(element.tag_name),
+    );
+}
+
+/// Whether a `<head>` is present, or could be rendered by a template tag.
+fn may_have_head(nodes: &[Node<'_>]) -> bool {
+    nodes.iter().any(|node| match &node.kind {
+        NodeKind::Element(el) => el.tag_name.eq_ignore_ascii_case("head"),
+        NodeKind::JinjaTag(_) => true,
+        NodeKind::JinjaBlock(block) => block.body.iter().any(|item| match item {
+            JinjaTagOrChildren::Children(children) => may_have_head(children),
+            JinjaTagOrChildren::Tag(_) => false,
+        }),
+        _ => false,
+    })
 }
 
 /// Outcome of inspecting a `<head>`'s descendants for a `<title>`.

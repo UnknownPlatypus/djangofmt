@@ -203,10 +203,13 @@ impl<'a> Checker<'a> {
             if self.is_rule_enabled(Rule::MissingImgDimensions) {
                 rules::pedantic::missing_img_dimensions::check(self, element);
             }
-        } else if element.tag_name.eq_ignore_ascii_case("html")
-            && self.is_rule_enabled(Rule::MissingHtmlLang)
-        {
-            rules::accessibility::missing_html_lang::check(self, element);
+        } else if element.tag_name.eq_ignore_ascii_case("html") {
+            if self.is_rule_enabled(Rule::MissingHtmlLang) {
+                rules::accessibility::missing_html_lang::check(self, element);
+            }
+            if self.is_rule_enabled(Rule::MissingTitle) {
+                rules::accessibility::missing_title::check_html(self, element);
+            }
         } else if element.tag_name.eq_ignore_ascii_case("head")
             && self.is_rule_enabled(Rule::MissingTitle)
         {
