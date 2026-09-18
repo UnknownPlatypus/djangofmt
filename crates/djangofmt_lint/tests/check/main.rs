@@ -3,8 +3,8 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, fix_ast,
-    graphical_handler, lint_source, parse,
+    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, graphical_handler,
+    lint_source, parse,
 };
 
 use insta::{assert_snapshot, glob};
@@ -58,13 +58,12 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let language = language_for(path);
-        let ast = parse(&input, language, &[])
+        let parsed = parse(&input, language_for(path), &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let fix = |threshold| fix_ast(&input, &ast, &settings, language, threshold, Some(path));
+        let fix = |threshold| parsed.fix(&settings, threshold, Some(path));
 
         let safe = fix(Applicability::Safe);
         if safe.applied_count > 0 {

@@ -2,13 +2,13 @@ use djangofmt_benchmark::{
     ALL_TEMPLATES, DJANGO_TEMPLATE_LARGE, FORMATTER_DIRECTIVE, LINT_DIRECTIVE, TestFile, warmup,
     with_directive,
 };
-use djangofmt_lint::{RuleSet, Settings, check_ast, parse};
+use djangofmt_lint::{RuleSet, Settings, parse};
 
 fn main() {
     divan::main();
 }
 
-/// `check_ast` with no rules: ast traversal only.
+/// `Parsed::check` with no rules: ast traversal only.
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_no_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(
@@ -21,13 +21,13 @@ fn check_no_rules(bencher: divan::Bencher, template: &'static TestFile) {
     );
 }
 
-/// `check_ast` with the default selection (every stable rule, preview off)
+/// `Parsed::check` with the default selection (every stable rule, preview off)
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_default_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(bencher, template, &Settings::default());
 }
 
-/// `check_ast` with all rules, preview included.
+/// `Parsed::check` with all rules, preview included.
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_all_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(bencher, template, &Settings::all());
@@ -48,18 +48,11 @@ fn check_lint_directive(bencher: divan::Bencher) {
 fn bench_directive(bencher: divan::Bencher, directive: &str) {
     let settings = Settings::default();
     let source = with_directive(&DJANGO_TEMPLATE_LARGE, directive);
-    let language = DJANGO_TEMPLATE_LARGE.profile.into();
-    let ast = parse(&source, language, &[]).expect("Parsing to succeed");
+    let parsed =
+        parse(&source, DJANGO_TEMPLATE_LARGE.profile.into(), &[]).expect("Parsing to succeed");
 
-    let run = || {
-        check_ast(
-            divan::black_box(source.as_str()),
-            divan::black_box(&ast),
-            divan::black_box(&settings),
-            divan::black_box(language),
-            divan::black_box(None),
-        )
-    };
+    let run =
+        || divan::black_box(&parsed).check(divan::black_box(&settings), divan::black_box(None));
     warmup(run);
 
     bencher
@@ -67,21 +60,13 @@ fn bench_directive(bencher: divan::Bencher, directive: &str) {
         .bench(run);
 }
 
-/// Time `check_ast` only: the AST is parsed once, outside the timed region.
+/// Time `Parsed::check` only: the AST is parsed once, outside the timed region.
 /// The `check_all_rules` − `check_no_rules` gap is then pure rule-body cost.
 fn bench_check(bencher: divan::Bencher, template: &TestFile, settings: &Settings) {
-    let language = template.profile.into();
-    let ast = parse(template.code, language, &[]).expect("Parsing to succeed");
+    let parsed = parse(template.code, template.profile.into(), &[]).expect("Parsing to succeed");
 
-    let run = || {
-        check_ast(
-            divan::black_box(template.code),
-            divan::black_box(&ast),
-            divan::black_box(settings),
-            divan::black_box(language),
-            divan::black_box(None),
-        )
-    };
+    let run =
+        || divan::black_box(&parsed).check(divan::black_box(settings), divan::black_box(None));
     warmup(run);
 
     bencher

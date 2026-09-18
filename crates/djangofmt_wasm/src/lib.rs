@@ -33,7 +33,7 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
 pub fn ast(source: &str, profile: &str) -> String {
     let profile = get_profile(profile);
     match djangofmt_lint::parse(source, profile.into(), &[]) {
-        Ok(ast) => format!("{ast:#?}"),
+        Ok(parsed) => format!("{:#?}", parsed.ast()),
         Err(e) => render_parse_error(source, &markup_fmt::FormatError::Syntax(e)),
     }
 }
