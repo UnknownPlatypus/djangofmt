@@ -18,3 +18,11 @@
 {% else %}
     {% block sidebar %}off{% endblock %}
 {% endif %}
+
+<!-- Django reads template tags before the HTML: raw-text bodies, HTML comments and attribute position all count -->
+<script>{% block js %}{% endblock %}</script>
+{% block js %}{% endblock %}
+<!-- {% block head %}{% endblock %} -->
+{% block head %}{% endblock %}
+<div {% block attrs %}class="a"{% endblock %}></div>
+{% block attrs %}{% endblock %}
