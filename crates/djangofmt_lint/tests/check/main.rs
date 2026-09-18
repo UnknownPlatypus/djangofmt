@@ -64,28 +64,16 @@ fn fix_snapshot() {
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let safe = fix_ast(
-            &input,
-            &ast,
-            &settings,
-            language,
-            Applicability::Safe,
-            Some(path),
-        );
+        let fix = |threshold| fix_ast(&input, &ast, &settings, language, threshold, Some(path));
+
+        let safe = fix(Applicability::Safe);
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(
-            &input,
-            &ast,
-            &settings,
-            language,
-            Applicability::Unsafe,
-            Some(path),
-        );
+        let unsafe_fixed = fix(Applicability::Unsafe);
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);

@@ -10,7 +10,6 @@ use smallvec::SmallVec;
 
 use crate::LintDiagnostic;
 use crate::Settings;
-use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
@@ -51,20 +50,6 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub const fn is_django(&self) -> bool {
         matches!(self.context.language(), Language::Django)
-    }
-
-    /// Whether the run targets Django `minimum` or newer.
-    ///
-    /// False for Jinja sources and whenever no `target-version` is configured, so a
-    /// version-gated rule stays off until the project states which Django it supports.
-    #[must_use]
-    pub fn targets_django(&self, minimum: DjangoVersion) -> bool {
-        self.is_django()
-            && self
-                .context
-                .settings()
-                .target_version
-                .is_some_and(|version| version >= minimum)
     }
 
     /// Block names recorded during the traversal, borrowed from the source.

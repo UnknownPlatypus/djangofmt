@@ -8,7 +8,7 @@ use std::borrow::Cow;
 use std::fmt::Write;
 use std::fs;
 use std::io::{self, Write as _};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::time::Instant;
 use tracing::{debug, error, info, warn};
 
@@ -55,12 +55,21 @@ impl CheckConfig {
                 .unwrap_or_default(),
         }
     }
+
+    /// How far a fix may go before it is held back.
+    const fn threshold(&self) -> Applicability {
+        if self.unsafe_fixes {
+            Applicability::Unsafe
+        } else {
+            Applicability::Safe
+        }
+    }
 }
 
 /// Per-file outcome of `check_source`.
 pub(crate) struct CheckResult {
-    /// Owning path for display.
-    path: PathBuf,
+    /// Relativized path, or `-` for stdin.
+    display_path: String,
     /// Diagnostics still present after any fixes were applied.
     file_diagnostics: FileDiagnostics,
     /// Total fixes applied to this file (0 when `--fix` is off).
@@ -110,7 +119,6 @@ pub(crate) struct CheckRun {
     per_file_ignores: Option<PerFileIgnores>,
     /// Same custom blocks as `format`, so both commands lint/format the same AST.
     pub(crate) custom_blocks: Vec<String>,
-    threshold: Applicability,
     /// One value carries both "should we fix" and "how far", so they can't disagree.
     pub(crate) fix: Option<Applicability>,
 }
@@ -134,12 +142,7 @@ impl CheckRun {
             .map(|patterns| PerFileIgnores::new(patterns, project_root))
             .transpose()?;
 
-        let threshold = if config.unsafe_fixes {
-            Applicability::Unsafe
-        } else {
-            Applicability::Safe
-        };
-        let fix = config.fix.then_some(threshold);
+        let fix = config.fix.then_some(config.threshold());
 
         let custom_blocks = merge_custom_blocks(
             args.template.custom_blocks.clone(),
@@ -152,7 +155,6 @@ impl CheckRun {
             settings,
             per_file_ignores,
             custom_blocks,
-            threshold,
             fix,
         })
     }
@@ -179,7 +181,7 @@ impl CheckRun {
 
         match self.config.output_format {
             OutputFormat::Full => print_full(results),
-            OutputFormat::Concise => print_concise(results, self.threshold),
+            OutputFormat::Concise => print_concise(results, self.config.threshold()),
         }
 
         print_summary(
@@ -266,7 +268,7 @@ fn print_full(results: &[CheckResult]) {
 fn print_concise(results: &[CheckResult], threshold: Applicability) {
     for result in results {
         let source = &result.file_diagnostics.source_code;
-        let path = relativize_path(&result.path);
+        let path = &result.display_path;
         for diag in &result.file_diagnostics.diagnostics {
             let (line, column) = source
                 .read_span(&diag.span, 0, 0)
@@ -354,7 +356,7 @@ fn print_show_fixes(results: &[CheckResult], total_applied: usize) {
         if result.applied_count == 0 {
             continue;
         }
-        info!("- {}:", relativize_path(&result.path));
+        info!("- {}:", result.display_path);
         let mut entries: Vec<_> = result.fixes_by_rule.iter().collect();
         entries.sort_by(|a, b| a.0.cmp(b.0));
         for (rule, summary) in entries {
@@ -384,7 +386,7 @@ impl<'a> Source<'a> {
         }
     }
 
-    fn read(&self) -> std::result::Result<String, Box<CommandError>> {
+    fn read(self) -> std::result::Result<String, Box<CommandError>> {
         match self {
             Self::File(path) => fs::read_to_string(path),
             Self::Stdin(_) => io::read_to_string(io::stdin().lock()),
@@ -414,7 +416,7 @@ pub(crate) fn check_source(
 
     // Like ruff, `--fix` on stdin always echoes the source (fixed, unchanged or even
     // unparsable) so editors piping it back never end up with an empty buffer.
-    if let (Source::Stdin(_), Some(_)) = (source, fix) {
+    if matches!(source, Source::Stdin(_)) && fix.is_some() {
         let echoed = outcome
             .as_ref()
             .ok()
@@ -443,20 +445,19 @@ pub(crate) fn check_source(
     }
     let outcome = outcome.unwrap_or_default();
 
-    let fixed = outcome.fixed.is_some();
-    let text = outcome.fixed.unwrap_or(text);
-    if let (Source::File(path), true) = (source, fixed) {
-        fs::write(path, &text).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
+    if let (Source::File(path), Some(fixed)) = (source, &outcome.fixed) {
+        fs::write(path, fixed).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
     }
+    let text = outcome.fixed.unwrap_or(text);
 
     let file_diagnostics = if outcome.diagnostics.is_empty() {
         FileDiagnostics::empty()
     } else {
-        FileDiagnostics::new(display_path, text, outcome.diagnostics)
+        FileDiagnostics::new(&display_path, text, outcome.diagnostics)
     };
 
     Ok(CheckResult {
-        path: path.map_or_else(|| PathBuf::from(STDIN_SENTINEL), Path::to_path_buf),
+        display_path,
         file_diagnostics,
         applied_count: outcome.applied_count,
         fixes_by_rule: outcome.applied_by_rule,

@@ -456,7 +456,7 @@ fn format_or_fallback<'a>(
             .map_or_else(String::new, |location| format!(" at {location}"));
         warn!(
             "{}: the embedded {language} formatter panicked{location} ({}), leaving that snippet unformatted. Please report it at {}/issues",
-            crate::error::path_display(path.map(Path::to_path_buf).as_ref()),
+            crate::error::path_display(path),
             err.payload,
             env!("CARGO_PKG_REPOSITORY"),
         );

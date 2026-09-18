@@ -58,11 +58,12 @@ impl Violation for EmptyTagPair {
 /// - `canvas`: a script-rendered drawing surface whose children are fallback content only.
 /// - `slot`: the default slot of a web component.
 /// - `pre`:  a whitespace-only `<pre>` renders meaningful content and is not "empty".
-/// - custom elements (`<my-widget>`): a script fills them in, so empty is their authored state.
 const EXCLUDED_TAGS: &[&str] = &[
     "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
 ];
 
+/// A hyphen marks a custom element (`<my-widget>`): a script fills it in,
+/// so empty is its authored state.
 fn is_excluded_tag(tag: &str) -> bool {
     tag.contains('-')
         || EXCLUDED_TAGS
