@@ -23,7 +23,7 @@ just bench-rs                                        # Rust micro-benchmarks
 
 This is a Rust workspace with six crates in `crates/`:
 
-**`djangofmt`** — the main CLI binary. Discovers files via `resolver.rs`, reads config from `pyproject.toml` (`[tool.djangofmt]`) merged with CLI args (`args.rs`), then processes files in parallel using rayon. The `format` command reformats in-place; the `check` command reports violations. Error reporting uses `miette`. Exit codes: 0 = success, 1 = formatting/lint errors, 2 = I/O or parse errors.
+**`djangofmt`** — the main CLI binary. Discovers files via `resolver.rs`, reads config from `pyproject.toml` (`[tool.djangofmt]`) merged with CLI args (`args.rs`), then processes files in parallel using rayon. Formatting is the default command (`djangofmt <paths>`) and reformats in-place; the `check` subcommand reports violations. Error reporting uses `miette`. Exit codes: 0 = success, 1 = formatting/lint errors, 2 = I/O or parse errors.
 
 **`djangofmt_lint`** — the linting library. `checker.rs` implements a visitor over the `markup_fmt` AST and runs rules from `rules/`. Each rule implements the `Violation` trait. The `Checker` struct collects violations with source offsets. Adding a rule is an end-to-end process covered by the `add-lint-rule` skill (`.agents/skills/add-lint-rule/SKILL.md`).
 

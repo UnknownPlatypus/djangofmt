@@ -98,7 +98,7 @@ djangofmt check --fix --unsafe-fixes .                            # Apply all fi
 djangofmt check --select category:all --preview --fix --unsafe-fixes .  # Every rule, preview ones included, with all fixes
 ```
 
-Fixable violations are marked with `[*]` in the report. Run `djangofmt check --help` for the full list of options.
+Fixable violations are marked with `[*]` in the report. See [Linting](https://unknownplatypus.github.io/djangofmt/docs/linter/) for rule selection, fixes and suppression comments, or `djangofmt check --help` for the full list of options.
 
 ## Pre-commit hook
 
@@ -180,6 +180,8 @@ fix = true
 `target-version` is the Django version your templates target. When unset, it comes from the minimum supported Django version in `[project] dependencies`.
 Rules that depend on it stay disabled until it is known.
 See [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) for the available rule names and categories.
+
+Every option is documented in the [settings reference](https://unknownplatypus.github.io/djangofmt/docs/settings/).
 
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
 The first `pyproject.toml` found is used. If no file is found or the file doesn't contain a `[tool.djangofmt]` section, defaults are used.
