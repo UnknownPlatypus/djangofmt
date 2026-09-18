@@ -1,0 +1,6 @@
+<!-- `{% raw %}` emits its body verbatim, so the blocks inside are text, not template tags -->
+{% raw %}
+{% block a %}{% endblock %}
+{% block a %}{% endblock %}
+<script>{% block a %}{% endblock %}</script>
+{% endraw %}
