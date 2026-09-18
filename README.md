@@ -108,10 +108,18 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
+  # Djangofmt version.
   rev: v0.2.12
   hooks:
+    # Run the linter.
+    - id: djangofmt-check
+      args: [--fix]
+    # Run the formatter.
     - id: djangofmt
 ```
+
+Run the linter first: an autofix can leave the template needing a reformat, and the formatter then picks it up in the same pass.
+Instead of `args: [--fix]`, you can set `fix = true` in `[tool.djangofmt.lint]`.
 
 The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
 
@@ -129,18 +137,6 @@ There is a dedicated pre-commit hook for these:
   rev: v0.2.12
   hooks:
     - id: djangofmt-svg
-```
-
-### Linting hook
-
-The `djangofmt-check` hook runs the linter on the same files as `djangofmt`. Set `fix = true` in `[tool.djangofmt.lint]` or pass `args: [--fix]` to apply safe fixes:
-
-```yaml
-- repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v0.2.12
-  hooks:
-    - id: djangofmt
-    - id: djangofmt-check
 ```
 
 ### Check mode
