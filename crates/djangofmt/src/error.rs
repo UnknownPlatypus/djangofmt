@@ -20,9 +20,10 @@ pub enum Error {
     Resolve(String),
 }
 
+/// A missing path means the source came from stdin, report it as the stdin sentinel `-`.
 #[must_use]
-pub fn path_display(path: Option<&PathBuf>) -> String {
-    path.map_or_else(|| "<unknown>".to_string(), relativize_path)
+pub fn path_display(path: Option<&Path>) -> String {
+    path.map_or_else(|| crate::STDIN_SENTINEL.to_string(), relativize_path)
 }
 
 /// Build a span that miette can always draw a caret under.
@@ -60,18 +61,18 @@ pub struct ParseError {
 /// An error that can occur while processing a file in a command (format or check).
 #[derive(Debug, Error, Diagnostic)]
 pub enum CommandError {
-    #[error("Failed to read {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
+    #[error("Failed to read {path}: {err}", path = path_display(.0.as_deref()), err = .1)]
     Read(Option<PathBuf>, #[source] io::Error),
     #[error(transparent)]
     #[diagnostic(transparent)]
     Parse(ParseError),
-    #[error("Failed to write {path}: {err}", path = path_display(.0.as_ref()), err = .1)]
+    #[error("Failed to write {path}: {err}", path = path_display(.0.as_deref()), err = .1)]
     Write(Option<PathBuf>, #[source] io::Error),
     #[error(
         "Panicked while processing {path}: This indicates a bug in djangofmt. \
          If you could open an issue at {repo}/issues/new?title=%5BPanic%5D \
          with the file contents and the trace below, we'd be very appreciative!\n{err}",
-        path = path_display(.0.as_ref()),
+        path = path_display(.0.as_deref()),
         repo = env!("CARGO_PKG_REPOSITORY"),
         err = .1
     )]
@@ -99,13 +100,13 @@ impl CommandError {
         match self {
             Self::Parse(err) => {
                 let (line, column) = err.location();
-                let path = path_display(err.path.as_ref());
+                let path = path_display(err.path.as_deref());
                 format!("{path}:{line}:{column}: {}", err.message)
             }
             Self::Read(..) | Self::Write(..) => self.to_string(),
             Self::Panic(path, err) => format!(
                 "{path}: Panicked: {payload}",
-                path = path_display(path.as_ref()),
+                path = path_display(path.as_deref()),
                 payload = err.payload
             ),
         }
@@ -184,7 +185,7 @@ impl ParseError {
                 (format!("external formatter error: {msg}"), None, 0.into())
             }
         };
-        let name = path_display(path.as_ref());
+        let name = path_display(path.as_deref());
         Self {
             path,
             message,

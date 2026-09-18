@@ -99,7 +99,16 @@ DEFAULT_TARGETS = [
             },
         ),
     ),
-    Project(repo=Repository(owner="sissbruecker", name="linkding", ref="master")),
+    Project(
+        repo=Repository(owner="sissbruecker", name="linkding", ref="master"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.SELF_CLOSING_NON_VOID: (
+                    "bookmarks/templates/bookmarks/bookmark_list.html",  # <div class="img" />
+                ),
+            },
+        ),
+    ),
     Project(repo=Repository(owner="saleor", name="saleor", ref="main")),
     Project(
         repo=Repository(
@@ -307,6 +316,9 @@ DEFAULT_TARGETS = [
             exclude={
                 ExcludeReason.MISSING_END_TAG: (
                     "babybuddy/templates/babybuddy/paginator.html",  # </li>
+                ),
+                ExcludeReason.SELF_CLOSING_NON_VOID: (
+                    "core/templates/core/widget_tag_editor.html",  # <option value="{{ t.name }}" />
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "babybuddy/templates/babybuddy/form_field.html",  # Stray quote in class attribute

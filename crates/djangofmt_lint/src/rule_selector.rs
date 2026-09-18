@@ -229,15 +229,15 @@ mod tests {
         );
 
         // A preview rule is still denoted by `all_rules`, but only *runs* under preview.
-        let preview = RuleSelector::Rule(Rule::EmptyTagPair);
+        let preview = RuleSelector::Rule(Rule::DjangoUrlPattern);
         assert_eq!(
             preview.all_rules().collect::<Vec<_>>(),
-            vec![Rule::EmptyTagPair]
+            vec![Rule::DjangoUrlPattern]
         );
         assert!(preview.rules(false).next().is_none());
         assert_eq!(
             preview.rules(true).collect::<Vec<_>>(),
-            vec![Rule::EmptyTagPair]
+            vec![Rule::DjangoUrlPattern]
         );
     }
 
@@ -249,9 +249,9 @@ mod tests {
         let all = RuleSelector::All;
         assert!(!all.is_exact());
         // Denotation ignores lifecycle…
-        assert!(all.all_rules().any(|rule| rule == Rule::EmptyTagPair));
+        assert!(all.all_rules().any(|rule| rule == Rule::DjangoUrlPattern));
         // …but a non-preview run excludes the preview rule.
-        assert!(!all.rules(false).any(|rule| rule == Rule::EmptyTagPair));
-        assert!(all.rules(true).any(|rule| rule == Rule::EmptyTagPair));
+        assert!(!all.rules(false).any(|rule| rule == Rule::DjangoUrlPattern));
+        assert!(all.rules(true).any(|rule| rule == Rule::DjangoUrlPattern));
     }
 }

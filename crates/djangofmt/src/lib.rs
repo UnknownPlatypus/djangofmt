@@ -59,7 +59,13 @@ pub fn run(
     setup_tracing(global_options.log_level());
 
     match command {
-        Some(args::Commands::Check(ref check_args)) => commands::check::check(check_args),
+        Some(args::Commands::Check(ref check_args)) => {
+            if is_stdin(&check_args.files, check_args.stdin_filename.as_deref()) {
+                commands::check_stdin::check_stdin(check_args)
+            } else {
+                commands::check::check(check_args)
+            }
+        }
         Some(args::Commands::Completions { shell }) => {
             shell.generate(&mut Args::command(), &mut std::io::stdout());
             Ok(ExitStatus::Success)
@@ -75,7 +81,7 @@ pub fn run(
 }
 
 /// Sentinel file argument meaning "read from standard input".
-const STDIN_SENTINEL: &str = "-";
+pub(crate) const STDIN_SENTINEL: &str = "-";
 
 /// Returns true if the command should read from standard input.
 fn is_stdin(files: &[PathBuf], stdin_filename: Option<&Path>) -> bool {

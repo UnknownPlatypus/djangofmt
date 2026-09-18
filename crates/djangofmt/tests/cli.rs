@@ -258,7 +258,7 @@ fn format_stdin_parse_error_exits_2() {
     ----- stderr -----
 
       × expected attribute value
-       ╭─[<unknown>:1:9]
+       ╭─[-:1:9]
      1 │ <div id=></div>
        ·         ▲
        ·         ╰── here
@@ -439,6 +439,88 @@ fn check_fixable_file_with_fix() {
     );
 }
 
+// ── Check from stdin ─────────────────────────────────────────────────
+
+#[test]
+fn check_stdin_with_filename_reports_diagnostics() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--output-format", "concise", "--stdin-filename", "foo.html"])
+            .pass_stdin("<img src=\"logo.png\">\n"),
+        @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    foo.html:1:2: missing-img-alt Missing `alt` attribute on `<img>`
+    Found 1 errors.
+    "
+    );
+}
+
+#[test]
+fn check_stdin_fix_writes_source_to_stdout() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--fix", "-"])
+            .pass_stdin("{% blocktranslate %}Hello{% endblocktranslate %}\n"),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {% blocktranslate trimmed %}Hello{% endblocktranslate %}
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    "
+    );
+}
+
+#[test]
+fn check_stdin_fix_echoes_unparsable_input() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--fix", "--output-format", "concise", "-"])
+            .pass_stdin("<div>\n"),
+        @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+    <div>
+
+    ----- stderr -----
+    -:1:2: expected close tag for opening tag <div>
+    Couldn't check 1 files!
+    "
+    );
+}
+
+#[test]
+fn check_stdin_force_exclude_parrots_input() {
+    assert_cmd_snapshot!(
+        cli()
+            .args([
+                "check",
+                "--fix",
+                "--force-exclude",
+                "--extend-exclude",
+                "foo.html",
+                "--stdin-filename",
+                "foo.html",
+            ])
+            .pass_stdin("<img src=\"logo.png\">\n"),
+        @r#"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    <img src="logo.png">
+
+    ----- stderr -----
+    "#
+    );
+}
+
 #[test]
 fn check_passes_file_path_to_path_aware_rules() {
     // `same-file-partial-include` only fires when the checked file's path reaches the rule:
@@ -447,12 +529,7 @@ fn check_passes_file_path_to_path_aware_rules() {
         "app/page.html",
         "{% partialdef nav %}<a>Home</a>{% endpartialdef %}\n{% include \"app/page.html#nav\" %}\n",
     );
-    let args = [
-        "check",
-        "--preview",
-        "--select",
-        "same-file-partial-include",
-    ];
+    let args = ["check", "--select", "same-file-partial-include"];
     assert_cmd_snapshot_tmpdir!(
         cli().args(args).args(["--output-format", "concise"]).arg(project.join("app/page.html")),
         @"
@@ -625,4 +702,20 @@ fn check_respects_pyproject_per_file_ignores() {
 
     Found 1 errors.
     "#);
+
+    // A relative `--stdin-filename` is normalized to project root.
+    assert_cmd_snapshot!(
+        cli()
+            .current_dir(project.path())
+            .args(["check", "--stdin-filename", "legacy/old.html"])
+            .pass_stdin(violation),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    "
+    );
 }

@@ -167,7 +167,7 @@ impl From<Profile> for Language {
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
     /// Check files for lint errors
-    Check(CheckCommand),
+    Check(Box<CheckCommand>),
     /// Generate shell completions
     #[clap(hide = true)]
     Completions {
@@ -220,8 +220,11 @@ fn parse_rule_selector(value: &str) -> Result<RuleSelector, String> {
 )]
 pub struct CheckCommand {
     /// List of files or directories to check.
-    #[arg(required = true)]
+    #[arg(required_unless_present = "stdin_filename")]
     pub files: Vec<PathBuf>,
+    /// The name of the file when passing it through stdin.
+    #[arg(long, value_name = "PATH")]
+    pub stdin_filename: Option<PathBuf>,
     #[clap(flatten)]
     pub template: TemplateArgs,
     /// Apply safe fixes automatically. Use `--no-fix` to disable.

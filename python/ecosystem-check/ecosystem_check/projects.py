@@ -75,6 +75,10 @@ class ExcludeReason(enum.StrEnum):
     # Legal, but discouraged enough that we keep requiring it.
     MISSING_END_TAG = enum.auto()
 
+    # A self-closing non-void element (`<div />`), which browsers read as an opening tag.
+    # A common JSX/Vue habit, rejected since djangofmt 1.0.
+    SELF_CLOSING_NON_VOID = enum.auto()
+
     # Malformed markup in the upstream project.
     INVALID_SOURCE_HTML = enum.auto()
 

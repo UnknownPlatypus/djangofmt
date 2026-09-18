@@ -31,14 +31,14 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [HTML spec: void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements)
 /// - [HTML spec: palpable content](https://html.spec.whatwg.org/multipage/dom.html#palpable-content)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(preview_since = "0.2.10")]
+#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
 pub struct EmptyTagPair {
     pub tag: String,
 }
 
 impl Violation for EmptyTagPair {
     const RULE: Rule = Rule::EmptyTagPair;
-    const CATEGORY: RuleCategory = RuleCategory::Suspicious;
+    const CATEGORY: RuleCategory = RuleCategory::Pedantic;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
@@ -50,22 +50,32 @@ impl Violation for EmptyTagPair {
     }
 }
 
-/// Tags whose empty form is legitimate rather than suspicious.
+/// Tags whose empty form is legitimate rather than suspicious, aligned with djlint's `H020`.
 ///
-/// - `td`, `th`, `li`, `dt`, `dd`: kept empty to preserve table or list structure.
+/// - `td`, `th`, `tr`, `li`, `dt`, `dd`, `tbody`, `thead`, `tfoot`, `colgroup`, `optgroup`:
+///   kept empty to preserve table or list structure, or as a script's insertion target.
 /// - `textarea`, `select`, `output`, `option`: form controls whose empty or script-populated
 ///   state is their normal initial state (`<option></option>` is a common blank placeholder).
-/// - `canvas`: a script-rendered drawing surface whose children are fallback content only.
+/// - `canvas`, `template`, `noscript`, `iframe`, `video`, `audio`, `object`, `picture`:
+///   filled in at runtime, or by their own resource rather than by child content.
+/// - `svg` and its container children: drawing surfaces that are empty until drawn.
 /// - `slot`: the default slot of a web component.
+/// - `body`, `head`: a base template's skeleton, filled by the templates extending it.
 /// - `pre`:  a whitespace-only `<pre>` renders meaningful content and is not "empty".
 const EXCLUDED_TAGS: &[&str] = &[
-    "td", "th", "li", "dt", "dd", "textarea", "select", "output", "option", "canvas", "slot", "pre",
+    "td", "th", "tr", "li", "dt", "dd", "tbody", "thead", "tfoot", "colgroup", "optgroup",
+    "textarea", "select", "output", "option", "canvas", "template", "noscript", "iframe", "video",
+    "audio", "object", "picture", "svg", "g", "defs", "mask", "marker", "symbol", "pattern",
+    "clipPath", "slot", "body", "head", "pre",
 ];
 
+/// A hyphen marks a custom element (`<my-widget>`).
+/// See <https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name>
 fn is_excluded_tag(tag: &str) -> bool {
-    EXCLUDED_TAGS
-        .iter()
-        .any(|excluded| tag.eq_ignore_ascii_case(excluded))
+    tag.contains('-')
+        || EXCLUDED_TAGS
+            .iter()
+            .any(|excluded| tag.eq_ignore_ascii_case(excluded))
 }
 
 /// Returns `true` when `children` is either empty or contains only whitespace-only text nodes.

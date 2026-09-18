@@ -10,11 +10,11 @@
 <!-- Void elements have no closing tag -->
 <br>
 <hr>
-<img src="logo.png" alt="Logo" width="100" height="100">
-<input type="text" name="q">
+<img alt="Logo" height="100" src="logo.png" width="100">
+<input name="q" type="text">
 
 <!-- Self-closing tags -->
-<input type="text" name="q" />
+<input name="q" type="text" />
 <br />
 
 <!-- Any attribute signals the empty tag is intentional
@@ -29,7 +29,7 @@
 
 <!-- `<script>` with `src` is an external script and legitimately empty -->
 <script src="app.js"></script>
-<link rel="stylesheet" href="app.css">
+<link href="app.css" rel="stylesheet">
 
 <!-- `<button>` with an accessible name is intentional -->
 <button aria-label="Close"></button>
@@ -71,8 +71,38 @@
 <!-- `<canvas>` is a script-rendered surface; its children are fallback content only -->
 <canvas></canvas>
 
+<!-- Table sections and `<optgroup>` hold structure or are a script's insertion target -->
+<table>
+    <colgroup></colgroup>
+    <thead></thead>
+    <tbody></tbody>
+    <tfoot></tfoot>
+    <tr></tr>
+</table>
+<select><optgroup></optgroup></select>
+
+<!-- Filled in at runtime or by their own resource -->
+<template></template>
+<noscript></noscript>
+<iframe></iframe>
+<video></video>
+<audio></audio>
+<object></object>
+<picture></picture>
+
+<!-- SVG containers are empty until drawn -->
+<svg></svg>
+<svg><g></g><defs></defs><mask></mask><marker></marker><symbol></symbol><pattern></pattern><clipPath></clipPath></svg>
+
+<!-- A base template's skeleton is filled by the templates extending it -->
+<html lang="en"><head></head><body></body></html>
+
 <!-- `<slot>` with no name is a web component's default slot -->
 <slot></slot>
+
+<!-- A custom element can be a placeholder its script fills in -->
+<my-widget></my-widget>
+<ng-transclude></ng-transclude>
 
 <!-- Exemptions are case-insensitive too -->
 <TEXTAREA></TEXTAREA>

@@ -3,8 +3,8 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, fix_ast,
-    graphical_handler, lint_source, parse,
+    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, graphical_handler,
+    lint_source, parse,
 };
 
 use insta::{assert_snapshot, glob};
@@ -58,19 +58,21 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let ast = parse(&input, language_for(path), &[])
+        let parsed = parse(&input, language_for(path), &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let safe = fix_ast(&input, &ast, &settings, Applicability::Safe, Some(path));
+        let fix = |threshold| parsed.fix(&settings, threshold, Some(path));
+
+        let safe = fix(Applicability::Safe);
         if safe.applied_count > 0 {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.fixed"), safe.output);
             });
         }
 
-        let unsafe_fixed = fix_ast(&input, &ast, &settings, Applicability::Unsafe, Some(path));
+        let unsafe_fixed = fix(Applicability::Unsafe);
         if unsafe_fixed.applied_count > safe.applied_count {
             build_settings(path).bind(|| {
                 assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);

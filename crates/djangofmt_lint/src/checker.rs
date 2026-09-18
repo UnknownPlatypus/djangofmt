@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use markup_fmt::Language;
 use markup_fmt::ast::{
     Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
     Root,
@@ -27,9 +28,14 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub const fn new(source: &'a str, settings: &'a Settings, path: Option<&'a Path>) -> Self {
+    pub const fn new(
+        source: &'a str,
+        settings: &'a Settings,
+        language: Language,
+        path: Option<&'a Path>,
+    ) -> Self {
         Self {
-            context: LintContext::new(source, settings, path),
+            context: LintContext::new(source, settings, language, path),
             block_names: SmallVec::new_const(),
         }
     }
@@ -38,6 +44,12 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub const fn context(&self) -> &LintContext<'a> {
         &self.context
+    }
+
+    /// Whether the source is parsed as a Django template rather than a Jinja one.
+    #[must_use]
+    pub const fn is_django(&self) -> bool {
+        matches!(self.context.language(), Language::Django)
     }
 
     /// Block names recorded during the traversal, borrowed from the source.
@@ -181,7 +193,7 @@ impl<'a> Checker<'a> {
         }
 
         if self.is_rule_enabled(Rule::EmptyTagPair) {
-            rules::suspicious::empty_tag_pair::check(self, element);
+            rules::pedantic::empty_tag_pair::check(self, element);
         }
 
         if element.tag_name.eq_ignore_ascii_case("img") {

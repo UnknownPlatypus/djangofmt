@@ -30,7 +30,7 @@ pub use checker::Checker;
 pub use django_version::DjangoVersion;
 pub use fix::apply::{
     AppliedFix, ApplyResult, FixerError, FixerResult, MAX_FIX_ITERATIONS, RuleFixSummary,
-    apply_fixes, fix_ast, lint_fix,
+    apply_fixes, lint_fix,
 };
 pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
 pub use lint_context::{DiagnosticGuard, LintContext};
@@ -172,29 +172,67 @@ impl FileDiagnostics {
     }
 }
 
-/// Check the AST for lint errors.
+/// A parsed template: the AST, the source it borrows, and the profile it was parsed with.
 ///
-/// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
-///
-/// `path` enables path-aware rules; pass [`None`] when linting a buffer without a backing file.
-#[must_use]
-pub fn check_ast<'a>(
+/// Only [`parse`] builds one, so a check can never run against a source or a profile
+/// the AST was not built from.
+#[derive(Debug)]
+pub struct Parsed<'a> {
     source: &'a str,
-    ast: &Root<'a>,
-    settings: &'a Settings,
-    path: Option<&'a Path>,
-) -> Vec<LintDiagnostic> {
-    let mut checker = Checker::new(source, settings, path);
-    // Walk the ast and collect diagnostics.
-    checker.visit_root(ast);
+    language: Language,
+    ast: Root<'a>,
+}
 
-    // Collect ignore comments and drop the ignored diagnostics.
-    let mut ignore_comments = suppression::collect_ignore_comments(ast, &checker);
-    checker.visit_ignore_comments(&ignore_comments);
-    suppression::record_matches(&checker, &mut ignore_comments);
-    checker.visit_unused_ignore_codes(&ignore_comments);
-    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
-    checker.into_diagnostics()
+impl<'a> Parsed<'a> {
+    /// The AST.
+    #[must_use]
+    pub const fn ast(&self) -> &Root<'a> {
+        &self.ast
+    }
+
+    /// The source the AST borrows.
+    #[must_use]
+    pub const fn source(&self) -> &'a str {
+        self.source
+    }
+
+    /// The profile the source was parsed with.
+    #[must_use]
+    pub const fn language(&self) -> Language {
+        self.language
+    }
+
+    /// Check the AST for lint errors.
+    ///
+    /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
+    ///
+    /// `path` enables path-aware rules; pass [`None`] when linting a buffer without a
+    /// backing file.
+    #[must_use]
+    pub fn check(&self, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
+        let mut checker = Checker::new(self.source, settings, self.language, path);
+        // Walk the ast and collect diagnostics.
+        checker.visit_root(&self.ast);
+
+        // Collect ignore comments and drop the ignored diagnostics.
+        let mut ignore_comments = suppression::collect_ignore_comments(&self.ast, &checker);
+        checker.visit_ignore_comments(&ignore_comments);
+        suppression::record_matches(&checker, &mut ignore_comments);
+        checker.visit_unused_ignore_codes(&ignore_comments);
+        suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
+        checker.into_diagnostics()
+    }
+
+    /// Check, then apply the fixes that meet `threshold` in a single pass.
+    #[must_use]
+    pub fn fix(
+        &self,
+        settings: &Settings,
+        threshold: Applicability,
+        path: Option<&Path>,
+    ) -> ApplyResult {
+        apply_fixes(self.source, &self.check(settings, path), threshold)
+    }
 }
 
 /// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block.
@@ -206,8 +244,12 @@ pub fn parse<'a>(
     source: &'a str,
     language: Language,
     custom_blocks: &[String],
-) -> Result<Root<'a>, SyntaxError> {
-    Parser::new(source, language, custom_blocks.to_vec()).parse_root()
+) -> Result<Parsed<'a>, SyntaxError> {
+    Ok(Parsed {
+        source,
+        language,
+        ast: Parser::new(source, language, custom_blocks.to_vec()).parse_root()?,
+    })
 }
 
 /// Parse and lint `source` in one call.
@@ -220,8 +262,7 @@ pub fn lint_source(
     settings: &Settings,
     path: Option<&Path>,
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
-    let ast = parse(source, language, custom_blocks)?;
-    Ok(check_ast(source, &ast, settings, path))
+    Ok(parse(source, language, custom_blocks)?.check(settings, path))
 }
 
 /// A completed [`lint_text`] run.

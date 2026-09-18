@@ -22,7 +22,6 @@ on:
       # And when we change this workflow itself...
       - .github/workflows/release-build-binaries.yml
 
-# TODO: This is not required when the repo go public
 permissions:
   contents: read
 

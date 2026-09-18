@@ -40,7 +40,7 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 - ⚡️ **70-120x faster** than existing Django template formatters
 - 🐍 **Installable via `pip`, `uv` or `pipx`**
 - 🛡️ **A strict HTML aware parser**: invalid HTML is reported as an error instead of being silently mangled
-- 🎨 **Formats `<style>`/`<script>` tags and attributes** with dedicated formatters
+- 🎨 **Formats CSS** in `<style>` tags and `style` attributes, and JSON in `<script type="application/json">`
 - 🔧 **[Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) with autofix**, for automatic error correction (e.g., automatically sort Tailwind classes)
 - 🛠️ **`pyproject.toml` and `.editorconfig` support**
 - ⌨️ **Editor integrations**, a **pre-commit hook** and a **browser playground**
@@ -49,6 +49,7 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 
 - [Installation](#installation)
 - [Usage](#usage)
+- [Linting](#linting)
 - [Pre-commit hook](#pre-commit-hook)
 - [Configuration](#configuration)
 - [Editor integration](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)
@@ -86,6 +87,19 @@ djangofmt templates/base.html  # Format individual files
 When given a directory, djangofmt recurses into it and formats all `*.html`, `*.jinja`, `*.jinja2`, and `*.j2` files it finds.
 It also respects `.gitignore` files.
 
+### Linting
+
+The `check` command runs the [lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) and exits with `1` when any violation remains:
+
+```shell
+djangofmt check .                                                 # Report violations
+djangofmt check --fix .                                           # Apply safe fixes, then report what is left
+djangofmt check --fix --unsafe-fixes .                            # Apply all fixes, unsafe ones included
+djangofmt check --select category:all --preview --fix --unsafe-fixes .  # Every rule, preview ones included, with all fixes
+```
+
+Fixable violations are marked with `[*]` in the report. Run `djangofmt check --help` for the full list of options.
+
 ## Pre-commit hook
 
 See [pre-commit](https://github.com/pre-commit/pre-commit) for instructions.
@@ -94,10 +108,18 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
+  # Djangofmt version.
   rev: v0.2.12
   hooks:
+    # Run the linter.
+    - id: djangofmt-check
+      args: [--fix]
+    # Run the formatter.
     - id: djangofmt
 ```
+
+Run the linter first: an autofix can leave the template needing a reformat, and the formatter then picks it up in the same pass.
+Instead of `args: [--fix]`, you can set `fix = true` in `[tool.djangofmt.lint]`.
 
 The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
 

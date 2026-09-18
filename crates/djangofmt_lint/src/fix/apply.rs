@@ -9,12 +9,10 @@ use std::borrow::Cow;
 use std::path::Path;
 
 use markup_fmt::SyntaxError;
-use markup_fmt::ast::Root;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::LintDiagnostic;
 use crate::Settings;
-use crate::check_ast;
 use crate::fix::{Applicability, IsolationLevel};
 
 /// Metadata about a single applied fix, captured for `--show-fixes`.
@@ -125,19 +123,6 @@ pub fn apply_fixes(
     }
 }
 
-/// Single-iteration helper: lint `ast` and apply the fixes in one pass.
-#[must_use]
-pub fn fix_ast(
-    source: &str,
-    ast: &Root<'_>,
-    settings: &Settings,
-    threshold: Applicability,
-    path: Option<&Path>,
-) -> ApplyResult {
-    let diagnostics = check_ast(source, ast, settings, path);
-    apply_fixes(source, &diagnostics, threshold)
-}
-
 /// Per-rule summary for `--show-fixes` output.
 #[derive(Debug, Clone, Default)]
 pub struct RuleFixSummary {
@@ -219,12 +204,12 @@ pub fn lint_fix(
             });
         }
 
-        let ast = match crate::parse(&current, profile, custom_blocks) {
-            Ok(ast) => {
+        let parsed = match crate::parse(&current, profile, custom_blocks) {
+            Ok(parsed) => {
                 if iterations == 0 {
                     had_valid_first_parse = true;
                 }
-                ast
+                parsed
             }
             Err(err) if had_valid_first_parse => {
                 return Err(FixerError::SyntaxRegression {
@@ -235,8 +220,8 @@ pub fn lint_fix(
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
-        let diagnostics = check_ast(&current, &ast, settings, path);
-        let result = apply_fixes(&current, &diagnostics, threshold);
+        let diagnostics = parsed.check(settings, path);
+        let result = apply_fixes(parsed.source(), &diagnostics, threshold);
         total_skipped += result.skipped_count;
         for applied in &result.applied_fixes {
             let entry = applied_by_rule.entry(applied.code).or_default();
