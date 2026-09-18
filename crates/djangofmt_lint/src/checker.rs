@@ -21,7 +21,6 @@ use crate::violation::Violation;
 pub struct Checker<'a> {
     context: LintContext<'a>,
     /// Block names collected during the traversal.
-    /// Blocks in attribute position (`<div {% block x %}…>`) are not visited here, so are not recorded.
     /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
     block_names: SmallVec<[&'a str; 8]>,
 }
@@ -169,7 +168,10 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
-            NodeKind::Comment(comment) => self.visit_comment(HTML_COMMENT, comment.raw),
+            NodeKind::Comment(comment) => {
+                self.visit_comment(HTML_COMMENT, comment.raw);
+                self.record_text_block_names(comment.raw);
+            }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
             _ => {}
         }
@@ -226,6 +228,18 @@ impl<'a> Checker<'a> {
 
         for child in &element.children {
             self.visit_node(child);
+        }
+
+        // The parser keeps these bodies as raw text, but Django still reads the tags in them.
+        if ["script", "style", "pre", "textarea"]
+            .iter()
+            .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
+        {
+            for child in &element.children {
+                if let NodeKind::Text(text) = &child.kind {
+                    self.record_text_block_names(text.raw);
+                }
+            }
         }
     }
 
@@ -301,9 +315,16 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn record_block_name(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
+    fn record_block_name<T>(&mut self, block: &JinjaBlock<'a, T>) {
         if let Some(name) = rules::correctness::duplicate_block_name::block_name(block) {
             self.block_names.push(name);
+        }
+    }
+
+    fn record_text_block_names(&mut self, raw: &'a str) {
+        if self.is_rule_enabled(Rule::DuplicateBlockName) {
+            self.block_names
+                .extend(rules::correctness::duplicate_block_name::block_names_in_text(raw));
         }
     }
 
@@ -312,6 +333,10 @@ impl<'a> Checker<'a> {
         block: &JinjaBlock<'a, Attribute<'a>>,
         element: &Element<'a>,
     ) {
+        if self.is_rule_enabled(Rule::DuplicateBlockName) {
+            self.record_block_name(block);
+        }
+
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
