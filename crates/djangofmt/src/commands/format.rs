@@ -141,10 +141,6 @@ pub fn build_markup_options(
             // <mspace width="1em"></mspace> -> <mspace width="1em" />
             mathml_self_closing: Some(true),
             // HTML normal elements should not be self-closing:
-            // <div/> -> <div></div>
-            // <div/>desfsdf -> <div></div>desfsdf
-            // TODO: This is actually slightly incorrect (but better than nothing).
-            //       We need a parse error or to match browser recovery to <div>desfsdf</div>
             html_normal_self_closing: Some(false),
             // This is actually nice to keep this setting false, it makes it possible to control wrapping
             // of props semi manually by inserting or not a newline before the first prop.

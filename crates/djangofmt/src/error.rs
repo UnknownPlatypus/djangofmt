@@ -159,6 +159,15 @@ impl ParseError {
                         // `pos` is just past the `{%`; the caret covers the tag name.
                         djangofmt_lint::span(jinja_name_pos(&source, *pos), tag_name.len()),
                     ),
+                    markup_fmt::SyntaxErrorKind::SelfClosingNonVoidElement(tag_name) => (
+                        syntax_err.kind.to_string(),
+                        Some(format!(
+                            "Browsers ignore the `/` and read `<{tag_name}/>` as an opening `<{tag_name}>`. \
+                             Write `<{tag_name}></{tag_name}>` for an empty element, or `</{tag_name}>` if this was meant to close one."
+                        )),
+                        // `pos` is the `<`; the caret covers the tag name.
+                        djangofmt_lint::span(syntax_err.pos + 1, tag_name.len()),
+                    ),
                     _ => (
                         syntax_err.kind.to_string(),
                         None,
