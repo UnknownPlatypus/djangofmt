@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
+use markup_fmt::ast::{NodeKind, Root};
 use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::Checker;
@@ -16,11 +16,11 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// rules. The result is inconsistent layout across browsers and behaviour that is hard to debug.
 ///
 /// The declaration must come before the `<html>` tag: one placed after it still leaves the
-/// browser in quirks mode. A DOCTYPE or `<html>` tag written inside a `{% if %}` or `{% for %}`
-/// block counts like one written at the top level.
+/// browser in quirks mode.
 ///
-/// Template partials (files with a root-level `{% extends %}` tag or `{% block %}` block) are
-/// assumed to inherit the DOCTYPE from their parent template and are not flagged.
+/// Files that extend another template are assumed to inherit the DOCTYPE from their parent and
+/// are not flagged. Neither is a document whose `<html>` tag is preceded by a root-level `{% %}`
+/// block, since the block may be the one emitting the DOCTYPE.
 ///
 /// ## Example
 /// ```html
@@ -61,57 +61,17 @@ impl Violation for MissingDoctype {
 }
 
 pub fn check(checker: &Checker<'_>, root: &Root<'_>) {
-    if let Scan::Html(html) = scan(&root.children, &mut false) {
-        checker.report_diagnostic(&MissingDoctype, checker.source_span(html.tag_name));
-    }
-}
-
-/// Outcome of walking the document in source order.
-enum Scan<'a, 's> {
-    /// Nothing decisive yet.
-    Continue,
-    /// A partial, or an `<html>` preceded by a DOCTYPE: nothing to report.
-    Done,
-    /// The first `<html>`, reached before any DOCTYPE.
-    Html(&'a Element<'s>),
-}
-
-/// Walks `nodes` in source order, descending into Jinja blocks, until an `<html>` tag or a
-/// partial marker settles the outcome.
-fn scan<'a, 's>(nodes: &'a [Node<'s>], doctype_seen: &mut bool) -> Scan<'a, 's> {
-    for node in nodes {
+    // The first of these nodes settles the file: a DOCTYPE declared after the `<html>` tag comes
+    // too late, and a `{% %}` block before it may be the one emitting the DOCTYPE.
+    for node in &root.children {
         match &node.kind {
-            NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return Scan::Done,
-            NodeKind::JinjaBlock(block) if is_block_partial(block) => return Scan::Done,
-            NodeKind::JinjaBlock(block) => {
-                for item in &block.body {
-                    if let JinjaTagOrChildren::Children(children) = item {
-                        match scan(children, doctype_seen) {
-                            Scan::Continue => {}
-                            outcome => return outcome,
-                        }
-                    }
-                }
-            }
-            NodeKind::Doctype(_) => *doctype_seen = true,
+            NodeKind::Doctype(_) | NodeKind::JinjaBlock(_) => return,
+            NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return,
             NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("html") => {
-                return if *doctype_seen {
-                    Scan::Done
-                } else {
-                    Scan::Html(el)
-                };
+                checker.report_diagnostic(&MissingDoctype, checker.source_span(el.tag_name));
+                return;
             }
             _ => {}
         }
     }
-    Scan::Continue
-}
-
-/// Returns `true` if the block opens with `{% block %}`, marking the file as a partial.
-/// Other root-level blocks (`{% if %}`, `{% for %}`, ...) are legitimate in full documents.
-fn is_block_partial(block: &JinjaBlock<'_, Node<'_>>) -> bool {
-    matches!(
-        block.body.first(),
-        Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "block"
-    )
 }
