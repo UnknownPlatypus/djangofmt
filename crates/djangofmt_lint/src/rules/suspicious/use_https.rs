@@ -151,7 +151,7 @@ fn is_local_host(after_scheme: &str) -> bool {
     if let Ok(ip) = host.parse::<IpAddr>() {
         return match ip {
             IpAddr::V4(v4) => v4.is_loopback() || v4.is_private() || v4.is_unspecified(),
-            IpAddr::V6(v6) => v6.is_loopback() || v6.is_unspecified(),
+            IpAddr::V6(v6) => v6.is_loopback() || v6.is_unique_local() || v6.is_unspecified(),
         };
     }
     host.eq_ignore_ascii_case("localhost")

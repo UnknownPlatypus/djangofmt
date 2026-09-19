@@ -26,9 +26,9 @@ pub enum TitleViolation {
 /// the default link text in result pages. A page without a title leaves users unable to tell tabs
 /// apart and fails WCAG Success Criterion 2.4.2.
 ///
-/// A document that omits `<head>` gets an empty one synthesised by the browser, so it has no
-/// title either. A template tag directly under `<html>` (such as an `{% include %}`) may render
-/// the `<head>`, so such documents are not reported.
+/// A document that omits `<head>` gets one synthesised by the browser, so a `<title>` written
+/// directly under `<html>` still counts. A template tag directly under `<html>` (such as an
+/// `{% include %}`) may render the `<head>`, so such documents are not reported.
 ///
 /// ## Example
 /// ```html
@@ -105,10 +105,13 @@ pub fn check_html(checker: &Checker<'_>, element: &Element<'_>) {
     );
 }
 
-/// Whether a `<head>` is present, or could be rendered by a template tag.
+/// Whether a `<head>` is present or implied by a bare `<title>`, or could be rendered by a
+/// template tag.
 fn may_have_head(nodes: &[Node<'_>]) -> bool {
     nodes.iter().any(|node| match &node.kind {
-        NodeKind::Element(el) => el.tag_name.eq_ignore_ascii_case("head"),
+        NodeKind::Element(el) => {
+            el.tag_name.eq_ignore_ascii_case("head") || el.tag_name.eq_ignore_ascii_case("title")
+        }
         NodeKind::JinjaTag(_) => true,
         NodeKind::JinjaBlock(block) => block.body.iter().any(|item| match item {
             JinjaTagOrChildren::Children(children) => may_have_head(children),
