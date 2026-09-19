@@ -1,9 +1,10 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{Attribute, Element, JinjaTagOrChildren, NativeAttribute};
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::declares_native_attr_matching;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -53,7 +54,11 @@ impl Violation for MissingHtmlLang {
 
 /// The caller guarantees `element` is an `<html>` element.
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    if element.attrs.iter().any(declares_lang) {
+    if element
+        .attrs
+        .iter()
+        .any(|attr| declares_native_attr_matching(attr, &declares_lang))
+    {
         return;
     }
 
@@ -61,15 +66,7 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
 }
 
 /// A `lang` with no value, or a blank one, names no language; a templated value counts.
-fn declares_lang(attr: &Attribute<'_>) -> bool {
-    match attr {
-        Attribute::Native(NativeAttribute { name, value, .. }) => {
-            name.eq_ignore_ascii_case("lang")
-                && matches!(value, Some((value, _)) if !value.trim_ascii().is_empty())
-        }
-        Attribute::JinjaBlock(block) => block.body.iter().any(|item| {
-            matches!(item, JinjaTagOrChildren::Children(children) if children.iter().any(declares_lang))
-        }),
-        _ => false,
-    }
+const fn declares_lang(attr: &NativeAttribute<'_>) -> bool {
+    attr.name.eq_ignore_ascii_case("lang")
+        && matches!(attr.value, Some((value, _)) if !value.trim_ascii().is_empty())
 }

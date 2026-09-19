@@ -125,3 +125,6 @@
 <!-- Asset roots are served from STATIC_URL / MEDIA_URL; `{% url %}` cannot express them -->
 <a href="/static/docs/">Docs</a>
 <a href="/media/uploads/">Uploads</a>
+
+<!-- The literal tail ends like a file, whatever the interpolation resolves to -->
+<a href="/reports/{{ report.id }}.pdf">Download</a>

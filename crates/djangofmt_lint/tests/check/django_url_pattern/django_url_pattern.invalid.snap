@@ -268,5 +268,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  60 │ <a href="/items/{{ item.id }}/">Item</a>
     ·          ──────────┬──────────
     ·                    ╰── here
+ 61 │ <a href="/items/{{ item.id }}">Item</a>
+    ╰────
+  help: Use `{% url 'view_name' %}` instead
+
+  × Hardcoded internal URL in `href`
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:61:10]
+ 60 │ <a href="/items/{{ item.id }}/">Item</a>
+ 61 │ <a href="/items/{{ item.id }}">Item</a>
+    ·          ──────────┬─────────
+    ·                    ╰── here
     ╰────
   help: Use `{% url 'view_name' %}` instead

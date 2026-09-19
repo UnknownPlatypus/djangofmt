@@ -19,7 +19,8 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// Only values that look like a route are reported: they contain a `/` and do not point at a file
 /// (`/favicon.ico`), an asset root (`/static/`, `/media/`), an external host, or a URL scheme.
 /// A literal path prefix followed by interpolation (`/items/{{ pk }}/`) is still a hardcoded
-/// route, while a value that starts with a tag or variable may resolve anywhere and is skipped.
+/// route, unless the value ends like a file (`/img/{{ name }}.png`). A value that starts with a
+/// tag or variable may resolve anywhere and is skipped.
 ///
 /// ## Example
 /// ```html
@@ -96,15 +97,13 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
     else {
         return;
     };
-    // Only the literal prefix can be judged: `/items/{{ pk }}/` is still a hardcoded route,
-    // while a value that starts with a tag or variable may resolve anywhere.
-    let literal_end = ["{{", "{%", "{#"]
-        .iter()
-        .filter_map(|marker| value_str.find(marker))
-        .min()
-        .unwrap_or(value_str.len());
     // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
-    if is_hardcoded_internal_path(value_str[..literal_end].trim_ascii()) {
+    let value = value_str.trim_ascii();
+    // Only literal text can be judged: the prefix tells a route from a value that may resolve
+    // anywhere (`{{ url }}`), the tail tells a route (`/items/{{ pk }}/`) from a file
+    // (`/img/{{ name }}.png`).
+    let (prefix, tail) = literal_ends(value);
+    if is_hardcoded_internal_path(prefix) && !last_segment_has_dot(tail) {
         checker.report_diagnostic(
             &DjangoUrlPattern {
                 attribute: canonical,
@@ -112,6 +111,24 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
             checker.source_span(value_str),
         );
     }
+}
+
+/// The literal text before the first template marker and after the last one; the whole value
+/// twice when it holds no template syntax.
+fn literal_ends(value: &str) -> (&str, &str) {
+    let Some(start) = ["{{", "{%", "{#"]
+        .iter()
+        .filter_map(|marker| value.find(marker))
+        .min()
+    else {
+        return (value, value);
+    };
+    let end = ["}}", "%}", "#}"]
+        .iter()
+        .filter_map(|marker| value.rfind(marker))
+        .max()
+        .map_or(value.len(), |end| end + 2);
+    (&value[..start], &value[end..])
 }
 
 /// Returns true if `value` looks like a hardcoded internal path that should use `{% url %}`.
