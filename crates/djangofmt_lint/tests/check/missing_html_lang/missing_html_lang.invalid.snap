@@ -2,7 +2,7 @@
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Missing `lang` attribute on `<html>`
    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:3:2]
  2 │ <!-- No attributes at all -->
  3 │ <html>
@@ -12,7 +12,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Add a `lang` attribute, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Missing `lang` attribute on `<html>`
    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:7:2]
  6 │ <!-- Has other attributes but no lang -->
  7 │ <html class="no-js" dir="ltr">
@@ -22,7 +22,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ╰────
   help: Add a `lang` attribute, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Missing `lang` attribute on `<html>`
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:11:2]
  10 │ <!-- Case-insensitive tag name -->
  11 │ <HTML>
@@ -32,7 +32,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `lang` attribute, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Missing `lang` attribute on `<html>`
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:16:6]
  15 │ {% if base_template %}
  16 │     <html>
@@ -42,7 +42,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `lang` attribute, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Missing `lang` attribute on `<html>`
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:21:2]
  20 │ <!-- Multi-line opening tag with no lang -->
  21 │ <html
@@ -52,7 +52,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `lang` attribute, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Missing `lang` attribute on `<html>`
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:27:2]
  26 │ <!-- XHTML `xml:lang` alone: HTML5 ignores it; screen readers need `lang` -->
  27 │ <html xml:lang="en">
@@ -62,7 +62,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Add a `lang` attribute, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Empty `lang` attribute on `<html>`
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:31:2]
  30 │ <!-- An empty or valueless `lang` names no language -->
  31 │ <html lang="">
@@ -70,9 +70,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·    ╰── here
  32 │ </html>
     ╰────
-  help: Add a `lang` attribute, e.g. `lang="en"`
+  help: Give `lang` a language tag, e.g. `lang="en"`
 
-  × Missing or empty `lang` attribute on `<html>`
+  × Empty `lang` attribute on `<html>`
     ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:33:2]
  32 │ </html>
  33 │ <html lang>
@@ -80,4 +80,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·    ╰── here
  34 │ </html>
     ╰────
-  help: Add a `lang` attribute, e.g. `lang="en"`
+  help: Give `lang` a language tag, e.g. `lang="en"`
