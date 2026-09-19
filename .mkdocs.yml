@@ -15,12 +15,18 @@ theme:
     - navigation.sections
     - navigation.indexes
     - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.path
     - navigation.footer
+    - navigation.top
+    - toc.follow
     - search.highlight
-    - search.suggest
     - content.code.copy
+    - content.code.select
+    - content.code.annotate
+    - content.tooltips
   palette:
     - media: "(prefers-color-scheme)"
       toggle:
@@ -37,27 +43,34 @@ theme:
         icon: material/brightness-4
         name: Switch to system preference
 
+plugins:
+  - glightbox
+
+# Declaring this key replaces zensical's defaults wholesale, so options it
+# would have set (`line_spans`, the mermaid fence) must be repeated here.
 markdown_extensions:
+  - abbr
   - admonition
   - attr_list
+  - def_list
   - md_in_html
   - toc:
       permalink: true
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.magiclink:
       repo_url_shortener: true
       repo_url_shorthand: true
       user: UnknownPlatypus
       repo: djangofmt
-  - pymdownx.snippets
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.tasklist:
-      custom_checkbox: true
   - pymdownx.emoji
 
 extra:
@@ -69,13 +82,15 @@ extra_css:
 
 nav:
   - Home: index.md
-  - Getting started:
+  - Formatting:
       - formatting.md
-      - linter.md
-      - editor-integration.md
       - known-limitations.md
-      - benchmarks.md
-  - Lint rules: rules.md
+  - Linting:
+      - Running the linter: linter.md
+      - rules.md
   - Settings: settings.md
-  - Contributing: contributing.md
-  - Changelog: changelog.md
+  - Editor integration: editor-integration.md
+  - Project:
+      - benchmarks.md
+      - contributing.md
+      - changelog.md

@@ -43,7 +43,7 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 - 🎨 **Formats CSS** in `<style>` tags and `style` attributes, and JSON in `<script type="application/json">`
 - 🔧 **[Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) with autofix**, for automatic error correction (e.g., automatically sort Tailwind classes)
 - 🛠️ **`pyproject.toml` and `.editorconfig` support**
-- ⌨️ **Editor integrations**, a **pre-commit hook** and a **browser playground**
+- ⌨️ **[Editor integrations](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)**, a **[pre-commit hook](#pre-commit-hook)** and a **[browser playground](https://unknownplatypus.github.io/djangofmt/)**
 
 ## Table of contents
 
