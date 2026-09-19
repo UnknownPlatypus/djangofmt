@@ -43,13 +43,12 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 - 🎨 **Formats CSS** in `<style>` tags and `style` attributes, and JSON in `<script type="application/json">`
 - 🔧 **[Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) with autofix**, for automatic error correction (e.g., automatically sort Tailwind classes)
 - 🛠️ **`pyproject.toml` and `.editorconfig` support**
-- ⌨️ **Editor integrations**, a **pre-commit hook** and a **browser playground**
+- ⌨️ **[Editor integrations](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)**, a **[pre-commit hook](#pre-commit-hook)** and a **[browser playground](https://unknownplatypus.github.io/djangofmt/)**
 
 ## Table of contents
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Linting](#linting)
 - [Pre-commit hook](#pre-commit-hook)
 - [Configuration](#configuration)
 - [Editor integration](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)
@@ -78,27 +77,26 @@ pipx install djangofmt
 
 ## Usage
 
+To run the formatter:
+
 ```shell
 djangofmt .                    # Format all files in the current directory (and any subdirectories).
 djangofmt src/templates        # Format all template files in `src/templates`
 djangofmt templates/base.html  # Format individual files
 ```
 
-When given a directory, djangofmt recurses into it and formats all `*.html`, `*.jinja`, `*.jinja2`, and `*.j2` files it finds.
-It also respects `.gitignore` files.
+When given a directory, djangofmt recurses into it and formats all `*.html`, `*.jinja`, `*.jinja2`, and `*.j2` files it finds (respecting `.gitignore` files).
 
-### Linting
-
-The `check` command runs the [lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) and exits with `1` when any violation remains:
+To run the linter:
 
 ```shell
-djangofmt check .                                                 # Report violations
-djangofmt check --fix .                                           # Apply safe fixes, then report what is left
-djangofmt check --fix --unsafe-fixes .                            # Apply all fixes, unsafe ones included
-djangofmt check --select category:all --preview --fix --unsafe-fixes .  # Every rule, preview ones included, with all fixes
+djangofmt check .                       # Report violations
+djangofmt check --fix .                 # Apply safe fixes, then report what is left
+djangofmt check --fix --unsafe-fixes .  # Apply all fixes, unsafe ones included
 ```
 
-Fixable violations are marked with `[*]` in the report. Run `djangofmt check --help` for the full list of options.
+- See [Running the linter](https://unknownplatypus.github.io/djangofmt/docs/linter/) for rule selection, fixes and suppression comments, or `djangofmt check --help` for the full list of options.
+- See [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) for the full list of available rules and categories.
 
 ## Pre-commit hook
 
@@ -118,9 +116,6 @@ Sample `.pre-commit-config.yaml`:
     - id: djangofmt
 ```
 
-Run the linter first: an autofix can leave the template needing a reformat, and the formatter then picks it up in the same pass.
-Instead of `args: [--fix]`, you can set `fix = true` in `[tool.djangofmt.lint]`.
-
 The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
 
 By default, the configuration uses pre-commit's [`files` option](https://pre-commit.com/#creating-new-hooks) to detect
@@ -129,7 +124,7 @@ by specifying the desired files in the hook configuration within your `.pre-comm
 
 ### `.svg` files support
 
-djangofmt can format svg files too. It will behave exactly the same way as if they were html files.
+djangofmt can format svg files too.
 There is a dedicated pre-commit hook for these:
 
 ```yaml
@@ -179,7 +174,8 @@ fix = true
 
 `target-version` is the Django version your templates target. When unset, it comes from the minimum supported Django version in `[project] dependencies`.
 Rules that depend on it stay disabled until it is known.
-See [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) for the available rule names and categories.
+
+Every option is documented in the [settings reference](https://unknownplatypus.github.io/djangofmt/docs/settings/).
 
 Djangofmt looks for a `pyproject.toml` file by traversing directories upward from the current working directory.
 The first `pyproject.toml` found is used. If no file is found or the file doesn't contain a `[tool.djangofmt]` section, defaults are used.

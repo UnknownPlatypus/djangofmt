@@ -3,7 +3,7 @@
 //!
 //! Each source file is copied with light textual rewrites: GitHub-flavored
 //! alert blockquotes become Material admonitions, top-level README/CONTRIBUTING
-//! links are mapped to their docs-site siblings, and CONTRIBUTING references
+//! links and absolute docs-site URLs are mapped to their docs-site siblings, and CONTRIBUTING references
 //! to repo-relative paths (e.g. `./python/...`) are rewritten as absolute
 //! GitHub URLs so the Zensical site can build under `--strict`.
 
@@ -41,6 +41,7 @@ fn render_index(src: &str) -> String {
         .expect("README.md is missing `<!-- Begin section: Overview -->` markers");
     let body = strip_docs_playground_banner(body);
     let body = rewrite_top_level_md_links(&body);
+    let body = rewrite_docs_site_links(&body);
     let body = rewrite_gh_alerts(&body);
     let mut out = String::with_capacity(body.len() + 64);
     // Front matter must be at line 1, so the warning comment comes after.
@@ -100,6 +101,38 @@ fn strip_docs_playground_banner(src: &str) -> String {
 fn rewrite_top_level_md_links(src: &str) -> String {
     src.replace("](CONTRIBUTING.md", "](contributing.md")
         .replace("](README.md", "](index.md")
+}
+
+/// Base URL of the published docs site, as the README links to it.
+const DOCS_SITE_URL: &str = "https://unknownplatypus.github.io/djangofmt/docs/";
+
+/// `](https://…/docs/page/#anchor)` → `](page.md#anchor)`, so the site links to
+/// its own pages relatively instead of jumping to the deployed site.
+fn rewrite_docs_site_links(src: &str) -> String {
+    let prefix = format!("]({DOCS_SITE_URL}");
+    let mut out = String::with_capacity(src.len());
+    let mut rest = src;
+    while let Some(start) = rest.find(&prefix) {
+        out.push_str(&rest[..start]);
+        out.push_str("](");
+        rest = &rest[start + prefix.len()..];
+        let end = rest.find(')').unwrap_or(rest.len());
+        let (page, anchor) = rest[..end].split_once('#').unwrap_or((&rest[..end], ""));
+        match page.strip_suffix('/').unwrap_or(page) {
+            "" => out.push_str("index.md"),
+            page => {
+                out.push_str(page);
+                out.push_str(".md");
+            }
+        }
+        if !anchor.is_empty() {
+            out.push('#');
+            out.push_str(anchor);
+        }
+        rest = &rest[end..];
+    }
+    out.push_str(rest);
+    out
 }
 
 /// `](./path)` → `](https://github.com/.../blob/main/path)`. Used by
@@ -198,6 +231,19 @@ mod tests {
         assert_eq!(
             rewrite_top_level_md_links("[Home](README.md#install)"),
             "[Home](index.md#install)"
+        );
+    }
+
+    #[test]
+    fn rewrites_docs_site_links() {
+        let src = "[Rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) and \
+                   [Skip](https://unknownplatypus.github.io/djangofmt/docs/formatting/#disabling-formatting) \
+                   and [Home](https://unknownplatypus.github.io/djangofmt/docs/) but not \
+                   [Playground](https://unknownplatypus.github.io/djangofmt/)";
+        assert_eq!(
+            rewrite_docs_site_links(src),
+            "[Rules](rules.md) and [Skip](formatting.md#disabling-formatting) and [Home](index.md) \
+             but not [Playground](https://unknownplatypus.github.io/djangofmt/)"
         );
     }
 

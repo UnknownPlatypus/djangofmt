@@ -14,7 +14,7 @@ use crate::django_requirement::infer_target_version;
 use crate::error::{Error, Result};
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 
-/// Options shared by the `format` and `check` commands.
+/// Options shared by the formatter (`djangofmt`) and the linter (`djangofmt check`).
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, OptionsMetadata)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct PyprojectSettings {

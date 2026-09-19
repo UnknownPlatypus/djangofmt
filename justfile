@@ -48,7 +48,7 @@ docs-build: docs-generate
 
 # Serve the Zensical docs site with live-reload (regenerates docs first).
 [group('docs')]
-docs-serve: docs-generate
+docs-dev: docs-generate
     uv run --isolated --group docs zensical serve --config-file .mkdocs.yml
 
 # Build playground WASM package

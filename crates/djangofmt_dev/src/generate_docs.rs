@@ -9,7 +9,7 @@ use djangofmt::options_metadata::OptionsMetadata;
 use djangofmt::pyproject::PyprojectSettings;
 use djangofmt_lint::{FixAvailability, Rule, RuleGroup};
 
-use crate::generate_all::{AUTOGEN_HEADER, Args, apply};
+use crate::generate_all::{AUTOGEN_HEADER, Args, Mode, apply};
 use crate::{REPO_BRANCH, REPO_URL, root_dir};
 
 /// Substituted with the next release version by release tooling. Until then
@@ -18,6 +18,10 @@ const NEXT_VERSION_PLACEHOLDER: &str = "NEXT_DJANGOFMT_VERSION";
 
 pub fn main(args: &Args) -> Result<()> {
     let dir = root_dir().join("docs").join("rules");
+    // Start clean so a renamed or removed rule doesn't leave its old page in the site.
+    if args.mode == Mode::Write && dir.exists() {
+        std::fs::remove_dir_all(&dir)?;
+    }
     for rule in Rule::iter() {
         let Some(explanation) = rule.explanation() else {
             // Skip rules with no doc comment: the generator would otherwise

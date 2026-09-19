@@ -238,18 +238,3 @@ jobs:
         env:
           MSRV: ${{ steps.msrv.outputs.value }}
         run: cargo "+${MSRV}" test --locked --no-run --workspace --all-targets --all-features
-
-  docs_check:
-    name: "rule docs up to date"
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - run: cargo run --locked -p djangofmt_dev -- generate-all
-      - name: Verify rule docs are up to date
-        run: |
-          git add --intent-to-add docs/
-          git diff HEAD --exit-code -- docs/

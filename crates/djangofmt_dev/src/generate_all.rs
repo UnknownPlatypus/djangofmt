@@ -53,3 +53,15 @@ pub fn main(args: &Args) -> Result<()> {
     sync_top_level::main(args)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Args, Mode, main};
+
+    /// Every generator renders end to end, so a rule doc naming an unknown option or a README
+    /// missing its section markers fails here rather than in the docs build.
+    #[test]
+    fn generates_every_page() {
+        main(&Args { mode: Mode::DryRun }).unwrap();
+    }
+}

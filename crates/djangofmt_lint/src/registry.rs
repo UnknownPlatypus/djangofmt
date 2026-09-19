@@ -50,6 +50,7 @@ impl RuleGroup {
     EnumIter,
     EnumString,
     strum::Display,
+    strum::EnumMessage,
     strum::VariantNames,
     Serialize,
     Deserialize,
@@ -63,8 +64,6 @@ pub enum RuleCategory {
     Suspicious,
     /// Code that should be written in a more idiomatic way.
     Style,
-    /// Code that does something simple but in a complex way.
-    Complexity,
     /// Code that creates accessibility (a11y) barriers.
     Accessibility,
     /// Rules that are rather strict, noisy, or have occasional false positives. Off by default.
