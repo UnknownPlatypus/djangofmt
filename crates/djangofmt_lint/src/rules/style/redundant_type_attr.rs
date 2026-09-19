@@ -10,16 +10,13 @@ use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for redundant `type` attributes on `<script>`, `<style>` and `<link rel="stylesheet">`
-/// tags.
+/// Checks for redundant `type` attributes on `<script>`, `<style>`
+/// and `<link rel="stylesheet">` tags.
 ///
 /// ## Why is this bad?
 /// Since HTML5, `<script>` defaults to `type="text/javascript"`, and `<style>` and stylesheet
 /// `<link>`s default to `type="text/css"`. Specifying these default values is redundant and adds
 /// unnecessary noise.
-///
-/// Non-default types (e.g., `module`, `text/less`, `application/ld+json`) are excluded by
-/// value comparison; values containing template interpolation are skipped explicitly.
 ///
 /// ## Example
 /// ```html
