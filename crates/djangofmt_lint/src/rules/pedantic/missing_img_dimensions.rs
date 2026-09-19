@@ -49,14 +49,10 @@ impl Violation for MissingImgDimensions {
 
 /// The caller guarantees `element` is an `<img>`.
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    let mut has_height = false;
-    let mut has_width = false;
-    for attr in &element.attrs {
-        has_height = has_height || declares_native_attr(attr, "height");
-        has_width = has_width || declares_native_attr(attr, "width");
-        if has_height && has_width {
-            return;
-        }
+    if declares_native_attr(&element.attrs, "height")
+        && declares_native_attr(&element.attrs, "width")
+    {
+        return;
     }
 
     checker.report_diagnostic(&MissingImgDimensions, checker.source_span(element.tag_name));
