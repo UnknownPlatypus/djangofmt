@@ -1,12 +1,12 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
+use crate::rules::helpers::{contains_interpolation, native_attrs};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -116,14 +116,12 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 
 /// `rel` is a space-separated token list (`rel="alternate stylesheet"`).
 fn is_stylesheet_link(element: &Element<'_>) -> bool {
-    element.attrs.iter().any(|attr| {
-        matches!(
-            attr,
-            Attribute::Native(NativeAttribute { name, value: Some((value, _)), .. })
-                if name.eq_ignore_ascii_case("rel")
-                    && value
-                        .split_ascii_whitespace()
-                        .any(|token| token.eq_ignore_ascii_case("stylesheet"))
-        )
+    native_attrs(&element.attrs).any(|attr| {
+        attr.name.eq_ignore_ascii_case("rel")
+            && attr.value.is_some_and(|(value, _)| {
+                value
+                    .split_ascii_whitespace()
+                    .any(|token| token.eq_ignore_ascii_case("stylesheet"))
+            })
     })
 }

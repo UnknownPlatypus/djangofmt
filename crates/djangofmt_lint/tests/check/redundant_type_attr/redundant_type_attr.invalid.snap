@@ -158,5 +158,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  42 │ <link rel="alternate stylesheet" type="text/css" href="print.css">
     ·                                        ────┬───
     ·                                            ╰── here
+ 43 │ <link {% if print_styles %}rel="stylesheet"{% endif %} type="text/css" href="print.css">
+    ╰────
+  help: Remove the `type` attribute
+
+  × Redundant `type="text/css"` on `<link>`
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:43:62]
+ 42 │ <link rel="alternate stylesheet" type="text/css" href="print.css">
+ 43 │ <link {% if print_styles %}rel="stylesheet"{% endif %} type="text/css" href="print.css">
+    ·                                                              ────┬───
+    ·                                                                  ╰── here
     ╰────
   help: Remove the `type` attribute

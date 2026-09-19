@@ -42,3 +42,4 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- `text/css` is the default for a stylesheet link -->
 <link rel="stylesheet" href="app.css">
 <link rel="alternate stylesheet" href="print.css">
+<link {% if print_styles %}rel="stylesheet"{% endif %} href="print.css">

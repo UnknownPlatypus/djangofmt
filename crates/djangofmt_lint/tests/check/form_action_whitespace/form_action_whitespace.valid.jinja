@@ -3,3 +3,6 @@
 <form method="post"
       action="{%- if connection -%} {{ url_for('connection_bp.edit_connection', connection_id=connection.id) }} {%- else -%} {{ url_for('connection_bp.new_connection') }} {%- endif -%} ">
 </form>
+
+<!-- Comment markers carry whitespace control too -->
+<form action=" {#- legacy endpoint -#} /submit/"></form>
