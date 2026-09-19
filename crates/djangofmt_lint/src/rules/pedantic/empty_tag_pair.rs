@@ -79,9 +79,10 @@ fn is_excluded_tag(tag: &str) -> bool {
 }
 
 /// Returns `true` when `children` is either empty or contains only whitespace-only text nodes.
+/// Only ASCII whitespace counts: a non-breaking space is rendered content, like `&nbsp;`.
 fn has_only_whitespace(children: &[Node<'_>]) -> bool {
     children.iter().all(|child| match &child.kind {
-        NodeKind::Text(text) => text.raw.chars().all(char::is_whitespace),
+        NodeKind::Text(text) => text.raw.chars().all(|c| c.is_ascii_whitespace()),
         _ => false,
     })
 }

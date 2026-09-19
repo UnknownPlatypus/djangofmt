@@ -5,6 +5,7 @@ use markup_fmt::ast::{
     Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
     Root,
 };
+use markup_fmt::parser::parse_jinja_tag_name;
 use miette::SourceSpan;
 use smallvec::SmallVec;
 
@@ -21,9 +22,10 @@ use crate::violation::Violation;
 pub struct Checker<'a> {
     context: LintContext<'a>,
     /// Block names collected during the traversal.
-    /// Blocks in attribute position (`<div {% block x %}…>`) are not visited here, so are not recorded.
     /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
     block_names: SmallVec<[&'a str; 8]>,
+    /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
+    in_raw: bool,
 }
 
 impl<'a> Checker<'a> {
@@ -37,6 +39,7 @@ impl<'a> Checker<'a> {
         Self {
             context: LintContext::new(source, settings, language, path),
             block_names: SmallVec::new_const(),
+            in_raw: false,
         }
     }
 
@@ -169,7 +172,10 @@ impl<'a> Checker<'a> {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
-            NodeKind::Comment(comment) => self.visit_comment(HTML_COMMENT, comment.raw),
+            NodeKind::Comment(comment) => {
+                self.visit_comment(HTML_COMMENT, comment.raw);
+                self.record_text_block_names(comment.raw);
+            }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
             _ => {}
         }
@@ -182,7 +188,7 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
-        if self.is_rule_enabled(Rule::SameFilePartialInclude) {
+        if !self.in_raw && self.is_rule_enabled(Rule::SameFilePartialInclude) {
             rules::style::same_file_partial_include::check(self, tag);
         }
     }
@@ -203,10 +209,13 @@ impl<'a> Checker<'a> {
             if self.is_rule_enabled(Rule::MissingImgDimensions) {
                 rules::pedantic::missing_img_dimensions::check(self, element);
             }
-        } else if element.tag_name.eq_ignore_ascii_case("html")
-            && self.is_rule_enabled(Rule::MissingHtmlLang)
-        {
-            rules::accessibility::missing_html_lang::check(self, element);
+        } else if element.tag_name.eq_ignore_ascii_case("html") {
+            if self.is_rule_enabled(Rule::MissingHtmlLang) {
+                rules::accessibility::missing_html_lang::check(self, element);
+            }
+            if self.is_rule_enabled(Rule::MissingTitle) {
+                rules::accessibility::missing_title::check_html(self, element);
+            }
         } else if element.tag_name.eq_ignore_ascii_case("head")
             && self.is_rule_enabled(Rule::MissingTitle)
         {
@@ -223,6 +232,18 @@ impl<'a> Checker<'a> {
 
         for child in &element.children {
             self.visit_node(child);
+        }
+
+        // The parser keeps these bodies as raw text, but Django still reads the tags in them.
+        if ["script", "style", "pre", "textarea"]
+            .iter()
+            .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
+        {
+            for child in &element.children {
+                if let NodeKind::Text(text) = &child.kind {
+                    self.record_text_block_names(text.raw);
+                }
+            }
         }
     }
 
@@ -281,14 +302,21 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_jinja_block(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
-        if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
-            rules::correctness::untrimmed_blocktranslate::check(self, block);
+        if !self.in_raw {
+            if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
+                rules::correctness::untrimmed_blocktranslate::check(self, block);
+            }
+            if self.is_rule_enabled(Rule::DuplicateBlockName) {
+                self.record_block_name(block);
+            }
         }
 
-        if self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.record_block_name(block);
-        }
-
+        // `{% raw %}` emits its body verbatim: the HTML inside is real, the template tags are not.
+        let outer_raw = self.in_raw;
+        self.in_raw |= matches!(
+            block.body.first(),
+            Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "raw"
+        );
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
@@ -296,11 +324,19 @@ impl<'a> Checker<'a> {
                 }
             }
         }
+        self.in_raw = outer_raw;
     }
 
-    fn record_block_name(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
+    fn record_block_name<T>(&mut self, block: &JinjaBlock<'a, T>) {
         if let Some(name) = rules::correctness::duplicate_block_name::block_name(block) {
             self.block_names.push(name);
+        }
+    }
+
+    fn record_text_block_names(&mut self, raw: &'a str) {
+        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
+            self.block_names
+                .extend(rules::correctness::duplicate_block_name::block_names_in_text(raw));
         }
     }
 
@@ -309,6 +345,10 @@ impl<'a> Checker<'a> {
         block: &JinjaBlock<'a, Attribute<'a>>,
         element: &Element<'a>,
     ) {
+        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
+            self.record_block_name(block);
+        }
+
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {

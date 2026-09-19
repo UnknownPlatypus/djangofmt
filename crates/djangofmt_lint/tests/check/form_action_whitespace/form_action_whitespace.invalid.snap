@@ -112,3 +112,32 @@ source: crates/djangofmt_lint/tests/check/main.rs
  36 │ {% endif %}
     ╰────
   help: Trim the `action` value
+
+  × Extra whitespace in form `action`
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:39:15]
+ 38 │ <!-- Padding around a template tag is inert too: the browser strips the edges of the rendered value -->
+ 39 │ <form action=" {% url 'foo:bar' %} "></form>
+    ·               ──────────┬──────────
+    ·                         ╰── here
+ 40 │ <form action="{% url 'foo:bar' %} "></form>
+    ╰────
+  help: Trim the `action` value
+
+  × Extra whitespace in form `action`
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:40:15]
+ 39 │ <form action=" {% url 'foo:bar' %} "></form>
+ 40 │ <form action="{% url 'foo:bar' %} "></form>
+    ·               ──────────┬─────────
+    ·                         ╰── here
+ 41 │ <form action=" {{ url }} "></form>
+    ╰────
+  help: Trim the `action` value
+
+  × Extra whitespace in form `action`
+    ╭─[tests/check/form_action_whitespace/form_action_whitespace.invalid.html:41:15]
+ 40 │ <form action="{% url 'foo:bar' %} "></form>
+ 41 │ <form action=" {{ url }} "></form>
+    ·               ─────┬─────
+    ·                    ╰── here
+    ╰────
+  help: Trim the `action` value

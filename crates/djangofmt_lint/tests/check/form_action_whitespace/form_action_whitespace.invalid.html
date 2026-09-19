@@ -34,3 +34,8 @@
 {% if show_form %}
     <form action=" /submit/ "></form>
 {% endif %}
+
+<!-- Padding around a template tag is inert too: the browser strips the edges of the rendered value -->
+<form action=" {% url 'foo:bar' %} "></form>
+<form action="{% url 'foo:bar' %} "></form>
+<form action=" {{ url }} "></form>

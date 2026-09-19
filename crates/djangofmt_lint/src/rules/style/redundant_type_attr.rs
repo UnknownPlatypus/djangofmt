@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{Element, NativeAttribute};
+use markup_fmt::ast::{Attribute, Element, NativeAttribute};
 
 use crate::Checker;
 use crate::fix::FixAvailability;
@@ -10,11 +10,13 @@ use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for redundant `type` attributes on `<script>` and `<style>` tags.
+/// Checks for redundant `type` attributes on `<script>`, `<style>` and `<link rel="stylesheet">`
+/// tags.
 ///
 /// ## Why is this bad?
-/// Since HTML5, `<script>` defaults to `type="text/javascript"` and `<style>` defaults to
-/// `type="text/css"`. Specifying these default values is redundant and adds unnecessary noise.
+/// Since HTML5, `<script>` defaults to `type="text/javascript"`, and `<style>` and stylesheet
+/// `<link>`s default to `type="text/css"`. Specifying these default values is redundant and adds
+/// unnecessary noise.
 ///
 /// Non-default types (e.g., `module`, `text/less`, `application/ld+json`) are excluded by
 /// value comparison; values containing template interpolation are skipped explicitly.
@@ -23,12 +25,14 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```html
 /// <script type="text/javascript" src="app.js"></script>
 /// <style type="text/css">.foo { color: red; }</style>
+/// <link rel="stylesheet" type="text/css" href="app.css">
 /// ```
 ///
 /// Use instead:
 /// ```html
 /// <script src="app.js"></script>
 /// <style>.foo { color: red; }</style>
+/// <link rel="stylesheet" href="app.css">
 /// ```
 ///
 /// ## References
@@ -69,7 +73,9 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 
     let default_type = if tag.eq_ignore_ascii_case("script") {
         "text/javascript"
-    } else if tag.eq_ignore_ascii_case("style") {
+    } else if tag.eq_ignore_ascii_case("style")
+        || (tag.eq_ignore_ascii_case("link") && is_stylesheet_link(element))
+    {
         "text/css"
     } else {
         return;
@@ -110,4 +116,18 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
         value_str,
         quote.is_some(),
     ));
+}
+
+/// `rel` is a space-separated token list (`rel="alternate stylesheet"`).
+fn is_stylesheet_link(element: &Element<'_>) -> bool {
+    element.attrs.iter().any(|attr| {
+        matches!(
+            attr,
+            Attribute::Native(NativeAttribute { name, value: Some((value, _)), .. })
+                if name.eq_ignore_ascii_case("rel")
+                    && value
+                        .split_ascii_whitespace()
+                        .any(|token| token.eq_ignore_ascii_case("stylesheet"))
+        )
+    })
 }

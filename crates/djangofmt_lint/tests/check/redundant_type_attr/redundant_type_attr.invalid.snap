@@ -141,3 +141,22 @@ source: crates/djangofmt_lint/tests/check/main.rs
  38 │ {% endif %}
     ╰────
   help: Remove the `type` attribute
+
+  × Redundant `type="text/css"` on `<link>`
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:41:30]
+ 40 │ <!-- `text/css` is the default for a stylesheet link -->
+ 41 │ <link rel="stylesheet" type="text/css" href="app.css">
+    ·                              ────┬───
+    ·                                  ╰── here
+ 42 │ <link rel="alternate stylesheet" type="text/css" href="print.css">
+    ╰────
+  help: Remove the `type` attribute
+
+  × Redundant `type="text/css"` on `<link>`
+    ╭─[tests/check/redundant_type_attr/redundant_type_attr.invalid.html:42:40]
+ 41 │ <link rel="stylesheet" type="text/css" href="app.css">
+ 42 │ <link rel="alternate stylesheet" type="text/css" href="print.css">
+    ·                                        ────┬───
+    ·                                            ╰── here
+    ╰────
+  help: Remove the `type` attribute

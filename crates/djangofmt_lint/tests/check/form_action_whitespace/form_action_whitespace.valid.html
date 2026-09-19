@@ -17,10 +17,8 @@
         some-event:my-custom-element#handleSomething" >
 </form>
 
-<!-- Interpolated values are skipped (template tags may legitimately have surrounding padding) -->
-<form action=" {% url 'foo:bar' %} "></form>
+<!-- Interpolated value with no padding -->
 <form action="{{ submit_url }}"></form>
-<form action=" {{ url }} "></form>
 
 <!-- Non-ASCII whitespace (NBSP) is preserved: URL parser doesn't strip it either -->
 <form action=" /submit/ "></form>

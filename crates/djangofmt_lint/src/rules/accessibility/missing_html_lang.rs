@@ -1,19 +1,20 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::Element;
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::declares_native_attr;
+use crate::rules::helpers::declares_native_attr_matching;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for `<html>` tags that do not declare a `lang` attribute.
+/// Checks for `<html>` tags that do not declare a non-empty `lang` attribute.
 ///
 /// ## Why is this bad?
 /// The `lang` attribute on `<html>` declares the primary language of the document. Screen readers
 /// use it to select the correct pronunciation rules, and search engines use it to index the page
-/// for the right audience.
+/// for the right audience. An empty or valueless `lang` declares the language as unknown, which
+/// is no better than omitting it.
 ///
 /// A `lang` attribute wrapped in a Jinja conditional (e.g. `{% if %}lang="en"{% endif %}`) is
 /// treated as present, to avoid false positives on dynamic templates.
@@ -43,7 +44,7 @@ impl Violation for MissingHtmlLang {
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
-        "Missing `lang` attribute on `<html>`".into()
+        "Missing or empty `lang` attribute on `<html>`".into()
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
@@ -56,10 +57,16 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     if element
         .attrs
         .iter()
-        .any(|attr| declares_native_attr(attr, "lang"))
+        .any(|attr| declares_native_attr_matching(attr, &declares_lang))
     {
         return;
     }
 
     checker.report_diagnostic(&MissingHtmlLang, checker.source_span(element.tag_name));
+}
+
+/// A `lang` with no value, or a blank one, names no language; a templated value counts.
+const fn declares_lang(attr: &NativeAttribute<'_>) -> bool {
+    attr.name.eq_ignore_ascii_case("lang")
+        && matches!(attr.value, Some((value, _)) if !value.trim_ascii().is_empty())
 }

@@ -32,3 +32,6 @@
 
 <!-- Browsers strip surrounding whitespace, so a padded value still resolves the static path -->
 <img src=" /static/img/logo.png " alt="" width="0" height="0">
+
+<!-- A literal `/static/` prefix is hardcoded whatever the interpolation appends -->
+<img src="/static/{{ theme }}/logo.png" alt="" width="0" height="0">

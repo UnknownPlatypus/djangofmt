@@ -54,3 +54,8 @@
 
 <!-- Browsers strip surrounding whitespace, so a padded value still resolves the internal path -->
 <a href=" /profile/ ">Profile</a>
+
+<!-- A literal path prefix followed by interpolation is still a hardcoded route -->
+<div data-src="/table/task/{{ task.id }}/log/"></div>
+<a href="/items/{{ item.id }}/">Item</a>
+<a href="/items/{{ item.id }}">Item</a>

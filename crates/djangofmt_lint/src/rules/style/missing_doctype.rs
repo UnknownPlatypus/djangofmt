@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
+use markup_fmt::ast::{Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
 use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::Checker;
@@ -14,6 +14,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// HTML5 requires a DOCTYPE declaration at the top of every document. Without it, browsers fall
 /// back to "quirks mode", which emulates legacy rendering bugs and applies different CSS box-model
 /// rules. The result is inconsistent layout across browsers and behaviour that is hard to debug.
+///
+/// The declaration must come before the `<html>` tag: one placed after it still leaves the
+/// browser in quirks mode. A DOCTYPE or `<html>` tag written inside a `{% if %}` or `{% for %}`
+/// block counts like one written at the top level.
 ///
 /// Template partials (files with a root-level `{% extends %}` tag or `{% block %}` block) are
 /// assumed to inherit the DOCTYPE from their parent template and are not flagged.
@@ -57,32 +61,50 @@ impl Violation for MissingDoctype {
 }
 
 pub fn check(checker: &Checker<'_>, root: &Root<'_>) {
-    let mut html_element = None;
-    let mut has_doctype = false;
+    if let Scan::Html(html) = scan(&root.children, &mut false) {
+        checker.report_diagnostic(&MissingDoctype, checker.source_span(html.tag_name));
+    }
+}
 
-    for node in &root.children {
+/// Outcome of walking the document in source order.
+enum Scan<'a, 's> {
+    /// Nothing decisive yet.
+    Continue,
+    /// A partial, or an `<html>` preceded by a DOCTYPE: nothing to report.
+    Done,
+    /// The first `<html>`, reached before any DOCTYPE.
+    Html(&'a Element<'s>),
+}
+
+/// Walks `nodes` in source order, descending into Jinja blocks, until an `<html>` tag or a
+/// partial marker settles the outcome.
+fn scan<'a, 's>(nodes: &'a [Node<'s>], doctype_seen: &mut bool) -> Scan<'a, 's> {
+    for node in nodes {
         match &node.kind {
-            NodeKind::JinjaBlock(block) if is_block_partial(block) => return,
-            NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return,
-            NodeKind::Doctype(_) => has_doctype = true,
-            NodeKind::Element(el)
-                if html_element.is_none() && el.tag_name.eq_ignore_ascii_case("html") =>
-            {
-                html_element = Some(el);
+            NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return Scan::Done,
+            NodeKind::JinjaBlock(block) if is_block_partial(block) => return Scan::Done,
+            NodeKind::JinjaBlock(block) => {
+                for item in &block.body {
+                    if let JinjaTagOrChildren::Children(children) = item {
+                        match scan(children, doctype_seen) {
+                            Scan::Continue => {}
+                            outcome => return outcome,
+                        }
+                    }
+                }
+            }
+            NodeKind::Doctype(_) => *doctype_seen = true,
+            NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("html") => {
+                return if *doctype_seen {
+                    Scan::Done
+                } else {
+                    Scan::Html(el)
+                };
             }
             _ => {}
         }
     }
-
-    if has_doctype {
-        return;
-    }
-
-    let Some(html) = html_element else {
-        return;
-    };
-
-    checker.report_diagnostic(&MissingDoctype, checker.source_span(html.tag_name));
+    Scan::Continue
 }
 
 /// Returns `true` if the block opens with `{% block %}`, marking the file as a partial.

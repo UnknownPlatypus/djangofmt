@@ -56,11 +56,17 @@
     </head>
 </html>
 
-<!-- Documents without any <head> are not checked (fragment / partial template) -->
+<!-- An include directly under <html> may render the <head>
+     (Regression: djLint #826 — head partial included from the base template) -->
 <html lang="en">
-    <body>
-        <p>No head, no problem.</p>
-    </body>
+    {% include "head.html" %}
+    <body></body>
+</html>
+
+<!-- The <head> start tag is optional: a bare <title> sits in the implied <head> -->
+<html lang="en">
+    <title>Page</title>
+    <body></body>
 </html>
 
 <!-- Fragment template extending a base with only blocks -->

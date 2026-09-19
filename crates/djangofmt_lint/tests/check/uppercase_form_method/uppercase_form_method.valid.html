@@ -27,3 +27,9 @@
     action="{% url 'submit' %}"
     method="post"
 ></form>
+
+<!-- A template comment renders to nothing, so the value is dynamic too -->
+<form method="POST{# keep me #}"></form>
+
+<!-- Not a form method at all: invalid-attr-value reports it, lowercasing would not make it valid -->
+<form method="PUT"></form>

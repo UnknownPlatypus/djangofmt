@@ -1,13 +1,13 @@
-use markup_fmt::ast::{Attribute, JinjaBlock, JinjaTagOrChildren};
+use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
 
 use crate::Checker;
 
-/// Returns true if the value contains Jinja/Django interpolation markers.
+/// Returns true if the value contains Jinja/Django template markers.
 ///
-/// Values with `{{` or `{%` are dynamic and should be skipped by most rules.
+/// Values with `{{`, `{%` or `{#` are dynamic and should be skipped by most rules.
 #[inline]
 pub fn contains_interpolation(value: &str) -> bool {
-    value.contains("{{") || value.contains("{%")
+    value.contains("{{") || value.contains("{%") || value.contains("{#")
 }
 
 /// Yields each `srcset` candidate URL.
@@ -24,24 +24,29 @@ pub fn srcset_candidates(value: &str) -> impl Iterator<Item = &str> {
 /// Returns true if `attr` declares a native HTML attribute named `name`
 /// (case-insensitive), either directly or recursively inside any branch of a
 /// Jinja `{% if %}…{% endif %}` block.
+pub fn declares_native_attr(attr: &Attribute<'_>, name: &str) -> bool {
+    declares_native_attr_matching(attr, &|native| native.name.eq_ignore_ascii_case(name))
+}
+
+/// Returns true if `attr` is a native HTML attribute satisfying `predicate`, either directly or
+/// recursively inside any branch of a Jinja `{% if %}…{% endif %}` block.
 ///
 /// Jinja `Tag` items are treated as non-declaring; we don't peek inside other
 /// tag bodies.
-pub fn declares_native_attr(attr: &Attribute<'_>, name: &str) -> bool {
+pub fn declares_native_attr_matching(
+    attr: &Attribute<'_>,
+    predicate: &impl Fn(&NativeAttribute<'_>) -> bool,
+) -> bool {
     match attr {
-        Attribute::Native(native) => native.name.eq_ignore_ascii_case(name),
-        Attribute::JinjaBlock(block) => jinja_block_declares_native_attr(block, name),
+        Attribute::Native(native) => predicate(native),
+        Attribute::JinjaBlock(block) => block.body.iter().any(|item| match item {
+            JinjaTagOrChildren::Children(children) => children
+                .iter()
+                .any(|attr| declares_native_attr_matching(attr, predicate)),
+            JinjaTagOrChildren::Tag(_) => false,
+        }),
         _ => false,
     }
-}
-
-fn jinja_block_declares_native_attr(block: &JinjaBlock<'_, Attribute<'_>>, name: &str) -> bool {
-    block.body.iter().any(|item| match item {
-        JinjaTagOrChildren::Children(children) => {
-            children.iter().any(|attr| declares_native_attr(attr, name))
-        }
-        JinjaTagOrChildren::Tag(_) => false,
-    })
 }
 
 /// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
