@@ -6,6 +6,7 @@
 <!-- Interpolation - dynamic values should be skipped -->
 <form method="{{ method }}">Submit</form>
 <form method="{% if x %}post{% else %}get{% endif %}">Submit</form>
+<form method="post{# swapped at render time #}">Submit</form>
 
 <!-- Non-form element with method attr - should not trigger -->
 <div method="put"></div>
