@@ -101,3 +101,13 @@ source: crates/djangofmt_lint/tests/check/main.rs
  71 │     <body>
     ╰────
   help: Add a `<head>` containing a `<title>` element
+
+  × Missing or empty `<title>` in `<head>`
+    ╭─[tests/check/missing_title/missing_title.invalid.html:77:2]
+ 76 │ <!-- Bare <title> in the implied <head>, with no content -->
+ 77 │ <html lang="en">
+    ·  ──┬─
+    ·    ╰── here
+ 78 │     <title></title>
+    ╰────
+  help: Add descriptive text to `<title>`

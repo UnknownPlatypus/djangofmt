@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{Element, JinjaBlock, JinjaTagOrChildren, Node, NodeKind};
+use markup_fmt::ast::{Element, JinjaTagOrChildren, Node, NodeKind};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
@@ -25,10 +25,6 @@ pub enum TitleViolation {
 /// bookmarks; screen readers announce it first when the page loads; and search engines use it as
 /// the default link text in result pages. A page without a title leaves users unable to tell tabs
 /// apart and fails WCAG Success Criterion 2.4.2.
-///
-/// A document that omits `<head>` gets one synthesised by the browser, so a `<title>` written
-/// directly under `<html>` still counts. A template tag directly under `<html>` (such as an
-/// `{% include %}`) may render the `<head>`, so such documents are not reported.
 ///
 /// ## Example
 /// ```html
@@ -79,10 +75,9 @@ impl Violation for MissingTitle {
 
 /// The caller guarantees `element` is a `<head>`.
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    let kind = match classify_title(&element.children) {
-        TitleStatus::Present => return,
-        TitleStatus::Empty => TitleViolation::Empty,
-        TitleStatus::Absent => TitleViolation::Absent,
+    let status = classify_title(&element.children, &node_title_status);
+    let Some(kind) = status.violation(TitleViolation::Absent) else {
+        return;
     };
 
     checker.report_diagnostic(
@@ -93,36 +88,21 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
 
 /// The caller guarantees `element` is an `<html>`.
 pub fn check_html(checker: &Checker<'_>, element: &Element<'_>) {
-    if may_have_head(&element.children) {
+    let status = classify_title(&element.children, &root_node_title_status);
+    let Some(kind) = status.violation(TitleViolation::NoHead) else {
         return;
-    }
+    };
 
     checker.report_diagnostic(
-        &MissingTitle {
-            kind: TitleViolation::NoHead,
-        },
+        &MissingTitle { kind },
         checker.source_span(element.tag_name),
     );
 }
 
-/// Whether a `<head>` is present or implied by a bare `<title>`, or could be rendered by a
-/// template tag.
-fn may_have_head(nodes: &[Node<'_>]) -> bool {
-    nodes.iter().any(|node| match &node.kind {
-        NodeKind::Element(el) => {
-            el.tag_name.eq_ignore_ascii_case("head") || el.tag_name.eq_ignore_ascii_case("title")
-        }
-        NodeKind::JinjaTag(_) => true,
-        NodeKind::JinjaBlock(block) => block.body.iter().any(|item| match item {
-            JinjaTagOrChildren::Children(children) => may_have_head(children),
-            JinjaTagOrChildren::Tag(_) => false,
-        }),
-        _ => false,
-    })
-}
-
-/// Outcome of inspecting a `<head>`'s descendants for a `<title>`.
+/// Outcome of inspecting a node list for the `<title>` it carries.
 enum TitleStatus {
+    /// A `<head>`, or a template tag that may render one, carries the title.
+    Deferred,
     /// A non-empty `<title>` was found.
     Present,
     /// At least one `<title>` was found, but none had content.
@@ -134,20 +114,49 @@ enum TitleStatus {
 impl TitleStatus {
     const fn merge(self, other: Self) -> Self {
         match (self, other) {
+            (Self::Deferred, _) | (_, Self::Deferred) => Self::Deferred,
             (Self::Present, _) | (_, Self::Present) => Self::Present,
             (Self::Empty, _) | (_, Self::Empty) => Self::Empty,
             _ => Self::Absent,
         }
     }
+
+    /// The violation to report, or `None` when a titled document was found. Callers pass the
+    /// kind standing for "no `<title>` here", which differs between a `<head>` and an `<html>`.
+    const fn violation(self, absent: TitleViolation) -> Option<TitleViolation> {
+        match self {
+            Self::Deferred | Self::Present => None,
+            Self::Empty => Some(TitleViolation::Empty),
+            Self::Absent => Some(absent),
+        }
+    }
 }
 
-/// Classify the title situation across a node list (head children or Jinja block children).
-fn classify_title(nodes: &[Node<'_>]) -> TitleStatus {
+/// Classify a node list by folding `node_status` over it, descending into Jinja block branches.
+fn classify_title(
+    nodes: &[Node<'_>],
+    node_status: &impl Fn(&Node<'_>) -> TitleStatus,
+) -> TitleStatus {
     nodes.iter().fold(TitleStatus::Absent, |acc, node| {
-        acc.merge(node_title_status(node))
+        let status = match &node.kind {
+            NodeKind::JinjaBlock(block) => {
+                block
+                    .body
+                    .iter()
+                    .fold(TitleStatus::Absent, |acc, item| match item {
+                        JinjaTagOrChildren::Children(children) => {
+                            acc.merge(classify_title(children, node_status))
+                        }
+                        JinjaTagOrChildren::Tag(_) => acc,
+                    })
+            }
+            _ => node_status(node),
+        };
+        acc.merge(status)
     })
 }
 
+/// Inside a `<head>`, only a `<title>` carries the title.
 fn node_title_status(node: &Node<'_>) -> TitleStatus {
     match &node.kind {
         NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("title") => {
@@ -157,19 +166,18 @@ fn node_title_status(node: &Node<'_>) -> TitleStatus {
                 TitleStatus::Empty
             }
         }
-        NodeKind::JinjaBlock(block) => jinja_block_title_status(block),
         _ => TitleStatus::Absent,
     }
 }
 
-fn jinja_block_title_status(block: &JinjaBlock<'_, Node<'_>>) -> TitleStatus {
-    block
-        .body
-        .iter()
-        .fold(TitleStatus::Absent, |acc, item| match item {
-            JinjaTagOrChildren::Children(children) => acc.merge(classify_title(children)),
-            JinjaTagOrChildren::Tag(_) => acc,
-        })
+/// Directly under `<html>`, the `<head>` start tag is optional, so a bare `<title>` counts. A
+/// `<head>`, or a template tag that may render one, hands the title to the `<head>` check.
+fn root_node_title_status(node: &Node<'_>) -> TitleStatus {
+    match &node.kind {
+        NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("head") => TitleStatus::Deferred,
+        NodeKind::JinjaTag(_) => TitleStatus::Deferred,
+        _ => node_title_status(node),
+    }
 }
 
 /// Whether `<title>`'s children carry visible or templated content.
