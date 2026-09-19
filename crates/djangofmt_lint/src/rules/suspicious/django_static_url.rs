@@ -16,9 +16,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// Projects that serve assets from a CDN, version assets with `ManifestStaticFilesStorage`, or
 /// mount static files under a different prefix end up with broken URLs.
 ///
-/// A URL that begins with a template tag or variable is skipped, since it may resolve anywhere.
-/// A literal `static/` prefix followed by interpolation is still hardcoded and is reported.
-///
 /// ## Example
 /// ```html
 /// <link rel="stylesheet" href="/static/css/app.css">
@@ -111,6 +108,8 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 fn report_static_path(checker: &Checker<'_>, url: &str, attribute: &'static str) {
     // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
     let trimmed = url.trim_ascii();
+
+    // A URL that begins with a template tag or variable is skipped, since it may resolve anywhere.
     if trimmed.starts_with("{{") || trimmed.starts_with("{%") {
         return;
     }

@@ -16,10 +16,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// conventional usage write them in lowercase (`get`, `post`, `dialog`).
 /// Uppercase or mixed-case values are stylistically inconsistent.
 ///
-/// Values containing template interpolation are skipped, as are values that are not a form method
-/// at all (`PUT`, `PATCH`, …): those are reported by `invalid-attr-value`, and lowercasing them
-/// would not make them valid.
-///
 /// ## Example
 /// ```html
 /// <form method="POST"></form>

@@ -11,13 +11,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// Checks for `<html>` tags that do not declare a non-empty `lang` attribute.
 ///
 /// ## Why is this bad?
-/// The `lang` attribute on `<html>` declares the primary language of the document. Screen readers
-/// use it to select the correct pronunciation rules, and search engines use it to index the page
-/// for the right audience. An empty or valueless `lang` declares the language as unknown, which
-/// is no better than omitting it.
-///
-/// A `lang` attribute wrapped in a Jinja conditional (e.g. `{% if %}lang="en"{% endif %}`) is
-/// treated as present, to avoid false positives on dynamic templates.
+/// The `lang` attribute on `<html>` declares the primary language of the document.
+/// Screen readers use it to select the correct pronunciation rules, and search engines use it to
+/// index the page for the right audience.
 ///
 /// ## Example
 /// ```html

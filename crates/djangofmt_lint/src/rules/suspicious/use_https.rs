@@ -20,10 +20,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 ///
 /// Prefer `https://` for all external links and subresources.
 ///
-/// Loopback, unspecified (`0.0.0.0`) and private-network addresses, and the `localhost`,
-/// `.local` and `.test` names are exempt: no public certificate authority issues certificates
-/// for them, so `https://` is not an option there.
-///
 /// ## Example
 /// ```html
 /// <a href="http://example.com">Link</a>

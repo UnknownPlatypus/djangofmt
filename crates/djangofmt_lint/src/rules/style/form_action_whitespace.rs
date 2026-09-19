@@ -15,11 +15,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// attribute, so the spaces are inert at runtime and only add noise to the source. They are
 /// commonly an accidental artefact of inserting a template tag inside the quotes.
 ///
-/// Padding around a template tag is reported too: whatever the tag renders, the browser strips
-/// the edges of the final value, so trimming the source is always safe. Whitespace next to a
-/// whitespace-control marker (`{%-`, `-%}`) is already removed by the template engine and is
-/// left alone. Only the `action` attribute is checked; sibling attributes such as `data-action`
-/// may legitimately span multiple lines.
 ///
 /// ## Example
 /// ```html
@@ -74,6 +69,7 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
 
     let start = value_str.trim_ascii_start();
     let trimmed = start.trim_ascii_end();
+
     // Whitespace-control markers already strip the padding next to them.
     let leading_inert =
         start.len() == value_str.len() || start.starts_with("{%-") || start.starts_with("{{-");
