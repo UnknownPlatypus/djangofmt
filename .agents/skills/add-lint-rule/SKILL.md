@@ -1,6 +1,6 @@
 ---
 name: add-lint-rule
-description: End-to-end process for a djangofmt_lint rule, from scoping to the single landing commit. Use when adding or porting a lint rule.
+description: Add or port a djangofmt_lint rule end to end, from scoping to the single landing commit. Use when adding or porting a lint rule.
 ---
 
 # Add Lint Rule
@@ -30,7 +30,7 @@ The rule's documentation lives in exactly one place: a single `///` doc comment 
 
 Write it for the template author reading the rendered docs: **what** the rule flags and why, NEVER **how** the implementation detects it. Detection mechanics — path matching, gates, skip conditions — live in the code; in the docs they are noise that goes stale.
 
-`RedundantTypeAttr` is the canonical model — mirror its structure exactly:
+`RedundantTypeAttr` is the canonical model — mirror its structure exactly, including where the blank `///` lines fall:
 
 ````rust
 /// ## What it does
@@ -71,12 +71,12 @@ pub struct MyRule {
 Formatting rules:
 
 - **Line width**: fill each line to column 100 (the workspace `rustfmt` width), counting the `///` prefix; wrapping earlier wastes vertical space and churns diffs when neighbouring text is edited.
-- `## What it does` — one sentence, starts with "Checks for". Content on the line **immediately after** the heading, no blank `///` line in between.
-- `## Why is this bad?` — content immediately after the heading. Add follow-up paragraphs (separated by blank `///`) for exclusions or non-obvious behaviour. Keep the voice declarative and plain ("`eval()` is insecure as it enables arbitrary code execution"). Avoid editorial flair like "classic X sink" or "brittle across browsers", filler adjectives, and second-person ("you").
-- `## Example` — code fence on the line **immediately after** the heading. No blank `///` between heading and ` ```html `. After the closing fence, blank line, then plain text `Use instead:` (NOT a sub-heading, no `##`), then the corrected code fence immediately on the next line. Use HTML/Jinja, not Python.
+- `## What it does` — one sentence, starts with "Checks for".
+- `## Why is this bad?` — declarative and plain, in the third person ("`eval()` is insecure as it enables arbitrary code execution").
+- `## Example` — HTML or Jinja markup; `Use instead:` is plain text between the two fences.
 - `## Fix safety` — include only when the fix is unsafe or conditionally unsafe. One short paragraph on what makes it unsafe. A safe fix carries no section; the `Fix` column of the rules table already reports that the rule is fixable.
 - `## Options` — include only when the rule reads settings from `pyproject.toml`. Bullet list of dotted option paths in backticks, nothing else: the generator turns each into a link to `docs/settings.md` and fails on unknown options. Document the option itself (doc comment, default, type, example) on its field in `pyproject.rs`, never in the rule.
-- `## References` — include when there is a relevant spec, framework doc, or upstream issue to link. Bullet list, one link per line. Link primary sources only (WHATWG/W3C specs, MDN, framework documentation, CWE/OWASP). Do **not** link other linters' rule pages; the cross-reference belongs in the PR description, not in the user-facing docs.
+- `## References` — include when there is a relevant spec, framework doc, or upstream issue to link. Bullet list, one link per line, primary sources only (WHATWG/W3C specs, MDN, framework documentation, CWE/OWASP). A cross-reference to another linter's rule belongs in the PR description.
 
 ### 1b. Derive `ViolationMetadata` and declare the lifecycle
 
@@ -99,12 +99,12 @@ Pick the lifecycle keyword for the rule:
 
 (`deprecated_since` / `removed_since` also exist, for retiring a rule.)
 
-Import the trait alongside `Violation`:
+Import the derive and the message-format attribute alongside `Violation`:
 
 ```rust
 use std::borrow::Cow;
 
-use crate::violation::{Violation, ViolationMetadata};
+use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 ```
 
 ### 1c. Implement `Violation`
@@ -115,6 +115,7 @@ impl Violation for MyRule {
     const CATEGORY: RuleCategory = RuleCategory::Style; // pick the right one
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always; // omit if no fix
 
+    #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
         // Concise, includes relevant values from fields.
         // Static text: `"…".into()`; formatted: `format!("…", …).into()`.
@@ -130,6 +131,8 @@ impl Violation for MyRule {
     }
 }
 ```
+
+`#[derive_message_formats]` is required on `message()`: it supplies the trait's `message_formats()`, which the docs generator reads for the Message column of the rules table.
 
 `FIX_AVAILABILITY` defaults to `FixAvailability::None`; omit it for fixless rules. Use `FixAvailability::Always` when every diagnostic carries a fix, `FixAvailability::Sometimes` when the fix is conditional. A fix that preserves runtime semantics is a `Fix::safe_edit`; one that can change what the page does is a `Fix::unsafe_edit`, and it is the unsafe case that earns the `## Fix safety` section in the docstring.
 
@@ -151,29 +154,32 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
+The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_jinja_block`. Most rules are attribute rules:
+
 ```rust
-pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    // Guard: return early if element/attr doesn't match
-    // Skip interpolated values with helpers::contains_interpolation()
-    let span = checker.source_span(value_str);
-    let mut guard = checker.report_diagnostic(&violation, span);
-    // For rules with fixes, attach via the guard before it drops:
-    guard.set_fix(Fix::safe_edit(Edit::deletion(span)));
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
+    // One `let…else` both destructures the attribute and requires a value;
+    // the paired offset is redundant with `source_span(value_str)`.
+    let NativeAttribute { name, value: Some((value_str, _)), quote } = attr else { return; };
+    if !name.eq_ignore_ascii_case("type") || contains_interpolation(value_str) {
+        return;
+    }
+    // ... decide whether `value_str` is a violation on this `element`
+    let mut guard = checker.report_diagnostic(&violation, checker.source_span(value_str));
+    // Only for rules with a fix; attach it before the guard drops:
+    guard.set_fix(delete_attr_fix(checker.context(), name, value_str, quote.is_some()));
 }
 ```
 
 Key points:
 
-- The `Checker` is passed as `&Checker<'_>`, **not** `&mut` — diagnostics are buffered through interior mutability (`RefCell`).
+- The `Checker` is passed as `&Checker<'_>`; diagnostics are buffered through interior mutability (`RefCell`), so no `&mut` is needed.
 - `checker.report_diagnostic(&violation, span)` returns a `DiagnosticGuard`. On `Drop` the guard pushes the diagnostic into the context's buffer. Hold the guard in a `let mut guard = ...` binding only if you need to attach a fix or override fields; otherwise let the temporary drop immediately.
 - If the rule is **not** gated upfront in `checker.rs` (Step 4), call `checker.report_diagnostic_if_enabled(...)` instead — it returns `Option<DiagnosticGuard>` and short-circuits when disabled.
-- For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`.
-- **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic such as widening a deletion over surrounding whitespace; the free `span(start, len)` is for offsets no slice provides.
+- For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`. Deleting a whole attribute is `delete_attr_fix` from `fix/edits.rs`, which widens the deletion over the surrounding whitespace.
+- **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
-- For attribute rules, fold the value match into the `let…else` that destructures the attribute rather than unwrapping it in a separate step: `let Attribute::Native(NativeAttribute { name, value: Some((value_str, _)), .. }) = attr else { continue; };` (the paired offset is redundant with `source_span(value_str)`).
-
-The function signature depends on what AST node the rule inspects. Element-level rules take `&Element<'_>`; Jinja block rules take `&JinjaBlock<'_, Node<'_>>`.
 
 ## Step 2: Export the module
 
@@ -194,12 +200,12 @@ define_rules! {
 
 ## Step 4: Wire it in the checker
 
-Add the rule check call in the appropriate `visit_*` method in `crates/djangofmt_lint/src/checker.rs`, gated by `is_rule_enabled`:
+Add the rule check call in the `visit_*` method matching the signature chosen in 1d, in `crates/djangofmt_lint/src/checker.rs`, gated by `is_rule_enabled`:
 
 ```rust
-fn visit_element(&mut self, element: &Element<'_>) {
+fn visit_native_attribute(&self, attr: &NativeAttribute<'a>, element: &Element<'a>) {
     if self.is_rule_enabled(Rule::MyRule) {
-        rules::style::my_rule::check(self, element);
+        rules::style::my_rule::check(self, attr, element);
     }
     // ...
 }
@@ -207,14 +213,16 @@ fn visit_element(&mut self, element: &Element<'_>) {
 
 If the rule's `check` uses `report_diagnostic_if_enabled` internally instead of being gated here, you can skip the `is_rule_enabled` wrapper — but gating upfront is cheaper when the rule does any non-trivial work before reporting.
 
-**Sharing expensive setup across a cluster of rules, or dispatching mutually-exclusive rules off one tag?** See **[checker-gating.md](checker-gating.md)** for `any_rule_enabled` and classify-once dispatch.
+**Several rules keyed off the same tag?** See **[checker-gating.md](checker-gating.md)** for classify-once dispatch.
 
 ## Step 5: Create test fixtures
 
 Create directory `crates/djangofmt_lint/tests/check/{rule_name}/` with two files.
 The directory name must be the rule code with underscores — the test runner derives
 the rule from it and runs **only that rule**, so fixtures never trip other rules'
-diagnostics (and a coverage test fails if the directory is missing or misnamed):
+diagnostics (and a coverage test fails if the directory is missing or misnamed).
+A `.jinja` extension instead of `.html` runs the fixture under the Jinja profile,
+the only one that allows whitespace-control markers.
 
 ### `{rule_name}.invalid.html`
 
@@ -250,25 +258,23 @@ Read every diagnostic in every snapshot before moving on: each span underlines t
 
 ## Step 7: Smoke-test against real templates
 
-Run the new rule over `~/greenday`, a large real-world template corpus:
+Run the new rule over a large corpus of real-world templates. `just ecosystem-check-lint-dev` is the ready-made corpus: it diffs the debug build against the installed `djangofmt` over the ecosystem repos with every rule selected, preview included, so each reported diagnostic is the new rule's. Any large template project works too:
 
 ```bash
-cargo run -p djangofmt -- check --select {rule-slug} ~/greenday
+cargo run -p djangofmt -- check --select {rule-slug} path/to/templates
 ```
 
 Add `--preview` if the rule is `preview_since`. Account for every diagnostic the run produces: each one is either a true positive, or a legitimate pattern that moves into `{rule_name}.valid.html` with the rule taught to skip it. The step is done when every remaining diagnostic is a true positive.
 
-## Step 8: Generate and proofread the rule documentation
+## Step 8: Pre-merge check and proofread the rendered docs
 
 ```bash
-just docs-generate
+just pre-mr-check
 ```
 
-This refreshes `docs/rules.md` and writes `docs/rules/{rule_name}.md` from the violation struct's doc comment. The output is gitignored (`docs/.gitignore`) — commit nothing; the step exists to prove the generator accepts the doc comment and to proofread the rendered page.
+Get it green. Its docs build regenerates `docs/rules.md` and `docs/rules/{rule_name}.md` from the doc comment; the output is gitignored (`docs/.gitignore`), so commit nothing from it. Then read `docs/rules/{rule_name}.md`: every section from 1a present in order, both example fences rendered, every reference link resolving, and the prose reading as the template author will see it.
 
 ## Step 9: Commit as a single commit
-
-Run `just pre-mr-check` and get it green first.
 
 A new rule lands as **one** commit on a branch. Squash review follow-ups into it before pushing.
 
@@ -278,15 +284,16 @@ A new rule lands as **one** commit on a branch. Squash review follow-ups into it
 
 ## Reference files
 
-- Reference rule with safe fix (doc layout, `DiagnosticGuard`, `Fix::safe_edit`): `crates/djangofmt_lint/src/rules/style/redundant_type_attr.rs`
+- Reference attribute rule with safe fix (doc layout, `DiagnosticGuard`, `delete_attr_fix`): `crates/djangofmt_lint/src/rules/style/redundant_type_attr.rs`
 - Reference rule with unsafe fix (`## Fix safety` section, `Fix::unsafe_edit`): `crates/djangofmt_lint/src/rules/suspicious/use_https.rs`
 - Reference rule without fix: `crates/djangofmt_lint/src/rules/correctness/invalid_attr_value.rs`
 - Multi-variant (enum) violation with `match` in `message()`/`help()`: `crates/djangofmt_lint/src/rules/accessibility/missing_title.rs`
-- Full-technique rule (WCAG H63) — multi-variant, per-variant spans, case-insensitive value validation: `crates/djangofmt_lint/src/rules/accessibility/table_header_missing_scope.rs`
+- Full-technique rule (WCAG H63) — multi-variant, per-variant spans, case-insensitive value validation: `crates/djangofmt_lint/src/rules/pedantic/table_header_missing_scope.rs`
 - Jinja-block-shaped rule with fix: `crates/djangofmt_lint/src/rules/correctness/untrimmed_blocktranslate.rs`
 - Violation trait: `crates/djangofmt_lint/src/violation.rs`
 - `LintContext` / `DiagnosticGuard`: `crates/djangofmt_lint/src/lint_context.rs`
 - Fix data model (`Edit`, `Fix`, `Applicability`, `FixAvailability`): `crates/djangofmt_lint/src/fix/mod.rs`
+- Fix helpers (`delete_attr_fix`): `crates/djangofmt_lint/src/fix/edits.rs`
 - Registry: `crates/djangofmt_lint/src/registry.rs`
 - Checker: `crates/djangofmt_lint/src/checker.rs`
 - Shared helpers: `crates/djangofmt_lint/src/rules/helpers.rs`

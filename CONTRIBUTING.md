@@ -26,6 +26,12 @@ just pre-mr-check
 
 This will run linting, formatting, and tests.
 
+## Adding a lint rule
+
+The process, from scoping the rule to the landing commit, is written up step by step in
+[`.agents/skills/add-lint-rule/SKILL.md`](./.agents/skills/add-lint-rule/SKILL.md).
+It is phrased for coding agents, and the steps are the same for a human.
+
 ## Other tools / scripts
 
 You can run the benchmarks locally using `just`.
