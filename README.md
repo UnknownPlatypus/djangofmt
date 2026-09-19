@@ -49,7 +49,6 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Linting](#linting)
 - [Pre-commit hook](#pre-commit-hook)
 - [Configuration](#configuration)
 - [Editor integration](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)
