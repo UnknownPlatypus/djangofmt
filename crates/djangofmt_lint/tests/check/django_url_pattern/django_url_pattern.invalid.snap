@@ -248,5 +248,35 @@ source: crates/djangofmt_lint/tests/check/main.rs
  56 │ <a href=" /profile/ ">Profile</a>
     ·          ─────┬─────
     ·               ╰── here
+ 57 │ 
+    ╰────
+  help: Use `{% url 'view_name' %}` instead
+
+  × Hardcoded internal URL in `data-src`
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:59:16]
+ 58 │ <!-- A literal path prefix followed by interpolation is still a hardcoded route -->
+ 59 │ <div data-src="/table/task/{{ task.id }}/log/"></div>
+    ·                ───────────────┬──────────────
+    ·                               ╰── here
+ 60 │ <a href="/items/{{ item.id }}/">Item</a>
+    ╰────
+  help: Use `{% url 'view_name' %}` instead
+
+  × Hardcoded internal URL in `href`
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:60:10]
+ 59 │ <div data-src="/table/task/{{ task.id }}/log/"></div>
+ 60 │ <a href="/items/{{ item.id }}/">Item</a>
+    ·          ──────────┬──────────
+    ·                    ╰── here
+ 61 │ <a href="/items/{{ item.id }}">Item</a>
+    ╰────
+  help: Use `{% url 'view_name' %}` instead
+
+  × Hardcoded internal URL in `href`
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:61:10]
+ 60 │ <a href="/items/{{ item.id }}/">Item</a>
+ 61 │ <a href="/items/{{ item.id }}">Item</a>
+    ·          ──────────┬─────────
+    ·                    ╰── here
     ╰────
   help: Use `{% url 'view_name' %}` instead
