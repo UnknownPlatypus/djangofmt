@@ -52,6 +52,10 @@ impl Violation for FormActionWhitespace {
     }
 }
 
+/// Delimiters whose whitespace-control marker eats the padding on their side.
+const TRIM_OPENINGS: [&str; 3] = ["{%-", "{{-", "{#-"];
+const TRIM_CLOSINGS: [&str; 3] = ["-%}", "-}}", "-#}"];
+
 /// The caller guarantees the attribute belongs to a `<form>`.
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
     let NativeAttribute {
@@ -72,9 +76,9 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
 
     // Whitespace-control markers already strip the padding next to them.
     let leading_inert =
-        start.len() == value_str.len() || start.starts_with("{%-") || start.starts_with("{{-");
+        start.len() == value_str.len() || TRIM_OPENINGS.iter().any(|open| start.starts_with(open));
     let trailing_inert =
-        trimmed.len() == start.len() || trimmed.ends_with("-%}") || trimmed.ends_with("-}}");
+        trimmed.len() == start.len() || TRIM_CLOSINGS.iter().any(|close| trimmed.ends_with(close));
     if leading_inert && trailing_inert {
         return;
     }

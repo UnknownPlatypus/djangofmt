@@ -1,6 +1,5 @@
 ---
 source: crates/djangofmt/tests/parse_error/main.rs
-assertion_line: 30
 ---
 
   × expected close tag for opening tag <html>

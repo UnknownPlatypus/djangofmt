@@ -416,7 +416,7 @@ mod tests {
 
     #[test]
     fn test_cli_invalid_target_version() {
-        assert_cmd_snapshot!(cli().args(["check", "--target-version", "5", "test.html"]), @r#"
+        assert_cmd_snapshot!(cli().args(["check", "--target-version", "5", "test.html"]), @"
         success: false
         exit_code: 2
         ----- stdout -----
@@ -425,7 +425,7 @@ mod tests {
         error: invalid value '5' for '--target-version <VERSION>': target-version must be a `major.minor` version (got `5`)
 
         For more information, try '--help'.
-        "#);
+        ");
     }
 
     #[test]
