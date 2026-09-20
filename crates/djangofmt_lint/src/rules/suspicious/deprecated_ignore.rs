@@ -27,7 +27,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// <div   class="keep-this-unformatted"   >Content</div>
 /// ```
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.0.0")]
 pub struct DeprecatedIgnore {
     /// Whether the directive sits in an HTML comment, the spelling also rendered to the client.
     pub in_html: bool,

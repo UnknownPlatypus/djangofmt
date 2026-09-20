@@ -34,7 +34,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// its code list, as in `ignore[...]: reason`. Dropping a code from a list, or a comment carrying
 /// no reason, is safe.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.0.0")]
 pub struct InvalidIgnoreCode {
     /// The invalid codes, comma-separated.
     pub codes: String,

@@ -416,7 +416,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt"
-version = "0.2.12"
+version = "1.0.0"
 dependencies = [
  "clap",
  "clap_complete_command",
@@ -449,7 +449,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_benchmark"
-version = "0.2.12"
+version = "1.0.0"
 dependencies = [
  "codspeed-divan-compat",
  "djangofmt",
@@ -460,7 +460,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_dev"
-version = "0.2.12"
+version = "1.0.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -471,7 +471,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_lint"
-version = "0.2.12"
+version = "1.0.0"
 dependencies = [
  "djangofmt_macros",
  "insta",
@@ -492,7 +492,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_macros"
-version = "0.2.12"
+version = "1.0.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -501,7 +501,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_wasm"
-version = "0.2.12"
+version = "1.0.0"
 dependencies = [
  "djangofmt",
  "djangofmt_lint",

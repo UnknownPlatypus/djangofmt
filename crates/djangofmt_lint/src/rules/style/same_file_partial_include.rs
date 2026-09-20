@@ -32,7 +32,7 @@ use crate::{Checker, span};
 /// ## References
 /// - [django-template-partials](https://github.com/carltongibson/django-template-partials)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.0.0")]
 pub struct SameFilePartialInclude<'a> {
     pub name: &'a str,
 }

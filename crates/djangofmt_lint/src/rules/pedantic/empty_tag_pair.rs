@@ -31,7 +31,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [HTML spec: void elements](https://html.spec.whatwg.org/multipage/syntax.html#void-elements)
 /// - [HTML spec: palpable content](https://html.spec.whatwg.org/multipage/dom.html#palpable-content)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.0.0")]
 pub struct EmptyTagPair {
     pub tag: String,
 }

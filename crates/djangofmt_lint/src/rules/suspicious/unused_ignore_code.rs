@@ -31,7 +31,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// The fix is marked as unsafe when it deletes a comment along with the free-text reason after its code list, as in `ignore[...]: reason`.
 /// Dropping a code from a list, or a comment carrying no reason, is safe.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.0.0")]
 pub struct UnusedIgnoreCode {
     /// The unused codes, grouped by reason: `` `a`; `b`, `c` (disabled rule) ``.
     pub codes: String,

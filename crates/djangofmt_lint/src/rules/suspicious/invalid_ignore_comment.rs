@@ -42,7 +42,7 @@ pub enum IgnoreCommentViolation {
 /// Removing a malformed or misplaced comment is marked as unsafe because it deletes
 /// the whole comment, so any trailing free text is deleted too.
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.0.0")]
 pub struct InvalidIgnoreComment {
     pub kind: IgnoreCommentViolation,
 }
