@@ -4,3 +4,4 @@
 {% block a %}{% endblock %}
 <script>{% block a %}{% endblock %}</script>
 {% endraw %}
+<div {% raw %}{% block a %}x="1"{% endblock %}{% block a %}y="2"{% endblock %}{% endraw %}></div>

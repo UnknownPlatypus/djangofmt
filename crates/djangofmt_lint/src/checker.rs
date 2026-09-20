@@ -18,6 +18,13 @@ use crate::rules::helpers::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 
+/// The rules that must not read what a Jinja `{% raw %}` body contains.
+const RAW_SENSITIVE_RULES: &[Rule] = &[
+    Rule::DuplicateBlockName,
+    Rule::SameFilePartialInclude,
+    Rule::UntrimmedBlocktranslate,
+];
+
 /// AST visitor that collects lint diagnostics.
 pub struct Checker<'a> {
     context: LintContext<'a>,
@@ -235,9 +242,10 @@ impl<'a> Checker<'a> {
         }
 
         // The parser keeps these bodies as raw text, but Django still reads the tags in them.
-        if ["script", "style", "pre", "textarea"]
-            .iter()
-            .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
+        if self.is_rule_enabled(Rule::DuplicateBlockName)
+            && ["script", "style", "pre", "textarea"]
+                .iter()
+                .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
         {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {
@@ -311,14 +319,8 @@ impl<'a> Checker<'a> {
             }
         }
 
-        // `{% raw %}` emits its body verbatim: the HTML inside is real, the template tags are not.
-        // Django has no `raw` tag — only Jinja parses one into a block — so it never reads a name.
         let outer_raw = self.in_raw;
-        self.in_raw |= !self.is_django()
-            && matches!(
-                block.body.first(),
-                Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "raw"
-            );
+        self.in_raw |= self.opens_raw(block);
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
@@ -327,6 +329,18 @@ impl<'a> Checker<'a> {
             }
         }
         self.in_raw = outer_raw;
+    }
+
+    /// Whether `block` opens a `{% raw %}` body, which emits its contents verbatim: the HTML
+    /// inside is real, the template tags are not. Django has no `raw` tag — only Jinja parses one
+    /// into a block — and reading the name costs a scan, so only look when a rule needs the answer.
+    fn opens_raw<T>(&self, block: &JinjaBlock<'a, T>) -> bool {
+        !self.is_django()
+            && self.any_rule_enabled(RAW_SENSITIVE_RULES)
+            && matches!(
+                block.body.first(),
+                Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "raw"
+            )
     }
 
     fn record_block_name<T>(&mut self, block: &JinjaBlock<'a, T>) {
@@ -351,6 +365,8 @@ impl<'a> Checker<'a> {
             self.record_block_name(block);
         }
 
+        let outer_raw = self.in_raw;
+        self.in_raw |= self.opens_raw(block);
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {
@@ -358,5 +374,6 @@ impl<'a> Checker<'a> {
                 }
             }
         }
+        self.in_raw = outer_raw;
     }
 }
