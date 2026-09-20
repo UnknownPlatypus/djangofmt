@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{Attribute, Element, NativeAttribute};
+use markup_fmt::ast::{Attribute, Element, JinjaTagOrChildren, NativeAttribute};
+use smallvec::SmallVec;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
@@ -47,26 +48,45 @@ impl Violation for DuplicateAttr<'_> {
 }
 
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    // Fast path: with fewer than 2 attributes there can be no duplicates.
-    if element.attrs.len() < 2 {
+    // Fast path: a lone attribute collides with nothing, unless it is a block holding several.
+    if element.attrs.len() < 2 && !matches!(element.attrs.first(), Some(Attribute::JinjaBlock(_))) {
         return;
     }
 
-    for (i, attr) in element.attrs.iter().enumerate() {
-        let Attribute::Native(NativeAttribute { name, .. }) = attr else {
-            continue;
-        };
+    let mut seen = SmallVec::<[(&str, usize); 8]>::new();
+    visit(checker, &element.attrs, 0, &mut 0, &mut seen);
+}
 
-        let is_duplicate = element.attrs[..i].iter().any(|prior| {
-            matches!(
-                prior,
-                Attribute::Native(NativeAttribute { name: prior_name, .. })
-                    if prior_name.eq_ignore_ascii_case(name)
-            )
-        });
-
-        if is_duplicate {
-            checker.report_diagnostic(&DuplicateAttr { name }, checker.source_span(name));
+/// Scope 0 is the element itself; every branch of a Jinja block gets its own id, so an attribute
+/// collides with the element's own attributes and with its branch, never with a sibling branch.
+fn visit<'s>(
+    checker: &Checker<'_>,
+    attrs: &[Attribute<'s>],
+    scope: usize,
+    next_scope: &mut usize,
+    seen: &mut SmallVec<[(&'s str, usize); 8]>,
+) {
+    for attr in attrs {
+        match attr {
+            Attribute::Native(NativeAttribute { name, .. }) => {
+                let is_duplicate = seen.iter().any(|&(prior, prior_scope)| {
+                    prior.eq_ignore_ascii_case(name)
+                        && (prior_scope == 0 || scope == 0 || prior_scope == scope)
+                });
+                if is_duplicate {
+                    checker.report_diagnostic(&DuplicateAttr { name }, checker.source_span(name));
+                }
+                seen.push((name, scope));
+            }
+            Attribute::JinjaBlock(block) => {
+                for item in &block.body {
+                    if let JinjaTagOrChildren::Children(children) = item {
+                        *next_scope += 1;
+                        visit(checker, children, *next_scope, next_scope, seen);
+                    }
+                }
+            }
+            _ => {}
         }
     }
 }

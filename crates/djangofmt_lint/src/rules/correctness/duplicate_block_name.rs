@@ -1,6 +1,9 @@
 use std::borrow::Cow;
+use std::sync::LazyLock;
 
-use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
+use memchr::memmem::Finder;
+
+use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
@@ -14,6 +17,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// for a child template to fill and defines the default content for that hole, so two blocks with
 /// the same name are ambiguous. Django raises a `TemplateSyntaxError` when the template is parsed,
 /// so a duplicate name breaks the template at runtime.
+///
+/// Django reads template tags before the HTML, so a block inside `<script>`, `<style>`, `<pre>` or
+/// `<textarea>`, inside an HTML comment, or in attribute position counts like any other.
 ///
 /// ## Example
 /// ```html
@@ -55,14 +61,37 @@ impl Violation for DuplicateBlockName<'_> {
     }
 }
 
-pub fn block_name<'s>(block: &JinjaBlock<'s, Node<'s>>) -> Option<&'s str> {
+pub fn block_name<'s, T>(block: &JinjaBlock<'s, T>) -> Option<&'s str> {
     let Some(JinjaTagOrChildren::Tag(open_tag)) = block.body.first() else {
         return None;
     };
-    // `{% block NAME %}`: one whitespace pass yields the tag (token 0) then the name (token 1).
-    // Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the name.
-    let mut tokens = open_tag
-        .content
+    block_name_from_content(open_tag.content)
+}
+
+/// The names of `{% block %}` tags written in text the parser leaves unread, such as a `<script>`
+/// body or an HTML comment. Django still parses them.
+pub fn block_names_in_text(raw: &str) -> impl Iterator<Item = &str> {
+    /// Built once: these bodies are often short, and a per-call searcher costs more than the scan.
+    static OPENING: LazyLock<Finder<'static>> = LazyLock::new(|| Finder::new(b"{%"));
+
+    OPENING.find_iter(raw.as_bytes()).filter_map(|start| {
+        let tag = &raw[start + 2..];
+        // Locating `%}` is the costly half, so drop the tags that cannot be a block first.
+        if !tag
+            .trim_start_matches(['+', '-'])
+            .trim_start()
+            .starts_with("block")
+        {
+            return None;
+        }
+        block_name_from_content(tag.split("%}").next()?)
+    })
+}
+
+/// `{% block NAME %}`: one whitespace pass yields the tag (token 0) then the name (token 1).
+/// Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the name.
+fn block_name_from_content(content: &str) -> Option<&str> {
+    let mut tokens = content
         .trim_start_matches(['+', '-'])
         .split_ascii_whitespace();
     if tokens.next() != Some("block") {
