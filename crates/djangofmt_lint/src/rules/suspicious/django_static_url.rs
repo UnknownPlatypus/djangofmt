@@ -4,7 +4,7 @@ use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::{contains_interpolation, srcset_candidates};
+use crate::rules::helpers::srcset_candidates;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -106,11 +106,14 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 
 /// Reports a URL that points at a hardcoded `static/` path.
 fn report_static_path(checker: &Checker<'_>, url: &str, attribute: &'static str) {
-    if contains_interpolation(url) {
+    // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
+    let trimmed = url.trim_ascii();
+
+    // A URL that begins with a template tag or variable is skipped, since it may resolve anywhere.
+    if trimmed.starts_with("{{") || trimmed.starts_with("{%") {
         return;
     }
-    // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
-    if starts_with_static_path(url.trim_ascii()) {
+    if starts_with_static_path(trimmed) {
         checker.report_diagnostic(&DjangoStaticUrl { attribute }, checker.source_span(url));
     }
 }

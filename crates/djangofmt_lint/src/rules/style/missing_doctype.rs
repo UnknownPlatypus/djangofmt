@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node, NodeKind, Root};
+use markup_fmt::ast::{NodeKind, Root};
 use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::Checker;
@@ -15,8 +15,12 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// back to "quirks mode", which emulates legacy rendering bugs and applies different CSS box-model
 /// rules. The result is inconsistent layout across browsers and behaviour that is hard to debug.
 ///
-/// Template partials (files with a root-level `{% extends %}` tag or `{% block %}` block) are
-/// assumed to inherit the DOCTYPE from their parent template and are not flagged.
+/// The declaration must come before the `<html>` tag: one placed after it still leaves the
+/// browser in quirks mode.
+///
+/// Files that extend another template are assumed to inherit the DOCTYPE from their parent and
+/// are not flagged. Neither is a document whose `<html>` tag is preceded by a root-level `{% %}`
+/// block, since the block may be the one emitting the DOCTYPE.
 ///
 /// ## Example
 /// ```html
@@ -57,39 +61,17 @@ impl Violation for MissingDoctype {
 }
 
 pub fn check(checker: &Checker<'_>, root: &Root<'_>) {
-    let mut html_element = None;
-    let mut has_doctype = false;
-
+    // The first of these nodes settles the file: a DOCTYPE declared after the `<html>` tag comes
+    // too late, and a `{% %}` block before it may be the one emitting the DOCTYPE.
     for node in &root.children {
         match &node.kind {
-            NodeKind::JinjaBlock(block) if is_block_partial(block) => return,
+            NodeKind::Doctype(_) | NodeKind::JinjaBlock(_) => return,
             NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return,
-            NodeKind::Doctype(_) => has_doctype = true,
-            NodeKind::Element(el)
-                if html_element.is_none() && el.tag_name.eq_ignore_ascii_case("html") =>
-            {
-                html_element = Some(el);
+            NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("html") => {
+                checker.report_diagnostic(&MissingDoctype, checker.source_span(el.tag_name));
+                return;
             }
             _ => {}
         }
     }
-
-    if has_doctype {
-        return;
-    }
-
-    let Some(html) = html_element else {
-        return;
-    };
-
-    checker.report_diagnostic(&MissingDoctype, checker.source_span(html.tag_name));
-}
-
-/// Returns `true` if the block opens with `{% block %}`, marking the file as a partial.
-/// Other root-level blocks (`{% if %}`, `{% for %}`, ...) are legitimate in full documents.
-fn is_block_partial(block: &JinjaBlock<'_, Node<'_>>) -> bool {
-    matches!(
-        block.body.first(),
-        Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "block"
-    )
 }

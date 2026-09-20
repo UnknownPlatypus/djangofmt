@@ -91,3 +91,23 @@ source: crates/djangofmt_lint/tests/check/main.rs
  62 │         <meta charset="utf-8">
     ╰────
   help: Add a `<title>` element to `<head>`
+
+  × Missing `<head>` and `<title>` in `<html>`
+    ╭─[tests/check/missing_title/missing_title.invalid.html:70:2]
+ 69 │ <!-- <html> with no <head> at all: the browser synthesises an empty one, so the page has no title -->
+ 70 │ <html lang="en">
+    ·  ──┬─
+    ·    ╰── here
+ 71 │     <body>
+    ╰────
+  help: Add a `<head>` containing a `<title>` element
+
+  × Missing or empty `<title>` in `<head>`
+    ╭─[tests/check/missing_title/missing_title.invalid.html:77:2]
+ 76 │ <!-- Bare <title> in the implied <head>, with no content -->
+ 77 │ <html lang="en">
+    ·  ──┬─
+    ·    ╰── here
+ 78 │     <title></title>
+    ╰────
+  help: Add descriptive text to `<title>`

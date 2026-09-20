@@ -49,11 +49,7 @@ impl Violation for MissingImgAlt {
 
 /// The caller guarantees `element` is an `<img>`.
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    if element
-        .attrs
-        .iter()
-        .any(|attr| declares_native_attr(attr, "alt"))
-    {
+    if declares_native_attr(&element.attrs, "alt") {
         return;
     }
 

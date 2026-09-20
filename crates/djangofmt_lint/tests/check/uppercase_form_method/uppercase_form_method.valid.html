@@ -27,3 +27,6 @@
     action="{% url 'submit' %}"
     method="post"
 ></form>
+
+<!-- Not a form method at all: invalid-attr-value reports it, lowercasing would not make it valid -->
+<form method="PUT"></form>

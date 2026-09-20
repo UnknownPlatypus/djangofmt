@@ -17,10 +17,9 @@
 <a href="tel:+15550100">Call</a>
 <a href="data:text/plain,hello">Data</a>
 
-<!-- Interpolation in href is skipped -->
+<!-- Interpolation without a literal `javascript:` prefix is not flagged -->
 <a href="{{ url }}">Link</a>
 <a href="{% if x %}/a{% else %}/b{% endif %}">Link</a>
-<a href="javascript:{{ payload }}">Link</a>
 
 <!-- Forms with safe actions -->
 <form action="{% url 'submit' %}"></form>

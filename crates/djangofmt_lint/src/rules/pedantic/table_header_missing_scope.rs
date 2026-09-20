@@ -86,11 +86,7 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
 
     let Some(scope) = native_scope else {
         // A `scope` wrapped in a Jinja block counts as present but stays unvalidated.
-        if element
-            .attrs
-            .iter()
-            .any(|attr| declares_native_attr(attr, "scope"))
-        {
+        if declares_native_attr(&element.attrs, "scope") {
             return;
         }
         checker.report_diagnostic(

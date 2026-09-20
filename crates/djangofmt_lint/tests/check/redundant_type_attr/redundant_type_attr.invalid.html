@@ -36,3 +36,8 @@
 {% if include_script %}
     <script type="text/javascript" src="app.js"></script>
 {% endif %}
+
+<!-- `text/css` is the default for a stylesheet link -->
+<link rel="stylesheet" type="text/css" href="app.css">
+<link rel="alternate stylesheet" type="text/css" href="print.css">
+<link {% if print_styles %}rel="stylesheet"{% endif %} type="text/css" href="print.css">

@@ -210,7 +210,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
-      - run: uv run --only-dev cargo llvm-cov --locked --workspace --exclude djangofmt_dev --all-targets --all-features --fail-under-lines 85
+      - run: uv run --only-dev cargo llvm-cov --locked --workspace --exclude djangofmt_dev --exclude djangofmt_benchmark --lib --bins --tests --all-features --fail-under-lines 85
       - name: Reject orphaned snapshot files
         run: uv run --only-dev cargo insta test --unreferenced reject --workspace --all-targets --all-features
 

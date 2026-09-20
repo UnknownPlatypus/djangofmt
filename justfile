@@ -1,6 +1,9 @@
 ecosystem_cache_dir := "/tmp/djangofmt-ecosystem-repos"
 export INSTA_UPDATE := "always"
 
+# `uv run` recipes pass `--only-dev`/`--only-group`: both omit the root project,
+# so uv never maturin-compiles the djangofmt wheel just to run a dev tool.
+
 # List all commands
 _default:
     @just --list  --unsorted
@@ -21,13 +24,13 @@ lint:
 # Run the full test suite, accepting snapshot updates automatically.
 [group('dev')]
 test:
-    cargo test --workspace --all-targets --all-features
+    cargo test --workspace --all-features --lib --bins --tests
 
 # Pre-merge request checks
 [group('dev')]
 pre-mr-check:
     SKIP=actionlint,renovate-config-validator pre-commit run -a
-    uv run maturin develop
+    uv run --only-dev maturin develop
     just lint
     just test
     just docs-build
@@ -39,17 +42,14 @@ docs-generate:
     cargo run -p djangofmt_dev -- generate-all
 
 # Build the Zensical docs site into `site/` (regenerates docs first).
-# `--isolated` runs zensical in a throwaway venv, which skips the maturin
-# compile of the djangofmt wheel (the docs site doesn't need it) and leaves
-# the project's `.venv` untouched.
 [group('docs')]
 docs-build: docs-generate
-    uv run --isolated --group docs zensical build --clean --strict --config-file .mkdocs.yml
+    uv run --only-group docs zensical build --clean --strict --config-file .mkdocs.yml
 
 # Serve the Zensical docs site with live-reload (regenerates docs first).
 [group('docs')]
 docs-dev: docs-generate
-    uv run --isolated --group docs zensical serve --config-file .mkdocs.yml
+    uv run --only-group docs zensical serve --config-file .mkdocs.yml
 
 # Build playground WASM package
 [group('playground')]
@@ -202,38 +202,38 @@ benchmark-git-repo repo_path:
 [group('ecosystem-check')]
 ecosystem-check baseline comparison *args:
     cargo build -p djangofmt
-    uv run ecosystem-check format {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+    uv run --only-dev ecosystem-check format {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
 
 # Run formatter ecosystem checks comparing debug build to system djangofmt
 [group('ecosystem-check')]
 ecosystem-check-dev:
     cargo build -p djangofmt
-    uv run ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
+    uv run --only-dev ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
 
 # Run formatter ecosystem checks comparing djangofmt debug build to 'djade' or 'rustywind'
 [group('ecosystem-check')]
 [arg('external-formatter', pattern='djade|rustywind')]
 ecosystem-check-stability external-formatter:
     cargo build -p djangofmt
-    uv run ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}} --format-comparison base-then-comp-converge
+    uv run --only-dev ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}} --format-comparison base-then-comp-converge
 
 # Run linter ecosystem checks
 [group('ecosystem-check')]
 ecosystem-check-lint baseline comparison *args:
     cargo build -p djangofmt
-    uv run ecosystem-check check {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+    uv run --only-dev ecosystem-check check {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
 
 # Run linter ecosystem checks comparing debug build to system djangofmt
 [group('ecosystem-check')]
 ecosystem-check-lint-dev:
     cargo build -p djangofmt
-    uv run ecosystem-check check djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
+    uv run --only-dev ecosystem-check check djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
 
 # Check that formatting keeps ecosystem templates parseable by Django or Jinja
 [group('ecosystem-check')]
 ecosystem-check-validate executable="target/debug/djangofmt" *args:
     cargo build -p djangofmt
-    uv run ecosystem-check validate {{executable}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+    uv run --only-dev ecosystem-check validate {{executable}} --cache-dir {{ecosystem_cache_dir}} {{args}}
 
 # Clean ecosystem check git repos cache
 [group('ecosystem-check')]

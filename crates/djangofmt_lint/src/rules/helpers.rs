@@ -1,4 +1,8 @@
-use markup_fmt::ast::{Attribute, JinjaBlock, JinjaTagOrChildren};
+use std::iter;
+use std::slice;
+
+use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
+use smallvec::{SmallVec, smallvec};
 
 use crate::Checker;
 
@@ -21,26 +25,38 @@ pub fn srcset_candidates(value: &str) -> impl Iterator<Item = &str> {
         .filter_map(|candidate| candidate.split_ascii_whitespace().next())
 }
 
-/// Returns true if `attr` declares a native HTML attribute named `name`
-/// (case-insensitive), either directly or recursively inside any branch of a
-/// Jinja `{% if %}…{% endif %}` block.
-///
-/// Jinja `Tag` items are treated as non-declaring; we don't peek inside other
-/// tag bodies.
-pub fn declares_native_attr(attr: &Attribute<'_>, name: &str) -> bool {
-    match attr {
-        Attribute::Native(native) => native.name.eq_ignore_ascii_case(name),
-        Attribute::JinjaBlock(block) => jinja_block_declares_native_attr(block, name),
-        _ => false,
-    }
+/// Returns true if `attrs` declares a native HTML attribute named `name` (case-insensitive).
+pub fn declares_native_attr(attrs: &[Attribute<'_>], name: &str) -> bool {
+    native_attrs(attrs).any(|native| native.name.eq_ignore_ascii_case(name))
 }
 
-fn jinja_block_declares_native_attr(block: &JinjaBlock<'_, Attribute<'_>>, name: &str) -> bool {
-    block.body.iter().any(|item| match item {
-        JinjaTagOrChildren::Children(children) => {
-            children.iter().any(|attr| declares_native_attr(attr, name))
+/// Yields every native HTML attribute in `attrs`, in source order, descending into each branch
+/// of a Jinja `{% if %}…{% endif %}` block.
+///
+/// Jinja `Tag` items yield nothing; we don't peek inside other tag bodies.
+pub fn native_attrs<'a, 's>(
+    attrs: &'a [Attribute<'s>],
+) -> impl Iterator<Item = &'a NativeAttribute<'s>> {
+    // Attribute lists left to walk, innermost last.
+    let mut stack: SmallVec<[slice::Iter<'a, Attribute<'s>>; 4]> = smallvec![attrs.iter()];
+    iter::from_fn(move || {
+        loop {
+            let Some(attr) = stack.last_mut()?.next() else {
+                stack.pop();
+                continue;
+            };
+            match attr {
+                Attribute::Native(native) => return Some(native),
+                // Reversed, so that the branches come out in source order.
+                Attribute::JinjaBlock(block) => {
+                    stack.extend(block.body.iter().rev().filter_map(|item| match item {
+                        JinjaTagOrChildren::Children(children) => Some(children.iter()),
+                        JinjaTagOrChildren::Tag(_) => None,
+                    }));
+                }
+                _ => {}
+            }
         }
-        JinjaTagOrChildren::Tag(_) => false,
     })
 }
 

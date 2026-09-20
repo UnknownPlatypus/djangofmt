@@ -16,8 +16,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// conventional usage write them in lowercase (`get`, `post`, `dialog`).
 /// Uppercase or mixed-case values are stylistically inconsistent.
 ///
-/// Values containing template interpolation are skipped.
-///
 /// ## Example
 /// ```html
 /// <form method="POST"></form>
@@ -71,6 +69,13 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
     }
 
     if contains_interpolation(value_str) {
+        return;
+    }
+
+    if !["get", "post", "dialog"]
+        .iter()
+        .any(|method| method.eq_ignore_ascii_case(value_str))
+    {
         return;
     }
 

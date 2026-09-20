@@ -1,0 +1,7 @@
+<!-- A root-level `{% if %}` or `{% block %}` before the `<html>` tag may be the one emitting
+     the DOCTYPE, so the file is left alone. -->
+{% if not is_fragment %}<!DOCTYPE html>{% endif %}
+<html lang="en">
+    <head><title>Page</title></head>
+    <body>Content</body>
+</html>
