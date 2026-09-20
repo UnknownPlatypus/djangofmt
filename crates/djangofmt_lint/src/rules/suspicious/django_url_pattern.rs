@@ -16,12 +16,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// paths from named URL patterns at render time, so the template stays correct across refactors
 /// and respects URL namespacing (`app_name`, `instance_namespace`).
 ///
-/// Only values that look like a route are reported: they contain a `/` and do not point at a file
-/// (`/favicon.ico`), an asset root (`/static/`, `/media/`), an external host, or a URL scheme.
-/// A literal path prefix followed by interpolation (`/items/{{ pk }}/`) is still a hardcoded
-/// route, unless the value ends like a file (`/img/{{ name }}.png`). A value that starts with a
-/// tag or variable may resolve anywhere and is skipped.
-///
 /// ## Example
 /// ```html
 /// <a href="/profile/">Profile</a>

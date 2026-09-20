@@ -15,10 +15,6 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// When duplicates are present, browsers keep the first occurrence and silently discard the rest,
 /// which usually does not match the author's intent.
 ///
-/// An attribute inside a `{% if %}` or `{% for %}` block is compared with the attributes outside
-/// the block and with those in the same branch, since they render together. Sibling branches
-/// never render together and are not compared with each other.
-///
 /// ## Example
 /// ```html
 /// <br class="a" id="asdf" class="b" />
