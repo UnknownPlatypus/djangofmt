@@ -342,4 +342,21 @@ mod tests {
             assert!(lint("<div>").is_err(), "{fix:?}");
         }
     }
+
+    #[test]
+    fn path_aware_rules_are_skipped_without_a_path() {
+        let settings = Settings::all();
+        let source = "{% partialdef card %}<span>A card</span>{% endpartialdef %}\n\
+                      {% include \"tpl.html#card\" %}";
+        let codes = |path| {
+            lint_source(source, Language::Jinja, &[], &settings, path)
+                .unwrap()
+                .into_iter()
+                .map(|diagnostic| diagnostic.code)
+                .collect::<Vec<_>>()
+        };
+
+        assert!(codes(Some(Path::new("tpl.html"))).contains(&"same-file-partial-include"));
+        assert!(!codes(None).contains(&"same-file-partial-include"));
+    }
 }

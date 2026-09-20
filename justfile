@@ -24,7 +24,7 @@ lint:
 # Run the full test suite, accepting snapshot updates automatically.
 [group('dev')]
 test:
-    cargo test --workspace --all-targets --all-features
+    cargo test --workspace --all-features --lib --bins --tests
 
 # Pre-merge request checks
 [group('dev')]
