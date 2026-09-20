@@ -312,11 +312,13 @@ impl<'a> Checker<'a> {
         }
 
         // `{% raw %}` emits its body verbatim: the HTML inside is real, the template tags are not.
+        // Django has no `raw` tag — only Jinja parses one into a block — so it never reads a name.
         let outer_raw = self.in_raw;
-        self.in_raw |= matches!(
-            block.body.first(),
-            Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "raw"
-        );
+        self.in_raw |= !self.is_django()
+            && matches!(
+                block.body.first(),
+                Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "raw"
+            );
         for item in &block.body {
             if let JinjaTagOrChildren::Children(children) = item {
                 for child in children {

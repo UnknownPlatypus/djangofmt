@@ -1,4 +1,7 @@
 use std::borrow::Cow;
+use std::sync::LazyLock;
+
+use memchr::memmem::Finder;
 
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren};
 
@@ -68,9 +71,20 @@ pub fn block_name<'s, T>(block: &JinjaBlock<'s, T>) -> Option<&'s str> {
 /// The names of `{% block %}` tags written in text the parser leaves unread, such as a `<script>`
 /// body or an HTML comment. Django still parses them.
 pub fn block_names_in_text(raw: &str) -> impl Iterator<Item = &str> {
-    raw.match_indices("{%").filter_map(|(start, _)| {
-        let content = raw[start + 2..].split("%}").next()?;
-        block_name_from_content(content)
+    /// Built once: these bodies are often short, and a per-call searcher costs more than the scan.
+    static OPENING: LazyLock<Finder<'static>> = LazyLock::new(|| Finder::new(b"{%"));
+
+    OPENING.find_iter(raw.as_bytes()).filter_map(|start| {
+        let tag = &raw[start + 2..];
+        // Locating `%}` is the costly half, so drop the tags that cannot be a block first.
+        if !tag
+            .trim_start_matches(['+', '-'])
+            .trim_start()
+            .starts_with("block")
+        {
+            return None;
+        }
+        block_name_from_content(tag.split("%}").next()?)
     })
 }
 

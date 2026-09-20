@@ -52,6 +52,11 @@ impl Violation for DuplicateAttr<'_> {
 }
 
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
+    // Fast path: a lone attribute collides with nothing, unless it is a block holding several.
+    if element.attrs.len() < 2 && !matches!(element.attrs.first(), Some(Attribute::JinjaBlock(_))) {
+        return;
+    }
+
     let mut seen = SmallVec::<[(&str, usize); 8]>::new();
     visit(checker, &element.attrs, 0, &mut 0, &mut seen);
 }
