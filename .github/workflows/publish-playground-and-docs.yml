@@ -73,7 +73,7 @@ jobs:
         run: deno task build
         working-directory: playground
       - name: Setup uv
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
           # Release runs deploy this build, so they must not read a cache PRs can write.
           enable-cache: ${{ github.event_name == 'pull_request' }}
