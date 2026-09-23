@@ -1,0 +1,10 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<?xml version="1.0" ?>
+<!-- Real-world: Zope src/Products/PageTemplates/tests/input/CheckWithXMLHeader.html — the
+     declaration belongs after the XML prolog, not at the top of the file. -->
+<!DOCTYPE html>
+<html>
+    <body>Content</body>
+</html>

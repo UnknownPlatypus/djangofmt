@@ -1,0 +1,9 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- `extendsfoo` is not the `extends` directive: the file is a full document, not a partial. -->
+{% extendsfoo "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+    <body></body>
+</html>
