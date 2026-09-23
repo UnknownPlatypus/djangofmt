@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- A bare `{% load %}` tag before `<html>` does not declare a DOCTYPE; the rule must still
+     flag the document. -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head><title>Page</title></head>
+    <body>Content</body>
+</html>

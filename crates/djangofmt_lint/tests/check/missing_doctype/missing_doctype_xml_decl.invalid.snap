@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Missing `<!DOCTYPE html>` declaration
+   ╭─[tests/check/missing_doctype/missing_doctype_xml_decl.invalid.html:4:2]
+ 3 │      declaration belongs after the XML prolog, not at the top of the file. -->
+ 4 │ <html>
+   ·  ──┬─
+   ·    ╰── here
+ 5 │     <body>Content</body>
+   ╰────
+  help: Add `<!DOCTYPE html>` before the `<html>` tag

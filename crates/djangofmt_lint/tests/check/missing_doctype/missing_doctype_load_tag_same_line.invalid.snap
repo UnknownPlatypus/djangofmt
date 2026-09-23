@@ -1,0 +1,13 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Missing `<!DOCTYPE html>` declaration
+   ╭─[tests/check/missing_doctype/missing_doctype_load_tag_same_line.invalid.html:3:19]
+ 2 │      `<html>` line, so the declaration is inserted mid-line. -->
+ 3 │ {% load static %}<html>
+   ·                   ──┬─
+   ·                     ╰── here
+ 4 │     <head><title>{{ event.what }}</title></head>
+   ╰────
+  help: Add `<!DOCTYPE html>` before the `<html>` tag

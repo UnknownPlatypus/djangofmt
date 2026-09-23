@@ -4,6 +4,7 @@ use markup_fmt::ast::{NodeKind, Root};
 use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::Checker;
+use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
@@ -39,6 +40,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// </html>
 /// ```
 ///
+/// ## Fix safety
+/// The fix is marked unsafe: switching a document out of quirks mode is the point of the rule, but
+/// it changes how the page renders, and a layout tuned against quirks-mode box sizing may shift.
+///
 /// ## References
 /// - [HTML spec: The DOCTYPE](https://html.spec.whatwg.org/multipage/syntax.html#the-doctype)
 /// - [MDN: Doctype](https://developer.mozilla.org/en-US/docs/Glossary/Doctype)
@@ -49,6 +54,7 @@ pub struct MissingDoctype;
 impl Violation for MissingDoctype {
     const RULE: Rule = Rule::MissingDoctype;
     const CATEGORY: RuleCategory = RuleCategory::Style;
+    const FIX_AVAILABILITY: FixAvailability = FixAvailability::Sometimes;
 
     #[derive_message_formats]
     fn message(&self) -> Cow<'static, str> {
@@ -57,6 +63,10 @@ impl Violation for MissingDoctype {
 
     fn help(&self) -> Option<Cow<'static, str>> {
         Some("Add `<!DOCTYPE html>` before the `<html>` tag".into())
+    }
+
+    fn fix_title(&self) -> Option<&'static str> {
+        Some("Add `<!DOCTYPE html>` declaration")
     }
 }
 
@@ -68,10 +78,23 @@ pub fn check(checker: &Checker<'_>, root: &Root<'_>) {
             NodeKind::Doctype(_) | NodeKind::JinjaBlock(_) => return,
             NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return,
             NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("html") => {
-                checker.report_diagnostic(&MissingDoctype, checker.source_span(el.tag_name));
+                let mut guard =
+                    checker.report_diagnostic(&MissingDoctype, checker.source_span(el.tag_name));
+                if !has_late_doctype(root) {
+                    guard.set_fix(Fix::unsafe_edit(Edit::insertion(
+                        "<!DOCTYPE html>\n",
+                        checker.source_offset(node.raw),
+                    )));
+                }
                 return;
             }
             _ => {}
         }
     }
+}
+
+fn has_late_doctype(root: &Root<'_>) -> bool {
+    root.children
+        .iter()
+        .any(|node| matches!(node.kind, NodeKind::Doctype(_)))
 }
