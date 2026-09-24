@@ -14,6 +14,24 @@ pub fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%") || value.contains("{#")
 }
 
+/// The candidate `input` was likely meant to be, when one is close enough to name.
+pub fn closest_match<'c>(
+    input: &str,
+    candidates: impl IntoIterator<Item = &'c str>,
+) -> Option<&'c str> {
+    candidates
+        .into_iter()
+        .map(|candidate| (strsim::levenshtein(input, candidate), candidate))
+        // A third of the longer spelling, so a suggestion stays a plausible misspelling
+        // rather than a rewrite of every character.
+        .filter(|&(distance, candidate)| {
+            let longest = input.len().max(candidate.len());
+            distance <= (longest / 3).max(1) && distance < longest
+        })
+        .min_by_key(|&(distance, _)| distance)
+        .map(|(_, candidate)| candidate)
+}
+
 /// Yields each `srcset` candidate URL.
 ///
 /// `srcset` holds a comma-separated list of candidates, each `<url> <descriptor>`
