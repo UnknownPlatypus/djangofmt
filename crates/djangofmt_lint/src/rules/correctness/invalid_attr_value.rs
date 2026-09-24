@@ -3,26 +3,24 @@ use std::borrow::Cow;
 use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
+use crate::html_spec::enum_attr;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
+use crate::rules::helpers::{closest_match, contains_interpolation};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for HTML attributes whose value is not in the set allowed by the
-/// HTML specification (and supported framework dialects such as HTMX or
-/// Alpine.js).
-///
-/// Currently only validates enum-type attributes (e.g., `<form method>`,
-/// `<input type>`, `<button type>`).
+/// Checks for HTML attributes whose value is not one of the keywords the HTML specification allows,
+/// such as `<form method>`, `<input type>` or `<img loading>`.
 ///
 /// ## Why is this bad?
-/// Browsers silently ignore unknown values for enum attributes and fall back
-/// to a default, which usually does not match the author's intent. The
-/// resulting bug is easy to miss because the page still renders.
+/// Browsers silently ignore an unknown keyword and fall back to a default, which usually does not
+/// match the author's intent: `<form method="put">` sends a `GET` request and
+/// `<img loading="lazzy">` loads eagerly. The resulting bug is easy to miss because the page still
+/// renders.
 ///
-/// Values containing template interpolation (`{{ ... }}` or `{% ... %}`),
-/// unknown elements (web components, custom tags), and unknown attributes
-/// are skipped.
+/// Keywords match case-insensitively, except where the specification makes case significant, as in
+/// `<ol type>`. Values containing template interpolation (`{{ ... }}` or `{% ... %}`) and custom
+/// elements are skipped.
 ///
 /// ## Example
 ///
@@ -37,13 +35,14 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## References
-/// - [HTML Living Standard: `form.method`](https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fs-method)
+/// - [HTML Living Standard: Keywords and enumerated attributes](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#keywords-and-enumerated-attributes)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
 #[violation_metadata(stable_since = "0.2.5")]
 pub struct InvalidAttrValue {
     pub value: String,
-    pub attribute: &'static str,
+    pub attribute: String,
     pub allowed: &'static [&'static str],
+    pub suggestion: Option<&'static str>,
 }
 
 impl Violation for InvalidAttrValue {
@@ -60,49 +59,52 @@ impl Violation for InvalidAttrValue {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        if self.allowed.is_empty() {
-            None
-        } else {
-            Some(format!("Use one of: {}", self.allowed.join(", ")).into())
+        if let Some(keyword) = self.suggestion {
+            return Some(format!("Did you mean `{keyword}`?").into());
         }
+        let allowed: Vec<_> = self
+            .allowed
+            .iter()
+            .map(|&keyword| if keyword.is_empty() { "\"\"" } else { keyword })
+            .collect();
+        Some(format!("Use one of: {}", allowed.join(", ")).into())
     }
 }
 
-/// Check a single attribute for an invalid enum value.
+/// Check a single attribute for a value outside its keywords.
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
-    // Pending implementation of djangofmt_html_spec.
-    // Currently only checks for <form method="...">.
-    if !element.tag_name.eq_ignore_ascii_case("form") {
-        return;
-    }
-
     let NativeAttribute {
         name,
-        value: Some((value_str, _)),
+        value: Some((value, _)),
         ..
     } = attr
     else {
         return;
     };
-
-    if !name.eq_ignore_ascii_case("method") {
+    let Some(spec) = enum_attr(element.tag_name, name) else {
+        return;
+    };
+    if spec.accepts(value) || contains_interpolation(value) {
         return;
     }
 
-    // Skip interpolated values
-    if contains_interpolation(value_str) {
-        return;
-    }
-
-    let allowed: &[&str] = &["get", "post", "dialog"];
-    if !allowed.iter().any(|v| v.eq_ignore_ascii_case(value_str)) {
-        checker.report_diagnostic(
-            &InvalidAttrValue {
-                value: (*value_str).into(),
-                attribute: "method",
-                allowed,
-            },
-            checker.source_span(value_str),
-        );
-    }
+    let typed = if spec.case_insensitive {
+        Cow::Owned(value.to_ascii_lowercase())
+    } else {
+        Cow::Borrowed(*value)
+    };
+    let keywords = spec
+        .values
+        .iter()
+        .copied()
+        .filter(|keyword| !keyword.is_empty());
+    checker.report_diagnostic(
+        &InvalidAttrValue {
+            value: (*value).into(),
+            attribute: (*name).into(),
+            allowed: spec.values,
+            suggestion: closest_match(&typed, keywords),
+        },
+        checker.source_span(value),
+    );
 }

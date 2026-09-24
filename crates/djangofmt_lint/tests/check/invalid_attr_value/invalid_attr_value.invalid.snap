@@ -10,7 +10,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                ╰── here
  3 │ <form method="delete">Submit</form>
    ╰────
-  help: Use one of: get, post, dialog
+  help: Use one of: post, get, dialog
 
   × Invalid value `delete` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:3:15]
@@ -20,7 +20,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                  ╰── here
  4 │ <form method="patch">Submit</form>
    ╰────
-  help: Use one of: get, post, dialog
+  help: Use one of: post, get, dialog
 
   × Invalid value `patch` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:4:15]
@@ -30,7 +30,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                 ╰── here
  5 │ 
    ╰────
-  help: Use one of: get, post, dialog
+  help: Use one of: post, get, dialog
 
   × Invalid value `invalid` for attribute `method`
    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:8:19]
@@ -40,7 +40,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
    ·                      ╰── here
  9 │ {% endif %}
    ╰────
-  help: Use one of: get, post, dialog
+  help: Use one of: post, get, dialog
 
   × Invalid value `patch` for attribute `method`
     ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:13:19]
@@ -50,7 +50,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ·                     ╰── here
  14 │ </div>
     ╰────
-  help: Use one of: get, post, dialog
+  help: Use one of: post, get, dialog
 
   × Invalid value `delete` for attribute `method`
     ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:17:28]
@@ -58,5 +58,75 @@ source: crates/djangofmt_lint/tests/check/main.rs
  17 │ <form {% if show %}method="delete"{% endif %}>Submit</form>
     ·                            ───┬──
     ·                               ╰── here
+ 18 │ 
     ╰────
-  help: Use one of: get, post, dialog
+  help: Use one of: post, get, dialog
+
+  × Invalid value `PUT` for attribute `METHOD`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:20:15]
+ 19 │ <!-- Uppercase tag and attribute names -->
+ 20 │ <FORM METHOD="PUT">Submit</FORM>
+    ·               ─┬─
+    ·                ╰── here
+ 21 │ 
+    ╰────
+  help: Use one of: post, get, dialog
+
+  × Invalid value ` post` for attribute `method`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:23:15]
+ 22 │ <!-- Keyword with surrounding spaces -->
+ 23 │ <form method=" post">Submit</form>
+    ·               ──┬──
+    ·                 ╰── here
+ 24 │ 
+    ╰────
+  help: Did you mean `post`?
+
+  × Invalid value `txt` for attribute `type`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:26:14]
+ 25 │ <!-- Element-specific keywords, with a close match to suggest -->
+ 26 │ <input type="txt">
+    ·              ─┬─
+    ·               ╰── here
+ 27 │ 
+    ╰────
+  help: Did you mean `text`?
+
+  × Invalid value `lazzy` for attribute `loading`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:29:15]
+ 28 │ <!-- Keywords shared by a few elements -->
+ 29 │ <img loading="lazzy" src="hero.webp" alt="">
+    ·               ──┬──
+    ·                 ╰── here
+ 30 │ 
+    ╰────
+  help: Did you mean `lazy`?
+
+  × Invalid value `false` for attribute `hidden`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:32:14]
+ 31 │ <!-- Global attribute, empty keyword listed in the help -->
+ 32 │ <div hidden="false"></div>
+    ·              ──┬──
+    ·                ╰── here
+ 33 │ 
+    ╰────
+  help: Use one of: "", hidden, until-found
+
+  × Invalid value `auto` for attribute `dir`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:35:11]
+ 34 │ <!-- Element definition replaces the global one -->
+ 35 │ <bdo dir="auto">text</bdo>
+    ·           ──┬─
+    ·             ╰── here
+ 36 │ 
+    ╰────
+  help: Use one of: ltr, rtl
+
+  × Invalid value `X` for attribute `type`
+    ╭─[tests/check/invalid_attr_value/invalid_attr_value.invalid.html:38:11]
+ 37 │ <!-- Case-sensitive keywords -->
+ 38 │ <ol type="X"></ol>
+    ·           ┬
+    ·           ╰── here
+    ╰────
+  help: Use one of: 1, a, A, i, I

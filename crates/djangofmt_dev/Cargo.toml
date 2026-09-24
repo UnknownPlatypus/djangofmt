@@ -12,6 +12,7 @@ anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 djangofmt = { path = "../djangofmt", default-features = false }
 djangofmt_lint = { path = "../djangofmt_lint" }
+serde_json = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 
 [lints]

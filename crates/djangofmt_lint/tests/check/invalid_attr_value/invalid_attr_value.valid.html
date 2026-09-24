@@ -16,3 +16,16 @@
 
 <!-- Form with method attr but no value - should not trigger -->
 <form method>Submit</form>
+
+<!-- Keywords match regardless of case -->
+<img loading="LAZY" src="hero.webp" alt="">
+
+<!-- Case-sensitive keywords -->
+<ol type="A"></ol>
+<ol type="a"></ol>
+
+<!-- Empty keyword -->
+<img crossorigin="" src="hero.webp" alt="">
+
+<!-- Custom elements have no spec -->
+<my-widget dir="sideways"></my-widget>

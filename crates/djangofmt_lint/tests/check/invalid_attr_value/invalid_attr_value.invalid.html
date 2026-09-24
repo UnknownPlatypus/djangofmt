@@ -15,3 +15,24 @@
 
 <!-- Jinja block as attribute -->
 <form {% if show %}method="delete"{% endif %}>Submit</form>
+
+<!-- Uppercase tag and attribute names -->
+<FORM METHOD="PUT">Submit</FORM>
+
+<!-- Keyword with surrounding spaces -->
+<form method=" post">Submit</form>
+
+<!-- Element-specific keywords, with a close match to suggest -->
+<input type="txt">
+
+<!-- Keywords shared by a few elements -->
+<img loading="lazzy" src="hero.webp" alt="">
+
+<!-- Global attribute, empty keyword listed in the help -->
+<div hidden="false"></div>
+
+<!-- Element definition replaces the global one -->
+<bdo dir="auto">text</bdo>
+
+<!-- Case-sensitive keywords -->
+<ol type="X"></ol>

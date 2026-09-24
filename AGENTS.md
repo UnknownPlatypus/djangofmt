@@ -33,7 +33,7 @@ This is a Rust workspace with six crates in `crates/`:
 
 **`djangofmt_macros`** — proc macros consumed by `djangofmt_lint`: the `ViolationMetadata` derive and `derive_message_formats`.
 
-**`djangofmt_dev`** — dev-only CLI that generates the rule docs (`docs/rules.md`, `docs/rules/`) from violation doc comments and syncs README/CONTRIBUTING into `docs/`; run via `just docs-generate`. Its output is gitignored, never committed.
+**`djangofmt_dev`** — dev-only CLI that generates the rule docs (`docs/rules.md`, `docs/rules/`) from violation doc comments and syncs README/CONTRIBUTING into `docs/`; run via `just docs-generate`. Its output is gitignored, never committed. The one exception is `djangofmt_lint/src/html_spec/generated.rs`, the attribute tables built from markuplint's HTML spec by `just html-spec`: it is committed, and changes only by bumping the spec version in that recipe.
 
 ### Key external dependencies
 

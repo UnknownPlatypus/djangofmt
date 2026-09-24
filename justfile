@@ -35,6 +35,13 @@ pre-mr-check:
     just test
     just docs-build
 
+# Download markuplint's HTML spec and regenerate the lint attribute tables from it
+[group('dev')]
+html-spec version="5.0.1":
+    mkdir -p target/html-spec
+    curl -sSfL https://registry.npmjs.org/@markuplint/html-spec/-/html-spec-{{version}}.tgz | tar -xz -C target/html-spec
+    cargo run -p djangofmt_dev -- generate-html-spec
+
 # Regenerate the per-rule documentation under docs/rules/ and docs/rules.md
 # (and sync README/CONTRIBUTING into docs/).
 [group('docs')]
