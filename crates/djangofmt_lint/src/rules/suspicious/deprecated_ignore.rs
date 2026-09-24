@@ -33,6 +33,9 @@ pub struct DeprecatedIgnore {
     pub in_html: bool,
     /// Whether the comment is the legacy whole-file opt-out, spelled `file-ignore[format]`.
     pub file_level: bool,
+    /// Whether that opt-out quarantines a file that does not parse, spelled
+    /// `file-ignore[invalid-syntax]` instead, so the file gets formatted once it parses.
+    pub quarantines: bool,
     /// Why the rewrite is left to the author, when it is.
     pub unfixable: Option<Unfixable>,
 }
@@ -62,7 +65,11 @@ impl DeprecatedIgnore {
     /// The `{# #}` comment the directive should be written as, `reason` carried over when any.
     fn rewrite(&self, reason: &str) -> String {
         let keyword = if self.file_level { FILE_IGNORE } else { IGNORE };
-        let code = ReservedCode::Format.as_str();
+        let code = if self.quarantines {
+            ReservedCode::InvalidSyntax
+        } else {
+            ReservedCode::Format
+        };
         let reason = if reason.is_empty() {
             String::new()
         } else {
@@ -101,7 +108,9 @@ impl Violation for DeprecatedIgnore {
     }
 
     fn fix_title(&self) -> Option<&'static str> {
-        Some(if self.file_level {
+        Some(if self.quarantines {
+            "Rewrite as `{# djangofmt: file-ignore[invalid-syntax] #}`"
+        } else if self.file_level {
             "Rewrite as `{# djangofmt: file-ignore[format] #}`"
         } else {
             "Rewrite as `{# djangofmt: ignore[format] #}`"
@@ -123,23 +132,37 @@ fn reason(body: &str) -> &str {
 
 /// Lint a comment of either style, `body` being its text between `delimiters`.
 pub fn check(checker: &Checker<'_>, delimiters: CommentDelimiters, body: &str) {
-    if markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE) {
-        let whole_comment = delimiters.enclosing_comment(checker, body);
-        report(checker, whole_comment, body, delimiters == HTML_COMMENT);
+    report(checker, delimiters, body, false);
+}
+
+/// Lint the comment leading a file that does not parse: with no AST, it is read from the raw
+/// source, as [`FileIgnores::parse`](crate::FileIgnores::parse) reads it.
+pub fn check_quarantined(checker: &Checker<'_>) {
+    let source = strip_bom(checker.context().source());
+    for delimiters in [TEMPLATE_COMMENT, HTML_COMMENT] {
+        if let Some(body) = delimiters.body(source) {
+            report(checker, delimiters, body, true);
+        }
     }
 }
 
-/// Report the whole comment and rewrite it as a coded `{# #}` directive when it fits.
-fn report(checker: &Checker<'_>, comment: &str, comment_body: &str, in_html: bool) {
+/// Report `body` when it is the legacy directive, rewriting its whole comment as a coded
+/// `{# #}` directive when it fits.
+fn report(checker: &Checker<'_>, delimiters: CommentDelimiters, body: &str, quarantines: bool) {
+    if !markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE) {
+        return;
+    }
+    let comment = delimiters.enclosing_comment(checker, body);
     let violation = DeprecatedIgnore {
-        in_html,
+        in_html: delimiters == HTML_COMMENT,
         file_level: is_legacy_file_opt_out(checker, comment),
-        unfixable: Unfixable::in_body(comment_body),
+        quarantines,
+        unfixable: Unfixable::in_body(body),
     };
     let span = checker.source_span(comment);
     let mut guard = checker.report_diagnostic(&violation, span);
     if violation.unfixable.is_none() {
-        let rewritten = violation.rewrite(reason(comment_body));
+        let rewritten = violation.rewrite(reason(body));
         guard.set_fix(Fix::safe_edit(Edit::replacement(rewritten, span)));
     }
 }

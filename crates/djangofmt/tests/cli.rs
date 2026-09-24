@@ -579,8 +579,8 @@ fn check_fixable_file_with_show_fixes() {
 
 #[test]
 fn check_skips_unparsable_files_that_opted_out() {
-    // Both the explicit code and the legacy bare directive (#373) skip a file
-    // `check` cannot parse.
+    // Both the explicit code and the legacy bare directive (#373) hide the parse error of a file
+    // `check` cannot parse, but the legacy one is still reported for migration (#523).
     let project = Project::new()
         .file(
             "bracketed.html",
@@ -590,14 +590,23 @@ fn check_skips_unparsable_files_that_opted_out() {
             "legacy.html",
             "{# djangofmt: ignore #}\n<div id=>\n</div>\n",
         );
-    assert_cmd_snapshot!(cli().arg("check").arg(project.path()), @"
-    success: true
-    exit_code: 0
+    assert_cmd_snapshot_tmpdir!(cli().arg("check").arg(project.path()), @"
+    success: false
+    exit_code: 1
     ----- stdout -----
 
     ----- stderr -----
-    All checks passed!
-    2 files skipped !
+      × Deprecated ignore comment
+       ╭─[[TMP]/legacy.html:1:1]
+     1 │ {# djangofmt: ignore #}
+       · ───────────┬───────────
+       ·            ╰── here
+     2 │ <div id=>
+       ╰────
+      help: Write it as `{# djangofmt: file-ignore[invalid-syntax] #}` instead
+
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    1 file skipped !
     ");
 }
 

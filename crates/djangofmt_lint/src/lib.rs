@@ -281,7 +281,8 @@ pub struct LintOutcome {
 /// Lint `source`, applying fixes up to the given threshold when `fix` is [`Some`].
 ///
 /// Returns [`None`] when a leading `file-ignore[invalid-syntax]` comment quarantines a file
-/// that does not parse, like the formatter's `format_text`.
+/// that does not parse, like the formatter's `format_text`. The legacy bare directive,
+/// which quarantines too, is still reported so that it gets migrated.
 pub fn lint_text(
     source: &str,
     settings: &Settings,
@@ -320,9 +321,51 @@ pub fn lint_text(
     };
     match result {
         // `file-ignore[invalid-syntax]` quarantines the file instead of reporting.
-        Err(_) if FileIgnores::parse(source).invalid_syntax => Ok(None),
+        Err(_) if FileIgnores::parse(source).invalid_syntax => {
+            Ok(lint_quarantined(source, settings, language, fix, path))
+        }
         other => other.map(Some),
     }
+}
+
+/// Lint the one thing a quarantined file has without an AST: its leading comment, which only
+/// `deprecated-ignore` would ever migrate. [`None`] when that leaves nothing to report.
+fn lint_quarantined(
+    source: &str,
+    settings: &Settings,
+    language: Language,
+    fix: Option<Applicability>,
+    path: Option<&Path>,
+) -> Option<LintOutcome> {
+    let checker = Checker::new(source, settings, language, path);
+    if checker.is_rule_enabled(Rule::DeprecatedIgnore) {
+        rules::suspicious::deprecated_ignore::check_quarantined(&checker);
+    }
+    let diagnostics = checker.into_diagnostics();
+    if diagnostics.is_empty() {
+        return None;
+    }
+    let applied = fix.map(|threshold| apply_fixes(source, &diagnostics, threshold));
+    let Some(applied) = applied.filter(|applied| applied.applied_count > 0) else {
+        return Some(LintOutcome {
+            diagnostics,
+            ..LintOutcome::default()
+        });
+    };
+    // The rewritten comment still quarantines the file: nothing is left to report or iterate on.
+    let summaries = applied.applied_fixes.iter().map(|fix| {
+        let summary = RuleFixSummary {
+            count: 1,
+            fix_title: fix.fix_title,
+        };
+        (fix.code, summary)
+    });
+    Some(LintOutcome {
+        fixed: Some(applied.output),
+        applied_count: applied.applied_count,
+        applied_by_rule: summaries.collect(),
+        ..LintOutcome::default()
+    })
 }
 
 #[cfg(test)]
@@ -341,6 +384,23 @@ mod tests {
             );
             assert!(lint("<div>").is_err(), "{fix:?}");
         }
+    }
+
+    #[test]
+    fn quarantining_legacy_directive_is_migrated() {
+        let settings = Settings::all();
+        let lint = |source: &str, fix| {
+            lint_text(source, &settings, Language::Jinja, &[], fix, None)
+                .unwrap()
+                .unwrap_or_default()
+        };
+        let legacy = "{# djangofmt:ignore #}\n<div>";
+        assert_eq!(lint(legacy, None).diagnostics[0].code, "deprecated-ignore");
+
+        // Not `file-ignore[format]`, which would surface the parse error the directive was hiding.
+        let fixed = lint(legacy, Some(Applicability::Safe)).fixed.unwrap();
+        assert_eq!(fixed, "{# djangofmt: file-ignore[invalid-syntax] #}\n<div>");
+        assert!(lint(&fixed, None).diagnostics.is_empty());
     }
 
     #[test]
