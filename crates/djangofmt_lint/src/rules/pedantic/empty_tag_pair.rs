@@ -4,6 +4,7 @@ use markup_fmt::ast::{Element, Node, NodeKind};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::is_custom_element;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -69,10 +70,8 @@ const EXCLUDED_TAGS: &[&str] = &[
     "clipPath", "slot", "body", "head", "pre",
 ];
 
-/// A hyphen marks a custom element (`<my-widget>`).
-/// See <https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name>
 fn is_excluded_tag(tag: &str) -> bool {
-    tag.contains('-')
+    is_custom_element(tag)
         || EXCLUDED_TAGS
             .iter()
             .any(|excluded| tag.eq_ignore_ascii_case(excluded))

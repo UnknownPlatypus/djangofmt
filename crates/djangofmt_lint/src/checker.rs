@@ -270,7 +270,7 @@ impl<'a> Checker<'a> {
         }
 
         if self.is_rule_enabled(Rule::EmptyAttrValue) {
-            rules::style::empty_attr_value::check(self, attr);
+            rules::style::empty_attr_value::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::RedundantTypeAttr) {

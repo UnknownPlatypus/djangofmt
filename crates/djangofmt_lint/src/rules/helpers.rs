@@ -14,6 +14,13 @@ pub fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%") || value.contains("{#")
 }
 
+/// A hyphen marks a custom element (`<my-widget>`), whose attributes are its own API, not HTML's.
+/// See <https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name>
+#[inline]
+pub fn is_custom_element(tag: &str) -> bool {
+    tag.contains('-')
+}
+
 /// Yields each `srcset` candidate URL.
 ///
 /// `srcset` holds a comma-separated list of candidates, each `<url> <descriptor>`

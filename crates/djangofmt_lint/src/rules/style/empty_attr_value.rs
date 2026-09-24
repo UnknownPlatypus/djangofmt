@@ -1,11 +1,12 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::NativeAttribute;
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::is_custom_element;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -15,6 +16,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// An `id=""` or `class=""` attribute is almost always unintentional: no CSS class selector
 /// matches an element with an empty `class`, and `document.getElementById("")` returns nothing.
 /// Removing the attribute reduces template noise.
+///
+/// Custom elements (`<my-widget>`, `<c-button>`) are skipped: their attributes are the
+/// component's API. For example, [django-cotton](https://django-cotton.com/docs/components#vars)
+/// uses `class=""` to declare or override a component variable, so removing it changes the output.
 ///
 /// ## Example
 /// ```html
@@ -46,7 +51,11 @@ impl Violation for EmptyAttrValue<'_> {
     }
 }
 
-pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
+    if is_custom_element(element.tag_name) {
+        return;
+    }
+
     let NativeAttribute {
         name,
         value: Some((value_str, _)),
