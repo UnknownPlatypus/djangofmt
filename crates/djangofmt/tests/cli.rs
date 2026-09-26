@@ -383,7 +383,7 @@ fn check_file_with_lint_error() {
        ·               ─┬─
        ·                ╰── here
        ╰────
-      help: Use one of: get, post, dialog
+      help: Use one of: post, get, dialog
 
     Found 1 errors.
     "#);
@@ -705,7 +705,7 @@ fn check_respects_pyproject_per_file_ignores() {
        ·               ─┬─
        ·                ╰── here
        ╰────
-      help: Use one of: get, post, dialog
+      help: Use one of: post, get, dialog
 
     Found 1 errors.
     "#);
@@ -724,7 +724,7 @@ fn check_respects_pyproject_per_file_ignores() {
        ·               ─┬─
        ·                ╰── here
        ╰────
-      help: Use one of: get, post, dialog
+      help: Use one of: post, get, dialog
 
     Found 1 errors.
     "#);

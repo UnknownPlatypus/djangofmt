@@ -28,8 +28,12 @@ pub fn closest_match<'c>(
     candidates
         .into_iter()
         .map(|candidate| (strsim::levenshtein(input, candidate), candidate))
-        // A third of the longer spelling, so a suggestion stays a plausible misspelling.
-        .filter(|&(distance, candidate)| distance <= (input.len().max(candidate.len()) / 3).max(1))
+        // A third of the longer spelling,
+        // so a suggestion stays a plausible misspelling rather than a rewrite of every character.
+        .filter(|&(distance, candidate)| {
+            let longest = input.chars().count().max(candidate.chars().count());
+            distance <= (longest / 3).max(1) && distance < longest
+        })
         .min_by_key(|&(distance, _)| distance)
         .map(|(_, candidate)| candidate)
 }
