@@ -1,17 +1,12 @@
 {
   "name": "playground",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "tsc && astro build --minify",
     "preview": "astro preview"
-  },
-  "devDependencies": {
-    "daisyui": "5.7.46",
-    "typescript": "7.0.2",
-    "vite": "8.3.1"
   },
   "overrides": {
     "dompurify": "^3.3.3"
@@ -24,5 +19,10 @@
     "lz-string": "^1.5.0",
     "monaco-editor": "^0.57.0",
     "tailwindcss": "4.2.2"
+  },
+  "devDependencies": {
+    "daisyui": "5.7.46",
+    "typescript": "7.0.2",
+    "vite": "8.3.1"
   }
 }
