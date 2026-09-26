@@ -20,6 +20,20 @@ pub fn is_cotton_component(checker: &Checker<'_>, tag_name: &str) -> bool {
     checker.is_django() && tag_name.starts_with("c-")
 }
 
+/// The candidate `input` was likely meant to be, when one is close enough to name.
+pub fn closest_match<'c>(
+    input: &str,
+    candidates: impl IntoIterator<Item = &'c str>,
+) -> Option<&'c str> {
+    candidates
+        .into_iter()
+        .map(|candidate| (strsim::levenshtein(input, candidate), candidate))
+        // A third of the longer spelling, so a suggestion stays a plausible misspelling.
+        .filter(|&(distance, candidate)| distance <= (input.len().max(candidate.len()) / 3).max(1))
+        .min_by_key(|&(distance, _)| distance)
+        .map(|(_, candidate)| candidate)
+}
+
 /// Yields each `srcset` candidate URL.
 ///
 /// `srcset` holds a comma-separated list of candidates, each `<url> <descriptor>`
