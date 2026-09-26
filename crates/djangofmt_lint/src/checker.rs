@@ -42,9 +42,10 @@ impl<'a> Checker<'a> {
         settings: &'a Settings,
         language: Language,
         path: Option<&'a Path>,
+        quarantined: bool,
     ) -> Self {
         Self {
-            context: LintContext::new(source, settings, language, path),
+            context: LintContext::new(source, settings, language, path, quarantined),
             block_names: SmallVec::new_const(),
             in_raw: false,
         }

@@ -87,11 +87,10 @@ pub const HTML_COMMENT: CommentDelimiters = CommentDelimiters {
 };
 
 impl CommentDelimiters {
-    /// The body of a comment, only if `text` starts with one.
+    /// The body of a comment and the text after it, only if `text` starts with one.
     #[inline]
-    pub fn body(self, text: &str) -> Option<&str> {
-        let body = text.strip_prefix(self.open)?;
-        Some(&body[..body.find(self.close)?])
+    pub fn split(self, text: &str) -> Option<(&str, &str)> {
+        text.strip_prefix(self.open)?.split_once(self.close)
     }
 
     /// The whole comment around `comment_body`, delimiters included.

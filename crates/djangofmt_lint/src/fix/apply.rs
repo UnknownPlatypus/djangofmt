@@ -147,6 +147,8 @@ pub struct FixerResult {
     pub iterations: usize,
     /// Per-rule applied summaries, used by `--show-fixes`.
     pub applied_by_rule: rustc_hash::FxHashMap<&'static str, RuleFixSummary>,
+    /// Whether `source` only got its leading comment linted, see [`crate::parse_or_quarantine`].
+    pub quarantined: bool,
 }
 
 /// Errors from [`lint_fix`].
@@ -184,6 +186,7 @@ pub fn lint_fix(
     let mut total_skipped = 0usize;
     let mut iterations = 0usize;
     let mut had_valid_first_parse = false;
+    let mut quarantined = false;
     let mut applied_by_rule: FxHashMap<&'static str, RuleFixSummary> = FxHashMap::default();
 
     loop {
@@ -201,13 +204,15 @@ pub fn lint_fix(
                 skipped_count: total_skipped,
                 iterations,
                 applied_by_rule,
+                quarantined,
             });
         }
 
-        let parsed = match crate::parse(&current, profile, custom_blocks) {
+        let parsed = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
             Ok(parsed) => {
                 if iterations == 0 {
                     had_valid_first_parse = true;
+                    quarantined = parsed.quarantined;
                 }
                 parsed
             }
@@ -239,6 +244,7 @@ pub fn lint_fix(
                 skipped_count: total_skipped,
                 iterations,
                 applied_by_rule,
+                quarantined,
             });
         }
 

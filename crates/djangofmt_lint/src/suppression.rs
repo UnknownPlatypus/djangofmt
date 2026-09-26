@@ -304,25 +304,39 @@ impl FileIgnores {
     /// so they can be honored even when the file fails to parse.
     #[must_use]
     pub fn parse(source: &str) -> Self {
-        let source = strip_bom(source);
+        Self::parse_head(source)
+            .map(|(ignores, _)| ignores)
+            .unwrap_or_default()
+    }
 
+    /// The source up to the end of its leading comment, when that comment quarantines the file,
+    /// which is all the linter reads of a file that does not parse.
+    #[must_use]
+    pub fn quarantine_head(source: &str) -> Option<&str> {
+        let (ignores, head) = Self::parse_head(source)?;
+        ignores.invalid_syntax.then_some(head)
+    }
+
+    /// Opt-outs from the file's leading comment, a BOM and whitespace before it tolerated,
+    /// with the source up to the end of that comment.
+    fn parse_head(source: &str) -> Option<(Self, &str)> {
+        let unmarked = strip_bom(source);
+        let rest = unmarked.trim_start();
+        let (delimiters, (body, after)) = [TEMPLATE_COMMENT, HTML_COMMENT]
+            .into_iter()
+            .find_map(|delimiters| Some((delimiters, delimiters.split(rest)?)))?;
         // The formatter's bare `ignore` doubles as its node-level directive,
         // so it is only file-level when nothing (not even whitespace) precedes it.
-        let legacy_body = TEMPLATE_COMMENT
-            .body(source)
-            .or_else(|| HTML_COMMENT.body(source));
-        if let Some(body) = legacy_body
-            && markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE)
+        let ignores = if markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE) {
+            let leads = rest.len() == unmarked.len();
+            Self {
+                format: leads,
+                invalid_syntax: leads,
+            }
+        } else if delimiters == TEMPLATE_COMMENT
+            && let Some(IgnoreDirective::FileIgnore(codes)) = IgnoreDirective::parse(body)
         {
-            return Self {
-                format: true,
-                invalid_syntax: true,
-            };
-        }
-        leading_file_ignore_codes(source)
-            .unwrap_or_default()
-            .iter()
-            .fold(Self::default(), |mut ignores, code| {
+            codes.iter().fold(Self::default(), |mut ignores, code| {
                 match ReservedCode::from_str(code) {
                     Ok(ReservedCode::Format) => ignores.format = true,
                     Ok(ReservedCode::InvalidSyntax) => ignores.invalid_syntax = true,
@@ -330,16 +344,10 @@ impl FileIgnores {
                 }
                 ignores
             })
-    }
-}
-
-/// The codes of the file's leading `{# djangofmt: file-ignore[...] #}` comment,
-/// a BOM and whitespace before it tolerated.
-fn leading_file_ignore_codes(source: &str) -> Option<Vec<&str>> {
-    let comment_body = TEMPLATE_COMMENT.body(strip_bom(source).trim_start())?;
-    match IgnoreDirective::parse(comment_body)? {
-        IgnoreDirective::FileIgnore(codes) => Some(codes),
-        IgnoreDirective::Ignore(_) | IgnoreDirective::Malformed(_) => None,
+        } else {
+            Self::default()
+        };
+        Some((ignores, &source[..source.len() - after.len()]))
     }
 }
 
