@@ -48,19 +48,6 @@ This makes it possible to accommodate the 2 following use cases:
 
 See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for the rationale.
 
-## Preserving unquoted attribute values
-
-By default, djangofmt quotes all attribute values:
-
-```diff
-- <c-button editable=True count=42 />
-+ <c-button editable="True" count="42" />
-```
-
-Enable `preserve-unquoted-attrs` to suppress this transformation and keep them unquoted.
-This is useful for frameworks like [Django Cotton](https://django-cotton.com/) that use unquoted
-attribute values to pass non-string types (booleans, numbers, template variables).
-
 ## Disabling formatting
 
 To disable formatting for an entire file, add `{# djangofmt: file-ignore[format] #}` at the very top of the file:

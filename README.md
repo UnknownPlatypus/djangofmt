@@ -41,6 +41,7 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 - 🐍 **Installable via `pip`, `uv` or `pipx`**
 - 🛡️ **A strict HTML aware parser**: invalid HTML is reported as an error instead of being silently mangled
 - 🎨 **Formats CSS** in `<style>` tags and `style` attributes, and JSON in `<script type="application/json">`
+- 🧩 **[Django Cotton](https://django-cotton.com/) support**: `<c-*>` components keep their unquoted attribute values
 - 🔧 **[Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/) with autofix**, for automatic error correction (e.g., automatically sort Tailwind classes)
 - 🛠️ **`pyproject.toml` and `.editorconfig` support**
 - ⌨️ **[Editor integrations](https://unknownplatypus.github.io/djangofmt/docs/editor-integration/)**, a **[pre-commit hook](#pre-commit-hook)** and a **[browser playground](https://unknownplatypus.github.io/djangofmt/)**
@@ -155,7 +156,6 @@ indent-width = 4
 profile = "django"
 custom-blocks = ["stage", "flatblock"]
 html-void-self-closing = "never"
-preserve-unquoted-attrs = false
 ```
 
 Lint rules, used by the `djangofmt check` command, are configured in the nested `[tool.djangofmt.lint]` section:

@@ -119,9 +119,8 @@ pub struct FormatCommand {
     /// files would have been modified, and zero otherwise.
     #[arg(long)]
     pub check: bool,
-    /// Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted).
-    /// Use `--no-preserve-unquoted-attrs` to disable.
-    #[arg(long, overrides_with("no_preserve_unquoted_attrs"))]
+    /// Deprecated, removed in djangofmt 2.0: preserve unquoted HTML attribute values.
+    #[arg(long, overrides_with("no_preserve_unquoted_attrs"), hide = true)]
     pub preserve_unquoted_attrs: bool,
     /// Do not preserve unquoted HTML attribute values.
     #[arg(long, overrides_with("preserve_unquoted_attrs"), hide = true)]
@@ -353,10 +352,6 @@ mod tests {
               --check
                   Avoid writing any formatted files back; instead, exit with a non-zero status code if any
                   files would have been modified, and zero otherwise
-
-              --preserve-unquoted-attrs
-                  Preserve unquoted HTML attribute values (e.g. prop=True stays unquoted). Use
-                  `--no-preserve-unquoted-attrs` to disable
 
           -h, --help
                   Print help (see a summary with '-h')
