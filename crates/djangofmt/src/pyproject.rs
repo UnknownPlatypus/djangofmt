@@ -37,6 +37,9 @@ pub struct PyprojectSettings {
 
     /// Names of custom block tags to treat as paired blocks, so their content is indented
     /// instead of left untouched.
+    ///
+    /// A name matches the tag's whole first word, as Django reads it: `foo` matches `{% foo %}`
+    /// but not `{% foo:bar %}`, which needs `foo:bar`.
     #[option(
         default = "[]",
         value_type = "list[str]",
