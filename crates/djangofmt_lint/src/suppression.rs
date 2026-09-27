@@ -285,7 +285,7 @@ mod tests {
     }
 
     fn diagnostics(source: &str) -> Vec<LintDiagnostic> {
-        lint_source(source, Language::Django, &[], &Settings::all(), None).expect("parse")
+        lint_source(source, Language::Django, &[], &[], &Settings::all(), None).expect("parse")
     }
 
     #[test]

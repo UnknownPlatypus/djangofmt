@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<div>
+    <c-markdown class="prose">
+# Title
+
+- item   one
+- <b>item two
+</c-markdown>
+</div>

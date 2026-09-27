@@ -59,7 +59,7 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let parsed = parse(&input, language_for(path), &[])
+        let parsed = parse(&input, language_for(path), &[], &[])
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
@@ -130,6 +130,7 @@ fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
     lint_source(
         input,
         language_for(path),
+        &[],
         &[],
         &settings_for(path),
         Some(path),

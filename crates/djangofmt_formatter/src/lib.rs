@@ -31,6 +31,7 @@ impl FormatterConfig {
         print_width: LineLength,
         indent_width: IndentWidth,
         custom_blocks: Option<Vec<String>>,
+        raw_elements: Vec<String>,
         html_void_self_closing: SelfClosing,
         preserve_unquoted_attrs: bool,
     ) -> Self {
@@ -39,6 +40,7 @@ impl FormatterConfig {
                 print_width,
                 indent_width,
                 custom_blocks,
+                raw_elements,
                 html_void_self_closing,
                 preserve_unquoted_attrs,
             ),
@@ -54,6 +56,7 @@ pub fn build_markup_options(
     print_width: LineLength,
     indent_width: IndentWidth,
     custom_blocks: Option<Vec<String>>,
+    raw_elements: Vec<String>,
     html_void_self_closing: SelfClosing,
     preserve_unquoted_attrs: bool,
 ) -> markup_fmt::config::FormatOptions {
@@ -90,6 +93,11 @@ pub fn build_markup_options(
             // {% stage %}...{% endstage %}
             // {% cache %}...{% endcache %}
             custom_blocks,
+            // Keep the content of these elements byte for byte, like `<pre>`:
+            // <c-markdown>
+            // - item   one
+            // </c-markdown>
+            raw_elements,
             // Preserve unquoted HTML attribute values:
             // <c-button editable=True /> -> stays as editable=True
             preserve_unquoted_attrs,

@@ -178,6 +178,7 @@ pub fn lint_fix(
     settings: &Settings,
     profile: markup_fmt::Language,
     custom_blocks: &[String],
+    raw_elements: &[String],
     threshold: Applicability,
     path: Option<&Path>,
 ) -> Result<FixerResult, FixerError> {
@@ -208,7 +209,8 @@ pub fn lint_fix(
             });
         }
 
-        let input = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
+        let input = match crate::parse_or_quarantine(&current, profile, custom_blocks, raw_elements)
+        {
             Ok(input) => {
                 if iterations == 0 {
                     had_valid_first_parse = true;
@@ -401,6 +403,7 @@ mod tests {
             source,
             &settings,
             markup_fmt::Language::Django,
+            &[],
             &[],
             Applicability::Safe,
             None,

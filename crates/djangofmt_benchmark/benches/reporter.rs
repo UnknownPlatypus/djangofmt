@@ -26,6 +26,7 @@ fn render(bencher: divan::Bencher, template: &'static TestFile) {
         template.code,
         template.profile.into(),
         &[],
+        &[],
         &Settings::all(),
         None,
     )

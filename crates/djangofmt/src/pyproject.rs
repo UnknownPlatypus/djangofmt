@@ -10,7 +10,7 @@ use std::{
 };
 use tracing::debug;
 
-use crate::args::OutputFormat;
+use crate::args::{OutputFormat, parse_raw_element};
 use crate::django_requirement::infer_target_version;
 use crate::error::{Error, Result};
 use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
@@ -44,6 +44,17 @@ pub struct PyprojectSettings {
         example = r#"custom-blocks = ["cache", "spaceless"]"#
     )]
     pub custom_blocks: Option<Vec<String>>,
+
+    /// Names of elements whose content is kept byte for byte, like `<pre>`, e.g. a
+    /// `<c-markdown>` component whose whitespace matters. The opening tag's attributes are still
+    /// formatted, and the element closes at the first matching end tag.
+    #[option(
+        default = "[]",
+        value_type = "list[str]",
+        example = r#"raw-elements = ["c-markdown", "c-code-block"]"#
+    )]
+    #[serde(default, deserialize_with = "deserialize_raw_elements")]
+    pub raw_elements: Option<Vec<String>>,
 
     /// Whether void HTML elements are written self-closing (`<br />`) or not (`<br>`).
     /// `unchanged` keeps whatever the source uses.
@@ -222,6 +233,18 @@ impl UnsortedTailwindClassesOptions {
             prefix: self.prefix,
         }
     }
+}
+
+/// Rejects void elements at load time, like `--raw-elements` does.
+fn deserialize_raw_elements<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> std::result::Result<Option<Vec<String>>, D::Error> {
+    Vec::<String>::deserialize(deserializer)?
+        .iter()
+        .map(|name| parse_raw_element(name))
+        .collect::<std::result::Result<_, _>>()
+        .map(Some)
+        .map_err(serde::de::Error::custom)
 }
 
 #[derive(Deserialize, Debug)]

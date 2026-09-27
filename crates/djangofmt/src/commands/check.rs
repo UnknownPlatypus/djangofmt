@@ -21,7 +21,7 @@ use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::{LintSettings, PyprojectSettings};
 use crate::{ExitStatus, STDIN_SENTINEL};
 
-use super::format::merge_custom_blocks;
+use super::format::merge_lists;
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
 #[derive(Debug, PartialEq, Eq)]
@@ -118,8 +118,9 @@ pub(crate) struct CheckRun {
     config: CheckConfig,
     settings: Settings,
     per_file_ignores: Option<PerFileIgnores>,
-    /// Same custom blocks as `format`, so both commands lint/format the same AST.
+    /// Same custom blocks and raw elements as `format`, so both commands lint/format the same AST.
     pub(crate) custom_blocks: Vec<String>,
+    pub(crate) raw_elements: Vec<String>,
     /// One value carries both "should we fix" and "how far", so they can't disagree.
     pub(crate) fix: Option<Applicability>,
 }
@@ -145,9 +146,14 @@ impl CheckRun {
 
         let fix = config.fix.then_some(config.threshold());
 
-        let custom_blocks = merge_custom_blocks(
+        let custom_blocks = merge_lists(
             args.template.custom_blocks.clone(),
             pyproject.custom_blocks.clone(),
+        )
+        .unwrap_or_default();
+        let raw_elements = merge_lists(
+            args.template.raw_elements.clone(),
+            pyproject.raw_elements.clone(),
         )
         .unwrap_or_default();
 
@@ -156,6 +162,7 @@ impl CheckRun {
             settings,
             per_file_ignores,
             custom_blocks,
+            raw_elements,
             fix,
         })
     }
@@ -234,6 +241,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
                     profile,
                     &settings,
                     &run.custom_blocks,
+                    &run.raw_elements,
                     run.fix,
                 )
             })
@@ -407,13 +415,22 @@ pub(crate) fn check_source(
     profile: Profile,
     settings: &Settings,
     custom_blocks: &[String],
+    raw_elements: &[String],
     fix: Option<Applicability>,
 ) -> std::result::Result<CheckResult, Box<CommandError>> {
     let path = source.path();
     let display_path = path.map_or_else(|| STDIN_SENTINEL.to_owned(), relativize_path);
     let text = source.read()?;
 
-    let outcome = lint_text(&text, settings, profile.into(), custom_blocks, fix, path);
+    let outcome = lint_text(
+        &text,
+        settings,
+        profile.into(),
+        custom_blocks,
+        raw_elements,
+        fix,
+        path,
+    );
 
     // Like ruff, `--fix` on stdin always echoes the source (fixed, unchanged or even
     // unparsable) so editors piping it back never end up with an empty buffer.

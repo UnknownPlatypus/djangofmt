@@ -12,6 +12,7 @@ fn parse_templates(bencher: divan::Bencher, template: &'static TestFile) {
             divan::black_box(template.code),
             divan::black_box(template.profile.into()),
             &[],
+            &[],
         )
         .expect("Parsing to succeed")
     };

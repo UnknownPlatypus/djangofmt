@@ -7,6 +7,7 @@ use std::path::PathBuf;
 
 use djangofmt_lint::{DjangoVersion, RuleSelector};
 use djangofmt_syntax::Profile;
+use markup_fmt::Language;
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands
@@ -94,6 +95,25 @@ pub struct TemplateArgs {
         value_name = "BLOCK_NAMES",
     )]
     pub custom_blocks: Option<Vec<String>>,
+    /// Comma-separated list of elements whose content is kept byte for byte, like `<pre>`
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_parser = parse_raw_element,
+        value_name = "ELEMENT_NAMES",
+    )]
+    pub raw_elements: Option<Vec<String>>,
+}
+
+/// A void element closes at its opening tag, so it has no content to keep raw.
+pub(crate) fn parse_raw_element(name: &str) -> Result<String, String> {
+    let name = name.trim();
+    if markup_fmt::is_void_element(name, Language::Html) {
+        return Err(format!(
+            "`{name}` is a void element, it has no content to keep raw"
+        ));
+    }
+    Ok(name.to_owned())
 }
 
 #[derive(Clone, Debug, Default, clap::Parser)]
@@ -306,6 +326,9 @@ mod tests {
 
               --custom-blocks <BLOCK_NAMES>
                   Comma-separated list of custom block name to enable
+
+              --raw-elements <ELEMENT_NAMES>
+                  Comma-separated list of elements whose content is kept byte for byte, like `<pre>`
 
               --html-void-self-closing <HTML_VOID_SELF_CLOSING>
                   Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]

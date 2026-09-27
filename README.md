@@ -154,6 +154,7 @@ line-length = 120
 indent-width = 4
 profile = "django"
 custom-blocks = ["stage", "flatblock"]
+raw-elements = ["c-markdown"]
 html-void-self-closing = "never"
 ```
 

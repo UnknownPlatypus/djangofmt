@@ -17,6 +17,7 @@ invalid-css-property;
         LineLength::default(),
         IndentWidth::default(),
         None,
+        vec![],
         SelfClosing::default(),
         false,
     );

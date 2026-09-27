@@ -50,7 +50,7 @@ fn bench_directive(bencher: divan::Bencher, directive: &str) {
     let settings = Settings::default();
     let source = with_directive(&DJANGO_TEMPLATE_LARGE, directive);
     let parsed =
-        parse(&source, DJANGO_TEMPLATE_LARGE.profile.into(), &[]).expect("Parsing to succeed");
+        parse(&source, DJANGO_TEMPLATE_LARGE.profile.into(), &[], &[]).expect("Parsing to succeed");
 
     let run = || {
         check(
@@ -69,7 +69,8 @@ fn bench_directive(bencher: divan::Bencher, directive: &str) {
 /// Time `check` only: the AST is parsed once, outside the timed region.
 /// The `check_all_rules` − `check_no_rules` gap is then pure rule-body cost.
 fn bench_check(bencher: divan::Bencher, template: &TestFile, settings: &Settings) {
-    let parsed = parse(template.code, template.profile.into(), &[]).expect("Parsing to succeed");
+    let parsed =
+        parse(template.code, template.profile.into(), &[], &[]).expect("Parsing to succeed");
 
     let run = || {
         check(

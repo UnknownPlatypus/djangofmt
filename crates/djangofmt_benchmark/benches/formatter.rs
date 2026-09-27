@@ -12,6 +12,7 @@ fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
         LineLength::default(),
         IndentWidth::default(),
         None,
+        vec![],
         SelfClosing::default(),
         false,
     );

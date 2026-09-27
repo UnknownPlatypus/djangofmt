@@ -37,10 +37,15 @@ pub fn formatter_config_from_args(
         .or(pyproject.indent_width)
         .or(editorconfig.indent_width)
         .unwrap_or_default();
-    let custom_blocks = merge_custom_blocks(
+    let custom_blocks = merge_lists(
         args.template.custom_blocks.clone(),
         pyproject.custom_blocks.clone(),
     );
+    let raw_elements = merge_lists(
+        args.template.raw_elements.clone(),
+        pyproject.raw_elements.clone(),
+    )
+    .unwrap_or_default();
     let html_void_self_closing = args
         .html_void_self_closing
         .or(pyproject.html_void_self_closing)
@@ -56,13 +61,14 @@ pub fn formatter_config_from_args(
         line_length,
         indent_width,
         custom_blocks,
+        raw_elements,
         html_void_self_closing,
         preserve_unquoted_attrs,
     )
 }
 
-/// Merge custom blocks from CLI arguments and pyproject.toml settings, deduplicating entries.
-pub(crate) fn merge_custom_blocks(
+/// Merge a list setting from CLI arguments and pyproject.toml settings, deduplicating entries.
+pub(crate) fn merge_lists(
     cli: Option<Vec<String>>,
     pyproject: Option<Vec<String>>,
 ) -> Option<Vec<String>> {
@@ -326,8 +332,8 @@ mod tests {
     }
 
     #[test]
-    fn merge_custom_blocks_both_none() {
-        assert_eq!(merge_custom_blocks(None, None), None);
+    fn merge_lists_both_none() {
+        assert_eq!(merge_lists(None, None), None);
     }
 
     #[rstest]
@@ -339,14 +345,14 @@ mod tests {
         Some(vec!["bar", "baz"]),
         vec!["bar", "baz", "foo"],
     )]
-    fn merge_custom_blocks_cases(
+    fn merge_lists_cases(
         #[case] cli: Option<Vec<&str>>,
         #[case] pyproject: Option<Vec<&str>>,
         #[case] expected: Vec<&str>,
     ) {
         let cli = cli.map(to_strings);
         let pyproject = pyproject.map(to_strings);
-        let mut result = merge_custom_blocks(cli, pyproject).unwrap();
+        let mut result = merge_lists(cli, pyproject).unwrap();
 
         result.sort();
         assert_eq!(result, to_strings(expected));

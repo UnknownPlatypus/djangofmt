@@ -16,6 +16,7 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
         line_length,
         indent_width,
         None,
+        vec![],
         SelfClosing::default(),
         false,
     );
@@ -30,7 +31,7 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
 #[must_use]
 pub fn ast(source: &str, profile: &str) -> String {
     let profile = get_profile(profile);
-    match djangofmt_syntax::parse(source, profile.into(), &[]) {
+    match djangofmt_syntax::parse(source, profile.into(), &[], &[]) {
         Ok(parsed) => format!("{:#?}", parsed.ast()),
         Err(e) => render_parse_error(source, &markup_fmt::FormatError::Syntax(e)),
     }
@@ -46,6 +47,7 @@ pub fn doc_tree(source: &str, line_length: u16, indent_width: u8, profile: &str)
         line_length,
         indent_width,
         None,
+        vec![],
         SelfClosing::default(),
         false,
     );
@@ -184,7 +186,15 @@ pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
 
 fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let profile = get_profile(profile);
-    let outcome = match lint_text(source, &Settings::all(), profile.into(), &[], None, None) {
+    let outcome = match lint_text(
+        source,
+        &Settings::all(),
+        profile.into(),
+        &[],
+        &[],
+        None,
+        None,
+    ) {
         Ok(Some(outcome)) => outcome,
         // A leading `file-ignore[invalid-syntax]` quarantines the file.
         Ok(None) => return Ok(LintResult::new(0, String::new())),

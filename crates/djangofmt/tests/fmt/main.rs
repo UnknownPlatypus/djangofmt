@@ -44,6 +44,7 @@ fn build_config(pyproject: &PyprojectSettings) -> FormatterConfig {
         pyproject.line_length.unwrap_or_default(),
         pyproject.indent_width.unwrap_or_default(),
         pyproject.custom_blocks.clone(),
+        pyproject.raw_elements.clone().unwrap_or_default(),
         pyproject.html_void_self_closing.unwrap_or_default(),
         pyproject.preserve_unquoted_attrs.unwrap_or_default(),
     )

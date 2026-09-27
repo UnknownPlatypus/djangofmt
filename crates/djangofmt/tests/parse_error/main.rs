@@ -36,6 +36,7 @@ fn run_parse_error_test(path: &path::Path, input: &str) -> String {
         LineLength::default(),
         IndentWidth::default(),
         None,
+        vec![],
         SelfClosing::default(),
         false,
     );

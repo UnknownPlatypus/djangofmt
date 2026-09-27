@@ -10,7 +10,7 @@
 //! use markup_fmt::Language;
 //!
 //! let source = r#"<form method="put"></form>"#;
-//! let diagnostics = lint_source(source, Language::Jinja, &[], &Settings::default(), None).unwrap();
+//! let diagnostics = lint_source(source, Language::Jinja, &[], &[], &Settings::default(), None).unwrap();
 //! assert_eq!(diagnostics.len(), 1);
 //! ```
 
@@ -212,8 +212,9 @@ pub(crate) fn parse_or_quarantine<'a>(
     source: &'a str,
     language: Language,
     custom_blocks: &[String],
+    raw_elements: &[String],
 ) -> Result<LintInput<'a>, SyntaxError> {
-    let error = match parse(source, language, custom_blocks) {
+    let error = match parse(source, language, custom_blocks, raw_elements) {
         Ok(parsed) => {
             return Ok(LintInput {
                 parsed,
@@ -226,7 +227,7 @@ pub(crate) fn parse_or_quarantine<'a>(
         return Err(error);
     };
     Ok(LintInput {
-        parsed: parse(head, language, custom_blocks)?,
+        parsed: parse(head, language, custom_blocks, raw_elements)?,
         quarantined: true,
     })
 }
@@ -238,10 +239,11 @@ pub fn lint_source(
     source: &str,
     language: Language,
     custom_blocks: &[String],
+    raw_elements: &[String],
     settings: &Settings,
     path: Option<&Path>,
 ) -> Result<Vec<LintDiagnostic>, SyntaxError> {
-    Ok(parse_or_quarantine(source, language, custom_blocks)?.check(settings, path))
+    Ok(parse_or_quarantine(source, language, custom_blocks, raw_elements)?.check(settings, path))
 }
 
 /// The rules checking ignore comments, the only ones run on a quarantined file's leading comment.
@@ -276,20 +278,29 @@ pub fn lint_text(
     settings: &Settings,
     language: Language,
     custom_blocks: &[String],
+    raw_elements: &[String],
     fix: Option<Applicability>,
     path: Option<&Path>,
 ) -> Result<Option<LintOutcome>, SyntaxError> {
     let check_only = || {
-        let input = parse_or_quarantine(source, language, custom_blocks)?;
+        let input = parse_or_quarantine(source, language, custom_blocks, raw_elements)?;
         Ok(LintOutcome {
             diagnostics: input.check(settings, path),
             quarantined: input.quarantined,
             ..LintOutcome::default()
         })
     };
-    let outcome = match fix
-        .map(|threshold| lint_fix(source, settings, language, custom_blocks, threshold, path))
-    {
+    let outcome = match fix.map(|threshold| {
+        lint_fix(
+            source,
+            settings,
+            language,
+            custom_blocks,
+            raw_elements,
+            threshold,
+            path,
+        )
+    }) {
         Some(Ok(result)) => LintOutcome {
             // The compare is skipped when nothing was applied: `source` is then a plain clone.
             fixed: (result.applied_count > 0 && result.source != source).then_some(result.source),
@@ -321,7 +332,7 @@ mod tests {
         let settings = Settings::all();
         let quarantined = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div>";
         for fix in [None, Some(Applicability::Safe)] {
-            let lint = |source| lint_text(source, &settings, Language::Jinja, &[], fix, None);
+            let lint = |source| lint_text(source, &settings, Language::Jinja, &[], &[], fix, None);
             assert!(
                 lint(quarantined).is_ok_and(|outcome| outcome.is_none()),
                 "{fix:?}"
@@ -334,7 +345,15 @@ mod tests {
     fn quarantining_legacy_directive_is_migrated() {
         let legacy = "{# djangofmt:ignore #}\n<div>";
         let fix = Some(Applicability::Safe);
-        let outcome = lint_text(legacy, &Settings::all(), Language::Jinja, &[], fix, None);
+        let outcome = lint_text(
+            legacy,
+            &Settings::all(),
+            Language::Jinja,
+            &[],
+            &[],
+            fix,
+            None,
+        );
         // Not `file-ignore[format]`, which would surface the parse error the directive was hiding.
         assert_eq!(
             outcome.unwrap().unwrap().fixed.as_deref(),
@@ -348,7 +367,7 @@ mod tests {
         let source = "{% partialdef card %}<span>A card</span>{% endpartialdef %}\n\
                       {% include \"tpl.html#card\" %}";
         let codes = |path| {
-            lint_source(source, Language::Jinja, &[], &settings, path)
+            lint_source(source, Language::Jinja, &[], &[], &settings, path)
                 .unwrap()
                 .into_iter()
                 .map(|diagnostic| diagnostic.code)

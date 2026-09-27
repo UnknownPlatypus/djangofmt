@@ -39,6 +39,7 @@ pub fn check_stdin(cli: &CheckCommand) -> Result<ExitStatus> {
             profile,
             &settings,
             &run.custom_blocks,
+            &run.raw_elements,
             run.fix,
         )
     });

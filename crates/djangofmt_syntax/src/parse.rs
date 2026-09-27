@@ -33,7 +33,8 @@ impl<'a> Parsed<'a> {
     }
 }
 
-/// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block.
+/// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block
+/// and keeping the content of `raw_elements` as text.
 ///
 /// The single door to the parser: every consumer (check, fix, playground,
 /// benches, tests) must parse with the same configuration or lint on a
@@ -42,10 +43,17 @@ pub fn parse<'a>(
     source: &'a str,
     language: Language,
     custom_blocks: &[String],
+    raw_elements: &[String],
 ) -> Result<Parsed<'a>, SyntaxError> {
     Ok(Parsed {
         source,
         language,
-        ast: Parser::new(source, language, custom_blocks.to_vec()).parse_root()?,
+        ast: Parser::new(
+            source,
+            language,
+            custom_blocks.to_vec(),
+            raw_elements.to_vec(),
+        )
+        .parse_root()?,
     })
 }

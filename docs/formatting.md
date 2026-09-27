@@ -48,6 +48,21 @@ This makes it possible to accommodate the 2 following use cases:
 
 See https://github.com/g-plane/markup_fmt/issues/75#issuecomment-2456526352 for the rationale.
 
+## Keeping element content as written
+
+List elements whose content matters byte for byte, such as a markdown component, in `raw-elements`:
+
+```toml
+[tool.djangofmt]
+raw-elements = ["c-markdown", "c-code-block"]
+```
+
+Their content is kept exactly like `<pre>`: it is read as raw text, so unbalanced HTML inside is fine,
+while the opening tag's attributes are still formatted.
+The element closes at the first matching end tag, so nesting the same element isn't supported.
+
+For a one-off element, prefer a [`{# djangofmt: ignore[format] #}`](#disabling-formatting) comment.
+
 ## Disabling formatting
 
 To disable formatting for an entire file, add `{# djangofmt: file-ignore[format] #}` at the very top of the file:

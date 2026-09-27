@@ -242,12 +242,9 @@ impl<'a> Checker<'a> {
             self.visit_node(child);
         }
 
-        // The parser keeps these bodies as raw text, but Django still reads the tags in them.
-        if self.is_rule_enabled(Rule::DuplicateBlockName)
-            && ["script", "style", "pre", "textarea"]
-                .iter()
-                .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
-        {
+        // Only bodies the parser keeps as raw text (`<script>`, `<pre>`, `raw-elements`…)
+        // leave tags in an element's text, and Django still reads them.
+        if self.is_rule_enabled(Rule::DuplicateBlockName) {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {
                     self.record_text_block_names(text.raw);

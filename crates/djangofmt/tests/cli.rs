@@ -683,6 +683,80 @@ fn check_respects_pyproject_custom_blocks() {
 }
 
 #[test]
+fn format_merges_cli_and_pyproject_raw_elements() {
+    let original = "<c-markdown>\n- a   b\n</c-markdown>\n<c-code>\nx  =  1\n</c-code>\n";
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt]\nraw-elements = [\"c-markdown\"]\n",
+        )
+        .file("test.html", original);
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["--raw-elements", "c-code", "test.html"]), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file left unchanged !
+    ");
+    assert_eq!(project.read("test.html"), original);
+}
+
+#[test]
+fn format_rejects_void_raw_element() {
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt]\nraw-elements = [\"br\"]\n",
+        )
+        .file("test.html", "<br>\n");
+    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @r#"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    djangofmt failed
+      Error: Failed to parse pyproject.toml: TOML parse error at line 2, column 16
+      |
+    2 | raw-elements = ["br"]
+      |                ^^^^^^
+    `br` is a void element, it has no content to keep raw
+    "#);
+}
+
+#[test]
+fn check_records_block_names_in_raw_elements() {
+    // The unbalanced `<b>` only parses as raw text, where Django still reads the `{% block %}`.
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt]\nraw-elements = [\"c-markdown\"]\n",
+        )
+        .file(
+            "test.html",
+            "<c-markdown><b>{% block a %}{% endblock %}</c-markdown>\n{% block a %}{% endblock %}\n",
+        );
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "--select", "duplicate-block-name", "test.html"]), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+      × Duplicate `{% block %}` name `a`
+       ╭─[test.html:2:10]
+     1 │ <c-markdown><b>{% block a %}{% endblock %}</c-markdown>
+     2 │ {% block a %}{% endblock %}
+       ·          ┬
+       ·          ╰── here
+       ╰────
+      help: Rename or remove one of the `{% block a %}` tags
+
+    Found 1 errors.
+    ");
+}
+
+#[test]
 fn check_respects_pyproject_per_file_ignores() {
     // Same violation in both files: the glob must silence it in `legacy/` only.
     let violation = "<form method=\"put\"></form>\n";
