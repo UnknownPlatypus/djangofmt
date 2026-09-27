@@ -19,3 +19,6 @@ source: crates/djangofmt/tests/fmt/main.rs
     editable
     name_editable
 />
+
+<c-box style=color:red />
+<div class="card" style="color: red"></div>
