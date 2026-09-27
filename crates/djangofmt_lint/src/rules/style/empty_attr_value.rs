@@ -1,11 +1,12 @@
 use std::borrow::Cow;
 
-use markup_fmt::ast::NativeAttribute;
+use markup_fmt::ast::{Element, NativeAttribute};
 
 use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_attr_fix;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::is_cotton_component;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -46,7 +47,11 @@ impl Violation for EmptyAttrValue<'_> {
     }
 }
 
-pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
+pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
+    if is_cotton_component(checker, element.tag_name) {
+        return;
+    }
+
     let NativeAttribute {
         name,
         value: Some((value_str, _)),
