@@ -145,7 +145,6 @@ async def check(
     options: CliOptions,
 ) -> str:
     """Run `djangofmt check --fix` against the path, returning unfixed diagnostics."""
-    # The check CLI does not support --custom-blocks
     args = ["check", *options.to_args(executable.name, command=Command.CHECK)]
     files = set(
         glob.iglob("**/*templates/**/*.html", recursive=True, root_dir=path)
