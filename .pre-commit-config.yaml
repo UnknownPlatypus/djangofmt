@@ -52,7 +52,7 @@ repos:
     rev: 2ded3bc1d8379b49bfe7415ecea01f52a254c67d  # frozen: v1.5.2
     hooks:
       - id: tombi-format
-        exclude: Cargo.lock
+        exclude: ^(Cargo|uv)\.lock$
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: cef8b8350da46d8114c7e6b7272aebdccdf193ce  # frozen: v1.30.0
     hooks:
