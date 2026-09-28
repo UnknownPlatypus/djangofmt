@@ -112,7 +112,7 @@ class CliOptions(Serializable):
     def to_args(self, executable_name: str, *, command: Command) -> list[str]:
         if Formatter.DJANGOFMT in executable_name:
             args = ["--profile", self.profile]
-            if command is Command.FORMAT and self.custom_blocks:
+            if self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))
             if command is Command.CHECK:
                 # Select every rule, including preview, for maximum ecosystem coverage.

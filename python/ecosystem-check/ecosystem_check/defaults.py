@@ -46,6 +46,7 @@ DEFAULT_TARGETS = [
         repo=Repository(owner="mozilla", name="addons-server", ref="master"),
         cli_options=CliOptions(
             profile=Profile.JINJA,
+            custom_blocks="comment,spaceless",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "src/olympia/devhub/templates/devhub/addons/listing/macros.html",
@@ -102,6 +103,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="sissbruecker", name="linkding", ref="master"),
         cli_options=CliOptions(
+            custom_blocks="formhelp,htmlmin",
             exclude={
                 ExcludeReason.SELF_CLOSING_NON_VOID: (
                     "bookmarks/templates/bookmarks/bookmark_list.html",  # <div class="img" />
@@ -128,6 +130,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="django-oscar", name="django-oscar", ref="master"),
         cli_options=CliOptions(
+            custom_blocks="iffeature",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "src/oscar/templates/oscar/catalogue/browse.html",
@@ -149,6 +152,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="django-cms", name="django-cms", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="addtoblock,render_model_block",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # <body> opened inside a {% spaceless %} and closed outside
@@ -168,6 +172,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="wagtail", name="wagtail", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="dialog,dropdown,dropdown_button,field_row,fragment,help_block,panel,rawformattedfield",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "wagtail/admin/templates/wagtailadmin/shared/icon.html",
@@ -209,6 +214,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="unfoldadmin", name="django-unfold", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="capture,component,specialspaceless",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "src/unfold/templates/admin/actions.html",
@@ -248,6 +254,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="getsentry", name="sentry", ref="master"),
         cli_options=CliOptions(
+            custom_blocks="script",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "src/sentry/templates/sentry/emails/reports/body.html",
@@ -302,6 +309,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="healthchecks", name="healthchecks", ref="master"),
         cli_options=CliOptions(
+            custom_blocks="cell,compress,line,linemode,row,table",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # {% endwith %} placed inside the <div> the {% with %} opened before
@@ -340,6 +348,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="netbox-community", name="netbox", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="thumbnail",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     "netbox/templates/django/forms/widgets/select.html",
@@ -377,6 +386,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="pretalx", name="pretalx", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="escapescript",
             exclude={
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "doc/_templates/index.html",  # Dangling </p>
@@ -387,6 +397,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="openstack", name="horizon", ref="master"),
         cli_options=CliOptions(
+            custom_blocks="jstemplate,minifyspace,compress",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # <div> opened in the {% if logout_status %} branches
@@ -434,6 +445,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="rafalp", name="Misago", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="capture,withcontext",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # One element per {% if %}/{% elif %} branch, closed once afterwards
@@ -622,6 +634,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="SamuelJennings", name="cotton-bs5", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="show_code",
             exclude={
                 ExcludeReason.SELF_CLOSING_NON_VOID: (
                     "cotton_bs5/templates/cotton/icon.html",  # <i ... />
@@ -632,6 +645,7 @@ DEFAULT_TARGETS = [
     Project(
         repo=Repository(owner="SamuelJennings", name="django-mvp", ref="main"),
         cli_options=CliOptions(
+            custom_blocks="show_code",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # <div> opened and closed in separate {% if %} blocks
