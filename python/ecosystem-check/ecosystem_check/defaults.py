@@ -617,4 +617,72 @@ DEFAULT_TARGETS = [
             },
         ),
     ),
+    # Django Cotton templates
+    Project(repo=Repository(owner="wrabit", name="django-cotton", ref="main")),
+    Project(
+        repo=Repository(owner="SamuelJennings", name="cotton-bs5", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.SELF_CLOSING_NON_VOID: (
+                    "cotton_bs5/templates/cotton/icon.html",  # <i ... />
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="SamuelJennings", name="django-mvp", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <div> opened and closed in separate {% if %} blocks
+                    "mvp/templates/cotton/form/field.html",
+                    "mvp/templates/cotton/form/formset/row.html",
+                    # <optgroup> opened and closed in separate {% if %} blocks
+                    "mvp/templates/tailwind/layout/select.html",
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="FAIR-DM", name="fairdm", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <optgroup> opened and closed in separate {% if %} blocks
+                    "fairdm/utils/templates/forms/widgets/quantity_field.html",
+                ),
+                ExcludeReason.DYNAMIC_TAG_NAME: (
+                    "fairdm/utils/templates/forms/checkbox.html",
+                ),
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    # <h2> closed by </h4>
+                    "fairdm/contrib/contributors/templates/contributors/contributor_card.html",
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(owner="SarthakJariwala", name="shadcn-django", ref="main"),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.INVALID_SOURCE_HTML: (
+                    "docs/templates/separator.html",  # Missing closing div
+                ),
+            },
+        ),
+    ),
+    Project(
+        repo=Repository(
+            owner="focusconsulting", name="django-cotton-uswds", ref="main"
+        ),
+        cli_options=CliOptions(
+            exclude={
+                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <div> opened and closed in separate {% if %} blocks
+                    "django_cotton_uswds/templates/cotton/table/index.html",
+                    "django_cotton_uswds/templates/patterns/components/link/link.html",
+                ),
+            },
+        ),
+    ),
 ]
