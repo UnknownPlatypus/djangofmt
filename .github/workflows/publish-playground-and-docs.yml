@@ -65,7 +65,7 @@ jobs:
         run: wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
       - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
         with:
-          deno-version: "2.9.6"
+          deno-version: "2.9.7"
       - name: Install playground dependencies
         run: deno install --frozen
         working-directory: playground
@@ -73,7 +73,7 @@ jobs:
         run: deno task build
         working-directory: playground
       - name: Setup uv
-        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           # Release runs deploy this build, so they must not read a cache PRs can write.
           enable-cache: ${{ github.event_name == 'pull_request' }}
