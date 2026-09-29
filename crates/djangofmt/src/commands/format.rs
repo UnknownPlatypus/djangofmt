@@ -269,8 +269,22 @@ impl<'a> FormatContext<'a> {
     }
 }
 
+/// Warn here, once per run, rather than in [`FormatterConfig::from_args`], which may run per file.
+pub(crate) fn warn_deprecated_options(args: &FormatCommand, pyproject: &PyprojectSettings) {
+    if args.preserve_unquoted_attrs
+        || args.no_preserve_unquoted_attrs
+        || pyproject.preserve_unquoted_attrs.is_some()
+    {
+        warn!(
+            "`preserve-unquoted-attrs` is deprecated and will be removed in djangofmt 2.0. \
+             Unquoted values on Cotton components (`c-*`) are now preserved automatically."
+        );
+    }
+}
+
 pub fn format(args: &FormatCommand) -> Result<ExitStatus> {
     let resolved = super::resolve_command(&args.files, &args.file_selection)?;
+    warn_deprecated_options(args, &resolved.pyproject);
     let editorconfig = editorconfig::load_editorconfig_from_cwd();
     let context = FormatContext::new(args, &resolved.pyproject, editorconfig.as_ref());
 

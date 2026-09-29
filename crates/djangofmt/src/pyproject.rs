@@ -55,6 +55,9 @@ pub struct PyprojectSettings {
 
     /// Whether to leave unquoted attribute values (e.g. `prop=True`) as-is instead of quoting
     /// them. Useful for template syntaxes that assign non-string values through attributes.
+    ///
+    /// **Deprecated**, to be removed in djangofmt 2.0: in the `django` profile, unquoted values
+    /// on [Cotton](https://django-cotton.com) components (`c-*`) are now preserved automatically.
     #[option(
         default = "false",
         value_type = "bool",

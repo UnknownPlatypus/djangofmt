@@ -14,6 +14,12 @@ pub fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%") || value.contains("{#")
 }
 
+/// A [django-cotton](https://django-cotton.com) component (`<c-button>`), whose attributes and
+/// content are the component's API rather than HTML. Cotton only compiles Django templates.
+pub fn is_cotton_component(checker: &Checker<'_>, tag_name: &str) -> bool {
+    checker.is_django() && tag_name.starts_with("c-")
+}
+
 /// Yields each `srcset` candidate URL.
 ///
 /// `srcset` holds a comma-separated list of candidates, each `<url> <descriptor>`

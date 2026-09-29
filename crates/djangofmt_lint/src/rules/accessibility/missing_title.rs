@@ -4,6 +4,7 @@ use markup_fmt::ast::{Element, JinjaTagOrChildren, Node, NodeKind};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::is_cotton_component;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -75,7 +76,7 @@ impl Violation for MissingTitle {
 
 /// The caller guarantees `element` is a `<head>`.
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    let status = classify_title(&element.children, &node_title_status);
+    let status = classify_title(&element.children, &|node| node_title_status(checker, node));
     let Some(kind) = status.violation(TitleViolation::Absent) else {
         return;
     };
@@ -88,7 +89,9 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
 
 /// The caller guarantees `element` is an `<html>`.
 pub fn check_html(checker: &Checker<'_>, element: &Element<'_>) {
-    let status = classify_title(&element.children, &root_node_title_status);
+    let status = classify_title(&element.children, &|node| {
+        root_node_title_status(checker, node)
+    });
     let Some(kind) = status.violation(TitleViolation::NoHead) else {
         return;
     };
@@ -101,7 +104,8 @@ pub fn check_html(checker: &Checker<'_>, element: &Element<'_>) {
 
 /// Outcome of inspecting a node list for the `<title>` it carries.
 enum TitleStatus {
-    /// A `<head>`, or a template tag that may render one, carries the title.
+    /// A `<head>`, a template tag that may render one, or a Cotton component that may render
+    /// the title, carries it.
     Deferred,
     /// A non-empty `<title>` was found.
     Present,
@@ -156,8 +160,9 @@ fn classify_title(
     })
 }
 
-/// Inside a `<head>`, only a `<title>` carries the title.
-fn node_title_status(node: &Node<'_>) -> TitleStatus {
+/// Inside a `<head>`, only a `<title>`, or a Cotton component that may render one, carries the
+/// title.
+fn node_title_status(checker: &Checker<'_>, node: &Node<'_>) -> TitleStatus {
     match &node.kind {
         NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("title") => {
             if title_has_content(&el.children) {
@@ -166,17 +171,18 @@ fn node_title_status(node: &Node<'_>) -> TitleStatus {
                 TitleStatus::Empty
             }
         }
+        NodeKind::Element(el) if is_cotton_component(checker, el.tag_name) => TitleStatus::Deferred,
         _ => TitleStatus::Absent,
     }
 }
 
 /// Directly under `<html>`, the `<head>` start tag is optional, so a bare `<title>` counts. A
 /// `<head>`, or a template tag that may render one, hands the title to the `<head>` check.
-fn root_node_title_status(node: &Node<'_>) -> TitleStatus {
+fn root_node_title_status(checker: &Checker<'_>, node: &Node<'_>) -> TitleStatus {
     match &node.kind {
         NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("head") => TitleStatus::Deferred,
         NodeKind::JinjaTag(_) => TitleStatus::Deferred,
-        _ => node_title_status(node),
+        _ => node_title_status(checker, node),
     }
 }
 

@@ -5,7 +5,7 @@ use tracing::error;
 
 use crate::ExitStatus;
 use crate::args::{FormatCommand, Profile};
-use crate::commands::format::{FormatterConfig, format_text};
+use crate::commands::format::{FormatterConfig, format_text, warn_deprecated_options};
 use crate::config::resolve_profile;
 use crate::editorconfig;
 use crate::error::{CommandError, ParseError, Result};
@@ -16,6 +16,7 @@ use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
 pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
     let stdin_filename = cli.stdin_filename.as_deref();
     let (pyproject, project_root) = load_pyproject_from_cwd()?;
+    warn_deprecated_options(cli, &pyproject);
     let discovery_config =
         ResolvedDiscoveryConfig::new(&cli.file_selection, &pyproject, &project_root);
 

@@ -337,6 +337,25 @@ fn format_pyproject_overrides_editorconfig() {
 }
 
 #[test]
+fn format_warns_on_deprecated_preserve_unquoted_attrs() {
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt]\npreserve-unquoted-attrs = true\n",
+        )
+        .file("test.html", "<div class=foo></div>\n");
+    assert_cmd_snapshot!(cli().current_dir(project.path()).arg("test.html"), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    `preserve-unquoted-attrs` is deprecated and will be removed in djangofmt 2.0. Unquoted values on Cotton components (`c-*`) are now preserved automatically.
+    1 file left unchanged !
+    ");
+}
+
+#[test]
 fn check_clean_file() {
     let project = Project::new().file("test.html", "<form method=\"post\"></form>\n");
     assert_cmd_snapshot!(cli().arg("check").arg(project.join("test.html")), @"

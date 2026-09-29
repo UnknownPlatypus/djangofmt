@@ -155,7 +155,6 @@ indent-width = 4
 profile = "django"
 custom-blocks = ["stage", "flatblock"]
 html-void-self-closing = "never"
-preserve-unquoted-attrs = false
 ```
 
 Lint rules, used by the `djangofmt check` command, are configured in the nested `[tool.djangofmt.lint]` section:
