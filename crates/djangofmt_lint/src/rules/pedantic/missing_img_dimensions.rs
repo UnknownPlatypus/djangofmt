@@ -4,7 +4,7 @@ use markup_fmt::ast::Element;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::declares_native_attr;
+use crate::rules::helpers::{declares_native_attr, has_attr_spread};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -49,8 +49,9 @@ impl Violation for MissingImgDimensions {
 
 /// The caller guarantees `element` is an `<img>`.
 pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
-    if declares_native_attr(&element.attrs, "height")
-        && declares_native_attr(&element.attrs, "width")
+    if (declares_native_attr(&element.attrs, "height")
+        && declares_native_attr(&element.attrs, "width"))
+        || has_attr_spread(&element.attrs)
     {
         return;
     }

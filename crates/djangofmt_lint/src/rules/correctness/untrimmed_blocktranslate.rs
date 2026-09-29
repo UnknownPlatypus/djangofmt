@@ -62,7 +62,7 @@ pub fn check(checker: &Checker<'_>, block: &JinjaBlock<'_, Node<'_>>) {
         return;
     };
 
-    let tag_name = parse_jinja_tag_name(open_tag);
+    let tag_name = parse_jinja_tag_name(open_tag, checker.context().language());
     if tag_name != "blocktranslate" && tag_name != "blocktrans" {
         return;
     }

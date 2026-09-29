@@ -30,6 +30,20 @@ pub fn declares_native_attr(attrs: &[Attribute<'_>], name: &str) -> bool {
     native_attrs(attrs).any(|native| native.name.eq_ignore_ascii_case(name))
 }
 
+/// Returns true if `attrs` may render attributes the source doesn't show: a templated name such as
+/// `{{ attrs }}`, or a tag such as `{% include "attrs.html" %}`, in any `{% if %}` branch too.
+pub fn has_attr_spread(attrs: &[Attribute<'_>]) -> bool {
+    attrs.iter().any(|attr| match attr {
+        Attribute::Native(native) => contains_interpolation(native.name),
+        Attribute::JinjaTag(_) => true,
+        Attribute::JinjaBlock(block) => block.body.iter().any(|item| match item {
+            JinjaTagOrChildren::Children(children) => has_attr_spread(children),
+            JinjaTagOrChildren::Tag(_) => false,
+        }),
+        _ => false,
+    })
+}
+
 /// Yields every native HTML attribute in `attrs`, in source order, descending into each branch
 /// of a Jinja `{% if %}…{% endif %}` block.
 ///

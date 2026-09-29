@@ -66,7 +66,7 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>) {
         return;
     };
 
-    let tag_name = parse_jinja_tag_name(tag);
+    let tag_name = parse_jinja_tag_name(tag, checker.context().language());
     if tag_name != "include" {
         return;
     }

@@ -81,3 +81,13 @@ source: crates/djangofmt_lint/tests/check/main.rs
  34 │ </html>
     ╰────
   help: Give `lang` a language tag, e.g. `lang="en"`
+
+  × Empty `lang` attribute on `<html>`
+    ╭─[tests/check/missing_html_lang/missing_html_lang.invalid.html:35:2]
+ 34 │ </html>
+ 35 │ <html lang="" {{ attrs }}>
+    ·  ──┬─
+    ·    ╰── here
+ 36 │ </html>
+    ╰────
+  help: Give `lang` a language tag, e.g. `lang="en"`

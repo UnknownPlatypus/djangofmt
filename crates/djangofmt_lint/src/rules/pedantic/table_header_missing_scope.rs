@@ -4,7 +4,7 @@ use markup_fmt::ast::{Attribute, Element};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::{contains_interpolation, declares_native_attr};
+use crate::rules::helpers::{contains_interpolation, declares_native_attr, has_attr_spread};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// The keywords a `scope` attribute may take (HTML spec / WCAG H63).
@@ -26,7 +26,6 @@ pub enum ScopeViolation {
 /// The `scope` attribute tells assistive technology whether a header cell labels a column or a row.
 /// Without it, screen readers must guess the header-to-data association in anything but the simplest
 /// table, so cells may be announced with the wrong header or none at all.
-///
 ///
 /// ## Example
 /// ```html
@@ -85,8 +84,7 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
     });
 
     let Some(scope) = native_scope else {
-        // A `scope` wrapped in a Jinja block counts as present but stays unvalidated.
-        if declares_native_attr(&element.attrs, "scope") {
+        if declares_native_attr(&element.attrs, "scope") || has_attr_spread(&element.attrs) {
             return;
         }
         checker.report_diagnostic(

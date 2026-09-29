@@ -4,7 +4,7 @@ use markup_fmt::ast::Element;
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::native_attrs;
+use crate::rules::helpers::{has_attr_spread, native_attrs};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -73,6 +73,9 @@ pub fn check(checker: &Checker<'_>, element: &Element<'_>) {
             Some((value, _)) if !value.trim_ascii().is_empty() => return,
             _ => kind = LangViolation::Empty,
         }
+    }
+    if kind == LangViolation::Absent && has_attr_spread(&element.attrs) {
+        return;
     }
 
     checker.report_diagnostic(

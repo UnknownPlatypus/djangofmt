@@ -53,3 +53,8 @@
 <table>
     <tr><th scope>Name</th></tr>
 </table>
+
+<!-- An explicit invalid `scope` is checked beside attributes rendered from a template -->
+<table>
+    <tr><th scope="column" {{ attrs }}>Name</th></tr>
+</table>

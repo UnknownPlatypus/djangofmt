@@ -42,3 +42,8 @@
 <input type="image" src="submit.png" />
 <map name="planets"><area shape="circle" coords="50,50,20" href="/mercury" /></map>
 <object data="diagram.svg" type="image/svg+xml"></object>
+
+<!-- Attributes rendered from a template may include `alt` -->
+<img {{ attrs }} />
+<img src="photo.jpg" {% include "django/forms/widgets/attrs.html" %} />
+<img src="photo.jpg" {% if lazy %}{{ lazy_attrs }}{% endif %} />
