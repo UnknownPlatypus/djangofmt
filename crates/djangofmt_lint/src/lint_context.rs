@@ -27,6 +27,7 @@ pub struct LintContext<'a> {
     settings: &'a Settings,
     language: Language,
     path: Option<&'a Path>,
+    quarantined: bool,
 }
 
 impl<'a> LintContext<'a> {
@@ -36,12 +37,14 @@ impl<'a> LintContext<'a> {
         settings: &'a Settings,
         language: Language,
         path: Option<&'a Path>,
+        quarantined: bool,
     ) -> Self {
         Self {
             source,
             settings,
             language,
             path,
+            quarantined,
             diagnostics: RefCell::new(Vec::new()),
         }
     }
@@ -62,6 +65,12 @@ impl<'a> LintContext<'a> {
     #[must_use]
     pub const fn path(&self) -> Option<&'a Path> {
         self.path
+    }
+
+    /// Whether this run lints only the leading comment of a quarantined file.
+    #[must_use]
+    pub const fn is_quarantined(&self) -> bool {
+        self.quarantined
     }
 
     /// The settings active for this run.

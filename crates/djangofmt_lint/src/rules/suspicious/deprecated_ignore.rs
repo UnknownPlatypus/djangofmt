@@ -31,10 +31,21 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 pub struct DeprecatedIgnore {
     /// Whether the directive sits in an HTML comment, the spelling also rendered to the client.
     pub in_html: bool,
-    /// Whether the comment is the legacy whole-file opt-out, spelled `file-ignore[format]`.
-    pub file_level: bool,
+    /// What the directive opts out, which picks its new spelling.
+    pub scope: Scope,
     /// Why the rewrite is left to the author, when it is.
     pub unfixable: Option<Unfixable>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Scope {
+    /// The next node, spelled `ignore[format]`.
+    Node,
+    /// The whole file, spelled `file-ignore[format]`.
+    File,
+    /// A whole file that does not parse,
+    /// spelled `file-ignore[invalid-syntax]` so it gets formatted once it parses.
+    Quarantine,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -61,8 +72,11 @@ impl Unfixable {
 impl DeprecatedIgnore {
     /// The `{# #}` comment the directive should be written as, `reason` carried over when any.
     fn rewrite(&self, reason: &str) -> String {
-        let keyword = if self.file_level { FILE_IGNORE } else { IGNORE };
-        let code = ReservedCode::Format.as_str();
+        let (keyword, code) = match self.scope {
+            Scope::Node => (IGNORE, ReservedCode::Format),
+            Scope::File => (FILE_IGNORE, ReservedCode::Format),
+            Scope::Quarantine => (FILE_IGNORE, ReservedCode::InvalidSyntax),
+        };
         let reason = if reason.is_empty() {
             String::new()
         } else {
@@ -101,10 +115,10 @@ impl Violation for DeprecatedIgnore {
     }
 
     fn fix_title(&self) -> Option<&'static str> {
-        Some(if self.file_level {
-            "Rewrite as `{# djangofmt: file-ignore[format] #}`"
-        } else {
-            "Rewrite as `{# djangofmt: ignore[format] #}`"
+        Some(match self.scope {
+            Scope::Node => "Rewrite as `{# djangofmt: ignore[format] #}`",
+            Scope::File => "Rewrite as `{# djangofmt: file-ignore[format] #}`",
+            Scope::Quarantine => "Rewrite as `{# djangofmt: file-ignore[invalid-syntax] #}`",
         })
     }
 }
@@ -133,7 +147,7 @@ pub fn check(checker: &Checker<'_>, delimiters: CommentDelimiters, body: &str) {
 fn report(checker: &Checker<'_>, comment: &str, comment_body: &str, in_html: bool) {
     let violation = DeprecatedIgnore {
         in_html,
-        file_level: is_legacy_file_opt_out(checker, comment),
+        scope: scope(checker, comment),
         unfixable: Unfixable::in_body(comment_body),
     };
     let span = checker.source_span(comment);
@@ -144,8 +158,14 @@ fn report(checker: &Checker<'_>, comment: &str, comment_body: &str, in_html: boo
     }
 }
 
-/// Leading the file, the formatter's bare directive is its legacy whole-file opt-out.
-fn is_legacy_file_opt_out(checker: &Checker<'_>, comment: &str) -> bool {
+/// What the directive opts out: leading the file, it is the formatter's legacy whole-file opt-out.
+fn scope(checker: &Checker<'_>, comment: &str) -> Scope {
     let before = &checker.context().source()[..checker.source_offset(comment)];
-    strip_bom(before).is_empty()
+    if !strip_bom(before).is_empty() {
+        Scope::Node
+    } else if checker.context().is_quarantined() {
+        Scope::Quarantine
+    } else {
+        Scope::File
+    }
 }
