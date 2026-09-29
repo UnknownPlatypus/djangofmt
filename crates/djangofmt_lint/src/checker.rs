@@ -339,7 +339,7 @@ impl<'a> Checker<'a> {
             && self.any_rule_enabled(RAW_SENSITIVE_RULES)
             && matches!(
                 block.body.first(),
-                Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag) == "raw"
+                Some(JinjaTagOrChildren::Tag(tag)) if parse_jinja_tag_name(tag, self.context.language()) == "raw"
             )
     }
 

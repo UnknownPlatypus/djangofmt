@@ -37,3 +37,6 @@
 <!-- `height` and `width` declared inside a Jinja conditional -->
 <img src="photo.jpg" alt="photo"
     {% if portrait %}height="200" width="100"{% else %}height="100" width="200"{% endif %}>
+
+<!-- Attributes rendered from a template may include the dimensions -->
+<img src="photo.jpg" alt="photo" height="100" {{ attrs }}>

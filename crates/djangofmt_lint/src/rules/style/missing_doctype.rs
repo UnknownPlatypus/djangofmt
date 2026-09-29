@@ -76,7 +76,11 @@ pub fn check(checker: &Checker<'_>, root: &Root<'_>) {
     for node in &root.children {
         match &node.kind {
             NodeKind::Doctype(_) | NodeKind::JinjaBlock(_) => return,
-            NodeKind::JinjaTag(tag) if parse_jinja_tag_name(tag) == "extends" => return,
+            NodeKind::JinjaTag(tag)
+                if parse_jinja_tag_name(tag, checker.context().language()) == "extends" =>
+            {
+                return;
+            }
             NodeKind::Element(el) if el.tag_name.eq_ignore_ascii_case("html") => {
                 let mut guard =
                     checker.report_diagnostic(&MissingDoctype, checker.source_span(el.tag_name));

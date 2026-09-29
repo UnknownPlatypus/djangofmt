@@ -121,3 +121,13 @@ source: crates/djangofmt_lint/tests/check/main.rs
  55 │ </table>
     ╰────
   help: Add `scope="col"` or `scope="row"`
+
+  × Invalid `scope` value `column` on `<th>`
+    ╭─[tests/check/table_header_missing_scope/table_header_missing_scope.invalid.html:59:20]
+ 58 │ <table>
+ 59 │     <tr><th scope="column" {{ attrs }}>Name</th></tr>
+    ·                    ───┬──
+    ·                       ╰── here
+ 60 │ </table>
+    ╰────
+  help: Use one of `row`, `col`, `rowgroup`, or `colgroup`
