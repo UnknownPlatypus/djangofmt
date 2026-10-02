@@ -34,7 +34,7 @@ malva = {
 }
 markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
-  rev = "66ff75b28501736aa5b3d4aa58a688065865fee9",
+  rev = "abccaa0469f031c8cbd34e94ac2a6b66855f00d5",
 }
 memchr = { version = "2.8.3" }
 miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
