@@ -1,0 +1,13 @@
+<!-- Single-line block -->
+<title>{% block title %}Home{% endblock title %}</title>
+
+<!-- Single-line partialdef -->
+{% partialdef icon %}<svg></svg>{% endpartialdef icon %}
+
+<!-- Only the inner block repeats its name -->
+{% block header %}
+    <h1>{% block heading %}Welcome{% endblock heading %}</h1>
+{% endblock header %}
+
+<!-- Real-world (Misago): a block in attribute position -->
+<form method="post" {% block form_extra %}{% endblock form_extra %}></form>

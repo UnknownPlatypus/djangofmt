@@ -1,0 +1,42 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Redundant label on `{% endblock %}` of a single-line block
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:2:41]
+ 1 │ <!-- Single-line block -->
+ 2 │ <title>{% block title %}Home{% endblock title %}</title>
+   ·                                         ──┬──
+   ·                                           ╰── here
+ 3 │ 
+   ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant label on `{% endpartialdef %}` of a single-line block
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:5:50]
+ 4 │ <!-- Single-line partialdef -->
+ 5 │ {% partialdef icon %}<svg></svg>{% endpartialdef icon %}
+   ·                                                  ──┬─
+   ·                                                    ╰── here
+ 6 │ 
+   ╰────
+  help: Write it as `{% endpartialdef %}`
+
+  × Redundant label on `{% endblock %}` of a single-line block
+    ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:9:47]
+  8 │ {% block header %}
+  9 │     <h1>{% block heading %}Welcome{% endblock heading %}</h1>
+    ·                                               ───┬───
+    ·                                                  ╰── here
+ 10 │ {% endblock header %}
+    ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant label on `{% endblock %}` of a single-line block
+    ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:13:55]
+ 12 │ <!-- Real-world (Misago): a block in attribute position -->
+ 13 │ <form method="post" {% block form_extra %}{% endblock form_extra %}></form>
+    ·                                                       ─────┬────
+    ·                                                            ╰── here
+    ╰────
+  help: Write it as `{% endblock %}`

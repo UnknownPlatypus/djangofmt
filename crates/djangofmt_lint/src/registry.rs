@@ -277,4 +277,6 @@ define_rules! {
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
+    (MissingEndblockLabel, rules::style::missing_endblock_label::MissingEndblockLabel),
+    (RedundantEndblockLabel, rules::style::redundant_endblock_label::RedundantEndblockLabel),
 }
