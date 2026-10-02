@@ -534,6 +534,7 @@ dependencies = [
  "clap",
  "markup_fmt",
  "oxc-miette",
+ "regex",
  "rstest",
  "serde",
  "strum",

@@ -8,7 +8,9 @@ use std::borrow::Cow;
 use std::panic::UnwindSafe;
 use std::path::{Path, PathBuf};
 
-use djangofmt_syntax::{FORMAT_IGNORE_DIRECTIVES, FileIgnores, LEGACY_IGNORE_DIRECTIVE, Profile};
+use djangofmt_syntax::{
+    FORMAT_IGNORE_DIRECTIVES, FileIgnores, LEGACY_IGNORE_DIRECTIVE, Profile, dtl,
+};
 use tracing::{debug, warn};
 
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
@@ -235,6 +237,28 @@ pub fn format_text(
                             .join(" ")
                             .into())
                     }
+                }
+                // markup_fmt trims what these return and wraps it in one space on each side.
+                "markup-fmt-jinja-stmt" if profile == Profile::Django => {
+                    let body = code.trim_matches(dtl::is_space);
+                    Ok(if dtl::is_single_spaced(body) {
+                        code.into()
+                    } else {
+                        dtl::bits(body).join(" ").into()
+                    })
+                }
+                "markup-fmt-jinja-expr" if profile == Profile::Django => {
+                    let expr = code.trim_matches(dtl::is_space);
+                    // Only whitespace around `|` can go, and an expression Django rejects stays verbatim.
+                    Ok(
+                        if dtl::has_spaced_pipe(expr)
+                            && let Some(filter_expression) = dtl::filter_expression(expr)
+                        {
+                            filter_expression.to_string().into()
+                        } else {
+                            code.into()
+                        },
+                    )
                 }
                 _ => Ok(code.into()),
             }

@@ -14,6 +14,7 @@ doctest = false
 clap = { workspace = true, optional = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
+regex = { workspace = true }
 serde = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 textwrap = { workspace = true }
