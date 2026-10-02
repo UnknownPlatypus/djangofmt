@@ -65,6 +65,9 @@ pub fn build_markup_options(
         },
         language: markup_fmt::config::LanguageOptions {
             format_comments: false,
+            // Space out single-line Django comments, keeping their content as is (Django profile only):
+            // {#comment#} -> {# comment #}
+            format_template_comments: true,
             // HTML void elements should not be self-closing by default:
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             // <br/> -> <br>
