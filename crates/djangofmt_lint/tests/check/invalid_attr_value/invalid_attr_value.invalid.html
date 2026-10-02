@@ -15,3 +15,21 @@
 
 <!-- Jinja block as attribute -->
 <form {% if show %}method="delete"{% endif %}>Submit</form>
+
+<!-- Uppercase tag and attribute names -->
+<FORM METHOD="PUT">Submit</FORM>
+
+<!-- Keyword with surrounding spaces -->
+<form method=" post">Submit</form>
+
+<!-- Too many keywords to list in the help -->
+<input type="foo">
+
+<!-- Global attribute, empty keyword listed in the help -->
+<div hidden="false"></div>
+
+<!-- Element definition replaces the global one -->
+<bdo dir="auto">text</bdo>
+
+<!-- One-character value, too short for a suggestion -->
+<ol type="X"></ol>

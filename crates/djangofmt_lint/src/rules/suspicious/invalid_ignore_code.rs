@@ -7,6 +7,7 @@ use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_codes_or_comment;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::closest_match;
 use crate::suppression::{IgnoreComment, ReservedCode};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
@@ -110,12 +111,10 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
 
 /// The known code `code` was likely meant to be, when one is close enough to name.
 fn closest_known_code(code: &str) -> Option<&'static str> {
-    Rule::iter()
-        .map(<&'static str>::from)
-        .chain(ReservedCode::VARIANTS.iter().copied())
-        .map(|known| (strsim::levenshtein(code, known), known))
-        // A third of the longer spelling, so a suggestion stays a plausible misspelling.
-        .filter(|&(distance, known)| distance <= (code.len().max(known.len()) / 3).max(1))
-        .min_by_key(|&(distance, _)| distance)
-        .map(|(_, known)| known)
+    closest_match(
+        code,
+        Rule::iter()
+            .map(<&'static str>::from)
+            .chain(ReservedCode::VARIANTS.iter().copied()),
+    )
 }

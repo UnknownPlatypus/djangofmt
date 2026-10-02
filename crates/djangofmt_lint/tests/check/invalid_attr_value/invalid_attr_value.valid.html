@@ -16,3 +16,15 @@
 
 <!-- Form with method attr but no value - should not trigger -->
 <form method>Submit</form>
+
+<!-- Keywords match regardless of case -->
+<img loading="LAZY" src="hero.webp" alt="">
+
+<!-- Empty keyword -->
+<img crossorigin="" src="hero.webp" alt="">
+
+<!-- Custom elements have no spec -->
+<my-widget dir="sideways"></my-widget>
+
+<!-- Keywords that depend on another attribute are not checked -->
+<input colorspace="bogus">

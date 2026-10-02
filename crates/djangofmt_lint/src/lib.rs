@@ -17,6 +17,7 @@
 mod checker;
 pub mod django_version;
 pub mod fix;
+mod html_spec;
 pub mod lint_context;
 pub mod registry;
 pub mod rule_selector;

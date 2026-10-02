@@ -15,6 +15,7 @@ use clap::{Parser, Subcommand};
 
 mod generate_all;
 mod generate_docs;
+mod generate_html_spec;
 mod generate_rules_table;
 mod generate_settings;
 mod sync_top_level;
@@ -50,6 +51,8 @@ enum Command {
     GenerateSettings(generate_all::Args),
     /// Sync README, CHANGELOG and CONTRIBUTING into `docs/`.
     SyncTopLevel(generate_all::Args),
+    /// Generate the lint attribute tables from the HTML spec downloaded by `just html-spec`.
+    GenerateHtmlSpec(generate_all::Args),
 }
 
 fn main() -> Result<()> {
@@ -60,5 +63,6 @@ fn main() -> Result<()> {
         Command::GenerateRulesTable(args) => generate_rules_table::main(&args),
         Command::GenerateSettings(args) => generate_settings::main(&args),
         Command::SyncTopLevel(args) => sync_top_level::main(&args),
+        Command::GenerateHtmlSpec(args) => generate_html_spec::main(&args),
     }
 }

@@ -4,6 +4,7 @@ use markup_fmt::ast::NativeAttribute;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
+use crate::html_spec::{is_keyword, keywords};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -72,10 +73,7 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>) {
         return;
     }
 
-    if !["get", "post", "dialog"]
-        .iter()
-        .any(|method| method.eq_ignore_ascii_case(value_str))
-    {
+    if !keywords("form", "method").is_some_and(|methods| is_keyword(methods, value_str)) {
         return;
     }
 
