@@ -4,7 +4,7 @@
 - Every new CLI flag must also be readable from `pyproject.toml`: add it to `PyprojectSettings`/`LintSettings` in `pyproject.rs` and resolve it with CLI args taking precedence.
 - Keep tests lean: one case per behaviour, and a case another case already exercises is deleted.
 - Adding or porting a lint rule: follow `.agents/skills/add-lint-rule/SKILL.md` end to end.
-- Only the final commit of a branch needs a conventional-commit `type(scope):` prefix, e.g. `feat(lint):`, `fix(format):`, `chore(deps):` — branches are squash-merged and that title becomes the changelog entry. Earlier commits are for review only: give them plain descriptive titles.
+- Branches are squash-merged under the PR title, which becomes the changelog entry, so the PR title carries a conventional-commit `type(scope):` prefix, e.g. `feat(lint):`, `fix(format):`, `chore(deps):`. Commits get plain descriptive titles, except on a single-commit branch: GitHub reuses that commit's title as the PR title, so it carries the prefix.
 - Keep commit descriptions minimal or empty — write a body only when explicitly asked, or when a skill documents otherwise (e.g. `add-lint-rule`).
 
 ## Commands
