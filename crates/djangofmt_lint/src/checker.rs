@@ -399,6 +399,8 @@ impl<'a> Checker<'a> {
             }
         }
 
+        self.check_block_end(block);
+
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);
         for item in &block.body {
@@ -412,6 +414,20 @@ impl<'a> Checker<'a> {
             }
         }
         self.in_raw = outer_raw;
+    }
+
+    fn check_block_end<T>(&self, block: &JinjaBlock<'a, T>) {
+        if self.is_django()
+            && self.any_rule_enabled(&[Rule::MissingEndblockLabel, Rule::RedundantEndblockLabel])
+            && let Some(end) = rules::helpers::block_end(self, block)
+        {
+            if self.is_rule_enabled(Rule::MissingEndblockLabel) {
+                rules::style::missing_endblock_label::check(self, &end);
+            }
+            if self.is_rule_enabled(Rule::RedundantEndblockLabel) {
+                rules::style::redundant_endblock_label::check(self, &end);
+            }
+        }
     }
 
     /// Whether `block` opens a `{% raw %}` body, which emits its contents verbatim: the HTML
@@ -494,6 +510,7 @@ impl<'a> Checker<'a> {
         if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
             self.record_block_name(block);
         }
+        self.check_block_end(block);
 
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);

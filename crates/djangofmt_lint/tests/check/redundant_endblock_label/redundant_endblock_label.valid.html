@@ -1,0 +1,13 @@
+<!-- Unlabelled single-line block -->
+<title>{% block title %}Home{% endblock %}</title>
+
+<!-- Labelled multi-line block -->
+{% block content %}
+    <h1>{{ title }}</h1>
+{% endblock content %}
+
+<!-- Regression: djade #114 — a label naming another block is a Django error, left to the author -->
+{% block heading %}Welcome{% endblock header %}
+
+<!-- A closer with more than a label is a Django error, left alone -->
+{% block footer %}Bye{% endblock footer now %}

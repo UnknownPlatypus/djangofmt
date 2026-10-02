@@ -282,4 +282,6 @@ define_rules! {
     (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
     (LegacyTranslationTag, rules::upgrade::legacy_translation_tag::LegacyTranslationTag),
+    (MissingEndblockLabel, rules::style::missing_endblock_label::MissingEndblockLabel),
+    (RedundantEndblockLabel, rules::style::redundant_endblock_label::RedundantEndblockLabel),
 }

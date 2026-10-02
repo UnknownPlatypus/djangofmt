@@ -1,0 +1,20 @@
+<!-- Labelled multi-line block -->
+{% block content %}
+    <h1>{{ title }}</h1>
+{% endblock content %}
+
+<!-- Regression: djade #134 — a single-line block stays unlabelled -->
+<title>{% block title %}Home{% endblock %}</title>
+
+<!-- A label naming another block is a Django error, left to the author -->
+{% block header %}
+    <h1>{{ title }}</h1>
+{% endblock footer %}
+
+<!-- An unnamed block is a Django error, left alone -->
+{% block %}
+    <p>Unnamed</p>
+{% endblock %}
+
+<!-- A stray closer has no opener to name it -->
+{% endblock %}
