@@ -7,6 +7,7 @@ use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
+use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
 
 use crate::Checker;
@@ -69,11 +70,12 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>) {
     };
 
     let tag_name = parse_jinja_tag_name(tag, checker.context().language());
-    if tag_name != "include" {
+    // Only a `#fragment` names a partial, so skip lexing the other includes.
+    if tag_name != "include" || !tag.content.contains('#') {
         return;
     }
 
-    let Some((template_path, fragment)) = parse_partial_include(tag, tag_name) else {
+    let Some((template_path, fragment)) = parse_partial_include(tag) else {
         return;
     };
 
@@ -108,25 +110,22 @@ const fn whitespace_control_marker(edge: Option<char>) -> &'static str {
 }
 
 /// Split an include tag into `(template_path, fragment)`, or [`None`] if it is not static.
-fn parse_partial_include<'s>(tag: &JinjaTag<'s>, tag_name: &str) -> Option<(&'s str, &'s str)> {
-    // The arguments after the tag name, with whitespace-control markers stripped from both edges.
-    let args = tag
-        .content
-        .trim_matches(['-', '+'])
-        .trim()
-        .strip_prefix(tag_name)?
-        .trim();
+fn parse_partial_include<'s>(tag: &JinjaTag<'s>) -> Option<(&'s str, &'s str)> {
+    // Whitespace-control markers are stripped first, or they would lex as bits of their own.
+    // Trailing bits (`with`, `only`, ...) have no `{% partial %}` equivalent.
+    let [_, template] = bits(tag.content.trim_matches(['-', '+']))[..] else {
+        return None;
+    };
 
     // The template name must be a string literal; a variable name is dynamic and left alone.
-    let quote = args.chars().next()?;
+    let quote = template.chars().next()?;
     if quote != '"' && quote != '\'' {
         return None;
     }
-    let (template_ref, rest) = args[1..].split_once(quote)?;
+    let (template_ref, rest) = template[1..].split_once(quote)?;
 
-    // Trailing tokens (`with`, `only`, a filter, ...) and interpolation have no `{% partial %}`
-    // equivalent.
-    if !rest.trim().is_empty() || contains_interpolation(template_ref) {
+    // A filter after the string, or interpolation inside it, has no equivalent either.
+    if !rest.is_empty() || contains_interpolation(template_ref) {
         return None;
     }
 
