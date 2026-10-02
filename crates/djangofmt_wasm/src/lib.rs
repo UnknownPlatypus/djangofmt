@@ -32,7 +32,7 @@ pub fn ast(source: &str, profile: &str) -> String {
     let profile = get_profile(profile);
     match djangofmt_syntax::parse(source, profile.into(), &[]) {
         Ok(parsed) => format!("{:#?}", parsed.ast()),
-        Err(e) => render_parse_error(source, &markup_fmt::FormatError::Syntax(e)),
+        Err(e) => render_parse_error(source, &e),
     }
 }
 
@@ -50,16 +50,17 @@ pub fn doc_tree(source: &str, line_length: u16, indent_width: u8, profile: &str)
         false,
     );
 
-    markup_fmt::debug_doc_tree(
+    match markup_fmt::debug_doc_tree(
         source,
         markup_fmt::Language::from(profile),
         &config.markup,
         |code, _| Ok(code.into()),
-    )
-    .map_or_else(
-        |err| render_parse_error(source, &err),
-        |ir| compact_doc_ir(&ir),
-    )
+    ) {
+        Ok(ir) => compact_doc_ir(&ir),
+        Err(markup_fmt::FormatError::Syntax(err)) => render_parse_error(source, &err),
+        // Unreachable with the identity formatter above, shown as is rather than asserted.
+        Err(err @ markup_fmt::FormatError::External(_)) => err.to_string(),
+    }
 }
 
 struct DocNode {
@@ -188,10 +189,7 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
         Ok(Some(outcome)) => outcome,
         // A leading `file-ignore[invalid-syntax]` quarantines the file.
         Ok(None) => return Ok(LintResult::new(0, String::new())),
-        Err(e) => {
-            let err = markup_fmt::FormatError::Syntax(e);
-            return Ok(LintResult::new(1, render_parse_error(source, &err)));
-        }
+        Err(e) => return Ok(LintResult::new(1, render_parse_error(source, &e))),
     };
     let error_count = outcome.diagnostics.len();
 
@@ -222,7 +220,7 @@ fn get_profile(profile: &str) -> Profile {
     }
 }
 
-fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
+fn render_parse_error(source: &str, err: &markup_fmt::SyntaxError) -> String {
     let diagnostic = ParseError::new("template.html", source.to_string(), err);
     let handler = graphical_handler(GraphicalTheme::unicode_nocolor());
     let mut output = String::new();

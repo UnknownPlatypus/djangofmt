@@ -1,6 +1,5 @@
 use djangofmt_lint::{Applicability, FileDiagnostics, RuleFixSummary, Settings, lint_text};
 use djangofmt_syntax::{ParseError, Profile};
-use markup_fmt::FormatError;
 use miette::{SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
@@ -432,7 +431,7 @@ pub(crate) fn check_source(
     let outcome = match outcome {
         Ok(outcome) => outcome,
         Err(err) => {
-            let err = ParseError::new(&display_path, text, &FormatError::Syntax(err));
+            let err = ParseError::new(&display_path, text, &err);
             return Err(Box::new(CommandError::Parse(
                 path.map(Path::to_path_buf),
                 err,

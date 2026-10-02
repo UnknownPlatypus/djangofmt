@@ -9,6 +9,7 @@ use std::panic::UnwindSafe;
 use std::path::{Path, PathBuf};
 
 use djangofmt_syntax::{FORMAT_IGNORE_DIRECTIVES, FileIgnores, LEGACY_IGNORE_DIRECTIVE, Profile};
+use markup_fmt::{FormatError, Hints, SyntaxError};
 use tracing::{debug, warn};
 
 use crate::line_width::{IndentWidth, LineLength, SelfClosing};
@@ -49,8 +50,7 @@ impl FormatterConfig {
 }
 
 /// Build default `markup_fmt` options for HTML/Jinja formatting.
-#[must_use]
-pub fn build_markup_options(
+fn build_markup_options(
     print_width: LineLength,
     indent_width: IndentWidth,
     custom_blocks: Option<Vec<String>>,
@@ -163,7 +163,7 @@ pub fn format_text(
     config: &FormatterConfig,
     profile: Profile,
     path: Option<&Path>,
-) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
+) -> Result<Option<String>, SyntaxError> {
     let ignores = FileIgnores::parse(source);
     if ignores.format {
         return Ok(None);
@@ -172,78 +172,93 @@ pub fn format_text(
         source,
         markup_fmt::Language::from(profile),
         &config.markup,
-        |code, hints| {
-            match hints.ext {
-                "json" | "jsonc" => {
-                    // dprint mangles such a snippet instead of rejecting it, leaving a string that gains indentation on every pass -> https://github.com/dprint/dprint-plugin-json/issues/63
-                    if json_has_raw_control_char(code) {
-                        debug!(
-                            "JSON string holds a raw control character, leaving it unformatted."
-                        );
-                        return Ok(code.into());
-                    }
-                    let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
-                    let mut json_config = config.json.clone();
-                    json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
-                    Ok(format_or_fallback(code, "JSON", path, || {
-                        match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
-                            Ok(Some(formatted)) => formatted.into(),
-                            Ok(None) => code.into(),
-                            Err(error) => {
-                                debug!(
-                                    "Failed to format JSON, falling back to original code. Error: {:?}",
-                                    error
-                                );
-                                code.into()
-                            }
-                        }
-                    }))
-                }
-                "css" | "scss" | "sass" | "less" => {
-                    let mut malva_config = config.malva.clone();
-                    malva_config.layout.print_width = hints.print_width;
-
-                    let formatted_css = format_or_fallback(code, "CSS", path, || {
-                        malva::format_text(code, malva::Syntax::Css, &malva_config).map_or_else(
-                            |error| {
-                                debug!(
-                                    "Failed to format CSS, falling back to original code. Error: {:?}",
-                                    error
-                                );
-                                code.into()
-                            },
-                            Cow::from,
-                        )
-                    });
-
-                    // malva can return nothing at all: `single_line_top_level_declarations` drops
-                    // comments, and an unterminated `/*` swallows the sheet. Keep the source.
-                    if formatted_css.trim().is_empty() {
-                        return Ok(code.into());
-                    }
-
-                    // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
-                    // Tries to keep on formatting style attr on a single line like expected with
-                    // single_line_top_level_declarations = true
-                    if code.contains('{') {
-                        Ok(formatted_css)
-                    } else {
-                        Ok(formatted_css
-                            .lines()
-                            .map(str::trim)
-                            .collect::<Vec<_>>()
-                            .join(" ")
-                            .into())
-                    }
-                }
-                _ => Ok(code.into()),
-            }
-        },
+        |code, hints| Ok(format_embedded(code, &hints, config, path)),
     );
     match result {
+        Ok(formatted) => Ok(Some(formatted)),
         // `file-ignore[invalid-syntax]` quarantines the file instead of reporting.
-        Err(markup_fmt::FormatError::Syntax(_)) if ignores.invalid_syntax => Ok(None),
-        other => other.map(Some),
+        Err(FormatError::Syntax(_)) if ignores.invalid_syntax => Ok(None),
+        Err(FormatError::Syntax(err)) => Err(err),
+        // `format_embedded` is infallible, so markup_fmt never collects an external error.
+        Err(FormatError::External(errors)) => {
+            unreachable!("embedded formatter errors escaped their fallback: {errors:?}")
+        }
+    }
+}
+
+/// Format an embedded CSS or JSON snippet, keeping it as written when its formatter
+/// rejects it or panics.
+fn format_embedded<'a>(
+    code: &'a str,
+    hints: &Hints<'_>,
+    config: &FormatterConfig,
+    path: Option<&Path>,
+) -> Cow<'a, str> {
+    match hints.ext {
+        "json" | "jsonc" => {
+            // dprint mangles such a snippet instead of rejecting it, leaving a string that gains indentation on every pass -> https://github.com/dprint/dprint-plugin-json/issues/63
+            if json_has_raw_control_char(code) {
+                debug!("JSON string holds a raw control character, leaving it unformatted.");
+                return code.into();
+            }
+            let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
+            let mut json_config = config.json.clone();
+            json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
+            format_or_fallback(
+                code,
+                "JSON",
+                path,
+                || match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
+                    Ok(Some(formatted)) => formatted.into(),
+                    Ok(None) => code.into(),
+                    Err(error) => {
+                        debug!(
+                            "Failed to format JSON, falling back to original code. Error: {:?}",
+                            error
+                        );
+                        code.into()
+                    }
+                },
+            )
+        }
+        "css" | "scss" | "sass" | "less" => {
+            let mut malva_config = config.malva.clone();
+            malva_config.layout.print_width = hints.print_width;
+
+            let formatted_css = format_or_fallback(code, "CSS", path, || {
+                malva::format_text(code, malva::Syntax::Css, &malva_config).map_or_else(
+                    |error| {
+                        debug!(
+                            "Failed to format CSS, falling back to original code. Error: {:?}",
+                            error
+                        );
+                        code.into()
+                    },
+                    Cow::from,
+                )
+            });
+
+            // malva can return nothing at all: `single_line_top_level_declarations` drops
+            // comments, and an unterminated `/*` swallows the sheet. Keep the source.
+            if formatted_css.trim().is_empty() {
+                return code.into();
+            }
+
+            // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
+            // Tries to keep on formatting style attr on a single line like expected with
+            // single_line_top_level_declarations = true
+            if code.contains('{') {
+                formatted_css
+            } else {
+                formatted_css
+                    .lines()
+                    .map(str::trim)
+                    .collect::<Vec<_>>()
+                    .join(" ")
+                    .into()
+            }
+        }
+        _ => code.into(),
     }
 }
 

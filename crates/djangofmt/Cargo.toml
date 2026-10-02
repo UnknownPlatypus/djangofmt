@@ -29,7 +29,6 @@ djangofmt_syntax = { workspace = true, features = ["clap"] }
 editorconfig-parser = { workspace = true }
 globset = { workspace = true }
 ignore = { workspace = true }
-markup_fmt = { workspace = true }
 # Error reporting
 miette = { workspace = true }
 rayon = { workspace = true }

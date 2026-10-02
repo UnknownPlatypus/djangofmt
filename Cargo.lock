@@ -440,7 +440,6 @@ dependencies = [
  "ignore",
  "insta",
  "insta-cmd",
- "markup_fmt",
  "oxc-miette",
  "rayon",
  "rstest",

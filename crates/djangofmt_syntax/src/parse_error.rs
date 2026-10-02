@@ -1,3 +1,4 @@
+use markup_fmt::{SyntaxError, SyntaxErrorKind};
 use miette::{Diagnostic, NamedSource, SourceCode, SourceSpan, SpanContents};
 use thiserror::Error;
 
@@ -65,47 +66,35 @@ fn close_tag_hint(tag_name: &str) -> String {
 impl ParseError {
     /// `name` labels the source in the rendered report.
     #[must_use]
-    pub fn new(name: impl AsRef<str>, source: String, err: &markup_fmt::FormatError) -> Self {
-        let (message, hint, span) = match err {
-            markup_fmt::FormatError::Syntax(syntax_err) => {
-                match &syntax_err.kind {
-                    // Point to the opening tag instead of where the error was detected (which is always the end of the file)
-                    markup_fmt::SyntaxErrorKind::ExpectCloseTag { tag_name, pos, .. } => (
-                        format!("expected close tag for opening tag <{tag_name}>"),
-                        Some(close_tag_hint(tag_name)),
-                        // `pos` is the `<`; the caret covers the tag name.
-                        span(pos + 1, tag_name.len()),
-                    ),
-                    markup_fmt::SyntaxErrorKind::ExpectJinjaBlockEnd { tag_name, pos, .. } => (
-                        format!("unclosed {{% {tag_name} %}} block."),
-                        Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
-                        // `pos` is just past the `{%`; the caret covers the tag name.
-                        span(jinja_name_pos(&source, *pos), tag_name.len()),
-                    ),
-                    markup_fmt::SyntaxErrorKind::SelfClosingNonVoidElement(tag_name) => (
-                        syntax_err.kind.to_string(),
-                        Some(format!(
-                            "Browsers ignore the `/` and read `<{tag_name}/>` as an opening `<{tag_name}>`. \
-                             Write `<{tag_name}></{tag_name}>` for an empty element, or `</{tag_name}>` if this was meant to close one."
-                        )),
-                        // `pos` is the `<`; the caret covers the tag name.
-                        span(syntax_err.pos + 1, tag_name.len()),
-                    ),
-                    _ => (
-                        syntax_err.kind.to_string(),
-                        None,
-                        eof_aware_span(&source, syntax_err.pos),
-                    ),
-                }
-            }
-            markup_fmt::FormatError::External(errors) => {
-                let msg = errors
-                    .iter()
-                    .map(|e| format!("{e:?}"))
-                    .collect::<Vec<_>>()
-                    .join(", ");
-                (format!("external formatter error: {msg}"), None, 0.into())
-            }
+    pub fn new(name: impl AsRef<str>, source: String, err: &SyntaxError) -> Self {
+        let (message, hint, span) = match &err.kind {
+            // Point to the opening tag instead of where the error was detected (which is always the end of the file)
+            SyntaxErrorKind::ExpectCloseTag { tag_name, pos, .. } => (
+                format!("expected close tag for opening tag <{tag_name}>"),
+                Some(close_tag_hint(tag_name)),
+                // `pos` is the `<`; the caret covers the tag name.
+                span(pos + 1, tag_name.len()),
+            ),
+            SyntaxErrorKind::ExpectJinjaBlockEnd { tag_name, pos, .. } => (
+                format!("unclosed {{% {tag_name} %}} block."),
+                Some("Check for invalid HTML syntax inside the block that might prevent finding the end tag.".into()),
+                // `pos` is just past the `{%`; the caret covers the tag name.
+                span(jinja_name_pos(&source, *pos), tag_name.len()),
+            ),
+            SyntaxErrorKind::SelfClosingNonVoidElement(tag_name) => (
+                err.kind.to_string(),
+                Some(format!(
+                    "Browsers ignore the `/` and read `<{tag_name}/>` as an opening `<{tag_name}>`. \
+                     Write `<{tag_name}></{tag_name}>` for an empty element, or `</{tag_name}>` if this was meant to close one."
+                )),
+                // `pos` is the `<`; the caret covers the tag name.
+                span(err.pos + 1, tag_name.len()),
+            ),
+            _ => (
+                err.kind.to_string(),
+                None,
+                eof_aware_span(&source, err.pos),
+            ),
         };
         Self {
             message,

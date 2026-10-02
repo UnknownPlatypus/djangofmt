@@ -1,7 +1,3 @@
-#![expect(
-    clippy::result_large_err,
-    reason = "test surfaces the large error type directly"
-)]
 #[path = "../common.rs"]
 mod common;
 
@@ -9,13 +5,9 @@ use common::build_settings;
 use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 use std::{fs, path};
 
-use djangofmt_formatter::build_markup_options;
-use djangofmt_syntax::ParseError;
-use djangofmt_syntax::Profile;
-use djangofmt_syntax::graphical_handler;
+use djangofmt_formatter::{FormatterConfig, format_text};
+use djangofmt_syntax::{ParseError, Profile, graphical_handler};
 use insta::{assert_snapshot, glob};
-use markup_fmt::config::FormatOptions;
-use markup_fmt::{Language, format_text};
 use miette::GraphicalTheme;
 
 #[test]
@@ -32,7 +24,7 @@ fn parse_error_snapshot() {
 }
 
 fn run_parse_error_test(path: &path::Path, input: &str) -> String {
-    let options = build_markup_options(
+    let config = FormatterConfig::new(
         LineLength::default(),
         IndentWidth::default(),
         None,
@@ -42,23 +34,10 @@ fn run_parse_error_test(path: &path::Path, input: &str) -> String {
     // Use just the filename for display to avoid absolute paths in snapshots
     let display_path = path.file_name().unwrap_or_default().to_string_lossy();
 
-    match format_str(input, &display_path, &options, Profile::Django) {
+    match format_text(input, &config, Profile::Django, None) {
         Ok(_) => format!("Expected parse error for '{display_path}' but formatting succeeded"),
-        Err(err) => render_miette_error(&err),
+        Err(err) => render_miette_error(&ParseError::new(&display_path, input.to_string(), &err)),
     }
-}
-
-fn format_str(
-    input: &str,
-    name: &str,
-    format_options: &FormatOptions,
-    profile: Profile,
-) -> Result<String, ParseError> {
-    let format_result = format_text(input, Language::from(profile), format_options, |code, _| {
-        Ok(code.into())
-    });
-
-    format_result.map_err(|err| ParseError::new(name, input.to_string(), &err))
 }
 
 fn render_miette_error(error: &dyn miette::Diagnostic) -> String {
