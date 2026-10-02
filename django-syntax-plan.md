@@ -1,7 +1,9 @@
 # Plan: Django syntax-aware formatting and lint rules
 
 Issues: [#187](https://github.com/UnknownPlatypus/djangofmt/issues/187) "Integration with djade", [#379](https://github.com/UnknownPlatypus/djangofmt/issues/379) "Normalize whitespace in template tag expressions".
+
 Related: [PR #501](https://github.com/UnknownPlatypus/djangofmt/pull/501) upgrade rules PoC (rebased in step 2), [#79](https://github.com/UnknownPlatypus/djangofmt/issues/79) Jinja expression formatting (out of scope).
+
 Companion page: [Djade Coverage Map](https://claude.ai/artifact/QrPJU1nARDaahYPXeukhRB) holds the corpus counts and the per-feature tables.
 
 Status: **WIP plan, nothing implemented yet.**
@@ -13,7 +15,7 @@ Written on 2026-10-02 against djangofmt `1476d3b` (markup_fmt fork `66ff75b`), d
 - One module, `djangofmt_lint::dtl`, with two free functions that reproduce Django's own lexing: `bits()` for tag bodies (`smart_split_re`) and `filter_expression()` for `{{ }}` bodies (`filter_re`). Hand-written scanners, slices borrowed from the input, Django's regexes kept as a randomized test oracle.
 - The formatter gains two closure arms, Django profile only, that normalize whitespace inside `{% %}` and `{{ }}`: single spaces between bits, no spaces around filters. The only other formatter changes are two markup_fmt fork items: `{# x #}` edge spacing and one blank line between top-level blocks under `extends`.
 - Every other djade behaviour becomes a lint rule with a safe fix: six fixers in a new `upgrade` category, the `endblock`/`endpartialdef` label rule in `style`. All stable, all on by default.
-- Not mirrored: the three `load` rules (merge, sort libraries, sort `from` items). One `{% load %}` per line is the preferred style here. djangofmt-then-djade therefore never converges on `load`, documented as a known limitation.
+- Not mirrored: the three `load` rules (merge, sort libraries, sort `from` items). One `{% load %}` per line is the preferred style here. djade still merges and sorts `load` on djangofmt output, documented as a known limitation; the alternating convergence check is unaffected since djangofmt never splits or reorders loads.
 - Dropped from #501: the reverse parity mode and the unset-target-version-to-5.2 default. pretty_jinja stays parked on `pj-rebase`.
 
 ## Decisions
@@ -34,7 +36,7 @@ Written on 2026-10-02 against djangofmt `1476d3b` (markup_fmt fork `66ff75b`), d
 | Labels                                   | One `style` rule with a safe fix, not the printer                                                                                                | S instead of M, no fork change, opt-out. Stable when `check --fix` runs after formatting.                                                                                                                                      |
 | Checker wiring                           | Every `{% %}` reaches `visit_jinja_tag`, block openers, middles and closers included                                                             | Single-tag rules are written once. Pair rules (labels, ifequal) stay in `visit_jinja_block`.                                                                                                                                   |
 | Text tags                                | `tags_in_text` synthesizes `JinjaTag { content, start }` for attribute values, HTML comments and raw bodies, dispatched through the same visitor | 11.5% of trans hits sit there. Lands before the trans rename. Rules opt out with a list like `RAW_SENSITIVE_RULES`.                                                                                                            |
-| Parity check                             | Keep only djade-then-djangofmt convergence (`just ecosystem-check-stability djade`)                                                              | Without `load` merging the reverse direction can never pass.                                                                                                                                                                   |
+| Parity check                             | Keep only djade-then-djangofmt convergence (`just ecosystem-check-stability djade`)                                                              | A strict "djade is a no-op on djangofmt output" mode would always flag `load`.                                                                                                                                                 |
 | #501                                     | Rebase onto step 1                                                                                                                               | Keeps step 1 judgeable on its own.                                                                                                                                                                                             |
 | Jinja and pretty_jinja                   | Out of scope                                                                                                                                     | `pj-rebase` parked. `integrate-pretty-jinja` and `try-pretty-jinja` deleted.                                                                                                                                                   |
 
