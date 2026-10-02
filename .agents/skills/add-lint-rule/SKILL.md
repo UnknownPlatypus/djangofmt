@@ -22,6 +22,8 @@ Create `crates/djangofmt_lint/src/rules/{category}/{rule_name}.rs`.
 
 Every category but `pedantic` runs by default. Put a rule in `pedantic` when it is noisy on real templates and has no safe fix, unless it catches something important. Measure noise with `just ecosystem-check-lint-dev` before deciding.
 
+Put a rule that rewrites older Django syntax into its newer spelling in `upgrade`; when the newer spelling needs a minimum Django release, the rule also gates on it (see 1e).
+
 The file must contain:
 
 ### 1a. The violation struct with doc comment
@@ -154,7 +156,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
-The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_jinja_block`. Most rules are attribute rules:
+The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_jinja_block`, single-tag rules `(checker, tag)` from `visit_jinja_tag`, which sees every `{% %}` including block openers, middles and closers, and `{{ }}` rules `(checker, interpolation)` from `visit_jinja_interpolation`. Most rules are attribute rules:
 
 ```rust
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
@@ -180,6 +182,36 @@ Key points:
 - **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
+- **Keep the per-node path light**: every tag or `{{ }}` of the template goes through a tag or `{{ }}` rule, and `djangofmt_syntax::dtl::bits()` and `filter_expression()` run regexes. Reject on bytes first (`dtl::first_bit_is(tag.content, "load")`, `expr.contains(':')`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
+
+### 1e. Version-gated rules
+
+A rule whose rewrite only works from some Django release onwards gates on the target version, the way ruff's `UP` rules gate on `target-version`. The checker resolves the version once and passes it in, so files without one never call the rule:
+
+```rust
+// checker.rs
+if let Some(version) = self.target_version()
+    && self.is_rule_enabled(Rule::RedundantJsonScriptId)
+{
+    rules::upgrade::redundant_json_script_id::check(self, interpolation, version);
+}
+
+// the rule
+/// The release that made `json_script`'s element id optional.
+const ELEMENT_ID_OPTIONAL_IN: DjangoVersion = DjangoVersion::new(4, 1);
+
+pub fn check(checker: &Checker<'_>, interpolation: &JinjaInterpolation<'_>, target_version: DjangoVersion) {
+    if checker.is_django() && target_version >= ELEMENT_ID_OPTIONAL_IN && /* byte prefilter */ {
+        // ...
+    }
+}
+```
+
+- `checker.target_version()` is `None` when `target-version` is neither set nor inferable from `[project] dependencies`. The rule then stays silent: nothing says the newer spelling is available.
+- Name the floor as a `const` whose doc comment says what changed in that release. Never hardcode the version inline.
+- Pair it with `checker.is_django()`: a Django release means nothing for a Jinja template.
+- Say so in the docstring ("The rule is version-gated: it reports nothing until `lint.target-version` names Django 4.1 or newer") and list `lint.target-version` under `## Options`.
+- Fixtures run at `DjangoVersion::LATEST`, so the gate is always open for them; `check_gates_version_specific_rules_on_target_version` in `crates/djangofmt/tests/cli.rs` covers the closed gate once for every rule. Cover the Jinja half with a `.valid.jinja` fixture.
 
 ## Step 2: Export the module
 
@@ -290,6 +322,7 @@ A new rule lands as **one** commit on a branch. Squash review follow-ups into it
 - Multi-variant (enum) violation with `match` in `message()`/`help()`: `crates/djangofmt_lint/src/rules/accessibility/missing_title.rs`
 - Full-technique rule (WCAG H63) — multi-variant, per-variant spans, case-insensitive value validation: `crates/djangofmt_lint/src/rules/pedantic/table_header_missing_scope.rs`
 - Jinja-block-shaped rule with fix: `crates/djangofmt_lint/src/rules/correctness/untrimmed_blocktranslate.rs`
+- Version-gated `{{ }}` rule on `filter_expression()`: `crates/djangofmt_lint/src/rules/upgrade/redundant_json_script_id.rs`
 - Violation trait: `crates/djangofmt_lint/src/violation.rs`
 - `LintContext` / `DiagnosticGuard`: `crates/djangofmt_lint/src/lint_context.rs`
 - Fix data model (`Edit`, `Fix`, `Applicability`, `FixAvailability`): `crates/djangofmt_lint/src/fix/mod.rs`

@@ -14,6 +14,9 @@ from typing import Self
 from ecosystem_check import logger
 from ecosystem_check.types import HunkDetail, Serializable
 
+# `DjangoVersion::LATEST` in `crates/djangofmt_lint/src/django_version.rs`.
+LATEST_DJANGO_VERSION = "6.1"
+
 
 @dataclass(frozen=True, slots=True)
 class Project(Serializable):
@@ -115,13 +118,15 @@ class CliOptions(Serializable):
             if self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))
             if command is Command.CHECK:
-                # Select every rule, including preview, for maximum ecosystem coverage.
-                # Fixes are applied so they can be reviewed as a source diff.
+                # Select every rule, including preview and version-gated ones, for maximum
+                # ecosystem coverage. Fixes are applied so they can be reviewed as a source diff.
                 args.extend(
                     (
                         "--select",
                         "category:all",
                         "--preview",
+                        "--target-version",
+                        LATEST_DJANGO_VERSION,
                         "--fix",
                         "--unsafe-fixes",
                         "--output-format",

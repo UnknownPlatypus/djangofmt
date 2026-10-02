@@ -64,6 +64,8 @@ pub enum RuleCategory {
     Suspicious,
     /// Code that should be written in a more idiomatic way.
     Style,
+    /// Code written in older Django syntax that has a newer replacement.
+    Upgrade,
     /// Code that creates accessibility (a11y) barriers.
     Accessibility,
     /// Rules that are rather strict, noisy, or have occasional false positives. Off by default.
@@ -277,4 +279,6 @@ define_rules! {
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
+    (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
+    (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
 }

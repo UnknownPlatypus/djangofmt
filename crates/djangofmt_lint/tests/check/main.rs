@@ -3,8 +3,8 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, apply_fixes, check,
-    lint_source,
+    Applicability, DjangoVersion, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings,
+    apply_fixes, check, lint_source,
 };
 use djangofmt_syntax::{graphical_handler, parse};
 
@@ -122,6 +122,8 @@ fn settings_for(path: &Path) -> Settings {
     }
     Settings {
         rules,
+        // Version-gated rules stay off without a target version.
+        target_version: Some(DjangoVersion::LATEST),
         ..Settings::default()
     }
 }

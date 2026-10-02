@@ -1,0 +1,16 @@
+<!-- The two removed aliases of `static` -->
+{% load staticfiles %}
+{% load admin_static %}
+
+<!-- Among other libraries -->
+{% load i18n staticfiles l10n %}
+
+<!-- The tag already loads `static`, before or after the alias, so the alias is dropped -->
+{% load static staticfiles %}
+{% load staticfiles static %}
+
+<!-- Both aliases in one tag -->
+{% load staticfiles admin_static %}
+
+<!-- `{% load x from library %}` names its library last -->
+{% load static from staticfiles %}
