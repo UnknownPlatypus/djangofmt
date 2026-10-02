@@ -11,6 +11,7 @@ pub struct Parsed<'a> {
     source: &'a str,
     language: Language,
     ast: Root<'a>,
+    raw_elements: &'a [String],
 }
 
 impl<'a> Parsed<'a> {
@@ -31,6 +32,12 @@ impl<'a> Parsed<'a> {
     pub const fn language(&self) -> Language {
         self.language
     }
+
+    /// The configured elements whose content was parsed as raw text.
+    #[must_use]
+    pub const fn raw_elements(&self) -> &'a [String] {
+        self.raw_elements
+    }
 }
 
 /// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block
@@ -43,7 +50,7 @@ pub fn parse<'a>(
     source: &'a str,
     language: Language,
     custom_blocks: &[String],
-    raw_elements: &[String],
+    raw_elements: &'a [String],
 ) -> Result<Parsed<'a>, SyntaxError> {
     Ok(Parsed {
         source,
@@ -55,5 +62,6 @@ pub fn parse<'a>(
             raw_elements.to_vec(),
         )
         .parse_root()?,
+        raw_elements,
     })
 }

@@ -188,6 +188,7 @@ fn check_rules(
         parsed.source(),
         settings,
         parsed.language(),
+        parsed.raw_elements(),
         path,
         quarantined,
     );
@@ -212,7 +213,7 @@ pub(crate) fn parse_or_quarantine<'a>(
     source: &'a str,
     language: Language,
     custom_blocks: &[String],
-    raw_elements: &[String],
+    raw_elements: &'a [String],
 ) -> Result<LintInput<'a>, SyntaxError> {
     let error = match parse(source, language, custom_blocks, raw_elements) {
         Ok(parsed) => {

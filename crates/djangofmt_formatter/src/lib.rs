@@ -93,10 +93,8 @@ pub fn build_markup_options(
             // {% stage %}...{% endstage %}
             // {% cache %}...{% endcache %}
             custom_blocks,
-            // Keep the content of these elements byte for byte, like `<pre>`:
-            // <c-markdown>
-            // - item   one
-            // </c-markdown>
+            // Keep the content of these elements as written, like `<pre>`:
+            // <c-markdown>- item   one</c-markdown>
             raw_elements,
             // Preserve unquoted HTML attribute values:
             // <c-button editable=True /> -> stays as editable=True

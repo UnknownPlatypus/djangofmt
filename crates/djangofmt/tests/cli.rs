@@ -726,6 +726,21 @@ fn format_rejects_void_raw_element() {
 }
 
 #[test]
+fn format_rejects_style_raw_element() {
+    let project = Project::new().file("test.html", "<style></style>\n");
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["--raw-elements", "style", "test.html"]), @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    error: invalid value 'style' for '--raw-elements <ELEMENT_NAMES>': `style` content is formatted as code, it can't be kept raw
+
+    For more information, try '--help'.
+    ");
+}
+
+#[test]
 fn check_records_block_names_in_raw_elements() {
     // The unbalanced `<b>` only parses as raw text, where Django still reads the `{% block %}`.
     let project = Project::new()

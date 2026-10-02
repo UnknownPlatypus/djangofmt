@@ -105,12 +105,21 @@ pub struct TemplateArgs {
     pub raw_elements: Option<Vec<String>>,
 }
 
-/// A void element closes at its opening tag, so it has no content to keep raw.
+/// A void element closes at its opening tag, so it has no content to keep raw,
+/// and `<script>`/`<style>` content goes to the embedded formatters first.
 pub(crate) fn parse_raw_element(name: &str) -> Result<String, String> {
     let name = name.trim();
     if markup_fmt::is_void_element(name, Language::Html) {
         return Err(format!(
             "`{name}` is a void element, it has no content to keep raw"
+        ));
+    }
+    if ["script", "style"]
+        .iter()
+        .any(|tag| name.eq_ignore_ascii_case(tag))
+    {
+        return Err(format!(
+            "`{name}` content is formatted as code, it can't be kept raw"
         ));
     }
     Ok(name.to_owned())

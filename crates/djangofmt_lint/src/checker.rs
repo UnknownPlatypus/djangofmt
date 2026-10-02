@@ -31,6 +31,7 @@ pub struct Checker<'a> {
     /// Block names collected during the traversal.
     /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
     block_names: SmallVec<[&'a str; 8]>,
+    raw_elements: &'a [String],
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
 }
@@ -41,12 +42,14 @@ impl<'a> Checker<'a> {
         source: &'a str,
         settings: &'a Settings,
         language: Language,
+        raw_elements: &'a [String],
         path: Option<&'a Path>,
         quarantined: bool,
     ) -> Self {
         Self {
             context: LintContext::new(source, settings, language, path, quarantined),
             block_names: SmallVec::new_const(),
+            raw_elements,
             in_raw: false,
         }
     }
@@ -242,9 +245,8 @@ impl<'a> Checker<'a> {
             self.visit_node(child);
         }
 
-        // Only bodies the parser keeps as raw text (`<script>`, `<pre>`, `raw-elements`…)
-        // leave tags in an element's text, and Django still reads them.
-        if self.is_rule_enabled(Rule::DuplicateBlockName) {
+        // The parser keeps these bodies as raw text, but Django still reads the tags in them.
+        if self.is_rule_enabled(Rule::DuplicateBlockName) && self.is_raw_text(element.tag_name) {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {
                     self.record_text_block_names(text.raw);
@@ -345,6 +347,16 @@ impl<'a> Checker<'a> {
         if let Some(name) = rules::correctness::duplicate_block_name::block_name(block) {
             self.block_names.push(name);
         }
+    }
+
+    fn is_raw_text(&self, tag_name: &str) -> bool {
+        ["script", "style", "pre", "textarea"]
+            .iter()
+            .any(|tag| tag_name.eq_ignore_ascii_case(tag))
+            || self
+                .raw_elements
+                .iter()
+                .any(|tag| tag_name.eq_ignore_ascii_case(tag))
     }
 
     fn record_text_block_names(&mut self, raw: &'a str) {
