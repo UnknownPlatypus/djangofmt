@@ -2,8 +2,8 @@ use std::path::Path;
 
 use markup_fmt::Language;
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
-    Root,
+    Attribute, Element, JinjaBlock, JinjaInterpolation, JinjaTag, JinjaTagOrChildren,
+    NativeAttribute, Node, NodeKind, Root,
 };
 use markup_fmt::parser::parse_jinja_tag_name;
 use miette::SourceSpan;
@@ -11,6 +11,7 @@ use smallvec::SmallVec;
 
 use crate::LintDiagnostic;
 use crate::Settings;
+use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
@@ -61,6 +62,12 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub const fn is_django(&self) -> bool {
         matches!(self.context.language(), Language::Django)
+    }
+
+    /// The Django version the templates target, [`None`] when it is neither set nor inferred.
+    #[must_use]
+    pub const fn target_version(&self) -> Option<DjangoVersion> {
+        self.context.settings().target_version
     }
 
     /// Block names recorded during the traversal, borrowed from the source.
@@ -185,7 +192,21 @@ impl<'a> Checker<'a> {
                 self.record_text_block_names(comment.raw);
             }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
+            NodeKind::JinjaInterpolation(interpolation) => {
+                self.visit_jinja_interpolation(interpolation);
+            }
             _ => {}
+        }
+    }
+
+    /// Only node-position `{{ }}` reaches here: in an attribute value it stays part of the
+    /// value string.
+    fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
+        // No version-gated rule can fire without a target version.
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::RedundantJsonScriptId)
+        {
+            rules::upgrade::redundant_json_script_id::check(self, interpolation, version);
         }
     }
 
@@ -196,8 +217,18 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
-        if !self.in_raw && self.is_rule_enabled(Rule::SameFilePartialInclude) {
-            rules::style::same_file_partial_include::check(self, tag);
+        // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
+        if let Some(path) = self.context.path()
+            && !self.in_raw
+            && self.is_rule_enabled(Rule::SameFilePartialInclude)
+        {
+            rules::style::same_file_partial_include::check(self, tag, path);
+        }
+        // No version-gated rule can fire without a target version.
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
+        {
+            rules::upgrade::deprecated_static_library::check(self, tag, version);
         }
     }
 
@@ -323,9 +354,12 @@ impl<'a> Checker<'a> {
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);
         for item in &block.body {
-            if let JinjaTagOrChildren::Children(children) = item {
-                for child in children {
-                    self.visit_node(child);
+            match item {
+                JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag),
+                JinjaTagOrChildren::Children(children) => {
+                    for child in children {
+                        self.visit_node(child);
+                    }
                 }
             }
         }
@@ -369,9 +403,12 @@ impl<'a> Checker<'a> {
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);
         for item in &block.body {
-            if let JinjaTagOrChildren::Children(children) = item {
-                for child in children {
-                    self.visit_attribute(child, element);
+            match item {
+                JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag),
+                JinjaTagOrChildren::Children(children) => {
+                    for child in children {
+                        self.visit_attribute(child, element);
+                    }
                 }
             }
         }

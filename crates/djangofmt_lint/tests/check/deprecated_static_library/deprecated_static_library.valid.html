@@ -1,0 +1,23 @@
+<!-- The replacement library -->
+{% load static %}
+
+<!-- Other libraries -->
+{% load i18n humanize %}
+
+<!-- A tag name that merely starts with `load` -->
+{% loader staticfiles %}
+
+<!-- `staticfiles` as an imported name, not as the library -->
+{% load staticfiles from mylib %}
+
+<!-- Neither alias defines any tag but `static`, so this load is already broken -->
+{% load get_static_prefix from staticfiles %}
+
+<!-- Library names are Python module names, so they are case-sensitive -->
+{% load StaticFiles %}
+
+<!-- A library that merely embeds the deprecated name -->
+{% load staticfiles_extra %}
+
+<!-- Not a `{% load %}` tag -->
+{% static 'admin_static' %}

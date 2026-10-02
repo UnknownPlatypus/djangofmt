@@ -1,0 +1,42 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:2:25]
+ 1 │ <!-- Both spellings of the empty literal -->
+ 2 │ {{ user_data|json_script:"" }}
+   ·                         ─┬─
+   ·                          ╰── here
+ 3 │ {{ user_data|json_script:'' }}
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:3:25]
+ 2 │ {{ user_data|json_script:"" }}
+ 3 │ {{ user_data|json_script:'' }}
+   ·                         ─┬─
+   ·                          ╰── here
+ 4 │ 
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:6:38]
+ 5 │ <!-- Between other filters -->
+ 6 │ {{ user_data|default:"{}"|json_script:""|safe }}
+   ·                                      ─┬─
+   ·                                       ╰── here
+ 7 │ 
+   ╰────
+  help: Omit the argument
+
+  × Redundant empty element id passed to `json_script`
+   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:9:27]
+ 8 │ <!-- Whitespace around the pipe -->
+ 9 │ {{ user_data | json_script:"" }}
+   ·                           ─┬─
+   ·                            ╰── here
+   ╰────
+  help: Omit the argument

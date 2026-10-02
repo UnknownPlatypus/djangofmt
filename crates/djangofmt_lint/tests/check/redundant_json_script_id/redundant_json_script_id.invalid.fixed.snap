@@ -1,0 +1,12 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Both spellings of the empty literal -->
+{{ user_data|json_script }}
+{{ user_data|json_script }}
+
+<!-- Between other filters -->
+{{ user_data|default:"{}"|json_script|safe }}
+
+<!-- Whitespace around the pipe -->
+{{ user_data | json_script }}

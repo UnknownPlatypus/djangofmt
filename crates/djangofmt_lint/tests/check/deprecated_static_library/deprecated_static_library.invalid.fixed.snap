@@ -1,0 +1,19 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- The two removed aliases of `static` -->
+{% load static %}
+{% load static %}
+
+<!-- Among other libraries -->
+{% load i18n static l10n %}
+
+<!-- The tag already loads `static`, before or after the alias, so the alias is dropped -->
+{% load static %}
+{% load static %}
+
+<!-- Both aliases in one tag -->
+{% load static %}
+
+<!-- `{% load x from library %}` names its library last -->
+{% load static %}

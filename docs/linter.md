@@ -24,6 +24,8 @@ A more specific selector always wins, regardless of order.
 
 Rules marked 🧪 in the [rules table](rules.md) are in preview: they stay off until enabled with `--preview` or `preview = true`.
 
+Some `upgrade` rules rewrite into syntax that only exists from a given Django release: they stay off until [`target-version`](settings.md#lint_target-version) is set or inferred from `[project] dependencies`.
+
 To turn rules off for some files only, map a glob to the selectors to ignore there:
 
 ```toml
