@@ -14,8 +14,8 @@ use crate::LintDiagnostic;
 use crate::Settings;
 use crate::fix::Fix;
 use crate::registry::Rule;
-use crate::span;
 use crate::violation::Violation;
+use djangofmt_syntax::span;
 
 /// A type for collecting diagnostics in a given file.
 ///

@@ -7,7 +7,9 @@ use crate::Checker;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_codes_or_comment;
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{IgnoreComment, ReservedCode};
+use djangofmt_syntax::ReservedCode;
+
+use crate::suppression::IgnoreComment;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does

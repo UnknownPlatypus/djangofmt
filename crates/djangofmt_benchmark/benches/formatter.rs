@@ -1,8 +1,6 @@
-use djangofmt::{
-    commands::format::{FormatterConfig, format_text},
-    line_width::{IndentWidth, LineLength, SelfClosing},
-};
 use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
+use djangofmt_formatter::{FormatterConfig, format_text};
 
 fn main() {
     divan::main();

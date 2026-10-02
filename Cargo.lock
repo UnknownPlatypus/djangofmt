@@ -431,15 +431,15 @@ version = "1.0.0"
 dependencies = [
  "clap",
  "clap_complete_command",
+ "djangofmt_formatter",
  "djangofmt_lint",
  "djangofmt_macros",
- "dprint-plugin-json",
+ "djangofmt_syntax",
  "editorconfig-parser",
  "globset",
  "ignore",
  "insta",
  "insta-cmd",
- "malva",
  "markup_fmt",
  "oxc-miette",
  "rayon",
@@ -464,7 +464,9 @@ version = "1.0.0"
 dependencies = [
  "codspeed-divan-compat",
  "djangofmt",
+ "djangofmt_formatter",
  "djangofmt_lint",
+ "djangofmt_syntax",
  "oxc-miette",
  "tikv-jemallocator",
 ]
@@ -481,10 +483,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "djangofmt_formatter"
+version = "1.0.0"
+dependencies = [
+ "clap",
+ "djangofmt_syntax",
+ "dprint-plugin-json",
+ "malva",
+ "markup_fmt",
+ "rstest",
+ "serde",
+ "tracing",
+ "tracing-test",
+]
+
+[[package]]
 name = "djangofmt_lint"
 version = "1.0.0"
 dependencies = [
  "djangofmt_macros",
+ "djangofmt_syntax",
  "insta",
  "markup_fmt",
  "memchr",
@@ -496,7 +514,6 @@ dependencies = [
  "smallvec",
  "strsim",
  "strum",
- "textwrap",
  "thiserror",
  "tracing",
 ]
@@ -511,11 +528,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "djangofmt_syntax"
+version = "1.0.0"
+dependencies = [
+ "clap",
+ "markup_fmt",
+ "oxc-miette",
+ "rstest",
+ "serde",
+ "strum",
+ "textwrap",
+ "thiserror",
+]
+
+[[package]]
 name = "djangofmt_wasm"
 version = "1.0.0"
 dependencies = [
- "djangofmt",
+ "djangofmt_formatter",
  "djangofmt_lint",
+ "djangofmt_syntax",
  "insta",
  "markup_fmt",
  "oxc-miette",

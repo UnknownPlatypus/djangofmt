@@ -15,8 +15,8 @@ path = "fuzz_targets/fmt_idempotency.rs"
 test = false
 
 [dependencies]
-# default-features = false drops jemalloc, which conflicts with libFuzzer.
-djangofmt = { path = "../crates/djangofmt", default-features = false }
+djangofmt_formatter = { path = "../crates/djangofmt_formatter" }
+djangofmt_syntax = { path = "../crates/djangofmt_syntax" }
 libfuzzer-sys = "0.4"
 similar-asserts = "2.0.0"
 

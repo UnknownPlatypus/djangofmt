@@ -1,3 +1,5 @@
+//! Run a closure and turn its panic into an error value, keeping the default hook from printing.
+//! The formatter needs this to survive a panic in an embedded formatter; the CLI reuses it per file.
 use std::any::Any;
 use std::backtrace::BacktraceStatus;
 use std::cell::Cell;

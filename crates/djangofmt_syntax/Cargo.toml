@@ -1,0 +1,29 @@
+[package]
+name = "djangofmt_syntax"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+doctest = false
+
+[dependencies]
+clap = { workspace = true, optional = true }
+markup_fmt = { workspace = true }
+miette = { workspace = true }
+serde = { workspace = true }
+strum = { workspace = true, features = ["derive"] }
+textwrap = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+rstest = { workspace = true }
+
+[features]
+clap = ["dep:clap"]
+
+[lints]
+workspace = true

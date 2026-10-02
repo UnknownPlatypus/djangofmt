@@ -1,11 +1,9 @@
-use djangofmt::args::Profile;
-use djangofmt::commands::format::{FormatterConfig, format_text};
-use djangofmt::error::ParseError;
-use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use djangofmt_lint::{FileDiagnostics, Settings, graphical_handler, lint_text};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
+use djangofmt_formatter::{FormatterConfig, format_text};
+use djangofmt_lint::{FileDiagnostics, Settings, lint_text};
+use djangofmt_syntax::{ParseError, Profile, graphical_handler};
 use miette::GraphicalTheme;
 use serde::Serialize;
-use std::path::PathBuf;
 use tsify::Tsify;
 use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
@@ -32,7 +30,7 @@ pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -
 #[must_use]
 pub fn ast(source: &str, profile: &str) -> String {
     let profile = get_profile(profile);
-    match djangofmt_lint::parse(source, profile.into(), &[]) {
+    match djangofmt_syntax::parse(source, profile.into(), &[]) {
         Ok(parsed) => format!("{:#?}", parsed.ast()),
         Err(e) => render_parse_error(source, &markup_fmt::FormatError::Syntax(e)),
     }
@@ -225,11 +223,7 @@ fn get_profile(profile: &str) -> Profile {
 }
 
 fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
-    let diagnostic = ParseError::new(
-        Some(PathBuf::from("template.html")),
-        source.to_string(),
-        err,
-    );
+    let diagnostic = ParseError::new("template.html", source.to_string(), err);
     let handler = graphical_handler(GraphicalTheme::unicode_nocolor());
     let mut output = String::new();
     match handler.render_report(&mut output, &diagnostic) {

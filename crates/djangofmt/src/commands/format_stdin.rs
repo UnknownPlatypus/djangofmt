@@ -1,14 +1,17 @@
 use std::io::{Read, Write, stdin, stdout};
 use std::path::Path;
 
+use djangofmt_syntax::{ParseError, Profile};
 use tracing::error;
 
 use crate::ExitStatus;
-use crate::args::{FormatCommand, Profile};
-use crate::commands::format::{FormatterConfig, format_text, warn_deprecated_options};
+use crate::args::FormatCommand;
+use djangofmt_formatter::{FormatterConfig, format_text};
+
+use crate::commands::format::{formatter_config_from_args, warn_deprecated_options};
 use crate::config::resolve_profile;
 use crate::editorconfig;
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, Result, path_display};
 use crate::pyproject::load_pyproject_from_cwd;
 use crate::resolver::{ResolvedDiscoveryConfig, is_force_excluded};
 
@@ -37,7 +40,7 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
         editorconfig.as_ref(),
         stdin_filename.unwrap_or_else(|| Path::new("")),
     );
-    let config = FormatterConfig::from_args(cli, &pyproject, &settings);
+    let config = formatter_config_from_args(cli, &pyproject, &settings);
 
     match super::catch_file_panic(stdin_filename, || {
         format_source_code(stdin_filename, &config, profile, cli.check)
@@ -67,7 +70,11 @@ fn format_source_code(
     let formatted = match format_text(&source, config, profile, path) {
         Ok(f) => f,
         Err(err) => {
-            return Err(ParseError::new(path.map(Path::to_path_buf), source, &err).into());
+            let err = ParseError::new(path_display(path), source, &err);
+            return Err(Box::new(CommandError::Parse(
+                path.map(Path::to_path_buf),
+                err,
+            )));
         }
     };
 

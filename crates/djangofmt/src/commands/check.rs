@@ -1,4 +1,5 @@
 use djangofmt_lint::{Applicability, FileDiagnostics, RuleFixSummary, Settings, lint_text};
+use djangofmt_syntax::{ParseError, Profile};
 use markup_fmt::FormatError;
 use miette::{SourceCode, SpanContents};
 use rayon::iter::Either::{Left, Right};
@@ -12,9 +13,9 @@ use std::path::Path;
 use std::time::Instant;
 use tracing::{debug, error, info, warn};
 
-use crate::args::{CheckCommand, OutputFormat, Profile};
+use crate::args::{CheckCommand, OutputFormat};
 use crate::config::{resolve_bool_arg, resolve_lint_configuration, resolve_profile};
-use crate::error::{CommandError, ParseError, Result};
+use crate::error::{CommandError, Result};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::{LintSettings, PyprojectSettings};
@@ -431,12 +432,11 @@ pub(crate) fn check_source(
     let outcome = match outcome {
         Ok(outcome) => outcome,
         Err(err) => {
-            return Err(ParseError::new(
+            let err = ParseError::new(&display_path, text, &FormatError::Syntax(err));
+            return Err(Box::new(CommandError::Parse(
                 path.map(Path::to_path_buf),
-                text,
-                &FormatError::Syntax(err),
-            )
-            .into());
+                err,
+            )));
         }
     };
     let skipped = outcome.is_none();

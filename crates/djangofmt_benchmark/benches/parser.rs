@@ -1,5 +1,5 @@
 use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
-use djangofmt_lint::parse;
+use djangofmt_syntax::parse;
 
 fn main() {
     divan::main();

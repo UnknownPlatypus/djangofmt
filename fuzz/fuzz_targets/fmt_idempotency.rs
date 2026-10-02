@@ -5,10 +5,10 @@
 
 use std::sync::LazyLock;
 
-use djangofmt::args::Profile;
-use djangofmt::commands::format::{FormatterConfig, format_text};
-use djangofmt::error::ParseError;
-use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
+use djangofmt_syntax::Profile;
+use djangofmt_formatter::{FormatterConfig, format_text};
+use djangofmt_syntax::ParseError;
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 use libfuzzer_sys::{Corpus, fuzz_target};
 
 static CONFIG: LazyLock<FormatterConfig> = LazyLock::new(|| {
@@ -28,7 +28,7 @@ fn do_fuzz_profile(code: &str, profile: Profile) -> Corpus {
         Ok(None) => return Corpus::Reject,
         Err(err) => {
             // Exercise the diagnostic path, it does offset arithmetic on the error location.
-            let _ = ParseError::new(None, code.to_string(), &err);
+            let _ = ParseError::new("<source>", code.to_string(), &err);
             return Corpus::Reject;
         }
     };

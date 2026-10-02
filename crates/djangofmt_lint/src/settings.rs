@@ -140,7 +140,7 @@ mod tests {
     use crate::registry::{Rule, RuleCategory};
     use crate::rule_selector::{ALL_GROUP, DEFAULT_GROUP, RuleSelector, SelectionWarning};
     use crate::rule_set::RuleSet;
-    use crate::suppression::ReservedCode;
+    use djangofmt_syntax::ReservedCode;
 
     #[test]
     fn any_rule_enabled_reflects_membership() {

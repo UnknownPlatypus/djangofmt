@@ -170,7 +170,8 @@ impl std::fmt::Display for IndentWidth {
 ///     - <https://developer.mozilla.org/en-US/docs/Glossary/Void_element>
 ///     - <https://github.com/whatwg/html/issues/721>
 ///     - <https://github.com/whatwg/html/issues/9491>
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, clap::ValueEnum)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
+#[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 #[serde(rename_all = "lowercase")]
 pub enum SelfClosing {
     #[default]

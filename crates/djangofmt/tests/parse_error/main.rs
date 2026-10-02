@@ -6,14 +6,13 @@
 mod common;
 
 use common::build_settings;
-use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
-use std::path::{Path, PathBuf};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 use std::{fs, path};
 
-use djangofmt::args::Profile;
-use djangofmt::commands::format::build_markup_options;
-use djangofmt::error::ParseError;
-use djangofmt_lint::graphical_handler;
+use djangofmt_formatter::build_markup_options;
+use djangofmt_syntax::ParseError;
+use djangofmt_syntax::Profile;
+use djangofmt_syntax::graphical_handler;
 use insta::{assert_snapshot, glob};
 use markup_fmt::config::FormatOptions;
 use markup_fmt::{Language, format_text};
@@ -41,20 +40,17 @@ fn run_parse_error_test(path: &path::Path, input: &str) -> String {
         false,
     );
     // Use just the filename for display to avoid absolute paths in snapshots
-    let display_path = path.file_name().map(Path::new).map(Path::to_path_buf);
+    let display_path = path.file_name().unwrap_or_default().to_string_lossy();
 
-    match format_str(input, display_path, &options, Profile::Django) {
-        Ok(_) => format!(
-            "Expected parse error for '{}' but formatting succeeded",
-            path.file_name().unwrap_or_default().to_string_lossy()
-        ),
+    match format_str(input, &display_path, &options, Profile::Django) {
+        Ok(_) => format!("Expected parse error for '{display_path}' but formatting succeeded"),
         Err(err) => render_miette_error(&err),
     }
 }
 
 fn format_str(
     input: &str,
-    name: Option<PathBuf>,
+    name: &str,
     format_options: &FormatOptions,
     profile: Profile,
 ) -> Result<String, ParseError> {

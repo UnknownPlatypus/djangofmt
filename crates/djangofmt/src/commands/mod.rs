@@ -42,7 +42,7 @@ pub(crate) fn catch_file_panic<T>(
     path: Option<&Path>,
     f: impl FnOnce() -> std::result::Result<T, Box<CommandError>> + UnwindSafe,
 ) -> std::result::Result<T, Box<CommandError>> {
-    crate::panic::catch_unwind(f).unwrap_or_else(|error| {
+    djangofmt_formatter::panic::catch_unwind(f).unwrap_or_else(|error| {
         Err(Box::new(CommandError::Panic(
             path.map(Path::to_path_buf),
             Box::new(error),

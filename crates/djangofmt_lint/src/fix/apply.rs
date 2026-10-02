@@ -208,13 +208,13 @@ pub fn lint_fix(
             });
         }
 
-        let parsed = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
-            Ok(parsed) => {
+        let input = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
+            Ok(input) => {
                 if iterations == 0 {
                     had_valid_first_parse = true;
-                    quarantined = parsed.quarantined;
+                    quarantined = input.quarantined;
                 }
-                parsed
+                input
             }
             Err(err) if had_valid_first_parse => {
                 return Err(FixerError::SyntaxRegression {
@@ -225,8 +225,8 @@ pub fn lint_fix(
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
-        let diagnostics = parsed.check(settings, path);
-        let result = apply_fixes(parsed.source(), &diagnostics, threshold);
+        let diagnostics = input.check(settings, path);
+        let result = apply_fixes(&current, &diagnostics, threshold);
         total_skipped += result.skipped_count;
         for applied in &result.applied_fixes {
             let entry = applied_by_rule.entry(applied.code).or_default();
@@ -260,7 +260,7 @@ mod tests {
     use super::*;
     use crate::fix::{Edit, Fix};
 
-    use crate::span;
+    use djangofmt_syntax::span;
 
     fn diag_with_fix(fix: Fix) -> LintDiagnostic {
         LintDiagnostic {

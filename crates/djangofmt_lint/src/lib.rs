@@ -38,47 +38,17 @@ pub use registry::{Rule, RuleCategory, RuleGroup};
 pub use rule_selector::{RuleSelector, SelectionWarning, SelectorParseError};
 pub use rule_set::RuleSet;
 pub use settings::{LintConfiguration, Settings};
-pub use suppression::{
-    FORMAT_IGNORE_DIRECTIVES, FileIgnores, IGNORE_DIRECTIVE, LEGACY_IGNORE_DIRECTIVE, ReservedCode,
-};
 pub use violation::{Violation, ViolationMetadata};
 
 use std::borrow::Cow;
 use std::path::Path;
 
-use markup_fmt::ast::Root;
-use markup_fmt::parser::Parser;
+use djangofmt_syntax::{FileIgnores, Parsed, parse};
 use markup_fmt::{Language, SyntaxError};
-use miette::{Diagnostic, GraphicalReportHandler, GraphicalTheme, NamedSource, Report, SourceSpan};
+use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
 use rustc_hash::FxHashMap;
 use std::fmt;
 use std::sync::{Arc, LazyLock};
-
-/// Narrow a `usize` byte offset or length to the `u32` `oxc-miette` stores.
-///
-/// Files larger than 4 GiB are not a supported input, so this saturates.
-#[must_use]
-pub fn clamp_offset(value: usize) -> u32 {
-    u32::try_from(value).unwrap_or(u32::MAX)
-}
-
-/// Wrap help and note text without splitting URLs.
-/// `textwrap` treats `/` and `-` as break opportunities, so a URL is not one word.
-#[must_use]
-pub fn graphical_handler(theme: GraphicalTheme) -> GraphicalReportHandler {
-    GraphicalReportHandler::new_themed(theme)
-        .with_word_separator(textwrap::WordSeparator::AsciiSpace)
-        .with_word_splitter(textwrap::WordSplitter::NoHyphenation)
-        .with_break_words(false)
-}
-
-/// Build a [`SourceSpan`] from `usize` byte offsets.
-///
-/// For a span covering a slice of the source, use [`LintContext::source_span`] instead:
-#[must_use]
-pub fn span(start: usize, len: usize) -> SourceSpan {
-    SourceSpan::new(clamp_offset(start).into(), clamp_offset(len))
-}
 
 /// A single lint diagnostic without source code.
 ///
@@ -172,120 +142,92 @@ impl FileDiagnostics {
     }
 }
 
-/// A parsed template: the AST, the source it borrows, and the profile it was parsed with.
+/// Check `parsed` for lint errors.
 ///
-/// Only [`parse`] builds one, so a check can never run against a source or a profile
-/// the AST was not built from.
-#[derive(Debug)]
-pub struct Parsed<'a> {
-    source: &'a str,
-    language: Language,
-    ast: Root<'a>,
-    /// The AST covers only the leading comment of `source`, see [`parse_or_quarantine`].
+/// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
+/// Expects the whole file to have parsed: a file quarantined by `file-ignore[invalid-syntax]`
+/// goes through [`lint_source`] or [`lint_text`], which parse it themselves.
+///
+/// `path` enables path-aware rules; pass [`None`] when linting a buffer without a
+/// backing file.
+#[must_use]
+pub fn check(parsed: &Parsed<'_>, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
+    check_rules(parsed, false, settings, path)
+}
+
+/// A file as the linter reads it: parsed whole, or quarantined to its leading comment.
+pub(crate) struct LintInput<'a> {
+    parsed: Parsed<'a>,
+    /// Only the leading comment parsed, see [`parse_or_quarantine`].
+    pub(crate) quarantined: bool,
+}
+
+impl LintInput<'_> {
+    pub(crate) fn check(&self, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
+        check_rules(&self.parsed, self.quarantined, settings, path)
+    }
+}
+
+fn check_rules(
+    parsed: &Parsed<'_>,
     quarantined: bool,
-}
+    settings: &Settings,
+    path: Option<&Path>,
+) -> Vec<LintDiagnostic> {
+    // Like ruff skips its AST rules on a file with syntax errors, a quarantined file
+    // only gets the rules on ignore comments: its leading comment is all that parsed.
+    let quarantine_settings = quarantined.then(|| Settings {
+        rules: QUARANTINE_RULES
+            .into_iter()
+            .filter(|&rule| settings.is_enabled(rule))
+            .collect(),
+        ..settings.clone()
+    });
+    let settings = quarantine_settings.as_ref().unwrap_or(settings);
+    let mut checker = Checker::new(
+        parsed.source(),
+        settings,
+        parsed.language(),
+        path,
+        quarantined,
+    );
+    // Walk the ast and collect diagnostics.
+    checker.visit_root(parsed.ast());
 
-impl<'a> Parsed<'a> {
-    /// The AST.
-    #[must_use]
-    pub const fn ast(&self) -> &Root<'a> {
-        &self.ast
-    }
-
-    /// The source the AST borrows.
-    #[must_use]
-    pub const fn source(&self) -> &'a str {
-        self.source
-    }
-
-    /// The profile the source was parsed with.
-    #[must_use]
-    pub const fn language(&self) -> Language {
-        self.language
-    }
-
-    /// Check the AST for lint errors.
-    ///
-    /// Traverses the AST and runs all enabled lint rules, returning any diagnostics found.
-    ///
-    /// `path` enables path-aware rules; pass [`None`] when linting a buffer without a
-    /// backing file.
-    #[must_use]
-    pub fn check(&self, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
-        // Like ruff skips its AST rules on a file with syntax errors, a quarantined file
-        // only gets the rules on ignore comments: its leading comment is all that parsed.
-        let quarantine_settings = self.quarantined.then(|| Settings {
-            rules: QUARANTINE_RULES
-                .into_iter()
-                .filter(|&rule| settings.is_enabled(rule))
-                .collect(),
-            ..settings.clone()
-        });
-        let settings = quarantine_settings.as_ref().unwrap_or(settings);
-        let mut checker =
-            Checker::new(self.source, settings, self.language, path, self.quarantined);
-        // Walk the ast and collect diagnostics.
-        checker.visit_root(&self.ast);
-
-        // Collect ignore comments and drop the ignored diagnostics.
-        let mut ignore_comments = suppression::collect_ignore_comments(&self.ast, &checker);
-        checker.visit_ignore_comments(&ignore_comments);
-        suppression::record_matches(&checker, &mut ignore_comments);
-        checker.visit_unused_ignore_codes(&ignore_comments);
-        suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
-        checker.into_diagnostics()
-    }
-
-    /// Check, then apply the fixes that meet `threshold` in a single pass.
-    #[must_use]
-    pub fn fix(
-        &self,
-        settings: &Settings,
-        threshold: Applicability,
-        path: Option<&Path>,
-    ) -> ApplyResult {
-        apply_fixes(self.source, &self.check(settings, path), threshold)
-    }
-}
-
-/// Parse `source`, treating each of `custom_blocks` as a `{% tag %}...{% endtag %}` block.
-///
-/// The single door to the parser: every consumer (check, fix, playground,
-/// benches, tests) must parse with the same configuration or lint on a
-/// different AST than the one the formatter sees.
-pub fn parse<'a>(
-    source: &'a str,
-    language: Language,
-    custom_blocks: &[String],
-) -> Result<Parsed<'a>, SyntaxError> {
-    Ok(Parsed {
-        source,
-        language,
-        ast: Parser::new(source, language, custom_blocks.to_vec()).parse_root()?,
-        quarantined: false,
-    })
+    // Collect ignore comments and drop the ignored diagnostics.
+    let mut ignore_comments = suppression::collect_ignore_comments(parsed.ast(), &checker);
+    checker.visit_ignore_comments(&ignore_comments);
+    suppression::record_matches(&checker, &mut ignore_comments);
+    checker.visit_unused_ignore_codes(&ignore_comments);
+    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
+    checker.into_diagnostics()
 }
 
 /// [`parse`], falling back to the leading comment alone when that comment quarantines
-/// a file that does not parse: the lint equivalent of ruff still running its `noqa` rules
-/// on a file with syntax errors. The AST then borrows a prefix of `source`, so spans and
-/// fixes stay valid against the whole file.
+/// a file that does not parse.
+///
+/// The lint equivalent of ruff still running its `noqa` rules on a file with syntax errors.
+/// The AST then borrows a prefix of the file, so spans and fixes stay valid against the whole of it.
 pub(crate) fn parse_or_quarantine<'a>(
     source: &'a str,
     language: Language,
     custom_blocks: &[String],
-) -> Result<Parsed<'a>, SyntaxError> {
+) -> Result<LintInput<'a>, SyntaxError> {
     let error = match parse(source, language, custom_blocks) {
-        Ok(parsed) => return Ok(parsed),
+        Ok(parsed) => {
+            return Ok(LintInput {
+                parsed,
+                quarantined: false,
+            });
+        }
         Err(error) => error,
     };
     let Some(head) = FileIgnores::quarantine_head(source) else {
         return Err(error);
     };
-    Ok(Parsed {
-        source,
+    Ok(LintInput {
+        parsed: parse(head, language, custom_blocks)?,
         quarantined: true,
-        ..parse(head, language, custom_blocks)?
     })
 }
 
@@ -338,10 +280,10 @@ pub fn lint_text(
     path: Option<&Path>,
 ) -> Result<Option<LintOutcome>, SyntaxError> {
     let check_only = || {
-        let parsed = parse_or_quarantine(source, language, custom_blocks)?;
+        let input = parse_or_quarantine(source, language, custom_blocks)?;
         Ok(LintOutcome {
-            diagnostics: parsed.check(settings, path),
-            quarantined: parsed.quarantined,
+            diagnostics: input.check(settings, path),
+            quarantined: input.quarantined,
             ..LintOutcome::default()
         })
     };

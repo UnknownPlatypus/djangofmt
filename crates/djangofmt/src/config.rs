@@ -7,8 +7,9 @@
 use std::path::Path;
 
 use djangofmt_lint::LintConfiguration;
+use djangofmt_syntax::Profile;
 
-use crate::args::{CheckCommand, Profile};
+use crate::args::CheckCommand;
 use crate::pyproject::{LintSettings, UnsortedTailwindClassesOptions};
 
 /// Collapse a `--flag` / `--no-flag` pair into an optional bool.
