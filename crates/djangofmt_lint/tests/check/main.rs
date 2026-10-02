@@ -3,9 +3,10 @@ mod common;
 
 use common::build_settings;
 use djangofmt_lint::{
-    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, graphical_handler,
-    lint_source, parse,
+    Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, apply_fixes, check,
+    lint_source,
 };
+use djangofmt_syntax::{graphical_handler, parse};
 
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
@@ -63,7 +64,8 @@ fn fix_snapshot() {
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
 
-        let fix = |threshold| parsed.fix(&settings, threshold, Some(path));
+        let diagnostics = check(&parsed, &settings, Some(path));
+        let fix = |threshold| apply_fixes(&input, &diagnostics, threshold);
 
         let safe = fix(Applicability::Safe);
         if safe.applied_count > 0 {

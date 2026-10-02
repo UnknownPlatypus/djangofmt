@@ -1,10 +1,14 @@
 use std::borrow::Cow;
 
+use djangofmt_syntax::{
+    CommentDelimiters, FILE_IGNORE, HTML_COMMENT, IGNORE, LEGACY_IGNORE_DIRECTIVE, NAMESPACE,
+    ReservedCode, TEMPLATE_COMMENT, strip_bom,
+};
+
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
-use crate::suppression::{FILE_IGNORE, IGNORE, LEGACY_IGNORE_DIRECTIVE, NAMESPACE, ReservedCode};
+use crate::rules::helpers::enclosing_comment;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -138,7 +142,7 @@ fn reason(body: &str) -> &str {
 /// Lint a comment of either style, `body` being its text between `delimiters`.
 pub fn check(checker: &Checker<'_>, delimiters: CommentDelimiters, body: &str) {
     if markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE) {
-        let whole_comment = delimiters.enclosing_comment(checker, body);
+        let whole_comment = enclosing_comment(checker, delimiters, body);
         report(checker, whole_comment, body, delimiters == HTML_COMMENT);
     }
 }

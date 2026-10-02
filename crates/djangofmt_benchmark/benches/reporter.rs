@@ -4,7 +4,8 @@
 use djangofmt_benchmark::{
     DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, TestFile, warmup,
 };
-use djangofmt_lint::{FileDiagnostics, Settings, graphical_handler, lint_source};
+use djangofmt_lint::{FileDiagnostics, Settings, lint_source};
+use djangofmt_syntax::graphical_handler;
 use miette::GraphicalTheme;
 
 fn main() {

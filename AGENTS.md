@@ -21,9 +21,13 @@ uv run --only-dev cargo insta review                 # Accept/reject snapshot mi
 
 ## Architecture
 
-This is a Rust workspace with six crates in `crates/`:
+This is a Rust workspace with eight crates in `crates/`. `djangofmt_syntax` sits at the bottom, `djangofmt_formatter` and `djangofmt_lint` build on it independently, and the CLI, wasm and benchmark crates combine them:
 
-**`djangofmt`** — the main CLI binary. Discovers files via `resolver.rs`, reads config from `pyproject.toml` (`[tool.djangofmt]`) merged with CLI args (`args.rs`), then processes files in parallel using rayon. Formatting is the default command (`djangofmt <paths>`) and reformats in-place; the `check` subcommand reports violations. Error reporting uses `miette`. Exit codes: 0 = success, 1 = formatting/lint errors, 2 = I/O or parse errors.
+**`djangofmt`** — the main CLI binary. Discovers files via `resolver.rs`, reads config from `pyproject.toml` (`[tool.djangofmt]`) merged with CLI args (`args.rs`), then processes files in parallel using rayon. Formatting is the default command (`djangofmt <paths>`) and reformats in-place; the `check` subcommand reports violations. Error reporting uses `miette`. It holds no formatting or lint logic of its own. Exit codes: 0 = success, 1 = formatting/lint errors, 2 = I/O or parse errors.
+
+**`djangofmt_syntax`** — what both tools share about a template: `parse`/`Parsed`, `Profile`, spans, comment delimiters, the `djangofmt: ignore[...]` directive grammar and `FileIgnores`, and `ParseError` rendering. It must not depend on the formatter or the linter.
+
+**`djangofmt_formatter`** — the formatting engine: `format_text` and `FormatterConfig`, driving `markup_fmt` with `malva` and `dprint-plugin-json` for embedded CSS and JSON. Also owns `panic.rs`, the panic isolation it needs around those embedded formatters and which the CLI reuses per file.
 
 **`djangofmt_lint`** — the linting library. `checker.rs` implements a visitor over the `markup_fmt` AST and runs rules from `rules/`. Each rule implements the `Violation` trait. The `Checker` struct collects violations with source offsets.
 

@@ -1,0 +1,30 @@
+[package]
+name = "djangofmt_formatter"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+doctest = false
+
+[dependencies]
+clap = { workspace = true, optional = true }
+djangofmt_syntax = { workspace = true }
+dprint-plugin-json = { workspace = true }
+malva = { workspace = true }
+markup_fmt = { workspace = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+rstest = { workspace = true }
+tracing-test = { workspace = true }
+
+[features]
+clap = ["dep:clap", "djangofmt_syntax/clap"]
+
+[lints]
+workspace = true

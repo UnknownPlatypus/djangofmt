@@ -1,6 +1,7 @@
 use std::iter;
 use std::slice;
 
+use djangofmt_syntax::CommentDelimiters;
 use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
 use smallvec::{SmallVec, smallvec};
 
@@ -80,45 +81,15 @@ pub fn native_attrs<'a, 's>(
     })
 }
 
-/// A UTF-8 BOM is not Rust whitespace, so strip it explicitly.
-#[must_use]
-#[inline]
-pub fn strip_bom(source: &str) -> &str {
-    source.strip_prefix('\u{feff}').unwrap_or(source)
-}
-
-/// The delimiters of one comment style.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CommentDelimiters {
-    pub open: &'static str,
-    pub close: &'static str,
-}
-
-/// A `{# #}` template comment, the only kind that carries a lint suppression.
-pub const TEMPLATE_COMMENT: CommentDelimiters = CommentDelimiters {
-    open: "{#",
-    close: "#}",
-};
-
-/// An `<!-- -->` HTML comment, which is rendered to the client.
-pub const HTML_COMMENT: CommentDelimiters = CommentDelimiters {
-    open: "<!--",
-    close: "-->",
-};
-
-impl CommentDelimiters {
-    /// The body of a comment and the text after it, only if `text` starts with one.
-    #[inline]
-    pub fn split(self, text: &str) -> Option<(&str, &str)> {
-        text.strip_prefix(self.open)?.split_once(self.close)
-    }
-
-    /// The whole comment around `comment_body`, delimiters included.
-    /// An unterminated comment runs to the end of the source.
-    pub fn enclosing_comment<'s>(self, checker: &Checker<'s>, comment_body: &str) -> &'s str {
-        let source = checker.context().source();
-        let start = checker.source_offset(comment_body) - self.open.len();
-        let end = checker.source_end(comment_body) + self.close.len();
-        &source[start..end.min(source.len())]
-    }
+/// The whole comment around `comment_body`, delimiters included.
+/// An unterminated comment runs to the end of the source.
+pub fn enclosing_comment<'s>(
+    checker: &Checker<'s>,
+    delimiters: CommentDelimiters,
+    comment_body: &str,
+) -> &'s str {
+    let source = checker.context().source();
+    let start = checker.source_offset(comment_body) - delimiters.open.len();
+    let end = checker.source_end(comment_body) + delimiters.close.len();
+    &source[start..end.min(source.len())]
 }

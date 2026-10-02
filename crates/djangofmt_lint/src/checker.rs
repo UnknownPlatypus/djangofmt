@@ -14,9 +14,9 @@ use crate::Settings;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
-use crate::rules::helpers::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
+use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 
 /// The rules that must not read what a Jinja `{% raw %}` body contains.
 const RAW_SENSITIVE_RULES: &[Rule] = &[

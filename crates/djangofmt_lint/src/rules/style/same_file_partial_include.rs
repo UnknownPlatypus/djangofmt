@@ -7,7 +7,9 @@ use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
-use crate::{Checker, span};
+use djangofmt_syntax::span;
+
+use crate::Checker;
 
 /// ## What it does
 /// Checks for `{% include %}` tags that render a partial defined in the same template file.

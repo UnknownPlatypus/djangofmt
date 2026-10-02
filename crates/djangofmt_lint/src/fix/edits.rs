@@ -1,9 +1,8 @@
+use djangofmt_syntax::{span, strip_bom};
 use miette::SourceSpan;
 
 use crate::fix::{Edit, Fix};
 use crate::lint_context::LintContext;
-use crate::rules::helpers::strip_bom;
-use crate::span;
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 

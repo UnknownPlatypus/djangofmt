@@ -35,10 +35,12 @@ harness = false
 name = "summary"
 
 [dependencies]
-djangofmt = { path = "../djangofmt" }
+djangofmt_syntax = { workspace = true }
 
 [dev-dependencies]
 divan = { workspace = true }
+djangofmt = { path = "../djangofmt" }
+djangofmt_formatter = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
 miette = { workspace = true }
 

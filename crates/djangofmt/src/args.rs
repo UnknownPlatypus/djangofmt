@@ -1,12 +1,12 @@
-use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::logging::LogLevel;
 use clap::builder::Styles;
 use clap::builder::styling::{AnsiColor, Effects};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 use serde::Deserialize;
 use std::path::PathBuf;
 
 use djangofmt_lint::{DjangoVersion, RuleSelector};
-use markup_fmt::Language;
+use djangofmt_syntax::Profile;
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands
@@ -127,40 +127,6 @@ pub struct FormatCommand {
     pub no_preserve_unquoted_attrs: bool,
     #[clap(flatten)]
     pub file_selection: FileSelectionArgs,
-}
-
-#[derive(Copy, Clone, Debug, clap::ValueEnum, Deserialize, Default, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
-pub enum Profile {
-    #[default]
-    Django,
-    Jinja,
-}
-
-impl Profile {
-    /// Infer the profile from a file's extension.
-    ///
-    /// - `.html` → `Django`
-    /// - `.jinja`, `.jinja2`, `.j2` → `Jinja`
-    ///
-    /// Returns `None` for unrecognised extensions.
-    #[must_use]
-    pub fn from_path(path: &std::path::Path) -> Option<Self> {
-        match path.extension()?.to_str()? {
-            "html" => Some(Self::Django),
-            "jinja" | "jinja2" | "j2" => Some(Self::Jinja),
-            _ => None,
-        }
-    }
-}
-
-impl From<Profile> for Language {
-    fn from(profile: Profile) -> Self {
-        match profile {
-            Profile::Django => Self::Django,
-            Profile::Jinja => Self::Jinja,
-        }
-    }
 }
 
 #[derive(Debug, clap::Subcommand)]

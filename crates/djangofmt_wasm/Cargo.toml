@@ -17,8 +17,9 @@ crate-type = ["cdylib", "rlib"]
 doctest = false
 
 [dependencies]
-djangofmt = { path = "../djangofmt" }
+djangofmt_formatter = { workspace = true }
 djangofmt_lint = { path = "../djangofmt_lint" }
+djangofmt_syntax = { workspace = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
 serde = { workspace = true }

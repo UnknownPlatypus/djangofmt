@@ -1,4 +1,4 @@
-use djangofmt::args::Profile;
+use djangofmt_syntax::Profile;
 use std::fmt;
 
 // Benchmark the allocator the CLI ships with, minus its deferred work: page purging, and the

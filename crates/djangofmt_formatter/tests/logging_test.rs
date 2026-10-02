@@ -1,6 +1,6 @@
-use djangofmt::args::Profile;
-use djangofmt::commands::format::{FormatterConfig, format_text};
-use djangofmt::line_width::{IndentWidth, LineLength, SelfClosing};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
+use djangofmt_formatter::{FormatterConfig, format_text};
+use djangofmt_syntax::Profile;
 use tracing_test::traced_test;
 
 #[test]

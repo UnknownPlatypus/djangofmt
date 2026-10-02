@@ -4,7 +4,10 @@ use crate::Checker;
 use crate::fix::edits::{delete_codes_or_comment, delete_comment};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::suppression::{IgnoreComment, IgnoreDirective, ParseErrorKind, ReservedCode};
+use djangofmt_syntax::{IgnoreDirective, ReservedCode};
+use markup_fmt::ParseErrorKind;
+
+use crate::suppression::IgnoreComment;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 #[derive(Debug, PartialEq, Eq)]

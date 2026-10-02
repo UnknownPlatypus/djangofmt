@@ -2,7 +2,7 @@ use editorconfig_parser::{EditorConfig, EditorConfigProperty, MaxLineLength};
 use std::{fs, path::Path};
 use tracing::{debug, warn};
 
-use crate::line_width::{IndentWidth, LineLength};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength};
 
 /// Indent/line settings resolved from an `.editorconfig` for a specific file.
 #[derive(Debug, Default, PartialEq, Eq)]

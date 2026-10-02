@@ -2,9 +2,9 @@
 mod common;
 
 use common::build_settings;
-use djangofmt::args::Profile;
-use djangofmt::commands::format::{FormatterConfig, format_text};
 use djangofmt::pyproject::PyprojectSettings;
+use djangofmt_formatter::{FormatterConfig, format_text};
+use djangofmt_syntax::Profile;
 use insta::{assert_snapshot, glob};
 use std::{collections::BTreeMap, fs, path::Path};
 

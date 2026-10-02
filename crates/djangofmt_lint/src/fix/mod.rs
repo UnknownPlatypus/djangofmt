@@ -15,7 +15,7 @@ use std::cmp::Ordering;
 
 use miette::SourceSpan;
 
-use crate::span;
+use djangofmt_syntax::span;
 
 /// Forward-looking declaration of fix availability for a rule.
 ///
@@ -286,7 +286,7 @@ impl Fix {
 mod tests {
     use super::*;
 
-    use crate::span;
+    use djangofmt_syntax::span;
 
     #[test]
     fn edit_replacement() {

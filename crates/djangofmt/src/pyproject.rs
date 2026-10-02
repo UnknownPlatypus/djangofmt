@@ -1,6 +1,7 @@
 use djangofmt_lint::settings::unsorted_tailwind_classes;
 use djangofmt_lint::{DjangoVersion, RuleSelector};
 use djangofmt_macros::OptionsMetadata;
+use djangofmt_syntax::Profile;
 use serde::Deserialize;
 use std::{
     collections::BTreeMap,
@@ -9,10 +10,10 @@ use std::{
 };
 use tracing::debug;
 
-use crate::args::{OutputFormat, Profile};
+use crate::args::OutputFormat;
 use crate::django_requirement::infer_target_version;
 use crate::error::{Error, Result};
-use crate::line_width::{IndentWidth, LineLength, SelfClosing};
+use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 
 /// Options shared by the formatter (`djangofmt`) and the linter (`djangofmt check`).
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, OptionsMetadata)]

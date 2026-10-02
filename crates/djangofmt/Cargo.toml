@@ -22,13 +22,13 @@ doctest = false
 [dependencies]
 clap = { workspace = true }
 clap_complete_command = { workspace = true }
+djangofmt_formatter = { workspace = true, features = ["clap"] }
 djangofmt_lint = { path = "../djangofmt_lint" }
 djangofmt_macros = { workspace = true }
-dprint-plugin-json = { workspace = true }
+djangofmt_syntax = { workspace = true, features = ["clap"] }
 editorconfig-parser = { workspace = true }
 globset = { workspace = true }
 ignore = { workspace = true }
-malva = { workspace = true }
 markup_fmt = { workspace = true }
 # Error reporting
 miette = { workspace = true }
