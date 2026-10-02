@@ -1,0 +1,21 @@
+<!-- Multi-line block -->
+{% block content %}
+    <h1>{{ title }}</h1>
+{% endblock %}
+
+<!-- Multi-line partialdef -->
+{% partialdef card %}
+    <div class="card">{{ content }}</div>
+{% endpartialdef %}
+
+<!-- Multi-line inline partialdef -->
+{% partialdef button inline %}
+    <button>Submit</button>
+{% endpartialdef %}
+
+<!-- Only the inner block is unlabelled -->
+{% block sidebar %}
+    {% block menu %}
+        <nav>{{ menu }}</nav>
+    {% endblock %}
+{% endblock sidebar %}

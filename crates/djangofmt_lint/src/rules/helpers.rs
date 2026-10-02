@@ -1,8 +1,9 @@
 use std::iter;
 use std::slice;
+use std::str::SplitAsciiWhitespace;
 
 use djangofmt_syntax::CommentDelimiters;
-use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
+use markup_fmt::ast::{Attribute, JinjaBlock, JinjaTagOrChildren, NativeAttribute};
 use smallvec::{SmallVec, smallvec};
 
 use crate::Checker;
@@ -13,6 +14,87 @@ use crate::Checker;
 #[inline]
 pub fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%") || value.contains("{#")
+}
+
+/// The whitespace-separated tokens of a tag's content: `{% block NAME %}` yields `block`, `NAME`.
+/// Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the rest.
+pub fn tag_tokens(content: &str) -> SplitAsciiWhitespace<'_> {
+    content
+        .trim_start_matches(['+', '-'])
+        .split_ascii_whitespace()
+}
+
+/// A block whose closing tag Django lets repeat the block's name.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BlockKind {
+    /// `{% block NAME %}`
+    Block,
+    /// `{% partialdef NAME %}`
+    Partialdef,
+}
+
+impl BlockKind {
+    /// The closing tag's name.
+    #[must_use]
+    pub const fn end_tag(self) -> &'static str {
+        match self {
+            Self::Block => "endblock",
+            Self::Partialdef => "endpartialdef",
+        }
+    }
+}
+
+/// The closing tag of a `{% block NAME %}` or `{% partialdef NAME %}`, in a form Django accepts.
+pub struct BlockEnd<'s> {
+    pub kind: BlockKind,
+    /// The block's name, from the opening tag.
+    pub name: &'s str,
+    /// `endblock` or `endpartialdef`, in the closing tag.
+    pub tag_name: &'s str,
+    /// The closing tag's label, which repeats `name`.
+    pub label: Option<&'s str>,
+    /// Whether the closing tag sits on the opening tag's line.
+    pub same_line: bool,
+}
+
+/// The [`BlockEnd`] of `block`, or [`None`] for any other block and for the tags Django rejects:
+/// another arity, or a label naming another block.
+pub fn block_end<'s, T>(checker: &Checker<'s>, block: &JinjaBlock<'s, T>) -> Option<BlockEnd<'s>> {
+    let (Some(JinjaTagOrChildren::Tag(opener)), Some(JinjaTagOrChildren::Tag(closer))) =
+        (block.body.first(), block.body.last())
+    else {
+        return None;
+    };
+
+    let mut tokens = tag_tokens(opener.content);
+    let kind = match tokens.next()? {
+        "block" => BlockKind::Block,
+        "partialdef" => BlockKind::Partialdef,
+        _ => return None,
+    };
+    let name = match (tokens.next()?, tokens.next(), tokens.next()) {
+        (name, None, _) => name,
+        (name, Some("inline"), None) if kind == BlockKind::Partialdef => name,
+        _ => return None,
+    };
+
+    let mut tokens = tag_tokens(closer.content);
+    let tag_name = tokens.next().filter(|&token| token == kind.end_tag())?;
+    let label = match (tokens.next(), tokens.next()) {
+        (None, _) => None,
+        (Some(label), None) if label == name => Some(label),
+        _ => return None,
+    };
+
+    let between = &checker.context().source()
+        [checker.source_end(opener.content)..checker.source_offset(closer.content)];
+    Some(BlockEnd {
+        kind,
+        name,
+        tag_name,
+        label,
+        same_line: !between.contains('\n'),
+    })
 }
 
 /// A [django-cotton](https://django-cotton.com) component (`<c-button>`), whose attributes and
