@@ -1,0 +1,8 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{% load i18n %}
+{% block title %}Home{% endblock %}
+{% block content %}
+    <main></main>
+{% endblock %}
