@@ -84,10 +84,6 @@ DEFAULT_TARGETS = [
                     "django/views/templates/technical_500.html",
                     "tests/forms_tests/templates/forms_tests/use_fieldset.html",
                 ),
-                ExcludeReason.MISSING_END_TAG: (
-                    # Trailing <li> where </li> was intended
-                    "django/contrib/admindocs/templates/admin_doc/model_index.html",
-                ),
                 ExcludeReason.INTENTIONALLY_INVALID: (
                     "tests/template_backends/templates/template_backends/syntax_error.html",
                     "tests/test_client_regress/bad_templates/404.html",
@@ -662,15 +658,14 @@ DEFAULT_TARGETS = [
         cli_options=CliOptions(
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    # <a> opened and closed in separate {% if %} blocks
+                    "fairdm/contrib/contributors/templates/cotton/contributor/avatar.html",
+                    "fairdm/contrib/contributors/templates/cotton/contributor/stack.html",
                     # <optgroup> opened and closed in separate {% if %} blocks
                     "fairdm/utils/templates/forms/widgets/quantity_field.html",
                 ),
                 ExcludeReason.DYNAMIC_TAG_NAME: (
                     "fairdm/utils/templates/forms/checkbox.html",
-                ),
-                ExcludeReason.INVALID_SOURCE_HTML: (
-                    # <h2> closed by </h4>
-                    "fairdm/contrib/contributors/templates/contributors/contributor_card.html",
                 ),
             },
         ),
