@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 
+use djangofmt_syntax::dtl::bits;
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
 use markup_fmt::parser::parse_jinja_tag_name;
 
@@ -67,11 +68,8 @@ pub fn check(checker: &Checker<'_>, block: &JinjaBlock<'_, Node<'_>>) {
         return;
     }
 
-    if open_tag
-        .content
-        .split_ascii_whitespace()
-        .any(|w| w == "trimmed")
-    {
+    // Lex only when the word appears, since inside a quoted value it is not the option.
+    if open_tag.content.contains("trimmed") && bits(open_tag.content).contains(&"trimmed") {
         return;
     }
 
