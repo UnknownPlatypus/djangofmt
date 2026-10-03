@@ -1,0 +1,28 @@
+<!-- A standalone tag -->
+<h1>{% trans "Welcome" %}</h1>
+
+<!-- `as` stores the translation in a variable and stays -->
+{% trans "Welcome" as title %}
+
+<!-- A pair is renamed as one, keeping its options and its `plural` -->
+{% blocktrans with name=user.name count counter=items|length trimmed %}
+    {{ name }} has one item.
+{% plural %}
+    {{ name }} has {{ counter }} items.
+{% endblocktrans %}
+
+<!-- A pair in attribute position -->
+<input {% blocktrans %}placeholder="Search"{% endblocktrans %}>
+
+<!-- Django reads the tags in attribute values, raw-text bodies and HTML comments -->
+<input placeholder="{% trans 'Search' %}">
+<script>
+    const greeting = "{% blocktrans %}Hello {{ name }}{% endblocktrans %}";
+</script>
+<!-- {% trans "Draft" %} -->
+
+<!-- A pair split across two texts -->
+<!-- {% blocktrans %} -->Hello<!-- {% endblocktrans %} -->
+
+<!-- The tag names a load imports from `i18n` -->
+{% load blocktrans trans from i18n %}

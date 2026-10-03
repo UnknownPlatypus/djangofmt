@@ -31,11 +31,12 @@ const TAG_RULES: &[Rule] = &[
     Rule::DuplicateBlockName,
     Rule::SameFilePartialInclude,
     Rule::DeprecatedStaticLibrary,
+    Rule::LegacyTranslationTag,
 ];
 
 /// Where a tag reaching [`Checker::visit_jinja_tag`] comes from.
 #[derive(Clone, Copy, PartialEq, Eq)]
-enum TagOrigin {
+pub enum TagOrigin {
     Ast,
     /// Text the parser keeps verbatim but Django still compiles: an HTML comment, a raw-text body
     /// or an attribute value.
@@ -243,6 +244,11 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_jinja_tag(&mut self, tag: &JinjaTag<'a>, origin: TagOrigin) {
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::LegacyTranslationTag)
+        {
+            rules::upgrade::legacy_translation_tag::check_tag(self, tag, origin, version);
+        }
         // `visit_jinja_block` records the blocks of the AST; a tag in text has no block around it.
         if origin == TagOrigin::Text && self.is_rule_enabled(Rule::DuplicateBlockName) {
             self.record_text_block_name(tag.content);
@@ -379,6 +385,11 @@ impl<'a> Checker<'a> {
     }
 
     fn visit_jinja_block(&mut self, block: &JinjaBlock<'a, Node<'a>>) {
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::LegacyTranslationTag)
+        {
+            rules::upgrade::legacy_translation_tag::check_block(self, block, version);
+        }
         if !self.in_raw {
             if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
                 rules::correctness::untrimmed_blocktranslate::check(self, block);
@@ -475,6 +486,11 @@ impl<'a> Checker<'a> {
         block: &JinjaBlock<'a, Attribute<'a>>,
         element: &Element<'a>,
     ) {
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::LegacyTranslationTag)
+        {
+            rules::upgrade::legacy_translation_tag::check_block(self, block, version);
+        }
         if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
             self.record_block_name(block);
         }

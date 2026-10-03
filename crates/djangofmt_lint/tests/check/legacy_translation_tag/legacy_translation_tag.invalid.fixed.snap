@@ -1,0 +1,31 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- A standalone tag -->
+<h1>{% translate "Welcome" %}</h1>
+
+<!-- `as` stores the translation in a variable and stays -->
+{% translate "Welcome" as title %}
+
+<!-- A pair is renamed as one, keeping its options and its `plural` -->
+{% blocktranslate with name=user.name count counter=items|length trimmed %}
+    {{ name }} has one item.
+{% plural %}
+    {{ name }} has {{ counter }} items.
+{% endblocktranslate %}
+
+<!-- A pair in attribute position -->
+<input {% blocktranslate %}placeholder="Search"{% endblocktranslate %}>
+
+<!-- Django reads the tags in attribute values, raw-text bodies and HTML comments -->
+<input placeholder="{% translate 'Search' %}">
+<script>
+    const greeting = "{% blocktranslate %}Hello {{ name }}{% endblocktranslate %}";
+</script>
+<!-- {% translate "Draft" %} -->
+
+<!-- A pair split across two texts -->
+<!-- {% blocktranslate %} -->Hello<!-- {% endblocktranslate %} -->
+
+<!-- The tag names a load imports from `i18n` -->
+{% load blocktranslate translate from i18n %}

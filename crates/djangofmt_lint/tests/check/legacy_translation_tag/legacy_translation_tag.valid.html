@@ -1,0 +1,14 @@
+<!-- The current names -->
+{% translate "Welcome" %}
+{% blocktranslate trimmed %}Hello {{ name }}{% endblocktranslate %}
+
+<!-- Loads that import no legacy name from `i18n` -->
+{% load i18n %}
+{% load trans from mylib %}
+{% load i18n trans %}
+
+<!-- A quote glued to the name makes one bit, which Django rejects -->
+{% trans"Welcome" %}
+
+<!-- Django never compiles a verbatim body -->
+<script>{% verbatim %}{% trans "Welcome" %}{% endverbatim %}</script>

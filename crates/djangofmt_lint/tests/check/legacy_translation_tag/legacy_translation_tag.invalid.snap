@@ -1,0 +1,101 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Legacy `{% trans %}` tag name
+   ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:2:8]
+ 1 │ <!-- A standalone tag -->
+ 2 │ <h1>{% trans "Welcome" %}</h1>
+   ·        ──┬──
+   ·          ╰── here
+ 3 │ 
+   ╰────
+  help: Use `{% translate %}`
+
+  × Legacy `{% trans %}` tag name
+   ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:5:4]
+ 4 │ <!-- `as` stores the translation in a variable and stays -->
+ 5 │ {% trans "Welcome" as title %}
+   ·    ──┬──
+   ·      ╰── here
+ 6 │ 
+   ╰────
+  help: Use `{% translate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+   ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:8:4]
+ 7 │ <!-- A pair is renamed as one, keeping its options and its `plural` -->
+ 8 │ {% blocktrans with name=user.name count counter=items|length trimmed %}
+   ·    ─────┬────
+   ·         ╰── here
+ 9 │     {{ name }} has one item.
+   ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:15:11]
+ 14 │ <!-- A pair in attribute position -->
+ 15 │ <input {% blocktrans %}placeholder="Search"{% endblocktrans %}>
+    ·           ─────┬────
+    ·                ╰── here
+ 16 │ 
+    ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% trans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:18:24]
+ 17 │ <!-- Django reads the tags in attribute values, raw-text bodies and HTML comments -->
+ 18 │ <input placeholder="{% trans 'Search' %}">
+    ·                        ──┬──
+    ·                          ╰── here
+ 19 │ <script>
+    ╰────
+  help: Use `{% translate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:20:26]
+ 19 │ <script>
+ 20 │     const greeting = "{% blocktrans %}Hello {{ name }}{% endblocktrans %}";
+    ·                          ─────┬────
+    ·                               ╰── here
+ 21 │ </script>
+    ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% trans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:22:9]
+ 21 │ </script>
+ 22 │ <!-- {% trans "Draft" %} -->
+    ·         ──┬──
+    ·           ╰── here
+ 23 │ 
+    ╰────
+  help: Use `{% translate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:25:9]
+ 24 │ <!-- A pair split across two texts -->
+ 25 │ <!-- {% blocktrans %} -->Hello<!-- {% endblocktrans %} -->
+    ·         ─────┬────
+    ·              ╰── here
+ 26 │ 
+    ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:28:9]
+ 27 │ <!-- The tag names a load imports from `i18n` -->
+ 28 │ {% load blocktrans trans from i18n %}
+    ·         ─────┬────
+    ·              ╰── here
+    ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% trans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:28:20]
+ 27 │ <!-- The tag names a load imports from `i18n` -->
+ 28 │ {% load blocktrans trans from i18n %}
+    ·                    ──┬──
+    ·                      ╰── here
+    ╰────
+  help: Use `{% translate %}`
