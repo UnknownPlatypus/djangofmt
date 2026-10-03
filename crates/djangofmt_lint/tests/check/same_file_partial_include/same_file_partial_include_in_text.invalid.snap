@@ -1,0 +1,22 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Same-file partial `script-data` rendered via `{% include %}`
+   ╭─[tests/check/same_file_partial_include/same_file_partial_include_in_text.invalid.html:4:1]
+ 3 │ <input placeholder="{% partialdef hint %}Search{% endpartialdef %}">
+ 4 │ {% include "same_file_partial_include_in_text.invalid.html#script-data" %}
+   · ─────────────────────────────────────┬────────────────────────────────────
+   ·                                      ╰── here
+ 5 │ {% include "same_file_partial_include_in_text.invalid.html#hint" %}
+   ╰────
+  help: Use `{% partial script-data %}` instead
+
+  × Same-file partial `hint` rendered via `{% include %}`
+   ╭─[tests/check/same_file_partial_include/same_file_partial_include_in_text.invalid.html:5:1]
+ 4 │ {% include "same_file_partial_include_in_text.invalid.html#script-data" %}
+ 5 │ {% include "same_file_partial_include_in_text.invalid.html#hint" %}
+   · ─────────────────────────────────┬─────────────────────────────────
+   ·                                  ╰── here
+   ╰────
+  help: Use `{% partial hint %}` instead

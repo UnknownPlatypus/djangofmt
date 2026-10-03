@@ -1,0 +1,22 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library_in_text.invalid.html:2:14]
+ 1 │ <!-- Django reads the tags in an HTML comment or an attribute value like any other -->
+ 2 │ <!-- {% load staticfiles %} -->
+   ·              ─────┬─────
+   ·                   ╰── here
+ 3 │ <div title="{% load staticfiles %}"></div>
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library_in_text.invalid.html:3:21]
+ 2 │ <!-- {% load staticfiles %} -->
+ 3 │ <div title="{% load staticfiles %}"></div>
+   ·                     ─────┬─────
+   ·                          ╰── here
+   ╰────
+  help: Load `static` instead

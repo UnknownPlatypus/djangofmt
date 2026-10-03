@@ -1,0 +1,5 @@
+<!-- Django reads a partialdef in a raw-text body or an attribute value like any other -->
+<script>{% partialdef script-data %}{}{% endpartialdef %}</script>
+<input placeholder="{% partialdef hint %}Search{% endpartialdef %}">
+{% include "same_file_partial_include_in_text.invalid.html#script-data" %}
+{% include "same_file_partial_include_in_text.invalid.html#hint" %}

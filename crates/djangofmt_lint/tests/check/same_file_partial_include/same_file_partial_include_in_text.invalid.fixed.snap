@@ -1,0 +1,8 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Django reads a partialdef in a raw-text body or an attribute value like any other -->
+<script>{% partialdef script-data %}{}{% endpartialdef %}</script>
+<input placeholder="{% partialdef hint %}Search{% endpartialdef %}">
+{% partial script-data %}
+{% partial hint %}

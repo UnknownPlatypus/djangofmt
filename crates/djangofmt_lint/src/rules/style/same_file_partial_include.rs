@@ -6,7 +6,7 @@ use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::contains_interpolation;
+use crate::rules::helpers::{contains_interpolation, tags_in_text};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
@@ -141,15 +141,12 @@ fn parse_partial_include<'s>(tag: &JinjaTag<'s>) -> Option<(&'s str, &'s str)> {
 
 /// Whether the source contains a `{% partialdef <name> %}` opening tag.
 fn defines_partial(source: &str, name: &str) -> bool {
-    // Each `{%`-delimited chunk that opens with `partialdef <name>` as whole tokens. Splitting on
-    // `{%` rejects `endpartialdef` for free (its chunk starts with `end`).
-    source.split("{%").skip(1).any(|tag| {
-        tag.trim_start_matches(['-', '+'])
-            .trim_start()
-            .strip_prefix("partialdef")
-            .filter(|rest| rest.starts_with(char::is_whitespace))
-            .map(str::trim_start)
-            .and_then(|rest| rest.strip_prefix(name))
-            .is_some_and(|rest| rest.starts_with(|c: char| c.is_whitespace() || c == '%'))
+    // The whole source, so a partial defined in text the parser keeps verbatim counts too.
+    tags_in_text(source).any(|tag| {
+        let mut words = tag
+            .content
+            .trim_start_matches(['-', '+'])
+            .split_whitespace();
+        words.next() == Some("partialdef") && words.next() == Some(name)
     })
 }

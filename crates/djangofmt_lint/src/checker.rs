@@ -26,6 +26,22 @@ const RAW_SENSITIVE_RULES: &[Rule] = &[
     Rule::UntrimmedBlocktranslate,
 ];
 
+/// Every rule `visit_jinja_tag` runs: text is only scanned for tags when one is enabled.
+const TAG_RULES: &[Rule] = &[
+    Rule::DuplicateBlockName,
+    Rule::SameFilePartialInclude,
+    Rule::DeprecatedStaticLibrary,
+];
+
+/// Where a tag reaching [`Checker::visit_jinja_tag`] comes from.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum TagOrigin {
+    Ast,
+    /// Text the parser keeps verbatim but Django still compiles: an HTML comment, a raw-text body
+    /// or an attribute value.
+    Text,
+}
+
 /// AST visitor that collects lint diagnostics.
 pub struct Checker<'a> {
     context: LintContext<'a>,
@@ -34,6 +50,11 @@ pub struct Checker<'a> {
     block_names: SmallVec<[&'a str; 8]>,
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
+    /// Whether a rule reads the tags in text, which is only scanned for them then.
+    reads_text_tags: bool,
+    /// Where the last search for a `{%` started, and the `{%` it found (`usize::MAX` for none).
+    tag_search_from: usize,
+    next_tag_open: usize,
 }
 
 impl<'a> Checker<'a> {
@@ -49,6 +70,9 @@ impl<'a> Checker<'a> {
             context: LintContext::new(source, settings, language, path, quarantined),
             block_names: SmallVec::new_const(),
             in_raw: false,
+            reads_text_tags: settings.rules.contains_any(TAG_RULES),
+            tag_search_from: usize::MAX,
+            next_tag_open: usize::MAX,
         }
     }
 
@@ -186,10 +210,12 @@ impl<'a> Checker<'a> {
         match &node.kind {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
-            NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
+            NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag, TagOrigin::Ast),
             NodeKind::Comment(comment) => {
                 self.visit_comment(HTML_COMMENT, comment.raw);
-                self.record_text_block_names(comment.raw);
+                if self.reads_text_tags {
+                    self.visit_text_tags(comment.raw);
+                }
             }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
             NodeKind::JinjaInterpolation(interpolation) => {
@@ -216,7 +242,11 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
+    fn visit_jinja_tag(&mut self, tag: &JinjaTag<'a>, origin: TagOrigin) {
+        // `visit_jinja_block` records the blocks of the AST; a tag in text has no block around it.
+        if origin == TagOrigin::Text && self.is_rule_enabled(Rule::DuplicateBlockName) {
+            self.record_text_block_name(tag.content);
+        }
         // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
         if let Some(path) = self.context.path()
             && !self.in_raw
@@ -274,14 +304,14 @@ impl<'a> Checker<'a> {
         }
 
         // The parser keeps these bodies as raw text, but Django still reads the tags in them.
-        if self.is_rule_enabled(Rule::DuplicateBlockName)
+        if self.reads_text_tags
             && ["script", "style", "pre", "textarea"]
                 .iter()
                 .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
         {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {
-                    self.record_text_block_names(text.raw);
+                    self.visit_text_tags(text.raw);
                 }
             }
         }
@@ -289,9 +319,16 @@ impl<'a> Checker<'a> {
 
     fn visit_attribute(&mut self, attr: &Attribute<'a>, element: &Element<'a>) {
         match attr {
-            Attribute::Native(native) => self.visit_native_attribute(native, element),
+            Attribute::Native(native) => {
+                self.visit_native_attribute(native, element);
+                if self.reads_text_tags
+                    && let Some((value, _)) = native.value
+                {
+                    self.visit_text_tags(value);
+                }
+            }
             Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
-            Attribute::JinjaTag(tag) => self.visit_jinja_tag(tag),
+            Attribute::JinjaTag(tag) => self.visit_jinja_tag(tag, TagOrigin::Ast),
             _ => {}
         }
     }
@@ -355,7 +392,7 @@ impl<'a> Checker<'a> {
         self.in_raw |= self.opens_raw(block);
         for item in &block.body {
             match item {
-                JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag),
+                JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag, TagOrigin::Ast),
                 JinjaTagOrChildren::Children(children) => {
                     for child in children {
                         self.visit_node(child);
@@ -384,10 +421,52 @@ impl<'a> Checker<'a> {
         }
     }
 
-    fn record_text_block_names(&mut self, raw: &'a str) {
-        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.block_names
-                .extend(rules::correctness::duplicate_block_name::block_names_in_text(raw));
+    #[cold]
+    fn record_text_block_name(&mut self, content: &'a str) {
+        if let Some(name) =
+            rules::correctness::duplicate_block_name::block_name_from_content(content)
+        {
+            self.block_names.push(name);
+        }
+    }
+
+    /// Run the tag rules on the `{% %}` in `text`. Callers check `reads_text_tags` first, so that
+    /// a run without such rules walks the same code as before.
+    // Out of line, with the common case making no call: inlined or not, a heavier body would tax
+    // every attribute.
+    #[inline(never)]
+    fn visit_text_tags(&mut self, text: &'a str) {
+        let start = self.source_offset(text);
+        // The visitor walks the source in order, so one search answers for every text before the
+        // `{%` it finds.
+        if start < self.tag_search_from || self.next_tag_open < start {
+            self.search_tag_open(text, start);
+        } else if self.next_tag_open < start + text.len() {
+            self.scan_text_tags(text, start);
+        }
+    }
+
+    #[inline(never)]
+    fn search_tag_open(&mut self, text: &'a str, start: usize) {
+        self.tag_search_from = start;
+        self.next_tag_open = rules::helpers::find_tag_open(&self.context.source()[start..])
+            .map_or(usize::MAX, |found| start + found);
+        if self.next_tag_open < start + text.len() {
+            self.scan_text_tags(text, start);
+        }
+    }
+
+    #[inline(never)]
+    fn scan_text_tags(&mut self, text: &'a str, start: usize) {
+        if self.in_raw {
+            return;
+        }
+        for tag in rules::helpers::tags_in_text(text) {
+            let tag = JinjaTag {
+                start: start + tag.start,
+                ..tag
+            };
+            self.visit_jinja_tag(&tag, TagOrigin::Text);
         }
     }
 
@@ -404,7 +483,7 @@ impl<'a> Checker<'a> {
         self.in_raw |= self.opens_raw(block);
         for item in &block.body {
             match item {
-                JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag),
+                JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag, TagOrigin::Ast),
                 JinjaTagOrChildren::Children(children) => {
                     for child in children {
                         self.visit_attribute(child, element);

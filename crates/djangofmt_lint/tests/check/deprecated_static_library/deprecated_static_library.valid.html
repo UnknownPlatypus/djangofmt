@@ -21,3 +21,7 @@
 
 <!-- Not a `{% load %}` tag -->
 {% static 'admin_static' %}
+
+<!-- Django never compiles a verbatim body, around an HTML comment or inside a script -->
+{% verbatim %}<!-- {% load staticfiles %} -->{% endverbatim %}
+<script>{% verbatim %}{% load staticfiles %}{% endverbatim %}</script>

@@ -1,0 +1,6 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Django reads the tags in an HTML comment or an attribute value like any other -->
+<!-- {% load static %} -->
+<div title="{% load static %}"></div>

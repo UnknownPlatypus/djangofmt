@@ -1,8 +1,12 @@
 use std::iter;
 use std::slice;
+use std::sync::LazyLock;
 
 use djangofmt_syntax::CommentDelimiters;
-use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
+use djangofmt_syntax::dtl::{first_bit_is, is_space};
+use markup_fmt::ast::{Attribute, JinjaTag, JinjaTagOrChildren, NativeAttribute};
+use memchr::memmem::Finder;
+use memchr::{memchr, memchr_iter, memrchr};
 use smallvec::{SmallVec, smallvec};
 
 use crate::Checker;
@@ -92,4 +96,161 @@ pub fn enclosing_comment<'s>(
     let start = checker.source_offset(comment_body) - delimiters.open.len();
     let end = checker.source_end(comment_body) + delimiters.close.len();
     &source[start..end.min(source.len())]
+}
+
+/// Built once: most texts are short, and a per-call searcher costs more than the scan.
+static TAG_OPEN: LazyLock<Finder<'static>> = LazyLock::new(|| Finder::new(b"{%"));
+
+/// The offset of the first `{%` in `text`.
+pub fn find_tag_open(text: &str) -> Option<usize> {
+    let bytes = text.as_bytes();
+    // Unlike `TAG_OPEN`, no searcher to set up, which the checker's many short searches feel.
+    // `%` is rare outside tags, where `{` opens every `{{ }}` too.
+    memchr_iter(b'%', bytes)
+        .find(|&i| i > 0 && bytes[i - 1] == b'{')
+        .map(|i| i - 1)
+}
+
+/// The `{% %}` tags Django reads in `text`, a run of the template the parser keeps verbatim, such
+/// as an HTML comment, a `<script>` body or an attribute value. Each `start` is relative to `text`.
+///
+/// Mirrors Django's `tag_re`: a tag runs from `{%` to the first `%}` on the same line, and a `{%`
+/// inside a `{{ }}` or `{# #}` is not one. The tags inside a `{% verbatim %}` or `{% comment %}`
+/// body are dropped, their opener and closer kept; an unclosed one runs to the end of `text`.
+pub fn tags_in_text(text: &str) -> impl Iterator<Item = JinjaTag<'_>> {
+    let mut bodies = Bodies::default();
+    lex_tags(text).filter(move |tag| bodies.compiles(tag.content))
+}
+
+/// Where a run of tags stands in Django's handling of `{% verbatim %}` and `{% comment %}` bodies.
+#[derive(Default)]
+struct Bodies<'a> {
+    /// The lexer's state: the content of the open `{% verbatim %}`, whose body is text.
+    verbatim: Option<&'a str>,
+    /// The parser's state: inside a `{% comment %}` body, which `skip_past` drops.
+    in_comment: bool,
+}
+
+impl<'a> Bodies<'a> {
+    /// Whether Django compiles the tag holding `content`, given the tags before it.
+    fn compiles(&mut self, content: &'a str) -> bool {
+        // Outside a body only `verbatim` or `comment` opens one, so most tags pass on their first
+        // byte. Rarer whitespace than ASCII may precede the name, and takes the full check.
+        (self.verbatim.is_none()
+            && !self.in_comment
+            && !matches!(
+                content.trim_ascii_start().as_bytes().first(),
+                Some(b'v' | b'c' | b'\x0B' | b'\x1C'..=b'\x1F' | 0x80..)
+            ))
+            || self.compiles_slow(content)
+    }
+
+    #[cold]
+    fn compiles_slow(&mut self, content: &'a str) -> bool {
+        let content = content.trim_matches(is_space);
+        // The lexer runs before the parser: a verbatim body hides an `{% endcomment %}` within it.
+        if let Some(opener) = self.verbatim {
+            // Only `end` plus the opener's content, `{% endverbatim x %}` for `{% verbatim x %}`.
+            if content.strip_prefix("end") != Some(opener) {
+                return false;
+            }
+            self.verbatim = None;
+        } else if content == "verbatim" || content.starts_with("verbatim ") {
+            self.verbatim = Some(content);
+        }
+        if self.in_comment {
+            self.in_comment = content != "endcomment";
+            return !self.in_comment;
+        }
+        self.in_comment = first_bit_is(content, "comment");
+        true
+    }
+}
+
+/// Every `{% %}` token of Django's lexer in `text`, before the verbatim and comment handling.
+fn lex_tags(text: &str) -> impl Iterator<Item = JinjaTag<'_>> {
+    let bytes = text.as_bytes();
+    // Django's tokens never span a newline, so only the lines holding a `{%` are tokenized.
+    let mut pos = 0;
+    let mut line_end = 0;
+    // Per closer, whether it is missing from the rest of the line: never searching twice for it
+    // keeps the scan linear.
+    let mut unclosed = [false; 3];
+    iter::from_fn(move || {
+        loop {
+            if pos == line_end {
+                let next_tag = pos + TAG_OPEN.find(&bytes[pos..])?;
+                pos =
+                    memrchr(b'\n', &bytes[pos..next_tag]).map_or(pos, |newline| pos + newline + 1);
+                line_end = memchr(b'\n', &bytes[next_tag..])
+                    .map_or(bytes.len(), |newline| next_tag + newline);
+                unclosed = [false; 3];
+            }
+            let Some(brace) = memchr(b'{', &bytes[pos..line_end]) else {
+                pos = line_end;
+                continue;
+            };
+            let open = pos + brace;
+            // Like the regex, a failed match retries from the next byte: `{{%` holds a tag when
+            // `}}` never comes.
+            pos = open + 1;
+            let (close, kind) = match bytes.get(open + 1) {
+                Some(b'%') => (b'%', 0),
+                Some(b'{') => (b'}', 1),
+                Some(b'#') => (b'#', 2),
+                _ => continue,
+            };
+            if unclosed[kind] {
+                continue;
+            }
+            let body = open + 2;
+            let Some(len) = find_closer(&bytes[body..line_end], close) else {
+                unclosed[kind] = true;
+                continue;
+            };
+            pos = body + len + 2;
+            if close == b'%' {
+                return Some(JinjaTag {
+                    content: &text[body..body + len],
+                    start: body,
+                });
+            }
+        }
+    })
+}
+
+/// The offset in `line` of the first `close` byte followed by `}`.
+fn find_closer(line: &[u8], close: u8) -> Option<usize> {
+    memchr_iter(b'}', line.get(1..)?).find(|&i| line[i] == close)
+}
+
+#[cfg(test)]
+mod tests {
+    use rstest::rstest;
+
+    use super::tags_in_text;
+
+    #[rstest]
+    #[case::tag("a {% load static %} b", &[(" load static ", 4)])]
+    #[case::two_on_one_line("{% if a %}x{%endif%}", &[(" if a ", 2), ("endif", 13)])]
+    #[case::first_closer_wins(r#"{% x "%}" %}"#, &[(r#" x ""#, 2)])]
+    #[case::variable_and_comment_skipped("{{ '{% a %}' }} {# {% b %} #}", &[])]
+    #[case::multi_line_not_a_tag("{% if\na %}", &[])]
+    #[case::unterminated_not_a_tag("{% a", &[])]
+    #[case::unclosed_variable_retries("{{% a %}", &[(" a ", 3)])]
+    #[case::variable_ends_at_newline("{{ a\n{% b %} }}", &[(" b ", 7)])]
+    #[case::verbatim_body_dropped(
+        "{% verbatim x %}{% a %}{% endverbatim %}{% endverbatim x %}{% b %}",
+        &[(" verbatim x ", 2), (" endverbatim x ", 42), (" b ", 61)]
+    )]
+    #[case::comment_body_dropped(
+        r#"{% comment "note" %}{% a %}{% endcomment %}{% b %}"#,
+        &[(r#" comment "note" "#, 2), (" endcomment ", 29), (" b ", 45)]
+    )]
+    fn tags_in_text_cases(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
+        let tags: Vec<_> = tags_in_text(text)
+            .map(|tag| (tag.content, tag.start))
+            .collect();
+        assert_eq!(tags, expected);
+    }
 }
