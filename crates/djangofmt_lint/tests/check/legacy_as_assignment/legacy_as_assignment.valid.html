@@ -1,0 +1,43 @@
+<!-- Already `name=value` -->
+{% with total=engines.count %}{{ total }}{% endwith %}
+{% blocktranslate with name=engine.name count total=engines.count %}{{ name }}: {{ total }} engine{% plural %}{{ name }}: {{ total }} engines{% endblocktranslate %}
+
+<!-- `as` inside a quoted value -->
+{% with label="known as" %}{{ label }}{% endwith %}
+{% blocktranslate context "known as" %}Hello{% endblocktranslate %}
+
+<!-- Other tags that store their result `as` a name -->
+{% translate "Hello" as greeting %}
+{% url "home" as home_url %}
+{% cycle "odd" "even" as row_class %}
+
+<!-- Regression: djade test_migrate_assignments_with_mixed — mixing both forms is a syntax error -->
+{% with engines.count as total and vehicles=cars.count %}{{ total }} {{ vehicles }}{% endwith %}
+{% blocktranslate with engine.name as name and number=engine.number %}Hello {{ name }} #{{ number }}{% endblocktranslate %}
+
+<!-- djade turns this syntax error into `c=a=b` -->
+{% with a=b as c %}{{ c }}{% endwith %}
+
+<!-- Regression: djade test_migrate_assignments_with_unknown_end — a leftover bit is a syntax error -->
+{% with 'Go' as exclamation loud %}{{ exclamation }}{% endwith %}
+
+<!-- Regression: djade test_migrate_assignments_with_unknown_start — no assignment comes first -->
+{% with loud 'Go' as exclamation %}{{ exclamation }}{% endwith %}
+
+<!-- A value Django cannot compile -->
+{% with user|default: as person %}{{ person }}{% endwith %}
+
+<!-- A name `name=value` cannot spell -->
+{% with engines.count as engine.total %}{{ engine.total }}{% endwith %}
+
+<!-- Django glues `_("…")|upper` to the next bits and fails -->
+{% with _("Hello")|upper as greeting %}{{ greeting }}{% endwith %}
+
+<!-- djade drops `engines.count` from this `count`, which needs a name -->
+{% blocktranslate with engine.name as name count engines.count %}{{ name }}{% plural %}{{ name }}{% endblocktranslate %}
+
+<!-- Without `and`, `trimmed` is the option, and `as` is then unknown -->
+{% blocktranslate with engine.name as name trimmed as label %}Hello {{ name }}{% endblocktranslate %}
+
+<!-- An option given twice -->
+{% blocktranslate with engine.name as name with engine.number as number %}Hello {{ name }}{% endblocktranslate %}

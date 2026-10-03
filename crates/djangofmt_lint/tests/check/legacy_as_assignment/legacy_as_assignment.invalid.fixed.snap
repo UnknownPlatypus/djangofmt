@@ -1,0 +1,46 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- One assignment -->
+{% with total=engines.count %}{{ total }}{% endwith %}
+
+<!-- Several assignments joined by `and` -->
+{% with total=engines.count vehicles=cars.count %}{{ total }} {{ vehicles }}{% endwith %}
+
+<!-- A missing `and` is a syntax error, but has only one reading -->
+{% with total=engines.count vehicles=cars.count %}{{ total }} {{ vehicles }}{% endwith %}
+
+<!-- Django accepts a trailing `and`, which `name=value` does not -->
+{% with total=engines.count %}{{ total }}{% endwith %}
+
+<!-- Regression: djade #84 — a filter chain with a quoted argument -->
+{% with calendar_week_number=week|at_index:0|date:"W-Y" %}{{ calendar_week_number }}{% endwith %}
+
+<!-- The quoted value keeps its spaces, the bits around it get single ones -->
+{% with greeting="Hello  world" %}{{ greeting }}{% endwith %}
+
+<!-- Unusual spacing around the tag name and `as` -->
+{%with total=engines.count%}{{ total }}{% endwith %}
+
+<!-- Python's `\w` takes non-ASCII letters in names -->
+{% with título=article.title %}{{ título }}{% endwith %}
+
+<!-- `{% blocktranslate %}` and its `blocktrans` alias -->
+{% blocktranslate with name=engine.name %}Hello {{ name }}{% endblocktranslate %}
+{% blocktrans with name=engine.name number=engine.number %}Hello {{ name }} #{{ number }}{% endblocktrans %}
+
+<!-- The `count` clause, alone and after a legacy `with` clause -->
+{% blocktranslate count total=engines.count %}{{ total }} engine{% plural %}{{ total }} engines{% endblocktranslate %}
+{% blocktranslate with name=engine.name count total=engines.count %}{{ name }}: {{ total }} engine{% plural %}{{ name }}: {{ total }} engines{% endblocktranslate %}
+
+<!-- Only the legacy clause is rewritten -->
+{% blocktranslate with name=engine.name count total=engines.count %}{{ name }}: {{ total }} engine{% plural %}{{ name }}: {{ total }} engines{% endblocktranslate %}
+
+<!-- The other options stay in place and in order -->
+{% blocktranslate trimmed with name=engine.name context "greeting" asvar message %}Hello {{ name }}{% endblocktranslate %}{{ message }}
+
+<!-- A missing `and` before a word that is not an option -->
+{% blocktranslate with name=engine.name number=engine.number trimmed %}Hello {{ name }} #{{ number }}{% endblocktranslate %}
+
+<!-- Django reads the tags in attribute values -->
+<a title="{% with total=engines.count %}{{ total }}{% endwith %}">Engines</a>

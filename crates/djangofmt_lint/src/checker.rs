@@ -32,6 +32,7 @@ const TAG_RULES: &[Rule] = &[
     Rule::SameFilePartialInclude,
     Rule::DeprecatedStaticLibrary,
     Rule::LegacyTranslationTag,
+    Rule::LegacyAsAssignment,
 ];
 
 /// Where a tag reaching [`Checker::visit_jinja_tag`] comes from.
@@ -265,6 +266,9 @@ impl<'a> Checker<'a> {
             && self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
         {
             rules::upgrade::deprecated_static_library::check(self, tag, version);
+        }
+        if self.is_rule_enabled(Rule::LegacyAsAssignment) {
+            rules::upgrade::legacy_as_assignment::check(self, tag);
         }
     }
 

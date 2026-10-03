@@ -284,4 +284,5 @@ define_rules! {
     (LegacyTranslationTag, rules::upgrade::legacy_translation_tag::LegacyTranslationTag),
     (MissingEndblockLabel, rules::style::missing_endblock_label::MissingEndblockLabel),
     (RedundantEndblockLabel, rules::style::redundant_endblock_label::RedundantEndblockLabel),
+    (LegacyAsAssignment, rules::upgrade::legacy_as_assignment::LegacyAsAssignment<'static>),
 }
