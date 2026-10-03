@@ -81,6 +81,17 @@ fn starts_with_space(text: &str) -> bool {
     text.starts_with(is_space)
 }
 
+/// Whether `text` is one or more of Python's `\w`, like the key of a `key=value` bit.
+#[must_use]
+pub fn is_word(text: &str) -> bool {
+    static WORD: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"^[\p{L}\p{N}_]+$").expect("word pattern is valid"));
+    if text.is_ascii() {
+        return !text.is_empty() && text.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'_');
+    }
+    WORD.is_match(text)
+}
+
 /// A `{{ }}` body: a constant or variable followed by its filters.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FilterExpression<'a> {
@@ -181,6 +192,16 @@ mod tests {
     fn first_bit_is_cases(#[case] content: &str, #[case] expected: bool) {
         assert_eq!(first_bit_is(content, "load"), expected);
         assert_eq!(bits(content).first() == Some(&"load"), expected);
+    }
+
+    #[rstest]
+    #[case::ascii("total_2", true)]
+    #[case::non_ascii_letter("café", true)]
+    #[case::empty("", false)]
+    #[case::ascii_punctuation("b.c", false)]
+    #[case::mark_is_not_word_char("x\u{0903}", false)]
+    fn is_word_cases(#[case] text: &str, #[case] expected: bool) {
+        assert_eq!(is_word(text), expected);
     }
 
     #[rstest]

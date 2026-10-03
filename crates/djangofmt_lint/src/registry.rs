@@ -281,4 +281,5 @@ define_rules! {
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
     (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
+    (LegacyAsAssignment, rules::upgrade::legacy_as_assignment::LegacyAsAssignment<'static>),
 }

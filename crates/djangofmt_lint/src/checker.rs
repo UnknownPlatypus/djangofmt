@@ -230,6 +230,9 @@ impl<'a> Checker<'a> {
         {
             rules::upgrade::deprecated_static_library::check(self, tag, version);
         }
+        if self.is_rule_enabled(Rule::LegacyAsAssignment) {
+            rules::upgrade::legacy_as_assignment::check(self, tag);
+        }
     }
 
     fn visit_element(&mut self, element: &Element<'a>) {
