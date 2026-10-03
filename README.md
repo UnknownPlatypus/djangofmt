@@ -56,6 +56,7 @@ Heavily rely on the awesome [markup_fmt](https://github.com/g-plane/markup_fmt) 
 - [Controlling the formatting](https://unknownplatypus.github.io/djangofmt/docs/formatting/)
 - [Lint rules](https://unknownplatypus.github.io/djangofmt/docs/rules/)
 - [Known limitations](https://unknownplatypus.github.io/djangofmt/docs/known-limitations/)
+- [Coming from djade](https://unknownplatypus.github.io/djangofmt/docs/djade/)
 - [Benchmarks](https://unknownplatypus.github.io/djangofmt/docs/benchmarks/)
 - [Shell completions](#shell-completions)
 - [Contributing](#contributing)
@@ -110,12 +111,15 @@ Sample `.pre-commit-config.yaml`:
   # Djangofmt version.
   rev: v1.0.0
   hooks:
+    # Run the formatter.
+    - id: djangofmt
     # Run the linter.
     - id: djangofmt-check
       args: [--fix]
-    # Run the formatter.
-    - id: djangofmt
 ```
+
+Keep the formatter first: the `{% endblock %}` label fixes depend on the line breaks the formatter chooses, so in the other order a second run can still find violations.
+A fix that lengthens a tag, such as renaming `{% trans %}` to `{% translate %}`, can still leave a line for the next run to wrap.
 
 The [separate repository](https://github.com/UnknownPlatypus/djangofmt-pre-commit) enables installation without compiling the Rust code.
 
