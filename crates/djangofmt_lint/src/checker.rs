@@ -33,6 +33,7 @@ const TAG_RULES: &[Rule] = &[
     Rule::DeprecatedStaticLibrary,
     Rule::LegacyTranslationTag,
     Rule::LegacyAsAssignment,
+    Rule::DeprecatedLengthIsFilter,
 ];
 
 /// Where a tag reaching [`Checker::visit_jinja_tag`] comes from.
@@ -269,6 +270,11 @@ impl<'a> Checker<'a> {
         }
         if self.is_rule_enabled(Rule::LegacyAsAssignment) {
             rules::upgrade::legacy_as_assignment::check(self, tag);
+        }
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::DeprecatedLengthIsFilter)
+        {
+            rules::upgrade::deprecated_length_is_filter::check(self, tag, version);
         }
     }
 

@@ -1,0 +1,23 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- A lone condition, in `if` and in `elif` -->
+{% if eggs|length == 1 %}
+    One egg
+{% elif eggs|length == 2 %}
+    Two eggs
+{% endif %}
+
+<!-- A variable argument -->
+{% if eggs|length == n %}{% endif %}
+
+<!-- The filters before `length_is` stay in the chain -->
+{% if eggs|slice:":2"|length == 2 %}{% endif %}
+
+<!-- A dotted variable -->
+{% if basket.eggs|length == 1 %}{% endif %}
+
+<!-- Django reads the tags in raw-text bodies -->
+<script>
+    const single = {% if eggs|length == 1 %}true{% else %}false{% endif %};
+</script>

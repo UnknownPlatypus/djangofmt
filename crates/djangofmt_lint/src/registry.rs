@@ -286,4 +286,5 @@ define_rules! {
     (MissingEndblockLabel, rules::style::missing_endblock_label::MissingEndblockLabel),
     (RedundantEndblockLabel, rules::style::redundant_endblock_label::RedundantEndblockLabel),
     (LegacyAsAssignment, rules::upgrade::legacy_as_assignment::LegacyAsAssignment<'static>),
+    (DeprecatedLengthIsFilter, rules::upgrade::deprecated_length_is_filter::DeprecatedLengthIsFilter),
 }
