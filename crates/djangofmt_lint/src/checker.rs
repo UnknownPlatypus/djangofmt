@@ -394,6 +394,11 @@ impl<'a> Checker<'a> {
         {
             rules::upgrade::legacy_translation_tag::check_block(self, block, version);
         }
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::DeprecatedIfequalTag)
+        {
+            rules::upgrade::deprecated_ifequal_tag::check(self, block, version);
+        }
         if !self.in_raw {
             if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
                 rules::correctness::untrimmed_blocktranslate::check(self, block);
@@ -510,6 +515,11 @@ impl<'a> Checker<'a> {
             && self.is_rule_enabled(Rule::LegacyTranslationTag)
         {
             rules::upgrade::legacy_translation_tag::check_block(self, block, version);
+        }
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::DeprecatedIfequalTag)
+        {
+            rules::upgrade::deprecated_ifequal_tag::check(self, block, version);
         }
         if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
             self.record_block_name(block);

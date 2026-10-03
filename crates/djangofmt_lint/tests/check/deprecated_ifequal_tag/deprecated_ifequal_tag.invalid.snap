@@ -1,0 +1,113 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated `{% ifequal %}` tag
+   ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:2:4]
+ 1 │ <!-- Equal operands -->
+ 2 │ {% ifequal user.id comment.user_id %}
+   ·    ───┬───
+   ·       ╰── here
+ 3 │     <p>Your comment</p>
+   ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifnotequal %}` tag
+   ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:7:4]
+ 6 │ <!-- Unequal operands -->
+ 7 │ {% ifnotequal user.id comment.user_id %}
+   ·    ─────┬────
+   ·         ╰── here
+ 8 │     <p>Someone else's comment</p>
+   ╰────
+  help: Use `{% if %}` with `!=` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:12:4]
+ 11 │ <!-- The `{% else %}` branch stays as it is -->
+ 12 │ {% ifequal user.username "admin" %}
+    ·    ───┬───
+    ·       ╰── here
+ 13 │     <a href="/admin/">Admin</a>
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:19:4]
+ 18 │ <!-- A quoted operand keeps its spaces -->
+ 19 │ {% ifequal title 'the golden goose' %}<h1>{{ title }}</h1>{% endifequal %}
+    ·    ───┬───
+    ·       ╰── here
+ 20 │ 
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:22:4]
+ 21 │ <!-- A filtered operand -->
+ 22 │ {% ifequal user.name|lower 'admin' %}<p>Hi admin</p>{% endifequal %}
+    ·    ───┬───
+    ·       ╰── here
+ 23 │ 
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:25:4]
+ 24 │ <!-- A translated operand -->
+ 25 │ {% ifequal message _("Welcome back") %}<p>{{ message }}</p>{% endifequal %}
+    ·    ───┬───
+    ·       ╰── here
+ 26 │ 
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:28:4]
+ 27 │ <!-- Nested blocks, the inner one fixed on the next pass -->
+ 28 │ {% ifequal a b %}
+    ·    ───┬───
+    ·       ╰── here
+ 29 │     {% ifnotequal b c %}<p>a equals b, not c</p>{% endifnotequal %}
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifnotequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:29:8]
+ 28 │ {% ifequal a b %}
+ 29 │     {% ifnotequal b c %}<p>a equals b, not c</p>{% endifnotequal %}
+    ·        ─────┬────
+    ·             ╰── here
+ 30 │ {% endifequal %}
+    ╰────
+  help: Use `{% if %}` with `!=` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:33:4]
+ 32 │ <!-- Django ignores what follows the closing tag's name -->
+ 33 │ {% ifequal a b %}<p>Equal</p>{% endifequal a b %}
+    ·    ───┬───
+    ·       ╰── here
+ 34 │ 
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifnotequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:37:4]
+ 36 │      `endifequal`, ignoring the closer kind and the malformed inner opener -->
+ 37 │ {% ifnotequal a b %}
+    ·    ─────┬────
+    ·         ╰── here
+ 38 │     {% ifequal c %}<p>Malformed</p>{% endifequal %}
+    ╰────
+  help: Use `{% if %}` with `!=` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:43:36]
+ 42 │ <select name="language">
+ 43 │     <option value="{{ lang.0 }}"{% ifequal LANGUAGE_CODE lang.0 %} selected="selected"{% endifequal %}>{{ lang.1 }}</option>
+    ·                                    ───┬───
+    ·                                       ╰── here
+ 44 │ </select>
+    ╰────
+  help: Use `{% if %}` with `==` instead

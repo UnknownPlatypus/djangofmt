@@ -1,0 +1,11 @@
+<!-- The replacement tag -->
+{% if user.id == comment.user_id %}<p>Your comment</p>{% endif %}
+
+<!-- Django requires exactly two operands, so this block is already broken -->
+{% ifequal a b c %}<p>Broken</p>{% endifequal %}
+
+<!-- An operand `{% if %}` would read as an operator: `{% if in == b %}` is a syntax error -->
+{% ifequal in b %}<p>Equal</p>{% endifequal %}
+
+<!-- Regression: django-upgrade #63 — a `{% verbatim %}` body is literal text -->
+{% verbatim %}{% ifequal a b %}<p>Equal</p>{% endifequal %}{% endverbatim %}

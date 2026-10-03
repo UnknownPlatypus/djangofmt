@@ -1,0 +1,47 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Equal operands -->
+{% if user.id == comment.user_id %}
+    <p>Your comment</p>
+{% endif %}
+
+<!-- Unequal operands -->
+{% if user.id != comment.user_id %}
+    <p>Someone else's comment</p>
+{% endif %}
+
+<!-- The `{% else %}` branch stays as it is -->
+{% if user.username == "admin" %}
+    <a href="/admin/">Admin</a>
+{% else %}
+    <a href="/account/">Account</a>
+{% endif %}
+
+<!-- A quoted operand keeps its spaces -->
+{% if title == 'the golden goose' %}<h1>{{ title }}</h1>{% endif %}
+
+<!-- A filtered operand -->
+{% if user.name|lower == 'admin' %}<p>Hi admin</p>{% endif %}
+
+<!-- A translated operand -->
+{% if message == _("Welcome back") %}<p>{{ message }}</p>{% endif %}
+
+<!-- Nested blocks, the inner one fixed on the next pass -->
+{% if a == b %}
+    {% ifnotequal b c %}<p>a equals b, not c</p>{% endifnotequal %}
+{% endif %}
+
+<!-- Django ignores what follows the closing tag's name -->
+{% if a == b %}<p>Equal</p>{% endif %}
+
+<!-- Regression: djade `migrate_ifequal_tags` — it pairs the outer `ifnotequal` with the inner
+     `endifequal`, ignoring the closer kind and the malformed inner opener -->
+{% if a != b %}
+    {% ifequal c %}<p>Malformed</p>{% endifequal %}
+{% endif %}
+
+<!-- Real-world: peeringdb, in attribute position -->
+<select name="language">
+    <option value="{{ lang.0 }}"{% if LANGUAGE_CODE == lang.0 %} selected="selected"{% endif %}>{{ lang.1 }}</option>
+</select>

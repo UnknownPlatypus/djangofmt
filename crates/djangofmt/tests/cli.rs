@@ -575,6 +575,26 @@ fn check_stdin_fix_writes_source_to_stdout() {
 }
 
 #[test]
+fn check_fix_applies_nested_fixes_on_a_later_pass() {
+    // The outer pair's fix spans the inner pair's, which waits for the next pass.
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--fix", "--select", "deprecated-ifequal-tag"])
+            .args(["--target-version", "3.1", "-"])
+            .pass_stdin("{% ifequal a b %}{% ifnotequal b c %}x{% endifnotequal %}{% endifequal %}\n"),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    {% if a == b %}{% if b != c %}x{% endif %}{% endif %}
+
+    ----- stderr -----
+    Found 2 errors (2 fixed, 0 remaining).
+    "
+    );
+}
+
+#[test]
 fn check_stdin_fix_echoes_unparsable_input() {
     assert_cmd_snapshot!(
         cli()
