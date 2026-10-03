@@ -230,6 +230,11 @@ impl<'a> Checker<'a> {
         {
             rules::upgrade::deprecated_static_library::check(self, tag, version);
         }
+        if let Some(version) = self.target_version()
+            && self.is_rule_enabled(Rule::DeprecatedLengthIsFilter)
+        {
+            rules::upgrade::deprecated_length_is_filter::check(self, tag, version);
+        }
     }
 
     fn visit_element(&mut self, element: &Element<'a>) {

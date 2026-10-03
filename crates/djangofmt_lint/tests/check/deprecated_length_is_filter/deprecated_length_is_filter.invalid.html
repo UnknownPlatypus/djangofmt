@@ -1,0 +1,15 @@
+<!-- A lone condition, in `if` and in `elif` -->
+{% if eggs|length_is:1 %}
+    One egg
+{% elif eggs|length_is:2 %}
+    Two eggs
+{% endif %}
+
+<!-- A variable argument -->
+{% if eggs|length_is:n %}{% endif %}
+
+<!-- The filters before `length_is` stay in the chain -->
+{% if eggs|slice:":2"|length_is:2 %}{% endif %}
+
+<!-- A dotted variable -->
+{% if basket.eggs|length_is:1 %}{% endif %}

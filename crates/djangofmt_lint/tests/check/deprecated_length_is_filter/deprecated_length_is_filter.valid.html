@@ -1,0 +1,21 @@
+<!-- The replacement spelling -->
+{% if eggs|length == 1 %}{% endif %}
+
+<!-- A later filter reads the boolean `length_is` returns, which `length` does not -->
+{% if eggs|length_is:1|yesno %}{% endif %}
+
+<!-- A string argument went through `int()`, so `==` would compare the length with a string -->
+{% if eggs|length_is:"1" %}{% endif %}
+{% if eggs|length_is:_("1") %}{% endif %}
+
+<!-- In a longer condition the new `==` could regroup with a neighbouring comparison -->
+{% if eggs|length_is:1 and spam %}{% endif %}
+
+<!-- Printed rather than tested, so it renders `True` or `False` -->
+{{ eggs|length_is:1 }}
+
+<!-- Not an `if` or `elif` condition -->
+{% firstof eggs|length_is:1 %}
+
+<!-- An expression Django rejects is left as is -->
+{% if eggs[0]|length_is:1 %}{% endif %}
