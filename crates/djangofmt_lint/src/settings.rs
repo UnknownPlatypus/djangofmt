@@ -173,7 +173,7 @@ mod tests {
             ..LintConfiguration::default()
         };
         let (settings, warnings) = selection.into_settings();
-        assert!(warnings.is_empty());
+        assert_eq!(warnings, Vec::<SelectionWarning>::new());
 
         // The whole suspicious category is off...
         assert!(!settings.is_enabled(Rule::JavascriptUrl));

@@ -678,20 +678,17 @@ mod tests {
         };
         let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), dir.path());
 
-        assert!(
-            resolve_files(&[dir.path().to_path_buf()], &config)
-                .unwrap()
-                .is_empty()
+        assert_eq!(
+            resolve_files(&[dir.path().to_path_buf()], &config).unwrap(),
+            Vec::<PathBuf>::new()
         );
-        assert!(
-            resolve_files(&[dir.path().join("sub/deep/page.html")], &config)
-                .unwrap()
-                .is_empty()
+        assert_eq!(
+            resolve_files(&[dir.path().join("sub/deep/page.html")], &config).unwrap(),
+            Vec::<PathBuf>::new()
         );
-        assert!(
-            resolve_files(&[dir.path().join("sub")], &config)
-                .unwrap()
-                .is_empty()
+        assert_eq!(
+            resolve_files(&[dir.path().join("sub")], &config).unwrap(),
+            Vec::<PathBuf>::new()
         );
     }
 
@@ -832,7 +829,7 @@ mod tests {
         let config = ResolvedDiscoveryConfig::new(&cli, &default_pyproject(), dir.path());
         let files = resolve_files(&[dir.path().join(".venv/lib")], &config).unwrap();
 
-        assert!(files.is_empty());
+        assert_eq!(files, Vec::<PathBuf>::new());
     }
 
     #[test]

@@ -80,18 +80,24 @@
       description: "Pin tailwindcss to 4.2.2 due to vite 8 / rolldown incompatibility",
     },
     {
-      commitMessageTopic: "MSRV",
+      // Bump the toolchain and the MSRV in one PR, so each Rust release's new lints are fixed once.
+      groupName: "Rust toolchain and MSRV",
       matchManagers: ["custom.regex"],
-      matchDepNames: ["msrv"],
-      // We have a rolling support policy for the MSRV
-      // 2 releases back * 6 weeks per release * 7 days per week + 1
-      minimumReleaseAge: "85 days",
-      groupName: "MSRV",
+      matchDepNames: ["rust", "msrv"],
     },
     {
       matchManagers: ["custom.regex"],
-      matchDepNames: ["rust"],
-      commitMessageTopic: "Rust",
+      matchDepNames: ["msrv"],
+      // Rolling MSRV policy of 2 releases back: 2 * 6 weeks * 7 days + the 5 days the toolchain waits,
+      // so release N-2 becomes eligible on the same day as toolchain N.
+      minimumReleaseAge: "89 days",
+    },
+    {
+      // A patch MSRV bump only forces users to upgrade, the MSRV moves on new minors with the toolchain.
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["msrv"],
+      matchUpdateTypes: ["patch"],
+      enabled: false,
     },
     {
       matchManagers: ["custom.regex"],
