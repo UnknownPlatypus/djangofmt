@@ -21,8 +21,8 @@
     "tailwindcss": "4.2.2"
   },
   "devDependencies": {
-    "daisyui": "5.7.46",
+    "daisyui": "5.7.47",
     "typescript": "7.0.2",
-    "vite": "8.3.1"
+    "vite": "8.3.2"
   }
 }

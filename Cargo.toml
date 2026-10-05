@@ -21,7 +21,7 @@ divan = { package = "codspeed-divan-compat", version = "*" }
 djangofmt_formatter = { path = "crates/djangofmt_formatter" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
 djangofmt_syntax = { path = "crates/djangofmt_syntax" }
-dprint-plugin-json = { version = "0.24.0" }
+dprint-plugin-json = { version = "0.25.0" }
 editorconfig-parser = { version = "0.0.4" }
 globset = { version = "0.4.18" }
 ignore = { version = "0.4.25" }

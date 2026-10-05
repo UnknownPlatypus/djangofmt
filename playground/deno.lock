@@ -1,16 +1,16 @@
 {
   "version": "5",
   "specifiers": {
-    "npm:@tailwindcss/vite@4.2.2": "4.2.2_vite@8.3.1",
+    "npm:@tailwindcss/vite@4.2.2": "4.2.2_vite@8.3.2",
     "npm:ansi-to-html@~0.7.2": "0.7.2",
     "npm:astro@7": "7.1.3_@emnapi+core@1.11.3_@emnapi+runtime@1.11.3",
-    "npm:daisyui@5.7.46": "5.7.46",
+    "npm:daisyui@5.7.47": "5.7.47",
     "npm:diff@9": "9.0.0",
     "npm:lz-string@^1.5.0": "1.5.0",
     "npm:monaco-editor@0.57": "0.57.0",
     "npm:tailwindcss@4.2.2": "4.2.2",
     "npm:typescript@7.0.2": "7.0.2",
-    "npm:vite@8.3.1": "8.3.1_esbuild@0.28.1"
+    "npm:vite@8.3.2": "8.3.2_esbuild@0.28.1"
   },
   "npm": {
     "@astrojs/compiler-binding-darwin-arm64@0.3.1": {
@@ -796,7 +796,7 @@
         "@tailwindcss/oxide-win32-x64-msvc"
       ]
     },
-    "@tailwindcss/vite@4.2.2_vite@8.3.1": {
+    "@tailwindcss/vite@4.2.2_vite@8.3.2": {
       "integrity": "sha512-mEiF5HO1QqCLXoNEfXVA1Tzo+cYsrqV7w9Juj2wdUFyW07JRenqMG225MvPwr3ZD9N1bFQj46X7r33iHxLUW0w==",
       "dependencies": [
         "@tailwindcss/node",
@@ -1120,8 +1120,8 @@
         "css-tree@2.2.1"
       ]
     },
-    "daisyui@5.7.46": {
-      "integrity": "sha512-z/tfVXLpLRe1ojGeokzxauHA9Ij5CGfk+83EdatQbFSVr02h5mUcp4nkgQJOw68wH1wAAPu/SY+MWbDdJG2R4w=="
+    "daisyui@5.7.47": {
+      "integrity": "sha512-NOl4vPifelRqB3CMzoU751zc44KCDD9HdHMTTqQ30uiYVpIyK7+s94/ySDWgYqjdl1tQCaCrgGBx4KCizm+a3Q=="
     },
     "defu@6.1.7": {
       "integrity": "sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ=="
@@ -2061,8 +2061,8 @@
         "vfile-message"
       ]
     },
-    "vite@8.3.1_esbuild@0.28.1": {
-      "integrity": "sha512-/bvH9E9tmCXRGp2uXY3WbOldqpTwFkbha/8ANaEQ6VkxhH60KyqLwgZq6lG2y+4uT55x9+9eUHMpQ7uGnOCKjA==",
+    "vite@8.3.2_esbuild@0.28.1": {
+      "integrity": "sha512-SQr1x6W5vVSbROg7vsyXIaxK9b0G7zsT68acdWWRmnBUsgDieLCRG+Rep9WdZgcposvv/GSnr4GUUBqB3vXq6w==",
       "dependencies": [
         "esbuild",
         "lightningcss@1.33.0",
@@ -2107,13 +2107,13 @@
         "npm:@tailwindcss/vite@4.2.2",
         "npm:ansi-to-html@~0.7.2",
         "npm:astro@7",
-        "npm:daisyui@5.7.46",
+        "npm:daisyui@5.7.47",
         "npm:diff@9",
         "npm:lz-string@^1.5.0",
         "npm:monaco-editor@0.57",
         "npm:tailwindcss@4.2.2",
         "npm:typescript@7.0.2",
-        "npm:vite@8.3.1"
+        "npm:vite@8.3.2"
       ],
       "overrides": {
         "dompurify": "^3.3.3"
