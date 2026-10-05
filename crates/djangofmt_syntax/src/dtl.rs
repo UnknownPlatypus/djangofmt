@@ -88,7 +88,9 @@ pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
     let mut matches = FILTER.captures_iter(expr);
     // The first match must be the head, which only matches at the start.
     let head = matches.next()?;
-    let var = head.name("constant").or_else(|| head.name("var"))?;
+    let var = head
+        .name("constant")
+        .or_else(|| head.name("var").filter(|var| is_variable(var.as_str())))?;
     let mut filters = Vec::new();
     let mut upto = var.end();
     for filter in matches {
@@ -96,11 +98,15 @@ pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
         if whole.start() != upto {
             return None;
         }
+        let var_arg = filter.name("var_arg");
+        if var_arg.is_some_and(|arg| !is_variable(arg.as_str())) {
+            return None;
+        }
         filters.push(Filter {
             name: filter.name("filter_name")?.as_str(),
             arg: filter
                 .name("constant_arg")
-                .or_else(|| filter.name("var_arg"))
+                .or(var_arg)
                 .map(|arg| arg.as_str()),
         });
         upto = whole.end();
@@ -109,6 +115,30 @@ pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
         var: var.as_str(),
         filters,
     })
+}
+
+/// Whether Django's `Variable` accepts a `[\w.+-]+` match: a number, or a lookup path with no
+/// `+` or `-` and no segment starting with `_`.
+fn is_variable(var: &str) -> bool {
+    !(var.starts_with('_') || var.contains("._") || var.contains(['+', '-'])) || is_number(var)
+}
+
+/// Whether `Variable` reads `var` as a number: Python's `float()` when it holds a `.` or an `e`,
+/// `int()` otherwise, and never with a trailing `.`.
+fn is_number(var: &str) -> bool {
+    let bytes = var.as_bytes();
+    // Python allows a `_` digit separator only between two digits.
+    let separators_ok = var.match_indices('_').all(|(i, _)| {
+        i > 0 && bytes[i - 1].is_ascii_digit() && bytes.get(i + 1).is_some_and(u8::is_ascii_digit)
+    });
+    let digits = var.replace('_', "");
+    separators_ok
+        && if var.contains(['.', 'e', 'E']) {
+            !var.ends_with('.') && digits.parse::<f64>().is_ok()
+        } else {
+            let unsigned = digits.strip_prefix(['+', '-']).unwrap_or(&digits);
+            !unsigned.is_empty() && unsigned.bytes().all(|b| b.is_ascii_digit())
+        }
 }
 
 /// Prints `var|name:arg|name`, without the whitespace Django allows around `|`.
@@ -149,8 +179,14 @@ mod tests {
     #[case::string_constant("'egg'", Some("'egg'"))]
     #[case::translated_constant(r#"_("x") | upper"#, Some(r#"_("x")|upper"#))]
     #[case::dotted_var("engine..name", Some("engine..name"))]
-    #[case::plus_in_var("1e+5", Some("1e+5"))]
-    #[case::minus_in_var("total-1", Some("total-1"))]
+    #[case::exponent_sign("1e+5", Some("1e+5"))]
+    #[case::signed_number("-1.5", Some("-1.5"))]
+    #[case::digit_separator("-1_000", Some("-1_000"))]
+    #[case::trailing_dot("-1.", None)]
+    #[case::minus_in_name("total-1", None)]
+    #[case::minus_in_arg("a|default:b-c", None)]
+    #[case::underscore_prefix("_private", None)]
+    #[case::underscore_attribute("a._b", None)]
     #[case::filter("egg | crack", Some("egg|crack"))]
     #[case::constant_arg("egg | crack:'fully'", Some("egg|crack:'fully'"))]
     #[case::var_arg("egg | crack:amount", Some("egg|crack:amount"))]
