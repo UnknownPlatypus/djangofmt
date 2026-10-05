@@ -231,13 +231,13 @@ mod tests {
     /// A leading `file-ignore[...]` covers the whole file, nested nodes included.
     #[test]
     fn file_ignore_covers_the_whole_file() {
-        assert!(
+        assert_eq!(
             codes(
                 "{# djangofmt: file-ignore[invalid-attr-value] #}\n\
                  <form method=\"yes\"></form>\n\
                  <div><form method=\"put\"></form></div>"
-            )
-            .is_empty()
+            ),
+            Vec::<&str>::new()
         );
         // Below the file's top it covers nothing, and is reported as misplaced.
         assert_eq!(
@@ -251,9 +251,11 @@ mod tests {
     /// The rules on directives are suppressed like any other, by a `file-ignore[...]`.
     #[test]
     fn file_ignore_silences_the_directive_rules() {
-        assert!(
-            codes("{# djangofmt: file-ignore[invalid-ignore-code] #}\n{# djangofmt: ignore[not-a-rule] #}\n<p>hi</p>")
-                .is_empty()
+        assert_eq!(
+            codes(
+                "{# djangofmt: file-ignore[invalid-ignore-code] #}\n{# djangofmt: ignore[not-a-rule] #}\n<p>hi</p>"
+            ),
+            Vec::<&str>::new()
         );
     }
 
@@ -294,9 +296,9 @@ mod tests {
             codes("<form method=\"yes\"></form>"),
             ["invalid-attr-value"]
         );
-        assert!(
-            codes("{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>")
-                .is_empty()
+        assert_eq!(
+            codes("{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"),
+            Vec::<&str>::new()
         );
         // A non-matching code, an ignore comment placed after the node, and a later
         // sibling all keep their diagnostic; the first two comments are unused on top.
@@ -325,11 +327,11 @@ mod tests {
             assert!(!codes(&source).contains(&"invalid-attr-value"), "{filler}");
         }
         // Stacked ignore comments all reach the same target.
-        assert!(
+        assert_eq!(
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\" id=\"\"></form>"
-            )
-            .is_empty()
+            ),
+            Vec::<&str>::new()
         );
     }
 
@@ -337,8 +339,14 @@ mod tests {
     fn ignore_applies_inside_nested_nodes() {
         const GUARDED: &str =
             "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>";
-        assert!(codes(&format!("<div>\n{GUARDED}\n</div>")).is_empty());
-        assert!(codes(&format!("{{% if x %}}\n{GUARDED}\n{{% endif %}}")).is_empty());
+        assert_eq!(
+            codes(&format!("<div>\n{GUARDED}\n</div>")),
+            Vec::<&str>::new()
+        );
+        assert_eq!(
+            codes(&format!("{{% if x %}}\n{GUARDED}\n{{% endif %}}")),
+            Vec::<&str>::new()
+        );
     }
 
     #[test]
@@ -351,11 +359,11 @@ mod tests {
             ["Empty `class` attribute"]
         );
         // Likewise a block guards its own tags but not its body.
-        assert!(
+        assert_eq!(
             codes(
                 "{# djangofmt: ignore[untrimmed-blocktranslate] #}\n{% blocktranslate %}x{% endblocktranslate %}"
-            )
-            .is_empty()
+            ),
+            Vec::<&str>::new()
         );
         assert_eq!(
             codes(
@@ -367,9 +375,9 @@ mod tests {
 
     #[test]
     fn whitespace_control_markers_do_not_break_suppression() {
-        assert!(
-            codes("{#- djangofmt: ignore[invalid-attr-value] -#}\n<form method=\"yes\"></form>")
-                .is_empty()
+        assert_eq!(
+            codes("{#- djangofmt: ignore[invalid-attr-value] -#}\n<form method=\"yes\"></form>"),
+            Vec::<&str>::new()
         );
     }
 
