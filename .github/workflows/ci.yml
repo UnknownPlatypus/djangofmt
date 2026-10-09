@@ -21,9 +21,7 @@ env:
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
   # Make sure CI fails on all warnings, including Clippy lints
-  RUSTFLAGS: "-Dwarnings"
-  # Line-tables-only debug info: faster builds, backtraces still work.
-  CARGO_PROFILE_DEV_DEBUG: line-tables-only
+  CARGO_BUILD_WARNINGS: deny
 
 jobs:
   changed_files:

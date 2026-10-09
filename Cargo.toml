@@ -103,6 +103,10 @@ unused_result_ok = "deny"
 unwrap_used = "deny"
 wildcard_dependencies = "deny"
 
+[profile.dev]
+# Faster builds, backtraces still work.
+debug = "line-tables-only"
+
 [profile.release]
 strip = true
 # See python/benchmark_cargo_profiles.py
