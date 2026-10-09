@@ -179,19 +179,14 @@
       packageNameTemplate: "g-plane/{{depName}}",
       datasourceTemplate: "github-releases",
     },
-    // cargo-dist version, kept in sync between dist-workspace.toml and the generated release.yml installer.
+    // cargo-dist version in dist-workspace.toml, tracked from the wheel pinned in pyproject.toml so both bump together.
     {
       customType: "regex",
-      managerFilePatterns: [
-        "/(^|/)dist-workspace\\.toml$/",
-        "/.github/workflows/release\\.yml$/",
-      ],
-      matchStrings: [
-        '(?<packageName>[\\w-]+?)-version = "(?<currentValue>\\d+\\.\\d+\\.\\d+)"',
-        'https://github\\.com/axodotdev/(?<packageName>[\\w-]+?)/releases/download/v(?<currentValue>\\d+\\.\\d+\\.\\d+)/',
-      ],
-      datasourceTemplate: "crate",
-      versioningTemplate: "semver",
+      managerFilePatterns: ["/(^|/)dist-workspace\\.toml$/"],
+      matchStrings: ['cargo-dist-version = "(?<currentValue>\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "cargo-dist",
+      packageNameTemplate: "astral-dev-toolchain-cargo-dist",
+      datasourceTemplate: "pypi",
     },
   ],
   vulnerabilityAlerts: {
