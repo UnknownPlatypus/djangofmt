@@ -1,0 +1,17 @@
+[graph]
+all-features = true
+
+[licenses]
+allow = ["Apache-2.0", "ISC", "MIT", "Unicode-3.0", "Zlib"]
+
+[bans]
+wildcards = "deny"
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-git = [
+  "https://github.com/UnknownPlatypus/malva",
+  "https://github.com/UnknownPlatypus/markup_fmt",
+]

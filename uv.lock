@@ -49,6 +49,19 @@ wheels = [
 ]
 
 [[package]]
+name = "astral-dev-toolchain-cargo-deny"
+version = "0.20.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/3b/a6f62f063d65f5470f8867ed2d701398f3e4f69257403290d9f8a6e8b84e/astral_dev_toolchain_cargo_deny-0.20.2-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:985935f3757bbe9a0267c94b6e0813fc80c9ba13ba55b207525ee86b05618357", size = 4812491, upload-time = "2026-09-15T18:54:16.415Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/51/ec56268418cf3a002822b47351dc3f15b89b7300706f6a70b6c46ffdf50f/astral_dev_toolchain_cargo_deny-0.20.2-py3-none-macosx_11_0_arm64.whl", hash = "sha256:8741971eda68ec4018b891bf4eb97e4e53a16974bf43b7fe9903048919592bb7", size = 4642505, upload-time = "2026-09-15T18:54:18.759Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/2a/79d869d8d22a5812028d90369ce6c4735dd47cfe3e5de321aa869c32fae8/astral_dev_toolchain_cargo_deny-0.20.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:0e42259c537b2432f5655b3413940e899906033354c5838e367c6837b467a141", size = 4730326, upload-time = "2026-09-15T18:54:20.853Z" },
+    { url = "https://files.pythonhosted.org/packages/09/40/7f110ab4ca7b05f2ea91bf55a2642353f9dcb780a567e5ccd030a219f55e/astral_dev_toolchain_cargo_deny-0.20.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ae708f458c23ce1eecfd8f169befbb47424bdc21ecf0965e36db3b1d98400fee", size = 4947048, upload-time = "2026-09-15T18:54:23.462Z" },
+    { url = "https://files.pythonhosted.org/packages/c6/d0/68c33ddc7424e43187836b1a924d1895a1f89d3a438a4dd28c2ed92cc40b/astral_dev_toolchain_cargo_deny-0.20.2-py3-none-win_amd64.whl", hash = "sha256:fa38a4783426db539c456db9319911d81418bbe0e5d1c8da757c4965b9fab44e", size = 4948035, upload-time = "2026-09-15T18:54:26.551Z" },
+    { url = "https://files.pythonhosted.org/packages/ae/80/9362dbb0c9b0ab998c0beac2bace6c9463a3de637108fbc466c0cac67738/astral_dev_toolchain_cargo_deny-0.20.2-py3-none-win_arm64.whl", hash = "sha256:8cb16bf1ce1039f1c2cd4693cbba0e716b269270355261195b7b5af4b23f9e04", size = 4726694, upload-time = "2026-09-15T18:54:28.717Z" },
+]
+
+[[package]]
 name = "astral-dev-toolchain-cargo-dist"
 version = "0.32.0"
 source = { registry = "https://pypi.org/simple" }
@@ -184,6 +197,7 @@ source = { editable = "." }
 dev = [
     { name = "astral-dev-toolchain-cargo-bloat" },
     { name = "astral-dev-toolchain-cargo-codspeed" },
+    { name = "astral-dev-toolchain-cargo-deny" },
     { name = "astral-dev-toolchain-cargo-dist" },
     { name = "astral-dev-toolchain-cargo-insta" },
     { name = "astral-dev-toolchain-cargo-llvm-cov" },
@@ -202,6 +216,7 @@ docs = [
 dev = [
     { name = "astral-dev-toolchain-cargo-bloat", specifier = ">=0.12.1" },
     { name = "astral-dev-toolchain-cargo-codspeed", specifier = ">=5.0.2" },
+    { name = "astral-dev-toolchain-cargo-deny", specifier = ">=0.20.2" },
     { name = "astral-dev-toolchain-cargo-dist", specifier = "==0.32.0" },
     { name = "astral-dev-toolchain-cargo-insta", specifier = ">=1.48.0" },
     { name = "astral-dev-toolchain-cargo-llvm-cov", specifier = ">=0.9.0" },
