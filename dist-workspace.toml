@@ -12,11 +12,11 @@ aarch64-unknown-linux-gnu = "2.28"
 # Config for 'dist'
 [dist]
 # `release.yml` is hand-patched for least-privilege job permissions, to keep the
-# release tag out of shell source, and to call reusable workflows via `$/` rather
-# than `./`, so `dist` must not verify or regenerate it.
+# release tag out of shell source, to call reusable workflows via `$/` rather
+# than `./`, and to run `dist` from uv.lock, so `dist` must not verify or regenerate it.
 # Re-apply those patches after any `dist init`.
 allow-dirty = ["ci"]
-# The preferred dist version to use in CI (Cargo.toml SemVer syntax)
+# Must match the `astral-dev-toolchain-cargo-dist` pin in pyproject.toml, which CI runs.
 cargo-dist-version = "0.32.0"
 # CI backends to support
 ci = "github"
