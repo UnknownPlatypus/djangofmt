@@ -12,6 +12,7 @@ on:
       - Cargo.toml
       - Cargo.lock
       - rust-toolchain.toml
+      - uv.lock
       - .github/workflows/codspeed.yml
   # `workflow_dispatch` allows CodSpeed to trigger backtest
   # performance analysis in order to generate initial data.
@@ -36,19 +37,19 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Setup rust toolchain, cache and cargo-codspeed binary
-        uses: moonrepo/setup-rust@abb2d32350334249b178c401e5ec5836e0cd88d3 # v1.3.0
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
-          # No `channel`: read the pin from rust-toolchain.toml, so a new stable
-          # release can't silently re-baseline every benchmark.
-          cache-target: release
-          bins: cargo-codspeed
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Setup uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: false
 
       - name: Build the benchmark target(s)
-        run: cargo codspeed build -p djangofmt_benchmark --profile release
+        run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile release
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@373d6868929f444bc08d901fd0eb0ad52a8875ea # v5.2.1
         with:
           mode: simulation
           cycle-estimation: false
-          run: cargo codspeed run -p djangofmt_benchmark
+          run: uv run --only-dev cargo codspeed run -p djangofmt_benchmark

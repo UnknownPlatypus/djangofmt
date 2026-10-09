@@ -112,9 +112,8 @@ coverage-lcov:
 # Report the largest functions and crates in the release binary
 [group('dev')]
 bloat:
-    cargo install cargo-bloat@0.12.1 --locked
-    RUSTFLAGS="-C debuginfo=2 -C strip=none" cargo bloat --release -p djangofmt -n 15
-    RUSTFLAGS="-C debuginfo=2 -C strip=none" cargo bloat --release -p djangofmt --crates -n 15
+    RUSTFLAGS="-C debuginfo=2 -C strip=none" uv run --only-dev cargo bloat --release -p djangofmt -n 15
+    RUSTFLAGS="-C debuginfo=2 -C strip=none" uv run --only-dev cargo bloat --release -p djangofmt --crates -n 15
 
 # Fuzz the formatter (requires: rustup toolchain install nightly; cargo install cargo-fuzz)
 [group('dev')]
