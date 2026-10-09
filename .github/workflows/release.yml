@@ -236,6 +236,9 @@ jobs:
     permissions:
       # Creating the GitHub Release.
       "contents": "write"
+      # Attesting the release files.
+      "attestations": "write"
+      "id-token": "write"
     # use "always() && ..." to allow us to wait for all publish jobs while
     # still allowing individual publish jobs to skip themselves (for prereleases).
     # "host" however must run to completion, no skipping allowed!
@@ -259,6 +262,15 @@ jobs:
         run: |
           # Remove the granular manifests
           rm -f artifacts/*-dist-manifest.json
+      - name: Attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: |
+            artifacts/*.json
+            artifacts/*.sh
+            artifacts/*.ps1
+            artifacts/*.zip
+            artifacts/*.tar.gz
       - name: Create GitHub Release
         env:
           PRERELEASE_FLAG: "${{ fromJson(needs.host.outputs.val).announcement_is_prerelease && '--prerelease' || '' }}"

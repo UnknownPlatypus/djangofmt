@@ -56,6 +56,12 @@ pr-run-mode = "plan"
 dispatch-releases = true
 # Which phase dist should use to create the GitHub release
 github-release = "announce"
+# Whether to generate GitHub build provenance attestations
+github-attestations = true
+# Which phase dist should use to create the attestations
+github-attestations-phase = "announce"
+# Which release files to attest
+github-attestations-filters = ["*.json", "*.sh", "*.ps1", "*.zip", "*.tar.gz"]
 # Whether CI should include auto-generated code to build local artifacts
 build-local-artifacts = false
 # Local artifacts jobs to run in CI
@@ -78,3 +84,4 @@ install-path = ["$XDG_BIN_HOME/", "$XDG_DATA_HOME/../bin", "~/.local/bin"]
 "actions/checkout" = "de0fac2e4500dabe0009e67214ff5f5447ce83dd"  # v6.0.2
 "actions/upload-artifact" = "b7c566a772e6b6bfb58ed0dc250532a479d7789f"  # v6.0.0
 "actions/download-artifact" = "37930b1c2abaa49bbe596cd826c3c89aef350131"  # v7.0.0
+"actions/attest" = "1e69f48acb82d1966a394da916b4c1698aa569d6"  # v4.2.2
