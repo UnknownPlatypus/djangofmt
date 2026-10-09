@@ -94,9 +94,10 @@
 <a x-bind:href="solarPanelLayoutURL">Roof layout</a>
 <a :href="layoutUrl">Layout</a>
 
-<!-- Query-only links stay on the current route and resolve no named pattern. -->
+<!-- Query-only links stay on the current route and resolve no named pattern, even when a parameter carries a path. -->
 <a href="?page=2">Next page</a>
 <a href="?handler=RemoveAgreement&id=42">Remove</a>
+<a href="?next=/login/">Log in</a>
 
 <!-- Analytics keyword arguments inside a `{% include %}` are template-tag kwargs, not an HTML
      `action` attribute, and must not be read as a hardcoded route. -->

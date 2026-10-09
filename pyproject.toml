@@ -197,7 +197,7 @@ sort_commits = "newest"
 [tool.maturin]
 bindings = "bin"
 include = [
-  "rust-toolchain.toml",
+  { path = "rust-toolchain.toml", format = "sdist" },
 ]
 manifest-path = "crates/djangofmt/Cargo.toml"
 strip = true

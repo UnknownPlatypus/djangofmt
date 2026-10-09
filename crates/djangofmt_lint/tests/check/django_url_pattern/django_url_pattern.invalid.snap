@@ -278,5 +278,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  61 │ <a href="/items/{{ item.id }}">Item</a>
     ·          ──────────┬─────────
     ·                    ╰── here
+ 62 │ 
+    ╰────
+  help: Use `{% url 'view_name' %}` instead
+
+  × Hardcoded internal URL in `href`
+    ╭─[tests/check/django_url_pattern/django_url_pattern.invalid.html:64:10]
+ 63 │ <!-- a/href: `_` is a word character, so a relative route may start with it -->
+ 64 │ <a href="_internal/reports/">Reports</a>
+    ·          ─────────┬────────
+    ·                   ╰── here
     ╰────
   help: Use `{% url 'view_name' %}` instead
