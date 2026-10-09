@@ -108,7 +108,7 @@ Sample `.pre-commit-config.yaml`:
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
   # Djangofmt version.
-  rev: v1.0.0
+  rev: v1.0.1
   hooks:
     # Run the linter.
     - id: djangofmt-check
@@ -130,7 +130,7 @@ There is a dedicated pre-commit hook for these:
 
 ```yaml
 - repo: https://github.com/UnknownPlatypus/djangofmt-pre-commit
-  rev: v1.0.0
+  rev: v1.0.1
   hooks:
     - id: djangofmt-svg
 ```

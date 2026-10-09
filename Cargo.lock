@@ -427,7 +427,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "clap_complete_command",
@@ -460,7 +460,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_benchmark"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "codspeed-divan-compat",
  "djangofmt",
@@ -473,7 +473,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_dev"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -484,7 +484,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_formatter"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "djangofmt_syntax",
@@ -499,7 +499,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_lint"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "djangofmt_macros",
  "djangofmt_syntax",
@@ -520,7 +520,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_macros"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -529,7 +529,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_syntax"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "markup_fmt",
@@ -543,7 +543,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_wasm"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "djangofmt_formatter",
  "djangofmt_lint",

@@ -355,7 +355,7 @@ mod tests {
         success: true
         exit_code: 0
         ----- stdout -----
-        djangofmt 1.0.0
+        djangofmt 1.0.1
 
         ----- stderr -----
         ");
