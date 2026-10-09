@@ -68,8 +68,7 @@ pub fn check(checker: &Checker<'_>, block: &JinjaBlock<'_, Node<'_>>) {
         return;
     }
 
-    // Lex only when the word appears, since inside a quoted value it is not the option.
-    if open_tag.content.contains("trimmed") && bits(open_tag.content).contains(&"trimmed") {
+    if bits(open_tag.content).contains(&"trimmed") {
         return;
     }
 

@@ -241,7 +241,7 @@ pub fn format_text(
                 // markup_fmt trims what these return and wraps it in one space on each side.
                 "markup-fmt-jinja-stmt" if profile == Profile::Django => {
                     let body = code.trim_matches(dtl::is_space);
-                    Ok(if dtl::is_single_spaced(body) {
+                    Ok(if is_single_spaced(body) {
                         code.into()
                     } else {
                         dtl::bits(body).join(" ").into()
@@ -251,10 +251,10 @@ pub fn format_text(
                     let expr = code.trim_matches(dtl::is_space);
                     // Only whitespace around `|` can go, and an expression Django rejects stays verbatim.
                     Ok(
-                        if dtl::has_spaced_pipe(expr)
-                            && let Some(filter_expression) = dtl::filter_expression(expr)
+                        if has_spaced_pipe(expr)
+                            && let Some(compact) = dtl::compact_filter_expression(expr)
                         {
-                            filter_expression.to_string().into()
+                            compact.into()
                         } else {
                             code.into()
                         },
@@ -269,6 +269,27 @@ pub fn format_text(
         Err(markup_fmt::FormatError::Syntax(_)) if ignores.invalid_syntax => Ok(None),
         other => other.map(Some),
     }
+}
+
+/// Whether the only whitespace in a tag `body` is single plain spaces.
+fn is_single_spaced(body: &str) -> bool {
+    let mut after_space = false;
+    body.chars().all(|c| {
+        let single = if c == ' ' {
+            !after_space
+        } else {
+            !dtl::is_space(c)
+        };
+        after_space = c == ' ';
+        single
+    })
+}
+
+/// Whether whitespace touches a `|`, the only whitespace [`dtl::compact_filter_expression`] drops.
+fn has_spaced_pipe(expr: &str) -> bool {
+    expr.match_indices('|').any(|(i, _)| {
+        expr[..i].ends_with(dtl::is_space) || expr[i + 1..].starts_with(dtl::is_space)
+    })
 }
 
 /// Whether a string literal in `code` holds a raw control character (U+0000-U+001F).
