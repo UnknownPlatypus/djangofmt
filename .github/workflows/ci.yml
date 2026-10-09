@@ -32,25 +32,28 @@ jobs:
     permissions:
       contents: read
     outputs:
-      code: ${{ steps.changed.outputs.code_any_changed }}
+      code: ${{ steps.changed.outputs.code }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          fetch-depth: 2
+          persist-credentials: false
 
-      - uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+      - name: Check if code changed
         id: changed
-        with:
-          files_yaml: |
-            code:
-              - python/**
-              - crates/**
-              - .github/workflows/ci.yml
-              - Cargo.toml
-              - Cargo.lock
-              - rust-toolchain.toml
-              - rustfmt.toml
-              - clippy.toml
+        if: ${{ github.event_name == 'pull_request' }}
+        # HEAD is the PR merge commit, its first parent is the base branch tip.
+        run: |
+          git diff --quiet HEAD^1 HEAD -- \
+            'python/**' \
+            'crates/**' \
+            .github/workflows/ci.yml \
+            Cargo.toml \
+            Cargo.lock \
+            rust-toolchain.toml \
+            rustfmt.toml \
+            clippy.toml \
+            || echo "code=true" >> "$GITHUB_OUTPUT"
 
   build-and-compare:
     name: "Ecosystem check"
