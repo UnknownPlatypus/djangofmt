@@ -28,18 +28,6 @@ pub enum FixAvailability {
     None,
 }
 
-impl FixAvailability {
-    /// Short capitalized label suitable for a docs table cell.
-    #[must_use]
-    pub const fn label(self) -> &'static str {
-        match self {
-            Self::Always => "Always",
-            Self::Sometimes => "Sometimes",
-            Self::None => "None",
-        }
-    }
-}
-
 impl std::fmt::Display for FixAvailability {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
