@@ -51,12 +51,6 @@
       enabled: false,
     },
     {
-      // This file is managed by cargo-dist, don't try to update actions inside it.
-      matchManagers: ["github-actions"],
-      matchFileNames: [".github/workflows/release.yml"],
-      enabled: false,
-    },
-    {
       // Disable automatic updates for markup_fmt (cargo dep and dprint plugin), updates are handled manually.
       matchDepNames: ["markup_fmt"],
       enabled: false,
