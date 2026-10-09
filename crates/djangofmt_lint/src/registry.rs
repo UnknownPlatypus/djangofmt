@@ -22,19 +22,6 @@ pub enum RuleGroup {
     Removed { since: &'static str },
 }
 
-impl RuleGroup {
-    /// The version at which this lifecycle status was set.
-    #[must_use]
-    pub const fn since(self) -> &'static str {
-        match self {
-            Self::Stable { since }
-            | Self::Preview { since }
-            | Self::Deprecated { since }
-            | Self::Removed { since } => since,
-        }
-    }
-}
-
 /// Functional categories for lint rules.
 ///
 /// Categories help users enable/disable groups of related rules.

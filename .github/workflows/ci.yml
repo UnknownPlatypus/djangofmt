@@ -18,6 +18,8 @@ env:
   CARGO_TERM_COLOR: always
   # renovate: datasource=github-releases depName=astral-sh/uv
   UV_VERSION: 0.12.21
+  # renovate: datasource=github-releases depName=astral-sh/hawk
+  HAWK_VERSION: 0.1.15
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
   # Make sure CI fails on all warnings, including Clippy lints
@@ -193,6 +195,23 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
       - run: uv run --only-dev cargo shear
+
+  hawk:
+    name: "cargo hawk"
+    runs-on: ubuntu-24.04
+    needs: changed_files
+    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # hawk only runs on the exact toolchain it was built for, keep HAWK_VERSION in step with rust-toolchain.toml.
+      - name: Install hawk
+        run: curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/astral-sh/hawk/releases/download/${HAWK_VERSION}/cargo-hawk-installer.sh" | sh
+      - name: Find dead pub items
+        run: cargo hawk check --only dead-public -D warnings
 
   test:
     name: "cargo test + coverage"
