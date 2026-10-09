@@ -213,6 +213,7 @@ DEFAULT_TARGETS = [
             custom_blocks="capture,component,specialspaceless",
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
+                    "src/unfold/contrib/reversion_compare/templates/reversion-compare/action_list_partial.html",
                     "src/unfold/templates/admin/actions.html",
                     "src/unfold/templates/admin/dataset_actions.html",
                     "src/unfold/templates/admin/date_hierarchy.html",
@@ -547,12 +548,8 @@ DEFAULT_TARGETS = [
         cli_options=CliOptions(
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
-                    # <ul>/<a> opened inside an {% if %}, closed in a later one
+                    # <ul> opened inside an {% if %}, closed in a later one
                     "src/helpdesk/templates/helpdesk/public_view_ticket.html",
-                    "src/helpdesk/templates/helpdesk/report_index.html",
-                ),
-                ExcludeReason.INVALID_SOURCE_HTML: (
-                    "src/helpdesk/templates/helpdesk/debug.html",  # </col> on a void element
                 ),
             },
         ),
@@ -645,10 +642,7 @@ DEFAULT_TARGETS = [
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # <div> opened and closed in separate {% if %} blocks
-                    "mvp/templates/cotton/form/field.html",
-                    "mvp/templates/cotton/form/formset/row.html",
-                    # <optgroup> opened and closed in separate {% if %} blocks
-                    "mvp/templates/tailwind/layout/select.html",
+                    "mvp/templates/cotton/mvp/form/formset/row.html",
                 ),
             },
         ),
