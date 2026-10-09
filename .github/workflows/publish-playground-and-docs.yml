@@ -35,8 +35,7 @@ on:
       - "crates/djangofmt_dev/**"
       - ".github/workflows/publish-playground-and-docs.yml"
 
-# Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
-permissions: { id-token: write, pages: write }
+permissions: {}
 
 env:
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
@@ -50,11 +49,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    # Only use github-pages environment when not a PR
-    environment: ${{ github.event_name != 'pull_request' && 'github-pages' || '' }}
+  build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -95,15 +93,23 @@ jobs:
           cp -r playground/dist/. _site/
           mkdir -p _site/docs
           cp -r site/. _site/docs/
-      - name: Setup Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - name: Upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: "_site"
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request'
+    environment: github-pages
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      pages: write
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - name: Deploy to GitHub Pages
-        if: github.event_name != 'pull_request'
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
