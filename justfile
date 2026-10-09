@@ -120,6 +120,10 @@ bloat:
 [group('dev')]
 fuzz time="0" *args="":
     @mkdir -p fuzz/corpus/fmt_idempotency
+    @if ls fuzz/corpus/fmt_idempotency | grep -qE '^(crash|leak|oom|timeout|slow-unit|minimized-from)-'; then \
+        echo "error: fuzz/corpus/fmt_idempotency holds libFuzzer artifacts (crash-*, oom-*, ...) that abort the corpus replay, move them to fuzz/artifacts/" >&2; \
+        exit 1; \
+    fi
     cargo +nightly fuzz run -s none fmt_idempotency \
         fuzz/corpus/fmt_idempotency \
         crates/djangofmt/tests/fmt \
