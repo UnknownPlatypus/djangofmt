@@ -231,7 +231,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
-      # Advisories run weekly in advisories.yml so a new advisory doesn't fail unrelated PRs.
+      # Advisories are left to Renovate's OSV vulnerability alerts.
       - run: uv run --only-dev cargo deny check licenses sources bans
 
   test:
