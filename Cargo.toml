@@ -17,7 +17,7 @@ license = "MIT"
 anyhow = { version = "1.0.102" }
 clap = { version = "4.6.1", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
-divan = { package = "codspeed-divan-compat", version = "*" }
+divan = { package = "codspeed-divan-compat", version = "5.0.2" }
 djangofmt_formatter = { path = "crates/djangofmt_formatter" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
 djangofmt_syntax = { path = "crates/djangofmt_syntax" }
