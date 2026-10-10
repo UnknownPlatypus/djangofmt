@@ -1,0 +1,4 @@
+{# Jinja's i18n extension only knows `trans` #}
+{% trans %}Hello {{ name }}{% endtrans %}
+{# Nor does Jinja load Django's libraries #}
+{% load trans from i18n %}

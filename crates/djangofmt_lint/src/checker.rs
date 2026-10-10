@@ -69,6 +69,14 @@ impl<'a> Checker<'a> {
         self.context.settings().target_version
     }
 
+    /// Whether a Django template targets `version` or newer: the gate of a version-gated rule.
+    fn targets_django(&self, version: DjangoVersion) -> bool {
+        self.is_django()
+            && self
+                .target_version()
+                .is_some_and(|target| target >= version)
+    }
+
     /// Compute the byte offset of a string slice within the source.
     ///
     /// This is used to convert AST `raw` slices into [`SourceSpan`] offsets.
@@ -140,7 +148,10 @@ impl<'a> Checker<'a> {
     /// the rules that read the whole stream.
     pub fn check_tokens(&self) {
         let tokens = self.tokens();
-        for token in tokens.iter() {
+        // Whether a `{% load … from … %}` took `trans` or `blocktrans` from a library other than
+        // `i18n`, so the legacy tags after it may be that library's.
+        let mut foreign_translation_tags = false;
+        for (i, token) in tokens.iter().enumerate() {
             match token {
                 Token::Tag { tag, name } => match *name {
                     "include" => {
@@ -151,23 +162,39 @@ impl<'a> Checker<'a> {
                             rules::style::same_file_partial_include::check(self, tag, path);
                         }
                     }
-                    "load"
+                    "load" => {
                         if self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
-                            && self.is_django()
-                            && self
-                                .target_version()
-                                .is_some_and(|version| version >= DjangoVersion::new(2, 1)) =>
+                            && self.targets_django(DjangoVersion::new(2, 1))
+                        {
+                            rules::suspicious::deprecated_static_library::check(self, tag);
+                        }
+                        if self.is_rule_enabled(Rule::LegacyTranslationTag)
+                            && self.targets_django(DjangoVersion::new(3, 1))
+                        {
+                            foreign_translation_tags |=
+                                rules::style::legacy_translation_tag::check_load(self, tag);
+                        }
+                    }
+                    "trans" | "blocktrans"
+                        if !foreign_translation_tags
+                            && self.is_rule_enabled(Rule::LegacyTranslationTag)
+                            && self.targets_django(DjangoVersion::new(3, 1)) =>
                     {
-                        rules::suspicious::deprecated_static_library::check(self, tag);
+                        if *name == "trans" {
+                            rules::style::legacy_translation_tag::check_trans(self, tag);
+                        } else {
+                            rules::style::legacy_translation_tag::check_blocktrans(
+                                self,
+                                tag,
+                                &tokens[i + 1..],
+                            );
+                        }
                     }
                     _ => {}
                 },
                 Token::Var(interpolation) => {
                     if self.is_rule_enabled(Rule::RedundantJsonScriptId)
-                        && self.is_django()
-                        && self
-                            .target_version()
-                            .is_some_and(|version| version >= DjangoVersion::new(4, 1))
+                        && self.targets_django(DjangoVersion::new(4, 1))
                     {
                         rules::complexity::redundant_json_script_id::check(self, interpolation);
                     }

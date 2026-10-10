@@ -538,6 +538,29 @@ fn check_unsafe_fixes_are_opt_in() {
     );
 }
 
+#[test]
+fn check_fix_renames_and_trims_one_blocktrans() {
+    // The pair's rename spans the ` trimmed` insertion, which waits for the next pass.
+    let project = Project::new().file("test.html", "{% blocktrans %}Hello{% endblocktrans %}\n");
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--fix", "--target-version", "3.1"])
+            .args(["--select", "legacy-translation-tag,untrimmed-blocktranslate"])
+            .arg(project.join("test.html")),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 2 errors (2 fixed, 0 remaining).
+    ");
+    assert_eq!(
+        project.read("test.html"),
+        "{% blocktranslate trimmed %}Hello{% endblocktranslate %}\n"
+    );
+}
+
 // ── Check from stdin ─────────────────────────────────────────────────
 
 #[test]
@@ -675,18 +698,18 @@ fn check_warns_on_preview_rule_without_preview() {
 
 #[test]
 fn check_gates_version_specific_rules_on_target_version() {
-    // `deprecated-static-library` needs Django >= 2.1 and `redundant-json-script-id` >= 4.1;
-    // without a target version both stay off.
+    // `deprecated-static-library` needs Django >= 2.1, `legacy-translation-tag` >= 3.1 and
+    // `redundant-json-script-id` >= 4.1; without a target version all stay off.
     let project = Project::new().file(
         "test.html",
-        "{% load staticfiles %}\n{{ value|json_script:\"\" }}\n",
+        "{% load staticfiles %}\n{{ value|json_script:\"\" }}\n{% trans \"Hi\" %}\n",
     );
     let run = |version: Option<&str>| {
         let mut command = cli();
         command.args([
             "check",
             "--select",
-            "deprecated-static-library,redundant-json-script-id",
+            "deprecated-static-library,legacy-translation-tag,redundant-json-script-id",
             "--output-format",
             "concise",
         ]);
@@ -722,6 +745,16 @@ fn check_gates_version_specific_rules_on_target_version() {
     [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
     Found 1 errors. [*] 1 fixable with the --fix option.
     ");
+    assert_cmd_snapshot_tmpdir!(run(Some("3.1")), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
+    [TMP]/test.html:3:4: legacy-translation-tag [*] Legacy `{% trans %}` tag name
+    Found 2 errors. [*] 2 fixable with the --fix option.
+    ");
     assert_cmd_snapshot_tmpdir!(run(Some("4.0")), @"
     success: false
     exit_code: 1
@@ -729,7 +762,8 @@ fn check_gates_version_specific_rules_on_target_version() {
 
     ----- stderr -----
     [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
-    Found 1 errors. [*] 1 fixable with the --fix option.
+    [TMP]/test.html:3:4: legacy-translation-tag [*] Legacy `{% trans %}` tag name
+    Found 2 errors. [*] 2 fixable with the --fix option.
     ");
     assert_cmd_snapshot_tmpdir!(run(Some("4.1")), @"
     success: false
@@ -739,7 +773,8 @@ fn check_gates_version_specific_rules_on_target_version() {
     ----- stderr -----
     [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
     [TMP]/test.html:2:21: redundant-json-script-id [*] Redundant empty element id passed to `json_script`
-    Found 2 errors. [*] 2 fixable with the --fix option.
+    [TMP]/test.html:3:4: legacy-translation-tag [*] Legacy `{% trans %}` tag name
+    Found 3 errors. [*] 3 fixable with the --fix option.
     ");
 }
 

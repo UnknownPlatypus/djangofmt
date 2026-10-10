@@ -1,0 +1,19 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- A standalone tag keeps its arguments -->
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_translate.py::i18n35 -->
+{% load i18n %}{% translate "Page not found" as page_not_found %}{{ page_not_found }}
+
+<!-- A pair is renamed as one, keeping its options and its `plural` -->
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::i18n26 -->
+{% load i18n %}{% blocktranslate with extra_field=myextra_field count counter=number %}singular {{ extra_field }}{% plural %}plural{% endblocktranslate %}
+
+<!-- Django reads the tags in attribute values -->
+<input placeholder="{% translate 'Search' %}">
+
+<!-- A pair split across two texts -->
+<!-- {% blocktranslate %} -->Hello<!-- {% endblocktranslate %} -->
+
+<!-- The tag names a load imports from `i18n` -->
+{% load blocktranslate translate from i18n %}
