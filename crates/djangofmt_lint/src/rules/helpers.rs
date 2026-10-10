@@ -2,7 +2,7 @@ use std::iter;
 use std::slice;
 
 use djangofmt_syntax::CommentDelimiters;
-use djangofmt_syntax::dtl::is_space;
+use djangofmt_syntax::dtl::{bits, is_space};
 use markup_fmt::ast::{Attribute, JinjaBlock, JinjaTagOrChildren, NativeAttribute};
 use smallvec::{SmallVec, smallvec};
 
@@ -50,7 +50,7 @@ pub struct BlockEnd<'s> {
 }
 
 /// The [`BlockEnd`] of a block the caller has classified as `kind`, or [`None`] for the tags
-/// Django rejects: another arity, or a label naming another block.
+/// Django rejects: another arity, or a closing tag that is neither bare nor followed by the name.
 pub fn block_end<'s, T>(
     checker: &Checker<'s>,
     block: &JinjaBlock<'s, T>,
@@ -62,18 +62,28 @@ pub fn block_end<'s, T>(
         return None;
     };
 
-    let mut tokens = tag_tokens(opener.content).skip(1);
-    let name = match (tokens.next()?, tokens.next(), tokens.next()) {
-        (name, None, _) => name,
-        (name, Some("inline"), None) if kind == BlockKind::Partialdef => name,
-        _ => return None,
+    let name = match kind {
+        BlockKind::Block => {
+            let mut tokens = tag_tokens(opener.content).skip(1);
+            match (tokens.next()?, tokens.next()) {
+                (name, None) => name,
+                _ => return None,
+            }
+        }
+        // `partialdef` splits with `split_contents()`, which keeps a quoted name whole.
+        BlockKind::Partialdef => match bits(opener.content)[..] {
+            [_, name] | [_, name, "inline"] => name,
+            _ => return None,
+        },
     };
 
-    let mut tokens = tag_tokens(closer.content);
-    let end_tag = tokens.next().filter(|&token| token == kind.end_tag())?;
-    let label = match (tokens.next(), tokens.next()) {
-        (None, _) => None,
-        (Some(label), None) if label == name => Some(label),
+    // Django compares the whole closing tag, so exactly one space separates the label.
+    let end = closer.content.trim_matches(is_space);
+    let rest = end.strip_prefix(kind.end_tag())?;
+    let end_tag = &end[..kind.end_tag().len()];
+    let label = match rest.strip_prefix(' ') {
+        None if rest.is_empty() => None,
+        Some(label) if label == name => Some(label),
         _ => return None,
     };
 
