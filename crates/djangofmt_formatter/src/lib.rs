@@ -139,7 +139,6 @@ fn build_malva_config(indent_width: IndentWidth) -> malva::config::FormatOptions
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
             ignore_comment_directive: LEGACY_IGNORE_DIRECTIVE.into(),
-            ignore_file_comment_directive: LEGACY_IGNORE_DIRECTIVE.into(),
             ..malva::config::LanguageOptions::default()
         },
     }
