@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{% load i18n static %}
+{% if breakfast == 'egg  mcmuffin' or lunch %}
+    <p>{{ value|default:"n/a"|title }}</p>
+    <p>{{ egg|crack:amount }}</p>
+    <p>{{ engines[0].name | length }}</p>
+{% endif %}
+{% if a_very_long_variable_name == a_very_long_constant or another_variable_name == another_constant %}
+{% endif %}

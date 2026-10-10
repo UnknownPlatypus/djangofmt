@@ -2,6 +2,7 @@
 
 mod comment;
 mod diagnostic;
+pub mod dtl;
 mod ignore;
 mod parse;
 mod parse_error;
