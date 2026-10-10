@@ -50,6 +50,9 @@ on:
 # Release artifacts must not be built from caches that other workflows can write.
 env:
   ACTIONS_CACHE_MODE: none
+  # renovate: datasource=github-release-attachments depName=astral-sh/uv
+  UV_VERSION: 0.12.21
+  UV_CHECKSUM: 23f02075b652bb1df64178cfae41b5caf160822e720e2663568f3f5d63bc52c0 # x86_64-unknown-linux-gnu
 
 jobs:
   # Run 'dist plan' (or host) to determine what tasks we need to do
@@ -73,6 +76,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
           enable-cache: false
       # sure would be cool if github gave us proper conditionals...
       # so here's a doubly-nested ternary-via-truthiness to try to provide the best possible
@@ -129,6 +134,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
           enable-cache: false
       # Get all the local artifacts for the global tasks to use (for e.g. checksums)
       - name: Fetch local artifacts
@@ -186,6 +193,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
           enable-cache: false
       # Fetch artifacts from scratch-storage
       - name: Fetch artifacts

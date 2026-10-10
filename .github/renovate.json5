@@ -6,8 +6,6 @@
     "config:best-practices",
     "group:allNonMajor",
     "helpers:pinGitHubActionDigestsToSemver",
-    // Update annotated `*_VERSION` env vars in workflow files.
-    "customManagers:githubActionsVersions",
   ],
   labels: ["dependencies"],
   schedule: ["before 4am on Monday"],
@@ -105,6 +103,15 @@
     },
   ],
   customManagers: [
+    // Annotated `*_VERSION` env vars in workflow files, like `customManagers:githubActionsVersions`,
+    // plus an optional release asset `*_CHECKSUM` on the next line, bumped with the version.
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/workflows/.+\\.yml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+_VERSION: (?<currentValue>\\S+)(?:\\s+\\w+_CHECKSUM: (?<currentDigest>[a-f0-9]{64}))?",
+      ],
+    },
     // Maturin version used in maturin-action
     {
       customType: "regex",

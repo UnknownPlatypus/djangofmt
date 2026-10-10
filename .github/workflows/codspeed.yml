@@ -22,6 +22,11 @@ permissions: # optional for public repositories
   contents: read # required for actions/checkout
   id-token: write # required for OIDC authentication with CodSpeed
 
+env:
+  # renovate: datasource=github-release-attachments depName=astral-sh/uv
+  UV_VERSION: 0.12.21
+  UV_CHECKSUM: 23f02075b652bb1df64178cfae41b5caf160822e720e2663568f3f5d63bc52c0 # x86_64-unknown-linux-gnu
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -44,6 +49,8 @@ jobs:
       - name: Setup uv
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
+          version: ${{ env.UV_VERSION }}
+          checksum: ${{ env.UV_CHECKSUM }}
           enable-cache: false
 
       - name: Build the benchmark target(s)
