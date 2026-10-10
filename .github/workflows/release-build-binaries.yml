@@ -130,31 +130,31 @@ jobs:
       matrix:
         platform:
           - target: aarch64-unknown-linux-gnu
-            arch: aarch64
+            test_platform: linux/arm64
             manylinux: "2_17"
             # see https://github.com/astral-sh/ruff/issues/3791
             # and https://github.com/gnzlbg/jemallocator/issues/170#issuecomment-1503228963
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: armv7-unknown-linux-gnueabihf
-            arch: armv7
+            test_platform: linux/arm/v7
             manylinux: "2_17"
           - target: s390x-unknown-linux-gnu
-            arch: s390x
+            test_platform: linux/s390x
             manylinux: "2_17"
             # The cross assembler defaults to a pre-z990 arch and rejects the
             # long-displacement instructions in psm's stack-switching assembly (via swc).
             maturin_docker_options: -e CFLAGS_s390x_unknown_linux_gnu=-march=z10
           - target: powerpc64le-unknown-linux-gnu
-            arch: ppc64le
             manylinux: "2_17"
             # see https://github.com/astral-sh/ruff/issues/10073
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: riscv64gc-unknown-linux-gnu
-            arch: riscv64
             manylinux: "2_31"
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: arm-unknown-linux-musleabihf
-            arch: arm
+            # Its image sets QEMU_CPU=arm1176 so pip sees armv6l.
+            test_image: balenalib/rpi-raspbian:bullseye@sha256:851cfc48b26f6413a72a7f6873a7624ba2a427048976f6ab4483f72fe165d4f1
+            test_platform: linux/arm/v6
             manylinux: auto
 
     steps:
@@ -178,19 +178,25 @@ jobs:
             if [[ "${{ matrix.platform.target }}" == "riscv64gc-unknown-linux-gnu" ]] && command -v apt-get &> /dev/null; then
               apt-get update && apt-get install -y libatomic1
             fi
-      - uses: uraimo/run-on-arch-action@fa1f3e7de95534497266c7265950b5188355fbfb # v3.2.1
-        if: ${{ matrix.platform.arch != 'ppc64le' && matrix.platform.arch != 'riscv64' }}
-        name: "Test wheels"
+      - name: "Set up QEMU"
+        if: ${{ matrix.platform.test_platform }}
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
-          arch: ${{ matrix.platform.arch == 'arm' && 'armv6' || matrix.platform.arch }}
-          distro: ${{ matrix.platform.arch == 'arm' && 'bullseye' || 'ubuntu20.04' }}
-          install: |
-            apt-get update
-            apt-get install -y --no-install-recommends python3 python3-pip
-            pip3 install -U pip
-          run: |
-            pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
-            ${{ env.PACKAGE_NAME }} --help
+          image: tonistiigi/binfmt:qemu-v10.2.3@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
+          platforms: ${{ matrix.platform.test_platform }}
+          cache-image: false
+      - name: "Test wheels"
+        if: ${{ matrix.platform.test_platform }}
+        env:
+          TEST_IMAGE: ${{ matrix.platform.test_image || 'ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214' }}
+          TEST_PLATFORM: ${{ matrix.platform.test_platform }}
+        run: |
+          docker run --rm --platform "$TEST_PLATFORM" -v "$GITHUB_WORKSPACE/dist:/dist:ro" --env PACKAGE_NAME --env DEBIAN_FRONTEND=noninteractive "$TEST_IMAGE" sh -c "
+            apt-get update;
+            apt-get install -y --no-install-recommends python3 python3-pip;
+            pip3 install ${PACKAGE_NAME} --no-index --find-links /dist --force-reinstall;
+            ${PACKAGE_NAME} --help;
+            "
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -244,10 +250,10 @@ jobs:
       - name: "Test wheels"
         if: matrix.target == 'x86_64-unknown-linux-musl'
         run: |
-          docker run --rm -v ${{ github.workspace }}:/io -w /io --env PACKAGE_NAME alpine:latest sh -c "
+          docker run --rm -v "$GITHUB_WORKSPACE/dist:/dist:ro" --env PACKAGE_NAME alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 sh -c "
             apk add python3;
             python -m venv .venv;
-            .venv/bin/pip3 install ${PACKAGE_NAME} --no-index --find-links dist/ --force-reinstall;
+            .venv/bin/pip3 install ${PACKAGE_NAME} --no-index --find-links /dist --force-reinstall;
             .venv/bin/${PACKAGE_NAME} --help;
             "
       - name: "Upload wheels"
@@ -282,10 +288,10 @@ jobs:
       matrix:
         platform:
           - target: aarch64-unknown-linux-musl
-            arch: aarch64
+            test_platform: linux/arm64
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: armv7-unknown-linux-musleabihf
-            arch: armv7
+            test_platform: linux/arm/v7
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -304,17 +310,22 @@ jobs:
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
           docker-options: ${{ matrix.platform.maturin_docker_options }}
-      - uses: uraimo/run-on-arch-action@fa1f3e7de95534497266c7265950b5188355fbfb # v3.2.1
-        name: "Test wheels"
+      - name: "Set up QEMU"
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
         with:
-          arch: ${{ matrix.platform.arch }}
-          distro: alpine_latest
-          install: |
-            apk add python3
-          run: |
-            python -m venv .venv
-            .venv/bin/pip3 install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
-            .venv/bin/${{ env.PACKAGE_NAME }} --help
+          image: tonistiigi/binfmt:qemu-v10.2.3@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
+          platforms: ${{ matrix.platform.test_platform }}
+          cache-image: false
+      - name: "Test wheels"
+        env:
+          TEST_PLATFORM: ${{ matrix.platform.test_platform }}
+        run: |
+          docker run --rm --platform "$TEST_PLATFORM" -v "$GITHUB_WORKSPACE/dist:/dist:ro" --env PACKAGE_NAME alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 sh -c "
+            apk add python3;
+            python -m venv .venv;
+            .venv/bin/pip3 install ${PACKAGE_NAME} --no-index --find-links /dist --force-reinstall;
+            .venv/bin/${PACKAGE_NAME} --help;
+            "
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
