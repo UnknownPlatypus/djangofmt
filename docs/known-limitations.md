@@ -88,3 +88,31 @@ Requiring the close tag keeps the document unambiguous for both readers and the 
 Line endings are always normalized to `\n`: CRLF input is converted, and `.editorconfig`'s `end_of_line` is ignored.
 
 Making this configurable is skipped for now, but will be added if there is demand.
+
+## `{% load %}` tags are left as written
+
+Djangofmt never merges `{% load %}` tags nor sorts the libraries they load.
+djangofmt keeps one library per `{% load %}` line, and reordering libraries can change which tag wins when two of them define the same name.
+
+## Template tags inside text
+
+Django compiles the `{% %}` inside an attribute value, an HTML comment or a `<script>`, `<style>`, `<pre>` or `<textarea>` body like any other, but the parser keeps those as text.
+The formatter prints such tags and the `{{ }}` next to them as written; `style` values are the exception, their `{{ }}` are normalized along with the CSS.
+
+```html
+<a href="{%  url  'home' %}" title="{{ page.title | title }}">Home</a>
+```
+
+Lint rules read each of those tags on its own, so a block written there, or one whose opening and closing tags sit in two such places, is not paired, and the rules that need both tags skip it, such as [`deprecated-ifequal-tag`](rules/deprecated-ifequal-tag.md), [`missing-endblock-label`](rules/missing-endblock-label.md) and [`redundant-endblock-label`](rules/redundant-endblock-label.md).
+[`legacy-translation-tag`](rules/legacy-translation-tag.md) is the exception: it finds a `{% blocktrans %}`'s closer the way Django does.
+
+```html
+<option title="{% ifequal a b %}Current{% endifequal %}">Home</option>
+```
+
+A block in attribute position, such as `<option {% ifequal a b %}selected{% endifequal %}>`, is paired as usual.
+
+## Multi-line template tags
+
+Up to Django 6.1, a `{% %}` tag must fit on one line: Django reads one that spans several lines as plain text.
+Lint rules skip such a tag inside the text above, and the formatter joins one written in the template body onto a single line, turning text Django printed as is into a tag.
