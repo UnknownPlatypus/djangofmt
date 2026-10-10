@@ -1,0 +1,24 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::ifnotequal03 — the `{% else %}` branch stays as it is -->
+{% if a != b %}yes{% else %}no{% endif %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::ifequal-split08 — a quoted operand keeps its spaces and escapes -->
+{% if a == 'I\'m happy' %}yes{% else %}no{% endif %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::ifequal-filter05 — an operand keeps its filters -->
+{% if x|slice:"1"|upper == "A" %}x{% endif %}
+
+<!-- Nested blocks, the inner one fixed on the next pass -->
+{% if a == b %}
+    {% ifnotequal b c %}<p>a equals b, not c</p>{% endifnotequal %}
+{% endif %}
+
+<!-- Django ignores what follows the closing tag's name -->
+{% if a == b %}<p>Equal</p>{% endif %}
+
+<!-- Real-world: peeringdb, in attribute position -->
+<select name="language">
+    <option value="{{ lang.0 }}"{% if LANGUAGE_CODE == lang.0 %} selected="selected"{% endif %}>{{ lang.1 }}</option>
+</select>
