@@ -57,6 +57,7 @@ jobs:
     permissions:
       "contents": "read"
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 10
     outputs:
       val: ${{ steps.plan.outputs.manifest }}
       tag: ${{ (inputs.tag != 'dry-run' && inputs.tag) || '' }}
@@ -116,6 +117,7 @@ jobs:
     permissions:
       "contents": "read"
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       BUILD_MANIFEST_NAME: target/distrib/global-dist-manifest.json
@@ -173,6 +175,7 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 10
     outputs:
       val: ${{ steps.host.outputs.manifest }}
     steps:
@@ -244,6 +247,7 @@ jobs:
     # "host" however must run to completion, no skipping allowed!
     if: ${{ always() && needs.host.result == 'success' && (needs.custom-release-publish-pypi.result == 'skipped' || needs.custom-release-publish-pypi.result == 'success') }}
     runs-on: "ubuntu-22.04"
+    timeout-minutes: 10
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:

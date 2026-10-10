@@ -46,12 +46,13 @@ env:
 # `main` deploys (and workflow_dispatch / workflow_call runs) share a single `pages-deploy`
 # group, since GitHub Pages itself only accepts one deploy at a time.
 concurrency:
-  group: pages-${{ github.event_name == 'pull_request' && github.head_ref || 'deploy' }}
+  group: pages-${{ github.event.pull_request.number || 'deploy' }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -105,6 +106,7 @@ jobs:
     if: github.event_name != 'pull_request'
     environment: github-pages
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       id-token: write
       pages: write

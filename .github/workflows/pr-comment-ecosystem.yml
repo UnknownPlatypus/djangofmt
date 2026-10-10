@@ -21,6 +21,7 @@ concurrency:
 jobs:
   comment:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     # CI runs on pushes to main too, but only PRs produce an ecosystem result to comment.
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.event == 'pull_request' }}
     permissions:

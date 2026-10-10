@@ -22,6 +22,7 @@ jobs:
   update-dependents:
     name: Notify pre-commit mirror
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     environment:
       name: release
     steps:
