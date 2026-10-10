@@ -27,6 +27,7 @@ const TAG_RULES: &[Rule] = &[
     Rule::SameFilePartialInclude,
     Rule::UntrimmedBlocktranslate,
     Rule::DeprecatedStaticLibrary,
+    Rule::LegacyTranslationTag,
 ];
 
 /// AST visitor that collects lint diagnostics.
@@ -39,6 +40,9 @@ pub struct Checker<'a> {
     in_raw: bool,
     /// Whether a rule in `TAG_RULES` is enabled.
     reads_tags: bool,
+    /// Whether a `{% load … from … %}` took `trans` or `blocktrans` from a library other than
+    /// `i18n`, so the legacy tags after it may be that library's.
+    foreign_translation_tags: bool,
 }
 
 impl<'a> Checker<'a> {
@@ -55,6 +59,7 @@ impl<'a> Checker<'a> {
             block_names: SmallVec::new_const(),
             in_raw: false,
             reads_tags: settings.rules.contains_any(TAG_RULES),
+            foreign_translation_tags: false,
         }
     }
 
@@ -242,10 +247,30 @@ impl<'a> Checker<'a> {
                 }
             }
             "load" => {
+                if let Some(version) = self.target_version() {
+                    if self.is_rule_enabled(Rule::DeprecatedStaticLibrary) {
+                        rules::upgrade::deprecated_static_library::check(self, tag, version);
+                    }
+                    if self.is_rule_enabled(Rule::LegacyTranslationTag) {
+                        self.foreign_translation_tags |=
+                            rules::upgrade::legacy_translation_tag::check_load(self, tag, version);
+                    }
+                }
+            }
+            "trans" => {
                 if let Some(version) = self.target_version()
-                    && self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
+                    && !self.foreign_translation_tags
+                    && self.is_rule_enabled(Rule::LegacyTranslationTag)
                 {
-                    rules::upgrade::deprecated_static_library::check(self, tag, version);
+                    rules::upgrade::legacy_translation_tag::check_trans(self, tag, version);
+                }
+            }
+            "blocktrans" => {
+                if let Some(version) = self.target_version()
+                    && !self.foreign_translation_tags
+                    && self.is_rule_enabled(Rule::LegacyTranslationTag)
+                {
+                    rules::upgrade::legacy_translation_tag::check_blocktrans(self, tag, version);
                 }
             }
             _ => {}

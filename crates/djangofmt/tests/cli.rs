@@ -458,6 +458,29 @@ fn check_fixable_file_with_fix() {
     );
 }
 
+#[test]
+fn check_fix_renames_and_trims_one_blocktrans() {
+    // The pair's rename spans the ` trimmed` insertion, which waits for the next pass.
+    let project = Project::new().file("test.html", "{% blocktrans %}Hello{% endblocktrans %}\n");
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--fix", "--target-version", "3.1"])
+            .args(["--select", "legacy-translation-tag,untrimmed-blocktranslate"])
+            .arg(project.join("test.html")),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 2 errors (2 fixed, 0 remaining).
+    ");
+    assert_eq!(
+        project.read("test.html"),
+        "{% blocktranslate trimmed %}Hello{% endblocktranslate %}\n"
+    );
+}
+
 // ── Check from stdin ─────────────────────────────────────────────────
 
 #[test]

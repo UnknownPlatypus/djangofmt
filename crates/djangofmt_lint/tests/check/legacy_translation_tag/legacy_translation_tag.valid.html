@@ -1,0 +1,17 @@
+<!-- The current names -->
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_translate.py::i18n35 -->
+{% load i18n %}{% translate "Page not found" as page_not_found %}{{ page_not_found }}
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::i18n26 -->
+{% load i18n %}{% blocktranslate with extra_field=myextra_field count counter=number %}singular {{ extra_field }}{% plural %}plural{% endblocktranslate %}
+
+<!-- A pair Django rejects, which no rename fixes -->
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::test_with_block -->
+{% load i18n %}{% blocktrans %}{% block b %} {% endblock %}{% endblocktrans %}
+
+<!-- A whole-library load of a library named `trans` -->
+{% load i18n trans %}
+
+<!-- The tags after a load that takes a legacy name from another library -->
+{% load trans from mylib %}
+{% trans "Welcome" %}
+{% blocktrans %}Hello{% endblocktrans %}
