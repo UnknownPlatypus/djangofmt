@@ -1,0 +1,6 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<script type="application/json">
+    {"a": }
+</script>
