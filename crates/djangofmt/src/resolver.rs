@@ -222,8 +222,7 @@ pub fn resolve_files(
             .standard_filters(config.respect_gitignore)
             .hidden(false)
             .filter_entry(move |entry| {
-                // Roots come from the command line, so only the walk's own entries are excluded.
-                if entry.depth() > 0 && exclude.is_match_or_basename(entry.path()) {
+                if exclude.is_match_or_basename(entry.path()) {
                     debug!("Excluded: {}", entry.path().display());
                     return false;
                 }
