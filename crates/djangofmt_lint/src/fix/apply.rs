@@ -11,9 +11,8 @@ use std::path::Path;
 use markup_fmt::SyntaxError;
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use crate::LintDiagnostic;
-use crate::Settings;
 use crate::fix::{Applicability, IsolationLevel};
+use crate::{LintDiagnostic, LintInput, Settings};
 
 /// Metadata about a single applied fix, captured for `--show-fixes`.
 #[derive(Debug, Clone)]
@@ -31,8 +30,6 @@ pub struct ApplyResult {
     pub output: String,
     /// Number of fixes applied.
     pub applied_count: usize,
-    /// Number of fixes that were filtered out (overlap, isolation, applicability).
-    pub skipped_count: usize,
     /// Metadata for each applied fix, in application order.
     ///
     /// Used by the CLI's `--show-fixes` to render per-rule counts.
@@ -69,7 +66,6 @@ pub fn apply_fixes(
     let mut output = String::with_capacity(source.len());
     let mut last_pos: usize = 0;
     let mut applied_count = 0usize;
-    let mut skipped_count = 0usize;
     let mut applied_groups: FxHashSet<u32> = FxHashSet::default();
     let mut applied_fixes: Vec<AppliedFix> = Vec::new();
 
@@ -85,13 +81,11 @@ pub fn apply_fixes(
         if let IsolationLevel::Group(id) = fix.isolation()
             && applied_groups.contains(&id)
         {
-            skipped_count += 1;
             continue;
         }
 
         // Strict `<` so adjacent insertions at the same offset can both apply.
         if first.start() < last_pos {
-            skipped_count += 1;
             continue;
         }
 
@@ -118,7 +112,6 @@ pub fn apply_fixes(
     ApplyResult {
         output,
         applied_count,
-        skipped_count,
         applied_fixes,
     }
 }
@@ -141,10 +134,6 @@ pub struct FixerResult {
     pub remaining_diagnostics: Vec<LintDiagnostic>,
     /// Total fixes applied across iterations.
     pub applied_count: usize,
-    /// Total fixes skipped (overlap, isolation, applicability).
-    pub skipped_count: usize,
-    /// Number of fix iterations that ran.
-    pub iterations: usize,
     /// Per-rule applied summaries, used by `--show-fixes`.
     pub applied_by_rule: rustc_hash::FxHashMap<&'static str, RuleFixSummary>,
     /// Whether `source` only got its leading comment linted, see [`crate::parse_or_quarantine`].
@@ -181,11 +170,22 @@ pub fn lint_fix(
     threshold: Applicability,
     path: Option<&Path>,
 ) -> Result<FixerResult, FixerError> {
+    fix_loop(source, profile, custom_blocks, threshold, |input| {
+        input.check(settings, path)
+    })
+}
+
+/// [`lint_fix`] with the lint step passed in, so tests can feed it fixes no rule makes.
+fn fix_loop(
+    source: &str,
+    profile: markup_fmt::Language,
+    custom_blocks: &[String],
+    threshold: Applicability,
+    check: impl Fn(&LintInput<'_>) -> Vec<LintDiagnostic>,
+) -> Result<FixerResult, FixerError> {
     let mut current: Cow<'_, str> = Cow::Borrowed(source);
     let mut total_applied = 0usize;
-    let mut total_skipped = 0usize;
     let mut iterations = 0usize;
-    let mut had_valid_first_parse = false;
     let mut quarantined = false;
     let mut applied_by_rule: FxHashMap<&'static str, RuleFixSummary> = FxHashMap::default();
 
@@ -201,8 +201,6 @@ pub fn lint_fix(
                 // mismatched spans, drop them. A re-run will re-derive them.
                 remaining_diagnostics: Vec::new(),
                 applied_count: total_applied,
-                skipped_count: total_skipped,
-                iterations,
                 applied_by_rule,
                 quarantined,
             });
@@ -211,12 +209,11 @@ pub fn lint_fix(
         let input = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
             Ok(input) => {
                 if iterations == 0 {
-                    had_valid_first_parse = true;
                     quarantined = input.quarantined;
                 }
                 input
             }
-            Err(err) if had_valid_first_parse => {
+            Err(err) if iterations > 0 => {
                 return Err(FixerError::SyntaxRegression {
                     iteration: iterations,
                     error: err,
@@ -225,9 +222,8 @@ pub fn lint_fix(
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
-        let diagnostics = input.check(settings, path);
+        let diagnostics = check(&input);
         let result = apply_fixes(&current, &diagnostics, threshold);
-        total_skipped += result.skipped_count;
         for applied in &result.applied_fixes {
             let entry = applied_by_rule.entry(applied.code).or_default();
             entry.count += 1;
@@ -241,8 +237,6 @@ pub fn lint_fix(
                 source: current.into_owned(),
                 remaining_diagnostics: diagnostics,
                 applied_count: total_applied,
-                skipped_count: total_skipped,
-                iterations,
                 applied_by_rule,
                 quarantined,
             });
@@ -307,7 +301,6 @@ mod tests {
         // First one applied, second overlaps and is skipped.
         assert_eq!(result.output, "XXfghij");
         assert_eq!(result.applied_count, 1);
-        assert_eq!(result.skipped_count, 1);
     }
 
     #[test]
@@ -327,7 +320,6 @@ mod tests {
         // Only the first fix in group 1 applies.
         assert_eq!(result.output, "Xbcdefghij");
         assert_eq!(result.applied_count, 1);
-        assert_eq!(result.skipped_count, 1);
     }
 
     #[test]
@@ -390,11 +382,10 @@ mod tests {
         let result = apply_fixes(source, &[], Applicability::Safe);
         assert_eq!(result.output, "abc");
         assert_eq!(result.applied_count, 0);
-        assert_eq!(result.skipped_count, 0);
     }
 
     #[test]
-    fn lint_fix_no_op_returns_no_iterations() {
+    fn lint_fix_no_op_leaves_source_unchanged() {
         let source = "<div></div>";
         let settings = Settings::all();
         let result = lint_fix(
@@ -408,6 +399,22 @@ mod tests {
         .expect("lint_fix");
         assert_eq!(result.source, source);
         assert_eq!(result.applied_count, 0);
-        assert_eq!(result.iterations, 0);
+    }
+
+    #[test]
+    fn lint_fix_reports_a_fix_that_breaks_the_syntax() {
+        // `<p id=></p>` does not parse.
+        let fix = Fix::safe_edit(Edit::insertion(" id=", 2));
+        let result = fix_loop(
+            "<p></p>",
+            markup_fmt::Language::Django,
+            &[],
+            Applicability::Safe,
+            |_| vec![diag_with_fix(fix.clone())],
+        );
+        assert!(matches!(
+            result,
+            Err(FixerError::SyntaxRegression { iteration: 1, .. })
+        ));
     }
 }

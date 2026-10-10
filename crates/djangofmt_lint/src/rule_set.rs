@@ -187,4 +187,12 @@ mod tests {
         assert_eq!(set, RuleSet::empty());
         assert_eq!(set.into_iter().collect::<Vec<_>>(), vec![]);
     }
+
+    #[test]
+    fn contains_any_reflects_membership() {
+        let set = RuleSet::from_rule(Rule::UseHttps);
+        assert!(set.contains_any(&[Rule::InvalidAttrValue, Rule::UseHttps]));
+        assert!(!set.contains_any(&[Rule::InvalidAttrValue]));
+        assert!(!set.contains_any(&[]));
+    }
 }

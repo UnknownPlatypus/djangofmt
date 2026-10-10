@@ -183,7 +183,7 @@ fn guarded_ranges(
         if child_start > cursor {
             ranges.push(cursor..child_start);
         }
-        cursor = child_start + child.raw.len();
+        cursor = checker.source_end(child.raw);
     }
     if cursor < end {
         ranges.push(cursor..end);
@@ -326,6 +326,13 @@ mod tests {
             );
             assert!(!codes(&source).contains(&"invalid-attr-value"), "{filler}");
         }
+        // Text is a node of its own, so it takes the guard instead.
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[invalid-attr-value] #}\nLegacy: <form method=\"yes\"></form>"
+            ),
+            ["invalid-attr-value", "unused-ignore-code"]
+        );
         // Stacked ignore comments all reach the same target.
         assert_eq!(
             codes(
@@ -343,8 +350,11 @@ mod tests {
             codes(&format!("<div>\n{GUARDED}\n</div>")),
             Vec::<&str>::new()
         );
+        // In a later branch too, past the siblings of the first one.
         assert_eq!(
-            codes(&format!("{{% if x %}}\n{GUARDED}\n{{% endif %}}")),
+            codes(&format!(
+                "{{% if x %}}<p>x</p>{{% else %}}\n{GUARDED}\n{{% endif %}}"
+            )),
             Vec::<&str>::new()
         );
     }

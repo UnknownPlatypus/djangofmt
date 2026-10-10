@@ -209,3 +209,17 @@ impl Drop for DiagnosticGuard<'_, '_> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "subslice")]
+    fn source_offset_rejects_a_slice_running_past_the_source() {
+        let text = "<p>a</p><p>b</p>";
+        let settings = Settings::all();
+        let context = LintContext::new(&text[..8], &settings, Language::Django, None, false);
+        let _ = context.source_offset(&text[4..12]);
+    }
+}

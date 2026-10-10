@@ -1,0 +1,7 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<!-- Django's whitespace normalization doesn't apply to Jinja -->
+{% if  a  and  b %}
+    <p>{{ value | upper }}</p>
+{% endif %}

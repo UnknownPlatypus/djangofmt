@@ -1,0 +1,32 @@
+# Formatter and syntax are mostly covered by the CLI snapshot tests,
+# so every mutant must run these crates' tests, not only its own.
+test_package = ["djangofmt", "djangofmt_formatter", "djangofmt_lint", "djangofmt_syntax"]
+exclude_globs = [
+  "crates/djangofmt_benchmark/**",
+  "crates/djangofmt_dev/**",
+  "crates/djangofmt_wasm/**",
+  "crates/djangofmt_macros/**",
+  # Only `djangofmt_dev` reads it, to generate the settings docs.
+  "crates/djangofmt/src/options_metadata.rs",
+]
+# Text no test asserts: fix titles only show under `--show-fixes`, the rest in docs and error messages.
+exclude_re = [
+  "::fix_title -> ",
+  "Display for (FixAvailability|PanicError)>",
+  "Debug for RuleSet>",
+  # Equivalent: shortcuts whose slow path gives the same result.
+  "(Checker|LintContext)<'a>::any_rule_enabled -> bool with true",
+  "is_single_spaced -> bool with false",
+  "has_spaced_pipe -> bool with true",
+  # Equivalent: the target search skips the comment itself, and an empty range guards nothing.
+  "replace \\+ with \\* in siblings_after",
+  "replace < with <= in (siblings_after|guarded_ranges)",
+  "replace > with >= in guarded_ranges",
+  # Equivalent until the registry grows: no rule is deprecated or removed, and all fit one `u64`.
+  "replace && with \\|\\| in Settings::all",
+  "replace \\* with / in <impl Iterator for RuleSetIterator>::next",
+]
+all_features = true
+additional_cargo_test_args = ["--lib", "--bins", "--tests"]
+gitignore = true
+profile = "mutants"

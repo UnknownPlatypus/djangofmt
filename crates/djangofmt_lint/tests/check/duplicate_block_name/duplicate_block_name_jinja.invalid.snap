@@ -1,0 +1,12 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Duplicate `{% block %}` name `a`
+   ╭─[tests/check/duplicate_block_name/duplicate_block_name_jinja.invalid.jinja:5:10]
+ 4 │ {% endif %}
+ 5 │ {% block a %}{% endblock %}
+   ·          ┬
+   ·          ╰── here
+   ╰────
+  help: Rename or remove one of the `{% block a %}` tags

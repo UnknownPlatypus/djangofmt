@@ -80,6 +80,24 @@ fn format_directory() {
 }
 
 #[test]
+fn format_infers_jinja_profile_from_extension() {
+    // `verbatim` is only raw for django, so a `.jinja` file gets its content formatted.
+    let project = Project::new().file("page.jinja", "{% verbatim %}{{   x   }}{% endverbatim %}\n");
+    assert_cmd_snapshot!(cli().arg(project.join("page.jinja")), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    1 file reformatted !
+    ");
+    assert_eq!(
+        project.read("page.jinja"),
+        "{% verbatim %}{{ x }}{% endverbatim %}\n"
+    );
+}
+
+#[test]
 fn format_check_reports_without_writing() {
     let original = "<div   class=\"foo\"  >\n</div>\n";
     let project = Project::new().file("test.html", original);
@@ -353,6 +371,23 @@ fn format_warns_on_deprecated_preserve_unquoted_attrs() {
     `preserve-unquoted-attrs` is deprecated and will be removed in djangofmt 2.0. Unquoted values on Cotton components (`c-*`) are now preserved automatically.
     1 file left unchanged !
     ");
+
+    // The CLI flags are deprecated too, whichever way they point.
+    let project = Project::new().file("test.html", "<div class=foo></div>\n");
+    assert_cmd_snapshot!(
+        cli()
+            .current_dir(project.path())
+            .args(["--no-preserve-unquoted-attrs", "test.html"]),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    `preserve-unquoted-attrs` is deprecated and will be removed in djangofmt 2.0. Unquoted values on Cotton components (`c-*`) are now preserved automatically.
+    1 file reformatted !
+    "
+    );
 }
 
 #[test]
@@ -455,6 +490,26 @@ fn check_fixable_file_with_fix() {
     assert_eq!(
         project.read("test.html"),
         "{% blocktranslate trimmed %}Hello{% endblocktranslate %}\n"
+    );
+}
+
+#[test]
+fn check_reports_unsafe_fixes_as_hidden() {
+    // Nothing is applied without `--fix`, so `--show-fixes` has nothing to list.
+    let project = Project::new().file("test.html", "<a href=\"http://example.com\">x</a>\n");
+    assert_cmd_snapshot_tmpdir!(
+        cli()
+            .args(["check", "--show-fixes", "--output-format", "concise"])
+            .arg(project.join("test.html")),
+        @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:10: use-https Avoid `http://` URLs in `href`
+    Found 1 errors. (1 hidden fixes can be enabled with --unsafe-fixes)
+    "
     );
 }
 
@@ -572,6 +627,24 @@ fn check_passes_file_path_to_path_aware_rules() {
     assert_eq!(
         project.read("app/page.html"),
         "{% partialdef nav %}<a>Home</a>{% endpartialdef %}\n{% partial nav %}\n"
+    );
+}
+
+#[test]
+fn check_warns_on_preview_rule_without_preview() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--select", "django-url-pattern", "-"])
+            .pass_stdin("<div></div>\n"),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    rule `django-url-pattern` is in preview and was skipped; enable it with `--preview`
+    All checks passed!
+    "
     );
 }
 
@@ -742,6 +815,32 @@ fn check_respects_pyproject_per_file_ignores() {
 
     ----- stderr -----
     All checks passed!
+    "
+    );
+}
+
+#[test]
+fn check_respects_pyproject_rule_settings() {
+    // `tw-` classes only get sorted once the rule knows the prefix.
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt.lint]\nselect = [\"unsorted-tailwind-classes\"]\n\n\
+             [tool.djangofmt.lint.unsorted-tailwind-classes]\nprefix = \"tw-\"\n",
+        )
+        .file("test.html", "<div class=\"tw-p-4 tw-flex\"></div>\n");
+    assert_cmd_snapshot!(
+        cli()
+            .current_dir(project.path())
+            .args(["check", "--output-format", "concise", "test.html"]),
+        @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    test.html:1:13: unsorted-tailwind-classes [*] Unsorted Tailwind CSS classes
+    Found 1 errors. [*] 1 fixable with the --fix option.
     "
     );
 }

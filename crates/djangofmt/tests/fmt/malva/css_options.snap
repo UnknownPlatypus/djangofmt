@@ -1,0 +1,32 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<style>
+    @keyframes fade {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+    @media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) and (hover: hover)
+                and (pointer: fine) {
+        .a {
+            color: red;
+        }
+    }
+    .navigation-item:is(
+        .navigation-item--active,
+        .navigation-item--highlighted,
+        .navigation-item--current,
+        .navigation-item--hover,
+        .navigation-item--focus
+    ) {
+        color: red;
+    }
+    /* djangofmt-selector-override: ignore */
+    .a,.b {
+        color: red;
+    }
+</style>

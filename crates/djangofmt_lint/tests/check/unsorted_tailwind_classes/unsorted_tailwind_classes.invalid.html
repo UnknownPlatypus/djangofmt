@@ -17,7 +17,7 @@
 <a class="text-white bg-blue-700 btn hover:bg-blue-900 mt-4">Sign up</a>
 <button class="text-white bg-purple-600 hover:bg-purple-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5">Submit</button>
 
-<!-- With prefix (v3) -->
+<!-- A v3 prefix (`tw-`) is left alone unless configured -->
 <a class="tw-text-white tw-bg-blue-700 btn hover:tw-bg-blue-900 tw-mt-4">Sign up</a>
 <button class="tw-text-white tw-bg-purple-600 hover:tw-bg-purple-800 focus:tw-ring-4 focus:tw-ring-primary-300 tw-font-medium tw-rounded-lg tw-text-sm tw-px-5 tw-py-2.5">Submit</button>
 
@@ -28,3 +28,7 @@
 <!-- Template interpolation: static runs on each side are sorted, interpolations untouched -->
 <div class="p-4 flex m-4 {{ extra_classes }}"></div>
 <span class="text-white p-4 {% if active %}flex{% endif %} bg-blue-700"></span>
+
+<!-- Line breaks between classes are kept -->
+<div class="p-4
+            flex"></div>

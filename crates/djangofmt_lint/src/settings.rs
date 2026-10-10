@@ -51,13 +51,6 @@ impl Settings {
     pub const fn is_enabled(&self, rule: Rule) -> bool {
         self.rules.contains(rule)
     }
-
-    /// Check if any of the given rules is enabled.
-    #[must_use]
-    #[inline]
-    pub const fn any_rule_enabled(&self, rules: &[Rule]) -> bool {
-        self.rules.contains_any(rules)
-    }
 }
 
 /// Raw lint input, merged from CLI flags and `[tool.djangofmt.lint]`, resolved into a [`Settings`]
@@ -139,29 +132,7 @@ mod tests {
     use super::{LintConfiguration, Settings};
     use crate::registry::{Rule, RuleCategory};
     use crate::rule_selector::{ALL_GROUP, DEFAULT_GROUP, RuleSelector, SelectionWarning};
-    use crate::rule_set::RuleSet;
     use djangofmt_syntax::ReservedCode;
-
-    #[test]
-    fn any_rule_enabled_reflects_membership() {
-        let all = Settings::default();
-        assert!(all.any_rule_enabled(&[Rule::UseHttps]));
-        assert!(all.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
-        assert!(!all.any_rule_enabled(&[]));
-
-        let none = Settings {
-            rules: RuleSet::default(),
-            ..Settings::default()
-        };
-        assert!(!none.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
-
-        let partial = Settings {
-            rules: RuleSet::from_rule(Rule::UseHttps),
-            ..Settings::default()
-        };
-        assert!(partial.any_rule_enabled(&[Rule::UseHttps, Rule::InvalidAttrValue]));
-        assert!(!partial.any_rule_enabled(&[Rule::InvalidAttrValue]));
-    }
 
     /// a bare rule in `select` (specificity 2) beats a `category:` in `ignore` (specificity 1), which beats `category:all` (specificity 0).
     #[test]
@@ -182,6 +153,17 @@ mod tests {
         assert!(settings.is_enabled(Rule::UseHttps));
         // Other stable categories remain on.
         assert!(settings.is_enabled(Rule::InvalidAttrValue));
+    }
+
+    #[test]
+    fn ignore_wins_a_specificity_tie() {
+        let (settings, _) = LintConfiguration {
+            select: Some(vec![RuleSelector::Rule(Rule::UseHttps)]),
+            ignore: vec![RuleSelector::Rule(Rule::UseHttps)],
+            ..LintConfiguration::default()
+        }
+        .into_settings();
+        assert!(!settings.is_enabled(Rule::UseHttps));
     }
 
     #[test]

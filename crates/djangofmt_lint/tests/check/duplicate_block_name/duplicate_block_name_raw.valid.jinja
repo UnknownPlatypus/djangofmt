@@ -1,4 +1,6 @@
-<!-- `{% raw %}` emits its body verbatim, so the blocks inside are text, not template tags -->
+{% block a %}{% endblock %}
+
+<!-- `{% raw %}` emits its body verbatim, so the blocks inside are text that can't clash with the one above -->
 {% raw %}
 {% block a %}{% endblock %}
 {% block a %}{% endblock %}

@@ -49,16 +49,6 @@ pub enum CommandError {
 }
 
 impl CommandError {
-    #[must_use]
-    pub fn path(&self) -> Option<&Path> {
-        match self {
-            Self::Parse(path, _)
-            | Self::Read(path, _)
-            | Self::Write(path, _)
-            | Self::Panic(path, _) => path.as_deref(),
-        }
-    }
-
     /// Render as a single `path:line:column: message` line.
     #[must_use]
     pub fn concise(&self) -> String {

@@ -23,3 +23,6 @@
 <button class="base" {% if active %}class="extra"{% endif %}></button>
 <button class="base" {% for cls in classes %}class="{{ cls }}"{% endfor %}></button>
 <button {% if a %}class="on"{% else %}id="off"{% endif %} class="always"></button>
+
+<!-- A block holding both duplicates is the element's only attribute -->
+<button {% if a %}class="on" class="off"{% endif %}></button>

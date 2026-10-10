@@ -109,6 +109,11 @@ coverage:
 coverage-lcov:
     uv run --only-dev cargo llvm-cov --workspace --exclude djangofmt_dev --lcov --output-path lcov.info
 
+# Run mutation testing, e.g. `just mutants -j4 -f 'crates/djangofmt_syntax/**'`
+[group('dev')]
+mutants *args="":
+    INSTA_UPDATE=no cargo mutants {{args}}
+
 # Report the largest functions and crates in the release binary
 [group('dev')]
 bloat:

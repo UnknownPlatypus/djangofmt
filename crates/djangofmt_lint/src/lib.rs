@@ -291,8 +291,7 @@ pub fn lint_text(
         .map(|threshold| lint_fix(source, settings, language, custom_blocks, threshold, path))
     {
         Some(Ok(result)) => LintOutcome {
-            // The compare is skipped when nothing was applied: `source` is then a plain clone.
-            fixed: (result.applied_count > 0 && result.source != source).then_some(result.source),
+            fixed: (result.source != source).then_some(result.source),
             diagnostics: result.remaining_diagnostics,
             applied_count: result.applied_count,
             applied_by_rule: result.applied_by_rule,

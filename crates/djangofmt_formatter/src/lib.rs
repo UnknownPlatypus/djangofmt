@@ -44,8 +44,8 @@ impl FormatterConfig {
                 html_void_self_closing,
                 preserve_unquoted_attrs,
             ),
-            malva: build_malva_config(print_width, indent_width),
-            json: build_json_config(print_width, indent_width),
+            malva: build_malva_config(indent_width),
+            json: build_json_config(indent_width),
         }
     }
 }
@@ -66,7 +66,6 @@ pub fn build_markup_options(
             ..markup_fmt::config::LayoutOptions::default()
         },
         language: markup_fmt::config::LanguageOptions {
-            format_comments: false,
             // HTML void elements should not be self-closing by default:
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             // <br/> -> <br>
@@ -121,13 +120,11 @@ pub fn build_markup_options(
 }
 
 /// Build default `malva` options for CSS/SCSS/SASS/LESS formatting.
-fn build_malva_config(
-    print_width: LineLength,
-    indent_width: IndentWidth,
-) -> malva::config::FormatOptions {
+///
+/// The print width is left out: each snippet gets the width `markup_fmt` has left for it.
+fn build_malva_config(indent_width: IndentWidth) -> malva::config::FormatOptions {
     malva::config::FormatOptions {
         layout: malva::config::LayoutOptions {
-            print_width: print_width.into(),
             indent_width: indent_width.into(),
             ..malva::config::LayoutOptions::default()
         },
@@ -141,18 +138,16 @@ fn build_malva_config(
             single_line_top_level_declarations: true,
             selector_override_comment_directive: "djangofmt-selector-override".into(),
             ignore_comment_directive: LEGACY_IGNORE_DIRECTIVE.into(),
-            ignore_file_comment_directive: LEGACY_IGNORE_DIRECTIVE.into(),
             ..malva::config::LanguageOptions::default()
         },
     }
 }
 
+/// Like [`build_malva_config`], the line width is set per snippet.
 fn build_json_config(
-    print_width: LineLength,
     indent_width: IndentWidth,
 ) -> dprint_plugin_json::configuration::Configuration {
     dprint_plugin_json::configuration::ConfigurationBuilder::new()
-        .line_width(print_width.value().into())
         .indent_width(indent_width.value())
         .build()
 }
@@ -273,16 +268,7 @@ pub fn format_text(
 
 /// Whether the only whitespace in a tag `body` is single plain spaces.
 fn is_single_spaced(body: &str) -> bool {
-    let mut after_space = false;
-    body.chars().all(|c| {
-        let single = if c == ' ' {
-            !after_space
-        } else {
-            !dtl::is_space(c)
-        };
-        after_space = c == ' ';
-        single
-    })
+    !body.contains("  ") && !body.chars().filter(|&c| c != ' ').any(dtl::is_space)
 }
 
 /// Whether whitespace touches a `|`, the only whitespace [`dtl::compact_filter_expression`] drops.

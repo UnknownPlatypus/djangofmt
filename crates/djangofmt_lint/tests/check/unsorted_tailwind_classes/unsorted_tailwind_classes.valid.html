@@ -14,6 +14,9 @@
 <!-- An element without a class attribute is never inspected -->
 <p>Plain paragraph with no class attribute.</p>
 
+<!-- Nor is any other attribute -->
+<div data-class="p-4 flex"></div>
+
 <!-- Template interpolation: static runs around it are already sorted, interpolations untouched -->
 <div class="flex {{ extra_classes }} p-4"></div>
 <div class="p-4 {% if active %}flex{% endif %} m-4"></div>

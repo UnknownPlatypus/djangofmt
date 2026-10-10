@@ -32,3 +32,6 @@ site/
 
 # Benchmark chart renders (uploaded to GitHub rather than committed)
 python/benchmarks/benchmark-*.svg
+
+# cargo-mutants output
+mutants.out*/

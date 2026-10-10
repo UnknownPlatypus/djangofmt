@@ -175,10 +175,7 @@ impl CheckRun {
     pub(crate) fn report(&self, results: &[CheckResult], errors: Vec<CommandError>) -> ExitStatus {
         let nb_errors = super::report_errors(errors, "check", self.config.output_format);
 
-        let mut totals = Totals::of(results);
-        if self.config.fix && self.config.unsafe_fixes {
-            totals.unsafe_fixable = 0;
-        }
+        let totals = Totals::of(results);
 
         match self.config.output_format {
             OutputFormat::Full => print_full(results),

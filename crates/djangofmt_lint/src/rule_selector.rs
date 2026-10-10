@@ -82,17 +82,6 @@ impl RuleSelector {
     }
 }
 
-impl fmt::Display for RuleSelector {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::All => write!(f, "{CATEGORY_PREFIX}{ALL_GROUP}"),
-            Self::Default => write!(f, "{CATEGORY_PREFIX}{DEFAULT_GROUP}"),
-            Self::Category(category) => write!(f, "{CATEGORY_PREFIX}{category}"),
-            Self::Rule(rule) => write!(f, "{rule}"),
-        }
-    }
-}
-
 impl FromStr for RuleSelector {
     type Err = SelectorParseError;
 
@@ -211,6 +200,21 @@ impl fmt::Display for SelectionWarning {
 mod tests {
     use super::RuleSelector;
     use crate::registry::Rule;
+
+    #[test]
+    fn parse_suggests_the_missing_category_prefix() {
+        assert_eq!("category:default".parse(), Ok(RuleSelector::Default));
+        let error = |value: &str| value.parse::<RuleSelector>().unwrap_err().to_string();
+        assert_eq!(
+            error("default"),
+            "Unknown rule `default`; did you mean `category:default`?"
+        );
+        assert_eq!(error("yay"), "Unknown rule selector: `yay`");
+        assert_eq!(
+            error("category:yay"),
+            "Unknown category `yay` (expected one of: all, default, correctness, suspicious, style, accessibility, pedantic)"
+        );
+    }
 
     /// `all_rules` is total: an exact selector denotes exactly its rule,
     /// regardless of lifecycle. This is what docs/`--explain` output relies on.

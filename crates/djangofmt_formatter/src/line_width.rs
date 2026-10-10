@@ -9,11 +9,6 @@ pub struct LineLength(NonZeroU16);
 
 impl LineLength {
     const MAX: u16 = 320;
-
-    #[must_use]
-    pub const fn value(self) -> u16 {
-        self.0.get()
-    }
 }
 
 impl Default for LineLength {
@@ -72,12 +67,6 @@ impl<'de> Deserialize<'de> for LineLength {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let value = u16::deserialize(deserializer)?;
         Self::try_from(value).map_err(serde::de::Error::custom)
-    }
-}
-
-impl std::fmt::Display for LineLength {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
     }
 }
 
@@ -151,12 +140,6 @@ impl<'de> Deserialize<'de> for IndentWidth {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let value = u8::deserialize(deserializer)?;
         Self::try_from(value).map_err(serde::de::Error::custom)
-    }
-}
-
-impl std::fmt::Display for IndentWidth {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
     }
 }
 

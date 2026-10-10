@@ -13,16 +13,12 @@ pub enum Profile {
 }
 
 impl Profile {
-    /// Infer the profile from a file's extension.
+    /// Infer the profile from a file's extension: `.jinja`, `.jinja2` and `.j2` are Jinja.
     ///
-    /// - `.html` → `Django`
-    /// - `.jinja`, `.jinja2`, `.j2` → `Jinja`
-    ///
-    /// Returns `None` for unrecognised extensions.
+    /// Returns `None` for any other extension, which the default (Django) covers.
     #[must_use]
     pub fn from_path(path: &Path) -> Option<Self> {
         match path.extension()?.to_str()? {
-            "html" => Some(Self::Django),
             "jinja" | "jinja2" | "j2" => Some(Self::Jinja),
             _ => None,
         }
