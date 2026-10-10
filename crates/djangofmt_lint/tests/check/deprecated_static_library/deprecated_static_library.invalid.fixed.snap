@@ -1,8 +1,7 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-<!-- The two removed aliases of `static` -->
-{% load static %}
+<!-- A removed alias of `static` -->
 {% load static %}
 
 <!-- Among other libraries -->

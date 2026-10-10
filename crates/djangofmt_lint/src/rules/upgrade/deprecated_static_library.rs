@@ -75,39 +75,43 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, target_version: DjangoVe
         return;
     }
     let content = tag.content;
-    // Both libraries contain `static`, so the other `{% load %}` tags are not lexed.
-    if !content.contains("static") {
+    if !DEPRECATED_LIBRARIES
+        .iter()
+        .any(|library| content.contains(library))
+    {
         return;
     }
     let bits = bits(content);
-    // Django reads `{% load a b from library %}` only from four bits on.
-    if bits.len() >= 4 && bits[bits.len() - 2] == "from" {
-        // `static` is the only tag either alias defines, so anything else is already broken.
-        if let ["load", "static", "from", library] = bits[..]
-            && DEPRECATED_LIBRARIES.contains(&library)
-        {
-            let start = checker.source_end(bits[1]);
-            let edit = Edit::deletion(span(start, checker.source_end(library) - start));
-            report(checker, library, edit);
+    match bits[..] {
+        // `static` is the only tag either alias defines, so a `from` load of anything else is left alone.
+        [_, kept @ "static", "from", library] if DEPRECATED_LIBRARIES.contains(&library) => {
+            report(checker, library, delete_after(checker, kept, library));
         }
-        return;
+        // Django reads `{% load a b from library %}` only from four bits on.
+        [_, _, .., "from", _] => {}
+        _ => {
+            // Renaming an alias once the tag loads `static` would load it twice, so drop the alias.
+            let mut loads_static = bits.contains(&"static");
+            for (previous, &library) in bits.iter().zip(&bits[1..]) {
+                if !DEPRECATED_LIBRARIES.contains(&library) {
+                    continue;
+                }
+                let edit = if loads_static {
+                    delete_after(checker, previous, library)
+                } else {
+                    Edit::replacement("static", checker.source_span(library))
+                };
+                report(checker, library, edit);
+                loads_static = true;
+            }
+        }
     }
+}
 
-    // Renaming an alias once the tag loads `static` would load it twice, so drop the alias.
-    let mut loads_static = bits.contains(&"static");
-    for (previous, &library) in bits.iter().zip(&bits[1..]) {
-        if !DEPRECATED_LIBRARIES.contains(&library) {
-            continue;
-        }
-        let edit = if loads_static {
-            let start = checker.source_end(previous);
-            Edit::deletion(span(start, checker.source_end(library) - start))
-        } else {
-            Edit::replacement("static", checker.source_span(library))
-        };
-        report(checker, library, edit);
-        loads_static = true;
-    }
+/// Delete `library` along with the whitespace before it, from the end of the `kept` bit.
+fn delete_after(checker: &Checker<'_>, kept: &str, library: &str) -> Edit {
+    let start = checker.source_end(kept);
+    Edit::deletion(span(start, checker.source_end(library) - start))
 }
 
 fn report(checker: &Checker<'_>, library: &str, edit: Edit) {

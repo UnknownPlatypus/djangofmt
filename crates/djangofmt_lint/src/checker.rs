@@ -26,6 +26,10 @@ const RAW_SENSITIVE_RULES: &[Rule] = &[
     Rule::UntrimmedBlocktranslate,
 ];
 
+/// Every rule an arm of `visit_jinja_tag` reaches: a tag's name is only read when one is enabled.
+/// A new arm adds its rules here.
+const TAG_RULES: &[Rule] = &[Rule::SameFilePartialInclude, Rule::DeprecatedStaticLibrary];
+
 /// AST visitor that collects lint diagnostics.
 pub struct Checker<'a> {
     context: LintContext<'a>,
@@ -34,6 +38,8 @@ pub struct Checker<'a> {
     block_names: SmallVec<[&'a str; 8]>,
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
+    /// Whether a rule in `TAG_RULES` is enabled.
+    reads_tags: bool,
 }
 
 impl<'a> Checker<'a> {
@@ -49,6 +55,7 @@ impl<'a> Checker<'a> {
             context: LintContext::new(source, settings, language, path, quarantined),
             block_names: SmallVec::new_const(),
             in_raw: false,
+            reads_tags: settings.rules.contains_any(TAG_RULES),
         }
     }
 
@@ -64,9 +71,10 @@ impl<'a> Checker<'a> {
         matches!(self.context.language(), Language::Django)
     }
 
-    /// The Django version the templates target, [`None`] when it is neither set nor inferred.
+    /// The Django version the templates target, [`None`] when it is neither set nor inferred;
+    /// no version-gated rule can fire without one.
     #[must_use]
-    pub const fn target_version(&self) -> Option<DjangoVersion> {
+    const fn target_version(&self) -> Option<DjangoVersion> {
         self.context.settings().target_version
     }
 
@@ -202,7 +210,6 @@ impl<'a> Checker<'a> {
     /// Only node-position `{{ }}` reaches here: in an attribute value it stays part of the
     /// value string.
     fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
-        // No version-gated rule can fire without a target version.
         if let Some(version) = self.target_version()
             && self.is_rule_enabled(Rule::RedundantJsonScriptId)
         {
@@ -218,6 +225,9 @@ impl<'a> Checker<'a> {
 
     /// A tag has one name, so it is read once here and each arm holds that name's rules.
     fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
+        if !self.reads_tags {
+            return;
+        }
         match parse_jinja_tag_name(tag, self.context.language()) {
             "include" => {
                 // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
@@ -229,7 +239,6 @@ impl<'a> Checker<'a> {
                 }
             }
             "load" => {
-                // No version-gated rule can fire without a target version.
                 if let Some(version) = self.target_version()
                     && self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
                 {
@@ -361,7 +370,12 @@ impl<'a> Checker<'a> {
 
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);
-        for item in &block.body {
+        // The closer is `end` plus the opener's name, which no tag rule reads.
+        let items = match block.body.split_last() {
+            Some((JinjaTagOrChildren::Tag(_), items)) => items,
+            _ => &block.body[..],
+        };
+        for item in items {
             match item {
                 JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag),
                 JinjaTagOrChildren::Children(children) => {
@@ -410,7 +424,12 @@ impl<'a> Checker<'a> {
 
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);
-        for item in &block.body {
+        // The closer is `end` plus the opener's name, which no tag rule reads.
+        let items = match block.body.split_last() {
+            Some((JinjaTagOrChildren::Tag(_), items)) => items,
+            _ => &block.body[..],
+        };
+        for item in items {
             match item {
                 JinjaTagOrChildren::Tag(tag) => self.visit_jinja_tag(tag),
                 JinjaTagOrChildren::Children(children) => {

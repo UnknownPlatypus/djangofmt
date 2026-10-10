@@ -37,14 +37,14 @@ pub fn bits(content: &str) -> Vec<&str> {
 }
 
 /// A `{{ }}` body: a constant or variable followed by its filters.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct FilterExpression<'a> {
     /// The head, a string constant (`"x"`, `_("x")`) or a variable (`user.name`, `1.5`).
     pub var: &'a str,
     pub filters: Vec<Filter<'a>>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub struct Filter<'a> {
     pub name: &'a str,
     pub arg: Option<&'a str>,
@@ -55,9 +55,11 @@ impl fmt::Display for FilterExpression<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(self.var)?;
         for filter in &self.filters {
-            write!(f, "|{}", filter.name)?;
+            f.write_str("|")?;
+            f.write_str(filter.name)?;
             if let Some(arg) = filter.arg {
-                write!(f, ":{arg}")?;
+                f.write_str(":")?;
+                f.write_str(arg)?;
             }
         }
         Ok(())
@@ -108,13 +110,6 @@ pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
         var: var.as_str(),
         filters,
     })
-}
-
-/// A `{{ }}` body without the whitespace Django allows around `|`,
-/// or [`None`] where Django's `FilterExpression` raises.
-#[must_use]
-pub fn compact_filter_expression(expr: &str) -> Option<String> {
-    filter_expression(expr).map(|expression| expression.to_string())
 }
 
 /// Whether Django's `Variable` accepts a `[\w.+-]+` match.
@@ -176,7 +171,8 @@ mod tests {
     #[case::space_after_arg_separator("a|b: c", None)]
     #[case::space_without_separator("a .b", None)]
     #[case::mark_is_not_word_char("x\u{0903}|upper", None)]
-    fn compact_filter_expression_cases(#[case] expr: &str, #[case] expected: Option<&str>) {
-        assert_eq!(compact_filter_expression(expr).as_deref(), expected);
+    fn filter_expression_cases(#[case] expr: &str, #[case] expected: Option<&str>) {
+        let compact = filter_expression(expr).map(|expression| expression.to_string());
+        assert_eq!(compact.as_deref(), expected);
     }
 }

@@ -156,7 +156,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
-The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_jinja_block`, single-tag rules `(checker, tag)` from `visit_jinja_tag`, which sees every `{% %}` including block openers, middles and closers, and `{{ }}` rules `(checker, interpolation)` from `visit_jinja_interpolation`. Most rules are attribute rules:
+The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_jinja_block`, single-tag rules `(checker, tag)` from `visit_jinja_tag`, which reads each tag's name once and dispatches to that name's rules (block openers and middles included, closers not), and `{{ }}` rules `(checker, interpolation)` from `visit_jinja_interpolation`. Most rules are attribute rules:
 
 ```rust
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
@@ -182,7 +182,7 @@ Key points:
 - **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
-- **Keep the per-node path light**: every tag or `{{ }}` of the template goes through a tag or `{{ }}` rule, and `djangofmt_syntax::dtl::bits()` and `filter_expression()` run regexes. Reject on bytes first (`dtl::first_bit_is(tag.content, "load")`, `expr.contains(':')`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
+- **Keep the per-node path light**: every `{{ }}` of the template goes through each `{{ }}` rule, every tag of a name through that name's rules, and `djangofmt_syntax::dtl::bits()` and `filter_expression()` run regexes. Reject on bytes first (`content.contains("static")`, `expr.contains(':')`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
 
 ### 1e. Version-gated rules
 

@@ -88,4 +88,12 @@ mod tests {
         assert!(DjangoVersion::new(4, 2) < DjangoVersion::new(5, 0));
         assert!(DjangoVersion::new(3, 2) < DjangoVersion::new(3, 10));
     }
+
+    #[test]
+    fn latest_matches_the_ecosystem_check() {
+        // `just ecosystem-check-lint-dev` passes this version so that every gated rule fires.
+        let projects = include_str!("../../../python/ecosystem-check/ecosystem_check/projects.py");
+        let line = format!("LATEST_DJANGO_VERSION = \"{}\"", DjangoVersion::LATEST);
+        assert!(projects.contains(&line));
+    }
 }

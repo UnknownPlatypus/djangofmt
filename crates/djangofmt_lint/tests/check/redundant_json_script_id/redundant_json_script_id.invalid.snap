@@ -28,15 +28,5 @@ source: crates/djangofmt_lint/tests/check/main.rs
  6 │ {{ user_data|default:"{}"|json_script:""|safe }}
    ·                                      ─┬─
    ·                                       ╰── here
- 7 │ 
-   ╰────
-  help: Omit the argument
-
-  × Redundant empty element id passed to `json_script`
-   ╭─[tests/check/redundant_json_script_id/redundant_json_script_id.invalid.html:9:27]
- 8 │ <!-- Whitespace around the pipe -->
- 9 │ {{ user_data | json_script:"" }}
-   ·                           ─┬─
-   ·                            ╰── here
    ╰────
   help: Omit the argument

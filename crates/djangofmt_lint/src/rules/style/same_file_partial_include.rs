@@ -65,14 +65,10 @@ impl Violation for SameFilePartialInclude<'_> {
 
 /// The caller guarantees the tag is an `include`.
 pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
-    // Every include gets here and only a `#fragment` names a partial, so the rest runs out of line.
-    if tag.content.contains('#') {
-        check_include(checker, tag, current_path);
+    // Only a `#fragment` names a partial, so the other includes are not lexed.
+    if !tag.content.contains('#') {
+        return;
     }
-}
-
-#[cold]
-fn check_include(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
     let Some((template_path, fragment)) = parse_partial_include(tag) else {
         return;
     };

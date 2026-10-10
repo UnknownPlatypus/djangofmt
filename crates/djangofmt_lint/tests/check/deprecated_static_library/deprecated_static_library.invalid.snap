@@ -4,78 +4,68 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
   × Deprecated template library `staticfiles`
    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:2:9]
- 1 │ <!-- The two removed aliases of `static` -->
+ 1 │ <!-- A removed alias of `static` -->
  2 │ {% load staticfiles %}
    ·         ─────┬─────
    ·              ╰── here
- 3 │ {% load admin_static %}
-   ╰────
-  help: Load `static` instead
-
-  × Deprecated template library `admin_static`
-   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:3:9]
- 2 │ {% load staticfiles %}
- 3 │ {% load admin_static %}
-   ·         ──────┬─────
-   ·               ╰── here
- 4 │ 
+ 3 │ 
    ╰────
   help: Load `static` instead
 
   × Deprecated template library `staticfiles`
-   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:6:14]
- 5 │ <!-- Among other libraries -->
- 6 │ {% load i18n staticfiles l10n %}
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:5:14]
+ 4 │ <!-- Among other libraries -->
+ 5 │ {% load i18n staticfiles l10n %}
    ·              ─────┬─────
    ·                   ╰── here
- 7 │ 
+ 6 │ 
    ╰────
   help: Load `static` instead
 
   × Deprecated template library `staticfiles`
-    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:9:16]
-  8 │ <!-- The tag already loads `static`, before or after the alias, so the alias is dropped -->
-  9 │ {% load static staticfiles %}
-    ·                ─────┬─────
-    ·                     ╰── here
- 10 │ {% load staticfiles static %}
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:8:16]
+ 7 │ <!-- The tag already loads `static`, before or after the alias, so the alias is dropped -->
+ 8 │ {% load static staticfiles %}
+   ·                ─────┬─────
+   ·                     ╰── here
+ 9 │ {% load staticfiles static %}
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:9:9]
+  8 │ {% load static staticfiles %}
+  9 │ {% load staticfiles static %}
+    ·         ─────┬─────
+    ·              ╰── here
+ 10 │ 
     ╰────
   help: Load `static` instead
 
   × Deprecated template library `staticfiles`
-    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:10:9]
-  9 │ {% load static staticfiles %}
- 10 │ {% load staticfiles static %}
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:12:9]
+ 11 │ <!-- Both aliases in one tag -->
+ 12 │ {% load staticfiles admin_static %}
     ·         ─────┬─────
     ·              ╰── here
- 11 │ 
-    ╰────
-  help: Load `static` instead
-
-  × Deprecated template library `staticfiles`
-    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:13:9]
- 12 │ <!-- Both aliases in one tag -->
- 13 │ {% load staticfiles admin_static %}
-    ·         ─────┬─────
-    ·              ╰── here
- 14 │ 
+ 13 │ 
     ╰────
   help: Load `static` instead
 
   × Deprecated template library `admin_static`
-    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:13:21]
- 12 │ <!-- Both aliases in one tag -->
- 13 │ {% load staticfiles admin_static %}
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:12:21]
+ 11 │ <!-- Both aliases in one tag -->
+ 12 │ {% load staticfiles admin_static %}
     ·                     ──────┬─────
     ·                           ╰── here
- 14 │ 
+ 13 │ 
     ╰────
   help: Load `static` instead
 
   × Deprecated template library `staticfiles`
-    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:16:21]
- 15 │ <!-- `{% load x from library %}` names its library last -->
- 16 │ {% load static from staticfiles %}
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:15:21]
+ 14 │ <!-- `{% load x from library %}` names its library last -->
+ 15 │ {% load static from staticfiles %}
     ·                     ─────┬─────
     ·                          ╰── here
     ╰────
