@@ -1,8 +1,5 @@
-<!-- The replacement library -->
-{% load static %}
-
-<!-- Other libraries -->
-{% load i18n humanize %}
+<!-- Django: tests/template_tests/syntax_tests/test_static.py::test_static_statictag01 -->
+{% load static %}{% static "admin/base.css" %}
 
 <!-- A tag name that merely starts with `load` -->
 {% loader staticfiles %}

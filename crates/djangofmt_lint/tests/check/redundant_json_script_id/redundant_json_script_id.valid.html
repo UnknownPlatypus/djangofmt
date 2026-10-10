@@ -1,5 +1,5 @@
-<!-- The argument already omitted -->
-{{ user_data|json_script }}
+<!-- Django: tests/template_tests/filter_tests/test_json_script.py::test_without_id -->
+{{ value|json_script }}
 
 <!-- A non-empty id that merely looks blank: Django renders `id=" "` for it -->
 {{ user_data|json_script:" " }}
