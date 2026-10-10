@@ -116,3 +116,8 @@ lto = "thin"
 # The profile that 'dist' will build with
 [profile.dist]
 inherits = "release"
+
+# Used by cargo-mutants, see .cargo/mutants.toml
+[profile.mutants]
+inherits = "test"
+debug = "none"

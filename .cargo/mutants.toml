@@ -1,0 +1,13 @@
+# Formatter and syntax are mostly covered by the CLI snapshot tests,
+# so every mutant must run these crates' tests, not only its own.
+test_package = ["djangofmt", "djangofmt_formatter", "djangofmt_lint", "djangofmt_syntax"]
+exclude_globs = [
+  "crates/djangofmt_benchmark/**",
+  "crates/djangofmt_dev/**",
+  "crates/djangofmt_wasm/**",
+  "crates/djangofmt_macros/**",
+]
+all_features = true
+additional_cargo_test_args = ["--lib", "--bins", "--tests"]
+gitignore = true
+profile = "mutants"
