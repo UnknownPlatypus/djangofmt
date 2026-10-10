@@ -6,6 +6,15 @@ exclude_globs = [
   "crates/djangofmt_dev/**",
   "crates/djangofmt_wasm/**",
   "crates/djangofmt_macros/**",
+  # Only `djangofmt_dev` reads it, to generate the settings docs.
+  "crates/djangofmt/src/options_metadata.rs",
+]
+# Text no test asserts: fix titles only show under `--show-fixes`, the rest in docs and error messages.
+exclude_re = [
+  "::fix_title -> ",
+  "Display for (FixAvailability|IndentWidth|LineLength|RuleSelector|SelectionWarning|SelectorParseError)>",
+  "Debug for RuleSet>",
+  "category_list -> ",
 ]
 all_features = true
 additional_cargo_test_args = ["--lib", "--bins", "--tests"]
