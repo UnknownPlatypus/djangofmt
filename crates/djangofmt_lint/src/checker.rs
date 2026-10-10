@@ -224,18 +224,21 @@ impl<'a> Checker<'a> {
         }
     }
 
+    /// Django names a tag by its first bit; Jinja strips whitespace-control markers first.
+    fn tag_name(&self, tag: &JinjaTag<'a>) -> &'a str {
+        if self.is_django() {
+            dtl::tag_name(tag.content)
+        } else {
+            jinja_tag_name(tag, self.context.language())
+        }
+    }
+
     /// A tag has one name, so it is read once here and each arm holds that name's rules.
-    fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
+    fn visit_jinja_tag(&self, tag: &JinjaTag<'a>) {
         if !self.reads_tags {
             return;
         }
-        // Django names a tag by its first bit; Jinja strips whitespace-control markers first.
-        let name = if self.is_django() {
-            dtl::tag_name(tag.content)
-        } else {
-            parse_jinja_tag_name(tag, self.context.language())
-        };
-        match name {
+        match self.tag_name(tag) {
             "include" => {
                 // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
                 if let Some(path) = self.context.path()
@@ -447,5 +450,51 @@ impl<'a> Checker<'a> {
             }
         }
         self.in_raw = outer_raw;
+    }
+}
+
+/// `parse_jinja_tag_name` on bytes: the name is the run of `[A-Za-z0-9_]` past the
+/// whitespace-control markers and the whitespace. The fork decodes non-ASCII whitespace.
+fn jinja_tag_name<'s>(tag: &JinjaTag<'s>, language: Language) -> &'s str {
+    let rest = tag
+        .content
+        .trim_start_matches(['+', '-'])
+        .trim_ascii_start();
+    match rest.bytes().next() {
+        // `\x0B` and the non-ASCII code points are the whitespace ASCII trimming leaves behind.
+        Some(b) if b == b'\x0B' || b >= 0x80 => parse_jinja_tag_name(tag, language),
+        _ => {
+            let end = rest
+                .bytes()
+                .position(|b| !(b.is_ascii_alphanumeric() || b == b'_'))
+                .unwrap_or(rest.len());
+            &rest[..end]
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn jinja_tag_name_matches_the_parser() {
+        for content in [
+            "- if x -",
+            "+for",
+            " raw ",
+            "",
+            "set-x",
+            "\u{a0}set",
+            "\x0Bset",
+            "é",
+        ] {
+            let tag = JinjaTag { content, start: 0 };
+            assert_eq!(
+                jinja_tag_name(&tag, Language::Jinja),
+                parse_jinja_tag_name(&tag, Language::Jinja),
+                "{content:?}"
+            );
+        }
     }
 }
