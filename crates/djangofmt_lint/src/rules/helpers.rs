@@ -9,6 +9,11 @@ use smallvec::{SmallVec, smallvec};
 
 use crate::Checker;
 
+/// The bits `{% if %}` reads as operators rather than operands.
+pub const IF_OPERATORS: [&str; 11] = [
+    "and", "or", "not", "in", "is", "==", "!=", "<", ">", "<=", ">=",
+];
+
 /// Returns true if the value contains Jinja/Django template markers.
 ///
 /// Values with `{{`, `{%` or `{#` are dynamic and should be skipped by most rules.

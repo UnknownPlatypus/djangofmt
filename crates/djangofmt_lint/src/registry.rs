@@ -271,4 +271,5 @@ define_rules! {
     (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
     (LegacyTranslationTag, rules::upgrade::legacy_translation_tag::LegacyTranslationTag),
     (LegacyAsAssignment, rules::upgrade::legacy_as_assignment::LegacyAsAssignment<'static>),
+    (DeprecatedLengthIsFilter, rules::upgrade::deprecated_length_is_filter::DeprecatedLengthIsFilter),
 }
