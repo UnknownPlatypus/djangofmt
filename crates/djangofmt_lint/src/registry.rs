@@ -269,4 +269,5 @@ define_rules! {
     (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
     (LegacyTranslationTag, rules::upgrade::legacy_translation_tag::LegacyTranslationTag),
+    (LegacyAsAssignment, rules::upgrade::legacy_as_assignment::LegacyAsAssignment<'static>),
 }

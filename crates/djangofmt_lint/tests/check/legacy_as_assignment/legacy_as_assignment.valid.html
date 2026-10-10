@@ -1,0 +1,51 @@
+<!-- Django: tests/template_tests/syntax_tests/test_with.py::with01 -->
+{% with key=dict.key %}{{ key }}{% endwith %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::i18n26 -->
+{% blocktranslate with extra_field=myextra_field count counter=number %}singular {{ extra_field }}{% plural %}plural{% endblocktranslate %}
+
+<!-- `as` inside a quoted value -->
+{% blocktranslate context "known as" %}Hello{% endblocktranslate %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::i18n37 — another tag stores its result `as` a name -->
+{% translate "Page not found" as page_not_found %}
+
+<!-- Mixing both forms is a syntax error -->
+{% with engines.count as total and vehicles=cars.count %}{{ total }} {{ vehicles }}{% endwith %}
+{% blocktranslate with engine.name as name and number=engine.number %}Hello {{ name }} #{{ number }}{% endblocktranslate %}
+
+<!-- After a first `name=value` bit, Django leaves `as c` over, a syntax error -->
+{% with a=b as c %}{{ c }}{% endwith %}
+
+<!-- A leftover bit is a syntax error -->
+{% with 'Go' as exclamation loud %}{{ exclamation }}{% endwith %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_with.py::with-error02 — no whole assignment comes first -->
+{% with dict.key as %}{{ key }}{% endwith %}
+
+<!-- Django: tests/template_tests/test_parser.py::test_filter_parsing — a value Django cannot compile -->
+{% with article._hidden|upper as hidden %}{{ hidden }}{% endwith %}
+
+<!-- A name `name=value` cannot spell -->
+{% with engines.count as engine.total %}{{ engine.total }}{% endwith %}
+
+<!-- Django glues `_("…")|upper` to the next bits and fails -->
+{% with _("Hello")|upper as greeting %}{{ greeting }}{% endwith %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::test_count — a `count` clause without a pair -->
+{% blocktranslate with anton as name count a %}{{ name }}{% endblocktranslate %}
+
+<!-- A `count` clause takes exactly one pair -->
+{% blocktranslate count engines.count as total and cars.count as vehicles %}{{ total }}{% plural %}{{ total }}{% endblocktranslate %}
+
+<!-- Without `and`, `trimmed` is the option, and `as` is then unknown -->
+{% blocktranslate with engine.name as name trimmed as label %}Hello {{ name }}{% endblocktranslate %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::test_variable_twice — an option given twice -->
+{% blocktranslate with bar as foo with %}{{ foo }}{% endblocktranslate %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::test_template_tags_pgettext — `context` takes `with` as its argument -->
+{% blocktranslate context with "May" as month %}{{ month }}{% endblocktranslate %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::test_template_tags_pgettext — `context` without its argument -->
+{% blocktranslate count 2 as number context %}{{ number }} super result{% plural %}{{ number }} super results{% endblocktranslate %}

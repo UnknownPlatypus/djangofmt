@@ -28,6 +28,7 @@ const TAG_RULES: &[Rule] = &[
     Rule::UntrimmedBlocktranslate,
     Rule::DeprecatedStaticLibrary,
     Rule::LegacyTranslationTag,
+    Rule::LegacyAsAssignment,
 ];
 
 /// AST visitor that collects lint diagnostics.
@@ -265,8 +266,17 @@ impl<'a> Checker<'a> {
                     rules::upgrade::legacy_translation_tag::check_trans(self, tag, version);
                 }
             }
-            "blocktrans" => {
-                if let Some(version) = self.target_version()
+            "with" => {
+                if self.is_rule_enabled(Rule::LegacyAsAssignment) {
+                    rules::upgrade::legacy_as_assignment::check_with(self, tag);
+                }
+            }
+            "blocktranslate" | "blocktrans" => {
+                if self.is_rule_enabled(Rule::LegacyAsAssignment) {
+                    rules::upgrade::legacy_as_assignment::check_blocktranslate(self, tag);
+                }
+                if name == "blocktrans"
+                    && let Some(version) = self.target_version()
                     && !self.foreign_translation_tags
                     && self.is_rule_enabled(Rule::LegacyTranslationTag)
                 {
