@@ -14,11 +14,10 @@ source: crates/djangofmt/tests/fmt/main.rs
         foo();
     </script>
     <script>
-        // Template syntax is not valid JS, formatting is skipped entirely.
-  // Known limitation: the skipped body keeps its original indentation.
-  {% if debug %}
-  console.log( 'debug' );
-  {% endif %}
+        // Template syntax is not valid JS, formatting is skipped but the body is re-indented.
+        {% if debug %}
+        console.log( 'debug' );
+        {% endif %}
     </script>
     <script>
         // A bare tag parses as nested JS blocks and would be rewritten, so this is skipped too.

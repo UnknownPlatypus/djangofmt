@@ -11,8 +11,7 @@
         foo( );
     </script>
     <script>
-  // Template syntax is not valid JS, formatting is skipped entirely.
-  // Known limitation: the skipped body keeps its original indentation.
+  // Template syntax is not valid JS, formatting is skipped but the body is re-indented.
   {% if debug %}
   console.log( 'debug' );
   {% endif %}
