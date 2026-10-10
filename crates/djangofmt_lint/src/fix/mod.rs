@@ -3,7 +3,7 @@
 //! a [`Fix`] is one or more non-overlapping [`Edit`]s tagged with an [`Applicability`] threshold and an [`IsolationLevel`].
 //!
 //! Rules attach a [`Fix`] to a [`crate::LintDiagnostic`] via the diagnostic guard
-//! returned from [`crate::LintContext::report_diagnostic_if_enabled`]. The applier
+//! returned from [`crate::LintContext::report_diagnostic`]. The applier
 //! ([`apply::apply_fixes`]) gates by applicability, sorts by start position, and
 //! resolves overlap conflicts in a single forward pass.
 

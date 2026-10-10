@@ -3,8 +3,6 @@ use std::sync::LazyLock;
 
 use memchr::memmem::Finder;
 
-use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren};
-
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -61,13 +59,6 @@ impl Violation for DuplicateBlockName<'_> {
     }
 }
 
-pub fn block_name<'s, T>(block: &JinjaBlock<'s, T>) -> Option<&'s str> {
-    let Some(JinjaTagOrChildren::Tag(open_tag)) = block.body.first() else {
-        return None;
-    };
-    block_name_from_content(open_tag.content)
-}
-
 /// The names of `{% block %}` tags written in text the parser leaves unread, such as a `<script>`
 /// body or an HTML comment. Django still parses them.
 pub fn block_names_in_text(raw: &str) -> impl Iterator<Item = &str> {
@@ -90,7 +81,7 @@ pub fn block_names_in_text(raw: &str) -> impl Iterator<Item = &str> {
 
 /// `{% block NAME %}`: one whitespace pass yields the tag (token 0) then the name (token 1).
 /// Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the name.
-fn block_name_from_content(content: &str) -> Option<&str> {
+pub fn block_name_from_content(content: &str) -> Option<&str> {
     let mut tokens = content
         .trim_start_matches(['+', '-'])
         .split_ascii_whitespace();

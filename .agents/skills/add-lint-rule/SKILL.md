@@ -177,7 +177,6 @@ Key points:
 
 - The `Checker` is passed as `&Checker<'_>`; diagnostics are buffered through interior mutability (`RefCell`), so no `&mut` is needed.
 - `checker.report_diagnostic(&violation, span)` returns a `DiagnosticGuard`. On `Drop` the guard pushes the diagnostic into the context's buffer. Hold the guard in a `let mut guard = ...` binding only if you need to attach a fix or override fields; otherwise let the temporary drop immediately.
-- If the rule is **not** gated upfront in `checker.rs` (Step 4), call `checker.report_diagnostic_if_enabled(...)` instead — it returns `Option<DiagnosticGuard>` and short-circuits when disabled.
 - For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`. Deleting a whole attribute is `delete_attr_fix` from `fix/edits.rs`, which widens the deletion over the surrounding whitespace.
 - **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
@@ -242,8 +241,6 @@ fn visit_native_attribute(&self, attr: &NativeAttribute<'a>, element: &Element<'
     // ...
 }
 ```
-
-If the rule's `check` uses `report_diagnostic_if_enabled` internally instead of being gated here, you can skip the `is_rule_enabled` wrapper — but gating upfront is cheaper when the rule does any non-trivial work before reporting.
 
 **Several rules keyed off the same tag?** See **[checker-gating.md](checker-gating.md)** for classify-once dispatch.
 
