@@ -571,7 +571,6 @@ mod tests {
         ] {
             create_file(dir.path(), path);
         }
-        let root = dir.path().canonicalize().unwrap();
 
         let matched = |pattern: &str| {
             let pyproject = PyprojectSettings {
@@ -582,7 +581,7 @@ mod tests {
             let mut found: Vec<String> = resolve_files(&[dir.path().to_path_buf()], &config)
                 .unwrap()
                 .iter()
-                .map(|p| p.strip_prefix(&root).unwrap().display().to_string())
+                .map(|p| p.strip_prefix(dir.path()).unwrap().display().to_string())
                 .collect();
             found.sort();
             found
@@ -627,7 +626,6 @@ mod tests {
         ] {
             create_file(dir.path(), path);
         }
-        let root = dir.path().canonicalize().unwrap();
 
         let kept = |pattern: &str| {
             let pyproject = PyprojectSettings {
@@ -638,7 +636,7 @@ mod tests {
             let mut found: Vec<String> = resolve_files(&[dir.path().to_path_buf()], &config)
                 .unwrap()
                 .iter()
-                .map(|p| p.strip_prefix(&root).unwrap().display().to_string())
+                .map(|p| p.strip_prefix(dir.path()).unwrap().display().to_string())
                 .collect();
             found.sort();
             found
@@ -658,7 +656,7 @@ mod tests {
         );
         // Absolute patterns are matched as-is.
         assert_eq!(
-            kept(&root.join("sub").display().to_string()),
+            kept(&dir.path().join("sub").display().to_string()),
             ["other/page.html", "other/sub/page.html", "root.html"]
         );
     }

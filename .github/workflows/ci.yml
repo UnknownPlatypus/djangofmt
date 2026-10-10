@@ -253,6 +253,7 @@ jobs:
   test-other:
     name: "cargo test (${{ matrix.os }})"
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-2025, macos-15]
     runs-on: ${{ matrix.os }}
@@ -266,7 +267,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run tests
-        run: cargo test --workspace --lib --bins --tests --all-features
+        run: cargo test --workspace --lib --bins --tests --all-features --no-fail-fast
 
   msrv_check:
     name: "cargo check (msrv)"
