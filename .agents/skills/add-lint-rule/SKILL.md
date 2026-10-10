@@ -73,7 +73,6 @@ Formatting rules:
 - **Line width**: fill each line to column 100 (the workspace `rustfmt` width), counting the `///` prefix; wrapping earlier wastes vertical space and churns diffs when neighbouring text is edited.
 - `## What it does` — one sentence, starts with "Checks for".
 - `## Why is this bad?` — declarative and plain, in the third person ("`eval()` is insecure as it enables arbitrary code execution").
-- `## Known problems` — include only when the rule has a limitation users will meet (a case it cannot see, a layout read at fix time). One short paragraph.
 - `## Example` — HTML or Jinja markup; `Use instead:` is plain text between the two fences.
 - `## Fix safety` — include only when the fix is unsafe or conditionally unsafe. One short paragraph on what makes it unsafe. A safe fix carries no section; the `Fix` column of the rules table already reports that the rule is fixable.
 - `## Options` — include only when the rule reads settings from `pyproject.toml`. Bullet list of dotted option paths in backticks, nothing else: the generator turns each into a link to `docs/settings.md` and fails on unknown options. Document the option itself (doc comment, default, type, example) on its field in `pyproject.rs`, never in the rule.
