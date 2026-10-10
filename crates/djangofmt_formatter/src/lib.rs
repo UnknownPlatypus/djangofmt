@@ -280,7 +280,13 @@ pub fn format_text(
                     )
                 }
                 "js" | "mjs" | "jsx" | "ts" | "mts" | "tsx" => {
-                    Ok(format_js(code, &hints, config, path))
+                    let formatted = format_js(code, &hints, config, path);
+                    // markup_fmt only re-indents a raw `<script>` body when told formatting failed.
+                    if !hints.attr && formatted == code {
+                        Err(anyhow::anyhow!("left unformatted"))
+                    } else {
+                        Ok(formatted)
+                    }
                 }
                 _ => Ok(code.into()),
             }

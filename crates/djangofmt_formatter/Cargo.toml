@@ -11,6 +11,7 @@ publish = false
 doctest = false
 
 [dependencies]
+anyhow = { workspace = true }
 clap = { workspace = true, optional = true }
 djangofmt_syntax = { workspace = true }
 dprint-plugin-json = { workspace = true }
