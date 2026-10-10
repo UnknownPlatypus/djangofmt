@@ -1,6 +1,7 @@
 pub mod empty_attr_value;
 pub mod endblock_label;
 pub mod form_action_whitespace;
+pub mod legacy_as_assignment;
 pub mod legacy_translation_tag;
 pub mod missing_doctype;
 pub mod same_file_partial_include;
