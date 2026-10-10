@@ -147,9 +147,13 @@ fn language_for(path: &Path) -> Language {
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {
-    let display_path = path.strip_prefix(MANIFEST_DIR).unwrap_or(path);
+    // `glob!` yields canonical paths, `\\?\`-prefixed on Windows.
+    let manifest_dir = Path::new(MANIFEST_DIR)
+        .canonicalize()
+        .expect("CARGO_MANIFEST_DIR exists");
+    let display_path = path.strip_prefix(manifest_dir).unwrap_or(path);
     render_diagnostics(&FileDiagnostics::new(
-        display_path.to_string_lossy(),
+        display_path.to_string_lossy().replace('\\', "/"),
         input,
         diagnostics,
     ))

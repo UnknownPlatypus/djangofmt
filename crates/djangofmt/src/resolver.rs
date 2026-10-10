@@ -581,7 +581,12 @@ mod tests {
             let mut found: Vec<String> = resolve_files(&[dir.path().to_path_buf()], &config)
                 .unwrap()
                 .iter()
-                .map(|p| p.strip_prefix(dir.path()).unwrap().display().to_string())
+                .map(|p| {
+                    p.strip_prefix(dir.path())
+                        .unwrap()
+                        .to_string_lossy()
+                        .replace('\\', "/")
+                })
                 .collect();
             found.sort();
             found
@@ -636,7 +641,12 @@ mod tests {
             let mut found: Vec<String> = resolve_files(&[dir.path().to_path_buf()], &config)
                 .unwrap()
                 .iter()
-                .map(|p| p.strip_prefix(dir.path()).unwrap().display().to_string())
+                .map(|p| {
+                    p.strip_prefix(dir.path())
+                        .unwrap()
+                        .to_string_lossy()
+                        .replace('\\', "/")
+                })
                 .collect();
             found.sort();
             found

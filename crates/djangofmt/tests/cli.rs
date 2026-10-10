@@ -14,7 +14,7 @@ fn cli() -> Command {
 macro_rules! assert_cmd_snapshot_tmpdir {
     ($cmd:expr, @$snapshot:literal $(,)?) => {
         insta::with_settings!(
-            { filters => vec![(r"[^\s\[]+/(\w+\.html)", "[TMP]/$1")] },
+            { filters => vec![(r"[^\s\[]+[/\\](\w+\.html)", "[TMP]/$1")] },
             { assert_cmd_snapshot!($cmd, @$snapshot) }
         )
     };

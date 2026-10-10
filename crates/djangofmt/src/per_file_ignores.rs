@@ -106,6 +106,7 @@ fn build(builder: &GlobSetBuilder) -> Result<GlobSet> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fs::normalize_path;
     use djangofmt_lint::Rule;
 
     fn all_rules() -> RuleSet {
@@ -130,23 +131,25 @@ mod tests {
             ("templates/admin/**", Rule::InvalidAttrValue),
         ]);
         let base = all_rules();
+        // Normalized like discovered files, which gives `/proj` a drive on Windows.
+        let rules = |path| pfi.rules_for(&normalize_path(path), &base);
 
         // Bare glob: a `.jinja` nested anywhere drops `use-https` only.
-        let nested = pfi.rules_for(Path::new("/proj/app/templates/x.jinja"), &base);
+        let nested = rules("/proj/app/templates/x.jinja");
         assert!(!nested.contains(Rule::UseHttps));
         assert!(nested.contains(Rule::InvalidAttrValue));
 
         // A root-level admin `.jinja` matches both globs: the ignore sets union.
-        let admin = pfi.rules_for(Path::new("/proj/templates/admin/page.jinja"), &base);
+        let admin = rules("/proj/templates/admin/page.jinja");
         assert!(!admin.contains(Rule::UseHttps)); // from `*.jinja`
         assert!(!admin.contains(Rule::InvalidAttrValue)); // from `templates/admin/**`
 
         // `templates/admin/**` is anchored: the same dir nested under `app/` doesn't match.
-        let not_admin = pfi.rules_for(Path::new("/proj/app/templates/admin/page.html"), &base);
+        let not_admin = rules("/proj/app/templates/admin/page.html");
         assert!(not_admin.contains(Rule::InvalidAttrValue));
 
         // A file matching nothing keeps the full set.
-        assert_eq!(pfi.rules_for(Path::new("/proj/index.html"), &base), base);
+        assert_eq!(rules("/proj/index.html"), base);
     }
 
     /// `*` crosses `/`, as in ruff: `templates/*.html` covers nested files too.
@@ -159,7 +162,7 @@ mod tests {
             "/proj/templates/admin/deep/page.html",
         ] {
             assert!(
-                !pfi.rules_for(Path::new(path), &base)
+                !pfi.rules_for(&normalize_path(path), &base)
                     .contains(Rule::UseHttps),
                 "{path} should match `templates/*.html`"
             );
