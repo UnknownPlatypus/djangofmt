@@ -14,6 +14,10 @@
 <!-- No template name before the `#` -->
 {% include "#item-list" %}
 
+<!-- No partial name after it, not even next to a nameless `{% partialdef %}` -->
+{% partialdef %}{% endpartialdef %}
+{% include "same_file_partial_include.valid.html#" %}
+
 <!-- Only `{% include %}` has a `{% partial %}` equivalent -->
 {% extends "same_file_partial_include.valid.html#item-list" %}
 
