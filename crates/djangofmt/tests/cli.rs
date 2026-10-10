@@ -700,17 +700,18 @@ fn check_warns_on_preview_rule_without_preview() {
 fn check_gates_version_specific_rules_on_target_version() {
     // `deprecated-static-library` needs Django >= 2.1,
     // `legacy-translation-tag` and `deprecated-ifequal-tag` >= 3.1,
-    // `redundant-json-script-id` >= 4.1; without a target version all stay off.
+    // `redundant-json-script-id` >= 4.1, `deprecated-length-is-filter` >= 4.2;
+    // without a target version all stay off.
     let project = Project::new().file(
         "test.html",
-        "{% load staticfiles %}\n{{ value|json_script:\"\" }}\n{% trans \"Hi\" %}\n{% ifequal a b %}{% endifequal %}\n",
+        "{% load staticfiles %}\n{{ value|json_script:\"\" }}\n{% trans \"Hi\" %}\n{% ifequal a b %}{% endifequal %}\n{% if a|length_is:1 %}{% endif %}\n",
     );
     let run = |version: Option<&str>| {
         let mut command = cli();
         command.args([
             "check",
             "--select",
-            "deprecated-static-library,legacy-translation-tag,deprecated-ifequal-tag,redundant-json-script-id",
+            "deprecated-static-library,legacy-translation-tag,deprecated-ifequal-tag,redundant-json-script-id,deprecated-length-is-filter",
             "--output-format",
             "concise",
         ]);
@@ -779,6 +780,19 @@ fn check_gates_version_specific_rules_on_target_version() {
     [TMP]/test.html:3:4: legacy-translation-tag [*] Legacy `{% trans %}` tag name
     [TMP]/test.html:4:4: deprecated-ifequal-tag [*] Deprecated `{% ifequal %}` tag
     Found 4 errors. [*] 4 fixable with the --fix option.
+    ");
+    assert_cmd_snapshot_tmpdir!(run(Some("4.2")), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
+    [TMP]/test.html:2:21: redundant-json-script-id [*] Redundant empty element id passed to `json_script`
+    [TMP]/test.html:3:4: legacy-translation-tag [*] Legacy `{% trans %}` tag name
+    [TMP]/test.html:4:4: deprecated-ifequal-tag [*] Deprecated `{% ifequal %}` tag
+    [TMP]/test.html:5:9: deprecated-length-is-filter [*] Deprecated `length_is` filter
+    Found 5 errors. [*] 5 fixable with the --fix option.
     ");
 }
 
