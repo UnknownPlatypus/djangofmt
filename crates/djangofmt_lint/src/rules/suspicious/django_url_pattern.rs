@@ -110,19 +110,21 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 /// The literal text before the first template marker and after the last one; the whole value
 /// twice when it holds no template syntax.
 fn literal_ends(value: &str) -> (&str, &str) {
-    let Some(start) = ["{{", "{%", "{#"]
+    let Some(prefix) = ["{{", "{%", "{#"]
         .iter()
-        .filter_map(|marker| value.find(marker))
-        .min()
+        .filter_map(|marker| value.split_once(marker))
+        .map(|(prefix, _)| prefix)
+        .min_by_key(|prefix| prefix.len())
     else {
         return (value, value);
     };
-    let end = ["}}", "%}", "#}"]
+    let tail = ["}}", "%}", "#}"]
         .iter()
-        .filter_map(|marker| value.rfind(marker))
-        .max()
-        .map_or(value.len(), |end| end + 2);
-    (&value[..start], &value[end..])
+        .filter_map(|marker| value.rsplit_once(marker))
+        .map(|(_, tail)| tail)
+        .min_by_key(|tail| tail.len())
+        .unwrap_or_default();
+    (prefix, tail)
 }
 
 /// Returns true if `value` looks like a hardcoded internal path that should use `{% url %}`.

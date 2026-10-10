@@ -243,10 +243,9 @@ impl<'a> Checker<'a> {
         }
 
         // The parser keeps these bodies as raw text, but Django still reads the tags in them.
-        if self.is_rule_enabled(Rule::DuplicateBlockName)
-            && ["script", "style", "pre", "textarea"]
-                .iter()
-                .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
+        if ["script", "style", "pre", "textarea"]
+            .iter()
+            .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
         {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {

@@ -66,7 +66,6 @@ pub fn build_markup_options(
             ..markup_fmt::config::LayoutOptions::default()
         },
         language: markup_fmt::config::LanguageOptions {
-            format_comments: false,
             // HTML void elements should not be self-closing by default:
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             // <br/> -> <br>
@@ -269,16 +268,7 @@ pub fn format_text(
 
 /// Whether the only whitespace in a tag `body` is single plain spaces.
 fn is_single_spaced(body: &str) -> bool {
-    let mut after_space = false;
-    body.chars().all(|c| {
-        let single = if c == ' ' {
-            !after_space
-        } else {
-            !dtl::is_space(c)
-        };
-        after_space = c == ' ';
-        single
-    })
+    !body.contains("  ") && !body.chars().filter(|&c| c != ' ').any(dtl::is_space)
 }
 
 /// Whether whitespace touches a `|`, the only whitespace [`dtl::compact_filter_expression`] drops.

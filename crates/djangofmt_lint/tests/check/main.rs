@@ -6,7 +6,7 @@ use djangofmt_lint::{
     Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, apply_fixes, check,
     lint_source,
 };
-use djangofmt_syntax::{graphical_handler, parse};
+use djangofmt_syntax::{Profile, graphical_handler, parse};
 
 use insta::{assert_snapshot, glob};
 use markup_fmt::Language;
@@ -153,13 +153,9 @@ fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
     .expect("Failed to parse AST in test")
 }
 
-/// Mirror the CLI's extension inference (`Profile::from_path`).
 /// `.jinja` fixtures run under Jinja, the only profile allowing whitespace-control markers.
 fn language_for(path: &Path) -> Language {
-    match path.extension().and_then(|ext| ext.to_str()) {
-        Some("jinja") => Language::Jinja,
-        _ => Language::Django,
-    }
+    Profile::from_path(path).unwrap_or_default().into()
 }
 
 fn render_check_output(path: &Path, input: String, diagnostics: Vec<LintDiagnostic>) -> String {
