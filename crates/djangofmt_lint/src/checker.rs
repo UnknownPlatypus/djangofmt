@@ -31,6 +31,7 @@ const TAG_RULES: &[Rule] = &[
     Rule::LegacyTranslationTag,
     Rule::LegacyAsAssignment,
     Rule::DeprecatedIfequalTag,
+    Rule::DeprecatedLengthIsFilter,
 ];
 
 /// AST visitor that collects lint diagnostics.
@@ -283,6 +284,13 @@ impl<'a> Checker<'a> {
                     && self.is_rule_enabled(Rule::LegacyTranslationTag)
                 {
                     rules::upgrade::legacy_translation_tag::check_blocktrans(self, tag, version);
+                }
+            }
+            "if" | "elif" => {
+                if let Some(version) = self.target_version()
+                    && self.is_rule_enabled(Rule::DeprecatedLengthIsFilter)
+                {
+                    rules::upgrade::deprecated_length_is_filter::check(self, tag, version);
                 }
             }
             _ => {}

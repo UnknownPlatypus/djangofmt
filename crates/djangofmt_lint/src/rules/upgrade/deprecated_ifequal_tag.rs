@@ -7,6 +7,7 @@ use crate::Checker;
 use crate::django_version::DjangoVersion;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::IF_OPERATORS;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -94,11 +95,6 @@ impl Violation for DeprecatedIfequalTag {
 
 /// The release that deprecated both tags in favour of `{% if %}`.
 const DEPRECATED_IN: DjangoVersion = DjangoVersion::new(3, 1);
-
-/// The bits `{% if %}` reads as operators rather than operands.
-const IF_OPERATORS: [&str; 11] = [
-    "and", "or", "not", "in", "is", "==", "!=", "<", ">", "<=", ">=",
-];
 
 /// The caller guarantees an `ifequal` or `ifnotequal` block, which `tag` names, and passes the
 /// target version, so files without one never get here.

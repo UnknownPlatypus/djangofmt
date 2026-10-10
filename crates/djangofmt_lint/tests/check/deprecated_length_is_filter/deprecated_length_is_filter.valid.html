@@ -1,0 +1,20 @@
+<!-- The replacement spelling -->
+{% if eggs|length == 1 %}{% endif %}
+
+<!-- A later filter reads the boolean `length_is` returns, which `length` does not -->
+{% if eggs|length_is:1|yesno %}{% endif %}
+
+<!-- `int()` fails on a quoted argument other than an integer, leaving `==` no number to compare -->
+{% if eggs|length_is:"fish" %}{% endif %}
+
+<!-- An `{% if %}` operator word is a valid variable name for `length_is`, not an operand for `==` -->
+{% if eggs|length_is:not %}{% endif %}
+
+<!-- In a longer condition the new `==` could regroup with a neighbouring comparison -->
+{% if eggs|length_is:1 and spam %}{% endif %}
+
+<!-- Django: tests/template_tests/filter_tests/test_length_is.py::length_is_warning — not an `if` or `elif` condition -->
+{{ string|length_is:3 }}
+
+<!-- An expression Django rejects is left as is -->
+{% if eggs[0]|length_is:1 %}{% endif %}

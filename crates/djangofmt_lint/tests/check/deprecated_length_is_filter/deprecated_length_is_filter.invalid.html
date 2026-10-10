@@ -1,0 +1,16 @@
+<!-- Django: tests/template_tests/filter_tests/test_length_is.py::length_is08 -->
+{% if "X"|length_is:1 %}Length is 1{% else %}Length not 1{% endif %}
+
+<!-- Django: tests/template_tests/filter_tests/test_length_is.py::length_is01 — a quoted integer loses its quotes -->
+{% if some_list|length_is:"4" %}Four{% endif %}
+
+<!-- A variable argument, in `elif` -->
+{% if eggs %}{% elif eggs|length_is:n %}{% endif %}
+
+<!-- The filters before `length_is` stay in the chain -->
+{% if eggs|slice:":2"|length_is:2 %}{% endif %}
+
+<!-- Django reads the tags in raw-text bodies -->
+<script>
+    const single = {% if eggs|length_is:1 %}true{% else %}false{% endif %};
+</script>
