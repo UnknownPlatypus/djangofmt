@@ -71,14 +71,18 @@ const DEPRECATED_LIBRARIES: [&str; 2] = ["staticfiles", "admin_static"];
 /// The caller guarantees the tag is a `load` and passes the target version, so files without
 /// one never get here.
 pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, target_version: DjangoVersion) {
-    if checker.is_django()
-        && target_version >= DEPRECATED_IN
-        && DEPRECATED_LIBRARIES
-            .iter()
-            .any(|library| tag.content.contains(library))
-    {
+    if checker.is_django() && target_version >= DEPRECATED_IN && names_static(tag.content) {
         check_libraries(checker, tag.content);
     }
+}
+
+/// Both aliases contain `static`, read with a byte scan: a substring search costs more to set up
+/// than the content is long.
+fn names_static(content: &str) -> bool {
+    content
+        .as_bytes()
+        .windows(6)
+        .any(|bytes| bytes == b"static")
 }
 
 #[cold]
