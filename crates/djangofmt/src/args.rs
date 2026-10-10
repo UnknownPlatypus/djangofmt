@@ -270,6 +270,10 @@ mod tests {
 
     #[test]
     fn test_cli_help() {
+        // clap takes the usage name from argv[0], `djangofmt.exe` on Windows.
+        let mut settings = insta::Settings::clone_current();
+        settings.add_filter(r"djangofmt\.exe", "djangofmt");
+        let _bound = settings.bind_to_scope();
         assert_cmd_snapshot!(cli().arg("--help"), @"
         success: true
         exit_code: 0
