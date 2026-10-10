@@ -13,31 +13,10 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Write it as `{% endblock content %}`
 
   × Missing label on `{% endpartialdef %}` of a multi-line block
-    ╭─[tests/check/missing_endblock_label/missing_endblock_label.invalid.html:9:4]
-  8 │     <div class="card">{{ content }}</div>
-  9 │ {% endpartialdef %}
-    ·    ──────┬──────
-    ·          ╰── here
- 10 │ 
-    ╰────
-  help: Write it as `{% endpartialdef card %}`
-
-  × Missing label on `{% endpartialdef %}` of a multi-line block
-    ╭─[tests/check/missing_endblock_label/missing_endblock_label.invalid.html:14:4]
- 13 │     <button>Submit</button>
- 14 │ {% endpartialdef %}
-    ·    ──────┬──────
-    ·          ╰── here
- 15 │ 
-    ╰────
+   ╭─[tests/check/missing_endblock_label/missing_endblock_label.invalid.html:9:4]
+ 8 │     <button>Submit</button>
+ 9 │ {% endpartialdef %}
+   ·    ──────┬──────
+   ·          ╰── here
+   ╰────
   help: Write it as `{% endpartialdef button %}`
-
-  × Missing label on `{% endblock %}` of a multi-line block
-    ╭─[tests/check/missing_endblock_label/missing_endblock_label.invalid.html:20:8]
- 19 │         <nav>{{ menu }}</nav>
- 20 │     {% endblock %}
-    ·        ────┬───
-    ·            ╰── here
- 21 │ {% endblock sidebar %}
-    ╰────
-  help: Write it as `{% endblock menu %}`

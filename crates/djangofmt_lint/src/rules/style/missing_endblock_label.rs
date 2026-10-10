@@ -16,6 +16,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// a label on the closing tag and checks that it matches, and its template style guide asks for the
 /// label whenever the closing tag is not on the same line as the opening one.
 ///
+/// ## Known problems
 /// The label is decided from the layout at fix time: in a pre-commit hook that runs `check --fix`
 /// before the formatter, a block the formatter then spreads over several lines gets its label on
 /// the next run.
@@ -61,12 +62,16 @@ impl Violation for MissingEndblockLabel<'_> {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
+        // Built for every diagnostic, and `concat` costs a third of `format!` here.
         Some(
-            format!(
-                "Write it as `{{% {} {} %}}`",
+            [
+                "Write it as `{% ",
                 self.kind.end_tag(),
-                self.name
-            )
+                " ",
+                self.name,
+                " %}`",
+            ]
+            .concat()
             .into(),
         )
     }
@@ -76,19 +81,17 @@ impl Violation for MissingEndblockLabel<'_> {
     }
 }
 
+/// The caller guarantees a Django block whose closer has no label and sits on another line.
 pub fn check(checker: &Checker<'_>, end: &BlockEnd<'_>) {
-    if end.same_line || end.label.is_some() {
-        return;
-    }
     let mut guard = checker.report_diagnostic(
         &MissingEndblockLabel {
             kind: end.kind,
             name: end.name,
         },
-        checker.source_span(end.tag_name),
+        checker.source_span(end.end_tag),
     );
     guard.set_fix(Fix::safe_edit(Edit::insertion(
         [" ", end.name].concat(),
-        checker.source_end(end.tag_name),
+        checker.source_end(end.end_tag),
     )));
 }

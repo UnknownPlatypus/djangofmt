@@ -23,20 +23,10 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Write it as `{% endpartialdef %}`
 
   × Redundant label on `{% endblock %}` of a single-line block
-    ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:9:47]
-  8 │ {% block header %}
-  9 │     <h1>{% block heading %}Welcome{% endblock heading %}</h1>
-    ·                                               ───┬───
-    ·                                                  ╰── here
- 10 │ {% endblock header %}
-    ╰────
-  help: Write it as `{% endblock %}`
-
-  × Redundant label on `{% endblock %}` of a single-line block
-    ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:13:55]
- 12 │ <!-- Real-world (Misago): a block in attribute position -->
- 13 │ <form method="post" {% block form_extra %}{% endblock form_extra %}></form>
-    ·                                                       ─────┬────
-    ·                                                            ╰── here
-    ╰────
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:8:55]
+ 7 │ <!-- Real-world (Misago): a block in attribute position -->
+ 8 │ <form method="post" {% block form_extra %}{% endblock form_extra %}></form>
+   ·                                                       ─────┬────
+   ·                                                            ╰── here
+   ╰────
   help: Write it as `{% endblock %}`

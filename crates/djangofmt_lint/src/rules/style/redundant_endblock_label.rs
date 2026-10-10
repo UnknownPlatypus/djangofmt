@@ -20,6 +20,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// A label that names another block is left alone: Django rejects the template, and only its author
 /// knows which block was meant.
 ///
+/// ## Known problems
 /// The label is decided from the layout at fix time: in a pre-commit hook that runs `check --fix`
 /// before the formatter, a block the formatter then joins onto one line loses its label on the
 /// next run.
@@ -71,19 +72,14 @@ impl Violation for RedundantEndblockLabel {
     }
 }
 
-pub fn check(checker: &Checker<'_>, end: &BlockEnd<'_>) {
-    let Some(label) = end.label else {
-        return;
-    };
-    if !end.same_line {
-        return;
-    }
+/// The caller guarantees a Django block whose closer carries `label` on the opener's line.
+pub fn check(checker: &Checker<'_>, end: &BlockEnd<'_>, label: &str) {
     let mut guard = checker.report_diagnostic(
         &RedundantEndblockLabel { kind: end.kind },
         checker.source_span(label),
     );
     // From the end of the tag name, so the whitespace before the label goes with it.
-    let start = checker.source_end(end.tag_name);
+    let start = checker.source_end(end.end_tag);
     guard.set_fix(Fix::safe_edit(Edit::deletion(span(
         start,
         checker.source_end(label) - start,

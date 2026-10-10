@@ -14,6 +14,7 @@ use crate::Settings;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
+use crate::rules::helpers::BlockKind;
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
@@ -315,12 +316,8 @@ impl<'a> Checker<'a> {
             if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
                 rules::correctness::untrimmed_blocktranslate::check(self, block);
             }
-            if self.is_rule_enabled(Rule::DuplicateBlockName) {
-                self.record_block_name(block);
-            }
+            self.visit_block_opener(block);
         }
-
-        self.check_block_end(block);
 
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);
@@ -334,16 +331,40 @@ impl<'a> Checker<'a> {
         self.in_raw = outer_raw;
     }
 
-    fn check_block_end<T>(&self, block: &JinjaBlock<'a, T>) {
+    /// A block's opener has one name, so it is read once here and each arm holds that tag's rules.
+    fn visit_block_opener<T>(&mut self, block: &JinjaBlock<'a, T>) {
+        let Some(JinjaTagOrChildren::Tag(opener)) = block.body.first() else {
+            return;
+        };
+        let kind = match parse_jinja_tag_name(opener, self.context.language()) {
+            "block" => {
+                if self.is_rule_enabled(Rule::DuplicateBlockName)
+                    && let Some(name) =
+                        rules::correctness::duplicate_block_name::block_name_from_content(
+                            opener.content,
+                        )
+                {
+                    self.block_names.push(name);
+                }
+                BlockKind::Block
+            }
+            "partialdef" => BlockKind::Partialdef,
+            _ => return,
+        };
+        // Django's style guide decides the label; Jinja has no `partialdef` and no such rule.
         if self.is_django()
             && self.any_rule_enabled(&[Rule::MissingEndblockLabel, Rule::RedundantEndblockLabel])
-            && let Some(end) = rules::helpers::block_end(self, block)
+            && let Some(end) = rules::helpers::block_end(self, block, kind)
         {
-            if self.is_rule_enabled(Rule::MissingEndblockLabel) {
-                rules::style::missing_endblock_label::check(self, &end);
-            }
-            if self.is_rule_enabled(Rule::RedundantEndblockLabel) {
-                rules::style::redundant_endblock_label::check(self, &end);
+            // A label is either missing off the opener's line or redundant on it, never both.
+            match (end.same_line, end.label) {
+                (false, None) if self.is_rule_enabled(Rule::MissingEndblockLabel) => {
+                    rules::style::missing_endblock_label::check(self, &end);
+                }
+                (true, Some(label)) if self.is_rule_enabled(Rule::RedundantEndblockLabel) => {
+                    rules::style::redundant_endblock_label::check(self, &end, label);
+                }
+                _ => {}
             }
         }
     }
@@ -360,12 +381,6 @@ impl<'a> Checker<'a> {
             )
     }
 
-    fn record_block_name<T>(&mut self, block: &JinjaBlock<'a, T>) {
-        if let Some(name) = rules::correctness::duplicate_block_name::block_name(block) {
-            self.block_names.push(name);
-        }
-    }
-
     fn record_text_block_names(&mut self, raw: &'a str) {
         if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
             self.block_names
@@ -378,10 +393,9 @@ impl<'a> Checker<'a> {
         block: &JinjaBlock<'a, Attribute<'a>>,
         element: &Element<'a>,
     ) {
-        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.record_block_name(block);
+        if !self.in_raw {
+            self.visit_block_opener(block);
         }
-        self.check_block_end(block);
 
         let outer_raw = self.in_raw;
         self.in_raw |= self.opens_raw(block);

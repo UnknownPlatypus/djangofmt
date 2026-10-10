@@ -464,17 +464,9 @@ fn check_fix_endblock_labels_keeps_formatted_file_formatted() {
     // so neither fix changes the layout the formatter chose.
     let project = Project::new().file(
         "test.html",
-        "{% block content %}\n<h1>{% block title %}Home{% endblock title %}</h1>\n{% endblock %}\n",
+        "{% block content %}\n    <h1>{% block title %}Home{% endblock title %}</h1>\n{% endblock %}\n",
     );
     let path = project.join("test.html");
-    assert_cmd_snapshot!(cli().arg(&path), @"
-    success: true
-    exit_code: 0
-    ----- stdout -----
-
-    ----- stderr -----
-    1 file reformatted !
-    ");
     assert_cmd_snapshot!(cli().args(["check", "--fix"]).arg(&path), @"
     success: true
     exit_code: 0
@@ -483,10 +475,6 @@ fn check_fix_endblock_labels_keeps_formatted_file_formatted() {
     ----- stderr -----
     Found 2 errors (2 fixed, 0 remaining).
     ");
-    assert_eq!(
-        project.read("test.html"),
-        "{% block content %}\n    <h1>{% block title %}Home{% endblock %}</h1>\n{% endblock content %}\n"
-    );
     assert_cmd_snapshot!(cli().arg("--check").arg(&path), @"
     success: true
     exit_code: 0

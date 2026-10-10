@@ -1,8 +1,8 @@
 use std::iter;
 use std::slice;
-use std::str::SplitAsciiWhitespace;
 
 use djangofmt_syntax::CommentDelimiters;
+use djangofmt_syntax::dtl::is_space;
 use markup_fmt::ast::{Attribute, JinjaBlock, JinjaTagOrChildren, NativeAttribute};
 use smallvec::{SmallVec, smallvec};
 
@@ -16,25 +16,19 @@ pub fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%") || value.contains("{#")
 }
 
-/// The whitespace-separated tokens of a tag's content: `{% block NAME %}` yields `block`, `NAME`.
-/// Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the rest.
-pub fn tag_tokens(content: &str) -> SplitAsciiWhitespace<'_> {
-    content
-        .trim_start_matches(['+', '-'])
-        .split_ascii_whitespace()
+/// Django's `token.split_contents()` for a tag whose arguments hold no quotes: `str.split()`.
+pub fn tag_tokens(content: &str) -> impl Iterator<Item = &str> {
+    content.split(is_space).filter(|token| !token.is_empty())
 }
 
 /// A block whose closing tag Django lets repeat the block's name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BlockKind {
-    /// `{% block NAME %}`
     Block,
-    /// `{% partialdef NAME %}`
     Partialdef,
 }
 
 impl BlockKind {
-    /// The closing tag's name.
     #[must_use]
     pub const fn end_tag(self) -> &'static str {
         match self {
@@ -47,31 +41,28 @@ impl BlockKind {
 /// The closing tag of a `{% block NAME %}` or `{% partialdef NAME %}`, in a form Django accepts.
 pub struct BlockEnd<'s> {
     pub kind: BlockKind,
-    /// The block's name, from the opening tag.
     pub name: &'s str,
     /// `endblock` or `endpartialdef`, in the closing tag.
-    pub tag_name: &'s str,
+    pub end_tag: &'s str,
     /// The closing tag's label, which repeats `name`.
     pub label: Option<&'s str>,
-    /// Whether the closing tag sits on the opening tag's line.
     pub same_line: bool,
 }
 
-/// The [`BlockEnd`] of `block`, or [`None`] for any other block and for the tags Django rejects:
-/// another arity, or a label naming another block.
-pub fn block_end<'s, T>(checker: &Checker<'s>, block: &JinjaBlock<'s, T>) -> Option<BlockEnd<'s>> {
+/// The [`BlockEnd`] of a block the caller has classified as `kind`, or [`None`] for the tags
+/// Django rejects: another arity, or a label naming another block.
+pub fn block_end<'s, T>(
+    checker: &Checker<'s>,
+    block: &JinjaBlock<'s, T>,
+    kind: BlockKind,
+) -> Option<BlockEnd<'s>> {
     let (Some(JinjaTagOrChildren::Tag(opener)), Some(JinjaTagOrChildren::Tag(closer))) =
         (block.body.first(), block.body.last())
     else {
         return None;
     };
 
-    let mut tokens = tag_tokens(opener.content);
-    let kind = match tokens.next()? {
-        "block" => BlockKind::Block,
-        "partialdef" => BlockKind::Partialdef,
-        _ => return None,
-    };
+    let mut tokens = tag_tokens(opener.content).skip(1);
     let name = match (tokens.next()?, tokens.next(), tokens.next()) {
         (name, None, _) => name,
         (name, Some("inline"), None) if kind == BlockKind::Partialdef => name,
@@ -79,7 +70,7 @@ pub fn block_end<'s, T>(checker: &Checker<'s>, block: &JinjaBlock<'s, T>) -> Opt
     };
 
     let mut tokens = tag_tokens(closer.content);
-    let tag_name = tokens.next().filter(|&token| token == kind.end_tag())?;
+    let end_tag = tokens.next().filter(|&token| token == kind.end_tag())?;
     let label = match (tokens.next(), tokens.next()) {
         (None, _) => None,
         (Some(label), None) if label == name => Some(label),
@@ -91,7 +82,7 @@ pub fn block_end<'s, T>(checker: &Checker<'s>, block: &JinjaBlock<'s, T>) -> Opt
     Some(BlockEnd {
         kind,
         name,
-        tag_name,
+        end_tag,
         label,
         same_line: !between.contains('\n'),
     })

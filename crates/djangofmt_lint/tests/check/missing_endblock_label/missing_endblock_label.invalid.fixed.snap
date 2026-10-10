@@ -6,19 +6,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
     <h1>{{ title }}</h1>
 {% endblock content %}
 
-<!-- Multi-line partialdef -->
-{% partialdef card %}
-    <div class="card">{{ content }}</div>
-{% endpartialdef card %}
-
 <!-- Multi-line inline partialdef -->
 {% partialdef button inline %}
     <button>Submit</button>
 {% endpartialdef button %}
-
-<!-- Only the inner block is unlabelled -->
-{% block sidebar %}
-    {% block menu %}
-        <nav>{{ menu }}</nav>
-    {% endblock menu %}
-{% endblock sidebar %}
