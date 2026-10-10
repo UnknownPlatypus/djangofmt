@@ -1,0 +1,12 @@
+<!-- Django: tests/template_tests/syntax_tests/test_extends.py::inheritance01 -->
+1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}
+
+<!-- Django: docs/internals/contributing/writing-code/coding-style.txt, template style -->
+{% block header %}
+
+  Code goes here
+
+{% endblock header %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks02 — a label naming another block is a Django error, left to the author -->
+1{% block first %}_{% block second %}2{% endblock first %}_{% endblock second %}3

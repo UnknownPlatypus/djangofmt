@@ -1,0 +1,22 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Missing label on `{% endblock %}` of a multi-line block
+   ╭─[tests/check/missing_endblock_label/missing_endblock_label.invalid.html:6:4]
+ 5 │ 
+ 6 │ {% endblock %}
+   ·    ────┬───
+   ·        ╰── here
+ 7 │ 
+   ╰────
+  help: Write it as `{% endblock header %}`
+
+  × Missing label on `{% endpartialdef %}` of a multi-line block
+    ╭─[tests/check/missing_endblock_label/missing_endblock_label.invalid.html:11:4]
+ 10 │ TEST with 'space in name'!
+ 11 │ {% endpartialdef %}
+    ·    ──────┬──────
+    ·          ╰── here
+    ╰────
+  help: Write it as `{% endpartialdef 'space in name' %}`

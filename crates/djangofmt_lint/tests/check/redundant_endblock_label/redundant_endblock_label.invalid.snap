@@ -1,0 +1,42 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Redundant label on `{% endblock %}` of a single-line block
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:2:73]
+ 1 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+ 2 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
+   ·                                                                         ──┬──
+   ·                                                                           ╰── here
+ 3 │ 
+   ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant label on `{% endblock %}` of a single-line block
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:2:51]
+ 1 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+ 2 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
+   ·                                                   ───┬──
+   ·                                                      ╰── here
+ 3 │ 
+   ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant label on `{% endpartialdef %}` of a single-line block
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:5:78]
+ 4 │ <!-- Django: tests/template_tests/syntax_tests/test_partials.py::inline_partial_explicit_end -->
+ 5 │ {% partialdef testing-name inline %}HERE IS THE TEST CONTENT{% endpartialdef testing-name %}
+   ·                                                                              ──────┬─────
+   ·                                                                                    ╰── here
+ 6 │ 
+   ╰────
+  help: Write it as `{% endpartialdef %}`
+
+  × Redundant label on `{% endblock %}` of a single-line block
+   ╭─[tests/check/redundant_endblock_label/redundant_endblock_label.invalid.html:8:55]
+ 7 │ <!-- Real-world (Misago): a block in attribute position -->
+ 8 │ <form method="post" {% block form_extra %}{% endblock form_extra %}></form>
+   ·                                                       ─────┬────
+   ·                                                            ╰── here
+   ╰────
+  help: Write it as `{% endblock %}`

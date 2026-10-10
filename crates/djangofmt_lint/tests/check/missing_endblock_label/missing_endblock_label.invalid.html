@@ -1,0 +1,11 @@
+<!-- Django: docs/internals/contributing/writing-code/coding-style.txt, template style -->
+{% block header %}
+
+  Code goes here
+
+{% endblock %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_partials.py::test_valid_partialdef_names, over several lines -->
+{% partialdef 'space in name' %}
+TEST with 'space in name'!
+{% endpartialdef %}
