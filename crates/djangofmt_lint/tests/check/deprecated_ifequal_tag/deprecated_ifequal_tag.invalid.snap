@@ -1,0 +1,73 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated `{% ifnotequal %}` tag
+   ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:2:4]
+ 1 │ <!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::ifnotequal03 — the `{% else %}` branch stays as it is -->
+ 2 │ {% ifnotequal a b %}yes{% else %}no{% endifnotequal %}
+   ·    ─────┬────
+   ·         ╰── here
+ 3 │ 
+   ╰────
+  help: Use `{% if %}` with `!=` instead
+
+  × Deprecated `{% ifequal %}` tag
+   ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:5:4]
+ 4 │ <!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::ifequal-split08 — a quoted operand keeps its spaces and escapes -->
+ 5 │ {% ifequal a 'I\'m happy' %}yes{% else %}no{% endifequal %}
+   ·    ───┬───
+   ·       ╰── here
+ 6 │ 
+   ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+   ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:8:4]
+ 7 │ <!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::ifequal-filter05 — an operand keeps its filters -->
+ 8 │ {% ifequal x|slice:"1"|upper "A" %}x{% endifequal %}
+   ·    ───┬───
+   ·       ╰── here
+ 9 │ 
+   ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:11:4]
+ 10 │ <!-- Nested blocks, the inner one fixed on the next pass -->
+ 11 │ {% ifequal a b %}
+    ·    ───┬───
+    ·       ╰── here
+ 12 │     {% ifnotequal b c %}<p>a equals b, not c</p>{% endifnotequal %}
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifnotequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:12:8]
+ 11 │ {% ifequal a b %}
+ 12 │     {% ifnotequal b c %}<p>a equals b, not c</p>{% endifnotequal %}
+    ·        ─────┬────
+    ·             ╰── here
+ 13 │ {% endifequal %}
+    ╰────
+  help: Use `{% if %}` with `!=` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:16:4]
+ 15 │ <!-- Django ignores what follows the closing tag's name -->
+ 16 │ {% ifequal a b %}<p>Equal</p>{% endifequal a b %}
+    ·    ───┬───
+    ·       ╰── here
+ 17 │ 
+    ╰────
+  help: Use `{% if %}` with `==` instead
+
+  × Deprecated `{% ifequal %}` tag
+    ╭─[tests/check/deprecated_ifequal_tag/deprecated_ifequal_tag.invalid.html:20:36]
+ 19 │ <select name="language">
+ 20 │     <option value="{{ lang.0 }}"{% ifequal LANGUAGE_CODE lang.0 %} selected="selected"{% endifequal %}>{{ lang.1 }}</option>
+    ·                                    ───┬───
+    ·                                       ╰── here
+ 21 │ </select>
+    ╰────
+  help: Use `{% if %}` with `==` instead

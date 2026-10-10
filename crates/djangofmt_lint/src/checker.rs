@@ -15,6 +15,7 @@ use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
+use crate::rules::upgrade::deprecated_ifequal_tag::EqualityTag;
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 use djangofmt_syntax::dtl;
@@ -29,6 +30,7 @@ const TAG_RULES: &[Rule] = &[
     Rule::DeprecatedStaticLibrary,
     Rule::LegacyTranslationTag,
     Rule::LegacyAsAssignment,
+    Rule::DeprecatedIfequalTag,
 ];
 
 /// AST visitor that collects lint diagnostics.
@@ -428,10 +430,27 @@ impl<'a> Checker<'a> {
         }
         let name = self.tag_name(opener);
         if !self.in_raw {
-            if matches!(name, "blocktranslate" | "blocktrans")
-                && self.is_rule_enabled(Rule::UntrimmedBlocktranslate)
-            {
-                rules::correctness::untrimmed_blocktranslate::check(self, opener, name);
+            match name {
+                "blocktranslate" | "blocktrans" => {
+                    if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
+                        rules::correctness::untrimmed_blocktranslate::check(self, opener, name);
+                    }
+                }
+                "ifequal" | "ifnotequal" => {
+                    if let Some(version) = self.target_version()
+                        && self.is_rule_enabled(Rule::DeprecatedIfequalTag)
+                    {
+                        let equality = if name == "ifequal" {
+                            EqualityTag::Ifequal
+                        } else {
+                            EqualityTag::Ifnotequal
+                        };
+                        rules::upgrade::deprecated_ifequal_tag::check(
+                            self, block, equality, version,
+                        );
+                    }
+                }
+                _ => {}
             }
             self.visit_tag_named(opener, name);
         }

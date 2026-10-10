@@ -1,0 +1,14 @@
+<!-- The replacement tag -->
+{% if user.id == comment.user_id %}<p>Your comment</p>{% endif %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_if_equal.py::one_var — Django requires two operands, so this block is already broken -->
+{% ifnotequal a %}yes{% endifnotequal %}
+
+<!-- An operand `{% if %}` would read as an operator: `{% if in == b %}` is a syntax error -->
+{% ifequal in b %}<p>Equal</p>{% endifequal %}
+
+<!-- Regression: django-upgrade #63 — a `{% verbatim %}` body is literal text -->
+{% verbatim %}{% ifequal a b %}<p>Equal</p>{% endifequal %}{% endverbatim %}
+
+<!-- A pair inside text is seen as two single tags and left alone, see the known limitations -->
+<a class="{% ifequal a b %}active{% endifequal %}">Link</a>

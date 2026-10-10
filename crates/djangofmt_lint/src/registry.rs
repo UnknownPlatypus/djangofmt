@@ -266,6 +266,7 @@ define_rules! {
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
+    (DeprecatedIfequalTag, rules::upgrade::deprecated_ifequal_tag::DeprecatedIfequalTag),
     (DeprecatedStaticLibrary, rules::upgrade::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::upgrade::redundant_json_script_id::RedundantJsonScriptId),
     (LegacyTranslationTag, rules::upgrade::legacy_translation_tag::LegacyTranslationTag),
