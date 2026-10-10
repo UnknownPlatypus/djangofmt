@@ -95,9 +95,13 @@ jobs:
           args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
         if: ${{ startsWith(matrix.target, 'x86_64') }}
-        run: |
-          pip install dist/"${PACKAGE_NAME}"-*.whl --force-reinstall
-          "${PACKAGE_NAME}" --help
+        uses: astral-sh/github-actions/release-smoke-test@76d2758fc5c4394ada46510f46605deb7cec477e
+        with:
+          image: python:3.13-bookworm@sha256:933b46a028fd786c9c3d426ebabc237e29a15912231ea8de576e95f0e4f41a4c
+          artifacts: dist
+          run: |
+            pip install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
+            "${PACKAGE_NAME}" --help
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -149,6 +153,7 @@ jobs:
             # see https://github.com/astral-sh/ruff/issues/10073
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: riscv64gc-unknown-linux-gnu
+            test_platform: linux/riscv64
             manylinux: "2_31"
             maturin_docker_options: -e JEMALLOC_SYS_WITH_LG_PAGE=16
           - target: arm-unknown-linux-musleabihf
@@ -178,25 +183,20 @@ jobs:
             if [[ "${{ matrix.platform.target }}" == "riscv64gc-unknown-linux-gnu" ]] && command -v apt-get &> /dev/null; then
               apt-get update && apt-get install -y libatomic1
             fi
-      - name: "Set up QEMU"
-        if: ${{ matrix.platform.test_platform }}
-        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-        with:
-          image: tonistiigi/binfmt:qemu-v10.2.3@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
-          platforms: ${{ matrix.platform.test_platform }}
-          cache-image: false
       - name: "Test wheels"
         if: ${{ matrix.platform.test_platform }}
-        env:
-          TEST_IMAGE: ${{ matrix.platform.test_image || 'ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214' }}
-          TEST_PLATFORM: ${{ matrix.platform.test_platform }}
-        run: |
-          docker run --rm --platform "$TEST_PLATFORM" -v "$GITHUB_WORKSPACE/dist:/dist:ro" --env PACKAGE_NAME --env DEBIAN_FRONTEND=noninteractive "$TEST_IMAGE" sh -c "
-            apt-get update;
-            apt-get install -y --no-install-recommends python3 python3-pip;
-            pip3 install ${PACKAGE_NAME} --no-index --find-links /dist --force-reinstall;
-            ${PACKAGE_NAME} --help;
-            "
+        uses: astral-sh/github-actions/release-smoke-test@76d2758fc5c4394ada46510f46605deb7cec477e
+        with:
+          image: ${{ matrix.platform.test_image || 'ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214' }}
+          platform: ${{ matrix.platform.test_platform }}
+          artifacts: dist
+          run: |
+            apt-get update
+            apt-get install -y --no-install-recommends python3 python3-pip libatomic1
+            # Ubuntu 20.04's pip predates the manylinux_2_31 tag used by the riscv64 wheel.
+            python3 -m pip install --upgrade --require-hashes -r /pip-requirements.txt
+            python3 -m pip install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
+            "${PACKAGE_NAME}" --help
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -249,13 +249,15 @@ jobs:
           args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
         if: matrix.target == 'x86_64-unknown-linux-musl'
-        run: |
-          docker run --rm -v "$GITHUB_WORKSPACE/dist:/dist:ro" --env PACKAGE_NAME alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 sh -c "
-            apk add python3;
-            python -m venv .venv;
-            .venv/bin/pip3 install ${PACKAGE_NAME} --no-index --find-links /dist --force-reinstall;
-            .venv/bin/${PACKAGE_NAME} --help;
-            "
+        uses: astral-sh/github-actions/release-smoke-test@76d2758fc5c4394ada46510f46605deb7cec477e
+        with:
+          image: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+          artifacts: dist
+          run: |
+            apk add python3
+            python -m venv .venv
+            .venv/bin/pip3 install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
+            .venv/bin/"${PACKAGE_NAME}" --help
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -310,22 +312,17 @@ jobs:
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
           docker-options: ${{ matrix.platform.maturin_docker_options }}
-      - name: "Set up QEMU"
-        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-        with:
-          image: tonistiigi/binfmt:qemu-v10.2.3@sha256:400a4873b838d1b89194d982c45e5fb3cda4593fbfd7e08a02e76b03b21166f0
-          platforms: ${{ matrix.platform.test_platform }}
-          cache-image: false
       - name: "Test wheels"
-        env:
-          TEST_PLATFORM: ${{ matrix.platform.test_platform }}
-        run: |
-          docker run --rm --platform "$TEST_PLATFORM" -v "$GITHUB_WORKSPACE/dist:/dist:ro" --env PACKAGE_NAME alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 sh -c "
-            apk add python3;
-            python -m venv .venv;
-            .venv/bin/pip3 install ${PACKAGE_NAME} --no-index --find-links /dist --force-reinstall;
-            .venv/bin/${PACKAGE_NAME} --help;
-            "
+        uses: astral-sh/github-actions/release-smoke-test@76d2758fc5c4394ada46510f46605deb7cec477e
+        with:
+          image: alpine:3.24@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
+          platform: ${{ matrix.platform.test_platform }}
+          artifacts: dist
+          run: |
+            apk add python3
+            python -m venv .venv
+            .venv/bin/pip3 install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
+            .venv/bin/"${PACKAGE_NAME}" --help
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
