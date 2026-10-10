@@ -10,7 +10,7 @@ use std::{collections::BTreeMap, fs, path::Path};
 
 #[test]
 fn fmt_snapshot() {
-    glob!("**/*.html", |path| {
+    glob!("**/*.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
 
         let options = fs::read_to_string(path.with_file_name("config.toml"))
@@ -50,7 +50,7 @@ fn build_config(pyproject: &PyprojectSettings) -> FormatterConfig {
 }
 
 fn run_format_test(path: &Path, input: &str, config: &FormatterConfig) -> String {
-    let profile = Profile::Django;
+    let profile = Profile::from_path(path).unwrap_or_default();
 
     let output = format_text(input, config, profile, Some(path))
         .map_err(|err| format!("failed to format '{}': {:?}", path.display(), err))

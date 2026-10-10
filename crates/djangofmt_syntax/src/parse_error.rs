@@ -126,3 +126,19 @@ impl ParseError {
             })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The parse error fixtures end in a newline, never in a multibyte character.
+    #[test]
+    fn eof_span_covers_the_whole_last_char() {
+        assert_eq!(eof_aware_span("<p>é", 5), span(3, 2));
+    }
+
+    #[test]
+    fn jinja_name_pos_skips_trim_markers() {
+        assert_eq!(jinja_name_pos("{%- with %}", 2), 4);
+    }
+}

@@ -100,3 +100,19 @@ where
     CAPTURE_PANIC_INFO.set(prev_should_capture);
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn catch_unwind_captures_where_it_panicked() {
+        let error = catch_unwind(|| panic!("boom")).unwrap_err();
+        assert_eq!(error.payload, "boom");
+        assert!(
+            error
+                .location
+                .is_some_and(|location| location.starts_with(file!()))
+        );
+    }
+}

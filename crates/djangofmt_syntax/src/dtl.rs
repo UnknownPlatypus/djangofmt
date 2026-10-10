@@ -119,6 +119,7 @@ mod tests {
     #[case::dotted_var("engine..name", Some("engine..name"))]
     #[case::exponent_sign("1e+5", Some("1e+5"))]
     #[case::signed_number("-1.5", Some("-1.5"))]
+    #[case::signed_integer("-1", Some("-1"))]
     #[case::trailing_dot("-1.", None)]
     #[case::minus_in_name("total-1", None)]
     #[case::minus_in_arg("a|default:b-c", None)]

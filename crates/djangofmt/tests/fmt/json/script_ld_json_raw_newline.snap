@@ -7,3 +7,8 @@ source: crates/djangofmt/tests/fmt/main.rs
     -01T00:00:00"
     }
 </script>
+
+<!-- A space is no control character, so this snippet is formatted -->
+<script type="application/ld+json">
+    { "name": "Jane Doe" }
+</script>
