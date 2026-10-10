@@ -1,10 +1,12 @@
-<!-- Labelled multi-line block -->
-{% block content %}
-    <h1>{{ title }}</h1>
-{% endblock content %}
+<!-- Django: docs/internals/contributing/writing-code/coding-style.txt, template style -->
+{% block header %}
 
-<!-- Regression: djade #134 — a single-line block stays unlabelled -->
-<title>{% block title %}Home{% endblock %}</title>
+  Code goes here
+
+{% endblock header %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_extends.py::inheritance01 -->
+1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}
 
 <!-- An unnamed block is a Django error, left alone -->
 {% block %}

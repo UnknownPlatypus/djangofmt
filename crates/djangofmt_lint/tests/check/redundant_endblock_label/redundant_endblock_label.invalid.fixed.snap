@@ -1,11 +1,11 @@
 ---
 source: crates/djangofmt_lint/tests/check/main.rs
 ---
-<!-- Single-line block -->
-<title>{% block title %}Home{% endblock %}</title>
+<!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+1{% block first %}_{% block second %}2{% endblock %}_{% endblock %}3
 
-<!-- Single-line partialdef -->
-{% partialdef icon %}<svg></svg>{% endpartialdef %}
+<!-- Django: tests/template_tests/syntax_tests/test_partials.py::inline_partial_explicit_end -->
+{% partialdef testing-name inline %}HERE IS THE TEST CONTENT{% endpartialdef %}
 
 <!-- Real-world (Misago): a block in attribute position -->
 <form method="post" {% block form_extra %}{% endblock %}></form>

@@ -1,13 +1,12 @@
-<!-- Unlabelled single-line block -->
-<title>{% block title %}Home{% endblock %}</title>
+<!-- Django: tests/template_tests/syntax_tests/test_extends.py::inheritance01 -->
+1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}
 
-<!-- Labelled multi-line block -->
-{% block content %}
-    <h1>{{ title }}</h1>
-{% endblock content %}
+<!-- Django: docs/internals/contributing/writing-code/coding-style.txt, template style -->
+{% block header %}
 
-<!-- Regression: djade #114 — a label naming another block is a Django error, left to the author -->
-{% block heading %}Welcome{% endblock header %}
+  Code goes here
 
-<!-- A closer with more than a label is a Django error, left alone -->
-{% block footer %}Bye{% endblock footer now %}
+{% endblock header %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks02 — a label naming another block is a Django error, left to the author -->
+1{% block first %}_{% block second %}2{% endblock first %}_{% endblock second %}3
