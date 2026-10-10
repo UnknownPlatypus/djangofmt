@@ -67,7 +67,7 @@ pub enum IsolationLevel {
 /// (the common case) allocation-free. Empty replacement content is
 /// rejected by [`Edit::replacement`] and [`Edit::insertion`] via a
 /// `debug_assert!`; use [`Edit::deletion`] for the empty case.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Edit {
     range: SourceSpan,
     content: Option<Cow<'static, str>>,
@@ -139,14 +139,6 @@ impl Edit {
         self.content.as_deref()
     }
 }
-
-impl PartialEq for Edit {
-    fn eq(&self, other: &Self) -> bool {
-        self.start() == other.start() && self.end() == other.end() && self.content == other.content
-    }
-}
-
-impl Eq for Edit {}
 
 impl Ord for Edit {
     fn cmp(&self, other: &Self) -> Ordering {
