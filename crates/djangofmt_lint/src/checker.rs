@@ -21,7 +21,7 @@ use djangofmt_syntax::dtl;
 use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 
 /// Every rule an arm of `visit_tag_named` or `visit_block_opener` reaches: a tag's name is only
-/// read when one is enabled. A new arm adds its rules here.
+/// read, and text only scanned for tags, when one is enabled. A new arm adds its rules here.
 const TAG_RULES: &[Rule] = &[
     Rule::DuplicateBlockName,
     Rule::SameFilePartialInclude,
@@ -179,7 +179,7 @@ impl<'a> Checker<'a> {
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag),
             NodeKind::Comment(comment) => {
                 self.visit_comment(HTML_COMMENT, comment.raw);
-                self.record_text_block_names(comment.raw);
+                self.visit_text(comment.raw);
             }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
             NodeKind::JinjaInterpolation(interpolation) => {
@@ -216,7 +216,7 @@ impl<'a> Checker<'a> {
 
     /// A tag has one name, so it is read once here and each arm holds that name's rules.
     fn visit_jinja_tag(&mut self, tag: &JinjaTag<'a>) {
-        if self.reads_tags {
+        if self.reads_tags && !self.in_raw {
             self.visit_tag_named(tag, self.tag_name(tag));
         }
     }
@@ -224,8 +224,7 @@ impl<'a> Checker<'a> {
     fn visit_tag_named(&mut self, tag: &JinjaTag<'a>, name: &'a str) {
         match name {
             "block" => {
-                if !self.in_raw
-                    && self.is_rule_enabled(Rule::DuplicateBlockName)
+                if self.is_rule_enabled(Rule::DuplicateBlockName)
                     && let Some(name) =
                         rules::correctness::duplicate_block_name::block_name_from_content(
                             tag.content,
@@ -237,7 +236,6 @@ impl<'a> Checker<'a> {
             "include" => {
                 // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
                 if let Some(path) = self.context.path()
-                    && !self.in_raw
                     && self.is_rule_enabled(Rule::SameFilePartialInclude)
                 {
                     rules::style::same_file_partial_include::check(self, tag, path);
@@ -296,14 +294,14 @@ impl<'a> Checker<'a> {
         }
 
         // The parser keeps these bodies as raw text, but Django still reads the tags in them.
-        if self.is_rule_enabled(Rule::DuplicateBlockName)
+        if self.reads_tags
             && ["script", "style", "pre", "textarea"]
                 .iter()
                 .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
         {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {
-                    self.record_text_block_names(text.raw);
+                    self.visit_text(text.raw);
                 }
             }
         }
@@ -311,7 +309,12 @@ impl<'a> Checker<'a> {
 
     fn visit_attribute(&mut self, attr: &Attribute<'a>, element: &Element<'a>) {
         match attr {
-            Attribute::Native(native) => self.visit_native_attribute(native, element),
+            Attribute::Native(native) => {
+                self.visit_native_attribute(native, element);
+                if let Some((value, _)) = native.value {
+                    self.visit_text(value);
+                }
+            }
             Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
             Attribute::JinjaTag(tag) => self.visit_jinja_tag(tag),
             _ => {}
@@ -401,10 +404,25 @@ impl<'a> Checker<'a> {
         !self.is_django() && name == "raw"
     }
 
-    fn record_text_block_names(&mut self, raw: &'a str) {
-        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.block_names
-                .extend(rules::correctness::duplicate_block_name::block_names_in_text(raw));
+    /// The `{% %}` in `text` reach the tag rules, when one is on.
+    #[inline]
+    fn visit_text(&mut self, text: &'a str) {
+        if self.reads_tags && !self.in_raw {
+            self.visit_text_tags(text);
+        }
+    }
+
+    // Out of line: inlined or not, a heavier body would tax every attribute.
+    #[inline(never)]
+    fn visit_text_tags(&mut self, text: &'a str) {
+        let mut start = None;
+        for tag in rules::helpers::tags_in_text(text) {
+            let start = *start.get_or_insert_with(|| self.source_offset(text));
+            let tag = JinjaTag {
+                start: start + tag.start,
+                ..tag
+            };
+            self.visit_jinja_tag(&tag);
         }
     }
 

@@ -28,3 +28,7 @@
 
 <!-- ... and neither are `only` includes -->
 {% include "same_file_partial_include.valid.html#item-list" only %}
+
+<!-- A partial inside a `{% comment %}` body is never compiled, so the include targets nothing -->
+{% comment %}{% partialdef hidden %}<p>Hidden</p>{% endpartialdef %}{% endcomment %}
+{% include "same_file_partial_include.valid.html#hidden" %}
