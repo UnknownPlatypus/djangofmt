@@ -171,6 +171,10 @@ jobs:
   clippy_check:
     name: "cargo clippy"
     runs-on: ubuntu-24.04
+    needs: changed_files
+    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -180,8 +184,8 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --locked --all-targets --all-features
 
-  cargo-shear:
-    name: "cargo shear"
+  cargo-shear-deny:
+    name: "cargo shear + deny"
     runs-on: ubuntu-24.04
     needs: changed_files
     if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
@@ -197,6 +201,8 @@ jobs:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
       - run: uv run --only-dev cargo shear
+      - if: ${{ !cancelled() }}
+        run: uv run --only-dev cargo deny check licenses sources bans
 
   hawk:
     name: "cargo hawk"
@@ -215,25 +221,6 @@ jobs:
       - name: Find dead pub items
         run: cargo hawk check --only dead-public -D warnings
 
-  cargo-deny:
-    name: "cargo deny"
-    runs-on: ubuntu-24.04
-    needs: changed_files
-    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: Setup uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-        with:
-          version: ${{ env.UV_VERSION }}
-          enable-cache: false
-      # Advisories are left to Renovate's OSV vulnerability alerts.
-      - run: uv run --only-dev cargo deny check licenses sources bans
-
   test:
     name: "cargo test + coverage"
     runs-on: ubuntu-24.04
@@ -250,12 +237,14 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: false
-      - run: uv run --only-dev cargo llvm-cov --locked --workspace --exclude djangofmt_dev --exclude djangofmt_benchmark --lib --bins --tests --all-features --fail-under-lines 85
-      - name: Reject orphaned snapshot files
-        run: uv run --only-dev cargo insta test --unreferenced reject --workspace --all-targets --all-features
+      - name: Run tests with coverage, rejecting orphaned snapshot files
+        run: |
+          eval "$(uv run --only-dev cargo llvm-cov show-env --sh)"
+          uv run --only-dev cargo insta test --unreferenced reject --workspace --lib --bins --tests --all-features
+          uv run --only-dev cargo llvm-cov report --fail-under-lines 85 --ignore-filename-regex 'djangofmt_(dev|benchmark)/'
 
   msrv_check:
-    name: "cargo build (msrv)"
+    name: "cargo check (msrv)"
     runs-on: ubuntu-24.04
     needs: changed_files
     if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
@@ -274,7 +263,7 @@ jobs:
         env:
           MSRV: ${{ steps.msrv.outputs.value }}
         run: rustup toolchain install "${MSRV}"
-      - name: Build tests with MSRV
+      - name: Check with MSRV
         env:
           MSRV: ${{ steps.msrv.outputs.value }}
-        run: cargo "+${MSRV}" test --locked --no-run --workspace --all-targets --all-features
+        run: cargo "+${MSRV}" check --locked --workspace --all-targets --all-features
