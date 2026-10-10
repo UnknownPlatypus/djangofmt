@@ -36,6 +36,29 @@ pub fn bits(content: &str) -> Vec<&str> {
     SMART_SPLIT.find_iter(content).map(|m| m.as_str()).collect()
 }
 
+/// The name of a `{% %}` tag: the first of its [`bits`], `token.contents.split()[0]` in Django.
+#[must_use]
+pub fn tag_name(content: &str) -> &str {
+    let rest = content.trim_ascii_start();
+    // ASCII trimming leaves only `\x0B`, `\x1C` to `\x1F` and non-ASCII whitespace to decode.
+    let end = rest.bytes().position(|b| {
+        b.is_ascii_whitespace() || matches!(b, b'\x0B' | b'\x1C'..=b'\x1F') || b >= 0x80
+    });
+    match end {
+        None => rest,
+        Some(i) if rest.as_bytes()[i].is_ascii_whitespace() => &rest[..i],
+        Some(_) => tag_name_slow(rest),
+    }
+}
+
+#[cold]
+fn tag_name_slow(content: &str) -> &str {
+    content
+        .split(is_space)
+        .find(|bit| !bit.is_empty())
+        .unwrap_or("")
+}
+
 /// A `{{ }}` body: a constant or variable followed by its filters.
 #[derive(Debug)]
 pub struct FilterExpression<'a> {
@@ -146,6 +169,18 @@ mod tests {
     #[case::escaped_quotes_at_edge(r#"A "\"funky\" style" test."#, &["A", r#""\"funky\" style""#, "test."])]
     fn bits_cases(#[case] content: &str, #[case] expected: &[&str]) {
         assert_eq!(bits(content), expected);
+    }
+
+    #[rstest]
+    #[case::followed_by_space(" load static ", "load")]
+    #[case::alone("load", "load")]
+    #[case::python_whitespace_first("\u{a0}\u{1c}load static", "load")]
+    #[case::non_ascii_name("é x", "é")]
+    #[case::glued_quote(r#"load"static""#, r#"load"static""#)]
+    #[case::blank(" ", "")]
+    fn tag_name_cases(#[case] content: &str, #[case] expected: &str) {
+        assert_eq!(tag_name(content), expected);
+        assert_eq!(bits(content).first().copied().unwrap_or(""), expected);
     }
 
     #[rstest]

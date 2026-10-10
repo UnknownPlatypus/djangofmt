@@ -17,6 +17,7 @@ use crate::registry::Rule;
 use crate::rules;
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
+use djangofmt_syntax::dtl;
 use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 
 /// The rules that must not read what a Jinja `{% raw %}` body contains.
@@ -228,7 +229,13 @@ impl<'a> Checker<'a> {
         if !self.reads_tags {
             return;
         }
-        match parse_jinja_tag_name(tag, self.context.language()) {
+        // Django names a tag by its first bit; Jinja strips whitespace-control markers first.
+        let name = if self.is_django() {
+            dtl::tag_name(tag.content)
+        } else {
+            parse_jinja_tag_name(tag, self.context.language())
+        };
+        match name {
             "include" => {
                 // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
                 if let Some(path) = self.context.path()
