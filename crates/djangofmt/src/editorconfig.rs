@@ -109,6 +109,13 @@ mod tests {
     }
 
     #[test]
+    fn ignores_unreadable_editorconfig() {
+        let project = Project::new();
+        fs::write(project.join(".editorconfig"), b"\xff").unwrap();
+        assert!(load_editorconfig(project.path()).is_none());
+    }
+
+    #[test]
     fn reads_indent_and_line_length() {
         assert_eq!(
             settings(
@@ -192,6 +199,7 @@ indent_size = 3
     #[case("[*]\nindent_size = unset")]
     #[case("[*]\nmax_line_length = 0")]
     #[case("[*]\nmax_line_length = 321")]
+    #[case("[*]\nmax_line_length = 99999")]
     #[case("[*]\nmax_line_length = off")]
     fn ignores_invalid_values(#[case] editorconfig: &str) {
         assert_eq!(
