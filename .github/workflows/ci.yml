@@ -53,6 +53,7 @@ jobs:
             'python/**' \
             'crates/**' \
             .github/workflows/ci.yml \
+            .gitattributes \
             Cargo.toml \
             Cargo.lock \
             rust-toolchain.toml \
