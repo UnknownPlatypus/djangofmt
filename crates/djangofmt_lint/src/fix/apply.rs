@@ -11,9 +11,8 @@ use std::path::Path;
 use markup_fmt::SyntaxError;
 use rustc_hash::{FxHashMap, FxHashSet};
 
-use crate::LintDiagnostic;
-use crate::Settings;
 use crate::fix::{Applicability, IsolationLevel};
+use crate::{LintDiagnostic, LintInput, Settings};
 
 /// Metadata about a single applied fix, captured for `--show-fixes`.
 #[derive(Debug, Clone)]
@@ -171,6 +170,19 @@ pub fn lint_fix(
     threshold: Applicability,
     path: Option<&Path>,
 ) -> Result<FixerResult, FixerError> {
+    fix_loop(source, profile, custom_blocks, threshold, |input| {
+        input.check(settings, path)
+    })
+}
+
+/// [`lint_fix`] with the lint step passed in, so tests can feed it fixes no rule makes.
+fn fix_loop(
+    source: &str,
+    profile: markup_fmt::Language,
+    custom_blocks: &[String],
+    threshold: Applicability,
+    check: impl Fn(&LintInput<'_>) -> Vec<LintDiagnostic>,
+) -> Result<FixerResult, FixerError> {
     let mut current: Cow<'_, str> = Cow::Borrowed(source);
     let mut total_applied = 0usize;
     let mut iterations = 0usize;
@@ -210,7 +222,7 @@ pub fn lint_fix(
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
 
-        let diagnostics = input.check(settings, path);
+        let diagnostics = check(&input);
         let result = apply_fixes(&current, &diagnostics, threshold);
         for applied in &result.applied_fixes {
             let entry = applied_by_rule.entry(applied.code).or_default();
@@ -387,5 +399,22 @@ mod tests {
         .expect("lint_fix");
         assert_eq!(result.source, source);
         assert_eq!(result.applied_count, 0);
+    }
+
+    #[test]
+    fn lint_fix_reports_a_fix_that_breaks_the_syntax() {
+        // `<p id=></p>` does not parse.
+        let fix = Fix::safe_edit(Edit::insertion(" id=", 2));
+        let result = fix_loop(
+            "<p></p>",
+            markup_fmt::Language::Django,
+            &[],
+            Applicability::Safe,
+            |_| vec![diag_with_fix(fix.clone())],
+        );
+        assert!(matches!(
+            result,
+            Err(FixerError::SyntaxRegression { iteration: 1, .. })
+        ));
     }
 }
