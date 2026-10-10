@@ -11,3 +11,5 @@ source: crates/djangofmt/tests/fmt/main.rs
 <!--html comment-->
 {# djangofmt: ignore[format] #}
 <div   class="kept"   ></div>
+{#- jinja habit, dashes are text in Django -#}
+{#-no-spaces-#}
