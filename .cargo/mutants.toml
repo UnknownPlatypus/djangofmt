@@ -23,6 +23,12 @@ exclude_re = [
   "replace \\+ with \\* in siblings_after",
   "replace < with <= in (siblings_after|guarded_ranges)",
   "replace > with >= in guarded_ranges",
+  # Equivalent: `tag_free` only spares text a search,
+  # so overshooting the text's end or counting the `{%` just past it finds the same tags.
+  "replace \\+ with \\* in Checker<'a>::visit_text$",
+  "replace < with <= in Checker<'a>::visit_text_tags$",
+  # Equivalent: a later `%` still lands `lex_tags` on the tag's line and ends `tag_free` before it closes.
+  "replace == with != in find_tag_open",
   # Equivalent until the registry grows: no rule is deprecated or removed, and all fit one `u64`.
   "replace && with \\|\\| in Settings::all",
   "replace \\* with / in <impl Iterator for RuleSetIterator>::next",

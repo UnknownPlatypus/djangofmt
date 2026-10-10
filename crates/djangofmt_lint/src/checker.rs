@@ -1,3 +1,4 @@
+use std::ops::Range;
 use std::path::Path;
 
 use markup_fmt::Language;
@@ -28,6 +29,9 @@ pub struct Checker<'a> {
     block_names: SmallVec<[&'a str; 8]>,
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
+    /// The addresses of a source run no `{%` starts in,
+    /// ending on the next one: text inside it holds no tag.
+    tag_free: Range<usize>,
 }
 
 impl<'a> Checker<'a> {
@@ -43,6 +47,7 @@ impl<'a> Checker<'a> {
             context: LintContext::new(source, settings, language, path, quarantined),
             block_names: SmallVec::new_const(),
             in_raw: false,
+            tag_free: 0..0,
         }
     }
 
@@ -167,7 +172,7 @@ impl<'a> Checker<'a> {
             NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag, self.tag_name(tag)),
             NodeKind::Comment(comment) => {
                 self.visit_comment(HTML_COMMENT, comment.raw);
-                self.record_text_block_names(comment.raw);
+                self.visit_text(comment.raw);
             }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
             NodeKind::JinjaInterpolation(interpolation) => {
@@ -290,7 +295,7 @@ impl<'a> Checker<'a> {
         {
             for child in &element.children {
                 if let NodeKind::Text(text) = &child.kind {
-                    self.record_text_block_names(text.raw);
+                    self.visit_text(text.raw);
                 }
             }
         }
@@ -298,7 +303,12 @@ impl<'a> Checker<'a> {
 
     fn visit_attribute(&mut self, attr: &Attribute<'a>, element: &Element<'a>) {
         match attr {
-            Attribute::Native(native) => self.visit_native_attribute(native, element),
+            Attribute::Native(native) => {
+                self.visit_native_attribute(native, element);
+                if let Some((value, _)) = native.value {
+                    self.visit_text(value);
+                }
+            }
             Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
             Attribute::JinjaTag(tag) => self.visit_jinja_tag(tag, self.tag_name(tag)),
             _ => {}
@@ -385,10 +395,36 @@ impl<'a> Checker<'a> {
         self.in_raw = !self.is_django() && name == "raw";
     }
 
-    fn record_text_block_names(&mut self, raw: &'a str) {
-        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.block_names
-                .extend(rules::correctness::duplicate_block_name::block_names_in_text(raw));
+    /// The `{% %}` in `text` reach the tag rules.
+    #[inline]
+    fn visit_text(&mut self, text: &'a str) {
+        if !self.in_raw {
+            // Addresses, not offsets: this runs for every attribute value,
+            // and most lie in `tag_free`, which spares each a search.
+            let start = text.as_ptr().addr();
+            let end = start + text.len();
+            if self.tag_free.contains(&start) && end <= self.tag_free.end {
+                return;
+            }
+            self.visit_text_tags(text, start, end);
+        }
+    }
+
+    // Out of line: inlined or not, a heavier body would tax every attribute.
+    #[inline(never)]
+    fn visit_text_tags(&mut self, text: &'a str, start: usize, end: usize) {
+        let offset = self.source_offset(text);
+        let rest = &self.context.source().as_bytes()[offset..];
+        let next_tag = &rest[rules::helpers::find_tag_open(rest).unwrap_or(rest.len())..];
+        self.tag_free = start..next_tag.as_ptr().addr();
+        if self.tag_free.end < end {
+            for tag in rules::helpers::tags_in_text(text) {
+                let tag = JinjaTag {
+                    start: offset + tag.start,
+                    ..tag
+                };
+                self.visit_jinja_tag(&tag, self.tag_name(&tag));
+            }
         }
     }
 

@@ -24,6 +24,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- Include in attribute position -->
 <div {% partial attrs %}>Highlighted</div>
 
+<!-- Django reads the tags in HTML comments -->
+<!-- {% partial card %} -->
+
 <!-- Nested inside an element and a block: the visitor must descend to reach it -->
 <nav>
   {% if show_menu %}
