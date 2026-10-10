@@ -343,8 +343,11 @@ mod tests {
             codes(&format!("<div>\n{GUARDED}\n</div>")),
             Vec::<&str>::new()
         );
+        // In a later branch too, past the siblings of the first one.
         assert_eq!(
-            codes(&format!("{{% if x %}}\n{GUARDED}\n{{% endif %}}")),
+            codes(&format!(
+                "{{% if x %}}<p>x</p>{{% else %}}\n{GUARDED}\n{{% endif %}}"
+            )),
             Vec::<&str>::new()
         );
     }

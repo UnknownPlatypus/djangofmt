@@ -185,6 +185,17 @@ mod tests {
     }
 
     #[test]
+    fn ignore_wins_a_specificity_tie() {
+        let (settings, _) = LintConfiguration {
+            select: Some(vec![RuleSelector::Rule(Rule::UseHttps)]),
+            ignore: vec![RuleSelector::Rule(Rule::UseHttps)],
+            ..LintConfiguration::default()
+        }
+        .into_settings();
+        assert!(!settings.is_enabled(Rule::UseHttps));
+    }
+
+    #[test]
     fn default_excludes_preview_and_pedantic_but_all_includes_them() {
         let default = Settings::default();
         assert!(!default.is_enabled(Rule::DjangoUrlPattern)); // preview rule

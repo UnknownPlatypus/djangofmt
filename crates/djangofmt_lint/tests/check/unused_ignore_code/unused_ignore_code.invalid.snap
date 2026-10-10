@@ -74,11 +74,11 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
 
   × Unused rule code in suppression: `empty-attr-value`
-    ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:33:27]
+    ╭─[tests/check/unused_ignore_code/unused_ignore_code.invalid.html:33:22]
  32 │ <!-- A comment sharing its line keeps the line -->
- 33 │ <div>{# djangofmt: ignore[empty-attr-value] #}<p>hi</p></div>
-    ·                           ────────┬───────
-    ·                                   ╰── here
+ 33 │ {# djangofmt: ignore[empty-attr-value] #}<p>hi</p>
+    ·                      ────────┬───────
+    ·                              ╰── here
  34 │ 
     ╰────
 

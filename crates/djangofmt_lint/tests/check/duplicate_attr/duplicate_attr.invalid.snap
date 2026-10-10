@@ -108,5 +108,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  25 │ <button {% if a %}class="on"{% else %}id="off"{% endif %} class="always"></button>
     ·                                                           ──┬──
     ·                                                             ╰── here
+ 26 │ 
+    ╰────
+  help: Remove the duplicate `class` attribute
+
+  × Duplicate attribute `class`
+    ╭─[tests/check/duplicate_attr/duplicate_attr.invalid.html:28:30]
+ 27 │ <!-- A block holding both duplicates is the element's only attribute -->
+ 28 │ <button {% if a %}class="on" class="off"{% endif %}></button>
+    ·                              ──┬──
+    ·                                ╰── here
     ╰────
   help: Remove the duplicate `class` attribute

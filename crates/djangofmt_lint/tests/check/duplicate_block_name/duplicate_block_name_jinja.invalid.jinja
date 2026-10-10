@@ -1,0 +1,5 @@
+<!-- Only `{% raw %}` hides template tags: blocks inside any other block still count -->
+{% if cond %}
+{% block a %}{% endblock %}
+{% endif %}
+{% block a %}{% endblock %}
