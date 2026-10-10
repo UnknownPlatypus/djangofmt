@@ -42,6 +42,7 @@ env:
 jobs:
   sdist:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -71,6 +72,7 @@ jobs:
 
   linux:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       matrix:
         target:
@@ -126,6 +128,7 @@ jobs:
 
   linux-cross:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       matrix:
         platform:
@@ -219,6 +222,7 @@ jobs:
 
   musllinux:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       matrix:
         target:
@@ -278,6 +282,7 @@ jobs:
 
   musllinux-cross:
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     strategy:
       matrix:
         platform:
@@ -343,6 +348,7 @@ jobs:
 
   macos-x86_64:
     runs-on: macos-15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -385,6 +391,7 @@ jobs:
 
   macos-aarch64:
     runs-on: macos-15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -431,6 +438,7 @@ jobs:
 
   windows:
     runs-on: windows-2022
+    timeout-minutes: 20
     strategy:
       matrix:
         platform:

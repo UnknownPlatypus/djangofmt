@@ -30,6 +30,7 @@ jobs:
   benchmarks:
     name: Run benchmarks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       # See https://github.com/msgspec/msgspec/pull/1082
       GLIBC_TUNABLES: "glibc.cpu.hwcaps=-AVX512F,-AVX512DQ,-AVX512_VBMI2,-AVX2,-AVX,-ERMS,-FSRM"
