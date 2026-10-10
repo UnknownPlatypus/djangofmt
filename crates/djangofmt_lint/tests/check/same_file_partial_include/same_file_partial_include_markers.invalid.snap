@@ -8,5 +8,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  4 │ {%- include "same_file_partial_include_markers.invalid.jinja#footer" -%}
    · ────────────────────────────────────┬───────────────────────────────────
    ·                                     ╰── here
+ 5 │ 
+   ╰────
+  help: Use `{% partial footer %}` instead
+
+  × Same-file partial `footer` rendered via `{% include %}`
+   ╭─[tests/check/same_file_partial_include/same_file_partial_include_markers.invalid.jinja:7:1]
+ 6 │ <!-- So are Jinja's `+` markers -->
+ 7 │ {%+ include "same_file_partial_include_markers.invalid.jinja#footer" +%}
+   · ────────────────────────────────────┬───────────────────────────────────
+   ·                                     ╰── here
    ╰────
   help: Use `{% partial footer %}` instead

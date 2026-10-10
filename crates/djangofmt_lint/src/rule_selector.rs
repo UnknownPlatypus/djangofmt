@@ -212,6 +212,17 @@ mod tests {
     use super::RuleSelector;
     use crate::registry::Rule;
 
+    #[test]
+    fn parse_suggests_the_missing_category_prefix() {
+        assert_eq!("category:default".parse(), Ok(RuleSelector::Default));
+        let error = |value: &str| value.parse::<RuleSelector>().unwrap_err().to_string();
+        assert_eq!(
+            error("default"),
+            "Unknown rule `default`; did you mean `category:default`?"
+        );
+        assert_eq!(error("yay"), "Unknown rule selector: `yay`");
+    }
+
     /// `all_rules` is total: an exact selector denotes exactly its rule,
     /// regardless of lifecycle. This is what docs/`--explain` output relies on.
     #[test]

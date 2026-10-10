@@ -1,0 +1,4 @@
+{% partialdef footer %}<small>A footer</small>{% endpartialdef %}
+
+<!-- `{% raw %}` emits its body verbatim, so the include inside is text, not a template tag -->
+{% raw %}{% include "same_file_partial_include_raw.valid.jinja#footer" %}{% endraw %}

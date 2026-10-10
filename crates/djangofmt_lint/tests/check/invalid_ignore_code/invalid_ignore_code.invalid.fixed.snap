@@ -4,6 +4,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- Typo in a rule name -->
 <form method="yes"></form>
 
+<!-- A longer code leaves room for more typos -->
+<form method="yes"></form>
+
 <!-- Unknown code hiding among valid ones -->
 {# djangofmt: ignore[invalid-attr-value] #}
 <div></div>
