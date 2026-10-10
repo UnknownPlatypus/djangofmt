@@ -19,6 +19,7 @@ on:
       - Cargo.toml
       - Cargo.lock
       - rust-toolchain.toml
+      - .cargo/config.toml
       # And when we change this workflow itself...
       - .github/workflows/release-build-binaries.yml
 
@@ -449,6 +450,9 @@ jobs:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: ${{ matrix.platform.arch }}
+      - name: "Install LLVM tools"
+        if: ${{ matrix.platform.target == 'x86_64-pc-windows-msvc' }}
+        run: rustup component add llvm-tools-preview
 
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -457,6 +461,18 @@ jobs:
           maturin-version: v1.15.0
           target: ${{ matrix.platform.target }}
           args: --release --locked --out dist --compatibility pypi
+      - name: "Verify static Windows runtime"
+        if: ${{ matrix.platform.target == 'x86_64-pc-windows-msvc' }}
+        shell: bash
+        run: |
+          LLVM_READOBJ="$(rustc --print sysroot)/lib/rustlib/${{ matrix.platform.target }}/bin/llvm-readobj.exe"
+          IMPORTS_FILE="$RUNNER_TEMP/${PACKAGE_NAME}-coff-imports.txt"
+          "$LLVM_READOBJ" --coff-imports "target/${{ matrix.platform.target }}/release/${PACKAGE_NAME}.exe" > "$IMPORTS_FILE"
+
+          if grep -Eiq 'vcruntime[[:digit:]_]*\.dll|ucrtbase\.dll|api-ms-win-crt-' "$IMPORTS_FILE"; then
+            echo "${PACKAGE_NAME} must not dynamically link the Visual C++ runtime" >&2
+            exit 1
+          fi
       - name: "Test wheels"
         if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
         shell: bash
