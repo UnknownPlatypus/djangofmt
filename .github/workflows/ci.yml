@@ -250,6 +250,24 @@ jobs:
           uv run --only-dev cargo insta test --unreferenced reject --workspace --lib --bins --tests --all-features
           uv run --only-dev cargo llvm-cov report --fail-under-lines 85 --ignore-filename-regex 'djangofmt_(dev|benchmark)/'
 
+  test-other:
+    name: "cargo test (${{ matrix.os }})"
+    strategy:
+      matrix:
+        os: [windows-2025, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    needs: changed_files
+    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run tests
+        run: cargo test --workspace --lib --bins --tests --all-features
+
   msrv_check:
     name: "cargo check (msrv)"
     runs-on: ubuntu-24.04
