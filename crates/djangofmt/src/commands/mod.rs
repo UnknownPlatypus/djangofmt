@@ -50,14 +50,15 @@ pub(crate) fn catch_file_panic<T>(
     })
 }
 
-/// Sort errors by path, log each as a report, and return the count.
+/// Log each error as a report, and return the count.
 /// `verb` fills the summary line, e.g. "Couldn't format N files!".
+///
+/// Errors come in the resolved files' sorted order, which rayon keeps.
 pub(crate) fn report_errors(
-    mut errors: Vec<CommandError>,
+    errors: Vec<CommandError>,
     verb: &str,
     output_format: OutputFormat,
 ) -> usize {
-    errors.sort_unstable_by(|a, b| a.path().cmp(&b.path()));
     let count = errors.len();
     for err in errors {
         match output_format {
