@@ -1,18 +1,5 @@
 {% extends "base.html" %}
 {% load i18n %}
-
-
-{# Static files #}
-{% load static %}
 {# Page title #}
 {% block title %}{% translate "Home" %}{% endblock %}
-{% block content %}
-<main>
-{% block hero %}<h1>Hi</h1>{% endblock %}
-{% block body %}{% endblock %}
-</main>
-{% endblock content %}
-
-
-
-{% block scripts %}<script src="{% static 'home.js' %}"></script>{% endblock %}{% block footer %}{% endblock %}
+{% block content %}{% endblock %}
