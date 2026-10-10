@@ -107,13 +107,7 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 /// Reports a URL that points at a hardcoded `static/` path.
 fn report_static_path(checker: &Checker<'_>, url: &str, attribute: &'static str) {
     // Browsers strip surrounding ASCII whitespace when resolving URL attributes.
-    let trimmed = url.trim_ascii();
-
-    // A URL that begins with a template tag or variable is skipped, since it may resolve anywhere.
-    if trimmed.starts_with("{{") || trimmed.starts_with("{%") {
-        return;
-    }
-    if starts_with_static_path(trimmed) {
+    if starts_with_static_path(url.trim_ascii()) {
         checker.report_diagnostic(&DjangoStaticUrl { attribute }, checker.source_span(url));
     }
 }
