@@ -1,0 +1,5 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+<svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" /></svg>
+<math><mspace width="1em" /></math>
