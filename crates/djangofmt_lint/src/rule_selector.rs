@@ -210,6 +210,10 @@ mod tests {
             "Unknown rule `default`; did you mean `category:default`?"
         );
         assert_eq!(error("yay"), "Unknown rule selector: `yay`");
+        assert_eq!(
+            error("category:yay"),
+            "Unknown category `yay` (expected one of: all, default, correctness, suspicious, style, accessibility, pedantic)"
+        );
     }
 
     /// `all_rules` is total: an exact selector denotes exactly its rule,

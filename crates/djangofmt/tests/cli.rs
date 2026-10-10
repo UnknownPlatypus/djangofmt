@@ -631,6 +631,24 @@ fn check_passes_file_path_to_path_aware_rules() {
 }
 
 #[test]
+fn check_warns_on_preview_rule_without_preview() {
+    assert_cmd_snapshot!(
+        cli()
+            .args(["check", "--select", "django-url-pattern", "-"])
+            .pass_stdin("<div></div>\n"),
+        @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    rule `django-url-pattern` is in preview and was skipped; enable it with `--preview`
+    All checks passed!
+    "
+    );
+}
+
+#[test]
 fn check_fixable_file_with_show_fixes() {
     let project = Project::new().file(
         "test.html",

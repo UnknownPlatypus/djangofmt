@@ -12,9 +12,8 @@ exclude_globs = [
 # Text no test asserts: fix titles only show under `--show-fixes`, the rest in docs and error messages.
 exclude_re = [
   "::fix_title -> ",
-  "Display for (FixAvailability|IndentWidth|LineLength|PanicError|RuleSelector|SelectionWarning)>",
+  "Display for (FixAvailability|PanicError)>",
   "Debug for RuleSet>",
-  "category_list -> ",
   # Equivalent: shortcuts whose slow path gives the same result.
   "(Checker|LintContext)<'a>::any_rule_enabled -> bool with true",
   "is_single_spaced -> bool with false",
