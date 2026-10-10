@@ -3,6 +3,7 @@
 //! Python's `\s` and `\w` differ from the `regex` crate's, so both patterns spell them out.
 //! `\s` is [`is_space`], and `\w` is `[\p{L}\p{N}_]`.
 
+use std::fmt;
 use std::sync::LazyLock;
 
 use regex::Regex;
@@ -35,10 +36,62 @@ pub fn bits(content: &str) -> Vec<&str> {
     SMART_SPLIT.find_iter(content).map(|m| m.as_str()).collect()
 }
 
-/// A `{{ }}` body without the whitespace Django allows around `|`,
-/// or [`None`] where Django's `FilterExpression` raises.
+/// The name of a `{% %}` tag: the first of its [`bits`], `token.contents.split()[0]` in Django.
 #[must_use]
-pub fn compact_filter_expression(expr: &str) -> Option<String> {
+pub fn tag_name(content: &str) -> &str {
+    let rest = content.trim_ascii_start();
+    // ASCII trimming leaves only `\x0B`, `\x1C` to `\x1F` and non-ASCII whitespace to decode.
+    let end = rest.bytes().position(|b| {
+        b.is_ascii_whitespace() || matches!(b, b'\x0B' | b'\x1C'..=b'\x1F') || b >= 0x80
+    });
+    match end {
+        None => rest,
+        Some(i) if rest.as_bytes()[i].is_ascii_whitespace() => &rest[..i],
+        Some(_) => tag_name_slow(rest),
+    }
+}
+
+#[cold]
+fn tag_name_slow(content: &str) -> &str {
+    content
+        .split(is_space)
+        .find(|bit| !bit.is_empty())
+        .unwrap_or("")
+}
+
+/// A `{{ }}` body: a constant or variable followed by its filters.
+#[derive(Debug)]
+pub struct FilterExpression<'a> {
+    /// The head, a string constant (`"x"`, `_("x")`) or a variable (`user.name`, `1.5`).
+    var: &'a str,
+    pub filters: Vec<Filter<'a>>,
+}
+
+#[derive(Debug)]
+pub struct Filter<'a> {
+    pub name: &'a str,
+    pub arg: Option<&'a str>,
+}
+
+/// The expression without the whitespace Django allows around `|`.
+impl fmt::Display for FilterExpression<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.var)?;
+        for filter in &self.filters {
+            f.write_str("|")?;
+            f.write_str(filter.name)?;
+            if let Some(arg) = filter.arg {
+                f.write_str(":")?;
+                f.write_str(arg)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+/// Lex a `{{ }}` body like Django's `FilterExpression`, or [`None`] where Django raises.
+#[must_use]
+pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
     // `filter_re` as of Django 6.0, django/template/base.py
     static FILTER: LazyLock<Regex> = LazyLock::new(|| {
         let strdq = r#""[^"\\]*(?:\\.[^"\\]*)*""#;
@@ -59,22 +112,27 @@ pub fn compact_filter_expression(expr: &str) -> Option<String> {
     let var = head
         .name("constant")
         .or_else(|| head.name("var").filter(|var| is_variable(var.as_str())))?;
-    let mut compact = var.as_str().to_owned();
+    let mut filters = Vec::new();
     let mut upto = var.end();
     for filter in matches {
         let whole = filter.get_match();
-        if whole.start() != upto
-            || filter
-                .name("var_arg")
-                .is_some_and(|arg| !is_variable(arg.as_str()))
-        {
+        let var_arg = filter.name("var_arg");
+        if whole.start() != upto || var_arg.is_some_and(|arg| !is_variable(arg.as_str())) {
             return None;
         }
-        compact.push('|');
-        compact.push_str(&expr[filter.name("filter_name")?.start()..whole.end()]);
+        filters.push(Filter {
+            name: filter.name("filter_name")?.as_str(),
+            arg: filter
+                .name("constant_arg")
+                .or(var_arg)
+                .map(|arg| arg.as_str()),
+        });
         upto = whole.end();
     }
-    (upto == expr.len()).then_some(compact)
+    (upto == expr.len()).then_some(FilterExpression {
+        var: var.as_str(),
+        filters,
+    })
 }
 
 /// Whether Django's `Variable` accepts a `[\w.+-]+` match.
@@ -114,6 +172,18 @@ mod tests {
     }
 
     #[rstest]
+    #[case::followed_by_space(" load static ", "load")]
+    #[case::alone("load", "load")]
+    #[case::python_whitespace_first("\u{a0}\u{1c}load static", "load")]
+    #[case::non_ascii_name("é x", "é")]
+    #[case::glued_quote(r#"load"static""#, r#"load"static""#)]
+    #[case::blank(" ", "")]
+    fn tag_name_cases(#[case] content: &str, #[case] expected: &str) {
+        assert_eq!(tag_name(content), expected);
+        assert_eq!(bits(content).first().copied().unwrap_or(""), expected);
+    }
+
+    #[rstest]
     #[case::string_constant("'egg'", Some("'egg'"))]
     #[case::translated_constant(r#"_("x") | upper"#, Some(r#"_("x")|upper"#))]
     #[case::dotted_var("engine..name", Some("engine..name"))]
@@ -136,7 +206,8 @@ mod tests {
     #[case::space_after_arg_separator("a|b: c", None)]
     #[case::space_without_separator("a .b", None)]
     #[case::mark_is_not_word_char("x\u{0903}|upper", None)]
-    fn compact_filter_expression_cases(#[case] expr: &str, #[case] expected: Option<&str>) {
-        assert_eq!(compact_filter_expression(expr).as_deref(), expected);
+    fn filter_expression_cases(#[case] expr: &str, #[case] expected: Option<&str>) {
+        let compact = filter_expression(expr).map(|expression| expression.to_string());
+        assert_eq!(compact.as_deref(), expected);
     }
 }

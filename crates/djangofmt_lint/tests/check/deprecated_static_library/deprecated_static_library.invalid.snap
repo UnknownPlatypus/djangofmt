@@ -1,0 +1,62 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:2:9]
+ 1 │ <!-- Django 2.2: tests/staticfiles_tests/test_templatetag_deprecation.py::test_templatetag_deprecated -->
+ 2 │ {% load staticfiles %}{% static 'main.js' %}
+   ·         ─────┬─────
+   ·              ╰── here
+ 3 │ 
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:5:16]
+ 4 │ <!-- The tag already loads `static`, before or after the alias, so the alias is dropped -->
+ 5 │ {% load static staticfiles %}
+   ·                ─────┬─────
+   ·                     ╰── here
+ 6 │ {% load staticfiles static %}
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+   ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:6:9]
+ 5 │ {% load static staticfiles %}
+ 6 │ {% load staticfiles static %}
+   ·         ─────┬─────
+   ·              ╰── here
+ 7 │ 
+   ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:9:9]
+  8 │ <!-- Both aliases in one tag -->
+  9 │ {% load staticfiles admin_static %}
+    ·         ─────┬─────
+    ·              ╰── here
+ 10 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `admin_static`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:9:21]
+  8 │ <!-- Both aliases in one tag -->
+  9 │ {% load staticfiles admin_static %}
+    ·                     ──────┬─────
+    ·                           ╰── here
+ 10 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:12:21]
+ 11 │ <!-- Django 2.0: tests/staticfiles_tests/test_templatetags.py::test_template_tag -->
+ 12 │ {% load static from staticfiles %}{% static 'testfile.txt' %}
+    ·                     ─────┬─────
+    ·                          ╰── here
+    ╰────
+  help: Load `static` instead

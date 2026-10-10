@@ -13,6 +13,10 @@ pub struct DjangoVersion {
 }
 
 impl DjangoVersion {
+    /// The most recent Django release. Bump on each release, along with `LATEST_DJANGO_VERSION` in
+    /// the ecosystem check, so that selecting every rule really does run every rule.
+    pub const LATEST: Self = Self::new(6, 1);
+
     #[must_use]
     pub const fn new(major: u8, minor: u8) -> Self {
         Self { major, minor }
@@ -83,5 +87,13 @@ mod tests {
     fn orders_by_major_then_minor() {
         assert!(DjangoVersion::new(4, 2) < DjangoVersion::new(5, 0));
         assert!(DjangoVersion::new(3, 2) < DjangoVersion::new(3, 10));
+    }
+
+    #[test]
+    fn latest_matches_the_ecosystem_check() {
+        // `just ecosystem-check-lint-dev` passes this version so that every gated rule fires.
+        let projects = include_str!("../../../python/ecosystem-check/ecosystem_check/projects.py");
+        let line = format!("LATEST_DJANGO_VERSION = \"{}\"", DjangoVersion::LATEST);
+        assert!(projects.contains(&line));
     }
 }

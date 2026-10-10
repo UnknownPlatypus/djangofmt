@@ -1,8 +1,7 @@
 use std::borrow::Cow;
 
 use djangofmt_syntax::dtl::bits;
-use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren, Node};
-use markup_fmt::parser::parse_jinja_tag_name;
+use markup_fmt::ast::JinjaTag;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -56,30 +55,19 @@ impl Violation for UntrimmedBlocktranslate {
     }
 }
 
-/// Inspect the opening tag of a Jinja block and report a diagnostic if it
-/// is a `blocktranslate` / `blocktrans` block missing the `trimmed` keyword.
-pub fn check(checker: &Checker<'_>, block: &JinjaBlock<'_, Node<'_>>) {
-    let Some(JinjaTagOrChildren::Tag(open_tag)) = block.body.first() else {
-        return;
-    };
-
-    let tag_name = parse_jinja_tag_name(open_tag, checker.context().language());
-    if tag_name != "blocktranslate" && tag_name != "blocktrans" {
-        return;
-    }
-
+/// The caller guarantees a `{% blocktranslate %}` or `{% blocktrans %}` opener and passes its
+/// `name`, a slice of the opener.
+pub fn check(checker: &Checker<'_>, open_tag: &JinjaTag<'_>, name: &str) {
     if bits(open_tag.content).contains(&"trimmed") {
         return;
     }
-
-    let span = checker.source_span(open_tag.content);
-    let Some(mut guard) = checker.report_diagnostic_if_enabled(&UntrimmedBlocktranslate, span)
-    else {
-        return;
-    };
-
-    guard.set_fix(Fix::safe_edit(Edit::insertion(
-        " trimmed",
-        checker.source_end(tag_name),
-    )));
+    checker
+        .report_diagnostic(
+            &UntrimmedBlocktranslate,
+            checker.source_span(open_tag.content),
+        )
+        .set_fix(Fix::safe_edit(Edit::insertion(
+            " trimmed",
+            checker.source_end(name),
+        )));
 }

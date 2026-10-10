@@ -1,7 +1,7 @@
 use std::borrow::Cow;
+use std::path::Path;
 
 use markup_fmt::ast::JinjaTag;
-use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
@@ -63,18 +63,12 @@ impl Violation for SameFilePartialInclude<'_> {
     }
 }
 
-pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>) {
-    // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
-    let Some(current_path) = checker.context().path() else {
-        return;
-    };
-
-    let tag_name = parse_jinja_tag_name(tag, checker.context().language());
-    // Only a `#fragment` names a partial, so skip lexing the other includes.
-    if tag_name != "include" || !tag.content.contains('#') {
+/// The caller guarantees the tag is an `include`.
+pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
+    // Only a `#fragment` names a partial, so the other includes are not lexed.
+    if !tag.content.contains('#') {
         return;
     }
-
     let Some((template_path, fragment)) = parse_partial_include(tag) else {
         return;
     };

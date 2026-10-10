@@ -252,9 +252,9 @@ pub fn format_text(
                     // Only whitespace around `|` can go, and an expression Django rejects stays verbatim.
                     Ok(
                         if has_spaced_pipe(expr)
-                            && let Some(compact) = dtl::compact_filter_expression(expr)
+                            && let Some(expression) = dtl::filter_expression(expr)
                         {
-                            compact.into()
+                            expression.to_string().into()
                         } else {
                             code.into()
                         },
@@ -285,7 +285,7 @@ fn is_single_spaced(body: &str) -> bool {
     })
 }
 
-/// Whether whitespace touches a `|`, the only whitespace [`dtl::compact_filter_expression`] drops.
+/// Whether whitespace touches a `|`, the only whitespace [`dtl::FilterExpression`] prints without.
 fn has_spaced_pipe(expr: &str) -> bool {
     expr.match_indices('|').any(|(i, _)| {
         expr[..i].ends_with(dtl::is_space) || expr[i + 1..].starts_with(dtl::is_space)

@@ -576,6 +576,76 @@ fn check_passes_file_path_to_path_aware_rules() {
 }
 
 #[test]
+fn check_gates_version_specific_rules_on_target_version() {
+    // `deprecated-static-library` needs Django >= 2.1 and `redundant-json-script-id` >= 4.1;
+    // without a target version both stay off.
+    let project = Project::new().file(
+        "test.html",
+        "{% load staticfiles %}\n{{ value|json_script:\"\" }}\n",
+    );
+    let run = |version: Option<&str>| {
+        let mut command = cli();
+        command.args([
+            "check",
+            "--select",
+            "category:upgrade",
+            "--output-format",
+            "concise",
+        ]);
+        if let Some(version) = version {
+            command.args(["--target-version", version]);
+        }
+        command.arg(project.join("test.html"));
+        command
+    };
+
+    assert_cmd_snapshot!(run(None), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    ");
+    assert_cmd_snapshot!(run(Some("2.0")), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    All checks passed!
+    ");
+    assert_cmd_snapshot_tmpdir!(run(Some("2.1")), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    ");
+    assert_cmd_snapshot_tmpdir!(run(Some("4.0")), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
+    Found 1 errors. [*] 1 fixable with the --fix option.
+    ");
+    assert_cmd_snapshot_tmpdir!(run(Some("4.1")), @"
+    success: false
+    exit_code: 1
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:9: deprecated-static-library [*] Deprecated template library `staticfiles`
+    [TMP]/test.html:2:21: redundant-json-script-id [*] Redundant empty element id passed to `json_script`
+    Found 2 errors. [*] 2 fixable with the --fix option.
+    ");
+}
+
+#[test]
 fn check_fixable_file_with_show_fixes() {
     let project = Project::new().file(
         "test.html",

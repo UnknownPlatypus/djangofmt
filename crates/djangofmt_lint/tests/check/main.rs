@@ -122,7 +122,7 @@ fn settings_for(path: &Path) -> Settings {
     }
     Settings {
         rules,
-        ..Settings::default()
+        ..Settings::all()
     }
 }
 
