@@ -63,7 +63,7 @@ fn tag_name_slow(content: &str) -> &str {
 #[derive(Debug)]
 pub struct FilterExpression<'a> {
     /// The head, a string constant (`"x"`, `_("x")`) or a variable (`user.name`, `1.5`).
-    pub var: &'a str,
+    var: &'a str,
     pub filters: Vec<Filter<'a>>,
 }
 
