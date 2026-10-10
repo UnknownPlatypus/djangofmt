@@ -70,12 +70,6 @@ impl<'de> Deserialize<'de> for LineLength {
     }
 }
 
-impl std::fmt::Display for LineLength {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
 /// The width of an indentation level.
 /// The allowed range of values is 1..=16.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -146,12 +140,6 @@ impl<'de> Deserialize<'de> for IndentWidth {
     fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         let value = u8::deserialize(deserializer)?;
         Self::try_from(value).map_err(serde::de::Error::custom)
-    }
-}
-
-impl std::fmt::Display for IndentWidth {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
     }
 }
 

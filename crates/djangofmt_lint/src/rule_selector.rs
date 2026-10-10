@@ -82,17 +82,6 @@ impl RuleSelector {
     }
 }
 
-impl fmt::Display for RuleSelector {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::All => write!(f, "{CATEGORY_PREFIX}{ALL_GROUP}"),
-            Self::Default => write!(f, "{CATEGORY_PREFIX}{DEFAULT_GROUP}"),
-            Self::Category(category) => write!(f, "{CATEGORY_PREFIX}{category}"),
-            Self::Rule(rule) => write!(f, "{rule}"),
-        }
-    }
-}
-
 impl FromStr for RuleSelector {
     type Err = SelectorParseError;
 
