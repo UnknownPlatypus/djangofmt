@@ -12,9 +12,20 @@ exclude_globs = [
 # Text no test asserts: fix titles only show under `--show-fixes`, the rest in docs and error messages.
 exclude_re = [
   "::fix_title -> ",
-  "Display for (FixAvailability|IndentWidth|LineLength|RuleSelector|SelectionWarning|SelectorParseError)>",
+  "Display for (FixAvailability|IndentWidth|LineLength|PanicError|RuleSelector|SelectionWarning)>",
   "Debug for RuleSet>",
   "category_list -> ",
+  # Equivalent: shortcuts whose slow path gives the same result.
+  "(Checker|LintContext)<'a>::any_rule_enabled -> bool with true",
+  "is_single_spaced -> bool with false",
+  "has_spaced_pipe -> bool with true",
+  # Equivalent: the target search skips the comment itself, and an empty range guards nothing.
+  "replace \\+ with \\* in siblings_after",
+  "replace < with <= in (siblings_after|guarded_ranges)",
+  "replace > with >= in guarded_ranges",
+  # Equivalent until the registry grows: no rule is deprecated or removed, and all fit one `u64`.
+  "replace && with \\|\\| in Settings::all",
+  "replace \\* with / in <impl Iterator for RuleSetIterator>::next",
 ]
 all_features = true
 additional_cargo_test_args = ["--lib", "--bins", "--tests"]
