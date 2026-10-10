@@ -44,8 +44,8 @@ impl FormatterConfig {
                 html_void_self_closing,
                 preserve_unquoted_attrs,
             ),
-            malva: build_malva_config(print_width, indent_width),
-            json: build_json_config(print_width, indent_width),
+            malva: build_malva_config(indent_width),
+            json: build_json_config(indent_width),
         }
     }
 }
@@ -121,13 +121,11 @@ pub fn build_markup_options(
 }
 
 /// Build default `malva` options for CSS/SCSS/SASS/LESS formatting.
-fn build_malva_config(
-    print_width: LineLength,
-    indent_width: IndentWidth,
-) -> malva::config::FormatOptions {
+///
+/// The print width is left out: each snippet gets the width `markup_fmt` has left for it.
+fn build_malva_config(indent_width: IndentWidth) -> malva::config::FormatOptions {
     malva::config::FormatOptions {
         layout: malva::config::LayoutOptions {
-            print_width: print_width.into(),
             indent_width: indent_width.into(),
             ..malva::config::LayoutOptions::default()
         },
@@ -147,12 +145,11 @@ fn build_malva_config(
     }
 }
 
+/// Like [`build_malva_config`], the line width is set per snippet.
 fn build_json_config(
-    print_width: LineLength,
     indent_width: IndentWidth,
 ) -> dprint_plugin_json::configuration::Configuration {
     dprint_plugin_json::configuration::ConfigurationBuilder::new()
-        .line_width(print_width.value().into())
         .indent_width(indent_width.value())
         .build()
 }

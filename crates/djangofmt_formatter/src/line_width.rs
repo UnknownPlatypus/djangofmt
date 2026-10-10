@@ -9,11 +9,6 @@ pub struct LineLength(NonZeroU16);
 
 impl LineLength {
     const MAX: u16 = 320;
-
-    #[must_use]
-    pub const fn value(self) -> u16 {
-        self.0.get()
-    }
 }
 
 impl Default for LineLength {
