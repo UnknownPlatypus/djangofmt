@@ -20,6 +20,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// A label that names another block is left alone: Django rejects the template, and only its author
 /// knows which block was meant.
 ///
+/// The label is decided from the layout at fix time: in a pre-commit hook that runs `check --fix`
+/// before the formatter, a block the formatter then joins onto one line loses its label on the
+/// next run.
+///
 /// ## Example
 /// ```html
 /// <title>{% block title %}Home{% endblock title %}</title>

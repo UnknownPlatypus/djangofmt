@@ -16,6 +16,10 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// a label on the closing tag and checks that it matches, and its template style guide asks for the
 /// label whenever the closing tag is not on the same line as the opening one.
 ///
+/// The label is decided from the layout at fix time: in a pre-commit hook that runs `check --fix`
+/// before the formatter, a block the formatter then spreads over several lines gets its label on
+/// the next run.
+///
 /// ## Example
 /// ```html
 /// {% block content %}
