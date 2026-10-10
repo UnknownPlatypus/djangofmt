@@ -68,19 +68,35 @@ fn fix_snapshot() {
         let fix = |threshold| apply_fixes(&input, &diagnostics, threshold);
 
         let safe = fix(Applicability::Safe);
-        if safe.applied_count > 0 {
-            build_settings(path).bind(|| {
-                assert_snapshot!(format!("{stem}.fixed"), safe.output);
-            });
-        }
-
         let unsafe_fixed = fix(Applicability::Unsafe);
-        if unsafe_fixed.applied_count > safe.applied_count {
-            build_settings(path).bind(|| {
-                assert_snapshot!(format!("{stem}.unsafe-fixed"), unsafe_fixed.output);
-            });
-        }
+        assert_fix_snapshot(
+            path,
+            &format!("{stem}.fixed"),
+            safe.applied_count > 0,
+            &safe.output,
+        );
+        assert_fix_snapshot(
+            path,
+            &format!("{stem}.unsafe-fixed"),
+            unsafe_fixed.applied_count > safe.applied_count,
+            &unsafe_fixed.output,
+        );
     });
+}
+
+/// A fix that stops applying leaves its snapshot unreferenced, which only
+/// `cargo insta test --unreferenced reject` reports, so check for it here.
+fn assert_fix_snapshot(path: &Path, name: &str, applied: bool, output: &str) {
+    if applied {
+        build_settings(path).bind(|| assert_snapshot!(name, output));
+    } else {
+        let snapshot = path.with_file_name(format!("{name}.snap"));
+        assert!(
+            !snapshot.exists(),
+            "{} expects a fix, but none applied",
+            snapshot.display()
+        );
+    }
 }
 
 /// Every runnable rule has a non-empty fixture directory named after it.
