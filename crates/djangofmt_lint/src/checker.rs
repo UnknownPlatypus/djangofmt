@@ -182,6 +182,13 @@ impl<'a> Checker<'a> {
                     {
                         rules::style::legacy_translation_tag::check_trans(self, tag);
                     }
+                    "ifequal" | "ifnotequal"
+                        if self.is_rule_enabled(Rule::DeprecatedIfequalTag)
+                            && self.targets_django(DjangoVersion::new(3, 1))
+                            && let Some(closer) = tokens.closer(i) =>
+                    {
+                        rules::suspicious::deprecated_ifequal_tag::check(self, tag, closer);
+                    }
                     "with" => {
                         if self.is_rule_enabled(Rule::LegacyAsAssignment) {
                             rules::style::legacy_as_assignment::check_with(self, tag);
