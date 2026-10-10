@@ -1,0 +1,32 @@
+<!-- Django: tests/template_tests/syntax_tests/test_with.py::legacywith01 -->
+{% with dict.key as key %}{{ key }}{% endwith %}
+
+<!-- Django: tests/template_tests/test_parser.py::test_token_smart_split — translated strings keep their spaces -->
+{% with _("Page not found") as title and value|yesno:_("yes,no") as answer %}{{ title }} {{ answer }}{% endwith %}
+
+<!-- A missing `and` is a syntax error, but has only one reading -->
+{% with engines.count as total cars.count as vehicles %}{{ total }} {{ vehicles }}{% endwith %}
+
+<!-- Django accepts a trailing `and`, which `name=value` does not -->
+{% with engines.count as total and %}{{ total }}{% endwith %}
+
+<!-- Python's `\w` takes non-ASCII letters in names -->
+{% with article.title as título %}{{ título }}{% endwith %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::legacyi18n28, also run as `blocktrans` -->
+{% blocktrans with anton as a and berta as b %}{{ a }} + {{ b }}{% endblocktrans %}
+
+<!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::legacyi18n26 -->
+{% blocktranslate with myextra_field as extra_field count number as counter %}singular {{ extra_field }}{% plural %}plural{% endblocktranslate %}
+
+<!-- Only the legacy clause is rewritten -->
+{% blocktranslate with name=engine.name count engines.count as total %}{{ name }}: {{ total }} engine{% plural %}{{ name }}: {{ total }} engines{% endblocktranslate %}
+
+<!-- The other options stay in place and in order -->
+{% blocktranslate trimmed with engine.name as name context "greeting" asvar message %}Hello {{ name }}{% endblocktranslate %}{{ message }}
+
+<!-- A missing `and` before a word that is not an option -->
+{% blocktranslate with engine.name as name engine.number as number trimmed %}Hello {{ name }} #{{ number }}{% endblocktranslate %}
+
+<!-- Django reads the tags in attribute values -->
+<a title="{% with engines.count as total %}{{ total }}{% endwith %}">Engines</a>

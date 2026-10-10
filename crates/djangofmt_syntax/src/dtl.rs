@@ -8,6 +8,9 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
+/// Python's `\w`: a letter, a digit or `_`.
+const WORD: &str = r"\p{L}\p{N}_";
+
 /// Python's `\s` and `str.isspace()`: Unicode `White_Space` plus U+001C to U+001F.
 #[must_use]
 pub fn is_space(c: char) -> bool {
@@ -59,6 +62,14 @@ fn tag_name_slow(content: &str) -> &str {
         .unwrap_or("")
 }
 
+/// Whether `text` is one or more of Python's `\w`, like the key of a `key=value` bit.
+#[must_use]
+pub fn is_word(text: &str) -> bool {
+    static WORD_RE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(&format!("^[{WORD}]+$")).expect("word pattern is valid"));
+    WORD_RE.is_match(text)
+}
+
 /// A `{{ }}` body: a constant or variable followed by its filters.
 #[derive(Debug)]
 pub struct FilterExpression<'a> {
@@ -97,11 +108,10 @@ pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
         let strdq = r#""[^"\\]*(?:\\.[^"\\]*)*""#;
         let strsq = r"'[^'\\]*(?:\\.[^'\\]*)*'";
         let constant = format!(r"(?:_\({strdq}\)|_\({strsq}\)|{strdq}|{strsq})");
-        let word = r"\p{L}\p{N}_";
-        let var = format!(r"[{word}.+\-]+");
+        let var = format!(r"[{WORD}.+\-]+");
         let space = r"[\s\x1C-\x1F]";
         Regex::new(&format!(
-            r"^(?P<constant>{constant})|^(?P<var>{var})|{space}*\|{space}*(?P<filter_name>[{word}]+)(?::(?:(?P<constant_arg>{constant})|(?P<var_arg>{var})))?"
+            r"^(?P<constant>{constant})|^(?P<var>{var})|{space}*\|{space}*(?P<filter_name>[{WORD}]+)(?::(?:(?P<constant_arg>{constant})|(?P<var_arg>{var})))?"
         ))
         .expect("filter pattern is valid")
     });
@@ -181,6 +191,13 @@ mod tests {
     fn tag_name_cases(#[case] content: &str, #[case] expected: &str) {
         assert_eq!(tag_name(content), expected);
         assert_eq!(bits(content).first().copied().unwrap_or(""), expected);
+    }
+
+    #[rstest]
+    #[case::empty("", false)]
+    #[case::mark_is_not_word_char("x\u{0903}", false)]
+    fn is_word_cases(#[case] text: &str, #[case] expected: bool) {
+        assert_eq!(is_word(text), expected);
     }
 
     #[rstest]

@@ -1,0 +1,112 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Legacy `as` assignment in `{% with %}`
+   ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:2:9]
+ 1 │ <!-- Django: tests/template_tests/syntax_tests/test_with.py::legacywith01 -->
+ 2 │ {% with dict.key as key %}{{ key }}{% endwith %}
+   ·         ───────┬───────
+   ·                ╰── here
+ 3 │ 
+   ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% with %}`
+   ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:5:9]
+ 4 │ <!-- Django: tests/template_tests/test_parser.py::test_token_smart_split — translated strings keep their spaces -->
+ 5 │ {% with _("Page not found") as title and value|yesno:_("yes,no") as answer %}{{ title }} {{ answer }}{% endwith %}
+   ·         ─────────────────────────────────┬────────────────────────────────
+   ·                                          ╰── here
+ 6 │ 
+   ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% with %}`
+   ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:8:9]
+ 7 │ <!-- A missing `and` is a syntax error, but has only one reading -->
+ 8 │ {% with engines.count as total cars.count as vehicles %}{{ total }} {{ vehicles }}{% endwith %}
+   ·         ──────────────────────┬──────────────────────
+   ·                               ╰── here
+ 9 │ 
+   ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% with %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:11:9]
+ 10 │ <!-- Django accepts a trailing `and`, which `name=value` does not -->
+ 11 │ {% with engines.count as total and %}{{ total }}{% endwith %}
+    ·         ─────────────┬────────────
+    ·                      ╰── here
+ 12 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% with %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:14:9]
+ 13 │ <!-- Python's `\w` takes non-ASCII letters in names -->
+ 14 │ {% with article.title as título %}{{ título }}{% endwith %}
+    ·         ───────────┬───────────
+    ·                    ╰── here
+ 15 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% blocktrans %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:17:20]
+ 16 │ <!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::legacyi18n28, also run as `blocktrans` -->
+ 17 │ {% blocktrans with anton as a and berta as b %}{{ a }} + {{ b }}{% endblocktrans %}
+    ·                    ────────────┬────────────
+    ·                                ╰── here
+ 18 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% blocktranslate %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:20:24]
+ 19 │ <!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::legacyi18n26 -->
+ 20 │ {% blocktranslate with myextra_field as extra_field count number as counter %}singular {{ extra_field }}{% plural %}plural{% endblocktranslate %}
+    ·                        ──────────────┬─────────────
+    ·                                      ╰── here
+ 21 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% blocktranslate %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:23:47]
+ 22 │ <!-- Only the legacy clause is rewritten -->
+ 23 │ {% blocktranslate with name=engine.name count engines.count as total %}{{ name }}: {{ total }} engine{% plural %}{{ name }}: {{ total }} engines{% endblocktranslate %}
+    ·                                               ───────────┬──────────
+    ·                                                          ╰── here
+ 24 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% blocktranslate %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:26:32]
+ 25 │ <!-- The other options stay in place and in order -->
+ 26 │ {% blocktranslate trimmed with engine.name as name context "greeting" asvar message %}Hello {{ name }}{% endblocktranslate %}{{ message }}
+    ·                                ─────────┬─────────
+    ·                                         ╰── here
+ 27 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% blocktranslate %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:29:24]
+ 28 │ <!-- A missing `and` before a word that is not an option -->
+ 29 │ {% blocktranslate with engine.name as name engine.number as number trimmed %}Hello {{ name }} #{{ number }}{% endblocktranslate %}
+    ·                        ─────────────────────┬─────────────────────
+    ·                                             ╰── here
+ 30 │ 
+    ╰────
+  help: Use `name=value` instead
+
+  × Legacy `as` assignment in `{% with %}`
+    ╭─[tests/check/legacy_as_assignment/legacy_as_assignment.invalid.html:32:19]
+ 31 │ <!-- Django reads the tags in attribute values -->
+ 32 │ <a title="{% with engines.count as total %}{{ total }}{% endwith %}">Engines</a>
+    ·                   ───────────┬──────────
+    ·                              ╰── here
+    ╰────
+  help: Use `name=value` instead
