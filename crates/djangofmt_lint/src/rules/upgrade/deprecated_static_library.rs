@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use djangofmt_syntax::dtl::{bits, first_bit_is};
+use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
 use markup_fmt::ast::JinjaTag;
 
@@ -68,19 +68,13 @@ const DEPRECATED_IN: DjangoVersion = DjangoVersion::new(2, 1);
 
 const DEPRECATED_LIBRARIES: [&str; 2] = ["staticfiles", "admin_static"];
 
-/// The caller passes the target version, so files without one never get here.
+/// The caller guarantees the tag is a `load` and passes the target version, so files without
+/// one never get here.
 pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, target_version: DjangoVersion) {
     if !checker.is_django() || target_version < DEPRECATED_IN {
         return;
     }
-    // Every tag gets here, so the name is matched without lexing and the rest runs out of line.
-    if first_bit_is(tag.content, "load") {
-        check_load(checker, tag.content);
-    }
-}
-
-#[cold]
-fn check_load(checker: &Checker<'_>, content: &str) {
+    let content = tag.content;
     // Both libraries contain `static`, so the other `{% load %}` tags are not lexed.
     if !content.contains("static") {
         return;

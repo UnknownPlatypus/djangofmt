@@ -216,19 +216,27 @@ impl<'a> Checker<'a> {
         }
     }
 
+    /// A tag has one name, so it is read once here and each arm holds that name's rules.
     fn visit_jinja_tag(&self, tag: &JinjaTag<'_>) {
-        // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
-        if let Some(path) = self.context.path()
-            && !self.in_raw
-            && self.is_rule_enabled(Rule::SameFilePartialInclude)
-        {
-            rules::style::same_file_partial_include::check(self, tag, path);
-        }
-        // No version-gated rule can fire without a target version.
-        if let Some(version) = self.target_version()
-            && self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
-        {
-            rules::upgrade::deprecated_static_library::check(self, tag, version);
+        match parse_jinja_tag_name(tag, self.context.language()) {
+            "include" => {
+                // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
+                if let Some(path) = self.context.path()
+                    && !self.in_raw
+                    && self.is_rule_enabled(Rule::SameFilePartialInclude)
+                {
+                    rules::style::same_file_partial_include::check(self, tag, path);
+                }
+            }
+            "load" => {
+                // No version-gated rule can fire without a target version.
+                if let Some(version) = self.target_version()
+                    && self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
+                {
+                    rules::upgrade::deprecated_static_library::check(self, tag, version);
+                }
+            }
+            _ => {}
         }
     }
 

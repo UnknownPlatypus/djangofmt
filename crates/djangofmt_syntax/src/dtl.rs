@@ -36,33 +36,6 @@ pub fn bits(content: &str) -> Vec<&str> {
     SMART_SPLIT.find_iter(content).map(|m| m.as_str()).collect()
 }
 
-/// Whether `name` is the first of the [`bits`] of `content`, checked without lexing.
-///
-/// `name` holds no whitespace or quote, as a tag name never does.
-#[must_use]
-#[inline]
-pub fn first_bit_is(content: &str, name: &str) -> bool {
-    let rest = content.trim_ascii_start();
-    // ASCII trimming leaves only `\x0B`, `\x1C` to `\x1F` and non-ASCII whitespace to decode.
-    let rest = match rest.as_bytes().first() {
-        Some(b'\x0B' | b'\x1C'..=b'\x1F' | 0x80..) => trim_space_start(rest),
-        _ => rest,
-    };
-    rest.strip_prefix(name)
-        .is_some_and(|after| after.is_empty() || starts_with_space(after))
-}
-
-// Out of line: callers run `first_bit_is` on every tag, and these are rarely reached.
-#[cold]
-fn trim_space_start(text: &str) -> &str {
-    text.trim_start_matches(is_space)
-}
-
-#[cold]
-fn starts_with_space(text: &str) -> bool {
-    text.starts_with(is_space)
-}
-
 /// A `{{ }}` body: a constant or variable followed by its filters.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FilterExpression<'a> {
@@ -124,7 +97,10 @@ pub fn filter_expression(expr: &str) -> Option<FilterExpression<'_>> {
         }
         filters.push(Filter {
             name: filter.name("filter_name")?.as_str(),
-            arg: filter.name("constant_arg").or(var_arg).map(|arg| arg.as_str()),
+            arg: filter
+                .name("constant_arg")
+                .or(var_arg)
+                .map(|arg| arg.as_str()),
         });
         upto = whole.end();
     }
@@ -175,17 +151,6 @@ mod tests {
     #[case::escaped_quotes_at_edge(r#"A "\"funky\" style" test."#, &["A", r#""\"funky\" style""#, "test."])]
     fn bits_cases(#[case] content: &str, #[case] expected: &[&str]) {
         assert_eq!(bits(content), expected);
-    }
-
-    #[rstest]
-    #[case::followed_by_space(" load static ", true)]
-    #[case::alone("load", true)]
-    #[case::python_whitespace_first("\u{a0}\u{1c}load static", true)]
-    #[case::longer_name(" loader static", false)]
-    #[case::glued_quote(r#"load"static""#, false)]
-    fn first_bit_is_cases(#[case] content: &str, #[case] expected: bool) {
-        assert_eq!(first_bit_is(content, "load"), expected);
-        assert_eq!(bits(content).first() == Some(&"load"), expected);
     }
 
     #[rstest]
