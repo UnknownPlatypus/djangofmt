@@ -402,6 +402,21 @@ mod tests {
     }
 
     #[test]
+    fn lint_fix_stops_at_the_iteration_limit() {
+        let result = fix_loop(
+            "<p></p>",
+            markup_fmt::Language::Django,
+            &[],
+            Applicability::Safe,
+            |_| vec![diag_with_fix(Fix::safe_edit(Edit::insertion(" ", 0)))],
+        )
+        .expect("fix_loop");
+        assert_eq!(result.applied_count, MAX_FIX_ITERATIONS);
+        assert_eq!(result.source.len(), "<p></p>".len() + MAX_FIX_ITERATIONS);
+        assert!(result.remaining_diagnostics.is_empty());
+    }
+
+    #[test]
     fn lint_fix_reports_a_fix_that_breaks_the_syntax() {
         // `<p id=></p>` does not parse.
         let fix = Fix::safe_edit(Edit::insertion(" id=", 2));
