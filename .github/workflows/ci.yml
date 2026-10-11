@@ -25,6 +25,9 @@ env:
   UV_CHECKSUM: 23f02075b652bb1df64178cfae41b5caf160822e720e2663568f3f5d63bc52c0 # x86_64-unknown-linux-gnu
   # renovate: datasource=github-releases depName=astral-sh/hawk
   HAWK_VERSION: 0.1.15
+  # renovate: datasource=github-release-attachments depName=sourcefrog/cargo-mutants
+  CARGO_MUTANTS_VERSION: v27.1.0
+  CARGO_MUTANTS_CHECKSUM: dfe6dc37d0342c891d2829b5a695aa57c2d0edecef7e7d0399a30cc6e206411e # x86_64-unknown-linux-gnu
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
   # Make sure CI fails on all warnings, including Clippy lints
@@ -254,6 +257,34 @@ jobs:
           eval "$(uv run --only-dev cargo llvm-cov show-env --sh)"
           uv run --only-dev cargo insta test --unreferenced reject --workspace --lib --bins --tests --all-features
           uv run --only-dev cargo llvm-cov report --fail-under-lines 85 --ignore-filename-regex 'djangofmt_(dev|benchmark)/'
+
+  mutants:
+    name: "cargo mutants (PR diff)"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: changed_files
+    if: ${{ github.event_name == 'pull_request' && needs.changed_files.outputs.code == 'true' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Install cargo-mutants
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf -o "$RUNNER_TEMP/cargo-mutants.tar.gz" \
+            "https://github.com/sourcefrog/cargo-mutants/releases/download/${CARGO_MUTANTS_VERSION}/cargo-mutants-x86_64-unknown-linux-gnu.tar.gz"
+          echo "${CARGO_MUTANTS_CHECKSUM}  $RUNNER_TEMP/cargo-mutants.tar.gz" | sha256sum --check
+          tar xzf "$RUNNER_TEMP/cargo-mutants.tar.gz" -C ~/.cargo/bin
+      - name: Test the mutants of the lines this PR changes
+        env:
+          INSTA_UPDATE: no
+        # HEAD is the PR merge commit, its first parent is the base branch tip.
+        # A timeout is a mutant caught by an endless loop, but its exit code 3 outranks missed mutants.
+        run: |
+          git diff HEAD^1 HEAD > "$RUNNER_TEMP/pr.diff"
+          cargo mutants --in-diff "$RUNNER_TEMP/pr.diff" -j 2 || { [ $? -eq 3 ] && [ ! -s mutants.out/missed.txt ]; }
 
   test-other:
     name: "cargo test (${{ matrix.os }})"
