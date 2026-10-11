@@ -373,6 +373,14 @@ mod tests {
         assert_eq!(result, PyprojectSettings::default());
     }
 
+    #[test]
+    fn test_load_options_errors_on_unreadable_pyproject_toml() {
+        let project = Project::new();
+        fs::write(project.join("pyproject.toml"), b"\xff").unwrap();
+        let err = load_options(project.path()).unwrap_err();
+        assert!(err.to_string().starts_with("Failed to read"));
+    }
+
     #[rstest]
     #[case("[tool.djangofmt]\nunknown-option = 100")]
     #[case("[tool.djangofmt]\nline-length = 0")]

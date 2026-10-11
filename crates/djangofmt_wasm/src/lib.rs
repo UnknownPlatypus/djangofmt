@@ -234,6 +234,25 @@ fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
 
 #[cfg(test)]
 mod tests {
+    use super::{ast, doc_tree, format, lint_inner};
+
+    #[test]
+    fn every_view_renders_the_parse_error() {
+        let rendered = format("<div>", 80, 4, "django");
+        assert!(rendered.contains("expected close tag for opening tag <div>"));
+        assert_eq!(ast("<div>", "django"), rendered);
+        assert_eq!(doc_tree("<div>", 80, 4, "django"), rendered);
+        let linted = lint_inner("<div>", "django").unwrap();
+        assert_eq!((linted.error_count, linted.output), (1, rendered));
+    }
+
+    #[test]
+    fn lint_counts_and_renders_diagnostics() {
+        let linted = lint_inner("<img src=\"a.png\">", "jinja").unwrap();
+        assert_eq!(linted.error_count, 2);
+        assert!(linted.output.contains("Missing `alt` attribute on `<img>`"));
+    }
+
     #[test]
     fn control_flow_and_element() {
         let src = r#"{% if a %}<div class="x">hi</div>{% endif %}"#;

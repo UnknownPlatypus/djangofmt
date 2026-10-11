@@ -65,11 +65,11 @@ fn format_nonexistent_file() {
 }
 
 #[test]
-fn format_directory() {
+fn format_directories() {
     let project = Project::new()
-        .file("a.html", "<div   ></div>\n")
-        .file("b.html", "<span   ></span>\n");
-    assert_cmd_snapshot!(cli().arg(project.path()), @"
+        .file("a/a.html", "<div   ></div>\n")
+        .file("b/b.html", "<span   ></span>\n");
+    assert_cmd_snapshot!(cli().arg(project.join("a")).arg(project.join("b")), @"
     success: true
     exit_code: 0
     ----- stdout -----
@@ -136,6 +136,19 @@ fn format_quiet() {
 
     ----- stderr -----
     ");
+}
+
+#[test]
+fn format_verbose_logs_debug_messages() {
+    let project = Project::new().file("test.html", "<div></div>\n");
+    let output = cli()
+        .arg("-v")
+        .arg(project.join("test.html"))
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("DEBUG djangofmt::commands::format Formatted 1 files in"));
 }
 
 #[test]
@@ -494,7 +507,7 @@ fn check_fixable_file_with_fix() {
 }
 
 #[test]
-fn check_reports_unsafe_fixes_as_hidden() {
+fn check_unsafe_fixes_are_opt_in() {
     // Nothing is applied without `--fix`, so `--show-fixes` has nothing to list.
     let project = Project::new().file("test.html", "<a href=\"http://example.com\">x</a>\n");
     assert_cmd_snapshot_tmpdir!(
@@ -510,6 +523,18 @@ fn check_reports_unsafe_fixes_as_hidden() {
     [TMP]/test.html:1:10: use-https Avoid `http://` URLs in `href`
     Found 1 errors. (1 hidden fixes can be enabled with --unsafe-fixes)
     "
+    );
+    assert_cmd_snapshot!(cli().args(["check", "--fix", "--unsafe-fixes"]).arg(project.join("test.html")), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+
+    ----- stderr -----
+    Found 1 errors (1 fixed, 0 remaining).
+    ");
+    assert_eq!(
+        project.read("test.html"),
+        "<a href=\"https://example.com\">x</a>\n"
     );
 }
 
@@ -650,12 +675,13 @@ fn check_warns_on_preview_rule_without_preview() {
 
 #[test]
 fn check_fixable_file_with_show_fixes() {
-    let project = Project::new().file(
+    // `clean.html` has nothing fixed, so it is left out of the list.
+    let project = Project::new().file("clean.html", "<p></p>\n").file(
         "test.html",
         "{% blocktranslate %}Hello{% endblocktranslate %}\n",
     );
     assert_cmd_snapshot_tmpdir!(
-        cli().args(["check", "--fix", "--show-fixes"]).arg(project.join("test.html")),
+        cli().args(["check", "--fix", "--show-fixes"]).arg(project.path()),
         @"
     success: true
     exit_code: 0
