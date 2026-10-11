@@ -1,0 +1,29 @@
+<!-- Django: docs/internals/contributing/writing-code/coding-style.txt, template style -->
+{% block header %}
+
+  Code goes here
+
+{% endblock %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_partials.py::test_valid_partialdef_names, over several lines -->
+{% partialdef 'space in name' %}
+TEST with 'space in name'!
+{% endpartialdef %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
+
+<!-- Django: tests/template_tests/syntax_tests/test_partials.py::inline_partial_explicit_end -->
+{% partialdef testing-name inline %}HERE IS THE TEST CONTENT{% endpartialdef testing-name %}
+
+<!-- Real-world (Misago): a block in attribute position -->
+<form method="post" {% block form_extra %}{% endblock form_extra %}></form>
+
+<!-- Real-world (greenday): a `custom-blocks` entry over several lines -->
+{% stage dynamic %}
+    {% load i18n %}
+    {% translate "Appeler Hello Watt" %}
+{% endstage %}
+
+<!-- Real-world (greenday): a `custom-blocks` entry on one line -->
+<span>{% stage dynamic %}{{ csrf_token }}{% endstage dynamic %}</span>
