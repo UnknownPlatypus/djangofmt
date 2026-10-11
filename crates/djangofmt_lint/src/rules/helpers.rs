@@ -1,5 +1,6 @@
 use std::iter;
 use std::slice;
+use std::str::SplitAsciiWhitespace;
 
 use djangofmt_syntax::CommentDelimiters;
 use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
@@ -13,6 +14,13 @@ use crate::Checker;
 #[inline]
 pub fn contains_interpolation(value: &str) -> bool {
     value.contains("{{") || value.contains("{%") || value.contains("{#")
+}
+
+/// A `{% %}` tag's tag name then arguments. Strips `{%-`/`{%+` markers, otherwise read as the tag.
+pub fn tag_tokens(content: &str) -> SplitAsciiWhitespace<'_> {
+    content
+        .trim_start_matches(['+', '-'])
+        .split_ascii_whitespace()
 }
 
 /// A [django-cotton](https://django-cotton.com) component (`<c-button>`), whose attributes and
