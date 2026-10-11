@@ -1,12 +1,12 @@
 ---
 name: babysit-pr
-description: Drive an open djangofmt PR to green — conflicts, review threads, CodSpeed and ecosystem-check verdicts.
+description: Drive an open djangofmt PR to green — conflicts, failing CI jobs, review threads, CodSpeed and ecosystem-check verdicts.
 disable-model-invocation: true
 ---
 
 # Babysit PR
 
-Takes a PR number; default is the current branch's PR. Work through the four checks, then push **once** so CI (and CodSpeed, which is the slow one) runs a single time.
+Takes a PR number; default is the current branch's PR. Work through the five checks, then push **once** so CI (and CodSpeed, which is the slow one) runs a single time.
 
 ## 1. Conflicts
 
@@ -14,38 +14,48 @@ Takes a PR number; default is the current branch's PR. Work through the four che
 
 Done when `mergeable` is `MERGEABLE`.
 
-## 2. Review threads
+## 2. Failing CI jobs
+
+`gh pr checks N` lists the failures (CodSpeed and the ecosystem check are steps 4 and 5). Read the log with `gh run view <run-id> --log-failed`, reproduce with the matching `just` recipe, and fix the cause. `just pre-mr-check` runs them all.
+
+Done when every recipe that failed in CI passes locally.
+
+## 3. Review threads
 
 `gh pr view` doesn't expose review threads; use GraphQL:
 
 ```bash
-gh api graphql -f query='query{repository(owner:"UnknownPlatypus",name:"djangofmt"){pullRequest(number:N){reviewThreads(first:50){nodes{isResolved path line comments(first:20){nodes{author{login} body}}}}}}}' --jq '.data.repository.pullRequest.reviewThreads.nodes[]|select(.isResolved|not)'
+gh api graphql -f query='query{repository(owner:"UnknownPlatypus",name:"djangofmt"){pullRequest(number:N){reviewThreads(first:50){nodes{id isResolved path line comments(first:20){nodes{author{login} body}}}}}}}' --jq '.data.repository.pullRequest.reviewThreads.nodes[]|select(.isResolved|not)'
 ```
 
-A `coderabbitai` "Review limit reached" issue comment is not a review. Address every unresolved thread in one commit.
+Done when each unresolved thread is fixed in one commit or skipped.
 
-Done when each unresolved thread is either fixed in that commit or answered in the thread with the reason it isn't.
+## 4. CodSpeed
 
-## 3. CodSpeed
-
-`gh pr checks N` — a failing `CodSpeed Performance Analysis` is a regression; the `codspeed` comment's **Performance Changes** table names the benchmarks. Its footnote may say the base is an older `main` commit: then the table includes `main` changes that aren't yours.
-
-Triage from the code path before touching the profiler:
-
-- Which profile runs each benchmark is in `crates/djangofmt_benchmark/src/lib.rs` (`jinja_large/*` is `Profile::Jinja`). A benchmark your change should not reach but which regressed means the new work runs unconditionally; gate it on the condition that makes it necessary.
-- A single small benchmark a few percent off with every other one untouched is noise: acknowledge it on CodSpeed and say so in the PR.
-- Anything else: `codspeed:codspeed-optimize`. The `codspeed` CLI is not installed (only `cargo-codspeed`), so measure through CI: push, then `compare_runs` from the CodSpeed MCP between the new run and the previous head, and `query_flamegraph` on the worst benchmark.
+A failing `CodSpeed Performance Analysis` check: follow `codspeed:codspeed-optimize`.
 
 Done when the check is green, or the regression is acknowledged with its reason in the PR.
 
-## 4. Ecosystem check
+## 5. Ecosystem check
 
-The `github-actions` comment `ecosystem-check results` is partial when large; the full diff is the linked workflow run. To reproduce locally: `just ecosystem-check <main-binary> target/debug/djangofmt`.
+Read the full output, never the PR comment, which is truncated. The job log carries it untruncated (the job summary also caps at 1000k); the job id is in the `Ecosystem check` link from `gh pr checks N`:
 
-Every removed line must map to an added line through the PR's intended transformation. Classify the whole diff with a normalizing script (strip the intended change from both sides, then multiset-compare) rather than reading files; the residue is either line wraps caused by longer output (fine) or a regression (fix it, back to step 3).
+```bash
+gh run view --job <job-id> --log | awk -F'\t' '$2=="Run `djangofmt` ecosystem check"{sub(/^[^ ]+ /,"",$3); print $3}' > ecosystem.md
+```
+
+To reproduce locally: `just ecosystem-check <main-binary> target/debug/djangofmt` (`ecosystem-check-lint` for lint changes).
+
+Every removed line must map to an added line through the PR's intended transformation. Classify the whole diff with a normalizing script (strip the intended change from both sides, then multiset-compare) rather than reading files; the residue is either line wraps caused by longer output (fine) or a regression (fix it, back to step 4).
 
 Done when the residue is empty or wraps only.
 
 ## Finish
 
-Push, `gh pr checks N --watch`, and redo steps 3 and 4 on the new run. Report per check: what was found, what was done, and the numbers.
+Push, then resolve every thread from step 3 without replying, fixed or skipped:
+
+```bash
+gh api graphql -f query='mutation{resolveReviewThread(input:{threadId:"<id>"}){thread{isResolved}}}'
+```
+
+`gh pr checks N --watch`, then redo steps 2, 4 and 5 on the new run; anything still red goes in the report for the next run. Report per check: what was found, what was done, and the numbers. List skipped threads with the reason for each.
