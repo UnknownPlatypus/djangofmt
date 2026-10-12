@@ -23,6 +23,6 @@
   "devDependencies": {
     "daisyui": "5.7.47",
     "typescript": "7.0.2",
-    "vite": "8.3.2"
+    "vite": "8.3.4"
   }
 }
