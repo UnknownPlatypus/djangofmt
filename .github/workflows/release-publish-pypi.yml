@@ -15,8 +15,8 @@ on:
 env:
   ACTIONS_CACHE_MODE: none
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.12.21
-  UV_CHECKSUM: 23f02075b652bb1df64178cfae41b5caf160822e720e2663568f3f5d63bc52c0 # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.12.23
+  UV_CHECKSUM: 9167d72b3319674b6303c4cbe071854bba13ebdf3d76b1a7cbdc175471fb66d6 # x86_64-unknown-linux-gnu
 
 jobs:
   pypi-publish:
