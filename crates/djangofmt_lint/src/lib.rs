@@ -184,13 +184,7 @@ fn check_rules(
         ..settings.clone()
     });
     let settings = quarantine_settings.as_ref().unwrap_or(settings);
-    let mut checker = Checker::new(
-        parsed.source(),
-        settings,
-        parsed.language(),
-        path,
-        quarantined,
-    );
+    let mut checker = Checker::new(parsed, settings, path, quarantined);
     // Walk the ast and collect diagnostics.
     checker.visit_root(parsed.ast());
 
@@ -211,7 +205,7 @@ fn check_rules(
 pub(crate) fn parse_or_quarantine<'a>(
     source: &'a str,
     language: Language,
-    custom_blocks: &[String],
+    custom_blocks: &'a [String],
 ) -> Result<LintInput<'a>, SyntaxError> {
     let error = match parse(source, language, custom_blocks) {
         Ok(parsed) => {

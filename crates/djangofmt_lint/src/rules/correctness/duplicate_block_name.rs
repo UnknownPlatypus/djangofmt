@@ -7,6 +7,7 @@ use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren};
 
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::tag_tokens;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -88,12 +89,9 @@ pub fn block_names_in_text(raw: &str) -> impl Iterator<Item = &str> {
     })
 }
 
-/// `{% block NAME %}`: one whitespace pass yields the tag (token 0) then the name (token 1).
-/// Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the name.
+/// `{% block NAME %}`: the tag (token 0) then the name (token 1).
 fn block_name_from_content(content: &str) -> Option<&str> {
-    let mut tokens = content
-        .trim_start_matches(['+', '-'])
-        .split_ascii_whitespace();
+    let mut tokens = tag_tokens(content);
     if tokens.next() != Some("block") {
         return None;
     }
