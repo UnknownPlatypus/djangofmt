@@ -69,14 +69,15 @@ impl Violation for EndblockLabel<'_> {
     }
 
     fn help(&self) -> Option<Cow<'static, str>> {
-        let (sep, name) = match self.kind {
-            LabelViolation::Missing { name } => (" ", name),
-            LabelViolation::Redundant => ("", ""),
-        };
+        let end_tag = self.end_tag;
         Some(
-            ["Write it as `{% ", self.end_tag, sep, name, " %}`"]
-                .concat()
-                .into(),
+            match self.kind {
+                LabelViolation::Missing { name } => {
+                    format!("Write it as `{{% {end_tag} {name} %}}`")
+                }
+                LabelViolation::Redundant => format!("Write it as `{{% {end_tag} %}}`"),
+            }
+            .into(),
         )
     }
 
