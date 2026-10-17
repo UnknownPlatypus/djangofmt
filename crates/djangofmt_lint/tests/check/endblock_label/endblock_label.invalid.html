@@ -16,14 +16,14 @@ TEST with 'space in name'!
 <!-- Django: tests/template_tests/syntax_tests/test_partials.py::inline_partial_explicit_end -->
 {% partialdef testing-name inline %}HERE IS THE TEST CONTENT{% endpartialdef testing-name %}
 
-<!-- Real-world (Misago): a block in attribute position -->
-<form method="post" {% block form_extra %}{% endblock form_extra %}></form>
+<!-- Real-world: Misago misago/admin/templates/misago/admin/generic/form.html — a block in attribute position -->
+<form role="form" method="post" {% block form-extra %}{% endblock form-extra %}></form>
 
-<!-- Real-world (greenday): a `custom-blocks` entry over several lines -->
+<!-- A `custom-blocks` entry over several lines -->
 {% stage dynamic %}
     {% load i18n %}
     {% translate "Appeler Hello Watt" %}
 {% endstage %}
 
-<!-- Real-world (greenday): a `custom-blocks` entry on one line -->
+<!-- A `custom-blocks` entry on one line -->
 <span>{% stage dynamic %}{{ csrf_token }}{% endstage dynamic %}</span>

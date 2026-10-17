@@ -53,11 +53,11 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Write it as `{% endpartialdef %}`
 
   × Redundant end tag label on a single-line block
-    ╭─[tests/check/endblock_label/endblock_label.invalid.html:20:55]
- 19 │ <!-- Real-world (Misago): a block in attribute position -->
- 20 │ <form method="post" {% block form_extra %}{% endblock form_extra %}></form>
-    ·                                                       ─────┬────
-    ·                                                            ╰── here
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:20:67]
+ 19 │ <!-- Real-world: Misago misago/admin/templates/misago/admin/generic/form.html — a block in attribute position -->
+ 20 │ <form role="form" method="post" {% block form-extra %}{% endblock form-extra %}></form>
+    ·                                                                   ─────┬────
+    ·                                                                        ╰── here
  21 │ 
     ╰────
   help: Write it as `{% endblock %}`
@@ -74,7 +74,7 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
   × Redundant end tag label on a single-line block
     ╭─[tests/check/endblock_label/endblock_label.invalid.html:29:54]
- 28 │ <!-- Real-world (greenday): a `custom-blocks` entry on one line -->
+ 28 │ <!-- A `custom-blocks` entry on one line -->
  29 │ <span>{% stage dynamic %}{{ csrf_token }}{% endstage dynamic %}</span>
     ·                                                      ───┬───
     ·                                                         ╰── here
