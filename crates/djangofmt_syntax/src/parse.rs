@@ -2,10 +2,9 @@ use markup_fmt::ast::Root;
 use markup_fmt::parser::Parser;
 use markup_fmt::{Language, SyntaxError};
 
-/// A parsed template, carrying what every consumer of the AST needs to work on it.
+/// A parsed template: the AST, the source it borrows, and the configuration it was parsed with.
 ///
-/// The AST comes with the source it borrows and the configuration it was parsed with, and only
-/// [`parse`] builds one, so a check or a fix can never run against a source or a configuration
+/// Only [`parse`] builds one, so a check can never run against a source or a configuration
 /// the AST was not built from.
 #[derive(Debug)]
 pub struct Parsed<'a> {
