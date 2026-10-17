@@ -114,33 +114,28 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
         return;
     }
 
-    let between = &checker.context().source()
-        [checker.source_end(opener.content)..checker.source_offset(closer.content)];
-    let same_line = !between.contains('\n');
-    if same_line != label.is_some() {
-        return;
-    }
-
     // Django rejects other arities. `partialdef` keeps a quoted name whole.
     let name = match (tag, &bits(opener.content)[..]) {
         (_, [_, name]) | ("partialdef", [_, name, "inline"]) => *name,
         _ => return,
     };
 
+    let between = &checker.context().source()
+        [checker.source_end(opener.content)..checker.source_offset(closer.content)];
     let tag_end = checker.source_end(end_tag);
-    let (kind, span, edit) = match label {
-        None => (
+    let (kind, span, edit) = match (between.contains('\n'), label) {
+        (true, None) => (
             LabelViolation::Missing { name },
             checker.source_span(end_tag),
             Edit::insertion([" ", name].concat(), tag_end),
         ),
-        Some(label) if label == name => (
+        (false, Some(label)) if label == name => (
             LabelViolation::Redundant,
             checker.source_span(label),
             Edit::deletion(span(tag_end, checker.source_end(label) - tag_end)),
         ),
         // A label naming another block is a Django error, left to the author.
-        Some(_) => return,
+        _ => return,
     };
     checker
         .report_diagnostic(&EndblockLabel { end_tag, kind }, span)
