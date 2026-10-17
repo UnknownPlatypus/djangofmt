@@ -106,19 +106,13 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
     }
 
     let end = closer.content.trim_ascii();
-    let Some(rest) = end
-        .strip_prefix("end")
-        .and_then(|rest| rest.strip_prefix(tag))
-    else {
-        return;
-    };
-    let end_tag = &end[..end.len() - rest.len()];
     // Django matches the whole end tag, so the label follows exactly one space.
-    let label = match rest.strip_prefix(' ') {
-        None if rest.is_empty() => None,
-        Some(label) => Some(label),
-        None => return,
-    };
+    let (end_tag, label) = end
+        .split_once(' ')
+        .map_or((end, None), |(end_tag, label)| (end_tag, Some(label)));
+    if end_tag.strip_prefix("end") != Some(tag) {
+        return;
+    }
 
     let between = &checker.context().source()
         [checker.source_end(opener.content)..checker.source_offset(closer.content)];
