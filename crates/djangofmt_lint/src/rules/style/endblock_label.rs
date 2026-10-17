@@ -2,12 +2,13 @@ use std::borrow::Cow;
 
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
+use markup_fmt::Language;
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren};
+use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::tag_tokens;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -97,10 +98,7 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
     else {
         return;
     };
-    let mut args = tag_tokens(opener.content);
-    let Some(tag) = args.next() else {
-        return;
-    };
+    let tag = parse_jinja_tag_name(opener, Language::Django);
     if !matches!(tag, "block" | "partialdef")
         && !checker.custom_blocks().iter().any(|custom| custom == tag)
     {
@@ -130,16 +128,9 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
     }
 
     // Django rejects other arities. `partialdef` keeps a quoted name whole.
-    let name = if tag == "partialdef" {
-        match bits(opener.content)[..] {
-            [_, name] | [_, name, "inline"] => name,
-            _ => return,
-        }
-    } else {
-        match (args.next(), args.next()) {
-            (Some(name), None) => name,
-            _ => return,
-        }
+    let name = match (tag, &bits(opener.content)[..]) {
+        (_, [_, name]) | ("partialdef", [_, name, "inline"]) => *name,
+        _ => return,
     };
 
     let tag_end = checker.source_end(end_tag);
