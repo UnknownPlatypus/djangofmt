@@ -137,10 +137,14 @@ fn settings_for(path: &Path) -> Settings {
         rules.insert(Rule::InvalidAttrValue);
         rules.insert(Rule::EmptyAttrValue);
     }
-    Settings {
+    let mut settings = Settings {
         rules,
         ..Settings::default()
+    };
+    if rule == Rule::EndblockLabel {
+        settings.endblock_label.custom_blocks = custom_blocks();
     }
+    settings
 }
 
 fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {

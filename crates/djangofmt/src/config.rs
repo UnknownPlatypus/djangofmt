@@ -10,7 +10,7 @@ use djangofmt_lint::LintConfiguration;
 use djangofmt_syntax::Profile;
 
 use crate::args::CheckCommand;
-use crate::pyproject::{LintSettings, UnsortedTailwindClassesOptions};
+use crate::pyproject::{EndblockLabelOptions, LintSettings, UnsortedTailwindClassesOptions};
 
 /// Collapse a `--flag` / `--no-flag` pair into an optional bool.
 #[must_use]
@@ -60,6 +60,10 @@ pub fn resolve_lint_configuration(
         .target_version
         .or_else(|| lint.and_then(|l| l.target_version));
     // Per-rule config is pyproject-only, it has no CLI flags.
+    let endblock_label = lint
+        .and_then(|l| l.endblock_label.clone())
+        .map(EndblockLabelOptions::into_settings)
+        .unwrap_or_default();
     let unsorted_tailwind_classes = lint
         .and_then(|l| l.unsorted_tailwind_classes.clone())
         .map(UnsortedTailwindClassesOptions::into_settings)
@@ -70,6 +74,7 @@ pub fn resolve_lint_configuration(
         ignore,
         preview,
         target_version,
+        endblock_label,
         unsorted_tailwind_classes,
     }
 }

@@ -15,7 +15,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::args::{CheckCommand, OutputFormat};
 use crate::config::{resolve_bool_arg, resolve_lint_configuration, resolve_profile};
-use crate::error::{CommandError, Result};
+use crate::error::{CommandError, Error, Result};
 use crate::fs::relativize_path;
 use crate::per_file_ignores::PerFileIgnores;
 use crate::pyproject::{LintSettings, PyprojectSettings};
@@ -150,6 +150,17 @@ impl CheckRun {
             pyproject.custom_blocks.clone(),
         )
         .unwrap_or_default();
+        // The parser only pairs `custom-blocks`, so an entry missing there would silently do nothing.
+        if let Some(tag) = settings
+            .endblock_label
+            .custom_blocks
+            .iter()
+            .find(|tag| !custom_blocks.contains(tag))
+        {
+            return Err(Error::Resolve(format!(
+                "`lint.endblock-label.custom-blocks` lists `{tag}`, which is not in `custom-blocks`"
+            )));
+        }
 
         Ok(Self {
             config,

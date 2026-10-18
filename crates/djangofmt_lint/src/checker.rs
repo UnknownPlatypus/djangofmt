@@ -16,7 +16,7 @@ use crate::registry::Rule;
 use crate::rules;
 use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
-use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, Parsed, TEMPLATE_COMMENT};
+use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 
 /// The rules that must not read what a Jinja `{% raw %}` body contains.
 const RAW_SENSITIVE_RULES: &[Rule] = &[
@@ -33,29 +33,21 @@ pub struct Checker<'a> {
     block_names: SmallVec<[&'a str; 8]>,
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
-    /// The `custom-blocks` the source was parsed with.
-    custom_blocks: &'a [String],
 }
 
 impl<'a> Checker<'a> {
     #[must_use]
     pub const fn new(
-        parsed: &Parsed<'a>,
+        source: &'a str,
         settings: &'a Settings,
+        language: Language,
         path: Option<&'a Path>,
         quarantined: bool,
     ) -> Self {
         Self {
-            context: LintContext::new(
-                parsed.source(),
-                settings,
-                parsed.language(),
-                path,
-                quarantined,
-            ),
+            context: LintContext::new(source, settings, language, path, quarantined),
             block_names: SmallVec::new_const(),
             in_raw: false,
-            custom_blocks: parsed.custom_blocks(),
         }
     }
 
@@ -75,12 +67,6 @@ impl<'a> Checker<'a> {
     #[must_use]
     pub fn block_names(&self) -> &[&'a str] {
         &self.block_names
-    }
-
-    /// The `custom-blocks` the source was parsed with.
-    #[must_use]
-    pub const fn custom_blocks(&self) -> &'a [String] {
-        self.custom_blocks
     }
 
     /// Compute the byte offset of a string slice within the source.

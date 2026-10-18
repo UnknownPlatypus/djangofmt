@@ -27,7 +27,7 @@ header %}
     <nav>{{ menu }}</nav>
 {% endblock %}
 
-<!-- A built-in block takes no label; only `custom-blocks` entries do -->
+<!-- A block tag outside `block`, `partialdef` and the listed `custom-blocks` is left alone -->
 {% localize on %}
     {{ value }}
 {% endlocalize %}

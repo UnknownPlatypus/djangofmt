@@ -19,7 +19,8 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// On one line, the opening tag is in view and the label is noise. Over several lines, the opening
 /// tag may be out of view, and the label tells which block ends.
 ///
-/// Also applies to `{% endpartialdef %}` and to `custom-blocks` taking one argument.
+/// Also applies to `{% endpartialdef %}`, and to the `custom-blocks` listed in
+/// `lint.endblock-label.custom-blocks`.
 ///
 /// ## Example
 /// ```html
@@ -36,7 +37,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// ```
 ///
 /// ## Options
-/// - `custom-blocks`
+/// - `lint.endblock-label.custom-blocks`
 ///
 /// ## References
 /// - [Django coding style: template style](https://docs.djangoproject.com/en/stable/internals/contributing/writing-code/coding-style/#template-style)
@@ -100,9 +101,8 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
         return;
     };
     let tag = parse_jinja_tag_name(opener, Language::Django);
-    if !matches!(tag, "block" | "partialdef")
-        && !checker.custom_blocks().iter().any(|custom| custom == tag)
-    {
+    let custom_blocks = &checker.context().settings().endblock_label.custom_blocks;
+    if !matches!(tag, "block" | "partialdef") && !custom_blocks.iter().any(|custom| custom == tag) {
         return;
     }
 
