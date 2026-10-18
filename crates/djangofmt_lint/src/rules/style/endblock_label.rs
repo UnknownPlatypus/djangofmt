@@ -121,16 +121,30 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
         return;
     }
 
-    // Django rejects other arities. `partialdef` keeps a quoted name whole.
-    let name = match (tag, &bits(opener.content)[..]) {
-        (_, [_, name]) | ("partialdef", [_, name, "inline"]) => *name,
-        _ => return,
-    };
-
     let between = &checker.context().source()
         [checker.source_end(opener.content)..checker.source_offset(closer.content)];
+    let multi_line = between.contains('\n');
+    if label.is_none() && !multi_line {
+        return;
+    }
+
+    // Django rejects other arities. Only `partialdef` takes a quoted name, which `bits` keeps
+    // whole at the cost of a `Vec`; the other tags split on whitespace like `parse_jinja_tag_name`.
+    let name = if tag == "partialdef" {
+        match bits(opener.content)[..] {
+            [_, name] | [_, name, "inline"] => name,
+            _ => return,
+        }
+    } else {
+        let mut args = opener.content.split_whitespace().skip(1);
+        match (args.next(), args.next()) {
+            (Some(name), None) => name,
+            _ => return,
+        }
+    };
+
     let tag_end = checker.source_end(end_tag);
-    let (kind, span, edit) = match (between.contains('\n'), label) {
+    let (kind, span, edit) = match (multi_line, label) {
         (true, None) => (
             LabelViolation::Missing { name },
             checker.source_span(end_tag),
