@@ -35,7 +35,7 @@
     {
       // Group upload/download artifact updates, the versions are dependent only match git tags too otherwise this spams too much.
       groupName: "Artifact GitHub Actions dependencies",
-      matchManagers: ["github-actions"],
+      matchManagers: ["github-actions", "custom.regex"],
       matchDatasources: ["gitea-tags", "github-tags"],
       matchPackageNames: ["actions/*-artifact"],
       description: "Weekly update of artifact-related GitHub Actions dependencies",
@@ -178,6 +178,14 @@
       depNameTemplate: "cargo-dist",
       packageNameTemplate: "astral-dev-toolchain-cargo-dist",
       datasourceTemplate: "pypi",
+    },
+    // Action pins `dist generate` writes into release.yml, kept at the versions Renovate pins in the workflows.
+    {
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)dist-workspace\\.toml$/"],
+      matchStrings: ['"(?<depName>[\\w.-]+/[\\w.-]+)" = "(?<currentDigest>[a-f0-9]{40})"\\s+# (?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
+      datasourceTemplate: "github-tags",
+      extractVersionTemplate: "^(?<version>v?\\d+\\.\\d+\\.\\d+)$",
     },
   ],
   vulnerabilityAlerts: {
