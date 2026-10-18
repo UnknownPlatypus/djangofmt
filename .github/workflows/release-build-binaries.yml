@@ -375,6 +375,11 @@ jobs:
           maturin-version: v1.15.0
           target: x86_64
           args: --release --locked --out dist --compatibility pypi
+      - name: "Test wheels"
+        # The runner is arm64 and the universal Python defaults to that slice, so pip rejects the Intel wheel.
+        run: |
+          arch -x86_64 python -m pip install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
+          ${{ env.PACKAGE_NAME }} --help
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
