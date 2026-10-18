@@ -82,6 +82,13 @@
       enabled: false,
     },
     {
+      // Smoke-test images: only refresh the digest, the tags are chosen for the oldest glibc and pip each wheel must support.
+      matchManagers: ["custom.regex"],
+      matchDatasources: ["docker"],
+      matchUpdateTypes: ["major", "minor", "patch"],
+      enabled: false,
+    },
+    {
       matchManagers: ["custom.regex"],
       matchDepNames: ["maturin"],
       commitMessageTopic: "maturin",
@@ -178,6 +185,13 @@
       depNameTemplate: "cargo-dist",
       packageNameTemplate: "astral-dev-toolchain-cargo-dist",
       datasourceTemplate: "pypi",
+    },
+    // Container images pinned by digest in workflow step inputs (`image:`), which the github-actions manager does not parse.
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/workflows/.+\\.yml$/"],
+      matchStrings: ["(?<depName>[a-z0-9][a-z0-9./_-]*):(?<currentValue>[A-Za-z0-9][\\w.-]*)@(?<currentDigest>sha256:[a-f0-9]{64})"],
+      datasourceTemplate: "docker",
     },
     // Action pins `dist generate` writes into release.yml, kept at the versions Renovate pins in the workflows.
     {
