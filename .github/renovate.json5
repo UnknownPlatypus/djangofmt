@@ -27,12 +27,6 @@
   },
   packageRules: [
     {
-      // Annotate GitHub Actions SHAs with a SemVer version.
-      extends: ["helpers:pinGitHubActionDigests"],
-      extractVersion: "^(?<version>v?\\d+\\.\\d+\\.\\d+)$",
-      versioning: "regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$",
-    },
-    {
       // Group upload/download artifact updates, the versions are dependent only match git tags too otherwise this spams too much.
       groupName: "Artifact GitHub Actions dependencies",
       matchManagers: ["github-actions", "custom.regex"],
