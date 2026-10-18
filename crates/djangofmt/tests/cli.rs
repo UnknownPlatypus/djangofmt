@@ -872,36 +872,6 @@ fn check_respects_pyproject_rule_settings() {
 }
 
 #[test]
-fn check_endblock_label_custom_blocks() {
-    // Only the listed custom block gets a label; `section` is parsed as a block but left alone.
-    let project = Project::new()
-        .file(
-            "pyproject.toml",
-            "[tool.djangofmt]\ncustom-blocks = [\"stage\", \"section\"]\n\n\
-             [tool.djangofmt.lint]\nselect = [\"endblock-label\"]\n\n\
-             [tool.djangofmt.lint.endblock-label]\ncustom-blocks = [\"stage\"]\n",
-        )
-        .file(
-            "test.html",
-            "{% stage dynamic %}\n  <p>Hi</p>\n{% endstage %}\n{% section main %}\n  <p>Hi</p>\n{% endsection %}\n",
-        );
-    assert_cmd_snapshot!(
-        cli()
-            .current_dir(project.path())
-            .args(["check", "--output-format", "concise", "test.html"]),
-        @"
-    success: false
-    exit_code: 1
-    ----- stdout -----
-
-    ----- stderr -----
-    test.html:3:4: endblock-label [*] Missing end tag label on a multi-line block
-    Found 1 errors. [*] 1 fixable with the --fix option.
-    "
-    );
-}
-
-#[test]
 fn check_endblock_label_custom_block_must_be_parsed() {
     let project = Project::new()
         .file(

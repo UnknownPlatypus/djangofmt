@@ -2,6 +2,7 @@
 mod common;
 
 use common::build_settings;
+use djangofmt_lint::settings::endblock_label;
 use djangofmt_lint::{
     Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, apply_fixes, check,
     lint_source,
@@ -137,14 +138,13 @@ fn settings_for(path: &Path) -> Settings {
         rules.insert(Rule::InvalidAttrValue);
         rules.insert(Rule::EmptyAttrValue);
     }
-    let mut settings = Settings {
+    Settings {
         rules,
+        endblock_label: endblock_label::Settings {
+            custom_blocks: custom_blocks(),
+        },
         ..Settings::default()
-    };
-    if rule == Rule::EndblockLabel {
-        settings.endblock_label.custom_blocks = custom_blocks();
     }
-    settings
 }
 
 fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
