@@ -20,7 +20,9 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// tag may be out of view, and the label tells which block ends.
 ///
 /// Also applies to `{% endpartialdef %}`, and to the `custom-blocks` listed in
-/// `lint.endblock-label.custom-blocks`.
+/// `lint.endblock-label.custom-blocks`. Django rejects an `{% endblock %}` label naming another
+/// block, but accepts any label on a custom block, so for those the rule also fixes a label that
+/// does not match.
 ///
 /// ## Example
 /// ```html
@@ -54,6 +56,7 @@ pub struct EndblockLabel<'a> {
 pub enum LabelViolation<'a> {
     Missing { name: &'a str },
     Redundant,
+    Mismatched { name: &'a str },
 }
 
 impl Violation for EndblockLabel<'_> {
@@ -66,6 +69,7 @@ impl Violation for EndblockLabel<'_> {
         match self.kind {
             LabelViolation::Missing { .. } => "Missing end tag label on a multi-line block".into(),
             LabelViolation::Redundant => "Redundant end tag label on a single-line block".into(),
+            LabelViolation::Mismatched { .. } => "End tag label does not match the block".into(),
         }
     }
 
@@ -73,7 +77,7 @@ impl Violation for EndblockLabel<'_> {
         let end_tag = self.end_tag;
         Some(
             match self.kind {
-                LabelViolation::Missing { name } => {
+                LabelViolation::Missing { name } | LabelViolation::Mismatched { name } => {
                     format!("Write it as `{{% {end_tag} {name} %}}`")
                 }
                 LabelViolation::Redundant => format!("Write it as `{{% {end_tag} %}}`"),
@@ -86,6 +90,7 @@ impl Violation for EndblockLabel<'_> {
         Some(match self.kind {
             LabelViolation::Missing { .. } => "Add label",
             LabelViolation::Redundant => "Remove label",
+            LabelViolation::Mismatched { .. } => "Replace label",
         })
     }
 }
@@ -101,8 +106,9 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
         return;
     };
     let tag = parse_jinja_tag_name(opener, Language::Django);
+    let django_checks_label = matches!(tag, "block" | "partialdef");
     let custom_blocks = &checker.context().settings().endblock_label.custom_blocks;
-    if !matches!(tag, "block" | "partialdef") && !custom_blocks.iter().any(|custom| custom == tag) {
+    if !django_checks_label && !custom_blocks.iter().any(|custom| custom == tag) {
         return;
     }
 
@@ -130,12 +136,18 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
             checker.source_span(end_tag),
             Edit::insertion([" ", name].concat(), tag_end),
         ),
-        (false, Some(label)) if label == name => (
+        // A label naming another block is a Django error, left to the author.
+        (_, Some(label)) if django_checks_label && label != name => return,
+        (false, Some(label)) => (
             LabelViolation::Redundant,
             checker.source_span(label),
             Edit::deletion(span(tag_end, checker.source_end(label) - tag_end)),
         ),
-        // A label naming another block is a Django error, left to the author.
+        (true, Some(label)) if label != name => (
+            LabelViolation::Mismatched { name },
+            checker.source_span(label),
+            Edit::replacement(name.to_owned(), checker.source_span(label)),
+        ),
         _ => return,
     };
     checker

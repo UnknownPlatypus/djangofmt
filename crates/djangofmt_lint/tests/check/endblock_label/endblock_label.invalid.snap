@@ -78,5 +78,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  29 │ <span>{% stage dynamic %}{{ csrf_token }}{% endstage dynamic %}</span>
     ·                                                      ───┬───
     ·                                                         ╰── here
+ 30 │ 
     ╰────
   help: Write it as `{% endstage %}`
+
+  × End tag label does not match the block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:34:13]
+ 33 │     {{ csrf_token }}
+ 34 │ {% endstage cache %}
+    ·             ──┬──
+    ·               ╰── here
+    ╰────
+  help: Write it as `{% endstage dynamic %}`

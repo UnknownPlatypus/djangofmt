@@ -27,3 +27,8 @@ TEST with 'space in name'!
 
 <!-- A `custom-blocks` entry on one line -->
 <span>{% stage dynamic %}{{ csrf_token }}{% endstage dynamic %}</span>
+
+<!-- A `custom-blocks` entry whose label names another block; Django accepts it -->
+{% stage dynamic %}
+    {{ csrf_token }}
+{% endstage cache %}
