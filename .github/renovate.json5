@@ -27,15 +27,9 @@
   },
   packageRules: [
     {
-      // Annotate GitHub Actions SHAs with a SemVer version.
-      extends: ["helpers:pinGitHubActionDigests"],
-      extractVersion: "^(?<version>v?\\d+\\.\\d+\\.\\d+)$",
-      versioning: "regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$",
-    },
-    {
       // Group upload/download artifact updates, the versions are dependent only match git tags too otherwise this spams too much.
       groupName: "Artifact GitHub Actions dependencies",
-      matchManagers: ["github-actions"],
+      matchManagers: ["github-actions", "custom.regex"],
       matchDatasources: ["gitea-tags", "github-tags"],
       matchPackageNames: ["actions/*-artifact"],
       description: "Weekly update of artifact-related GitHub Actions dependencies",
@@ -62,16 +56,6 @@
       description: "Pin oxc-miette to 3.0.1, later versions dropped features we rely on",
     },
     {
-      // @tailwindcss/vite 4.2.3+ broke build with vite 8 / rolldown
-      // (`Missing field tsconfigPaths on BindingViteResolvePluginConfig.resolveOptions`).
-      // The aliasOnly:false change from tailwindlabs/tailwindcss#19803 triggers
-      // an oxc resolve path that requires tsconfigPaths, which vite 8 doesn't pass.
-      matchManagers: ["deno"],
-      matchDepNames: ["@tailwindcss/vite", "tailwindcss"],
-      allowedVersions: "<=4.2.2",
-      description: "Pin tailwindcss to 4.2.2 due to vite 8 / rolldown incompatibility",
-    },
-    {
       // Bump the toolchain and the MSRV in one PR, so each Rust release's new lints are fixed once.
       groupName: "Rust toolchain and MSRV",
       matchManagers: ["custom.regex"],
@@ -89,6 +73,13 @@
       matchManagers: ["custom.regex"],
       matchDepNames: ["msrv"],
       matchUpdateTypes: ["patch"],
+      enabled: false,
+    },
+    {
+      // Smoke-test images: only refresh the digest, the tags are chosen for the oldest glibc and pip each wheel must support.
+      matchManagers: ["custom.regex"],
+      matchDatasources: ["docker"],
+      matchUpdateTypes: ["major", "minor", "patch"],
       enabled: false,
     },
     {
@@ -188,6 +179,21 @@
       depNameTemplate: "cargo-dist",
       packageNameTemplate: "astral-dev-toolchain-cargo-dist",
       datasourceTemplate: "pypi",
+    },
+    // Container images pinned by digest in workflow step inputs (`image:`), which the github-actions manager does not parse.
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/workflows/.+\\.yml$/"],
+      matchStrings: ["(?<depName>[a-z0-9][a-z0-9./_-]*):(?<currentValue>[A-Za-z0-9][\\w.-]*)@(?<currentDigest>sha256:[a-f0-9]{64})"],
+      datasourceTemplate: "docker",
+    },
+    // Action pins `dist generate` writes into release.yml, kept at the versions Renovate pins in the workflows.
+    {
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)dist-workspace\\.toml$/"],
+      matchStrings: ['"(?<depName>[\\w.-]+/[\\w.-]+)" = "(?<currentDigest>[a-f0-9]{40})"\\s+# (?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
+      datasourceTemplate: "github-tags",
+      extractVersionTemplate: "^(?<version>v?\\d+\\.\\d+\\.\\d+)$",
     },
   ],
   vulnerabilityAlerts: {

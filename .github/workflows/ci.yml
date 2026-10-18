@@ -56,6 +56,7 @@ jobs:
           git diff --quiet HEAD^1 HEAD -- \
             'python/**' \
             'crates/**' \
+            '.cargo/**' \
             .github/workflows/ci.yml \
             .gitattributes \
             Cargo.toml \
@@ -232,7 +233,7 @@ jobs:
       - name: Install hawk
         run: curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/astral-sh/hawk/releases/download/${HAWK_VERSION}/cargo-hawk-installer.sh" | sh
       - name: Find dead pub items
-        run: cargo hawk check --only dead-public -D warnings
+        run: cargo hawk check --only dead-public --color=always -D warnings
 
   test:
     name: "cargo test + coverage"

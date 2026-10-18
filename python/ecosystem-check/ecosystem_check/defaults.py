@@ -263,7 +263,6 @@ DEFAULT_TARGETS = [
                 ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     "src/sentry/templates/sentry/emails/sentry-app-publish-confirmation.html",  # Broken close tag
-                    "src/sentry/templates/sentry/integrations/notify-disable.html",  # Dangling </a>
                 ),
             },
         ),
