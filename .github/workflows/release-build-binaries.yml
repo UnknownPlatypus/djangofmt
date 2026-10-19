@@ -100,7 +100,7 @@ jobs:
         if: ${{ startsWith(matrix.target, 'x86_64') }}
         uses: astral-sh/github-actions/release-smoke-test@76d2758fc5c4394ada46510f46605deb7cec477e
         with:
-          image: python:3.13-bookworm@sha256:933b46a028fd786c9c3d426ebabc237e29a15912231ea8de576e95f0e4f41a4c
+          image: python:3.13-bookworm@sha256:073ffebb96ae4d0ed73ccad59f08c47bd84af8a79f5258130f8458ac50ad9ff4
           artifacts: dist
           run: |
             pip install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
