@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.0.2](https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.1..v1.0.2) - 2026-10-20
+
+[**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
+
+### ⛰️ Features
+
+- *(format)* Normalize whitespace inside Django tags and filter expressions ([#542](https://github.com/UnknownPlatypus/djangofmt/issues/542)) - ([e82c32b](https://github.com/UnknownPlatypus/djangofmt/commit/e82c32bbff8cb55d649d80ab36d0feebb24c1dce))
+- *(lint)* Add `endblock-label` lint rule ([#569](https://github.com/UnknownPlatypus/djangofmt/issues/569)) - ([38e7094](https://github.com/UnknownPlatypus/djangofmt/commit/38e7094074dba1ce9d014990440fcf29565ed0f9))
+
+### 🐛 Bug Fixes
+
+- *(format)* Keep attribute quotes around template syntax ([#565](https://github.com/UnknownPlatypus/djangofmt/issues/565)) - ([3b11cc5](https://github.com/UnknownPlatypus/djangofmt/commit/3b11cc542ddfad0ad830a685d54f8228b44f61f9))
+- *(release)* Link the MSVC C runtime statically ([#562](https://github.com/UnknownPlatypus/djangofmt/issues/562)) - ([e0867a9](https://github.com/UnknownPlatypus/djangofmt/commit/e0867a9272c09c9c85f8c8737cf3b5909dbaf945))
+
+### 🧪 Testing
+
+- *(ecosystem)* Update exclusions for upstream django-unfold, django-mvp and django-helpdesk changes ([#558](https://github.com/UnknownPlatypus/djangofmt/issues/558)) - ([a4258c3](https://github.com/UnknownPlatypus/djangofmt/commit/a4258c3fd407db2b4956e3db7f30d5cd3ce3f6ec))
+- *(fuzz)* Refuse to fuzz a corpus that holds libFuzzer artifacts ([#546](https://github.com/UnknownPlatypus/djangofmt/issues/546)) - ([500bebd](https://github.com/UnknownPlatypus/djangofmt/commit/500bebd9198fa062f4ec8092f6dda8f543545856))
+- Close coverage gaps in the CLI, fix loop and wasm bindings ([#581](https://github.com/UnknownPlatypus/djangofmt/issues/581)) - ([8422ec0](https://github.com/UnknownPlatypus/djangofmt/commit/8422ec0c9765c493347ce5d2b2d040bb8c91eb14))
+- Set up cargo-mutants and close the gaps it found ([#568](https://github.com/UnknownPlatypus/djangofmt/issues/568)) - ([0f59ad3](https://github.com/UnknownPlatypus/djangofmt/commit/0f59ad36349282ead535de223bf52367eae6f14a))
+
+### ⚙️ Miscellaneous Tasks
+
+- *(agents)* Add the babysit-pr skill for driving an open PR to green ([#582](https://github.com/UnknownPlatypus/djangofmt/issues/582)) - ([c1d87f0](https://github.com/UnknownPlatypus/djangofmt/commit/c1d87f06c9f7100a9d7580adbe7ac028ac79d79e))
+- *(benchmark)* Install cargo-codspeed and cargo-bloat through uv ([#555](https://github.com/UnknownPlatypus/djangofmt/issues/555)) - ([07d12cf](https://github.com/UnknownPlatypus/djangofmt/commit/07d12cfc2770114accb0ff8c2695031c9bccc59f))
+- *(docs)* Build the Pages site without deploy permissions ([#548](https://github.com/UnknownPlatypus/djangofmt/issues/548)) - ([5e164b9](https://github.com/UnknownPlatypus/djangofmt/commit/5e164b90728ba110cddf2abc1fcfb07f3edf6b94))
+- *(lint)* Remove dead pub items and check for them with hawk ([#557](https://github.com/UnknownPlatypus/djangofmt/issues/557)) - ([d1c241e](https://github.com/UnknownPlatypus/djangofmt/commit/d1c241ed8ead64695ef55f8ba6c7981d86b230a3))
+- *(release)* Smoke-test wheels from a read-only dist in pinned images ([#564](https://github.com/UnknownPlatypus/djangofmt/issues/564)) - ([610b429](https://github.com/UnknownPlatypus/djangofmt/commit/610b42984affc8d4ba25ffd41f36fcf5e636aae3))
+- *(release)* Publish build provenance attestations ([#551](https://github.com/UnknownPlatypus/djangofmt/issues/551)) - ([fad5eb9](https://github.com/UnknownPlatypus/djangofmt/commit/fad5eb9f7f7bade5e47f8f3d819b20d442f66fdb))
+- *(release)* Install dist from the uv lockfile instead of curl | sh ([#553](https://github.com/UnknownPlatypus/djangofmt/issues/553)) - ([b644d45](https://github.com/UnknownPlatypus/djangofmt/commit/b644d45f1c6e8763739818fba46c2851e174b499))
+- *(renovate)* Let Renovate update the action pins in release.yml ([#550](https://github.com/UnknownPlatypus/djangofmt/issues/550)) - ([6c690fc](https://github.com/UnknownPlatypus/djangofmt/commit/6c690fc1373f98b8a78755a193c8f898aec97f8d))
+- Smoke-test Intel macOS wheels, track stale pins with Renovate and drop dead config ([#586](https://github.com/UnknownPlatypus/djangofmt/issues/586)) - ([c54d4aa](https://github.com/UnknownPlatypus/djangofmt/commit/c54d4aa9b0f7d3eff26efbddba8662ff3ddc5c49))
+- Run cargo-mutants on the lines each PR changes ([#580](https://github.com/UnknownPlatypus/djangofmt/issues/580)) - ([ac69e7a](https://github.com/UnknownPlatypus/djangofmt/commit/ac69e7a6a3262a35282fbcd1bf4664822012c627))
+- Run the tests on Windows and macOS ([#567](https://github.com/UnknownPlatypus/djangofmt/issues/567)) - ([08fc556](https://github.com/UnknownPlatypus/djangofmt/commit/08fc556923d5ac30bc735a723a1e5fc2bee9c7a5))
+- Add job timeouts, bash pipefail and per-PR concurrency groups ([#561](https://github.com/UnknownPlatypus/djangofmt/issues/561)) - ([a3d75d8](https://github.com/UnknownPlatypus/djangofmt/commit/a3d75d85662ea10dac33c23f01c2e88c43a08043))
+- Build the workspace once in the test job and trim the cheap jobs ([#559](https://github.com/UnknownPlatypus/djangofmt/issues/559)) - ([6607468](https://github.com/UnknownPlatypus/djangofmt/commit/6607468bfcec00075ecafb4bbb60fb15662dea9a))
+- Check licenses, sources and bans with cargo-deny ([#554](https://github.com/UnknownPlatypus/djangofmt/issues/554)) - ([5cac0b5](https://github.com/UnknownPlatypus/djangofmt/commit/5cac0b54059de3658feeea3e40586139c092b965))
+- Detect changed files with git diff instead of tj-actions ([#552](https://github.com/UnknownPlatypus/djangofmt/issues/552)) - ([3ce0d05](https://github.com/UnknownPlatypus/djangofmt/commit/3ce0d058a7ff4abe858ce5fcef5ce790023a3e10))
+- Fix small CI, packaging and test gaps ([#547](https://github.com/UnknownPlatypus/djangofmt/issues/547)) - ([2328d22](https://github.com/UnknownPlatypus/djangofmt/commit/2328d223f6bdc5fe84d17dbf0c770e8d9b5fd647))
+
 ## [1.0.1](https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.0..v1.0.1) - 2026-10-09
 
 [**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
@@ -376,7 +416,7 @@
 
 - *(ci)* Only build djangofmt in ci, not other workspace crates ([#170](https://github.com/UnknownPlatypus/djangofmt/issues/170)) - ([7bbbfc8](https://github.com/UnknownPlatypus/djangofmt/commit/7bbbfc8f66a3d5f018a55355366c6d72ea8db5b9))
 
-## [0.2.5](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.4..v0.2.5) - 2026-01-12
+## [0.2.5](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.3..v0.2.5) - 2026-01-12
 
 [**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
 
@@ -384,10 +424,18 @@
 
 - *(debug)* Add debug logs on external formatter failures ([#143](https://github.com/UnknownPlatypus/djangofmt/issues/143)) - ([a5dda3b](https://github.com/UnknownPlatypus/djangofmt/commit/a5dda3bf4d11c94d0da4f667835d03074fb43cc2))
 - *(format)* Don't format django multiline comment tags (`{% comment %}...{% endcomment %}`) ([#162](https://github.com/UnknownPlatypus/djangofmt/issues/162)) - ([6a6ca10](https://github.com/UnknownPlatypus/djangofmt/commit/6a6ca106c3009fa85d7555b7f019f6c6de500620))
+- *(format)* Auto-sort css statements using `smacss` ordering and enforce `%` in keyframes ([#114](https://github.com/UnknownPlatypus/djangofmt/issues/114)) - ([1dd641f](https://github.com/UnknownPlatypus/djangofmt/commit/1dd641fedc4a07f826c95935d4ceb9d68e0a0070))
+- *(format)* Auto-indent `<script>` tag content ([#115](https://github.com/UnknownPlatypus/djangofmt/issues/115)) - ([d959cf0](https://github.com/UnknownPlatypus/djangofmt/commit/d959cf060622a9e6b20f022e22b9c7ad538852f3))
+- *(format)* Keep style attribute value on a single line ([#113](https://github.com/UnknownPlatypus/djangofmt/issues/113)) - ([7c2f33c](https://github.com/UnknownPlatypus/djangofmt/commit/7c2f33ca3987ed659dcfb91e4b13999bb4694dde))
+- *(format)* Skip file parsing if there is a top-level `<!-- djangofmt:ignore -->` ([#112](https://github.com/UnknownPlatypus/djangofmt/issues/112)) - ([fcbab9b](https://github.com/UnknownPlatypus/djangofmt/commit/fcbab9b3cc2315b930314a78b4643dd23ce5ba10))
+- *(format)* Improve formatting of `style` tags and attributes ([#111](https://github.com/UnknownPlatypus/djangofmt/issues/111)) - ([24920db](https://github.com/UnknownPlatypus/djangofmt/commit/24920db6e561ae3360d5b972dd66c7d8fe3b777b))
 - *(lint)* Show source file name in lint diagnostics ([#159](https://github.com/UnknownPlatypus/djangofmt/issues/159)) - ([6ee8c96](https://github.com/UnknownPlatypus/djangofmt/commit/6ee8c963af1bdefad0c6509f4f672be371e397aa))
 - *(lint)* Add building blocks for linting ([#144](https://github.com/UnknownPlatypus/djangofmt/issues/144)) - ([08a12a0](https://github.com/UnknownPlatypus/djangofmt/commit/08a12a05fb4037a8569b7ee10dfc49672058e682))
 - *(playground)* Add a "Open issue on Github" button in the playground ([#163](https://github.com/UnknownPlatypus/djangofmt/issues/163)) - ([ae247b3](https://github.com/UnknownPlatypus/djangofmt/commit/ae247b36c92434aa643c48515b017262312378a8))
 - *(playground)* Add a new collapsible panel to display linting errors ([#148](https://github.com/UnknownPlatypus/djangofmt/issues/148)) - ([067e4a0](https://github.com/UnknownPlatypus/djangofmt/commit/067e4a090d5a801cb31483461a90ed485797b4af))
+- *(playground)* Add playground deploy to release workflow ([#124](https://github.com/UnknownPlatypus/djangofmt/issues/124)) - ([124b149](https://github.com/UnknownPlatypus/djangofmt/commit/124b14995a7a5611bc84f00d6493f1cddb1ca928))
+- *(playground)* Add an online playground ([#118](https://github.com/UnknownPlatypus/djangofmt/issues/118)) - ([a655190](https://github.com/UnknownPlatypus/djangofmt/commit/a655190832fbd78e06c86f00cc5d7ecb3e7bb28b))
+- *(playground)* Expose a wasm format command ([#122](https://github.com/UnknownPlatypus/djangofmt/issues/122)) - ([847d3d8](https://github.com/UnknownPlatypus/djangofmt/commit/847d3d830a66239ef06d07827a73ec7d4914aa1a))
 
 ### 🐛 Bug Fixes
 
@@ -395,6 +443,7 @@
 
 ### 🚜 Refactor
 
+- *(cargo)* Switch to workspace setup ([#121](https://github.com/UnknownPlatypus/djangofmt/issues/121)) - ([ad75960](https://github.com/UnknownPlatypus/djangofmt/commit/ad75960ee2a7d972a92b7ec078837d9031ef451e))
 - *(format)* Remove `line_col_to_offset` and use miette `SourceOffset::from_location` for error reporting ([#145](https://github.com/UnknownPlatypus/djangofmt/issues/145)) - ([f8acc95](https://github.com/UnknownPlatypus/djangofmt/commit/f8acc953b8d34dd382c7e86b54f013b9fb5130e8))
 
 ### ⚡ Performance
@@ -413,33 +462,14 @@
 - *(pre-commit)* Simplify dprint discovery in pre-commit ([#137](https://github.com/UnknownPlatypus/djangofmt/issues/137)) - ([f4eb28c](https://github.com/UnknownPlatypus/djangofmt/commit/f4eb28c2ed38ac3a55f1aeb111749da32176b4ea))
 - *(review)* Add coderrabit ([#141](https://github.com/UnknownPlatypus/djangofmt/issues/141)) - ([bac6128](https://github.com/UnknownPlatypus/djangofmt/commit/bac6128b6f38dc2ac77dee8e8b727ab5b30b5f84))
 
-### New Contributors ❤️
-
-- @Mouarius made their first contribution in [#156](https://github.com/UnknownPlatypus/djangofmt/pull/156)
-
-## [0.2.4](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.3..v0.2.4) - 2025-12-15
-
-[**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
-
-### ⛰️ Features
-
-- *(format)* Auto-sort css statements using `smacss` ordering and enforce `%` in keyframes ([#114](https://github.com/UnknownPlatypus/djangofmt/issues/114)) - ([1dd641f](https://github.com/UnknownPlatypus/djangofmt/commit/1dd641fedc4a07f826c95935d4ceb9d68e0a0070))
-- *(format)* Auto-indent `<script>` tag content ([#115](https://github.com/UnknownPlatypus/djangofmt/issues/115)) - ([d959cf0](https://github.com/UnknownPlatypus/djangofmt/commit/d959cf060622a9e6b20f022e22b9c7ad538852f3))
-- *(format)* Keep style attribute value on a single line ([#113](https://github.com/UnknownPlatypus/djangofmt/issues/113)) - ([7c2f33c](https://github.com/UnknownPlatypus/djangofmt/commit/7c2f33ca3987ed659dcfb91e4b13999bb4694dde))
-- *(format)* Skip file parsing if there is a top-level `<!-- djangofmt:ignore -->` ([#112](https://github.com/UnknownPlatypus/djangofmt/issues/112)) - ([fcbab9b](https://github.com/UnknownPlatypus/djangofmt/commit/fcbab9b3cc2315b930314a78b4643dd23ce5ba10))
-- *(format)* Improve formatting of `style` tags and attributes ([#111](https://github.com/UnknownPlatypus/djangofmt/issues/111)) - ([24920db](https://github.com/UnknownPlatypus/djangofmt/commit/24920db6e561ae3360d5b972dd66c7d8fe3b777b))
-- *(playground)* Add playground deploy to release workflow ([#124](https://github.com/UnknownPlatypus/djangofmt/issues/124)) - ([124b149](https://github.com/UnknownPlatypus/djangofmt/commit/124b14995a7a5611bc84f00d6493f1cddb1ca928))
-- *(playground)* Add an online playground ([#118](https://github.com/UnknownPlatypus/djangofmt/issues/118)) - ([a655190](https://github.com/UnknownPlatypus/djangofmt/commit/a655190832fbd78e06c86f00cc5d7ecb3e7bb28b))
-- *(playground)* Expose a wasm format command ([#122](https://github.com/UnknownPlatypus/djangofmt/issues/122)) - ([847d3d8](https://github.com/UnknownPlatypus/djangofmt/commit/847d3d830a66239ef06d07827a73ec7d4914aa1a))
-
-### 🚜 Refactor
-
-- *(cargo)* Switch to workspace setup ([#121](https://github.com/UnknownPlatypus/djangofmt/issues/121)) - ([ad75960](https://github.com/UnknownPlatypus/djangofmt/commit/ad75960ee2a7d972a92b7ec078837d9031ef451e))
-
 ### ⚙️ Miscellaneous Tasks
 
 - *(rust)* Bump rust version to 1.89 ([#110](https://github.com/UnknownPlatypus/djangofmt/issues/110)) - ([dcf68aa](https://github.com/UnknownPlatypus/djangofmt/commit/dcf68aa2b68ff01dc8e959d32b7b31fff6173cfe))
 - Update release script - ([815fd8c](https://github.com/UnknownPlatypus/djangofmt/commit/815fd8c6470dfc19656b74412b72bf6f7a58e2bf))
+
+### New Contributors ❤️
+
+- @Mouarius made their first contribution in [#156](https://github.com/UnknownPlatypus/djangofmt/pull/156)
 
 ## [0.2.3](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.2..v0.2.3) - 2025-11-30
 
