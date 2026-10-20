@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.2](https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.1..v1.0.2) - 2026-10-20
+## [1.1.0](https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.1..v1.1.0) - 2026-10-20
 
 [**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
 
@@ -12,6 +12,7 @@
 ### 🐛 Bug Fixes
 
 - *(format)* Keep attribute quotes around template syntax ([#565](https://github.com/UnknownPlatypus/djangofmt/issues/565)) - ([3b11cc5](https://github.com/UnknownPlatypus/djangofmt/commit/3b11cc542ddfad0ad830a685d54f8228b44f61f9))
+- *(release)* Drop empty uv publish env vars that broke the PyPI upload - ([967e6c6](https://github.com/UnknownPlatypus/djangofmt/commit/967e6c6fef9feb53f9f5c69cc4da955417a3c1b0))
 - *(release)* Link the MSVC C runtime statically ([#562](https://github.com/UnknownPlatypus/djangofmt/issues/562)) - ([e0867a9](https://github.com/UnknownPlatypus/djangofmt/commit/e0867a9272c09c9c85f8c8737cf3b5909dbaf945))
 
 ### 🧪 Testing

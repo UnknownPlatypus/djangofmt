@@ -1,6 +1,6 @@
 [project]
 name = "djangofmt"
-version = "1.0.2"
+version = "1.1.0"
 description = "A fast, HTML aware, Django template formatter and linter, written in Rust."
 readme = "README.md"
 requires-python = ">=3.8"

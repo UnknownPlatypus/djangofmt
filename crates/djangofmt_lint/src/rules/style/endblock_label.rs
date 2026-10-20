@@ -46,7 +46,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [Django documentation: template inheritance](https://docs.djangoproject.com/en/stable/ref/templates/language/#template-inheritance)
 /// - [Django documentation: template partials](https://docs.djangoproject.com/en/stable/ref/templates/language/#template-partials)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "1.0.2")]
+#[violation_metadata(stable_since = "1.1.0")]
 pub struct EndblockLabel<'a> {
     pub end_tag: &'a str,
     pub kind: LabelViolation<'a>,
