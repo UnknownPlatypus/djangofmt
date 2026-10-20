@@ -870,3 +870,22 @@ fn check_respects_pyproject_rule_settings() {
     "
     );
 }
+
+#[test]
+fn check_endblock_label_custom_block_must_be_parsed() {
+    let project = Project::new()
+        .file(
+            "pyproject.toml",
+            "[tool.djangofmt.lint.endblock-label]\ncustom-blocks = [\"stage\"]\n",
+        )
+        .file("test.html", "<p>Hi</p>\n");
+    assert_cmd_snapshot!(cli().current_dir(project.path()).args(["check", "test.html"]), @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    djangofmt failed
+      Error: `lint.endblock-label.custom-blocks` lists `stage`, which is not in `custom-blocks`
+    ");
+}

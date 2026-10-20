@@ -1,0 +1,33 @@
+<!-- Django: docs/internals/contributing/writing-code/coding-style.txt, template style -->
+{% block header %}
+
+  Code goes here
+
+{% endblock header %}
+
+<!-- Django: tests/template_tests/syntax_tests/test_extends.py::inheritance01 -->
+1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}
+
+<!-- An unnamed block is a Django error, left alone -->
+{% block %}
+    <p>Unnamed</p>
+{% endblock %}
+
+<!-- A label naming another block is a Django error, left alone -->
+{% block first %}&{% endblock second %}
+
+<!-- A label not separated by exactly one space is a Django error, left alone -->
+{% block header %}
+    <p>Header</p>
+{% endblock
+header %}
+
+<!-- `inline` is a partialdef option; on a block it is a Django error, left alone -->
+{% block sidebar inline %}
+    <nav>{{ menu }}</nav>
+{% endblock %}
+
+<!-- A block tag outside `block`, `partialdef` and the listed `custom-blocks` is left alone -->
+{% localize on %}
+    {{ value }}
+{% endlocalize %}

@@ -1,0 +1,92 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Missing end tag label on a multi-line block
+   ╭─[tests/check/endblock_label/endblock_label.invalid.html:6:4]
+ 5 │ 
+ 6 │ {% endblock %}
+   ·    ────┬───
+   ·        ╰── here
+ 7 │ 
+   ╰────
+  help: Write it as `{% endblock header %}`
+
+  × Missing end tag label on a multi-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:11:4]
+ 10 │ TEST with 'space in name'!
+ 11 │ {% endpartialdef %}
+    ·    ──────┬──────
+    ·          ╰── here
+ 12 │ 
+    ╰────
+  help: Write it as `{% endpartialdef 'space in name' %}`
+
+  × Redundant end tag label on a single-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:14:73]
+ 13 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+ 14 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
+    ·                                                                         ──┬──
+    ·                                                                           ╰── here
+ 15 │ 
+    ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant end tag label on a single-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:14:51]
+ 13 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+ 14 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
+    ·                                                   ───┬──
+    ·                                                      ╰── here
+ 15 │ 
+    ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant end tag label on a single-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:17:78]
+ 16 │ <!-- Django: tests/template_tests/syntax_tests/test_partials.py::inline_partial_explicit_end -->
+ 17 │ {% partialdef testing-name inline %}HERE IS THE TEST CONTENT{% endpartialdef testing-name %}
+    ·                                                                              ──────┬─────
+    ·                                                                                    ╰── here
+ 18 │ 
+    ╰────
+  help: Write it as `{% endpartialdef %}`
+
+  × Redundant end tag label on a single-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:20:67]
+ 19 │ <!-- Real-world: Misago misago/admin/templates/misago/admin/generic/form.html — a block in attribute position -->
+ 20 │ <form role="form" method="post" {% block form-extra %}{% endblock form-extra %}></form>
+    ·                                                                   ─────┬────
+    ·                                                                        ╰── here
+ 21 │ 
+    ╰────
+  help: Write it as `{% endblock %}`
+
+  × Missing end tag label on a multi-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:26:4]
+ 25 │     {% translate "Appeler Hello Watt" %}
+ 26 │ {% endstage %}
+    ·    ────┬───
+    ·        ╰── here
+ 27 │ 
+    ╰────
+  help: Write it as `{% endstage dynamic %}`
+
+  × Redundant end tag label on a single-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:29:54]
+ 28 │ <!-- A `custom-blocks` entry on one line -->
+ 29 │ <span>{% stage dynamic %}{{ csrf_token }}{% endstage dynamic %}</span>
+    ·                                                      ───┬───
+    ·                                                         ╰── here
+ 30 │ 
+    ╰────
+  help: Write it as `{% endstage %}`
+
+  × End tag label does not match the block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:34:13]
+ 33 │     {{ csrf_token }}
+ 34 │ {% endstage cache %}
+    ·             ──┬──
+    ·               ╰── here
+    ╰────
+  help: Write it as `{% endstage dynamic %}`

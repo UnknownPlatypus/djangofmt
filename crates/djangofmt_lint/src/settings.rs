@@ -6,6 +6,15 @@ use crate::rule_selector::{RuleSelector, SelectionWarning};
 use crate::rule_set::RuleSet;
 
 /// Per-rule config is keyed by rule name, since djangofmt has no plugin grouping to key it by.
+pub mod endblock_label {
+    /// Settings for [`crate::registry::Rule::EndblockLabel`].
+    #[derive(Debug, Clone, Default, PartialEq, Eq)]
+    pub struct Settings {
+        /// The `custom-blocks` whose end tag takes a label matching their single argument.
+        pub custom_blocks: Vec<String>,
+    }
+}
+
 pub mod unsorted_tailwind_classes {
     /// Settings for [`crate::registry::Rule::UnsortedTailwindClasses`].
     #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -22,6 +31,7 @@ pub struct Settings {
     pub rules: RuleSet,
     /// The Django version the templates target. `None` keeps version-gated rules off.
     pub target_version: Option<DjangoVersion>,
+    pub endblock_label: endblock_label::Settings,
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
@@ -41,6 +51,7 @@ impl Settings {
                 .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
                 .collect(),
             target_version: None,
+            endblock_label: endblock_label::Settings::default(),
             unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         }
     }
@@ -65,6 +76,7 @@ pub struct LintConfiguration {
     pub preview: bool,
     /// The Django version the templates target.
     pub target_version: Option<DjangoVersion>,
+    pub endblock_label: endblock_label::Settings,
     pub unsorted_tailwind_classes: unsorted_tailwind_classes::Settings,
 }
 
@@ -117,6 +129,7 @@ impl LintConfiguration {
             Settings {
                 rules,
                 target_version: self.target_version,
+                endblock_label: self.endblock_label,
                 unsorted_tailwind_classes: self.unsorted_tailwind_classes,
             },
             warnings,

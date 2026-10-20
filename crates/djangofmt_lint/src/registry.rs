@@ -264,4 +264,5 @@ define_rules! {
     (InvalidIgnoreCode, rules::suspicious::invalid_ignore_code::InvalidIgnoreCode),
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
+    (EndblockLabel, rules::style::endblock_label::EndblockLabel),
 }

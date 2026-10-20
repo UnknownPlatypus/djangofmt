@@ -2,6 +2,7 @@
 mod common;
 
 use common::build_settings;
+use djangofmt_lint::settings::endblock_label;
 use djangofmt_lint::{
     Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, apply_fixes, check,
     lint_source,
@@ -59,7 +60,8 @@ fn check_invalid() {
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
         let input = fs::read_to_string(path).unwrap();
-        let parsed = parse(&input, language_for(path), &[])
+        let custom_blocks = custom_blocks();
+        let parsed = parse(&input, language_for(path), &custom_blocks)
             .unwrap_or_else(|err| panic!("Failed to parse {}: {err:?}", path.display()));
         let stem = path.file_stem().unwrap().to_str().unwrap();
         let settings = settings_for(path);
@@ -138,6 +140,9 @@ fn settings_for(path: &Path) -> Settings {
     }
     Settings {
         rules,
+        endblock_label: endblock_label::Settings {
+            custom_blocks: custom_blocks(),
+        },
         ..Settings::default()
     }
 }
@@ -146,11 +151,16 @@ fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
     lint_source(
         input,
         language_for(path),
-        &[],
+        &custom_blocks(),
         &settings_for(path),
         Some(path),
     )
     .expect("Failed to parse AST in test")
+}
+
+/// Fixtures may use `{% stage %}` as a `custom-blocks` entry.
+fn custom_blocks() -> Vec<String> {
+    vec!["stage".to_owned()]
 }
 
 /// `.jinja` fixtures run under Jinja, the only profile allowing whitespace-control markers.

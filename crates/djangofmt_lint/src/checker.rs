@@ -314,9 +314,7 @@ impl<'a> Checker<'a> {
             if self.is_rule_enabled(Rule::UntrimmedBlocktranslate) {
                 rules::correctness::untrimmed_blocktranslate::check(self, block);
             }
-            if self.is_rule_enabled(Rule::DuplicateBlockName) {
-                self.record_block_name(block);
-            }
+            self.check_block_tags(block);
         }
 
         let outer_raw = self.in_raw;
@@ -343,9 +341,15 @@ impl<'a> Checker<'a> {
             )
     }
 
-    fn record_block_name<T>(&mut self, block: &JinjaBlock<'a, T>) {
-        if let Some(name) = rules::correctness::duplicate_block_name::block_name(block) {
+    /// The `{% block %}` rules, run on blocks in both content and attribute position.
+    fn check_block_tags<T>(&mut self, block: &JinjaBlock<'a, T>) {
+        if self.is_rule_enabled(Rule::DuplicateBlockName)
+            && let Some(name) = rules::correctness::duplicate_block_name::block_name(block)
+        {
             self.block_names.push(name);
+        }
+        if self.is_rule_enabled(Rule::EndblockLabel) {
+            rules::style::endblock_label::check(self, block);
         }
     }
 
@@ -361,8 +365,8 @@ impl<'a> Checker<'a> {
         block: &JinjaBlock<'a, Attribute<'a>>,
         element: &Element<'a>,
     ) {
-        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.record_block_name(block);
+        if !self.in_raw {
+            self.check_block_tags(block);
         }
 
         let outer_raw = self.in_raw;

@@ -1,4 +1,4 @@
-use djangofmt_lint::settings::unsorted_tailwind_classes;
+use djangofmt_lint::settings::{endblock_label, unsorted_tailwind_classes};
 use djangofmt_lint::{DjangoVersion, RuleSelector};
 use djangofmt_macros::OptionsMetadata;
 use djangofmt_syntax::Profile;
@@ -198,7 +198,35 @@ pub struct LintSettings {
     pub per_file_ignores: Option<BTreeMap<String, Vec<RuleSelector>>>,
 
     #[option_group]
+    pub endblock_label: Option<EndblockLabelOptions>,
+
+    #[option_group]
     pub unsorted_tailwind_classes: Option<UnsortedTailwindClassesOptions>,
+}
+
+/// Options for the [`endblock-label`](rules/endblock-label.md) rule.
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq, OptionsMetadata)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub struct EndblockLabelOptions {
+    /// The `custom-blocks` entries whose end tag, like `{% endblock %}`, takes an optional label
+    /// repeating the opening tag's single argument. Only list a tag whose end tag accepts both
+    /// `{% endtag %}` and `{% endtag NAME %}`; a tag requiring or rejecting the label breaks once
+    /// the fix is applied.
+    #[option(
+        default = "[]",
+        value_type = "list[str]",
+        example = r#"custom-blocks = ["stage", "flatblock"]"#
+    )]
+    pub custom_blocks: Option<Vec<String>>,
+}
+
+impl EndblockLabelOptions {
+    #[must_use]
+    pub fn into_settings(self) -> endblock_label::Settings {
+        endblock_label::Settings {
+            custom_blocks: self.custom_blocks.unwrap_or_default(),
+        }
+    }
 }
 
 /// Options for the [`unsorted-tailwind-classes`](rules/unsorted-tailwind-classes.md) rule.
