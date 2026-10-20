@@ -5,3 +5,6 @@ source: crates/djangofmt/tests/fmt/main.rs
 <p>
     {% blocktranslate %}This is a fairly long translatable sentence that will certainly exceed the configured print width of one hundred and twenty characters.{% endblocktranslate %}
 </p>
+{% blocktranslate with note="x trimmed y" %}
+    Kept    as    {{ note }}
+{% endblocktranslate %}

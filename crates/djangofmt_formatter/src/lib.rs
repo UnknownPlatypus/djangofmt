@@ -66,6 +66,9 @@ pub fn build_markup_options(
             ..markup_fmt::config::LayoutOptions::default()
         },
         language: markup_fmt::config::LanguageOptions {
+            // Space out single-line Django comments, content kept as is: {#comment#} -> {# comment #}
+            // Jinja comments are left to `format_comments`.
+            format_template_comments: true,
             // HTML void elements should not be self-closing by default:
             // See https://developer.mozilla.org/en-US/docs/Glossary/Void_element#self-closing_tags
             // <br/> -> <br>

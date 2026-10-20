@@ -1,0 +1,11 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{# Page title #}
+{% block title %}{% translate "Home" %}{% endblock %}
+
+{% block content %}{% endblock %}
