@@ -86,13 +86,6 @@ impl<'a> LintContext<'a> {
         self.settings.rules.contains(rule)
     }
 
-    /// Returns whether any of the given rules should be checked.
-    #[must_use]
-    #[inline]
-    pub const fn any_rule_enabled(&self, rules: &[Rule]) -> bool {
-        self.settings.rules.contains_any(rules)
-    }
-
     /// Compute the byte offset of `slice` within the source.
     ///
     /// # Panics
@@ -131,18 +124,6 @@ impl<'a> LintContext<'a> {
     #[must_use]
     pub fn source_span(&self, slice: &str) -> SourceSpan {
         span(self.source_offset(slice), slice.len())
-    }
-
-    /// Build a guard for an enabled rule. Returns `None` if the rule is disabled.
-    pub fn report_diagnostic_if_enabled<V: Violation>(
-        &self,
-        violation: &V,
-        span: SourceSpan,
-    ) -> Option<DiagnosticGuard<'_, 'a>> {
-        if !self.is_rule_enabled(V::RULE) {
-            return None;
-        }
-        Some(self.report_diagnostic(violation, span))
     }
 
     /// Build a guard for a rule the caller has already gated with

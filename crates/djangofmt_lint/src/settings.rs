@@ -44,13 +44,15 @@ impl Default for Settings {
 
 impl Settings {
     /// Every runnable rule, including preview rules.
+    ///
+    /// Targets [`DjangoVersion::MAX`] so that version-gated rules run too.
     #[must_use]
     pub fn all() -> Self {
         Self {
             rules: Rule::iter()
                 .filter(|rule| !rule.is_deprecated() && !rule.is_removed())
                 .collect(),
-            target_version: None,
+            target_version: Some(DjangoVersion::MAX),
             endblock_label: endblock_label::Settings::default(),
             unsorted_tailwind_classes: unsorted_tailwind_classes::Settings::default(),
         }

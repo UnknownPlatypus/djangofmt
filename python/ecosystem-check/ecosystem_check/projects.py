@@ -115,13 +115,15 @@ class CliOptions(Serializable):
             if self.custom_blocks:
                 args.extend(("--custom-blocks", self.custom_blocks))
             if command is Command.CHECK:
-                # Select every rule, including preview, for maximum ecosystem coverage.
-                # Fixes are applied so they can be reviewed as a source diff.
+                # Select every rule, including preview and version-gated ones, for maximum
+                # ecosystem coverage. Fixes are applied so they can be reviewed as a source diff.
                 args.extend(
                     (
                         "--select",
                         "category:all",
                         "--preview",
+                        "--target-version",
+                        "255.255",  # `DjangoVersion::MAX`, above every release
                         "--fix",
                         "--unsafe-fixes",
                         "--output-format",

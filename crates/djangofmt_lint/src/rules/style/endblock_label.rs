@@ -2,9 +2,7 @@ use std::borrow::Cow;
 
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
-use markup_fmt::Language;
 use markup_fmt::ast::{JinjaBlock, JinjaTagOrChildren};
-use markup_fmt::parser::parse_jinja_tag_name;
 
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
@@ -95,7 +93,8 @@ impl Violation for EndblockLabel<'_> {
     }
 }
 
-pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
+/// The caller passes the opener's name as `tag`.
+pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>, tag: &str) {
     // A Django style guide convention, Jinja has none.
     if !checker.is_django() {
         return;
@@ -105,7 +104,6 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
     else {
         return;
     };
-    let tag = parse_jinja_tag_name(opener, Language::Django);
     let django_checks_label = matches!(tag, "block" | "partialdef");
     let custom_blocks = &checker.context().settings().endblock_label.custom_blocks;
     if !django_checks_label && !custom_blocks.iter().any(|custom| custom == tag) {
@@ -129,7 +127,7 @@ pub fn check<T>(checker: &Checker<'_>, block: &JinjaBlock<'_, T>) {
     }
 
     // Django rejects other arities. Only `partialdef` takes a quoted name, which `bits` keeps
-    // whole at the cost of a `Vec`; the other tags split on whitespace like `parse_jinja_tag_name`.
+    // whole at the cost of a `Vec`; the other tags split on whitespace like `dtl::tag_name`.
     let name = if tag == "partialdef" {
         match bits(opener.content)[..] {
             [_, name] | [_, name, "inline"] => name,

@@ -143,7 +143,7 @@ fn settings_for(path: &Path) -> Settings {
         endblock_label: endblock_label::Settings {
             custom_blocks: custom_blocks(),
         },
-        ..Settings::default()
+        ..Settings::all()
     }
 }
 
