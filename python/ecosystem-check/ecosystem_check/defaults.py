@@ -655,10 +655,10 @@ DEFAULT_TARGETS = [
                     "fairdm/contrib/contributors/templates/cotton/contributor/avatar.html",
                     "fairdm/contrib/contributors/templates/cotton/contributor/stack.html",
                     # <optgroup> opened and closed in separate {% if %} blocks
-                    "fairdm/utils/templates/forms/widgets/quantity_field.html",
+                    "fairdm/templates/forms/widgets/quantity_field.html",
                 ),
                 ExcludeReason.DYNAMIC_TAG_NAME: (
-                    "fairdm/utils/templates/forms/checkbox.html",
+                    "fairdm/templates/forms/checkbox.html",
                 ),
             },
         ),

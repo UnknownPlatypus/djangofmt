@@ -25,6 +25,7 @@ env:
   UV_CHECKSUM: eadd9d27c134ab5ac1ffd4473b97a741407f3ea238288f03121fc4deddf90220 # x86_64-unknown-linux-gnu
   # renovate: datasource=github-releases depName=astral-sh/hawk
   HAWK_VERSION: 0.1.15
+  HAWK_TOOLCHAIN: 1.99.0 # channel of hawk's rust-toolchain.toml at HAWK_VERSION
   # renovate: datasource=github-release-attachments depName=sourcefrog/cargo-mutants
   CARGO_MUTANTS_VERSION: v27.1.0
   CARGO_MUTANTS_CHECKSUM: dfe6dc37d0342c891d2829b5a695aa57c2d0edecef7e7d0399a30cc6e206411e # x86_64-unknown-linux-gnu
@@ -229,11 +230,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # hawk only runs on the exact toolchain it was built for, keep HAWK_VERSION in step with rust-toolchain.toml.
+      # hawk only runs on the exact toolchain it was built for, which lags behind rust-toolchain.toml.
       - name: Install hawk
         run: curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/astral-sh/hawk/releases/download/${HAWK_VERSION}/cargo-hawk-installer.sh" | sh
       - name: Find dead pub items
-        run: cargo hawk check --only dead-public --color=always -D warnings
+        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --only dead-public --color=always -D warnings
 
   test:
     name: "cargo test + coverage"
