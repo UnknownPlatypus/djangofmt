@@ -1,0 +1,20 @@
+<!-- Django: tests/template_tests/filter_tests/test_json_script.py::test_without_id -->
+{{ value|json_script }}
+
+<!-- A non-empty id that merely looks blank: Django renders `id=" "` for it -->
+{{ user_data|json_script:" " }}
+
+<!-- The id comes from a variable, so its emptiness is unknown -->
+{{ user_data|json_script:element_id }}
+
+<!-- A filter whose name only embeds `json_script` -->
+{{ user_data|my_json_script:"" }}
+
+<!-- The filter call only appears inside a string argument -->
+{{ user_data|default:'|json_script:""' }}
+
+<!-- An expression Django rejects is left as is -->
+{{ user_data|json_script: "" }}
+
+<!-- Only `{{ }}` is checked, not filters inside tags -->
+{% with script=user_data|json_script:"" %}{{ script }}{% endwith %}

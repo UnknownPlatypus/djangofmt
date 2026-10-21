@@ -212,7 +212,7 @@ mod tests {
         assert_eq!(error("yay"), "Unknown rule selector: `yay`");
         assert_eq!(
             error("category:yay"),
-            "Unknown category `yay` (expected one of: all, default, correctness, suspicious, style, accessibility, pedantic)"
+            "Unknown category `yay` (expected one of: all, default, correctness, suspicious, complexity, style, accessibility, pedantic)"
         );
     }
 

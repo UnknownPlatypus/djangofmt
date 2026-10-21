@@ -49,6 +49,8 @@ pub enum RuleCategory {
     Correctness,
     /// Code that is most likely wrong or useless.
     Suspicious,
+    /// Code that does something simple in a complex way.
+    Complexity,
     /// Code that should be written in a more idiomatic way.
     Style,
     /// Code that creates accessibility (a11y) barriers.
@@ -243,7 +245,7 @@ define_rules! {
     (UntrimmedBlocktranslate, rules::correctness::untrimmed_blocktranslate::UntrimmedBlocktranslate),
     (DuplicateBlockName, rules::correctness::duplicate_block_name::DuplicateBlockName),
     (EmptyAttrValue, rules::style::empty_attr_value::EmptyAttrValue<'static>),
-    (RedundantTypeAttr, rules::style::redundant_type_attr::RedundantTypeAttr),
+    (RedundantTypeAttr, rules::complexity::redundant_type_attr::RedundantTypeAttr),
     (DjangoStaticUrl, rules::suspicious::django_static_url::DjangoStaticUrl),
     (DjangoUrlPattern, rules::suspicious::django_url_pattern::DjangoUrlPattern),
     (JavascriptUrl, rules::suspicious::javascript_url::JavascriptUrl),
@@ -266,4 +268,5 @@ define_rules! {
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
     (EndblockLabel, rules::style::endblock_label::EndblockLabel),
     (DeprecatedStaticLibrary, rules::suspicious::deprecated_static_library::DeprecatedStaticLibrary<'static>),
+    (RedundantJsonScriptId, rules::complexity::redundant_json_script_id::RedundantJsonScriptId),
 }

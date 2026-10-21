@@ -2,8 +2,8 @@ use std::path::Path;
 
 use markup_fmt::Language;
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaTag, JinjaTagOrChildren, NativeAttribute, Node, NodeKind,
-    Root,
+    Attribute, Element, JinjaBlock, JinjaInterpolation, JinjaTag, JinjaTagOrChildren,
+    NativeAttribute, Node, NodeKind, Root,
 };
 use markup_fmt::parser::parse_jinja_tag_name;
 use miette::SourceSpan;
@@ -170,7 +170,23 @@ impl<'a> Checker<'a> {
                 self.record_text_block_names(comment.raw);
             }
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
+            NodeKind::JinjaInterpolation(interpolation) => {
+                self.visit_jinja_interpolation(interpolation);
+            }
             _ => {}
+        }
+    }
+
+    /// Only node-position `{{ }}` reaches here: in an attribute value it stays part of the
+    /// value string.
+    fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
+        if self.is_rule_enabled(Rule::RedundantJsonScriptId)
+            && self.is_django()
+            && self
+                .target_version()
+                .is_some_and(|version| version >= DjangoVersion::new(4, 1))
+        {
+            rules::complexity::redundant_json_script_id::check(self, interpolation);
         }
     }
 
@@ -299,7 +315,7 @@ impl<'a> Checker<'a> {
         }
 
         if self.is_rule_enabled(Rule::RedundantTypeAttr) {
-            rules::style::redundant_type_attr::check(self, attr, element);
+            rules::complexity::redundant_type_attr::check(self, attr, element);
         }
 
         if self.is_rule_enabled(Rule::DjangoStaticUrl) {
