@@ -278,6 +278,8 @@ fn print_concise(results: &[CheckResult], threshold: Applicability) {
     for result in results {
         let source = &result.file_diagnostics.source_code;
         let path = &result.display_path;
+        // One record per file: stderr is unbuffered, so a record per diagnostic costs a syscall each.
+        let mut rendered = String::new();
         for diag in &result.file_diagnostics.diagnostics {
             let (line, column) = source
                 .read_span(&diag.span, 0, 0)
@@ -289,10 +291,15 @@ fn print_concise(results: &[CheckResult], threshold: Applicability) {
             } else {
                 ""
             };
-            error!(
+            writeln!(
+                rendered,
                 "{path}:{line}:{column}: {}{fixable} {}",
                 diag.code, diag.message
-            );
+            )
+            .expect("rendering to a String cannot fail");
+        }
+        if !rendered.is_empty() {
+            error!("{}", rendered.trim_end_matches('\n'));
         }
     }
 }
