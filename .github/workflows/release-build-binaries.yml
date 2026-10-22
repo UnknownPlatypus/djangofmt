@@ -69,6 +69,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-sdist
+          compression-level: 0
           path: dist
 
   linux:
@@ -109,6 +110,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.target }}
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         shell: bash
@@ -127,6 +129,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-${{ matrix.target }}
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
@@ -205,6 +208,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         shell: bash
@@ -223,6 +227,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
@@ -267,6 +272,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.target }}
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         shell: bash
@@ -285,6 +291,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-${{ matrix.target }}
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
@@ -333,6 +340,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         shell: bash
@@ -351,6 +359,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
@@ -384,6 +393,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-macos-x86_64
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         run: |
@@ -399,6 +409,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-macos-x86_64
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
@@ -431,6 +442,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-aarch64-apple-darwin
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         run: |
@@ -446,6 +458,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-aarch64-apple-darwin
+          compression-level: 0
           path: |
             *.tar.gz
             *.sha256
@@ -504,6 +517,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
+          compression-level: 0
           path: dist
       - name: "Archive binary"
         shell: bash
@@ -515,6 +529,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
+          compression-level: 0
           path: |
             *.zip
             *.sha256
