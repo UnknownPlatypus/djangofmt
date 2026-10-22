@@ -7,6 +7,7 @@ mod ignore;
 mod parse;
 mod parse_error;
 mod profile;
+pub mod tokens;
 
 pub use comment::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT, strip_bom};
 pub use diagnostic::{clamp_offset, graphical_handler, span};

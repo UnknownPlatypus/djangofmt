@@ -1,5 +1,8 @@
 use std::borrow::Cow;
 
+use djangofmt_syntax::tokens::{Token, Tokens};
+use smallvec::SmallVec;
+
 use crate::Checker;
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -57,21 +60,23 @@ impl Violation for DuplicateBlockName<'_> {
     }
 }
 
-/// The name of a `{% block NAME %}` the caller recognised: the token after `block`.
-/// Strip `{%-`/`{%+` markers first; otherwise they become a leading token and shift the name.
-pub fn block_name_from_content(content: &str) -> Option<&str> {
-    content
-        .trim_start_matches(['+', '-'])
-        .split_ascii_whitespace()
-        .nth(1)
-}
-
 /// Flag every block name that occurs more than once, reporting each occurrence after the first.
-pub fn check(checker: &Checker<'_>) {
-    let names = checker.block_names();
-    for (i, &name) in names.iter().enumerate() {
-        if names[..i].contains(&name) {
-            checker.report_diagnostic(&DuplicateBlockName { name }, checker.source_span(name));
+pub fn check(checker: &Checker<'_>, tokens: &Tokens<'_>) {
+    // Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
+    let mut names: SmallVec<[&str; 8]> = SmallVec::new();
+    for token in tokens.iter() {
+        // The token after `block`; `{%-`/`{%+` markers would otherwise shift it.
+        if let Token::Tag { tag, name: "block" } = token
+            && let Some(name) = tag
+                .content
+                .trim_start_matches(['+', '-'])
+                .split_ascii_whitespace()
+                .nth(1)
+        {
+            if names.contains(&name) {
+                checker.report_diagnostic(&DuplicateBlockName { name }, checker.source_span(name));
+            }
+            names.push(name);
         }
     }
 }

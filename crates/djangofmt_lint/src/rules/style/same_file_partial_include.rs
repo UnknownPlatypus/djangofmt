@@ -5,10 +5,11 @@ use markup_fmt::ast::JinjaTag;
 
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
-use crate::rules::helpers::{contains_interpolation, tags_in_text};
+use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
+use djangofmt_syntax::tokens::Token;
 
 use crate::Checker;
 
@@ -78,7 +79,7 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
     }
 
     // Without a local partialdef, the suffix-matched include necessarily resolves to another file.
-    if !defines_partial(checker.context().source(), fragment) {
+    if !defines_partial(checker, fragment) {
         return;
     }
 
@@ -132,13 +133,9 @@ fn parse_partial_include<'s>(tag: &JinjaTag<'s>) -> Option<(&'s str, &'s str)> {
 }
 
 /// Whether the source contains a `{% partialdef <name> %}` opening tag.
-fn defines_partial(source: &str, name: &str) -> bool {
-    // The whole source, so a partial defined in text the parser keeps verbatim counts too.
-    tags_in_text(source).any(|tag| {
-        let mut words = tag
-            .content
-            .trim_start_matches(['-', '+'])
-            .split_whitespace();
-        words.next() == Some("partialdef") && words.next() == Some(name)
+fn defines_partial(checker: &Checker<'_>, name: &str) -> bool {
+    checker.tokens().iter().any(|token| {
+        matches!(token, Token::Tag { tag, name: "partialdef" }
+            if tag.content.trim_start_matches(['-', '+']).split_whitespace().nth(1) == Some(name))
     })
 }

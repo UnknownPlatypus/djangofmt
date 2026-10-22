@@ -193,6 +193,14 @@ fn check_rules(
     );
     // Walk the ast and collect diagnostics.
     checker.visit_root(parsed.ast());
+    // The token rules read Django's token stream, lexed only when one of them is on.
+    if settings
+        .rules
+        .iter()
+        .any(|rule| matches!(rule.source(), registry::LintSource::Tokens))
+    {
+        checker.check_tokens();
+    }
 
     // Collect ignore comments and drop the ignored diagnostics.
     let mut ignore_comments = suppression::collect_ignore_comments(parsed.ast(), &checker);
@@ -200,7 +208,10 @@ fn check_rules(
     suppression::record_matches(&checker, &mut ignore_comments);
     checker.visit_unused_ignore_codes(&ignore_comments);
     suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
-    checker.into_diagnostics()
+    let mut diagnostics = checker.into_diagnostics();
+    // Source order, whichever pass found them: the tag rules run after the AST walk.
+    diagnostics.sort_by_key(|diagnostic| diagnostic.span.offset());
+    diagnostics
 }
 
 /// [`parse`], falling back to the leading comment alone when that comment quarantines
