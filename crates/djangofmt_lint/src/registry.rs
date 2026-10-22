@@ -265,4 +265,5 @@ define_rules! {
     (DeprecatedIgnore, rules::suspicious::deprecated_ignore::DeprecatedIgnore),
     (UnusedIgnoreCode, rules::suspicious::unused_ignore_code::UnusedIgnoreCode),
     (EndblockLabel, rules::style::endblock_label::EndblockLabel),
+    (DeprecatedStaticLibrary, rules::suspicious::deprecated_static_library::DeprecatedStaticLibrary<'static>),
 }

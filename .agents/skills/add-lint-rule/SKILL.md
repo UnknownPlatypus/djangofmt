@@ -22,6 +22,8 @@ Create `crates/djangofmt_lint/src/rules/{category}/{rule_name}.rs`.
 
 Every category but `pedantic` runs by default. Put a rule in `pedantic` when it is noisy on real templates and has no safe fix, unless it catches something important. Measure noise with `just ecosystem-check-lint-dev` before deciding.
 
+Pick the category by what the rule catches, the way ruff sorts its `UP` rules and clippy its `msrv` lints: a deprecated tag, filter or library goes in `suspicious`, an older spelling Django still supports in `style`. A minimum Django release is no category: the rule gates on it instead (see 1e).
+
 The file must contain:
 
 ### 1a. The violation struct with doc comment
@@ -154,7 +156,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
-The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_jinja_block`. Most rules are attribute rules:
+The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share, and single-tag rules `(checker, tag)` from the arm of their tag name in `visit_jinja_tag`, which also sees block openers. Most rules are attribute rules:
 
 ```rust
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
@@ -175,11 +177,34 @@ Key points:
 
 - The `Checker` is passed as `&Checker<'_>`; diagnostics are buffered through interior mutability (`RefCell`), so no `&mut` is needed.
 - `checker.report_diagnostic(&violation, span)` returns a `DiagnosticGuard`. On `Drop` the guard pushes the diagnostic into the context's buffer. Hold the guard in a `let mut guard = ...` binding only if you need to attach a fix or override fields; otherwise let the temporary drop immediately.
-- If the rule is **not** gated upfront in `checker.rs` (Step 4), call `checker.report_diagnostic_if_enabled(...)` instead — it returns `Option<DiagnosticGuard>` and short-circuits when disabled.
 - For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`. Deleting a whole attribute is `delete_attr_fix` from `fix/edits.rs`, which widens the deletion over the surrounding whitespace.
 - **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
+- **Keep the per-node path light**: every tag of a name goes through that name's rules, and `djangofmt_syntax::dtl::bits()` runs a regex. Reject on bytes first (`content.contains("static")`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
+
+### 1e. Version-gated rules
+
+A rule that only applies from some Django release onwards, the one that deprecated the old spelling or introduced the new one, gates on the target version the way ruff's rules gate on `target-version` and clippy's on `msrv`. As in ruff, the gate sits in the checker next to `is_rule_enabled`, with the release inline, and the rule never sees the version:
+
+```rust
+// checker.rs, the `load` arm of `visit_jinja_tag`
+"load"
+    if self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
+        && self.is_django()
+        && self
+            .target_version()
+            .is_some_and(|version| version >= DjangoVersion::new(2, 1)) =>
+{
+    rules::suspicious::deprecated_static_library::check(self, tag);
+}
+```
+
+- `checker.target_version()` is `None` when `target-version` is neither set nor inferable from `[project] dependencies`. The rule then stays silent: nothing says the newer spelling is available.
+- A rule reads `checker.target_version()` itself only when the version changes what it reports or fixes, not just whether it runs.
+- Pair the gate with `self.is_django()`: a Django release means nothing for a Jinja template.
+- Say so in the docstring ("The rule is version-gated: it reports nothing until `lint.target-version` names Django 2.1 or newer") and list `lint.target-version` under `## Options`.
+- Fixtures run at `DjangoVersion::MAX`, so the gate is always open for them; `check_gates_version_specific_rules_on_target_version` in `crates/djangofmt/tests/cli.rs` covers the closed gate once for every rule. Cover the Jinja half with a `.valid.jinja` fixture.
 
 ## Step 2: Export the module
 
@@ -210,8 +235,6 @@ fn visit_native_attribute(&self, attr: &NativeAttribute<'a>, element: &Element<'
     // ...
 }
 ```
-
-If the rule's `check` uses `report_diagnostic_if_enabled` internally instead of being gated here, you can skip the `is_rule_enabled` wrapper — but gating upfront is cheaper when the rule does any non-trivial work before reporting.
 
 **Several rules keyed off the same tag?** See **[checker-gating.md](checker-gating.md)** for classify-once dispatch.
 
@@ -290,6 +313,7 @@ A new rule lands as **one** commit on a branch. Squash review follow-ups into it
 - Multi-variant (enum) violation with `match` in `message()`/`help()`: `crates/djangofmt_lint/src/rules/accessibility/missing_title.rs`
 - Full-technique rule (WCAG H63) — multi-variant, per-variant spans, case-insensitive value validation: `crates/djangofmt_lint/src/rules/pedantic/table_header_missing_scope.rs`
 - Jinja-block-shaped rule with fix: `crates/djangofmt_lint/src/rules/correctness/untrimmed_blocktranslate.rs`
+- Version-gated tag rule: `crates/djangofmt_lint/src/rules/suspicious/deprecated_static_library.rs`
 - Violation trait: `crates/djangofmt_lint/src/violation.rs`
 - `LintContext` / `DiagnosticGuard`: `crates/djangofmt_lint/src/lint_context.rs`
 - Fix data model (`Edit`, `Fix`, `Applicability`, `FixAvailability`): `crates/djangofmt_lint/src/fix/mod.rs`

@@ -18,4 +18,4 @@ if element.tag_name.eq_ignore_ascii_case("img") {
 
 When you lift such a precondition into the dispatcher, delete the now-redundant guard from the rule's `check` and record the contract in its doc comment (e.g. `/// The caller guarantees the element is an <img>.`).
 
-`checker.any_rule_enabled(&[Rule::A, Rule::B])` exists for a cluster that shares expensive setup (a subtree walk, a built index) before its per-rule checks. Around cheap dispatch it skips nothing: with every rule enabled, the default, the gate is always true.
+A cluster that shares expensive setup (a subtree walk, a built index) belongs in one check function, the way ruff does it: the checker gates the call on `any_rule_enabled(&[Rule::A, Rule::B])` and the function reports each rule through `report_diagnostic_if_enabled`. Add both helpers back to `Checker` and `LintContext` with the first such function. Around cheap dispatch the gate skips nothing: with every rule enabled, the default, it is always true.

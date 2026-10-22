@@ -1,0 +1,15 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+<!-- Django 2.2: tests/staticfiles_tests/test_templatetag_deprecation.py::test_templatetag_deprecated -->
+{% load static %}{% static 'main.js' %}
+
+<!-- The tag already loads `static`, before or after the alias, so the alias is dropped -->
+{% load static %}
+{% load static %}
+
+<!-- Both aliases in one tag -->
+{% load static %}
+
+<!-- Django 2.0: tests/staticfiles_tests/test_templatetags.py::test_template_tag -->
+{% load static %}{% static 'testfile.txt' %}

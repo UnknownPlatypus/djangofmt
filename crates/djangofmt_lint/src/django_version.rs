@@ -13,6 +13,9 @@ pub struct DjangoVersion {
 }
 
 impl DjangoVersion {
+    /// Above every Django release, so it opens every version gate without a bump per release.
+    pub const MAX: Self = Self::new(u8::MAX, u8::MAX);
+
     #[must_use]
     pub const fn new(major: u8, minor: u8) -> Self {
         Self { major, minor }

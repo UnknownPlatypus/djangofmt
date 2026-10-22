@@ -15,9 +15,10 @@ exclude_re = [
   "Display for (FixAvailability|PanicError)>",
   "Debug for RuleSet>",
   # Equivalent: shortcuts whose slow path gives the same result.
-  "(Checker|LintContext)<'a>::any_rule_enabled -> bool with true",
   "is_single_spaced -> bool with false",
   "has_spaced_pipe -> bool with true",
+  "replace match guard .* with true in jinja_tag_name",
+  "replace match guard .* with false in tag_name",
   # Equivalent: the target search skips the comment itself, and an empty range guards nothing.
   "replace \\+ with \\* in siblings_after",
   "replace < with <= in (siblings_after|guarded_ranges)",
