@@ -22,7 +22,7 @@ Create `crates/djangofmt_lint/src/rules/{category}/{rule_name}.rs`.
 
 Every category but `pedantic` runs by default. Put a rule in `pedantic` when it is noisy on real templates and has no safe fix, unless it catches something important. Measure noise with `just ecosystem-check-lint-dev` before deciding.
 
-Pick the category by what the rule catches, the way ruff sorts its `UP` rules and clippy its `msrv` lints: a deprecated tag, filter or library goes in `suspicious`, an older spelling Django still supports in `style`. A minimum Django release is no category: the rule gates on it instead (see 1e).
+Pick the category by what the rule catches, the way ruff sorts its `UP` rules and clippy its `msrv` lints: a deprecated tag, filter or library goes in `suspicious`, a redundant argument or attribute in `complexity`, an older spelling Django still supports in `style`. A minimum Django release is no category: the rule gates on it instead (see 1e).
 
 The file must contain:
 
@@ -156,7 +156,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
-The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share, and single-tag rules `(checker, tag)` from the arm of their tag name in `visit_jinja_tag`, which also sees block openers. Most rules are attribute rules:
+The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share, single-tag rules `(checker, tag)` from the arm of their tag name in `visit_jinja_tag`, which also sees block openers, and `{{ }}` rules `(checker, interpolation)` from `visit_jinja_interpolation`. Most rules are attribute rules:
 
 ```rust
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
@@ -181,7 +181,7 @@ Key points:
 - **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
-- **Keep the per-node path light**: every tag of a name goes through that name's rules, and `djangofmt_syntax::dtl::bits()` runs a regex. Reject on bytes first (`content.contains("static")`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
+- **Keep the per-node path light**: every `{{ }}` of the template goes through each `{{ }}` rule, every tag of a name through that name's rules, and `djangofmt_syntax::dtl::bits()` and `filter_expression()` run regexes. Reject on bytes first (`content.contains("static")`, `expr.contains(':')`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
 
 ### 1e. Version-gated rules
 
@@ -307,13 +307,14 @@ A new rule lands as **one** commit on a branch. Squash review follow-ups into it
 
 ## Reference files
 
-- Reference attribute rule with safe fix (doc layout, `DiagnosticGuard`, `delete_attr_fix`): `crates/djangofmt_lint/src/rules/style/redundant_type_attr.rs`
+- Reference attribute rule with safe fix (doc layout, `DiagnosticGuard`, `delete_attr_fix`): `crates/djangofmt_lint/src/rules/complexity/redundant_type_attr.rs`
 - Reference rule with unsafe fix (`## Fix safety` section, `Fix::unsafe_edit`): `crates/djangofmt_lint/src/rules/suspicious/use_https.rs`
 - Reference rule without fix: `crates/djangofmt_lint/src/rules/correctness/invalid_attr_value.rs`
 - Multi-variant (enum) violation with `match` in `message()`/`help()`: `crates/djangofmt_lint/src/rules/accessibility/missing_title.rs`
 - Full-technique rule (WCAG H63) — multi-variant, per-variant spans, case-insensitive value validation: `crates/djangofmt_lint/src/rules/pedantic/table_header_missing_scope.rs`
 - Jinja-block-shaped rule with fix: `crates/djangofmt_lint/src/rules/correctness/untrimmed_blocktranslate.rs`
 - Version-gated tag rule: `crates/djangofmt_lint/src/rules/suspicious/deprecated_static_library.rs`
+- Version-gated `{{ }}` rule on `filter_expression()`: `crates/djangofmt_lint/src/rules/complexity/redundant_json_script_id.rs`
 - Violation trait: `crates/djangofmt_lint/src/violation.rs`
 - `LintContext` / `DiagnosticGuard`: `crates/djangofmt_lint/src/lint_context.rs`
 - Fix data model (`Edit`, `Fix`, `Applicability`, `FixAvailability`): `crates/djangofmt_lint/src/fix/mod.rs`

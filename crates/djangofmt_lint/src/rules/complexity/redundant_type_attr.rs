@@ -44,7 +44,7 @@ pub struct RedundantTypeAttr {
 
 impl Violation for RedundantTypeAttr {
     const RULE: Rule = Rule::RedundantTypeAttr;
-    const CATEGORY: RuleCategory = RuleCategory::Style;
+    const CATEGORY: RuleCategory = RuleCategory::Complexity;
     const FIX_AVAILABILITY: FixAvailability = FixAvailability::Always;
 
     #[derive_message_formats]
