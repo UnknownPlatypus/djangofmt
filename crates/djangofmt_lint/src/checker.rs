@@ -175,14 +175,27 @@ impl<'a> Checker<'a> {
                                 rules::style::legacy_translation_tag::check_load(self, tag);
                         }
                     }
-                    "trans" | "blocktrans"
+                    "trans"
                         if !foreign_translation_tags
                             && self.is_rule_enabled(Rule::LegacyTranslationTag)
                             && self.targets_django(DjangoVersion::new(3, 1)) =>
                     {
-                        if *name == "trans" {
-                            rules::style::legacy_translation_tag::check_trans(self, tag);
-                        } else {
+                        rules::style::legacy_translation_tag::check_trans(self, tag);
+                    }
+                    "with" => {
+                        if self.is_rule_enabled(Rule::LegacyAsAssignment) {
+                            rules::style::legacy_as_assignment::check_with(self, tag);
+                        }
+                    }
+                    "blocktranslate" | "blocktrans" => {
+                        if self.is_rule_enabled(Rule::LegacyAsAssignment) {
+                            rules::style::legacy_as_assignment::check_blocktranslate(self, tag);
+                        }
+                        if *name == "blocktrans"
+                            && !foreign_translation_tags
+                            && self.is_rule_enabled(Rule::LegacyTranslationTag)
+                            && self.targets_django(DjangoVersion::new(3, 1))
+                        {
                             rules::style::legacy_translation_tag::check_blocktrans(
                                 self,
                                 tag,

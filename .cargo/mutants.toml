@@ -19,6 +19,10 @@ exclude_re = [
   "has_spaced_pipe -> bool with true",
   "replace match guard .* with true in jinja_tag_name",
   "replace match guard .* with false in tag_name",
+  "has_as_bit -> bool with true",
+  "replace == with != in has_as_bit",
+  # Equivalent: a block's closer left in its body reaches no tag rule.
+  "delete match arm \\[rest @\\.\\., .* in inner_items",
   # Equivalent: the target search skips the comment itself, and an empty range guards nothing.
   "replace \\+ with \\* in siblings_after",
   "replace < with <= in (siblings_after|guarded_ranges)",
