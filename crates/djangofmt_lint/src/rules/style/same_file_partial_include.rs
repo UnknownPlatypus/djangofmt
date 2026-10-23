@@ -9,6 +9,7 @@ use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
+use djangofmt_syntax::tokens::Token;
 
 use crate::Checker;
 
@@ -78,7 +79,7 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
     }
 
     // Without a local partialdef, the suffix-matched include necessarily resolves to another file.
-    if !defines_partial(checker.context().source(), fragment) {
+    if !defines_partial(checker, fragment) {
         return;
     }
 
@@ -132,16 +133,9 @@ fn parse_partial_include<'s>(tag: &JinjaTag<'s>) -> Option<(&'s str, &'s str)> {
 }
 
 /// Whether the source contains a `{% partialdef <name> %}` opening tag.
-fn defines_partial(source: &str, name: &str) -> bool {
-    // Each `{%`-delimited chunk that opens with `partialdef <name>` as whole tokens. Splitting on
-    // `{%` rejects `endpartialdef` for free (its chunk starts with `end`).
-    source.split("{%").skip(1).any(|tag| {
-        tag.trim_start_matches(['-', '+'])
-            .trim_start()
-            .strip_prefix("partialdef")
-            .filter(|rest| rest.starts_with(char::is_whitespace))
-            .map(str::trim_start)
-            .and_then(|rest| rest.strip_prefix(name))
-            .is_some_and(|rest| rest.starts_with(|c: char| c.is_whitespace() || c == '%'))
+fn defines_partial(checker: &Checker<'_>, name: &str) -> bool {
+    checker.tokens().iter().any(|token| {
+        matches!(token, Token::Tag { tag, name: "partialdef" }
+            if tag.content.trim_start_matches(['-', '+']).split_whitespace().nth(1) == Some(name))
     })
 }

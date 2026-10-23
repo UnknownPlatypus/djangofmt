@@ -244,7 +244,7 @@ mod tests {
             codes(
                 "<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
             ),
-            ["invalid-attr-value", "invalid-ignore-comment"]
+            ["invalid-ignore-comment", "invalid-attr-value"]
         );
     }
 
@@ -304,7 +304,7 @@ mod tests {
         // sibling all keep their diagnostic; the first two comments are unused on top.
         assert_eq!(
             codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
         assert_eq!(
             codes("<form method=\"yes\"></form>\n{# djangofmt: ignore[invalid-attr-value] #}"),
@@ -331,7 +331,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\nLegacy: <form method=\"yes\"></form>"
             ),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
         // Stacked ignore comments all reach the same target.
         assert_eq!(
@@ -379,7 +379,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{% if x %}<form method=\"yes\"></form>{% endif %}"
             ),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
     }
 
@@ -404,7 +404,7 @@ mod tests {
     fn attribute_position_comments_never_suppress() {
         assert_eq!(
             codes("<form {# djangofmt: ignore[invalid-attr-value] #} method=\"yes\"></form>"),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
     }
 }

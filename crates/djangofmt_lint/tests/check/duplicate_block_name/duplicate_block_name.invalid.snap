@@ -78,5 +78,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  28 │ {% block attrs %}{% endblock %}
     ·          ──┬──
     ·            ╰── here
+ 29 │ <div title="{% block v %}{% endblock %}"></div>
     ╰────
   help: Rename or remove one of the `{% block attrs %}` tags
+
+  × Duplicate `{% block %}` name `v`
+    ╭─[tests/check/duplicate_block_name/duplicate_block_name.invalid.html:30:10]
+ 29 │ <div title="{% block v %}{% endblock %}"></div>
+ 30 │ {% block v %}{% endblock %}
+    ·          ┬
+    ·          ╰── here
+    ╰────
+  help: Rename or remove one of the `{% block v %}` tags

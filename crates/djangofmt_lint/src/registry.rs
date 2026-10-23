@@ -81,7 +81,8 @@ impl RuleCategory {
 /// # Adding a new rule
 /// 1. Create the violation struct in `rules/` implementing `Violation`
 /// 2. Add entry here: `(RuleName, ViolationStruct)`
-/// 3. Wire up the check in the appropriate `visit_*` method in `checker.rs`
+/// 3. Wire up the check in the appropriate `visit_*` method in `checker.rs`, or for a rule
+///    reading Django's tokens in `check_tokens`, and list it in `Rule::source`
 ///
 /// The compiler will error if:
 /// - The violation struct doesn't exist
@@ -269,4 +270,28 @@ define_rules! {
     (EndblockLabel, rules::style::endblock_label::EndblockLabel),
     (DeprecatedStaticLibrary, rules::suspicious::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::complexity::redundant_json_script_id::RedundantJsonScriptId),
+}
+
+/// The representation of a template a rule reads, which picks the pass that runs it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LintSource {
+    /// The `markup_fmt` tree: elements, attributes and the blocks the parser paired.
+    Ast,
+    /// Django's token stream: every `{% %}` and `{{ }}`, inside text too.
+    Tokens,
+}
+
+impl Rule {
+    /// Where the rule reads the template: a token rule runs from `Checker::check_tokens`,
+    /// an AST rule from the `visit_*` hook of its node.
+    #[must_use]
+    pub const fn source(self) -> LintSource {
+        match self {
+            Self::DuplicateBlockName
+            | Self::SameFilePartialInclude
+            | Self::DeprecatedStaticLibrary
+            | Self::RedundantJsonScriptId => LintSource::Tokens,
+            _ => LintSource::Ast,
+        }
+    }
 }

@@ -42,7 +42,8 @@ fn check_invalid() {
         let file_diagnostics = collect_diagnostics(path, &input);
         assert!(
             !file_diagnostics.is_empty(),
-            "Expected diagnostics, got none"
+            "Expected diagnostics, got none for {}",
+            path.display()
         );
         let output = render_check_output(path, input, file_diagnostics);
         build_settings(path).bind(|| {

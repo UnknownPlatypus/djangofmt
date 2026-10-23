@@ -30,7 +30,7 @@ This is a Rust workspace with eight crates in `crates/`. `djangofmt_syntax` sits
 
 **`djangofmt_formatter`** — the formatting engine: `format_text` and `FormatterConfig`, driving `markup_fmt` with `malva` and `dprint-plugin-json` for embedded CSS and JSON. Also owns `panic.rs`, the panic isolation it needs around those embedded formatters and which the CLI reuses per file.
 
-**`djangofmt_lint`** — the linting library. `checker.rs` implements a visitor over the `markup_fmt` AST and runs rules from `rules/`. Each rule implements the `Violation` trait. The `Checker` struct collects violations with source offsets.
+**`djangofmt_lint`** — the linting library. `checker.rs` runs the rules from `rules/` in two passes, each rule declaring which through `Rule::source()` as ruff does: AST rules from a visitor over the `markup_fmt` tree, token rules from `check_tokens` over Django's token stream (`djangofmt_syntax::tokens`), which holds the `{% %}` and `{{ }}` the HTML parser keeps as text. Each rule implements the `Violation` trait. The `Checker` struct collects violations with source offsets.
 
 **`djangofmt_wasm`** — WebAssembly bindings for the browser playground, built with `wasm-pack`.
 
