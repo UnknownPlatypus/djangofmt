@@ -270,6 +270,7 @@ define_rules! {
     (EndblockLabel, rules::style::endblock_label::EndblockLabel),
     (DeprecatedStaticLibrary, rules::suspicious::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::complexity::redundant_json_script_id::RedundantJsonScriptId),
+    (LegacyTranslationTag, rules::style::legacy_translation_tag::LegacyTranslationTag),
 }
 
 /// The representation of a template a rule reads, which picks the pass that runs it.
@@ -290,7 +291,8 @@ impl Rule {
             Self::DuplicateBlockName
             | Self::SameFilePartialInclude
             | Self::DeprecatedStaticLibrary
-            | Self::RedundantJsonScriptId => LintSource::Tokens,
+            | Self::RedundantJsonScriptId
+            | Self::LegacyTranslationTag => LintSource::Tokens,
             _ => LintSource::Ast,
         }
     }

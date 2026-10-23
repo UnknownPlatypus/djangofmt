@@ -1,0 +1,61 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Legacy `{% trans %}` tag name
+   ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:3:19]
+ 2 │ <!-- Django: tests/template_tests/syntax_tests/i18n/test_translate.py::i18n35 -->
+ 3 │ {% load i18n %}{% trans "Page not found" as page_not_found %}{{ page_not_found }}
+   ·                   ──┬──
+   ·                     ╰── here
+ 4 │ 
+   ╰────
+  help: Use `{% translate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+   ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:7:19]
+ 6 │ <!-- Django: tests/template_tests/syntax_tests/i18n/test_blocktranslate.py::i18n26 -->
+ 7 │ {% load i18n %}{% blocktrans with extra_field=myextra_field count counter=number %}singular {{ extra_field }}{% plural %}plural{% endblocktrans %}
+   ·                   ─────┬────
+   ·                        ╰── here
+ 8 │ 
+   ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% trans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:10:24]
+  9 │ <!-- Django reads the tags in attribute values -->
+ 10 │ <input placeholder="{% trans 'Search' %}">
+    ·                        ──┬──
+    ·                          ╰── here
+ 11 │ 
+    ╰────
+  help: Use `{% translate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:13:9]
+ 12 │ <!-- A pair split across two texts -->
+ 13 │ <!-- {% blocktrans %} -->Hello<!-- {% endblocktrans %} -->
+    ·         ─────┬────
+    ·              ╰── here
+ 14 │ 
+    ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% blocktrans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:16:9]
+ 15 │ <!-- The tag names a load imports from `i18n` -->
+ 16 │ {% load blocktrans trans from i18n %}
+    ·         ─────┬────
+    ·              ╰── here
+    ╰────
+  help: Use `{% blocktranslate %}`
+
+  × Legacy `{% trans %}` tag name
+    ╭─[tests/check/legacy_translation_tag/legacy_translation_tag.invalid.html:16:20]
+ 15 │ <!-- The tag names a load imports from `i18n` -->
+ 16 │ {% load blocktrans trans from i18n %}
+    ·                    ──┬──
+    ·                      ╰── here
+    ╰────
+  help: Use `{% translate %}`
