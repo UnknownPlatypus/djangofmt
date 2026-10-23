@@ -1,3 +1,4 @@
+pub mod deprecated_ifequal_tag;
 pub mod deprecated_ignore;
 pub mod deprecated_static_library;
 pub mod django_static_url;
