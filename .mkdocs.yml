@@ -90,6 +90,7 @@ nav:
       - rules.md
   - Settings: settings.md
   - Editor integration: editor-integration.md
+  - Coming from djade: djade.md
   - Project:
       - benchmarks.md
       - contributing.md
