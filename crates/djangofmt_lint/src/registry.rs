@@ -273,6 +273,7 @@ define_rules! {
     (LegacyTranslationTag, rules::style::legacy_translation_tag::LegacyTranslationTag),
     (LegacyAsAssignment, rules::style::legacy_as_assignment::LegacyAsAssignment<'static>),
     (DeprecatedIfequalTag, rules::suspicious::deprecated_ifequal_tag::DeprecatedIfequalTag),
+    (DeprecatedLengthIsFilter, rules::suspicious::deprecated_length_is_filter::DeprecatedLengthIsFilter),
 }
 
 /// The representation of a template a rule reads, which picks the pass that runs it.
@@ -296,7 +297,8 @@ impl Rule {
             | Self::RedundantJsonScriptId
             | Self::LegacyTranslationTag
             | Self::LegacyAsAssignment
-            | Self::DeprecatedIfequalTag => LintSource::Tokens,
+            | Self::DeprecatedIfequalTag
+            | Self::DeprecatedLengthIsFilter => LintSource::Tokens,
             _ => LintSource::Ast,
         }
     }

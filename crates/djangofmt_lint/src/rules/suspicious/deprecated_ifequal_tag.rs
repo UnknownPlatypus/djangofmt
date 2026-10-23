@@ -6,6 +6,7 @@ use markup_fmt::ast::JinjaTag;
 use crate::Checker;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
+use crate::rules::helpers::IF_OPERATORS;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
@@ -86,11 +87,6 @@ impl Violation for DeprecatedIfequalTag {
         Some("Replace with `{% if %}`")
     }
 }
-
-/// The bits `{% if %}` reads as operators rather than operands.
-const IF_OPERATORS: [&str; 11] = [
-    "and", "or", "not", "in", "is", "==", "!=", "<", ">", "<=", ">=",
-];
 
 /// The caller guarantees an `ifequal` or `ifnotequal` opener and the closer the token stream
 /// pairs it with, wherever the HTML parser put either.

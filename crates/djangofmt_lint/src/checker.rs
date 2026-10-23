@@ -189,6 +189,12 @@ impl<'a> Checker<'a> {
                     {
                         rules::suspicious::deprecated_ifequal_tag::check(self, tag, closer);
                     }
+                    "if" | "elif"
+                        if self.is_rule_enabled(Rule::DeprecatedLengthIsFilter)
+                            && self.targets_django(DjangoVersion::new(4, 2)) =>
+                    {
+                        rules::suspicious::deprecated_length_is_filter::check(self, tag);
+                    }
                     "with" => {
                         if self.is_rule_enabled(Rule::LegacyAsAssignment) {
                             rules::style::legacy_as_assignment::check_with(self, tag);

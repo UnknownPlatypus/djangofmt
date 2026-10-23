@@ -1,0 +1,53 @@
+---
+source: crates/djangofmt_lint/tests/check/main.rs
+---
+
+  × Deprecated `length_is` filter
+   ╭─[tests/check/deprecated_length_is_filter/deprecated_length_is_filter.invalid.html:2:11]
+ 1 │ <!-- Django: tests/template_tests/filter_tests/test_length_is.py::length_is08 -->
+ 2 │ {% if "X"|length_is:1 %}Length is 1{% else %}Length not 1{% endif %}
+   ·           ─────┬─────
+   ·                ╰── here
+ 3 │ 
+   ╰────
+  help: Compare `length` with `==` instead
+
+  × Deprecated `length_is` filter
+   ╭─[tests/check/deprecated_length_is_filter/deprecated_length_is_filter.invalid.html:5:17]
+ 4 │ <!-- Django: tests/template_tests/filter_tests/test_length_is.py::length_is01 — a quoted integer loses its quotes -->
+ 5 │ {% if some_list|length_is:"4" %}Four{% endif %}
+   ·                 ──────┬──────
+   ·                       ╰── here
+ 6 │ 
+   ╰────
+  help: Compare `length` with `==` instead
+
+  × Deprecated `length_is` filter
+   ╭─[tests/check/deprecated_length_is_filter/deprecated_length_is_filter.invalid.html:8:27]
+ 7 │ <!-- A variable argument, in `elif` -->
+ 8 │ {% if eggs %}{% elif eggs|length_is:n %}{% endif %}
+   ·                           ─────┬─────
+   ·                                ╰── here
+ 9 │ 
+   ╰────
+  help: Compare `length` with `==` instead
+
+  × Deprecated `length_is` filter
+    ╭─[tests/check/deprecated_length_is_filter/deprecated_length_is_filter.invalid.html:11:23]
+ 10 │ <!-- The filters before `length_is` stay in the chain -->
+ 11 │ {% if eggs|slice:":2"|length_is:2 %}{% endif %}
+    ·                       ─────┬─────
+    ·                            ╰── here
+ 12 │ 
+    ╰────
+  help: Compare `length` with `==` instead
+
+  × Deprecated `length_is` filter
+    ╭─[tests/check/deprecated_length_is_filter/deprecated_length_is_filter.invalid.html:15:31]
+ 14 │ <script>
+ 15 │     const single = {% if eggs|length_is:1 %}true{% else %}false{% endif %};
+    ·                               ─────┬─────
+    ·                                    ╰── here
+ 16 │ </script>
+    ╰────
+  help: Compare `length` with `==` instead
