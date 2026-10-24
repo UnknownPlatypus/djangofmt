@@ -19,10 +19,10 @@ use crate::registry::{Rule, RuleCategory};
 const CATEGORY_PREFIX: &str = "category:";
 
 /// The group name that selects every rule (`category:all`).
-pub(crate) const ALL_GROUP: &str = "all";
+pub const ALL_GROUP: &str = "all";
 
 /// The group name that selects every category enabled by default (`category:default`).
-pub(crate) const DEFAULT_GROUP: &str = "default";
+pub const DEFAULT_GROUP: &str = "default";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RuleSelector {

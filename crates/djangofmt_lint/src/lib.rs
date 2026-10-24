@@ -15,14 +15,14 @@
 //! ```
 
 mod checker;
-pub mod django_version;
-pub mod fix;
-pub mod lint_context;
-pub mod registry;
-pub mod rule_selector;
-pub mod rule_set;
+mod django_version;
+mod fix;
+mod lint_context;
+mod registry;
+mod rule_selector;
+mod rule_set;
 mod rules;
-pub mod settings;
+mod settings;
 mod suppression;
 mod violation;
 
@@ -34,10 +34,10 @@ pub use fix::apply::{
 };
 pub use fix::{Applicability, Edit, Fix, FixAvailability, IsolationLevel};
 pub use lint_context::{DiagnosticGuard, LintContext};
-pub use registry::{Rule, RuleCategory, RuleGroup};
+pub use registry::{Rule, RuleCategory, RuleGroup, RuleIter};
 pub use rule_selector::{RuleSelector, SelectionWarning, SelectorParseError};
-pub use rule_set::RuleSet;
-pub use settings::{LintConfiguration, Settings};
+pub use rule_set::{RuleSet, RuleSetIterator};
+pub use settings::{LintConfiguration, Settings, endblock_label, unsorted_tailwind_classes};
 pub use violation::{Violation, ViolationMetadata};
 
 use std::borrow::Cow;
