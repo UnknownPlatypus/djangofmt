@@ -1799,9 +1799,9 @@ dependencies = [
 
 [[package]]
 name = "tiny_pretty"
-version = "0.4.2"
+version = "0.4.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c6f118a569adc26e8a9a377130f181a461770225e588c73a00c8636b8680b6c"
+checksum = "58b2d5989bcee0f42e4efffdd6280defe2d0ea91ebbea29c7615412855ef75fa"
 dependencies = [
  "unicode-width",
 ]

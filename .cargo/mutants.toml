@@ -28,8 +28,8 @@ exclude_re = [
   "replace \\* with / in <impl Iterator for RuleSetIterator>::next",
 ]
 all_features = true
-# Mutants often leave unused code behind, so CI's `CARGO_BUILD_WARNINGS=deny` would make them unviable.
-additional_cargo_args = ["--config", "build.warnings='warn'"]
+# Mutants often leave unused code behind, which `warnings = "deny"` would turn into unviable builds.
+cap_lints = true
 additional_cargo_test_args = ["--lib", "--bins", "--tests"]
 gitignore = true
 profile = "mutants"
