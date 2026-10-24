@@ -13,7 +13,7 @@ impl LineLength {
 
 impl Default for LineLength {
     fn default() -> Self {
-        Self(NonZeroU16::new(120).expect("120 is not zero"))
+        Self(const { NonZeroU16::new(120).expect("120 is not zero") })
     }
 }
 
@@ -86,7 +86,7 @@ impl IndentWidth {
 
 impl Default for IndentWidth {
     fn default() -> Self {
-        Self(NonZeroU8::new(4).expect("4 is not zero"))
+        Self(const { NonZeroU8::new(4).expect("4 is not zero") })
     }
 }
 
