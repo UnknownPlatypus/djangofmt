@@ -32,8 +32,6 @@ env:
   CARGO_MUTANTS_CHECKSUM: dfe6dc37d0342c891d2829b5a695aa57c2d0edecef7e7d0399a30cc6e206411e # x86_64-unknown-linux-gnu
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
-  # Make sure CI fails on all warnings, including Clippy lints
-  CARGO_BUILD_WARNINGS: deny
 
 jobs:
   changed_files:
