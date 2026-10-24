@@ -145,15 +145,6 @@
       datasourceTemplate: "github-releases",
       extractVersionTemplate: "^v(?<version>.*)$",
     },
-    // wasm-pack version used in wasm-pack-action
-    {
-      customType: "regex",
-      managerFilePatterns: ["/.github/workflows/publish-playground-and-docs\\.yml$/"],
-      matchStrings: ["version: (?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
-      depNameTemplate: "wasm-pack",
-      packageNameTemplate: "rustwasm/wasm-pack",
-      datasourceTemplate: "github-releases",
-    },
     // Official dprint plugins (plugins.dprint.dev/<name>-<version>.wasm)
     {
       customType: "regex",
