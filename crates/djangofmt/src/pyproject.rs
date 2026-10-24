@@ -345,7 +345,7 @@ mod tests {
     fn test_load_options_from_pyproject_toml() {
         let project = Project::new().file(
             "pyproject.toml",
-            r"
+            "
             [tool.djangofmt]
             line-length=200
             indent-width=4
@@ -372,7 +372,7 @@ mod tests {
     fn test_load_options_from_incomplete_pyproject_toml() {
         let project = Project::new().file(
             "pyproject.toml",
-            r"
+            "
             [tool.djangofmt]
             line-length=200
             ",
@@ -452,7 +452,7 @@ mod tests {
 
     #[test]
     fn test_load_preserve_unquoted_attrs() {
-        let content = r"
+        let content = "
 [tool.djangofmt]
 preserve-unquoted-attrs = true
 ";
@@ -468,7 +468,7 @@ preserve-unquoted-attrs = true
 
     #[test]
     fn test_load_fix_flags() {
-        let content = r"
+        let content = "
 [tool.djangofmt.lint]
 fix = true
 unsafe-fixes = true
