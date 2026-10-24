@@ -10,8 +10,8 @@ publish = false
 [dependencies]
 anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
-djangofmt = { path = "../djangofmt", default-features = false }
-djangofmt_lint = { path = "../djangofmt_lint" }
+djangofmt = { workspace = true }
+djangofmt_lint = { workspace = true }
 strum = { workspace = true, features = ["derive"] }
 
 [lints]

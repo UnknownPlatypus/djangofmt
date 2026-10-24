@@ -7,8 +7,10 @@ allow = ["Apache-2.0", "ISC", "MIT", "Unicode-3.0", "Zlib"]
 [bans]
 wildcards = "deny"
 allow-wildcard-paths = true
+workspace-dependencies = { duplicates = "deny", include-path-dependencies = true, unused = "deny" }
 
 [sources]
+required-git-spec = "rev"
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
