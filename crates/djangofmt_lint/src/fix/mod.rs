@@ -63,7 +63,7 @@ pub enum IsolationLevel {
 /// `range` is a [`miette::SourceSpan`] for codebase consistency.
 ///
 /// `content` distinguishes pure deletion ([`None`]) from non-empty
-/// replacement ([`Some(...)`]); the [`Cow`] keeps static replacement content
+/// replacement ([`Some`]); the [`Cow`] keeps static replacement content
 /// (the common case) allocation-free. Empty replacement content is
 /// rejected by [`Edit::replacement`] and [`Edit::insertion`] via a
 /// `debug_assert!`; use [`Edit::deletion`] for the empty case.

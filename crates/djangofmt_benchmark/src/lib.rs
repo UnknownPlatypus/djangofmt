@@ -1,3 +1,5 @@
+//! Real-world templates and the allocator shared by the divan micro-benchmarks.
+
 use djangofmt_syntax::Profile;
 use std::fmt;
 

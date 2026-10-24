@@ -263,7 +263,7 @@ pub struct LintOutcome {
     pub applied_count: usize,
     /// Per-rule applied summaries, for `--show-fixes`.
     pub applied_by_rule: FxHashMap<&'static str, RuleFixSummary>,
-    /// Whether only the leading comment was linted, see [`parse_or_quarantine`].
+    /// Whether only the leading comment was linted, see `parse_or_quarantine`.
     pub quarantined: bool,
 }
 

@@ -7,12 +7,12 @@ use tracing_tree::time::Uptime;
 
 #[derive(Debug, Default, PartialOrd, Ord, PartialEq, Eq, Copy, Clone)]
 pub enum LogLevel {
-    /// No output ([`log::LevelFilter::Off`]).
+    /// No output ([`LevelFilter::OFF`]).
     Quiet,
-    /// All user-facing output ([`log::LevelFilter::Info`]).
+    /// All user-facing output ([`LevelFilter::INFO`]).
     #[default]
     Default,
-    /// All outputs ([`log::LevelFilter::Debug`]).
+    /// All outputs ([`LevelFilter::DEBUG`]).
     Verbose,
 }
 

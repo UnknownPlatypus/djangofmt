@@ -155,6 +155,9 @@ unused_lifetimes = "deny"
 unused_qualifications = "deny"
 warnings = "deny"
 
+[workspace.lints.rustdoc]
+missing_crate_level_docs = "deny"
+
 [profile.dev]
 # Faster builds, backtraces still work.
 debug = "line-tables-only"
