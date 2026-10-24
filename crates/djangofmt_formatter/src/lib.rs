@@ -5,6 +5,7 @@ pub mod line_width;
 pub mod panic;
 
 use std::borrow::Cow;
+use std::fmt::Debug;
 use std::panic::UnwindSafe;
 use std::path::{Path, PathBuf};
 
@@ -182,48 +183,30 @@ pub fn format_text(
                     let fake_filename = PathBuf::from(format!("djangofmt_fmt_stdin.{}", hints.ext));
                     let mut json_config = config.json.clone();
                     json_config.line_width = u32::try_from(hints.print_width).unwrap_or(u32::MAX);
-                    Ok(format_or_fallback(code, "JSON", path, || {
-                        match dprint_plugin_json::format_text(&fake_filename, code, &json_config) {
-                            Ok(Some(formatted)) => formatted.into(),
-                            Ok(None) => code.into(),
-                            Err(error) => {
-                                debug!(
-                                    "Failed to format JSON, falling back to original code. Error: {:?}",
-                                    error
-                                );
-                                code.into()
-                            }
-                        }
-                    }))
+                    Ok(format_or_fallback("JSON", path, || {
+                        dprint_plugin_json::format_text(&fake_filename, code, &json_config)
+                            .map(|formatted| formatted.map_or(Cow::Borrowed(code), Cow::from))
+                    })
+                    .unwrap_or(Cow::Borrowed(code)))
                 }
                 "css" | "scss" | "sass" | "less" => {
                     let mut malva_config = config.malva.clone();
                     malva_config.layout.print_width = hints.print_width;
 
-                    let formatted_css = format_or_fallback(code, "CSS", path, || {
-                        malva::format_text(code, malva::Syntax::Css, &malva_config).map_or_else(
-                            |error| {
-                                debug!(
-                                    "Failed to format CSS, falling back to original code. Error: {:?}",
-                                    error
-                                );
-                                code.into()
-                            },
-                            Cow::from,
-                        )
-                    });
-
                     // malva can return nothing at all: `single_line_top_level_declarations` drops
                     // comments, and an unterminated `/*` swallows the sheet. Keep the source.
-                    if formatted_css.trim().is_empty() {
+                    let Some(formatted_css) = format_or_fallback("CSS", path, || {
+                        malva::format_text(code, malva::Syntax::Css, &malva_config)
+                    })
+                    .filter(|css| !css.trim().is_empty()) else {
                         return Ok(code.into());
-                    }
+                    };
 
                     // Workaround a bug in malva -> https://github.com/g-plane/malva/issues/44
                     // Tries to keep on formatting style attr on a single line like expected with
                     // single_line_top_level_declarations = true
                     if code.contains('{') {
-                        Ok(formatted_css)
+                        Ok(formatted_css.into())
                     } else {
                         Ok(formatted_css
                             .lines()
@@ -306,25 +289,31 @@ fn json_has_raw_control_char(code: &str) -> bool {
     false
 }
 
-/// Run an embedded formatter, falling back to the original `code` if it panics.
-fn format_or_fallback<'a>(
-    code: &'a str,
+/// Run an embedded formatter, returning `None` when it fails or panics so the caller keeps its source.
+fn format_or_fallback<T, E: Debug>(
     language: &str,
     path: Option<&Path>,
-    format: impl FnOnce() -> Cow<'a, str> + UnwindSafe,
-) -> Cow<'a, str> {
-    catch_unwind(format).unwrap_or_else(|err| {
-        let location = err
-            .location
-            .map_or_else(String::new, |location| format!(" at {location}"));
-        warn!(
-            "{}: the embedded {language} formatter panicked{location} ({}), leaving that snippet unformatted. Please report it at {}/issues",
-            path.unwrap_or_else(|| Path::new("<source>")).display(),
-            err.payload,
-            env!("CARGO_PKG_REPOSITORY"),
-        );
-        Cow::Borrowed(code)
-    })
+    format: impl FnOnce() -> Result<T, E> + UnwindSafe,
+) -> Option<T> {
+    match catch_unwind(format) {
+        Ok(Ok(formatted)) => Some(formatted),
+        Ok(Err(error)) => {
+            debug!("Failed to format {language}, falling back to original code. Error: {error:?}");
+            None
+        }
+        Err(err) => {
+            let location = err
+                .location
+                .map_or_else(String::new, |location| format!(" at {location}"));
+            warn!(
+                "{}: the embedded {language} formatter panicked{location} ({}), leaving that snippet unformatted. Please report it at {}/issues",
+                path.unwrap_or_else(|| Path::new("<source>")).display(),
+                err.payload,
+                env!("CARGO_PKG_REPOSITORY"),
+            );
+            None
+        }
+    }
 }
 
 #[cfg(test)]
@@ -333,11 +322,10 @@ mod tests {
     use rstest::rstest;
 
     #[test]
-    fn format_or_fallback_returns_original_code_on_panic() {
-        let code = "color: red";
+    fn format_or_fallback_returns_none_on_panic() {
         assert_eq!(
-            format_or_fallback(code, "CSS", None, || panic!("boom")),
-            code
+            format_or_fallback::<(), ()>("CSS", None, || panic!("boom")),
+            None
         );
     }
 
