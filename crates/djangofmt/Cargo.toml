@@ -23,7 +23,7 @@ doctest = false
 clap = { workspace = true }
 clap_complete_command = { workspace = true }
 djangofmt_formatter = { workspace = true, features = ["clap"] }
-djangofmt_lint = { path = "../djangofmt_lint" }
+djangofmt_lint = { workspace = true }
 djangofmt_macros = { workspace = true }
 djangofmt_syntax = { workspace = true, features = ["clap"] }
 editorconfig-parser = { workspace = true }

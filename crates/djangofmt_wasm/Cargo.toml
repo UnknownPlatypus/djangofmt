@@ -18,7 +18,7 @@ doctest = false
 
 [dependencies]
 djangofmt_formatter = { workspace = true }
-djangofmt_lint = { path = "../djangofmt_lint" }
+djangofmt_lint = { workspace = true }
 djangofmt_syntax = { workspace = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
