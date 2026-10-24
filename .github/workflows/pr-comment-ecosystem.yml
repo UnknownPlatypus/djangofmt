@@ -13,9 +13,10 @@ on: # zizmor: ignore[dangerous-triggers] # We mitigate potential issues in `Skip
         description: The CI workflow that triggers the workflow run
         required: true
 
-# Cancel running jobs for the same workflow and branch.
+# `github.ref` is always `main` on `workflow_run`, so key on the triggering run's source branch
+# (a newer push to a PR supersedes its pending comment); `workflow_dispatch` has no such payload.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name || github.repository }}-${{ github.event.workflow_run.head_branch || github.run_id }}
   cancel-in-progress: true
 
 jobs:
