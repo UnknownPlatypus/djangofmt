@@ -69,8 +69,13 @@ tracing-tree = { version = "0.4.1" }
 tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.122" }
 
-# Every restriction lint is on; the allows below are deliberate opt-outs, so new ones surface on toolchain bumps.
 [workspace.lints.clippy]
+nursery = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+restriction = { level = "deny", priority = -1 }
+wildcard_dependencies = "deny"
+
+# Deliberate opt-outs; new restriction lints surface on toolchain bumps.
 absolute_paths = "allow"
 arbitrary_source_item_ordering = "allow"
 arithmetic_side_effects = "allow"
@@ -104,11 +109,9 @@ mod_module_files = "allow"
 module_name_repetitions = "allow"
 needless_raw_strings = "allow"
 non_ascii_literal = "allow"
-nursery = { level = "deny", priority = -1 }
 panic = "allow"
 partial_pub_fields = "allow"
 pattern_type_mismatch = "allow"
-pedantic = { level = "deny", priority = -1 }
 pub_use = "allow"
 pub_with_shorthand = "allow"
 question_mark_used = "allow"
@@ -116,7 +119,6 @@ redundant_test_prefix = "allow"
 ref_patterns = "allow"
 renamed_function_params = "allow"
 rest_pattern_accessible_field = "allow"
-restriction = { level = "deny", priority = -1 }
 return_and_then = "allow"
 semicolon_outside_block = "allow"
 shadow_reuse = "allow"
@@ -133,7 +135,6 @@ unreachable = "allow"
 unseparated_literal_suffix = "allow"
 unused_trait_names = "allow"
 use_debug = "allow"
-wildcard_dependencies = "deny"
 wildcard_enum_match_arm = "allow"
 
 [workspace.lints.rust]
