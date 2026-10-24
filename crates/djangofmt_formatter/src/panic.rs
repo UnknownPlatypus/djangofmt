@@ -1,5 +1,9 @@
 //! Run a closure and turn its panic into an error value, keeping the default hook from printing.
 //! The formatter needs this to survive a panic in an embedded formatter; the CLI reuses it per file.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "this module is the only panic boundary"
+)]
 use std::any::Any;
 use std::backtrace::BacktraceStatus;
 use std::cell::Cell;
