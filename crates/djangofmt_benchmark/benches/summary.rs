@@ -1,4 +1,6 @@
 use djangofmt::commands::format::{FormatResult, build_summary};
+// Links the lib for its jemalloc global allocator, which no other import here pulls in.
+use djangofmt_benchmark as _;
 
 fn main() {
     divan::main();
