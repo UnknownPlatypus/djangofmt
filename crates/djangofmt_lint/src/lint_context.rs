@@ -20,7 +20,7 @@ use djangofmt_syntax::span;
 /// A type for collecting diagnostics in a given file.
 ///
 /// [`LintContext::report_diagnostic`] can be used to obtain a [`DiagnosticGuard`], which will push
-/// a [`Violation`] to the contained [`Diagnostic`] collection on `Drop`.
+/// a [`Violation`] to the contained [`LintDiagnostic`] collection on `Drop`.
 pub struct LintContext<'a> {
     diagnostics: RefCell<Vec<LintDiagnostic>>,
     source: &'a str,

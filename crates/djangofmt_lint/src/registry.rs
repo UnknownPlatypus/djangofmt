@@ -76,7 +76,7 @@ impl RuleCategory {
 /// # What this macro generates
 /// - `Rule` enum with human-friendly kebab-case names (e.g., `invalid-attr-value`)
 /// - `Rule::category()` method returning the functional category (from `Violation::CATEGORY`)
-/// - Compile-time verification that each violation implements `Violation` with matching `CODE`
+/// - Compile-time verification that each violation implements `Violation` with matching `RULE`
 ///
 /// # Adding a new rule
 /// 1. Create the violation struct in `rules/` implementing `Violation`
@@ -86,7 +86,7 @@ impl RuleCategory {
 /// The compiler will error if:
 /// - The violation struct doesn't exist
 /// - The violation doesn't implement `Violation`
-/// - The violation's `CODE` doesn't match the rule name
+/// - The violation's `RULE` doesn't match the rule name
 macro_rules!
 define_rules {
     (
