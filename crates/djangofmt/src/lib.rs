@@ -59,8 +59,8 @@ pub fn install_report_hook() {
     struct SharedHandler;
 
     impl ReportHandler for SharedHandler {
-        fn debug(&self, diagnostic: &dyn Diagnostic, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-            HANDLER.debug(diagnostic, f)
+        fn debug(&self, error: &dyn Diagnostic, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            HANDLER.debug(error, f)
         }
     }
 
