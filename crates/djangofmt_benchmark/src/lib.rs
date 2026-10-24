@@ -21,9 +21,10 @@ mod allocator {
     #[global_allocator]
     static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
+    // jemalloc reads this symbol as a `const char *`, so it must be a thin pointer, not a `&[u8]`.
     #[unsafe(export_name = "_rjem_malloc_conf")]
-    pub static MALLOC_CONF: &[u8] =
-        b"dirty_decay_ms:-1,muzzy_decay_ms:-1,tcache_gc_incr_bytes:1099511627776\0";
+    pub static MALLOC_CONF: &u8 =
+        &b"dirty_decay_ms:-1,muzzy_decay_ms:-1,tcache_gc_incr_bytes:1099511627776\0"[0];
 }
 
 pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {

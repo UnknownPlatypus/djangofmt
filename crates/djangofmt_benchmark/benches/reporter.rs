@@ -9,6 +9,8 @@ use djangofmt_syntax::graphical_handler;
 use miette::GraphicalTheme;
 
 fn main() {
+    // `Report::new` runs the hook per diagnostic, so measure the one the CLI installs.
+    djangofmt::install_report_hook();
     divan::main();
 }
 

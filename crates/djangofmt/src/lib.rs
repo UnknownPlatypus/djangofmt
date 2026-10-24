@@ -1,7 +1,10 @@
+use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+use std::sync::LazyLock;
 
 use clap::CommandFactory;
+use miette::{Diagnostic, MietteHandler, MietteHandlerOpts, ReportHandler};
 use tracing::warn;
 
 use crate::args::Args;
@@ -39,6 +42,29 @@ impl From<ExitStatus> for ExitCode {
             ExitStatus::Error => Self::from(2),
         }
     }
+}
+
+/// Install the `miette` hook that renders every `Report` the CLI prints.
+pub fn install_report_hook() {
+    // Built once: `miette` calls the hook per `Report`, and each build probes the terminal.
+    static HANDLER: LazyLock<MietteHandler> = LazyLock::new(|| {
+        // Match the wrap policy of `djangofmt_syntax::graphical_handler`, keeping URLs unbroken.
+        MietteHandlerOpts::new()
+            .word_separator(textwrap::WordSeparator::AsciiSpace)
+            .word_splitter(textwrap::WordSplitter::NoHyphenation)
+            .break_words(false)
+            .build()
+    });
+
+    struct SharedHandler;
+
+    impl ReportHandler for SharedHandler {
+        fn debug(&self, diagnostic: &dyn Diagnostic, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            HANDLER.debug(diagnostic, f)
+        }
+    }
+
+    let _ = miette::set_hook(Box::new(|_| Box::new(SharedHandler)));
 }
 
 /// Main entrypoint to any command.
