@@ -18,7 +18,7 @@ pub struct GlobalConfigArgs {
 
 impl GlobalConfigArgs {
     #[must_use]
-    pub fn log_level(&self) -> LogLevel {
+    pub(crate) fn log_level(&self) -> LogLevel {
         LogLevel::from(&self.log_level_args)
     }
 }

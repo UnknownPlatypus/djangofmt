@@ -67,6 +67,7 @@ pub fn delete_comment(ctx: &LintContext<'_>, comment: &str) -> Edit {
 }
 
 /// The outcome of [`delete_codes_or_comment`].
+#[derive(Debug)]
 pub struct CodesDeletion {
     /// The span to report the violation on.
     pub span: SourceSpan,

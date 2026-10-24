@@ -18,7 +18,7 @@ use crate::line_width::{IndentWidth, LineLength, SelfClosing};
 use crate::panic::catch_unwind;
 
 /// Pre-built configuration for all formatters.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct FormatterConfig {
     /// Config for main HTML/Jinja formatter.
     pub markup: markup_fmt::config::FormatOptions,
