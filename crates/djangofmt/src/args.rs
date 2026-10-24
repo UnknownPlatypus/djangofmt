@@ -269,7 +269,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cli_help() {
+    fn cli_help() {
         // clap takes the usage name from argv[0], `djangofmt.exe` on Windows.
         let mut settings = insta::Settings::clone_current();
         settings.add_filter(r"djangofmt\.exe", "djangofmt");
@@ -354,7 +354,7 @@ mod tests {
         ");
     }
     #[test]
-    fn test_cli_version() {
+    fn cli_version() {
         assert_cmd_snapshot!(cli().arg("--version"), @"
         success: true
         exit_code: 0
@@ -366,7 +366,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cli_invalid_line_length() {
+    fn cli_invalid_line_length() {
         assert_cmd_snapshot!(cli().args(["--line-length", "321", "test.html"]), @"
         success: false
         exit_code: 2
@@ -380,7 +380,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cli_invalid_target_version() {
+    fn cli_invalid_target_version() {
         assert_cmd_snapshot!(cli().args(["check", "--target-version", "5", "test.html"]), @"
         success: false
         exit_code: 2
@@ -394,7 +394,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cli_invalid_indent_width() {
+    fn cli_invalid_indent_width() {
         assert_cmd_snapshot!(cli().args(["--indent-width", "17", "test.html"]), @"
         success: false
         exit_code: 2
