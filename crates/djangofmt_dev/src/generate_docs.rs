@@ -23,13 +23,8 @@ pub fn main(args: &Args) -> Result<()> {
         std::fs::remove_dir_all(&dir)?;
     }
     for rule in Rule::iter() {
-        let Some(explanation) = rule.explanation() else {
-            // Skip rules with no doc comment: the generator would otherwise
-            // emit a near-empty Markdown file.
-            continue;
-        };
         let path = dir.join(rule.to_string()).with_extension("md");
-        apply(args.mode, &path, &render(rule, explanation)?)?;
+        apply(args.mode, &path, &render(rule, rule.explanation())?)?;
     }
     Ok(())
 }

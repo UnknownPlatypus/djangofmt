@@ -5,6 +5,12 @@ use syn::{Attribute, DeriveInput, Error, Lit, LitStr, Meta};
 
 pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let docs = collect_docs(&input.attrs);
+    if docs.trim().is_empty() {
+        return Err(Error::new_spanned(
+            &input.ident,
+            "missing `///` doc comment: it becomes the rule's docs page",
+        ));
+    }
     let Some(group) = collect_rule_group(&input.attrs)? else {
         return Err(Error::new_spanned(
             &input,
@@ -15,14 +21,6 @@ pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
     let name = input.ident;
     let (impl_generics, ty_generics, where_clause) = &input.generics.split_for_impl();
 
-    // return `None` when the struct has no doc comment so the docs generator can skip
-    // undocumented rules instead of writing an empty Markdown file.
-    let explain_body = if docs.is_empty() {
-        quote! { None }
-    } else {
-        quote! { Some(#docs) }
-    };
-
     // Anchor `file!()` / `line!()` at the struct ident's span so the compiler resolves them to
     // the struct's source location instead of the `#[derive(ViolationMetadata)]` attribute line.
     let span = name.span();
@@ -32,8 +30,8 @@ pub fn derive(input: DeriveInput) -> syn::Result<TokenStream> {
     Ok(quote! {
         #[automatically_derived]
         impl #impl_generics crate::ViolationMetadata for #name #ty_generics #where_clause {
-            fn explain() -> Option<&'static str> {
-                #explain_body
+            fn explain() -> &'static str {
+                #docs
             }
 
             fn group() -> crate::registry::RuleGroup {

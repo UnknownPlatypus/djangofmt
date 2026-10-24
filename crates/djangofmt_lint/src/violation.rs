@@ -13,10 +13,7 @@ use crate::registry::{Rule, RuleCategory, RuleGroup};
 /// Powers the per-rule documentation generator under `djangofmt_dev`.
 pub trait ViolationMetadata {
     /// The rendered rule documentation, taken verbatim from the violation struct's doc comment.
-    ///
-    /// Returns `None` when the violation has no doc comment, so the docs
-    /// generator can skip undocumented rules instead of writing an empty file.
-    fn explain() -> Option<&'static str>;
+    fn explain() -> &'static str;
 
     /// The rule's lifecycle status, supplied via
     /// `#[violation_metadata(stable_since = "…")]` (or `preview_since` /
