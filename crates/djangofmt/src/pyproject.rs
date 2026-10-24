@@ -275,7 +275,7 @@ struct Tool {
     djangofmt: Option<PyprojectSettings>,
 }
 
-/// Loads `Options` from a given `pyproject.toml` file
+/// Loads `Options` from a given `pyproject.toml` file.
 fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> {
     let pyproject = toml::from_str::<PyProject>(content)
         .map_err(|err| Error::Resolve(format!("Failed to parse pyproject.toml: {err}")))?;
@@ -342,10 +342,10 @@ mod tests {
     use rstest::rstest;
 
     #[test]
-    fn test_load_options_from_pyproject_toml() {
+    fn load_options_from_complete_pyproject_toml() {
         let project = Project::new().file(
             "pyproject.toml",
-            r"
+            "
             [tool.djangofmt]
             line-length=200
             indent-width=4
@@ -369,10 +369,10 @@ mod tests {
     }
 
     #[test]
-    fn test_load_options_from_incomplete_pyproject_toml() {
+    fn load_options_from_incomplete_pyproject_toml() {
         let project = Project::new().file(
             "pyproject.toml",
-            r"
+            "
             [tool.djangofmt]
             line-length=200
             ",
@@ -388,21 +388,21 @@ mod tests {
     }
 
     #[test]
-    fn test_load_options_returns_default_when_no_pyproject_toml() {
+    fn load_options_returns_default_when_no_pyproject_toml() {
         let project = Project::new();
         let (result, _) = load_options(project.path()).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
-    fn test_load_options_returns_default_when_empty_pyproject_toml() {
+    fn load_options_returns_default_when_empty_pyproject_toml() {
         let project = Project::new().file("pyproject.toml", "");
         let (result, _) = load_options(project.join("pyproject.toml")).unwrap();
         assert_eq!(result, PyprojectSettings::default());
     }
 
     #[test]
-    fn test_load_options_errors_on_unreadable_pyproject_toml() {
+    fn load_options_errors_on_unreadable_pyproject_toml() {
         let project = Project::new();
         fs::write(project.join("pyproject.toml"), b"\xff").unwrap();
         let err = load_options(project.path()).unwrap_err();
@@ -421,11 +421,11 @@ mod tests {
     fn test_load_options_errors_on_invalid_toml(#[case] content: &str) {
         // Invalid config (including unknown lint selectors) must fail fast rather
         // than silently falling back to defaults.
-        assert!(load_options_from_pyproject_toml(content).is_err());
+        load_options_from_pyproject_toml(content).unwrap_err();
     }
 
     #[test]
-    fn test_load_options_with_file_selection_fields() {
+    fn load_options_with_file_selection_fields() {
         let content = r#"
         [tool.djangofmt]
         line-length = 120
@@ -451,8 +451,8 @@ mod tests {
     }
 
     #[test]
-    fn test_load_preserve_unquoted_attrs() {
-        let content = r"
+    fn load_preserve_unquoted_attrs() {
+        let content = "
 [tool.djangofmt]
 preserve-unquoted-attrs = true
 ";
@@ -467,8 +467,8 @@ preserve-unquoted-attrs = true
     }
 
     #[test]
-    fn test_load_fix_flags() {
-        let content = r"
+    fn load_fix_flags() {
+        let content = "
 [tool.djangofmt.lint]
 fix = true
 unsafe-fixes = true
@@ -490,7 +490,7 @@ show-fixes = true
     }
 
     #[test]
-    fn test_load_lint_unsorted_tailwind_classes_prefix() {
+    fn load_lint_unsorted_tailwind_classes_prefix() {
         let content = r#"
 [tool.djangofmt.lint.unsorted-tailwind-classes]
 prefix = "tw-"
@@ -511,7 +511,7 @@ prefix = "tw-"
     }
 
     #[test]
-    fn test_load_lint_options() {
+    fn load_lint_options() {
         use djangofmt_lint::{Rule, RuleCategory};
 
         let content = r#"
@@ -571,7 +571,7 @@ target-version = "5.2"
     }
 
     #[test]
-    fn test_load_lint_per_file_ignores() {
+    fn load_lint_per_file_ignores() {
         use djangofmt_lint::Rule;
 
         let content = r#"

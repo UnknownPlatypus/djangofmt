@@ -173,6 +173,6 @@ mod tests {
     fn invalid_pattern_errors() {
         let mut patterns = BTreeMap::new();
         patterns.insert("[unclosed".to_string(), vec![]);
-        assert!(PerFileIgnores::new(&patterns, Path::new("/proj")).is_err());
+        PerFileIgnores::new(&patterns, Path::new("/proj")).unwrap_err();
     }
 }

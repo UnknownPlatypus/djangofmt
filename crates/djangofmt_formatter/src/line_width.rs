@@ -152,17 +152,17 @@ impl<'de> Deserialize<'de> for IndentWidth {
 ///     - <https://html.spec.whatwg.org/multipage/syntax.html#start-tags:~:text=On%20void,parser>
 ///     - <https://developer.mozilla.org/en-US/docs/Glossary/Void_element>
 ///     - <https://github.com/whatwg/html/issues/721>
-///     - <https://github.com/whatwg/html/issues/9491>
+///     - <https://github.com/whatwg/html/issues/9491>.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
 #[cfg_attr(feature = "clap", derive(clap::ValueEnum))]
 #[serde(rename_all = "lowercase")]
 pub enum SelfClosing {
     #[default]
-    /// Never use self-closing syntax
+    /// Never use self-closing syntax.
     Never,
-    /// Always use self-closing syntax
+    /// Always use self-closing syntax.
     Always,
-    /// Keep existing style as-is
+    /// Keep existing style as-is.
     Unchanged,
 }
 

@@ -14,7 +14,7 @@ pub enum Error {
     // -- Externals
     #[error(transparent)]
     #[diagnostic(code(djangofmt::io_error))]
-    Io(#[from] std::io::Error),
+    Io(#[from] io::Error),
 
     #[error("{0}")]
     #[diagnostic(code(djangofmt::resolve_error))]

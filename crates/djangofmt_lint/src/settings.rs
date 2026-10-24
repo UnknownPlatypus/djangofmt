@@ -228,7 +228,7 @@ mod tests {
         );
     }
 
-    /// A selector listed twice is collapsed even when another selector sits between the duplicates
+    /// A selector listed twice is collapsed even when another selector sits between the duplicates.
     #[test]
     fn duplicate_selectors_are_deduped() {
         let (settings, warnings) = LintConfiguration {

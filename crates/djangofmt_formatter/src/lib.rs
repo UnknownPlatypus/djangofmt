@@ -20,11 +20,11 @@ use crate::panic::catch_unwind;
 /// Pre-built configuration for all formatters.
 #[derive(Clone)]
 pub struct FormatterConfig {
-    /// Config for main HTML/Jinja formatter
+    /// Config for main HTML/Jinja formatter.
     pub markup: markup_fmt::config::FormatOptions,
-    /// Config for CSS/SCSS formatter
+    /// Config for CSS/SCSS formatter.
     pub malva: malva::config::FormatOptions,
-    /// Config for JSON formatter
+    /// Config for JSON formatter.
     pub json: dprint_plugin_json::configuration::Configuration,
 }
 
@@ -161,7 +161,7 @@ pub fn format_text(
     config: &FormatterConfig,
     profile: Profile,
     path: Option<&Path>,
-) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
+) -> Result<Option<String>, markup_fmt::FormatError> {
     let ignores = FileIgnores::parse(source);
     if ignores.format {
         return Ok(None);

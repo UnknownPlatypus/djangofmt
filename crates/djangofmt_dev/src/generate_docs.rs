@@ -179,8 +179,6 @@ mod tests {
 
     #[test]
     fn unknown_option_is_an_error() {
-        assert!(
-            link_options(Rule::UnsortedTailwindClasses, "## Options\n- `lint.nope`\n").is_err()
-        );
+        link_options(Rule::UnsortedTailwindClasses, "## Options\n- `lint.nope`\n").unwrap_err();
     }
 }

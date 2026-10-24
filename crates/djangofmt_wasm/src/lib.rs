@@ -256,6 +256,6 @@ mod tests {
     #[test]
     fn control_flow_and_element() {
         let src = r#"{% if a %}<div class="x">hi</div>{% endif %}"#;
-        insta::assert_snapshot!(super::doc_tree(src, 80, 4, "django"));
+        insta::assert_snapshot!(doc_tree(src, 80, 4, "django"));
     }
 }

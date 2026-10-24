@@ -44,7 +44,7 @@ pub struct ResolvedDiscoveryConfig {
     pub exclude: Vec<String>,
     /// List of file path patterns to include.
     pub include: Vec<String>,
-    /// Respect `.gitignore` files when discovering files
+    /// Respect `.gitignore` files when discovering files.
     pub respect_gitignore: bool,
     /// Enforce exclusions, even for paths passed to djangofmt directly on the command-line.
     pub force_exclude: bool,
@@ -291,8 +291,8 @@ struct FileVisitor<'s> {
 }
 
 impl ignore::ParallelVisitor for FileVisitor<'_> {
-    fn visit(&mut self, result: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
-        match result {
+    fn visit(&mut self, entry: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
+        match entry {
             // `filter_entry` already matched non-directories against the include set.
             Ok(entry) if entry.file_type().is_some_and(|ft| !ft.is_dir()) => {
                 debug!("Discovered: {}", entry.path().display());
@@ -322,7 +322,6 @@ impl Drop for FileVisitor<'_> {
 #[cfg(test)]
 mod tests {
     use std::fs;
-    use std::path::Path;
 
     use tempfile::tempdir;
 
@@ -341,7 +340,7 @@ mod tests {
         ResolvedDiscoveryConfig::new(cli, pyproject, Path::new("."))
     }
 
-    /// Helper to create a file in a temp dir
+    /// Helper to create a file in a temp dir.
     fn create_file(base: &Path, relative: &str) {
         let path = base.join(relative);
         if let Some(parent) = path.parent() {
@@ -358,7 +357,7 @@ mod tests {
     }
 
     #[test]
-    fn test_defaults() {
+    fn defaults() {
         let config = resolved(&default_cli(), &default_pyproject());
         assert_eq!(
             config.include,
@@ -371,7 +370,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pyproject_exclude_replaces_defaults() {
+    fn pyproject_exclude_replaces_defaults() {
         let pyproject = PyprojectSettings {
             exclude: Some(vec!["custom_dir".to_string()]),
             ..Default::default()
@@ -381,7 +380,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pyproject_extend_exclude_adds_to_defaults() {
+    fn pyproject_extend_exclude_adds_to_defaults() {
         let pyproject = PyprojectSettings {
             extend_exclude: Some(vec!["vendor".to_string()]),
             ..Default::default()
@@ -392,7 +391,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cli_exclude_replaces_pyproject_and_defaults() {
+    fn cli_exclude_replaces_pyproject_and_defaults() {
         let cli = FileSelectionArgs {
             exclude: Some(vec!["migrations".to_string()]),
             ..Default::default()
@@ -406,7 +405,7 @@ mod tests {
     }
 
     #[test]
-    fn test_extend_exclude_accumulates_from_both() {
+    fn extend_exclude_accumulates_from_both() {
         let cli = FileSelectionArgs {
             extend_exclude: Some(vec!["cli_extra".to_string()]),
             ..Default::default()
@@ -421,7 +420,7 @@ mod tests {
     }
 
     #[test]
-    fn test_cli_exclude_with_extend_exclude() {
+    fn cli_exclude_with_extend_exclude() {
         let cli = FileSelectionArgs {
             exclude: Some(vec!["migrations".to_string()]),
             extend_exclude: Some(vec!["vendor".to_string()]),
@@ -439,7 +438,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pyproject_include_replaces_defaults() {
+    fn pyproject_include_replaces_defaults() {
         let pyproject = PyprojectSettings {
             include: Some(vec!["*.txt".to_string()]),
             ..Default::default()
@@ -449,7 +448,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pyproject_extend_include_adds_to_defaults() {
+    fn pyproject_extend_include_adds_to_defaults() {
         let pyproject = PyprojectSettings {
             extend_include: Some(vec!["*.djhtml".to_string()]),
             ..Default::default()
@@ -462,7 +461,7 @@ mod tests {
     }
 
     #[test]
-    fn test_respect_gitignore_pyproject_false() {
+    fn respect_gitignore_pyproject_false() {
         let pyproject = PyprojectSettings {
             respect_gitignore: Some(false),
             ..Default::default()
@@ -472,7 +471,7 @@ mod tests {
     }
 
     #[test]
-    fn test_respect_gitignore_cli_overrides_pyproject() {
+    fn respect_gitignore_cli_overrides_pyproject() {
         let cli = FileSelectionArgs {
             no_respect_gitignore: true,
             ..Default::default()
@@ -486,7 +485,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_discovers_html_in_directory() {
+    fn resolve_files_discovers_html_in_directory() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "a.html");
         create_file(dir.path(), "b.jinja");
@@ -506,7 +505,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_respects_gitignore() {
+    fn resolve_files_respects_gitignore() {
         let dir = tempdir().unwrap();
         std::process::Command::new("git")
             .args(["init"])
@@ -526,7 +525,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_no_respect_gitignore() {
+    fn resolve_files_no_respect_gitignore() {
         let dir = tempdir().unwrap();
         std::process::Command::new("git")
             .args(["init"])
@@ -550,16 +549,16 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_nonexistent_path_errors() {
+    fn resolve_files_nonexistent_path_errors() {
         let config = resolved(&default_cli(), &default_pyproject());
         let result = resolve_files(&[PathBuf::from("/nonexistent/path")], &config);
-        assert!(result.is_err());
+        result.unwrap_err();
     }
 
     /// Worked example of ruff's `include` glob semantics: path patterns anchor at the
     /// project root and `*` crosses `/`, while a bare pattern matches at any depth.
     #[test]
-    fn test_resolve_files_include_glob_semantics() {
+    fn resolve_files_include_glob_semantics() {
         let dir = tempdir().unwrap();
         for path in [
             "root.html",
@@ -619,7 +618,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_exclude_glob_semantics() {
+    fn resolve_files_exclude_glob_semantics() {
         let dir = tempdir().unwrap();
         for path in [
             "root.html",
@@ -674,7 +673,7 @@ mod tests {
     /// select differently depending on how the file was reached: patterns anchor at the
     /// project root even when the walk starts deeper.
     #[test]
-    fn test_resolve_files_exclude_agrees_across_walk_and_explicit_paths() {
+    fn resolve_files_exclude_agrees_across_walk_and_explicit_paths() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "sub/deep/page.html");
 
@@ -701,7 +700,7 @@ mod tests {
 
     /// Like ruff, `!` is not negation: the pattern is a literal glob that matches nothing.
     #[test]
-    fn test_resolve_files_negated_exclude_pattern_is_literal() {
+    fn resolve_files_negated_exclude_pattern_is_literal() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "keep.html");
 
@@ -716,7 +715,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_deduplicates() {
+    fn resolve_files_deduplicates() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "a.html");
 
@@ -727,7 +726,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_sorted_deterministically() {
+    fn resolve_files_sorted_deterministically() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "c.html");
         create_file(dir.path(), "a.html");
@@ -741,7 +740,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_invalid_glob_pattern_errors() {
+    fn resolve_files_invalid_glob_pattern_errors() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "a.html");
 
@@ -751,11 +750,11 @@ mod tests {
         };
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
         let result = resolve_files(&[dir.path().to_path_buf()], &config);
-        assert!(result.is_err());
+        result.unwrap_err();
     }
 
     #[test]
-    fn test_resolve_files_nested_gitignore() {
+    fn resolve_files_nested_gitignore() {
         let dir = tempdir().unwrap();
         std::process::Command::new("git")
             .args(["init"])
@@ -777,7 +776,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_force_exclude_filters_explicit_files() {
+    fn resolve_files_force_exclude_filters_explicit_files() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "a.html");
         create_file(dir.path(), "b.html");
@@ -800,7 +799,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_force_exclude_outside_project_root() {
+    fn resolve_files_force_exclude_outside_project_root() {
         // Outside the root, root-anchored patterns can't apply but name ones still do.
         let root = tempdir().unwrap();
         let outside = tempdir().unwrap();
@@ -825,7 +824,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_force_exclude_filters_explicit_directories() {
+    fn resolve_files_force_exclude_filters_explicit_directories() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), ".venv/lib/a.html");
 
@@ -840,7 +839,7 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_files_no_force_exclude_keeps_explicit_files() {
+    fn resolve_files_no_force_exclude_keeps_explicit_files() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "a.html");
         create_file(dir.path(), "b.html");
@@ -863,7 +862,7 @@ mod tests {
     /// discovered under their own (lexical) path.
     #[cfg(unix)]
     #[test]
-    fn test_resolve_files_symlinks() {
+    fn resolve_files_symlinks() {
         let dir = tempdir().unwrap();
         create_file(dir.path(), "real_dir/template.html");
         std::os::unix::fs::symlink(dir.path().join("real_dir"), dir.path().join("link_dir"))

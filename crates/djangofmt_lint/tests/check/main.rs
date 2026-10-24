@@ -55,7 +55,7 @@ fn check_invalid() {
 /// Snapshots the post-fix source for each `*.invalid.html` fixture that produces a fix.
 ///
 /// Safe fixes are snapshot as `{stem}.fixed`;
-/// Unsafe fixes are snapshot as `{stem}.unsafe-fixed`;
+/// Unsafe fixes are snapshot as `{stem}.unsafe-fixed`.
 #[test]
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
@@ -127,6 +127,10 @@ fn settings_for(path: &Path) -> Settings {
         .and_then(Path::file_name)
         .and_then(|name| name.to_str())
         .expect("fixture files live in a rule directory");
+    #[expect(
+        clippy::panic,
+        reason = "allow-panic-in-tests skips helpers in tests/: https://github.com/rust-lang/rust-clippy/issues/13981"
+    )]
     let rule = dir
         .replace('_', "-")
         .parse::<Rule>()

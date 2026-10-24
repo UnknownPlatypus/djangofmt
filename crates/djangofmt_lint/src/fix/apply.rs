@@ -135,7 +135,7 @@ pub struct FixerResult {
     /// Total fixes applied across iterations.
     pub applied_count: usize,
     /// Per-rule applied summaries, used by `--show-fixes`.
-    pub applied_by_rule: rustc_hash::FxHashMap<&'static str, RuleFixSummary>,
+    pub applied_by_rule: FxHashMap<&'static str, RuleFixSummary>,
     /// Whether `source` only got its leading comment linted, see [`crate::parse_or_quarantine`].
     pub quarantined: bool,
 }

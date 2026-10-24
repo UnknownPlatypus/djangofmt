@@ -266,8 +266,6 @@ impl Fix {
 mod tests {
     use super::*;
 
-    use djangofmt_syntax::span;
-
     #[test]
     fn edit_replacement() {
         let edit = Edit::replacement("hello", span(0, 5));

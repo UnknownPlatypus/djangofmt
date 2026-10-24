@@ -164,7 +164,7 @@ mod tests {
     use super::{Rule, RuleSet};
 
     #[test]
-    fn test_all_rules() {
+    fn all_rules() {
         for rule in Rule::iter() {
             let set = RuleSet::from_rule(rule);
 

@@ -214,7 +214,7 @@ fn is_whitespace_text(node: &Node<'_>) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{LintDiagnostic, Settings, lint_source};
+    use crate::{Settings, lint_source};
     use markup_fmt::Language;
     use rstest::rstest;
 

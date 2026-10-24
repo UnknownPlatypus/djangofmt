@@ -70,39 +70,88 @@ tsify = { version = "0.5.6" }
 wasm-bindgen = { version = "0.2.122" }
 
 [workspace.lints.clippy]
-allow_attributes = "deny"
-allow_attributes_without_reason = "deny"
-clone_on_ref_ptr = "deny"
-dbg_macro = "deny"
-empty_drop = "deny"
-empty_enum_variants_with_brackets = "deny"
-empty_structs_with_brackets = "deny"
-exit = "deny"
-get_unwrap = "deny"
-infinite_loop = "deny"
-iter_over_hash_type = "deny"  # iteration order must be explicit; output must stay deterministic
-large_include_file = "deny"
-map_with_unused_argument_over_ranges = "deny"
-missing_errors_doc = "allow"
-non_zero_suggestions = "deny"
 nursery = { level = "deny", priority = -1 }
-pathbuf_init_then_push = "deny"
 pedantic = { level = "deny", priority = -1 }
-precedence_bits = "deny"
-print_stderr = "deny"
-print_stdout = "deny"
-rc_buffer = "deny"
-rc_mutex = "deny"
-rest_pat_in_fully_bound_structs = "deny"
-string_lit_chars_any = "deny"
-suspicious_xor_used_as_pow = "deny"
-todo = "deny"
-undocumented_unsafe_blocks = "deny"
-unimplemented = "deny"
-unnecessary_safety_comment = "deny"
-unused_result_ok = "deny"
-unwrap_used = "deny"
+restriction = { level = "deny", priority = -1 }
 wildcard_dependencies = "deny"
+
+# Opt-outs; new restriction lints are on by default, so they surface on toolchain bumps.
+# Contradict idiomatic Rust or how this codebase is written.
+absolute_paths = "allow"
+arbitrary_source_item_ordering = "allow"
+as_conversions = "allow"
+definition_in_module_root = "allow"
+else_if_without_else = "allow"
+error_impl_error = "allow"
+expect_used = "allow"
+field_scoped_visibility_modifiers = "allow"
+impl_trait_in_params = "allow"
+implicit_return = "allow"
+inline_modules = "allow"
+inline_trait_bounds = "allow"
+let_underscore_must_use = "allow"
+let_underscore_untyped = "allow"
+map_err_ignore = "allow"
+min_ident_chars = "allow"
+missing_asserts_for_indexing = "allow"
+missing_docs_in_private_items = "allow"
+missing_errors_doc = "allow"
+missing_inline_in_public_items = "allow"
+missing_trait_methods = "allow"
+module_name_repetitions = "allow"
+partial_pub_fields = "allow"
+pattern_type_mismatch = "allow"
+pub_use = "allow"
+question_mark_used = "allow"
+shadow_reuse = "allow"
+shadow_same = "allow"
+shadow_unrelated = "allow"
+single_call_fn = "allow"
+single_char_lifetime_names = "allow"
+tests_outside_test_module = "allow"
+unreachable = "allow"
+use_debug = "allow"
+
+# Pure taste, no bug or clarity gain.
+ref_patterns = "allow"
+return_and_then = "allow"
+str_to_string = "allow"
+unused_trait_names = "allow"
+
+# Opposite of a convention we already follow.
+mod_module_files = "allow"
+pub_with_shorthand = "allow"
+semicolon_outside_block = "allow"
+unseparated_literal_suffix = "allow"
+
+# Not applicable: no_std, published API stability, overflow-critical math.
+arithmetic_side_effects = "allow"
+exhaustive_enums = "allow"
+exhaustive_structs = "allow"
+integer_division = "allow"
+integer_division_remainder_used = "allow"
+non_ascii_literal = "allow"
+std_instead_of_alloc = "allow"
+std_instead_of_core = "allow"
+
+# Offsets come from the parser; `.get().expect()` would not be safer.
+indexing_slicing = "allow"
+string_slice = "allow"
+
+# Listing every markup_fmt variant/field would bury the matches that matter.
+rest_pattern_accessible_field = "allow"
+wildcard_enum_match_arm = "allow"
+
+# Enabling the whole restriction group is the point.
+blanket_clippy_restriction_lints = "allow"
+
+[workspace.lints.rust]
+redundant_imports = "deny"
+redundant_lifetimes = "deny"
+trivial_numeric_casts = "deny"
+unused_lifetimes = "deny"
+unused_qualifications = "deny"
+warnings = "deny"
 
 [profile.dev]
 # Faster builds, backtraces still work.

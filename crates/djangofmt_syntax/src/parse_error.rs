@@ -4,7 +4,7 @@ use thiserror::Error;
 use crate::diagnostic::span;
 
 /// Build a span that miette can always draw a caret under.
-/// If the parse error is at EOF, place the caret just before
+/// If the parse error is at EOF, place the caret just before.
 fn eof_aware_span(source: &str, pos: usize) -> SourceSpan {
     if pos < source.len() {
         span(pos, 0)
@@ -38,7 +38,7 @@ pub struct ParseError {
 pub const SKIP_FILE_HINT: &str = "Add `{# djangofmt: file-ignore[invalid-syntax] #}` at the top of this file, or list it in `extend-exclude`, to skip it.";
 
 /// Elements whose end tag HTML5 allows omitting, while djangofmt keeps requiring it.
-/// <https://html.spec.whatwg.org/multipage/syntax.html#optional-tags>
+/// <https://html.spec.whatwg.org/multipage/syntax.html#optional-tags>.
 const OPTIONAL_END_TAG_ELEMENTS: [&str; 19] = [
     "body", "caption", "colgroup", "dd", "dt", "head", "html", "li", "optgroup", "option", "p",
     "rp", "rt", "tbody", "td", "tfoot", "th", "thead", "tr",
