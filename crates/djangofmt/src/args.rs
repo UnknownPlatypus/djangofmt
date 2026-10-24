@@ -221,10 +221,6 @@ pub struct CheckCommand {
     pub file_selection: FileSelectionArgs,
 }
 
-#[expect(
-    clippy::module_name_repetitions,
-    reason = "the `Args` suffix is the shared clap convention"
-)]
 #[derive(Debug, Default, Clone, clap::Args)]
 pub struct LogLevelArgs {
     /// Enable verbose logging.
