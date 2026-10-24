@@ -3,7 +3,7 @@ use std::process::ExitCode;
 use clap::Parser;
 
 use djangofmt::args::Args;
-use djangofmt::{ExitStatus, run};
+use djangofmt::{ExitStatus, install_report_hook, run};
 
 // We use jemalloc for performance reasons.
 // This has to be kept in sync with the Cargo.toml file section that declares a dependency on tikv-jemallocator.
@@ -25,16 +25,7 @@ use djangofmt::{ExitStatus, run};
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[must_use]
 pub fn main() -> ExitCode {
-    // Match the wrap policy of `djangofmt_syntax::graphical_handler`, keeping URLs unbroken.
-    let _ = miette::set_hook(Box::new(|_| {
-        Box::new(
-            miette::MietteHandlerOpts::new()
-                .word_separator(textwrap::WordSeparator::AsciiSpace)
-                .word_splitter(textwrap::WordSplitter::NoHyphenation)
-                .break_words(false)
-                .build(),
-        )
-    }));
+    install_report_hook();
 
     let args = Args::parse();
 
