@@ -298,14 +298,14 @@ fn print_concise(results: &[CheckResult], threshold: Applicability) {
 
 fn print_summary(totals: &Totals, config: &CheckConfig, parse_errors: usize) {
     let Totals {
-        diagnostics: total,
+        diagnostics,
         applied,
         safe_fixable,
         unsafe_fixable,
         ..
     } = *totals;
 
-    if total == 0 && applied == 0 {
+    if diagnostics == 0 && applied == 0 {
         if parse_errors == 0 {
             info!("All checks passed!");
         }
@@ -313,8 +313,8 @@ fn print_summary(totals: &Totals, config: &CheckConfig, parse_errors: usize) {
     }
 
     if config.fix {
-        let found = applied + total;
-        info!("Found {found} errors ({applied} fixed, {total} remaining).");
+        let found = applied + diagnostics;
+        info!("Found {found} errors ({applied} fixed, {diagnostics} remaining).");
         return;
     }
 
@@ -339,12 +339,14 @@ fn print_summary(totals: &Totals, config: &CheckConfig, parse_errors: usize) {
             String::new()
         };
         info!(
-            "Found {total} errors. [*] {fixable_with_fix} fixable with the --fix option.{suffix}"
+            "Found {diagnostics} errors. [*] {fixable_with_fix} fixable with the --fix option.{suffix}"
         );
     } else if hidden > 0 {
-        info!("Found {total} errors. ({hidden} hidden fixes can be enabled with --unsafe-fixes)");
+        info!(
+            "Found {diagnostics} errors. ({hidden} hidden fixes can be enabled with --unsafe-fixes)"
+        );
     } else {
-        info!("Found {total} errors.");
+        info!("Found {diagnostics} errors.");
     }
 }
 
