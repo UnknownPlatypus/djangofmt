@@ -242,8 +242,10 @@ pub fn resolve_files(
         files.extend(state.finish());
     }
 
-    files.sort();
-    files.dedup();
+    // Byte order: `PathBuf::cmp` compares component-wise, a measurable cost before rayon starts.
+    // Every path here is normalized, so byte equality is path equality and dedup can share the key.
+    files.sort_unstable_by(|a, b| a.as_os_str().cmp(b.as_os_str()));
+    files.dedup_by(|a, b| a.as_os_str() == b.as_os_str());
 
     debug!("Resolved {} files to process", files.len());
     Ok(files)
