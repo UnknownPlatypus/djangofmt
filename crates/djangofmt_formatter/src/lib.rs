@@ -161,7 +161,7 @@ pub fn format_text(
     config: &FormatterConfig,
     profile: Profile,
     path: Option<&Path>,
-) -> std::result::Result<Option<String>, markup_fmt::FormatError> {
+) -> Result<Option<String>, markup_fmt::FormatError> {
     let ignores = FileIgnores::parse(source);
     if ignores.format {
         return Ok(None);

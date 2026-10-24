@@ -322,7 +322,6 @@ impl Drop for FileVisitor<'_> {
 #[cfg(test)]
 mod tests {
     use std::fs;
-    use std::path::Path;
 
     use tempfile::tempdir;
 
@@ -553,7 +552,7 @@ mod tests {
     fn test_resolve_files_nonexistent_path_errors() {
         let config = resolved(&default_cli(), &default_pyproject());
         let result = resolve_files(&[PathBuf::from("/nonexistent/path")], &config);
-        assert!(result.is_err());
+        result.unwrap_err();
     }
 
     /// Worked example of ruff's `include` glob semantics: path patterns anchor at the
@@ -751,7 +750,7 @@ mod tests {
         };
         let config = ResolvedDiscoveryConfig::new(&default_cli(), &pyproject, dir.path());
         let result = resolve_files(&[dir.path().to_path_buf()], &config);
-        assert!(result.is_err());
+        result.unwrap_err();
     }
 
     #[test]

@@ -421,7 +421,7 @@ mod tests {
     fn test_load_options_errors_on_invalid_toml(#[case] content: &str) {
         // Invalid config (including unknown lint selectors) must fail fast rather
         // than silently falling back to defaults.
-        assert!(load_options_from_pyproject_toml(content).is_err());
+        load_options_from_pyproject_toml(content).unwrap_err();
     }
 
     #[test]
