@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "**"
 
 permissions: {}
 
@@ -80,6 +78,9 @@ jobs:
         with:
           ref: main
           persist-credentials: false
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Build main version
         run: cargo build --locked -p djangofmt --release --verbose && mv target/release/djangofmt ./main_djangofmt
 
@@ -190,6 +191,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Install Rust toolchain
         run: rustup component add clippy
       - name: Run Clippy
@@ -229,6 +233,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          key: ${{ env.HAWK_TOOLCHAIN }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       # hawk only runs on the exact toolchain it was built for, which lags behind rust-toolchain.toml.
       - name: Install hawk
         run: |
@@ -238,7 +246,7 @@ jobs:
           tar xzf "$RUNNER_TEMP/cargo-hawk.tar.gz" -C ~/.cargo/bin --strip-components=1 \
             cargo-hawk-x86_64-unknown-linux-gnu/cargo-hawk cargo-hawk-x86_64-unknown-linux-gnu/cargo-hawk-driver
       - name: Find dead pub items
-        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --only dead-public --color=always -D warnings
+        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --target-dir target/hawk --only dead-public --color=always -D warnings
 
   test:
     name: "cargo test + coverage"
@@ -252,6 +260,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Setup uv
         uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
@@ -308,6 +319,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Run tests
         run: cargo test --workspace --lib --bins --tests --all-features --no-fail-fast
 
@@ -323,6 +337,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Read MSRV from Cargo.toml
         id: msrv
         run: |
