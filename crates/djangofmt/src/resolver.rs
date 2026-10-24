@@ -291,8 +291,8 @@ struct FileVisitor<'s> {
 }
 
 impl ignore::ParallelVisitor for FileVisitor<'_> {
-    fn visit(&mut self, result: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
-        match result {
+    fn visit(&mut self, entry: Result<ignore::DirEntry, ignore::Error>) -> ignore::WalkState {
+        match entry {
             // `filter_entry` already matched non-directories against the include set.
             Ok(entry) if entry.file_type().is_some_and(|ft| !ft.is_dir()) => {
                 debug!("Discovered: {}", entry.path().display());
