@@ -4,6 +4,7 @@ ci:
     - dprint # dprint does not work offline https://github.com/dprint/dprint/issues/895
     - actionlint
     - cargo-clippy
+    - cargo-doc
     - cargo-fmt
     - renovate-config-validator
     - tombi-format
@@ -108,6 +109,14 @@ repos:
           "--allow-staged",
           "--allow-dirty",
         ]
+  - repo: local
+    hooks:
+      - id: cargo-doc
+        name: cargo doc
+        entry: env RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace --all-features --document-private-items
+        language: system
+        types: [rust]
+        pass_filenames: false
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: a1785f8e81fe9936d828bef574e6db07e8c8c374  # frozen: 0.12.23
     hooks:
