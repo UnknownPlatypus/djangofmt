@@ -1,3 +1,5 @@
+//! The djangofmt CLI: file discovery, configuration, and parallel formatting and linting runs.
+
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;

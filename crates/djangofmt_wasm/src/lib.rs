@@ -1,3 +1,5 @@
+//! WebAssembly bindings for the browser playground.
+
 use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 use djangofmt_formatter::{FormatterConfig, format_text};
 use djangofmt_lint::{FileDiagnostics, Settings, lint_text};
