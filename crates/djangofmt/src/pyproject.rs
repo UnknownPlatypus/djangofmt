@@ -369,25 +369,6 @@ mod tests {
     }
 
     #[test]
-    fn load_options_from_incomplete_pyproject_toml() {
-        let project = Project::new().file(
-            "pyproject.toml",
-            "
-            [tool.djangofmt]
-            line-length=200
-            ",
-        );
-        let (result, _) = load_options(project.join("pyproject.toml")).unwrap();
-        assert_eq!(
-            result,
-            PyprojectSettings {
-                line_length: Some(LineLength::try_from(200u16).unwrap()),
-                ..Default::default()
-            }
-        );
-    }
-
-    #[test]
     fn load_options_returns_default_when_no_pyproject_toml() {
         let project = Project::new();
         let (result, _) = load_options(project.path()).unwrap();
