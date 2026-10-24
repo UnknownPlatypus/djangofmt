@@ -20,7 +20,7 @@ use editorconfig_parser::EditorConfig;
 
 /// Build a [`FormatterConfig`] by merging CLI arguments with `pyproject.toml` and `.editorconfig` settings.
 ///
-/// Precedence is `cli` > `pyproject` > `editorconfig` > `default`
+/// Precedence is `cli` > `pyproject` > `editorconfig` > `default`.
 #[must_use]
 pub fn formatter_config_from_args(
     args: &FormatCommand,

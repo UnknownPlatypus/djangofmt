@@ -9,7 +9,7 @@ use djangofmt_lint::{DjangoVersion, RuleSelector};
 use djangofmt_syntax::Profile;
 
 /// All configuration options that can be passed "globally",
-/// i.e., can be passed to all subcommands
+/// i.e., can be passed to all subcommands.
 #[derive(Debug, Default, Clone, clap::Args)]
 pub struct GlobalConfigArgs {
     #[clap(flatten)]
@@ -83,10 +83,10 @@ pub struct FileSelectionArgs {
 /// CLI arguments describing the templates being processed, shared by `format` and `check`.
 #[derive(Clone, Debug, Default, clap::Args)]
 pub struct TemplateArgs {
-    /// Template language profile to use [default: django]
+    /// Template language profile to use [default: django].
     #[arg(long, value_enum)]
     pub profile: Option<Profile>,
-    /// Comma-separated list of custom block name to enable
+    /// Comma-separated list of custom block name to enable.
     #[arg(
         long,
         value_delimiter = ',',
@@ -104,15 +104,15 @@ pub struct FormatCommand {
     /// The name of the file when passing it through stdin.
     #[arg(long, value_name = "PATH")]
     pub stdin_filename: Option<PathBuf>,
-    /// Set the line-length [default: 120]
+    /// Set the line-length [default: 120].
     #[arg(long)]
     pub line_length: Option<LineLength>,
-    /// Set the indent width [default: 4]
+    /// Set the indent width [default: 4].
     #[arg(long)]
     pub indent_width: Option<IndentWidth>,
     #[clap(flatten)]
     pub template: TemplateArgs,
-    /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
+    /// Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never].
     #[arg(long, value_enum)]
     pub html_void_self_closing: Option<SelfClosing>,
     /// Avoid writing any formatted files back; instead, exit with a non-zero status code if any
@@ -131,12 +131,12 @@ pub struct FormatCommand {
 
 #[derive(Debug, clap::Subcommand)]
 pub enum Commands {
-    /// Check files for lint errors
+    /// Check files for lint errors.
     Check(Box<CheckCommand>),
-    /// Generate shell completions
+    /// Generate shell completions.
     #[clap(hide = true)]
     Completions {
-        /// The shell to generate the completions for
+        /// The shell to generate the completions for.
         #[arg(value_enum)]
         shell: clap_complete_command::Shell,
     },
@@ -204,7 +204,7 @@ pub struct CheckCommand {
     pub unsafe_fixes: bool,
     #[arg(long, overrides_with("unsafe_fixes"), hide = true)]
     pub no_unsafe_fixes: bool,
-    /// Output format for diagnostics [default: full]
+    /// Output format for diagnostics [default: full].
     #[arg(long, value_enum)]
     pub output_format: Option<OutputFormat>,
     /// List per-rule fix counts after applying. Use `--no-show-fixes` to disable.
@@ -212,7 +212,7 @@ pub struct CheckCommand {
     pub show_fixes: bool,
     #[arg(long, overrides_with("show_fixes"), hide = true)]
     pub no_show_fixes: bool,
-    /// The Django version the templates target, as major.minor (e.g. 5.2)
+    /// The Django version the templates target, as major.minor (e.g. 5.2).
     #[arg(long, value_name = "VERSION")]
     pub target_version: Option<DjangoVersion>,
     #[clap(flatten)]

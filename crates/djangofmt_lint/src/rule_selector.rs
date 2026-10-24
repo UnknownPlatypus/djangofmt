@@ -26,7 +26,7 @@ pub(crate) const DEFAULT_GROUP: &str = "default";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum RuleSelector {
-    /// Select all rules (includes rules in preview if enabled)
+    /// Select all rules (includes rules in preview if enabled).
     All,
     /// Select every rule in a category that is enabled by default, i.e. everything but `pedantic`.
     Default,
@@ -75,7 +75,7 @@ impl RuleSelector {
         })
     }
 
-    /// Returns true if this selector is exact i.e. selects a single rule by code
+    /// Returns true if this selector is exact i.e. selects a single rule by code.
     #[must_use]
     pub const fn is_exact(self) -> bool {
         matches!(self, Self::Rule(_))
@@ -128,13 +128,13 @@ pub struct SelectorParseError {
 }
 
 impl SelectorParseError {
-    /// An invalid rule selected (e.g. `--select yay`)
+    /// An invalid rule selected (e.g. `--select yay`).
     fn unknown_rule(value: &str) -> Self {
         Self {
             message: format!("Unknown rule selector: `{value}`"),
         }
     }
-    /// An invalid category selected (e.g. `--select category:yay`)
+    /// An invalid category selected (e.g. `--select category:yay`).
     fn unknown_category(value: &str) -> Self {
         Self {
             message: format!(
@@ -144,7 +144,7 @@ impl SelectorParseError {
         }
     }
 
-    /// An invalid rule selected that look like a category (e.g. `--select correctness`, expected `--select category:correctness`)
+    /// An invalid rule selected that look like a category (e.g. `--select correctness`, expected `--select category:correctness`).
     fn missing_category_prefix(value: &str) -> Self {
         Self {
             message: format!("Unknown rule `{value}`; did you mean `{CATEGORY_PREFIX}{value}`?"),

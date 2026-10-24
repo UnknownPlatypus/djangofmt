@@ -22,7 +22,7 @@ fn check_no_rules(bencher: divan::Bencher, template: &'static TestFile) {
     );
 }
 
-/// `check` with the default selection (every stable rule, preview off)
+/// `check` with the default selection (every stable rule, preview off).
 #[divan::bench(args = ALL_TEMPLATES)]
 fn check_default_rules(bencher: divan::Bencher, template: &'static TestFile) {
     bench_check(bencher, template, &Settings::default());

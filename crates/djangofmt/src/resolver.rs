@@ -44,7 +44,7 @@ pub struct ResolvedDiscoveryConfig {
     pub exclude: Vec<String>,
     /// List of file path patterns to include.
     pub include: Vec<String>,
-    /// Respect `.gitignore` files when discovering files
+    /// Respect `.gitignore` files when discovering files.
     pub respect_gitignore: bool,
     /// Enforce exclusions, even for paths passed to djangofmt directly on the command-line.
     pub force_exclude: bool,
@@ -340,7 +340,7 @@ mod tests {
         ResolvedDiscoveryConfig::new(cli, pyproject, Path::new("."))
     }
 
-    /// Helper to create a file in a temp dir
+    /// Helper to create a file in a temp dir.
     fn create_file(base: &Path, relative: &str) {
         let path = base.join(relative);
         if let Some(parent) = path.parent() {

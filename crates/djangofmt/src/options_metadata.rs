@@ -116,11 +116,11 @@ impl OptionSet {
 pub struct OptionField {
     /// The field's doc comment.
     pub doc: &'static str,
-    /// The default value, rendered as TOML. Ex) `"false"`
+    /// The default value, rendered as TOML. Ex) `"false"`.
     pub default: &'static str,
-    /// Ex) `"bool"`
+    /// Ex) `"bool"`.
     pub value_type: &'static str,
-    /// The TOML sub-table the example belongs to. Ex) `"per-file-ignores"`
+    /// The TOML sub-table the example belongs to. Ex) `"per-file-ignores"`.
     pub scope: Option<&'static str>,
     /// A TOML snippet setting this option.
     pub example: &'static str,

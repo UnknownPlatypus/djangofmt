@@ -70,7 +70,7 @@ const EXCLUDED_TAGS: &[&str] = &[
 ];
 
 /// A hyphen marks a custom element (`<my-widget>`).
-/// See <https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name>
+/// See <https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name>.
 fn is_excluded_tag(tag: &str) -> bool {
     tag.contains('-')
         || EXCLUDED_TAGS

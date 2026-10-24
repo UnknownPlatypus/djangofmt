@@ -275,7 +275,7 @@ struct Tool {
     djangofmt: Option<PyprojectSettings>,
 }
 
-/// Loads `Options` from a given `pyproject.toml` file
+/// Loads `Options` from a given `pyproject.toml` file.
 fn load_options_from_pyproject_toml(content: &str) -> Result<PyprojectSettings> {
     let pyproject = toml::from_str::<PyProject>(content)
         .map_err(|err| Error::Resolve(format!("Failed to parse pyproject.toml: {err}")))?;

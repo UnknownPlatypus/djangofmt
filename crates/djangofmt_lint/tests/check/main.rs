@@ -55,7 +55,7 @@ fn check_invalid() {
 /// Snapshots the post-fix source for each `*.invalid.html` fixture that produces a fix.
 ///
 /// Safe fixes are snapshot as `{stem}.fixed`;
-/// Unsafe fixes are snapshot as `{stem}.unsafe-fixed`;
+/// Unsafe fixes are snapshot as `{stem}.unsafe-fixed`.
 #[test]
 fn fix_snapshot() {
     glob!("**/*.invalid.{html,jinja}", |path| {
