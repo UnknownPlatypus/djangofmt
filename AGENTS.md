@@ -1,6 +1,7 @@
 ## Conventions
 
 - Use comments sparingly — only when they explain hidden behavior — and keep them to 1-2 lines. Rule doc comments (`## What it does` …) are the generated docs and exempt.
+- Core lint and format infrastructure mirrors ruff's design upfront, even before a rule needs it. Peripheral features (editorconfig, ecosystem-check tooling) stay minimal and match a reference tool's scope, not the full spec.
 - Every new CLI flag must also be readable from `pyproject.toml`: add it to `PyprojectSettings`/`LintSettings` in `pyproject.rs` and resolve it with CLI args taking precedence.
 - Keep tests lean: one case per behaviour, and a case another case already exercises is deleted.
 - Adding or porting a lint rule: follow `.agents/skills/add-lint-rule/SKILL.md` end to end.
@@ -11,45 +12,19 @@
 ## Commands
 
 ```bash
-just                                                 # List every recipe (coverage, benchmarks, ecosystem checks, docs)
-just pre-mr-check                                    # Full pre-merge check: pre-commit, clippy, all tests, docs build
-cargo test --workspace --all-targets --all-features  # Run all tests
-cargo test -p djangofmt --test cli <test_name>       # Run a specific CLI integration test
-cargo test -p djangofmt --test fmt                   # Run all formatting snapshot tests
-cargo clippy --all-targets --all-features            # Lint
-uv run --only-dev cargo insta review                 # Accept/reject snapshot mismatches after a formatter change
+just                                  # List every recipe (coverage, benchmarks, ecosystem checks, fuzzing, docs)
+just pre-mr-check                     # Full pre-merge check: pre-commit, clippy, all tests, docs build
+uv run --only-dev cargo insta review  # Accept/reject snapshot mismatches
 ```
 
 ## Architecture
 
-This is a Rust workspace with eight crates in `crates/`. `djangofmt_syntax` sits at the bottom, `djangofmt_formatter` and `djangofmt_lint` build on it independently, and the CLI, wasm and benchmark crates combine them:
+`djangofmt_syntax` sits at the bottom and depends on neither the formatter nor the linter. `djangofmt_formatter` and `djangofmt_lint` build on it independently. The `djangofmt` CLI, wasm and benchmark crates combine them; the CLI holds no formatting or lint logic of its own.
 
-**`djangofmt`** — the main CLI binary. Discovers files via `resolver.rs`, reads config from `pyproject.toml` (`[tool.djangofmt]`) merged with CLI args (`args.rs`), then processes files in parallel using rayon. Formatting is the default command (`djangofmt <paths>`) and reformats in-place; the `check` subcommand reports violations. Error reporting uses `miette`. It holds no formatting or lint logic of its own. Exit codes: 0 = success, 1 = formatting/lint errors, 2 = I/O or parse errors.
+Formatter fixes get a fixture in `crates/djangofmt/tests/fmt/`: the harness formats every fixture twice, so it also catches unstable output.
 
-**`djangofmt_syntax`** — what both tools share about a template: `parse`/`Parsed`, `Profile`, spans, comment delimiters, the `djangofmt: ignore[...]` directive grammar and `FileIgnores`, and `ParseError` rendering. It must not depend on the formatter or the linter.
+### `markup_fmt`
 
-**`djangofmt_formatter`** — the formatting engine: `format_text` and `FormatterConfig`, driving `markup_fmt` with `malva` and `dprint-plugin-json` for embedded CSS and JSON. Also owns `panic.rs`, the panic isolation it needs around those embedded formatters and which the CLI reuses per file.
+The HTML/Jinja2 parser and formatter that provides the AST, pinned to a git rev of the `UnknownPlatypus/markup_fmt` fork in the root `Cargo.toml`. Fixes to it go in a local checkout of the fork as two branches: one on top of `django/baseline`, which djangofmt then pins, and a cherry-pick of the same commits on top of `g-plane/main` for the upstream PR.
 
-**`djangofmt_lint`** — the linting library. `checker.rs` implements a visitor over the `markup_fmt` AST and runs rules from `rules/`. Each rule implements the `Violation` trait. The `Checker` struct collects violations with source offsets.
-
-**`djangofmt_wasm`** — WebAssembly bindings for the browser playground, built with `wasm-pack`.
-
-**`djangofmt_benchmark`** — divan-based micro-benchmarks embedding real-world templates from Django/Wagtail/Zulip.
-
-**`djangofmt_macros`** — proc macros consumed by `djangofmt_lint`: the `ViolationMetadata` derive and `derive_message_formats`.
-
-**`djangofmt_dev`** — dev-only CLI that generates the rule docs (`docs/rules.md`, `docs/rules/`) from violation doc comments and syncs README/CONTRIBUTING into `docs/`; run via `just docs-generate`. Its output is gitignored, never committed.
-
-### Key external dependencies
-
-- **`markup_fmt`** — the HTML/Jinja2 parser and formatter that provides the AST. An upstream dependency (not vendored), pinned to a git rev of the `UnknownPlatypus/markup_fmt` fork in the root `Cargo.toml`. Fixes to it go in a local checkout of the fork as two branches: one on top of `django/baseline`, which djangofmt then pins, and a cherry-pick of the same commits on top of `g-plane/main` for the upstream PR.
-- **`malva`** — formats inline CSS in `<style>` tags/attributes.
-- **`dprint-plugin-json`** — formats `<script type="application/json">` content.
-- **`insta`** / **`insta-cmd`** — snapshot testing for formatter output and CLI behavior respectively.
-
-### Test layout
-
-- `crates/djangofmt/tests/fmt/` — snapshot tests for formatting. Each test is an `.html` input file; expected output is a `.snap` file alongside it.
-- `crates/djangofmt/tests/cli.rs` — CLI integration tests using `insta-cmd` and `tempfile`.
-- `crates/djangofmt/tests/parse_error/` — parse error reporting tests.
-- `crates/djangofmt_lint/tests/check/` — lint rule fixtures, one directory per rule holding a `valid` and an `invalid` file.
+To test an unpushed fork commit, point the workspace dependency at `{ path = "../markup_fmt/markup_fmt" }`: `[patch]` cannot resolve an unpushed rev. Restore the `{ git, rev }` line and `Cargo.lock` before committing.
