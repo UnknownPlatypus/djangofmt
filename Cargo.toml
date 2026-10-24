@@ -75,26 +75,20 @@ pedantic = { level = "deny", priority = -1 }
 restriction = { level = "deny", priority = -1 }
 wildcard_dependencies = "deny"
 
-# Deliberate opt-outs; new restriction lints surface on toolchain bumps.
+# Opt-outs; new restriction lints are on by default, so they surface on toolchain bumps.
+# Contradict idiomatic Rust or how this codebase is written.
 absolute_paths = "allow"
 arbitrary_source_item_ordering = "allow"
-arithmetic_side_effects = "allow"
 as_conversions = "allow"
-blanket_clippy_restriction_lints = "allow"
 definition_in_module_root = "allow"
 else_if_without_else = "allow"
 error_impl_error = "allow"
-exhaustive_enums = "allow"
-exhaustive_structs = "allow"
 expect_used = "allow"
 field_scoped_visibility_modifiers = "allow"
 impl_trait_in_params = "allow"
 implicit_return = "allow"
-indexing_slicing = "allow"
 inline_modules = "allow"
 inline_trait_bounds = "allow"
-integer_division = "allow"
-integer_division_remainder_used = "allow"
 let_underscore_must_use = "allow"
 let_underscore_untyped = "allow"
 map_err_ignore = "allow"
@@ -104,33 +98,52 @@ missing_docs_in_private_items = "allow"
 missing_errors_doc = "allow"
 missing_inline_in_public_items = "allow"
 missing_trait_methods = "allow"
-mod_module_files = "allow"
 module_name_repetitions = "allow"
-non_ascii_literal = "allow"
 partial_pub_fields = "allow"
 pattern_type_mismatch = "allow"
 pub_use = "allow"
-pub_with_shorthand = "allow"
 question_mark_used = "allow"
-ref_patterns = "allow"
-rest_pattern_accessible_field = "allow"
-return_and_then = "allow"
-semicolon_outside_block = "allow"
 shadow_reuse = "allow"
 shadow_same = "allow"
 shadow_unrelated = "allow"
 single_call_fn = "allow"
 single_char_lifetime_names = "allow"
-std_instead_of_alloc = "allow"
-std_instead_of_core = "allow"
-str_to_string = "allow"
-string_slice = "allow"
 tests_outside_test_module = "allow"
 unreachable = "allow"
-unseparated_literal_suffix = "allow"
-unused_trait_names = "allow"
 use_debug = "allow"
+
+# Pure taste, no bug or clarity gain.
+ref_patterns = "allow"
+return_and_then = "allow"
+str_to_string = "allow"
+unused_trait_names = "allow"
+
+# Opposite of a convention we already follow.
+mod_module_files = "allow"
+pub_with_shorthand = "allow"
+semicolon_outside_block = "allow"
+unseparated_literal_suffix = "allow"
+
+# Not applicable: no_std, published API stability, overflow-critical math.
+arithmetic_side_effects = "allow"
+exhaustive_enums = "allow"
+exhaustive_structs = "allow"
+integer_division = "allow"
+integer_division_remainder_used = "allow"
+non_ascii_literal = "allow"
+std_instead_of_alloc = "allow"
+std_instead_of_core = "allow"
+
+# Offsets come from the parser; `.get().expect()` would not be safer.
+indexing_slicing = "allow"
+string_slice = "allow"
+
+# Listing every markup_fmt variant/field would bury the matches that matter.
+rest_pattern_accessible_field = "allow"
 wildcard_enum_match_arm = "allow"
+
+# Enabling the whole restriction group is the point.
+blanket_clippy_restriction_lints = "allow"
 
 [workspace.lints.rust]
 redundant_imports = "deny"
