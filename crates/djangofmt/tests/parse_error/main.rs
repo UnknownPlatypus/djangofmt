@@ -2,7 +2,7 @@
     clippy::result_large_err,
     reason = "test surfaces the large error type directly"
 )]
-#[path = "../common.rs"]
+#[path = "../common/mod.rs"]
 mod common;
 
 use common::build_settings;

@@ -1,4 +1,4 @@
-#[path = "../../../djangofmt/tests/common.rs"]
+#[path = "../../../djangofmt/tests/common/mod.rs"]
 mod common;
 
 use common::build_settings;
