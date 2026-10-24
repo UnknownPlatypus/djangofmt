@@ -2,3 +2,16 @@ allow-print-in-tests = true
 allow-unwrap-in-tests = true
 allow-dbg-in-tests = true
 allow-panic-in-tests = true
+
+too-many-arguments-threshold = 6
+
+disallowed-methods = [
+  { path = "std::panic::catch_unwind", reason = "use djangofmt_formatter::panic::catch_unwind, the only panic boundary" },
+  { path = "std::panic::set_hook", reason = "would replace the capture hook in djangofmt_formatter::panic" },
+  { path = "std::panic::take_hook", reason = "would replace the capture hook in djangofmt_formatter::panic" },
+]
+disallowed-types = [
+  { path = "std::panic::AssertUnwindSafe", reason = "state seen after a caught panic may be broken" },
+  { path = "std::collections::HashMap", reason = "use rustc_hash::FxHashMap" },
+  { path = "std::collections::HashSet", reason = "use rustc_hash::FxHashSet" },
+]

@@ -24,7 +24,7 @@ use crate::{ExitStatus, STDIN_SENTINEL};
 use super::format::merge_custom_blocks;
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct CheckConfig {
     pub fix: bool,
     pub unsafe_fixes: bool,
@@ -193,15 +193,7 @@ impl CheckRun {
             OutputFormat::Concise => print_concise(results, self.config.threshold()),
         }
 
-        print_summary(
-            totals.diagnostics,
-            totals.applied,
-            totals.safe_fixable,
-            totals.unsafe_fixable,
-            self.config.fix,
-            self.config.unsafe_fixes,
-            nb_errors,
-        );
+        print_summary(&totals, &self.config, nb_errors);
 
         print_skipped(totals.skipped);
 
@@ -304,37 +296,37 @@ fn print_concise(results: &[CheckResult], threshold: Applicability) {
     }
 }
 
-fn print_summary(
-    total: usize,
-    applied: usize,
-    safe_fixable: usize,
-    unsafe_fixable: usize,
-    apply_to_disk: bool,
-    unsafe_fixes_enabled: bool,
-    parse_errors: usize,
-) {
-    if total == 0 && applied == 0 {
+fn print_summary(totals: &Totals, config: &CheckConfig, parse_errors: usize) {
+    let Totals {
+        diagnostics,
+        applied,
+        safe_fixable,
+        unsafe_fixable,
+        ..
+    } = *totals;
+
+    if diagnostics == 0 && applied == 0 {
         if parse_errors == 0 {
             info!("All checks passed!");
         }
         return;
     }
 
-    if apply_to_disk {
-        let found = applied + total;
-        info!("Found {found} errors ({applied} fixed, {total} remaining).");
+    if config.fix {
+        let found = applied + diagnostics;
+        info!("Found {found} errors ({applied} fixed, {diagnostics} remaining).");
         return;
     }
 
     // With `--unsafe-fixes` set (but no `--fix`), unsafe fixes count toward
     // what `--fix` would apply; without it they are reported as hidden.
     let fixable_with_fix = safe_fixable
-        + if unsafe_fixes_enabled {
+        + if config.unsafe_fixes {
             unsafe_fixable
         } else {
             0
         };
-    let hidden = if unsafe_fixes_enabled {
+    let hidden = if config.unsafe_fixes {
         0
     } else {
         unsafe_fixable
@@ -347,12 +339,14 @@ fn print_summary(
             String::new()
         };
         info!(
-            "Found {total} errors. [*] {fixable_with_fix} fixable with the --fix option.{suffix}"
+            "Found {diagnostics} errors. [*] {fixable_with_fix} fixable with the --fix option.{suffix}"
         );
     } else if hidden > 0 {
-        info!("Found {total} errors. ({hidden} hidden fixes can be enabled with --unsafe-fixes)");
+        info!(
+            "Found {diagnostics} errors. ({hidden} hidden fixes can be enabled with --unsafe-fixes)"
+        );
     } else {
-        info!("Found {total} errors.");
+        info!("Found {diagnostics} errors.");
     }
 }
 
@@ -482,7 +476,7 @@ pub(crate) fn check_source(
 
 #[cfg(test)]
 mod tests {
-    use super::{CheckConfig, print_summary};
+    use super::{CheckConfig, Totals, print_summary};
     use crate::args::{CheckCommand, OutputFormat};
     use crate::pyproject::LintSettings;
     use tracing_test::traced_test;
@@ -568,14 +562,14 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_all_passed() {
-        print_summary(0, 0, 0, 0, false, false, 0);
+        print_summary(&Totals::default(), &CheckConfig::default(), 0);
         assert!(logs_contain("All checks passed!"));
     }
 
     #[test]
     #[traced_test]
     fn summary_silent_when_only_parse_errors() {
-        print_summary(0, 0, 0, 0, false, false, 2);
+        print_summary(&Totals::default(), &CheckConfig::default(), 2);
         assert!(!logs_contain("All checks passed!"));
         assert!(!logs_contain("Found"));
     }
@@ -584,7 +578,19 @@ mod tests {
     #[traced_test]
     fn summary_apply_to_disk_ignores_fixable_counts() {
         // Under `--fix`, fixable counts shouldn't leak into the message.
-        print_summary(2, 3, 4, 5, true, true, 0);
+        let totals = Totals {
+            diagnostics: 2,
+            applied: 3,
+            safe_fixable: 4,
+            unsafe_fixable: 5,
+            ..Totals::default()
+        };
+        let config = CheckConfig {
+            fix: true,
+            unsafe_fixes: true,
+            ..CheckConfig::default()
+        };
+        print_summary(&totals, &config, 0);
         assert!(logs_contain("Found 5 errors (3 fixed, 2 remaining)."));
         assert!(!logs_contain("fixable with"));
         assert!(!logs_contain("hidden"));
@@ -593,7 +599,12 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_check_only_safe_fixable() {
-        print_summary(7, 0, 2, 0, false, false, 0);
+        let totals = Totals {
+            diagnostics: 7,
+            safe_fixable: 2,
+            ..Totals::default()
+        };
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 2 fixable with the --fix option."
         ));
@@ -603,7 +614,13 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_check_only_safe_and_unsafe_hidden() {
-        print_summary(7, 0, 2, 3, false, false, 0);
+        let totals = Totals {
+            diagnostics: 7,
+            safe_fixable: 2,
+            unsafe_fixable: 3,
+            ..Totals::default()
+        };
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 2 fixable with the --fix option. \
              (3 hidden fixes can be enabled with --unsafe-fixes)"
@@ -613,7 +630,12 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_check_only_unsafe_hidden() {
-        print_summary(7, 0, 0, 3, false, false, 0);
+        let totals = Totals {
+            diagnostics: 7,
+            unsafe_fixable: 3,
+            ..Totals::default()
+        };
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain(
             "Found 7 errors. (3 hidden fixes can be enabled with --unsafe-fixes)"
         ));
@@ -625,7 +647,17 @@ mod tests {
     fn summary_check_with_unsafe_fixes_enabled_combines_counts() {
         // `--unsafe-fixes` set, but no `--fix`: unsafe fixes are now reportable
         // as fixable, not hidden.
-        print_summary(7, 0, 2, 3, false, true, 0);
+        let totals = Totals {
+            diagnostics: 7,
+            safe_fixable: 2,
+            unsafe_fixable: 3,
+            ..Totals::default()
+        };
+        let config = CheckConfig {
+            unsafe_fixes: true,
+            ..CheckConfig::default()
+        };
+        print_summary(&totals, &config, 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 5 fixable with the --fix option."
         ));
@@ -635,7 +667,16 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_check_with_unsafe_fixes_enabled_only_unsafe() {
-        print_summary(7, 0, 0, 3, false, true, 0);
+        let totals = Totals {
+            diagnostics: 7,
+            unsafe_fixable: 3,
+            ..Totals::default()
+        };
+        let config = CheckConfig {
+            unsafe_fixes: true,
+            ..CheckConfig::default()
+        };
+        print_summary(&totals, &config, 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 3 fixable with the --fix option."
         ));
@@ -645,7 +686,11 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_check_no_fixes_available() {
-        print_summary(5, 0, 0, 0, false, false, 0);
+        let totals = Totals {
+            diagnostics: 5,
+            ..Totals::default()
+        };
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain("Found 5 errors."));
         assert!(!logs_contain("fixable with"));
         assert!(!logs_contain("hidden"));
