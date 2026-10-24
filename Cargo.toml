@@ -148,9 +148,13 @@ wildcard_enum_match_arm = "allow"
 blanket_clippy_restriction_lints = "allow"
 
 [workspace.lints.rust]
+ambiguous_negative_literals = "deny"
+missing_debug_implementations = "deny"
 redundant_imports = "deny"
 redundant_lifetimes = "deny"
 trivial_numeric_casts = "deny"
+unnameable_types = "deny"
+unsafe_code = "deny"
 unused_lifetimes = "deny"
 unused_qualifications = "deny"
 warnings = "deny"
