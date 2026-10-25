@@ -1,4 +1,4 @@
-#[path = "../common.rs"]
+#[path = "../common/mod.rs"]
 mod common;
 
 use common::build_settings;

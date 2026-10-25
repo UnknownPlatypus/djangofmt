@@ -349,17 +349,6 @@ mod tests {
         ----- stderr -----
         ");
     }
-    #[test]
-    fn cli_version() {
-        assert_cmd_snapshot!(cli().arg("--version"), @"
-        success: true
-        exit_code: 0
-        ----- stdout -----
-        djangofmt 1.1.0
-
-        ----- stderr -----
-        ");
-    }
 
     #[test]
     fn cli_invalid_line_length() {

@@ -53,6 +53,8 @@ impl std::fmt::Display for PanicError {
     }
 }
 
+impl std::error::Error for PanicError {}
+
 #[derive(Default)]
 struct CapturedPanicInfo {
     backtrace: Option<std::backtrace::Backtrace>,

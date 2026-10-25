@@ -141,13 +141,16 @@ pub struct FixerResult {
 }
 
 /// Errors from [`lint_fix`].
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum FixerError {
     /// `source` failed to parse; no fix was attempted.
-    InitialParse(SyntaxError),
+    #[error("source failed to parse, no fix was attempted")]
+    InitialParse(#[source] SyntaxError),
     /// A fix introduced a syntax error in source that previously parsed.
+    #[error("a fix introduced a syntax error at iteration {iteration}")]
     SyntaxRegression {
         iteration: usize,
+        #[source]
         error: SyntaxError,
     },
 }

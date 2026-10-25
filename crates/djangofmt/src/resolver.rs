@@ -229,12 +229,7 @@ pub fn resolve_files(
                 // Directories descend; like ruff, everything else (symlinks included) is a
                 // file candidate and must match the include set.
                 entry.file_type().is_none_or(|ft| ft.is_dir()) || include.is_match(entry.path())
-            })
-            .threads(
-                std::thread::available_parallelism()
-                    .map_or(1, std::num::NonZeroUsize::get)
-                    .min(12),
-            );
+            });
 
         let state = WalkFilesState::new();
         let mut visitor_builder = FileVisitorBuilder::new(&state);
