@@ -491,6 +491,7 @@ DEFAULT_TARGETS = [
                     # <a>/<optgroup> opened inside an {% if %}
                     "bookwyrm/templates/book/edit/edit_book.html",
                     "bookwyrm/templates/book/sections/description.html",
+                    "bookwyrm/templates/snippets/form_help.html",
                     "bookwyrm/templates/widgets/select.html",
                 ),
             },
