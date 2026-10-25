@@ -122,3 +122,11 @@ repos:
     hooks:
       - id: uv-lock
       - id: uv-sync
+  - repo: local
+    hooks:
+      - id: single-item-path
+        name: "no `pub use` of a `pub mod` (item reachable via two paths)"
+        language: pygrep
+        entry: '^pub mod (\w+);.*^pub use (crate::|self::)?\1::'
+        args: [--multiline]
+        types: [rust]

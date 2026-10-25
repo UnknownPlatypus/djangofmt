@@ -1,5 +1,4 @@
-use djangofmt_lint::settings::{endblock_label, unsorted_tailwind_classes};
-use djangofmt_lint::{DjangoVersion, RuleSelector};
+use djangofmt_lint::{DjangoVersion, RuleSelector, endblock_label, unsorted_tailwind_classes};
 use djangofmt_macros::OptionsMetadata;
 use djangofmt_syntax::Profile;
 use serde::Deserialize;

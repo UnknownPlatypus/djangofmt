@@ -2,10 +2,9 @@
 mod common;
 
 use common::build_settings;
-use djangofmt_lint::settings::endblock_label;
 use djangofmt_lint::{
     Applicability, FileDiagnostics, LintDiagnostic, Rule, RuleSet, Settings, apply_fixes, check,
-    lint_source,
+    endblock_label, lint_source,
 };
 use djangofmt_syntax::{Profile, graphical_handler, parse};
 
