@@ -35,6 +35,7 @@ pub trait OptionsMetadata {
 }
 
 /// An option that is either a single [`OptionField`] or a nested [`OptionSet`].
+#[derive(Debug)]
 pub enum OptionEntry {
     /// A single option.
     Field(OptionField),
@@ -43,7 +44,7 @@ pub enum OptionEntry {
 }
 
 /// A set of options, extracted by calling [`OptionsMetadata::record`].
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct OptionSet {
     record: fn(&mut dyn Visit),
     doc: fn() -> Option<&'static str>,

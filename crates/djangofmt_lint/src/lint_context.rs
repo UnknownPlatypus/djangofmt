@@ -21,6 +21,7 @@ use djangofmt_syntax::span;
 ///
 /// [`LintContext::report_diagnostic`] can be used to obtain a [`DiagnosticGuard`], which will push
 /// a [`Violation`] to the contained [`LintDiagnostic`] collection on `Drop`.
+#[derive(Debug)]
 pub struct LintContext<'a> {
     diagnostics: RefCell<Vec<LintDiagnostic>>,
     source: &'a str,
@@ -164,6 +165,7 @@ impl<'a> LintContext<'a> {
 }
 
 /// Guard that holds a partially-built diagnostic and pushes it on Drop.
+#[derive(Debug)]
 pub struct DiagnosticGuard<'ctx, 'a> {
     context: &'ctx LintContext<'a>,
     diagnostic: Option<LintDiagnostic>,

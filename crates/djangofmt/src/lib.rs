@@ -26,7 +26,7 @@ pub mod resolver;
 #[cfg(test)]
 mod test_support;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum ExitStatus {
     /// Command was successful and there were no errors.
     Success,

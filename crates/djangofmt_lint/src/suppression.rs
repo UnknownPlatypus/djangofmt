@@ -42,6 +42,7 @@ fn has_reason(body: &str) -> bool {
 }
 
 /// A `{# djangofmt: ... #}` comment as the linter reads it.
+#[derive(Debug)]
 pub struct IgnoreComment<'s> {
     /// The whole comment, delimiters included: what a diagnostic points at and a fix deletes.
     pub raw: &'s str,

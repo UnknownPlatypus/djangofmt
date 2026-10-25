@@ -122,6 +122,7 @@ impl IntoIterator for &RuleSet {
 }
 
 /// Iterator over the rules in a [`RuleSet`], using `trailing_zeros()` to skip zero words.
+#[derive(Debug)]
 pub struct RuleSetIterator {
     set: RuleSet,
     word_index: usize,
