@@ -61,7 +61,7 @@ See the [README](./python/ecosystem-check/README.md).
 ## Fuzzing
 
 The formatter can be fuzzed with [cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz)
-(requires `rustup toolchain install nightly` and `cargo install cargo-fuzz`):
+(requires `rustup toolchain install nightly`):
 
 ```shell
 just fuzz     # run until interrupted

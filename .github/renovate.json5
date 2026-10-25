@@ -34,6 +34,11 @@
       description: "Weekly update of artifact-related GitHub Actions dependencies",
     },
     {
+      // Its tags are bare `vN`, which `helpers:pinGitHubActionDigestsToSemver` filters out.
+      matchPackageNames: ["dawidd6/action-download-artifact"],
+      extractVersion: "^(?<version>v\\d+)$",
+    },
+    {
       // This package rule disables updates for GitHub runners: we'd only pin them to a specific version if there was a deliberate reason to do so
       groupName: "GitHub runners",
       matchManagers: ["github-actions"],
@@ -144,15 +149,6 @@
       packageNameTemplate: "denoland/deno",
       datasourceTemplate: "github-releases",
       extractVersionTemplate: "^v(?<version>.*)$",
-    },
-    // wasm-pack version used in wasm-pack-action
-    {
-      customType: "regex",
-      managerFilePatterns: ["/.github/workflows/publish-playground-and-docs\\.yml$/"],
-      matchStrings: ["version: (?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
-      depNameTemplate: "wasm-pack",
-      packageNameTemplate: "rustwasm/wasm-pack",
-      datasourceTemplate: "github-releases",
     },
     // Official dprint plugins (plugins.dprint.dev/<name>-<version>.wasm)
     {

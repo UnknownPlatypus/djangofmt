@@ -8,10 +8,6 @@ if [ "$branch" != "main" ]; then
 	exit 1
 fi
 
-if ! command -v typos &>/dev/null; then
-	echo "typos is not installed. Run 'cargo install typos-cli' to install it, otherwise the typos won't be fixed"
-fi
-
 if [ -z "$1" ]; then
 	echo "Please provide a tag."
 	echo "Usage: ./release.sh v[X.Y.Z]"
@@ -27,7 +23,8 @@ grep -rlZ NEXT_DJANGOFMT_VERSION crates/djangofmt_lint/src/rules | xargs -0 -r s
 # sync cargo.lock
 cargo build
 # update the changelog
-git cliff --tag "$1" -o
+# `uv run` puts the dev group's typos on PATH for the changelog's commit preprocessor.
+uv run --only-dev git-cliff --tag "$1" -o
 git add -A && pre-commit run || true
 git add -A && pre-commit run
 
@@ -39,7 +36,7 @@ export GIT_CLIFF_TEMPLATE="\
 		- {% if commit.breaking %}(breaking) {% endif %}{{ commit.message | upper_first }} ({{ commit.id | truncate(length=7, end=\"\") }})\
 	{% endfor %}
 	{% endfor %}"
-changelog=$(git cliff --unreleased --strip all)
+changelog=$(uv run --only-dev git-cliff --unreleased --strip all)
 
 # prompt before this
 echo -n "Ready to commit and tag release $1? [y/N] "

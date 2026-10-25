@@ -120,7 +120,7 @@ bloat:
     RUSTFLAGS="-C debuginfo=2 -C strip=none" uv run --only-dev cargo bloat --release -p djangofmt -n 15
     RUSTFLAGS="-C debuginfo=2 -C strip=none" uv run --only-dev cargo bloat --release -p djangofmt --crates -n 15
 
-# Fuzz the formatter (requires: rustup toolchain install nightly; cargo install cargo-fuzz)
+# Fuzz the formatter (requires: rustup toolchain install nightly)
 [group('dev')]
 fuzz time="0" *args="":
     @mkdir -p fuzz/corpus/fmt_idempotency
@@ -128,7 +128,7 @@ fuzz time="0" *args="":
         echo "error: fuzz/corpus/fmt_idempotency holds libFuzzer artifacts (crash-*, oom-*, ...) that abort the corpus replay, move them to fuzz/artifacts/" >&2; \
         exit 1; \
     fi
-    cargo +nightly fuzz run -s none fmt_idempotency \
+    uv run --only-dev cargo +nightly fuzz run -s none fmt_idempotency \
         fuzz/corpus/fmt_idempotency \
         crates/djangofmt/tests/fmt \
         crates/djangofmt/tests/parse_error \
@@ -139,7 +139,7 @@ fuzz time="0" *args="":
 # Minimize a fuzz crash artifact from fuzz/artifacts/fmt_idempotency/
 [group('dev')]
 fuzz-min artifact:
-    cargo +nightly fuzz tmin -s none fmt_idempotency {{artifact}}
+    uv run --only-dev cargo +nightly fuzz tmin -s none fmt_idempotency {{artifact}}
 
 # Run rust micro-benchmarks
 [group('bench')]
