@@ -3,6 +3,7 @@ use djangofmt_syntax::{ParseError, Profile};
 use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use std::borrow::Cow;
+use std::fmt::Write as _;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -267,24 +268,23 @@ pub fn build_summary<'a>(
     } else {
         ("reformatted", "left unchanged")
     };
-    let parts: Vec<String> = [
+    // Pre-sized so the three parts never reallocate: the longest summary is under 96 bytes.
+    let mut summary = String::with_capacity(96);
+    for (count, label) in [
         (changed, changed_label),
         (unchanged, unchanged_label),
         (skipped, "skipped"),
-    ]
-    .iter()
-    .filter(|(count, _)| *count > 0)
-    .map(|(count, label)| {
-        format!(
-            "{} file{} {}",
-            count,
-            if *count == 1 { "" } else { "s" },
-            label
-        )
-    })
-    .collect();
-
-    parts.join(", ")
+    ] {
+        if count == 0 {
+            continue;
+        }
+        if !summary.is_empty() {
+            summary.push_str(", ");
+        }
+        let plural = if count == 1 { "" } else { "s" };
+        write!(summary, "{count} file{plural} {label}").expect("writing to a String cannot fail");
+    }
+    summary
 }
 
 #[cfg(test)]
