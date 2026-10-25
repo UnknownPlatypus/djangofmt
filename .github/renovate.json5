@@ -34,6 +34,11 @@
       description: "Weekly update of artifact-related GitHub Actions dependencies",
     },
     {
+      // Its tags are bare `vN`, which `helpers:pinGitHubActionDigestsToSemver` filters out.
+      matchPackageNames: ["dawidd6/action-download-artifact"],
+      extractVersion: "^(?<version>v\\d+)$",
+    },
+    {
       // This package rule disables updates for GitHub runners: we'd only pin them to a specific version if there was a deliberate reason to do so
       groupName: "GitHub runners",
       matchManagers: ["github-actions"],

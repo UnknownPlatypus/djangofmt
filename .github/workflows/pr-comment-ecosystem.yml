@@ -27,7 +27,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+      - uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
         name: Download pull request number
         with:
           name: pr-number
@@ -51,7 +51,7 @@ jobs:
               echo "pr-number=${pr_number}" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+      - uses: dawidd6/action-download-artifact@eab87c9830c39eff17e5a6eadb20bfb4bc880477 # v27
         name: "Download ecosystem check results"
         id: download-ecosystem-result
         if: steps.pr-number.outputs.pr-number
