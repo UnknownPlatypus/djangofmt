@@ -42,8 +42,8 @@ env:
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.1
-  UV_CHECKSUM: eadd9d27c134ab5ac1ffd4473b97a741407f3ea238288f03121fc4deddf90220 # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.4
+  UV_CHECKSUM: 2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f # x86_64-unknown-linux-gnu
   # renovate: datasource=github-release-attachments depName=wasm-bindgen/wasm-pack
   WASM_PACK_VERSION: v0.15.0
   WASM_PACK_CHECKSUM: c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a # x86_64-unknown-linux-musl

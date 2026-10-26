@@ -33,7 +33,7 @@
   },
   "excludes": [],
   "plugins": [
-    "https://plugins.dprint.dev/markdown-0.26.0.wasm",
+    "https://plugins.dprint.dev/markdown-0.27.1.wasm",
     "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm",
     "https://plugins.dprint.dev/typescript-0.96.1.wasm",
     "https://plugins.dprint.dev/json-0.25.2.wasm",
