@@ -19,8 +19,8 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.4
-  UV_CHECKSUM: 2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.6
+  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645 # x86_64-unknown-linux-gnu
   # renovate: datasource=github-release-attachments depName=astral-sh/hawk
   HAWK_VERSION: 0.1.15
   HAWK_CHECKSUM: c50189129c43f026b19a0e7da2a405ab2599ff9426a826f7db8ab64d7274d1d5 # x86_64-unknown-linux-gnu
@@ -93,7 +93,7 @@ jobs:
         run: cargo build --locked -p djangofmt --release --verbose && mv target/release/djangofmt ./pr_djangofmt
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
@@ -212,7 +212,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
@@ -264,7 +264,7 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Setup uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}

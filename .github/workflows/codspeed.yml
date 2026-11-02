@@ -24,8 +24,8 @@ permissions: # optional for public repositories
 
 env:
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.4
-  UV_CHECKSUM: 2b428396f12572d4429cf210ca234dd599a33b3af0958a4d5ed569d63e3f344f # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.6
+  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645 # x86_64-unknown-linux-gnu
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -47,7 +47,7 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Setup uv
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
@@ -56,7 +56,7 @@ jobs:
       - name: Build the benchmark target(s)
         run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile release
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@821a40cd6c80e3cfe387caf55668287addd808da # v5.5.0
+        uses: CodSpeedHQ/action@78102a468f96d8e0ccb92d0ec49425753fc42062 # v5.6.0
         with:
           mode: simulation
           cycle-estimation: false
