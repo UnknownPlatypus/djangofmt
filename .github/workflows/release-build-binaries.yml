@@ -45,15 +45,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build sdist"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -66,7 +66,7 @@ jobs:
           pip install dist/${{ env.PACKAGE_NAME }}-*.tar.gz --force-reinstall
           ${{ env.PACKAGE_NAME }} --help
       - name: "Upload sdist"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-sdist
           compression-level: 0
@@ -81,16 +81,16 @@ jobs:
           - x86_64-unknown-linux-gnu
           - i686-unknown-linux-gnu
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
       - name: "Build wheels"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -107,7 +107,7 @@ jobs:
             pip install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
             "${PACKAGE_NAME}" --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-${{ matrix.target }}
           compression-level: 0
@@ -126,7 +126,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-${{ matrix.target }}
           compression-level: 0
@@ -170,15 +170,15 @@ jobs:
             manylinux: auto
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build wheels"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -205,7 +205,7 @@ jobs:
             python3 -m pip install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
             "${PACKAGE_NAME}" --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
           compression-level: 0
@@ -224,7 +224,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
           compression-level: 0
@@ -241,16 +241,16 @@ jobs:
           - x86_64-unknown-linux-musl
           - i686-unknown-linux-musl
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
       - name: "Build wheels"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -269,7 +269,7 @@ jobs:
             .venv/bin/pip3 install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
             .venv/bin/"${PACKAGE_NAME}" --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-${{ matrix.target }}
           compression-level: 0
@@ -288,7 +288,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-${{ matrix.target }}
           compression-level: 0
@@ -309,15 +309,15 @@ jobs:
             test_platform: linux/arm/v7
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
       - name: "Build wheels"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -337,7 +337,7 @@ jobs:
             .venv/bin/pip3 install "${PACKAGE_NAME}" --no-index --find-links /dist --force-reinstall
             .venv/bin/"${PACKAGE_NAME}" --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
           compression-level: 0
@@ -356,7 +356,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
           compression-level: 0
@@ -368,17 +368,17 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: x64
 
       - name: "Build wheels - x86_64"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -390,7 +390,7 @@ jobs:
           arch -x86_64 python -m pip install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
           ${{ env.PACKAGE_NAME }} --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-macos-x86_64
           compression-level: 0
@@ -406,7 +406,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-macos-x86_64
           compression-level: 0
@@ -418,17 +418,17 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
           architecture: arm64
 
       - name: "Build wheels"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -439,7 +439,7 @@ jobs:
           pip install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
           ${{ env.PACKAGE_NAME }} --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-aarch64-apple-darwin
           compression-level: 0
@@ -455,7 +455,7 @@ jobs:
           tar czvf $ARCHIVE_FILE $ARCHIVE_NAME
           shasum -a 256 $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-aarch64-apple-darwin
           compression-level: 0
@@ -476,10 +476,10 @@ jobs:
           - target: aarch64-pc-windows-msvc
             arch: x64 # not relevant here
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      - uses: actions/setup-python@v7.1.0
         with:
           cache: ""
           python-version: ${{ env.PYTHON_VERSION }}
@@ -489,7 +489,7 @@ jobs:
         run: rustup component add llvm-tools-preview
 
       - name: "Build wheels"
-        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
           maturin-version: v1.15.0
@@ -514,7 +514,7 @@ jobs:
           pip install ${{ env.PACKAGE_NAME }} --no-index --find-links dist/ --force-reinstall
           ${{ env.PACKAGE_NAME }} --help
       - name: "Upload wheels"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: wheels-${{ matrix.platform.target }}
           compression-level: 0
@@ -526,7 +526,7 @@ jobs:
           7z a $ARCHIVE_FILE ./target/${{ matrix.platform.target }}/release/${{ env.PACKAGE_NAME }}.exe
           sha256sum $ARCHIVE_FILE > $ARCHIVE_FILE.sha256
       - name: "Upload binary"
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: artifacts-${{ matrix.platform.target }}
           compression-level: 0
