@@ -157,6 +157,8 @@ fn is_local_host(after_scheme: &str) -> bool {
 }
 
 fn ends_with_ignore_ascii_case(haystack: &str, suffix: &str) -> bool {
+    // Bytes, so a suffix offset inside a multi-byte host char can't panic.
+    let (haystack, suffix) = (haystack.as_bytes(), suffix.as_bytes());
     haystack.len() >= suffix.len()
         && haystack[haystack.len() - suffix.len()..].eq_ignore_ascii_case(suffix)
 }
