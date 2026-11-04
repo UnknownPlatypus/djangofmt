@@ -6,11 +6,13 @@
 
 use std::iter;
 use std::ops::Deref;
+use std::sync::LazyLock;
 
 use markup_fmt::Language;
 use markup_fmt::ast::{JinjaInterpolation, JinjaTag};
 use markup_fmt::parser::parse_jinja_tag_name;
 use memchr::{memchr, memchr_iter};
+use regex::Regex;
 
 use crate::dtl::{self, is_space};
 
@@ -23,22 +25,62 @@ pub enum Token<'s> {
     Var(JinjaInterpolation<'s>),
 }
 
+impl<'s> Token<'s> {
+    fn tag(content: &'s str, start: usize, language: Language) -> Self {
+        let tag = JinjaTag { content, start };
+        Self::Tag {
+            name: tag_name(&tag, language),
+            tag,
+        }
+    }
+}
+
 /// The tokens of a template in source order, less the bodies of `{% verbatim %}` (text to
 /// Django's lexer), `{% comment %}` (skipped by its parser) and Jinja's `{% raw %}`.
 #[derive(Debug)]
 pub struct Tokens<'s>(Vec<Token<'s>>);
+
+/// Jinja's `raw_end` pattern: a `{% endraw %}` with optional whitespace-control markers.
+static ENDRAW: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\{%[-+]?\s*endraw\s*[-+]?%\}").expect("endraw pattern is valid"));
 
 impl<'s> Tokens<'s> {
     /// Lex `source` like Django's `Lexer`, or like Jinja's for any other language, where a token
     /// may span lines.
     #[must_use]
     pub fn lex(source: &'s str, language: Language) -> Self {
-        let mut skipped = SkippedBody::default();
-        Self(
-            lex(source, language)
-                .filter(|token| skipped.compiles(token))
-                .collect(),
-        )
+        if matches!(language, Language::Django) {
+            let mut skipped = SkippedBody::default();
+            return Self(
+                lex(source, language, 0)
+                    .filter(|token| skipped.compiles(token))
+                    .collect(),
+            );
+        }
+        // Jinja's lexer reads a `{% raw %}` body as text up to the `{% endraw %}` it searches
+        // for, so a stray `{%` or `{{` in the body never swallows the closer.
+        let mut tokens = Vec::new();
+        let mut from = 0;
+        loop {
+            let mut raw_end = None;
+            for token in lex(source, language, from) {
+                if let Token::Tag { tag, name: "raw" } = &token
+                    && tag.content.trim_matches(['-', '+']).trim_matches(is_space) == "raw"
+                {
+                    raw_end = Some(tag.start + tag.content.len() + 2);
+                }
+                tokens.push(token);
+                if raw_end.is_some() {
+                    break;
+                }
+            }
+            let Some(closer) = raw_end.and_then(|end| ENDRAW.find_at(source, end)) else {
+                return Self(tokens);
+            };
+            let body = closer.start() + 2;
+            tokens.push(Token::tag(&source[body..closer.end() - 2], body, language));
+            from = closer.end();
+        }
     }
 
     /// The closer of the block the tag at `opener` opens: the next `end<name>` at its depth.
@@ -103,7 +145,7 @@ fn jinja_tag_name<'s>(tag: &JinjaTag<'s>, language: Language) -> &'s str {
     }
 }
 
-/// Where a run of tokens stands in the `{% verbatim %}`, `{% raw %}` and `{% comment %}` bodies.
+/// Where a run of Django's tokens stands in the `{% verbatim %}` and `{% comment %}` bodies.
 #[derive(Default)]
 struct SkippedBody<'s> {
     /// The lexer's state: the content of the open `{% verbatim %}`, closed by `end` + itself.
@@ -122,13 +164,9 @@ impl<'s> SkippedBody<'s> {
         let Token::Tag { tag, name } = token else {
             return !self.in_body();
         };
-        // Only `verbatim`, `raw` or `comment` opens a body: most names pass on their first byte.
-        // Django's name keeps the `-`/`+` markers, Jinja's stops at `\x1C`-`\x1F`.
-        (!self.in_body()
-            && !matches!(
-                name.as_bytes().first(),
-                None | Some(b'v' | b'r' | b'c' | b'-' | b'+')
-            ))
+        // Only `verbatim` or `comment` opens a body, so most names pass on their first byte;
+        // the name keeps a whitespace-control marker.
+        (!self.in_body() && !matches!(name.as_bytes().first(), Some(b'v' | b'c' | b'-' | b'+')))
             || self.compiles_slow(tag.content)
     }
 
@@ -141,7 +179,7 @@ impl<'s> SkippedBody<'s> {
                 return false;
             }
             self.verbatim = None;
-        } else if content == "verbatim" || content.starts_with("verbatim ") || content == "raw" {
+        } else if content == "verbatim" || content.starts_with("verbatim ") {
             self.verbatim = Some(content);
         }
         if self.in_comment {
@@ -158,14 +196,14 @@ const TAG: usize = 0;
 const VARIABLE: usize = 1;
 const COMMENT: usize = 2;
 
-/// Every `{% %}` and `{{ }}` token of Django's `tag_re` in `text`, verbatim and comment bodies
-/// included.
-fn lex(text: &str, language: Language) -> impl Iterator<Item = Token<'_>> {
+/// Every `{% %}` and `{{ }}` token of Django's `tag_re` in `text` from `from` on, verbatim and
+/// comment bodies included.
+fn lex(text: &str, language: Language, from: usize) -> impl Iterator<Item = Token<'_>> {
     let multiline = !matches!(language, Language::Django);
     let bytes = text.as_bytes();
     // Django's tokens never span a newline, so only the lines holding a `{` opener are tokenized.
-    let mut pos = 0;
-    let mut line_end = 0;
+    let mut pos = from;
+    let mut line_end = from;
     // Per closer, whether it is missing from the rest of the line: never searching twice for it
     // keeps the scan linear.
     let mut unclosed = [false; 3];
@@ -199,16 +237,7 @@ fn lex(text: &str, language: Language) -> impl Iterator<Item = Token<'_>> {
             pos = body + len + 2;
             let content = &text[body..body + len];
             return Some(match kind {
-                TAG => {
-                    let tag = JinjaTag {
-                        content,
-                        start: body,
-                    };
-                    Token::Tag {
-                        name: tag_name(&tag, language),
-                        tag,
-                    }
-                }
+                TAG => Token::tag(content, body, language),
                 VARIABLE => Token::Var(JinjaInterpolation {
                     expr: content,
                     start: body,
@@ -258,9 +287,10 @@ mod tests {
         &[(" verbatim x ", 2), (" endverbatim x ", 42), (" b ", 61)]
     )]
     #[case::comment_body_dropped(
-        r#"{% comment "note" %}{% a %}{% endcomment %}{% b %}"#,
-        &[(r#" comment "note" "#, 2), (" endcomment ", 29), (" b ", 45)]
+        r#"{% comment "note" %}{% a %}{{ c }}{% endcomment %}{% b %}"#,
+        &[(r#" comment "note" "#, 2), (" endcomment ", 36), (" b ", 52)]
     )]
+    #[case::raw_is_no_body("{% raw %}{% a %}{% endraw %}", &[(" raw ", 2), (" a ", 11), (" endraw ", 18)])]
     fn django_tokens(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
         assert_eq!(lexed(text, Language::Django), expected);
     }
@@ -277,9 +307,10 @@ mod tests {
         }
     }
 
+    /// The stray `{%` in the raw body would otherwise swallow the `{% endraw %}`.
     #[test]
-    fn jinja_tags_span_lines_and_skip_raw() {
-        let text = "{% if\na %}{%- raw -%}{% b %}{{ c }}{% endraw %}";
+    fn jinja_tags_span_lines_and_raw_bodies_are_text() {
+        let text = "{% if\na %}{%- raw -%}{% b %}{{ c }}{%{% endraw %}{% d %}";
         let names: Vec<_> = Tokens::lex(text, Language::Jinja)
             .iter()
             .map(|token| match token {
@@ -287,7 +318,7 @@ mod tests {
                 Token::Var(var) => var.expr,
             })
             .collect();
-        assert_eq!(names, ["if", "raw", "endraw"]);
+        assert_eq!(names, ["if", "raw", "endraw", "d"]);
     }
 
     #[test]
