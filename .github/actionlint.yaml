@@ -1,0 +1,6 @@
+paths:
+  .github/workflows/release.yml:
+    ignore:
+      # actionlint does not support GitHub's `$/` self-repository `uses:` syntax yet.
+      # https://github.com/rhysd/actionlint/issues/711
+      - 'reusable workflow call "\$/\.github/workflows/[^"/]+\.yml" at "uses" is not following the format '
