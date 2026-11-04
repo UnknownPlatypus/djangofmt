@@ -198,27 +198,25 @@ fn lex(text: &str, language: Language) -> impl Iterator<Item = Token<'_>> {
             };
             pos = body + len + 2;
             let content = &text[body..body + len];
-            match kind {
+            return Some(match kind {
                 TAG => {
                     let tag = JinjaTag {
                         content,
                         start: body,
                     };
-                    return Some(Token::Tag {
+                    Token::Tag {
                         name: tag_name(&tag, language),
                         tag,
-                    });
+                    }
                 }
-                VARIABLE => {
-                    return Some(Token::Var(JinjaInterpolation {
-                        expr: content,
-                        start: body,
-                        trim_prev: false,
-                        trim_next: false,
-                    }));
-                }
-                _ => {}
-            }
+                VARIABLE => Token::Var(JinjaInterpolation {
+                    expr: content,
+                    start: body,
+                    trim_prev: false,
+                    trim_next: false,
+                }),
+                _ => continue,
+            });
         }
     })
 }
