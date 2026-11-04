@@ -55,7 +55,7 @@ impl RuleSet {
     /// Whether `rule` is in the set.
     #[must_use]
     #[inline]
-    pub const fn contains(&self, rule: Rule) -> bool {
+    pub const fn contains(self, rule: Rule) -> bool {
         let rule = rule as u16;
         let index = rule as usize / Self::SLICE_BITS as usize;
         let shift = rule % Self::SLICE_BITS;
@@ -65,7 +65,7 @@ impl RuleSet {
     /// Whether any of `rules` is in the set.
     #[must_use]
     #[inline]
-    pub const fn contains_any(&self, rules: &[Rule]) -> bool {
+    pub const fn contains_any(self, rules: &[Rule]) -> bool {
         let mut i = 0;
         while i < rules.len() {
             if self.contains(rules[i]) {
@@ -78,9 +78,9 @@ impl RuleSet {
 
     /// Iterate the rules in ascending discriminant order.
     #[must_use]
-    pub const fn iter(&self) -> RuleSetIterator {
+    pub const fn iter(self) -> RuleSetIterator {
         RuleSetIterator {
-            set: *self,
+            set: self,
             word_index: 0,
             word: self.0[0],
         }

@@ -10,7 +10,7 @@ use djangofmt_syntax::Profile;
 
 /// All configuration options that can be passed "globally",
 /// i.e., can be passed to all subcommands.
-#[derive(Debug, Default, Clone, clap::Args)]
+#[derive(Debug, Default, Clone, Copy, clap::Args)]
 pub struct GlobalConfigArgs {
     #[clap(flatten)]
     log_level_args: LogLevelArgs,
@@ -18,7 +18,7 @@ pub struct GlobalConfigArgs {
 
 impl GlobalConfigArgs {
     #[must_use]
-    pub(crate) fn log_level(&self) -> LogLevel {
+    pub(crate) fn log_level(self) -> LogLevel {
         LogLevel::from(&self.log_level_args)
     }
 }
@@ -221,7 +221,7 @@ pub struct CheckCommand {
     pub file_selection: FileSelectionArgs,
 }
 
-#[derive(Debug, Default, Clone, clap::Args)]
+#[derive(Debug, Default, Clone, Copy, clap::Args)]
 pub struct LogLevelArgs {
     /// Enable verbose logging.
     #[arg(

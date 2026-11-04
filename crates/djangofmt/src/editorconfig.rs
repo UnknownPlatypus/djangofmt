@@ -5,7 +5,7 @@ use tracing::{debug, warn};
 use djangofmt_formatter::line_width::{IndentWidth, LineLength};
 
 /// Indent/line settings resolved from an `.editorconfig` for a specific file.
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct EditorconfigSettings {
     pub line_length: Option<LineLength>,
     pub indent_width: Option<IndentWidth>,

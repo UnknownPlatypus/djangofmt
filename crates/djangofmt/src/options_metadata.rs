@@ -35,7 +35,7 @@ pub trait OptionsMetadata {
 }
 
 /// An option that is either a single [`OptionField`] or a nested [`OptionSet`].
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum OptionEntry {
     /// A single option.
     Field(OptionField),
@@ -113,7 +113,7 @@ impl OptionSet {
 }
 
 /// A single option, as declared by a `#[option(…)]` attribute.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OptionField {
     /// The field's doc comment.
     pub doc: &'static str,

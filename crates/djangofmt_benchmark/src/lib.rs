@@ -117,7 +117,7 @@ pub fn warmup<T>(f: impl Fn() -> T) {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct TestFile {
     pub name: &'static str,
     pub code: &'static str,
