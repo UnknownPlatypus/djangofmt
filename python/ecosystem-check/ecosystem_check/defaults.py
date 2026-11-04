@@ -90,7 +90,6 @@ DEFAULT_TARGETS = [
                 ),
                 ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
                     "django/forms/jinja2/django/forms/widgets/multiwidget.html",
-                    "docs/_theme/djangodocs/layout.html",
                     "docs/_theme/djangodocs-epub/epub-cover.html",
                 ),
             },
