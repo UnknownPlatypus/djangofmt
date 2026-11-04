@@ -4,6 +4,8 @@ allow-dbg-in-tests = true
 allow-panic-in-tests = true
 
 too-many-arguments-threshold = 6
+# `wildcard_imports` skips `prelude` modules by default.
+warn-on-all-wildcard-imports = true
 
 disallowed-methods = [
   { path = "std::panic::catch_unwind", reason = "use djangofmt_formatter::panic::catch_unwind, the only panic boundary" },
