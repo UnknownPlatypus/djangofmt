@@ -164,15 +164,15 @@ impl<'s> SkippedBody<'s> {
         let Token::Tag { tag, name } = token else {
             return !self.in_body();
         };
-        // Only `verbatim` or `comment` opens a body, so most names pass on their first byte;
-        // the name keeps a whitespace-control marker.
-        (!self.in_body() && !matches!(name.as_bytes().first(), Some(b'v' | b'c' | b'-' | b'+')))
+        // Only `verbatim` or `comment` opens a body, so most names pass on their first byte.
+        (!self.in_body() && !matches!(name.as_bytes().first(), Some(b'v' | b'c')))
             || self.compiles_slow(tag.content)
     }
 
     #[cold]
     fn compiles_slow(&mut self, content: &'s str) -> bool {
-        let content = content.trim_matches(['-', '+']).trim_matches(is_space);
+        // `token_string[2:-2].strip()`, which the lexer and `skip_past` compare whole.
+        let content = content.trim_matches(is_space);
         // The lexer runs before the parser: a verbatim body hides an `{% endcomment %}` within it.
         if let Some(opener) = self.verbatim {
             if content.strip_prefix("end") != Some(opener) {
@@ -291,6 +291,10 @@ mod tests {
         &[(r#" comment "note" "#, 2), (" endcomment ", 36), (" b ", 52)]
     )]
     #[case::raw_is_no_body("{% raw %}{% a %}{% endraw %}", &[(" raw ", 2), (" a ", 11), (" endraw ", 18)])]
+    #[case::closer_compared_whole(
+        "{% comment %}{%- endcomment %}{% a %}{% endcomment %}{% b %}",
+        &[(" comment ", 2), (" endcomment ", 39), (" b ", 55)]
+    )]
     fn django_tokens(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
         assert_eq!(lexed(text, Language::Django), expected);
     }
