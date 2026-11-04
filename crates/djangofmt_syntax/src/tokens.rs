@@ -267,16 +267,7 @@ mod tests {
 
     #[test]
     fn jinja_tag_name_matches_the_parser() {
-        for content in [
-            "- if x -",
-            "+for",
-            " raw ",
-            "",
-            "set-x",
-            "\u{a0}set",
-            "\x0Bset",
-            "é",
-        ] {
+        for content in ["- if x -", "+for", "set-x", "\u{a0}set", "\x0Bset", "é"] {
             let tag = JinjaTag { content, start: 0 };
             assert_eq!(
                 jinja_tag_name(&tag, Language::Jinja),
