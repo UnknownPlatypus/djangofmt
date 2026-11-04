@@ -9,7 +9,7 @@ use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
-use djangofmt_syntax::tokens::Token;
+use djangofmt_syntax::tokens::{Token, Tokens};
 
 use crate::Checker;
 
@@ -65,7 +65,7 @@ impl Violation for SameFilePartialInclude<'_> {
 }
 
 /// The caller guarantees the tag is an `include`.
-pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
+pub fn check(checker: &Checker<'_>, tokens: &Tokens<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
     // Only a `#fragment` names a partial, so the other includes are not lexed.
     if !tag.content.contains('#') {
         return;
@@ -79,7 +79,7 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
     }
 
     // Without a local partialdef, the suffix-matched include necessarily resolves to another file.
-    if !defines_partial(checker, fragment) {
+    if !defines_partial(tokens, fragment) {
         return;
     }
 
@@ -133,8 +133,8 @@ fn parse_partial_include<'s>(tag: &JinjaTag<'s>) -> Option<(&'s str, &'s str)> {
 }
 
 /// Whether the source contains a `{% partialdef <name> %}` opening tag.
-fn defines_partial(checker: &Checker<'_>, name: &str) -> bool {
-    checker.tokens().iter().any(|token| {
+fn defines_partial(tokens: &Tokens<'_>, name: &str) -> bool {
+    tokens.iter().any(|token| {
         matches!(token, Token::Tag { tag, name: "partialdef" }
             if tag.content.trim_start_matches(['-', '+']).split_whitespace().nth(1) == Some(name))
     })

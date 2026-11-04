@@ -1,4 +1,3 @@
-use std::cell::OnceCell;
 use std::path::Path;
 
 use markup_fmt::Language;
@@ -23,8 +22,6 @@ use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 #[derive(Debug)]
 pub struct Checker<'a> {
     context: LintContext<'a>,
-    /// Lexed on first use, so a run without a token rule never pays for it.
-    tokens: OnceCell<Tokens<'a>>,
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
 }
@@ -40,15 +37,8 @@ impl<'a> Checker<'a> {
     ) -> Self {
         Self {
             context: LintContext::new(source, settings, language, path, quarantined),
-            tokens: OnceCell::new(),
             in_raw: false,
         }
-    }
-
-    /// Django's token stream for the source: every `{% %}` and `{{ }}`, in text too.
-    pub fn tokens(&self) -> &Tokens<'a> {
-        self.tokens
-            .get_or_init(|| Tokens::lex(self.context.source(), self.context.language()))
     }
 
     /// Borrow the underlying [`LintContext`].
@@ -140,7 +130,7 @@ impl<'a> Checker<'a> {
     /// Run the token rules over Django's token stream: the tags by name, the `{{ }}` and
     /// the rules that read the whole stream.
     pub fn check_tokens(&self) {
-        let tokens = self.tokens();
+        let tokens = Tokens::lex(self.context.source(), self.context.language());
         for token in tokens.iter() {
             match token {
                 Token::Tag { tag, name } => match *name {
@@ -149,7 +139,9 @@ impl<'a> Checker<'a> {
                         if let Some(path) = self.context.path()
                             && self.is_rule_enabled(Rule::SameFilePartialInclude)
                         {
-                            rules::style::same_file_partial_include::check(self, tag, path);
+                            rules::style::same_file_partial_include::check(
+                                self, &tokens, tag, path,
+                            );
                         }
                     }
                     "load"
@@ -176,7 +168,7 @@ impl<'a> Checker<'a> {
             }
         }
         if self.is_rule_enabled(Rule::DuplicateBlockName) {
-            rules::correctness::duplicate_block_name::check(self, tokens);
+            rules::correctness::duplicate_block_name::check(self, &tokens);
         }
     }
 
