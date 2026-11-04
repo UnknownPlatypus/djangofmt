@@ -175,6 +175,20 @@ fn format_file_parse_error_exits_2() {
     "#);
 }
 
+#[test]
+fn no_color_beats_force_color() {
+    let project = Project::new().file("test.html", "<div>");
+    let output = cli()
+        .arg(project.join("test.html"))
+        .env("FORCE_COLOR", "1")
+        .env("NO_COLOR", "1")
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("expected close tag"), "{stderr}");
+    assert!(!stderr.contains('\x1b'), "{stderr}");
+}
+
 // ── Format from stdin ────────────────────────────────────────────────
 
 #[test]

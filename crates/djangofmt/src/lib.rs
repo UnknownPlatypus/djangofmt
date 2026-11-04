@@ -51,11 +51,16 @@ pub fn install_report_hook() {
     // Built once: `miette` calls the hook per `Report`, and each build probes the terminal.
     static HANDLER: LazyLock<MietteHandler> = LazyLock::new(|| {
         // Match the wrap policy of `djangofmt_syntax::graphical_handler`, keeping URLs unbroken.
-        MietteHandlerOpts::new()
+        let opts = MietteHandlerOpts::new()
             .word_separator(textwrap::WordSeparator::AsciiSpace)
             .word_splitter(textwrap::WordSplitter::NoHyphenation)
-            .break_words(false)
-            .build()
+            .break_words(false);
+        // `miette` lets `FORCE_COLOR` win, but a non-empty `NO_COLOR` is the more explicit request.
+        if std::env::var_os("NO_COLOR").is_some_and(|value| !value.is_empty()) {
+            opts.color(false).build()
+        } else {
+            opts.build()
+        }
     });
 
     struct SharedHandler;
