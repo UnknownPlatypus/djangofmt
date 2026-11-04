@@ -152,6 +152,7 @@ missing_debug_implementations = "deny"
 redundant_imports = "deny"
 redundant_lifetimes = "deny"
 trivial_numeric_casts = "deny"
+unexpected_cfgs = { level = "deny", check-cfg = ["cfg(fuzzing)"] }
 unnameable_types = "deny"
 unsafe_code = "deny"
 unused_lifetimes = "deny"

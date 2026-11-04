@@ -304,6 +304,10 @@ fn format_or_fallback<T, E: Debug>(
             None
         }
         Err(err) => {
+            // Re-raise under cargo-fuzz, the fallback would hide this bug from the fuzzer.
+            if cfg!(fuzzing) {
+                std::panic::resume_unwind(Box::new(err.to_string()));
+            }
             let location = err
                 .location
                 .map_or_else(String::new, |location| format!(" at {location}"));
