@@ -153,7 +153,7 @@ impl<'s> SkippedBody<'s> {
     }
 }
 
-/// The three closers `lex` tracks per line.
+/// The token kinds, indexing the closers `lex` tracks per line.
 const TAG: usize = 0;
 const VARIABLE: usize = 1;
 const COMMENT: usize = 2;
