@@ -171,29 +171,22 @@ fn lex(text: &str, language: Language) -> impl Iterator<Item = Token<'_>> {
     let mut unclosed = [false; 3];
     iter::from_fn(move || {
         loop {
-            if pos == line_end {
-                // The first opener of its line, so the line is scanned from it.
-                pos += find_tag_open(&bytes[pos..])?;
+            let open = pos + find_tag_open(&bytes[pos..])?;
+            if open >= line_end {
                 line_end = if multiline {
                     bytes.len()
                 } else {
-                    memchr(b'\n', &bytes[pos..]).map_or(bytes.len(), |nl| pos + nl)
+                    memchr(b'\n', &bytes[open..]).map_or(bytes.len(), |nl| open + nl)
                 };
                 unclosed = [false; 3];
             }
-            let Some(brace) = memchr(b'{', &bytes[pos..line_end]) else {
-                pos = line_end;
-                continue;
-            };
-            let open = pos + brace;
             // Like the regex, a failed match retries from the next byte: `{{%` holds a tag when
             // `}}` never comes.
             pos = open + 1;
-            let (close, kind) = match bytes.get(open + 1) {
-                Some(b'%') => (b'%', TAG),
-                Some(b'{') => (b'}', VARIABLE),
-                Some(b'#') => (b'#', COMMENT),
-                _ => continue,
+            let (close, kind) = match bytes[open + 1] {
+                b'%' => (b'%', TAG),
+                b'{' => (b'}', VARIABLE),
+                _ => (b'#', COMMENT),
             };
             if unclosed[kind] {
                 continue;
