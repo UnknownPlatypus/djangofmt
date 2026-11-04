@@ -237,12 +237,12 @@ mod tests {
 
     use super::*;
 
-    fn tags(text: &str, language: Language) -> Vec<(&str, usize)> {
+    fn lexed(text: &str, language: Language) -> Vec<(&str, usize)> {
         Tokens::lex(text, language)
             .iter()
-            .filter_map(|token| match token {
-                Token::Tag { tag, .. } => Some((tag.content, tag.start)),
-                Token::Var(_) => None,
+            .map(|token| match token {
+                Token::Tag { tag, .. } => (tag.content, tag.start),
+                Token::Var(var) => (var.expr, var.start),
             })
             .collect()
     }
@@ -250,7 +250,7 @@ mod tests {
     #[rstest]
     #[case::two_on_one_line("{% if a %}x{%endif%}", &[(" if a ", 2), ("endif", 13)])]
     #[case::first_closer_wins(r#"{% x "{%}" %}"#, &[(r#" x "{"#, 2)])]
-    #[case::variable_and_comment_skipped("{{ '{% a %}' }} {# {% b %} #}", &[])]
+    #[case::variable_kept_comment_dropped("{{ '{% a %}' }} {# {% b %} #}", &[(" '{% a %}' ", 2)])]
     #[case::newline_ends_token("{% a\n{% b %}", &[(" b ", 7)])]
     #[case::unclosed_variable_retries("{{% a %}", &[(" a ", 3)])]
     #[case::verbatim_body_dropped(
@@ -261,8 +261,8 @@ mod tests {
         r#"{% comment "note" %}{% a %}{% endcomment %}{% b %}"#,
         &[(r#" comment "note" "#, 2), (" endcomment ", 29), (" b ", 45)]
     )]
-    fn django_tags(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
-        assert_eq!(tags(text, Language::Django), expected);
+    fn django_tokens(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
+        assert_eq!(lexed(text, Language::Django), expected);
     }
 
     #[test]
@@ -297,22 +297,6 @@ mod tests {
             })
             .collect();
         assert_eq!(names, ["if", "raw", "endraw"]);
-    }
-
-    #[test]
-    fn variables_are_lexed_outside_skipped_bodies() {
-        let tokens = Tokens::lex(
-            "{{ a }}{% comment %}{{ b }}{% endcomment %}",
-            Language::Django,
-        );
-        let vars: Vec<_> = tokens
-            .iter()
-            .filter_map(|token| match token {
-                Token::Var(var) => Some(var.expr),
-                Token::Tag { .. } => None,
-            })
-            .collect();
-        assert_eq!(vars, [" a "]);
     }
 
     #[test]
