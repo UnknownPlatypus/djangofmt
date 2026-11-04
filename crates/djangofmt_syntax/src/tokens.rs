@@ -82,29 +82,6 @@ impl<'s> Tokens<'s> {
             from = closer.end();
         }
     }
-
-    /// The closer of the block the tag at `opener` opens: the next `end<name>` at its depth.
-    #[must_use]
-    pub fn closer(&self, opener: usize) -> Option<&JinjaTag<'s>> {
-        let Token::Tag { name, .. } = &self.0[opener] else {
-            return None;
-        };
-        let mut depth = 0usize;
-        for token in &self.0[opener + 1..] {
-            let Token::Tag { tag, name: other } = token else {
-                continue;
-            };
-            if other == name {
-                depth += 1;
-            } else if other.strip_prefix("end") == Some(*name) {
-                if depth == 0 {
-                    return Some(tag);
-                }
-                depth -= 1;
-            }
-        }
-        None
-    }
 }
 
 impl<'s> Deref for Tokens<'s> {
@@ -323,16 +300,5 @@ mod tests {
             })
             .collect();
         assert_eq!(names, ["if", "raw", "endraw", "d"]);
-    }
-
-    #[test]
-    fn closer_skips_nested_blocks_and_intermediate_tags() {
-        let tokens = Tokens::lex(
-            "{% if a %}{% if b %}{% else %}{% endif %}{% elif c %}{% endif %}{% endif %}",
-            Language::Django,
-        );
-        assert_eq!(tokens.closer(0).map(|tag| tag.start), Some(55));
-        assert_eq!(tokens.closer(1).map(|tag| tag.start), Some(32));
-        assert!(tokens.closer(2).is_none());
     }
 }
