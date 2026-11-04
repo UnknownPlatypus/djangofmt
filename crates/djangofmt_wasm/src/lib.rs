@@ -13,8 +13,8 @@ use wasm_bindgen::prelude::wasm_bindgen;
 #[wasm_bindgen]
 pub fn format(
     source: &str,
-    line_length: u16,
-    indent_width: u8,
+    line_length: usize,
+    indent_width: usize,
     profile: &str,
 ) -> Result<String, JsError> {
     let config = formatter_config(line_length, indent_width).map_err(|e| JsError::new(&e))?;
@@ -37,8 +37,8 @@ pub fn ast(source: &str, profile: &str) -> Result<String, JsError> {
 #[wasm_bindgen]
 pub fn doc_tree(
     source: &str,
-    line_length: u16,
-    indent_width: u8,
+    line_length: usize,
+    indent_width: usize,
     profile: &str,
 ) -> Result<String, JsError> {
     let config = formatter_config(line_length, indent_width).map_err(|e| JsError::new(&e))?;
@@ -55,7 +55,8 @@ pub fn doc_tree(
     ))
 }
 
-fn formatter_config(line_length: u16, indent_width: u8) -> Result<FormatterConfig, String> {
+// `usize`, as wasm-bindgen wraps JS numbers into narrower ints: `width=65656` would arrive as 120.
+fn formatter_config(line_length: usize, indent_width: usize) -> Result<FormatterConfig, String> {
     Ok(FormatterConfig::new(
         LineLength::try_from(line_length)?,
         IndentWidth::try_from(indent_width)?,
@@ -257,8 +258,8 @@ mod tests {
     #[test]
     fn invalid_options_are_rejected() {
         assert_eq!(
-            formatter_config(0, 4).unwrap_err(),
-            "line-length must be between 1 and 320 (got 0)"
+            formatter_config(65656, 4).unwrap_err(),
+            "line-length must be between 1 and 320 (got 65656)"
         );
         assert_eq!(
             parse_profile("vue").unwrap_err(),
