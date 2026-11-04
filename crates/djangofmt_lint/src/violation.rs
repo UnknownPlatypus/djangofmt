@@ -33,7 +33,7 @@ pub trait ViolationMetadata {
 /// Each violation knows its own rule via the associated constant.
 ///
 /// The `RULE` constant ties the violation to the registry, enabling:
-/// - `checker.report(violation, span)` without passing the rule explicitly
+/// - `checker.report_diagnostic(&violation, span)` without passing the rule explicitly
 /// - Compile-time verification that every violation has a registered rule
 ///
 /// The `CATEGORY` constant declares the functional grouping (e.g., Correctness, Style).

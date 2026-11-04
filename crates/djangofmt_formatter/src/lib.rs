@@ -156,6 +156,8 @@ fn build_json_config(
 /// Format the given source code.
 ///
 /// `path` only labels diagnostics, pass `None` when the source has no file behind it.
+/// Returns `Ok(None)` when the file opts out via `file-ignore[format]`, or fails to parse under
+/// `file-ignore[invalid-syntax]`.
 pub fn format_text(
     source: &str,
     config: &FormatterConfig,

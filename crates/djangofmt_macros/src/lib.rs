@@ -38,6 +38,7 @@ pub fn derive_message_formats(_attr: TokenStream, item: TokenStream) -> TokenStr
 /// Fields opt in with `#[option(default = "…", value_type = "…", example = "…")]` — their doc
 /// comment becomes the option's documentation — or with `#[option_group]` for a nested
 /// `Option<T>` table. Fields carrying neither attribute are left out of the generated docs.
+/// An optional `scope = "…"` names the TOML sub-table the example belongs to.
 #[proc_macro_derive(OptionsMetadata, attributes(option, option_group))]
 pub fn derive_options_metadata(item: TokenStream) -> TokenStream {
     let input: DeriveInput = parse_macro_input!(item);

@@ -42,9 +42,8 @@ pub const MAX_FIX_ITERATIONS: usize = 10;
 /// Apply all fixes from `diagnostics` whose applicability is at least
 /// `threshold` to `source`.
 ///
-/// See the spec §5.1 for the algorithm. Strict `<` is used for overlap
-/// detection (so two adjacent insertions at the same byte offset can both
-/// apply).
+/// Strict `<` is used for overlap detection, so two adjacent insertions at the same byte offset
+/// can both apply.
 #[must_use]
 pub fn apply_fixes(
     source: &str,

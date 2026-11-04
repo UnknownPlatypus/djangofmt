@@ -24,7 +24,7 @@ static CONFIG: LazyLock<FormatterConfig> = LazyLock::new(|| {
 fn do_fuzz_profile(code: &str, profile: Profile) -> Corpus {
     let formatted = match format_text(code, &CONFIG, profile, None) {
         Ok(Some(formatted)) => formatted,
-        // Skipped via a djangofmt:ignore directive.
+        // Opted out via a `file-ignore` comment.
         Ok(None) => return Corpus::Reject,
         Err(err) => {
             // Exercise the diagnostic path, it does offset arithmetic on the error location.

@@ -248,7 +248,6 @@ pub enum FormatResult {
     Skipped,
 }
 
-/// Write a summary of the formatting results to stdout.
 #[must_use]
 pub fn build_summary<'a>(
     results: impl IntoIterator<Item = &'a FormatResult>,

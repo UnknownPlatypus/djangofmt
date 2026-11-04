@@ -1,8 +1,7 @@
 //! Option resolution: merging CLI arguments, `pyproject.toml` settings and defaults.
 //!
 //! Precedence is always CLI > pyproject > default; [`resolve_profile`] extends
-//! it with file-extension inference. Every command resolves through here so the
-//! file and stdin paths cannot disagree.
+//! it with file-extension inference.
 
 use std::path::Path;
 

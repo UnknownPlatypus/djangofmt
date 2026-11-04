@@ -125,8 +125,6 @@ fn report_http_scheme(checker: &Checker<'_>, url: &str, attribute: &'static str)
 
 /// Whether the authority of a URL (the part after `http://`) refers to the local machine, a
 /// private network, or a special-use name that no public certificate authority serves.
-///
-/// [spec]: https://w3c.github.io/webappsec-secure-contexts/#is-origin-trustworthy
 fn is_local_host(after_scheme: &str) -> bool {
     // Authority is everything up to the path, query, or fragment.
     let authority = after_scheme

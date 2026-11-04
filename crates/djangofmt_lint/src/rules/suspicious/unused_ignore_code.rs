@@ -11,7 +11,7 @@ use crate::suppression::{IgnoreComment, IgnoreScope};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 
 /// ## What it does
-/// Checks for `ignore[...]` / `file-ignore[...]` suppression that are no longer applicable.
+/// Checks for `ignore[...]` / `file-ignore[...]` suppressions that are no longer applicable.
 ///
 /// ## Why is this bad?
 /// A suppression that no longer matches any diagnostic violations is likely included by mistake,

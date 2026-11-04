@@ -13,7 +13,7 @@ pub mod check_stdin;
 pub mod format;
 pub mod format_stdin;
 
-/// Shared preamble for all commands: loads pyproject settings and discovers files.
+/// Shared preamble of the file commands: loads pyproject settings and discovers files.
 pub(crate) struct ResolvedCommand {
     pub pyproject: PyprojectSettings,
     pub files: Vec<PathBuf>,
