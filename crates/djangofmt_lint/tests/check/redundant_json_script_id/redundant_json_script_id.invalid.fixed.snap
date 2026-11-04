@@ -8,5 +8,5 @@ source: crates/djangofmt_lint/tests/check/main.rs
 <!-- Between other filters -->
 {{ user_data|default:"{}"|json_script|safe }}
 
-<!-- Django reads the `{{ }}` in attribute values, HTML comments and raw bodies too -->
+<!-- Django reads the `{{ }}` in attribute values -->
 <div data-user="{{ user_data|json_script }}"></div>
