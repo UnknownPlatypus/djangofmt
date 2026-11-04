@@ -315,13 +315,13 @@ impl<'a> Checker<'a> {
 
     /// Shared by both block visitors, which differ only in how they visit children.
     fn visit_opener<T>(&mut self, block: &JinjaBlock<'a, T>) {
+        if self.in_raw {
+            return;
+        }
         let Some(JinjaTagOrChildren::Tag(opener)) = block.body.first() else {
             return;
         };
         let name = tag_name(opener, self.context.language());
-        if self.in_raw {
-            return;
-        }
         if matches!(name, "blocktranslate" | "blocktrans")
             && self.is_rule_enabled(Rule::UntrimmedBlocktranslate)
         {
