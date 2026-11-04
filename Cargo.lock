@@ -504,7 +504,6 @@ dependencies = [
  "djangofmt_syntax",
  "insta",
  "markup_fmt",
- "memchr",
  "oxc-miette",
  "rstest",
  "rustc-hash",
