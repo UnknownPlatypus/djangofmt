@@ -21,6 +21,9 @@
 <!-- Include in attribute position -->
 <div {% include "same_file_partial_include.invalid.html#attrs" %}>Highlighted</div>
 
+<!-- Django reads the tags in HTML comments -->
+<!-- {% include "same_file_partial_include.invalid.html#card" %} -->
+
 <!-- Nested inside an element and a block: the visitor must descend to reach it -->
 <nav>
   {% if show_menu %}

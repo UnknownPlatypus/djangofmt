@@ -52,12 +52,22 @@ source: crates/djangofmt_lint/tests/check/main.rs
     ╰────
   help: Use `{% partial attrs %}` instead
 
+  × Same-file partial `card` rendered via `{% include %}`
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:25:6]
+ 24 │ <!-- Django reads the tags in HTML comments -->
+ 25 │ <!-- {% include "same_file_partial_include.invalid.html#card" %} -->
+    ·      ─────────────────────────────┬─────────────────────────────
+    ·                                   ╰── here
+ 26 │ 
+    ╰────
+  help: Use `{% partial card %}` instead
+
   × Same-file partial `menu` rendered via `{% include %}`
-    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:27:5]
- 26 │   {% if show_menu %}
- 27 │     {% include "same_file_partial_include.invalid.html#menu" %}
+    ╭─[tests/check/same_file_partial_include/same_file_partial_include.invalid.html:30:5]
+ 29 │   {% if show_menu %}
+ 30 │     {% include "same_file_partial_include.invalid.html#menu" %}
     ·     ─────────────────────────────┬─────────────────────────────
     ·                                  ╰── here
- 28 │   {% endif %}
+ 31 │   {% endif %}
     ╰────
   help: Use `{% partial menu %}` instead
