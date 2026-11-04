@@ -5,7 +5,6 @@
   extends: [
     "config:best-practices",
     "group:allNonMajor",
-    "helpers:pinGitHubActionDigestsToSemver",
   ],
   labels: ["dependencies"],
   schedule: ["before 4am on Monday"],
@@ -15,7 +14,6 @@
   lockFileMaintenance: { enabled: false },
   prHourlyLimit: 10,
   enabledManagers: ["github-actions", "cargo", "pep621", "npm", "deno", "custom.regex"],
-  pinDigests: true, // Pin GitHub Actions to immutable SHAs.
   cargo: {
     // See https://docs.renovatebot.com/configuration-options/#rangestrategy
     rangeStrategy: "update-lockfile",
@@ -32,11 +30,6 @@
       matchDatasources: ["gitea-tags", "github-tags"],
       matchPackageNames: ["actions/*-artifact"],
       description: "Weekly update of artifact-related GitHub Actions dependencies",
-    },
-    {
-      // Its tags are bare `vN`, which `helpers:pinGitHubActionDigestsToSemver` filters out.
-      matchPackageNames: ["dawidd6/action-download-artifact"],
-      extractVersion: "^(?<version>v\\d+)$",
     },
     {
       // This package rule disables updates for GitHub runners: we'd only pin them to a specific version if there was a deliberate reason to do so
@@ -189,6 +182,14 @@
       matchStrings: ['"(?<depName>[\\w.-]+/[\\w.-]+)" = "(?<currentDigest>[a-f0-9]{40})"\\s+# (?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
       datasourceTemplate: "github-tags",
       extractVersionTemplate: "^(?<version>v?\\d+\\.\\d+\\.\\d+)$",
+    },
+    // gh-actions-lock in the `actions-lock` pre-commit hook, which pre-commit.ci autoupdate doesn't bump.
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^\\.pre-commit-config\\.yaml$/"],
+      matchStrings: ['"github\\.com/github/gh-actions-lock/cmd/gh-actions-lock@(?<currentValue>v\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "github/gh-actions-lock",
+      datasourceTemplate: "github-releases",
     },
   ],
   vulnerabilityAlerts: {

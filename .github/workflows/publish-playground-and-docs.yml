@@ -63,7 +63,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: "Install Rust toolchain"
@@ -77,7 +77,7 @@ jobs:
             "wasm-pack-${WASM_PACK_VERSION}-x86_64-unknown-linux-musl/wasm-pack"
       - name: "Run wasm-pack build"
         run: wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
-      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+      - uses: denoland/setup-deno@v2.0.5
         with:
           deno-version: "v2.9.8"
       - name: Install playground dependencies
@@ -87,7 +87,7 @@ jobs:
         run: deno task build
         working-directory: playground
       - name: Setup uv
-        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        uses: astral-sh/setup-uv@v10.3.2
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
@@ -108,7 +108,7 @@ jobs:
           cp -r site/. _site/docs/
       - name: Upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: "_site"
 
@@ -123,7 +123,7 @@ jobs:
       pages: write
     steps:
       - name: Setup Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        uses: actions/configure-pages@v6.0.0
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        uses: actions/deploy-pages@v5.0.1
