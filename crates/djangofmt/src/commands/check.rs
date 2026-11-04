@@ -173,13 +173,17 @@ impl CheckRun {
 
     /// The run's settings, narrowed by `per-file-ignores` when they match `path`.
     pub(crate) fn settings_for(&self, path: Option<&Path>) -> Cow<'_, Settings> {
-        match (&self.per_file_ignores, path) {
-            (Some(pfi), Some(path)) => Cow::Owned(Settings {
-                rules: pfi.rules_for(path, &self.settings.rules),
-                ..self.settings.clone()
-            }),
-            _ => Cow::Borrowed(&self.settings),
+        let Some((pfi, path)) = self.per_file_ignores.as_ref().zip(path) else {
+            return Cow::Borrowed(&self.settings);
+        };
+        let rules = pfi.rules_for(path, &self.settings.rules);
+        if rules == self.settings.rules {
+            return Cow::Borrowed(&self.settings);
         }
+        Cow::Owned(Settings {
+            rules,
+            ..self.settings.clone()
+        })
     }
 
     /// Print diagnostics, errors and the summary, then fold them into the exit code.
