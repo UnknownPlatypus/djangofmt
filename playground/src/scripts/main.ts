@@ -1,11 +1,20 @@
 import AnsiToHtml from "ansi-to-html";
-import init, { ast, doc_tree, format, lint, type LintResult } from "../../pkg/djangofmt_wasm.js";
+import init, { ast, doc_tree, format, lint } from "../../pkg/djangofmt_wasm.js";
 import { writeClipboardText } from "./clipboard";
 import { createEditors, monaco } from "./monaco-editor";
 import { openGithubIssue, savePermalinkToClipboard } from "./permalink";
 
 window.monaco = monaco;
 createEditors();
+
+// The wasm views throw on invalid options, e.g. a permalink with `width=0`.
+function orError(render: () => string): string {
+  try {
+    return render();
+  } catch (e) {
+    return String(e);
+  }
+}
 
 function formatCode(
   source: string,
@@ -14,7 +23,7 @@ function formatCode(
   mode: string,
 ): { formatted: string; duration: number } {
   const start = performance.now();
-  const formatted = format(source, width, indent, mode.toLowerCase());
+  const formatted = orError(() => format(source, width, indent, mode.toLowerCase()));
   const duration = performance.now() - start;
   return { formatted, duration };
 }
@@ -23,7 +32,7 @@ const ansiConverter = new AnsiToHtml({ escapeXML: true });
 
 function lintCode(source: string, mode: string): { text: string; errorCount: number } {
   try {
-    const result = lint(source, mode.toLowerCase()) as LintResult;
+    const result = lint(source, mode.toLowerCase());
     const text = result.output ? ansiConverter.toHtml(result.output) : "✓ No lint issues found.";
     return { text, errorCount: result.error_count };
   } catch (e) {
@@ -48,8 +57,8 @@ declare global {
 init().then(() => {
   window.formatCode = formatCode;
   window.lintCode = lintCode;
-  window.astView = ast;
-  window.docTreeView = doc_tree;
+  window.astView = (source, mode) => orError(() => ast(source, mode));
+  window.docTreeView = (source, width, indent, mode) => orError(() => doc_tree(source, width, indent, mode));
   window.savePermalinkToClipboard = savePermalinkToClipboard;
   window.writeClipboardText = writeClipboardText;
   window.openGithubIssue = openGithubIssue;

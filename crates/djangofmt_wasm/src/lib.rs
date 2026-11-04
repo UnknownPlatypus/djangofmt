@@ -6,53 +6,44 @@ use djangofmt_lint::{FileDiagnostics, Settings, lint_text};
 use djangofmt_syntax::{ParseError, Profile, graphical_handler};
 use miette::GraphicalTheme;
 use serde::Serialize;
-use tsify::Tsify;
-use wasm_bindgen::prelude::*;
-#[wasm_bindgen]
-#[must_use]
-pub fn format(source: &str, line_length: u16, indent_width: u8, profile: &str) -> String {
-    let profile = get_profile(profile);
-    let line_length = LineLength::try_from(line_length).unwrap_or_default();
-    let indent_width = IndentWidth::try_from(indent_width).unwrap_or_default();
-    let config = FormatterConfig::new(
-        line_length,
-        indent_width,
-        None,
-        SelfClosing::default(),
-        false,
-    );
+use tsify::{Ts, Tsify};
+use wasm_bindgen::JsError;
+use wasm_bindgen::prelude::wasm_bindgen;
 
-    match format_text(source, &config, profile, None) {
+#[wasm_bindgen]
+pub fn format(
+    source: &str,
+    line_length: usize,
+    indent_width: usize,
+    profile: &str,
+) -> Result<String, JsError> {
+    let config = formatter_config(line_length, indent_width).map_err(|e| JsError::new(&e))?;
+    let profile = parse_profile(profile).map_err(|e| JsError::new(&e))?;
+    Ok(match format_text(source, &config, profile, None) {
         Ok(opt) => opt.unwrap_or_else(|| source.to_string()),
         Err(err) => render_parse_error(source, &err),
-    }
+    })
 }
 
 #[wasm_bindgen]
-#[must_use]
-pub fn ast(source: &str, profile: &str) -> String {
-    let profile = get_profile(profile);
-    match djangofmt_syntax::parse(source, profile.into(), &[]) {
+pub fn ast(source: &str, profile: &str) -> Result<String, JsError> {
+    let profile = parse_profile(profile).map_err(|e| JsError::new(&e))?;
+    Ok(match djangofmt_syntax::parse(source, profile.into(), &[]) {
         Ok(parsed) => format!("{:#?}", parsed.ast()),
         Err(e) => render_parse_error(source, &markup_fmt::FormatError::Syntax(e)),
-    }
+    })
 }
 
 #[wasm_bindgen]
-#[must_use]
-pub fn doc_tree(source: &str, line_length: u16, indent_width: u8, profile: &str) -> String {
-    let profile = get_profile(profile);
-    let line_length = LineLength::try_from(line_length).unwrap_or_default();
-    let indent_width = IndentWidth::try_from(indent_width).unwrap_or_default();
-    let config = FormatterConfig::new(
-        line_length,
-        indent_width,
-        None,
-        SelfClosing::default(),
-        false,
-    );
-
-    markup_fmt::debug_doc_tree(
+pub fn doc_tree(
+    source: &str,
+    line_length: usize,
+    indent_width: usize,
+    profile: &str,
+) -> Result<String, JsError> {
+    let config = formatter_config(line_length, indent_width).map_err(|e| JsError::new(&e))?;
+    let profile = parse_profile(profile).map_err(|e| JsError::new(&e))?;
+    Ok(markup_fmt::debug_doc_tree(
         source,
         markup_fmt::Language::from(profile),
         &config.markup,
@@ -61,7 +52,28 @@ pub fn doc_tree(source: &str, line_length: u16, indent_width: u8, profile: &str)
     .map_or_else(
         |err| render_parse_error(source, &err),
         |ir| compact_doc_ir(&ir),
-    )
+    ))
+}
+
+// `usize`, as wasm-bindgen wraps JS numbers into narrower ints: `width=65656` would arrive as 120.
+fn formatter_config(line_length: usize, indent_width: usize) -> Result<FormatterConfig, String> {
+    Ok(FormatterConfig::new(
+        LineLength::try_from(line_length)?,
+        IndentWidth::try_from(indent_width)?,
+        None,
+        SelfClosing::default(),
+        false,
+    ))
+}
+
+fn parse_profile(profile: &str) -> Result<Profile, String> {
+    match profile.to_ascii_lowercase().as_str() {
+        "django" => Ok(Profile::Django),
+        "jinja" => Ok(Profile::Jinja),
+        _ => Err(format!(
+            "Unknown profile `{profile}`, expected `django` or `jinja`"
+        )),
+    }
 }
 
 struct DocNode {
@@ -165,8 +177,8 @@ fn nest_children(wrapper: &DocNode) -> &[DocNode] {
     }
 }
 
-#[derive(Serialize, Tsify)]
-struct LintResult {
+#[derive(Debug, Serialize, Tsify)]
+pub struct LintResult {
     error_count: usize,
     output: String,
 }
@@ -179,13 +191,12 @@ impl LintResult {
     }
 }
 #[wasm_bindgen]
-pub fn lint(source: &str, profile: &str) -> Result<JsValue, JsError> {
-    lint_inner(source, profile)
-        .and_then(|result| serde_wasm_bindgen::to_value(&result).map_err(into_error))
+pub fn lint(source: &str, profile: &str) -> Result<Ts<LintResult>, JsError> {
+    let profile = parse_profile(profile).map_err(|e| JsError::new(&e))?;
+    Ok(lint_inner(source, profile)?.into_ts()?)
 }
 
-fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
-    let profile = get_profile(profile);
+fn lint_inner(source: &str, profile: Profile) -> Result<LintResult, std::fmt::Error> {
     let outcome = match lint_text(source, &Settings::all(), profile.into(), &[], None, None) {
         Ok(Some(outcome)) => outcome,
         // A leading `file-ignore[invalid-syntax]` quarantines the file.
@@ -205,23 +216,10 @@ fn lint_inner(source: &str, profile: &str) -> Result<LintResult, JsError> {
     let file_diagnostics = FileDiagnostics::new("", source, outcome.diagnostics);
     let handler = graphical_handler(GraphicalTheme::unicode());
     let mut output = String::new();
-    file_diagnostics
-        .render(&handler, &mut output)
-        .map_err(into_error)?;
+    file_diagnostics.render(&handler, &mut output)?;
 
     let result = LintResult::new(error_count, output);
     Ok(result)
-}
-
-pub(crate) fn into_error<E: std::fmt::Display>(err: E) -> JsError {
-    JsError::new(&err.to_string())
-}
-
-fn get_profile(profile: &str) -> Profile {
-    match profile.to_ascii_lowercase().as_str() {
-        "jinja" => Profile::Jinja,
-        _ => Profile::Django,
-    }
 }
 
 fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
@@ -236,28 +234,42 @@ fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{ast, doc_tree, format, lint_inner};
+    use djangofmt_syntax::Profile;
+
+    use super::{ast, doc_tree, format, formatter_config, lint_inner, parse_profile};
 
     #[test]
     fn every_view_renders_the_parse_error() {
-        let rendered = format("<div>", 80, 4, "django");
+        let rendered = format("<div>", 80, 4, "django").unwrap();
         assert!(rendered.contains("expected close tag for opening tag <div>"));
-        assert_eq!(ast("<div>", "django"), rendered);
-        assert_eq!(doc_tree("<div>", 80, 4, "django"), rendered);
-        let linted = lint_inner("<div>", "django").unwrap();
+        assert_eq!(ast("<div>", "django").unwrap(), rendered);
+        assert_eq!(doc_tree("<div>", 80, 4, "django").unwrap(), rendered);
+        let linted = lint_inner("<div>", Profile::Django).unwrap();
         assert_eq!((linted.error_count, linted.output), (1, rendered));
     }
 
     #[test]
     fn lint_counts_and_renders_diagnostics() {
-        let linted = lint_inner("<img src=\"a.png\">", "jinja").unwrap();
+        let linted = lint_inner("<img src=\"a.png\">", Profile::Jinja).unwrap();
         assert_eq!(linted.error_count, 2);
         assert!(linted.output.contains("Missing `alt` attribute on `<img>`"));
     }
 
     #[test]
+    fn invalid_options_are_rejected() {
+        assert_eq!(
+            formatter_config(65656, 4).unwrap_err(),
+            "line-length must be between 1 and 320 (got 65656)"
+        );
+        assert_eq!(
+            parse_profile("vue").unwrap_err(),
+            "Unknown profile `vue`, expected `django` or `jinja`"
+        );
+    }
+
+    #[test]
     fn control_flow_and_element() {
         let src = r#"{% if a %}<div class="x">hi</div>{% endif %}"#;
-        insta::assert_snapshot!(doc_tree(src, 80, 4, "django"));
+        insta::assert_snapshot!(doc_tree(src, 80, 4, "django").unwrap());
     }
 }

@@ -23,7 +23,6 @@ djangofmt_syntax = { workspace = true }
 markup_fmt = { workspace = true }
 miette = { workspace = true }
 serde = { workspace = true }
-serde-wasm-bindgen = { workspace = true }
 tsify = { workspace = true }
 wasm-bindgen = { workspace = true }
 
