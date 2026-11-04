@@ -75,8 +75,9 @@ pub fn check(checker: &Checker<'_>, tokens: &Tokens<'_>) {
         {
             if names.contains(&name) {
                 checker.report_diagnostic(&DuplicateBlockName { name }, checker.source_span(name));
+            } else {
+                names.push(name);
             }
-            names.push(name);
         }
     }
 }
