@@ -251,9 +251,8 @@ mod tests {
     #[case::two_on_one_line("{% if a %}x{%endif%}", &[(" if a ", 2), ("endif", 13)])]
     #[case::first_closer_wins(r#"{% x "{%}" %}"#, &[(r#" x "{"#, 2)])]
     #[case::variable_and_comment_skipped("{{ '{% a %}' }} {# {% b %} #}", &[])]
-    #[case::multi_line_not_a_tag("{% if\na %}", &[])]
+    #[case::newline_ends_token("{% a\n{% b %}", &[(" b ", 7)])]
     #[case::unclosed_variable_retries("{{% a %}", &[(" a ", 3)])]
-    #[case::variable_ends_at_newline("{{ a\n{% b %} }}", &[(" b ", 7)])]
     #[case::verbatim_body_dropped(
         "{% verbatim x %}{% a %}{% endverbatim %}{% endverbatim x %}{% b %}",
         &[(" verbatim x ", 2), (" endverbatim x ", 42), (" b ", 61)]
