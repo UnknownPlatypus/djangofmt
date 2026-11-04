@@ -119,16 +119,16 @@ impl<'s> SkippedBody<'s> {
 
     /// Whether Django compiles `token`, given the tags before it.
     fn compiles(&mut self, token: &Token<'s>) -> bool {
-        let Token::Tag { tag, .. } = token else {
+        let Token::Tag { tag, name } = token else {
             return !self.in_body();
         };
-        // Outside a body only `verbatim`, `raw` or `comment` opens one, so most tags pass on
-        // their first byte; a whitespace-control marker may precede it.
+        // Only `verbatim`, `raw` or `comment` opens a body: most names pass on their first byte.
+        // Django's name keeps the `-`/`+` markers, Jinja's stops at `\x1C`-`\x1F`.
         (!self.in_body()
-            && !tag
-                .content
-                .trim_start_matches(is_space)
-                .starts_with(['v', 'r', 'c', '-', '+']))
+            && !matches!(
+                name.as_bytes().first(),
+                None | Some(b'v' | b'r' | b'c' | b'-' | b'+')
+            ))
             || self.compiles_slow(tag.content)
     }
 
