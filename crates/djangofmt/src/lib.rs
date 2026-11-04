@@ -79,7 +79,8 @@ pub fn install_report_hook() {
 ///
 /// # Errors
 ///
-/// Will return `Err` on any formatting error (e.g. invalid file path, parse errors, formatting errors.).
+/// Returns `Err` when configuration or file discovery fails. Per-file read, parse and format errors
+/// are reported instead, and give `Ok(ExitStatus::Error)`.
 pub fn run(
     Args {
         fmt,
