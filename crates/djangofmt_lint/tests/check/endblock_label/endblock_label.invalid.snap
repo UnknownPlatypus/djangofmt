@@ -23,21 +23,21 @@ source: crates/djangofmt_lint/tests/check/main.rs
   help: Write it as `{% endpartialdef 'space in name' %}`
 
   × Redundant end tag label on a single-line block
-    ╭─[tests/check/endblock_label/endblock_label.invalid.html:14:73]
- 13 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
- 14 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
-    ·                                                                         ──┬──
-    ·                                                                           ╰── here
- 15 │ 
-    ╰────
-  help: Write it as `{% endblock %}`
-
-  × Redundant end tag label on a single-line block
     ╭─[tests/check/endblock_label/endblock_label.invalid.html:14:51]
  13 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
  14 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
     ·                                                   ───┬──
     ·                                                      ╰── here
+ 15 │ 
+    ╰────
+  help: Write it as `{% endblock %}`
+
+  × Redundant end tag label on a single-line block
+    ╭─[tests/check/endblock_label/endblock_label.invalid.html:14:73]
+ 13 │ <!-- Django: tests/template_tests/syntax_tests/test_named_endblock.py::namedendblocks01 -->
+ 14 │ 1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3
+    ·                                                                         ──┬──
+    ·                                                                           ╰── here
  15 │ 
     ╰────
   help: Write it as `{% endblock %}`

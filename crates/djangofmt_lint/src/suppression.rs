@@ -158,8 +158,9 @@ fn siblings_after<'n, 's>(
     }
 }
 
-/// Byte ranges the comment at `offset` guards: the first node after it, minus that node's children.
-/// For an element that is its opening and closing tags; for a block, its `{% %}` tags.
+/// Byte ranges the comment at `offset` guards: the first node after it, minus the children that
+/// can take an ignore of their own. For an element that is its opening and closing tags plus
+/// its text and HTML comments; for a block, its `{% %}` tags plus the same.
 fn guarded_ranges(
     root: &Root<'_>,
     offset: usize,
@@ -180,6 +181,11 @@ fn guarded_ranges(
     let end = checker.source_end(target.raw);
     let mut cursor = start;
     for child in child_slices(target).flatten() {
+        // Text and HTML comments are no target for a comment of their own: the tags Django reads
+        // in a `<script>` body or a `<!-- -->` are only reachable through the parent's.
+        if matches!(child.kind, NodeKind::Text(_) | NodeKind::Comment(_)) {
+            continue;
+        }
         let child_start = checker.source_offset(child.raw);
         if child_start > cursor {
             ranges.push(cursor..child_start);
@@ -245,7 +251,27 @@ mod tests {
             codes(
                 "<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
             ),
-            ["invalid-attr-value", "invalid-ignore-comment"]
+            ["invalid-ignore-comment", "invalid-attr-value"]
+        );
+    }
+
+    /// The token rules read the tags inside a `<script>` body and an HTML comment, which hold
+    /// no node an ignore comment could bind to, so the enclosing node's ignore covers them.
+    #[test]
+    fn node_ignore_covers_the_text_and_comments_inside_it() {
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[duplicate-block-name] #}\n\
+                 <script>{% block a %}{% endblock %}{% block a %}{% endblock %}</script>"
+            ),
+            Vec::<&str>::new()
+        );
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[duplicate-block-name] #}\n\
+                 <div><!-- {% block a %}{% block a %} --></div>"
+            ),
+            Vec::<&str>::new()
         );
     }
 
@@ -305,7 +331,7 @@ mod tests {
         // sibling all keep their diagnostic; the first two comments are unused on top.
         assert_eq!(
             codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
         assert_eq!(
             codes("<form method=\"yes\"></form>\n{# djangofmt: ignore[invalid-attr-value] #}"),
@@ -332,7 +358,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\nLegacy: <form method=\"yes\"></form>"
             ),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
         // Stacked ignore comments all reach the same target.
         assert_eq!(
@@ -380,7 +406,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{% if x %}<form method=\"yes\"></form>{% endif %}"
             ),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
     }
 
@@ -405,7 +431,7 @@ mod tests {
     fn attribute_position_comments_never_suppress() {
         assert_eq!(
             codes("<form {# djangofmt: ignore[invalid-attr-value] #} method=\"yes\"></form>"),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
     }
 }

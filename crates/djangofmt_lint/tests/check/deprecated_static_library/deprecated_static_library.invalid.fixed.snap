@@ -13,3 +13,6 @@ source: crates/djangofmt_lint/tests/check/main.rs
 
 <!-- Django 2.0: tests/staticfiles_tests/test_templatetags.py::test_template_tag -->
 {% load static %}{% static 'testfile.txt' %}
+
+<!-- Django reads the tags in attribute values -->
+<div title="{% load static %}"></div>
