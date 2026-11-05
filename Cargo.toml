@@ -161,6 +161,7 @@ warnings = "deny"
 
 [workspace.lints.rustdoc]
 missing_crate_level_docs = "deny"
+unescaped_backticks = "deny"
 
 [profile.dev]
 # Faster builds, backtraces still work.

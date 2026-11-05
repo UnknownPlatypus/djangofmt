@@ -176,7 +176,7 @@ impl CheckRun {
         let Some((pfi, path)) = self.per_file_ignores.as_ref().zip(path) else {
             return Cow::Borrowed(&self.settings);
         };
-        let rules = pfi.rules_for(path, &self.settings.rules);
+        let rules = pfi.rules_for(path, self.settings.rules);
         if rules == self.settings.rules {
             return Cow::Borrowed(&self.settings);
         }

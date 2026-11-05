@@ -4,6 +4,8 @@ allow-dbg-in-tests = true
 allow-panic-in-tests = true
 
 too-many-arguments-threshold = 6
+# No published API to keep stable, so lint `pub` items like private ones.
+avoid-breaking-exported-api = false
 # `wildcard_imports` skips `prelude` modules by default.
 warn-on-all-wildcard-imports = true
 

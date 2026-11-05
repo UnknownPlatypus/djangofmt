@@ -61,7 +61,7 @@ impl PerFileIgnores {
 
     /// Effective rule set for `path`: `base` minus every matching glob's ignored rules.
     #[must_use]
-    pub fn rules_for(&self, path: &Path, base: &RuleSet) -> RuleSet {
+    pub fn rules_for(&self, path: &Path, base: RuleSet) -> RuleSet {
         let full = Candidate::new(path);
         let name = path.file_name().map(Candidate::new);
 
@@ -69,10 +69,10 @@ impl PerFileIgnores {
         let by_name = name.filter(|name| self.basenames.is_match_candidate(name));
         let by_path = self.absolutes.is_match_candidate(&full);
         if by_name.is_none() && !by_path {
-            return *base;
+            return base;
         }
 
-        let mut rules = *base;
+        let mut rules = base;
         let matches = by_name
             .map(|name| self.basenames.matches_candidate(&name))
             .unwrap_or_default()
@@ -132,7 +132,7 @@ mod tests {
         ]);
         let base = all_rules();
         // Normalized like discovered files, which gives `/proj` a drive on Windows.
-        let rules = |path| pfi.rules_for(&normalize_path(path), &base);
+        let rules = |path| pfi.rules_for(&normalize_path(path), base);
 
         // Bare glob: a `.jinja` nested anywhere drops `use-https` only.
         let nested = rules("/proj/app/templates/x.jinja");
@@ -162,7 +162,7 @@ mod tests {
             "/proj/templates/admin/deep/page.html",
         ] {
             assert!(
-                !pfi.rules_for(&normalize_path(path), &base)
+                !pfi.rules_for(&normalize_path(path), base)
                     .contains(Rule::UseHttps),
                 "{path} should match `templates/*.html`"
             );
