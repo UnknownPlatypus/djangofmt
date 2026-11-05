@@ -171,7 +171,7 @@ pub fn category_list() -> String {
 }
 
 /// A non-fatal issue surfaced while resolving a [`LintConfiguration`](crate::settings::LintConfiguration).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SelectionWarning {
     /// A preview rule was named explicitly without preview mode; it was skipped.
     PreviewRuleSkipped(Rule),

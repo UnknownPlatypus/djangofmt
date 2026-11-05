@@ -40,7 +40,7 @@ pub fn format_stdin(cli: &FormatCommand) -> Result<ExitStatus> {
         editorconfig.as_ref(),
         stdin_filename.unwrap_or_else(|| Path::new("")),
     );
-    let config = formatter_config_from_args(cli, &pyproject, settings);
+    let config = formatter_config_from_args(cli, &pyproject, &settings);
 
     match super::catch_file_panic(stdin_filename, || {
         format_source_code(stdin_filename, &config, profile, cli.check)

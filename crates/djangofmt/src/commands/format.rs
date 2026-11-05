@@ -26,7 +26,7 @@ use editorconfig_parser::EditorConfig;
 pub fn formatter_config_from_args(
     args: &FormatCommand,
     pyproject: &PyprojectSettings,
-    editorconfig: EditorconfigSettings,
+    editorconfig: &EditorconfigSettings,
 ) -> FormatterConfig {
     let line_length = args
         .line_length
@@ -123,7 +123,7 @@ impl<'a> FormatContext<'a> {
 
     fn build_config(&self, path: &Path) -> FormatterConfig {
         let editorconfig = editorconfig::resolve_editorconfig(self.editorconfig, path);
-        formatter_config_from_args(self.args, self.pyproject, editorconfig)
+        formatter_config_from_args(self.args, self.pyproject, &editorconfig)
     }
 }
 
@@ -236,7 +236,7 @@ fn format_path(
 }
 
 /// The result of an individual formatting operation.
-#[derive(Eq, PartialEq, Debug, Clone, Copy)]
+#[derive(Eq, PartialEq, Debug)]
 pub enum FormatResult {
     /// The file was formatted.
     Formatted,
@@ -359,7 +359,8 @@ mod tests {
     fn formatter_config_from_args_defaults() {
         let args = FormatCommand::default();
         let pyproject = PyprojectSettings::default();
-        let config = formatter_config_from_args(&args, &pyproject, EditorconfigSettings::default());
+        let config =
+            formatter_config_from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert_eq!(config.markup.layout.print_width, 120);
         assert_eq!(config.markup.layout.indent_width, 4);
     }
@@ -378,7 +379,8 @@ mod tests {
             html_void_self_closing: Some(SelfClosing::Never),
             ..Default::default()
         };
-        let config = formatter_config_from_args(&args, &pyproject, EditorconfigSettings::default());
+        let config =
+            formatter_config_from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert_eq!(config.markup.layout.print_width, 80);
         assert_eq!(config.markup.layout.indent_width, 2);
         assert_eq!(config.markup.language.html_void_self_closing, Some(true));
@@ -391,7 +393,8 @@ mod tests {
             line_length: Some(LineLength::try_from(200u16).unwrap()),
             ..Default::default()
         };
-        let config = formatter_config_from_args(&args, &pyproject, EditorconfigSettings::default());
+        let config =
+            formatter_config_from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert_eq!(config.markup.layout.print_width, 200);
     }
 
@@ -402,7 +405,8 @@ mod tests {
             line_length: Some(LineLength::try_from(100u16).unwrap()),
             indent_width: Some(IndentWidth::try_from(2u8).unwrap()),
         };
-        let config = formatter_config_from_args(&args, &PyprojectSettings::default(), editorconfig);
+        let config =
+            formatter_config_from_args(&args, &PyprojectSettings::default(), &editorconfig);
         assert_eq!(config.markup.layout.print_width, 100);
         assert_eq!(config.markup.layout.indent_width, 2);
     }
@@ -414,7 +418,8 @@ mod tests {
             ..Default::default()
         };
         let pyproject = PyprojectSettings::default();
-        let config = formatter_config_from_args(&args, &pyproject, EditorconfigSettings::default());
+        let config =
+            formatter_config_from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert!(config.markup.language.preserve_unquoted_attrs);
     }
 
@@ -425,7 +430,8 @@ mod tests {
             preserve_unquoted_attrs: Some(true),
             ..Default::default()
         };
-        let config = formatter_config_from_args(&args, &pyproject, EditorconfigSettings::default());
+        let config =
+            formatter_config_from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert!(config.markup.language.preserve_unquoted_attrs);
     }
 
@@ -439,7 +445,8 @@ mod tests {
             preserve_unquoted_attrs: Some(true),
             ..Default::default()
         };
-        let config = formatter_config_from_args(&args, &pyproject, EditorconfigSettings::default());
+        let config =
+            formatter_config_from_args(&args, &pyproject, &EditorconfigSettings::default());
         assert!(!config.markup.language.preserve_unquoted_attrs);
     }
 

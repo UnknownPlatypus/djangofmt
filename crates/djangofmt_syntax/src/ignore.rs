@@ -87,7 +87,7 @@ impl<'s> IgnoreDirective<'s> {
 
 /// File-wide opt-outs declared by the leading comment of a file: `file-ignore[...]` codes,
 /// or the legacy bare `djangofmt:ignore` in `{# #}` or `<!-- -->` form, which sets both.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct FileIgnores {
     /// The formatter skips the whole file (`file-ignore[format]`).
     pub format: bool,

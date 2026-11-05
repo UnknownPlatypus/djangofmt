@@ -1,3 +1,2 @@
 edition = "2024"
 style_edition = "2024"
-hex_literal_case = "Lower"

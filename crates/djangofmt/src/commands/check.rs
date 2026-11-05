@@ -24,7 +24,7 @@ use crate::{ExitStatus, STDIN_SENTINEL};
 use super::format::merge_custom_blocks;
 
 /// Resolved fix-related configuration after merging CLI args with pyproject settings.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq)]
 pub struct CheckConfig {
     pub fix: bool,
     pub unsafe_fixes: bool,
@@ -58,7 +58,7 @@ impl CheckConfig {
     }
 
     /// How far a fix may go before it is held back.
-    const fn threshold(self) -> Applicability {
+    const fn threshold(&self) -> Applicability {
         if self.unsafe_fixes {
             Applicability::Unsafe
         } else {
@@ -197,7 +197,7 @@ impl CheckRun {
             OutputFormat::Concise => print_concise(results, self.config.threshold()),
         }
 
-        print_summary(&totals, self.config, nb_errors);
+        print_summary(&totals, &self.config, nb_errors);
 
         print_skipped(totals.skipped);
 
@@ -300,7 +300,7 @@ fn print_concise(results: &[CheckResult], threshold: Applicability) {
     }
 }
 
-fn print_summary(totals: &Totals, config: CheckConfig, parse_errors: usize) {
+fn print_summary(totals: &Totals, config: &CheckConfig, parse_errors: usize) {
     let Totals {
         diagnostics,
         applied,
@@ -566,14 +566,14 @@ mod tests {
     #[test]
     #[traced_test]
     fn summary_all_passed() {
-        print_summary(&Totals::default(), CheckConfig::default(), 0);
+        print_summary(&Totals::default(), &CheckConfig::default(), 0);
         assert!(logs_contain("All checks passed!"));
     }
 
     #[test]
     #[traced_test]
     fn summary_silent_when_only_parse_errors() {
-        print_summary(&Totals::default(), CheckConfig::default(), 2);
+        print_summary(&Totals::default(), &CheckConfig::default(), 2);
         assert!(!logs_contain("All checks passed!"));
         assert!(!logs_contain("Found"));
     }
@@ -594,7 +594,7 @@ mod tests {
             unsafe_fixes: true,
             ..CheckConfig::default()
         };
-        print_summary(&totals, config, 0);
+        print_summary(&totals, &config, 0);
         assert!(logs_contain("Found 5 errors (3 fixed, 2 remaining)."));
         assert!(!logs_contain("fixable with"));
         assert!(!logs_contain("hidden"));
@@ -608,7 +608,7 @@ mod tests {
             safe_fixable: 2,
             ..Totals::default()
         };
-        print_summary(&totals, CheckConfig::default(), 0);
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 2 fixable with the --fix option."
         ));
@@ -624,7 +624,7 @@ mod tests {
             unsafe_fixable: 3,
             ..Totals::default()
         };
-        print_summary(&totals, CheckConfig::default(), 0);
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 2 fixable with the --fix option. \
              (3 hidden fixes can be enabled with --unsafe-fixes)"
@@ -639,7 +639,7 @@ mod tests {
             unsafe_fixable: 3,
             ..Totals::default()
         };
-        print_summary(&totals, CheckConfig::default(), 0);
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain(
             "Found 7 errors. (3 hidden fixes can be enabled with --unsafe-fixes)"
         ));
@@ -661,7 +661,7 @@ mod tests {
             unsafe_fixes: true,
             ..CheckConfig::default()
         };
-        print_summary(&totals, config, 0);
+        print_summary(&totals, &config, 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 5 fixable with the --fix option."
         ));
@@ -680,7 +680,7 @@ mod tests {
             unsafe_fixes: true,
             ..CheckConfig::default()
         };
-        print_summary(&totals, config, 0);
+        print_summary(&totals, &config, 0);
         assert!(logs_contain(
             "Found 7 errors. [*] 3 fixable with the --fix option."
         ));
@@ -694,7 +694,7 @@ mod tests {
             diagnostics: 5,
             ..Totals::default()
         };
-        print_summary(&totals, CheckConfig::default(), 0);
+        print_summary(&totals, &CheckConfig::default(), 0);
         assert!(logs_contain("Found 5 errors."));
         assert!(!logs_contain("fixable with"));
         assert!(!logs_contain("hidden"));

@@ -15,7 +15,7 @@ use crate::fix::{Applicability, IsolationLevel};
 use crate::{LintDiagnostic, LintInput, Settings};
 
 /// Metadata about a single applied fix, captured for `--show-fixes`.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct AppliedFix {
     /// Rule code of the diagnostic the fix came from.
     pub code: &'static str,
@@ -116,7 +116,7 @@ pub fn apply_fixes(
 }
 
 /// Per-rule summary for `--show-fixes` output.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct RuleFixSummary {
     /// Number of fixes applied for this rule across all iterations.
     pub count: usize,
