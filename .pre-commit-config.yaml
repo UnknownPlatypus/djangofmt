@@ -48,6 +48,10 @@ repos:
     rev: 479be5958357ba5ab65ce47172117348516860e9  # frozen: v3.14.1-1
     hooks:
       - id: shfmt
+  - repo: https://github.com/UnknownPlatypus/just-pre-commit
+    rev: 2a9e3d8990edaa5b9685c5564cd6368b9d49e65e  # frozen: v1.59.0
+    hooks:
+      - id: just-fmt
   - repo: https://github.com/tombi-toml/tombi-pre-commit
     rev: 67d13bcf8d97660524276ba6716c22211aa59f3b  # frozen: v1.9.9
     hooks:
