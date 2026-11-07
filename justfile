@@ -57,8 +57,8 @@ playground-wasm-build:
     wasm-pack build --target web crates/djangofmt_wasm --out-dir ../../playground/pkg
 
 # Run playground dev server (builds WASM first)
-[working-directory: 'playground']
 [group('playground')]
+[working-directory('playground')]
 playground-dev: playground-wasm-build
     deno install
     deno task dev
@@ -71,14 +71,14 @@ setup-bench-py:
     npm ci --prefix ./python/benchmarks
 
 # Run python benchmarks on a directory of templates
-[working-directory: 'python/benchmarks']
 [group('bench')]
+[working-directory('python/benchmarks')]
 bench-py dir: setup-bench-py
-    uv run ./run_formatter.sh {{dir}}
+    uv run ./run_formatter.sh {{ dir }}
 
 # Render the benchmark chart from chart.vl.json (light + dark SVG)
-[working-directory: 'python/benchmarks']
 [group('bench')]
+[working-directory('python/benchmarks')]
 bench-chart:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -112,7 +112,7 @@ coverage-lcov:
 # Run mutation testing, e.g. `just mutants -j4 -f 'crates/djangofmt_syntax/**'`
 [group('dev')]
 mutants *args="":
-    INSTA_UPDATE=no cargo mutants {{args}}
+    INSTA_UPDATE=no cargo mutants {{ args }}
 
 # Report the largest functions and crates in the release binary
 [group('dev')]
@@ -134,12 +134,12 @@ fuzz time="0" *args="":
         crates/djangofmt/tests/parse_error \
         crates/djangofmt_lint/tests/check \
         crates/djangofmt_benchmark/resources \
-        -- -dict=fuzz/django.dict -timeout=2 -max_total_time={{time}} {{args}}
+        -- -dict=fuzz/django.dict -timeout=2 -max_total_time={{ time }} {{ args }}
 
 # Minimize a fuzz crash artifact from fuzz/artifacts/fmt_idempotency/
 [group('dev')]
 fuzz-min artifact:
-    uv run --only-dev cargo +nightly fuzz tmin -s none fmt_idempotency {{artifact}}
+    uv run --only-dev cargo +nightly fuzz tmin -s none fmt_idempotency {{ artifact }}
 
 # Run rust micro-benchmarks
 [group('bench')]
@@ -152,7 +152,7 @@ benchmark-git-repo repo_path:
     #!/usr/bin/env bash
     set -euo pipefail
 
-    REPO_DIR=$(realpath "{{repo_path}}")
+    REPO_DIR=$(realpath "{{ repo_path }}")
     ROOT_DIR=$(pwd)
     TEMP_DIR="/tmp/benchmark-djangofmt-$(date +%Y-%m-%dT%H:%M:%S%Z)"
     DJANGOFMT_DEV="$ROOT_DIR/target/release/djangofmt"
@@ -205,45 +205,44 @@ benchmark-git-repo repo_path:
         "$DEV_CMD" \
         "$SYS_CMD"
 
-
 # Run formatter ecosystem checks
 [group('ecosystem-check')]
 ecosystem-check baseline comparison *args:
     cargo build -p djangofmt
-    uv run --only-dev ecosystem-check format {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+    uv run --only-dev ecosystem-check format {{ baseline }} {{ comparison }} --cache-dir {{ ecosystem_cache_dir }} {{ args }}
 
 # Run formatter ecosystem checks comparing debug build to system djangofmt
 [group('ecosystem-check')]
 ecosystem-check-dev:
     cargo build -p djangofmt
-    uv run --only-dev ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
+    uv run --only-dev ecosystem-check format djangofmt "target/debug/djangofmt" --cache-dir {{ ecosystem_cache_dir }}
 
 # Run formatter ecosystem checks comparing djangofmt debug build to 'djade' or 'rustywind'
-[group('ecosystem-check')]
 [arg('external-formatter', pattern='djade|rustywind')]
+[group('ecosystem-check')]
 ecosystem-check-stability external-formatter:
     cargo build -p djangofmt
-    uv run --only-dev ecosystem-check format {{external-formatter}} "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}} --format-comparison base-then-comp-converge
+    uv run --only-dev ecosystem-check format {{ external-formatter }} "target/debug/djangofmt" --cache-dir {{ ecosystem_cache_dir }} --format-comparison base-then-comp-converge
 
 # Run linter ecosystem checks
 [group('ecosystem-check')]
 ecosystem-check-lint baseline comparison *args:
     cargo build -p djangofmt
-    uv run --only-dev ecosystem-check check {{baseline}} {{comparison}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+    uv run --only-dev ecosystem-check check {{ baseline }} {{ comparison }} --cache-dir {{ ecosystem_cache_dir }} {{ args }}
 
 # Run linter ecosystem checks comparing debug build to system djangofmt
 [group('ecosystem-check')]
 ecosystem-check-lint-dev:
     cargo build -p djangofmt
-    uv run --only-dev ecosystem-check check djangofmt "target/debug/djangofmt" --cache-dir {{ecosystem_cache_dir}}
+    uv run --only-dev ecosystem-check check djangofmt "target/debug/djangofmt" --cache-dir {{ ecosystem_cache_dir }}
 
 # Check that formatting keeps ecosystem templates parseable by Django or Jinja
 [group('ecosystem-check')]
 ecosystem-check-validate executable="target/debug/djangofmt" *args:
     cargo build -p djangofmt
-    uv run --only-dev ecosystem-check validate {{executable}} --cache-dir {{ecosystem_cache_dir}} {{args}}
+    uv run --only-dev ecosystem-check validate {{ executable }} --cache-dir {{ ecosystem_cache_dir }} {{ args }}
 
 # Clean ecosystem check git repos cache
 [group('ecosystem-check')]
 ecosystem-check-clean-cache:
-    rm -rf {{ecosystem_cache_dir}}
+    rm -rf {{ ecosystem_cache_dir }}
