@@ -282,8 +282,6 @@ mod tests {
         assert_eq!(edit.content(), Some("xyz"));
     }
 
-    // Clamping only happens where `usize` is wider than `u32`.
-    #[cfg(target_pointer_width = "64")]
     #[test]
     fn edit_end_does_not_overflow_clamped_spans() {
         // `span` clamps both offset and length to `u32::MAX`; summing them

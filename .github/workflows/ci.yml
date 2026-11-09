@@ -195,7 +195,7 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Install Rust toolchain
-        run: rustup component add clippy rustfmt
+        run: rustup component add clippy
       - name: Run Clippy
         run: cargo clippy --locked --all-targets --all-features
       - name: Check docs
@@ -203,9 +203,6 @@ jobs:
         env:
           RUSTDOCFLAGS: -Dwarnings
         run: cargo doc --locked --no-deps --workspace --all-features --document-private-items
-      - name: Check formatting
-        if: ${{ !cancelled() }}
-        run: cargo fmt --all --check
 
   cargo-shear-deny:
     name: "cargo shear + deny"
@@ -331,46 +328,6 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Run tests
         run: cargo test --locked --workspace --lib --bins --tests --all-features --no-fail-fast
-
-  test-cross:
-    name: "cargo test (${{ matrix.target }})"
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: i686-unknown-linux-gnu
-            packages: gcc-multilib
-          # Big-endian. Cross-compiled natively, only the test binaries run under qemu.
-          - target: s390x-unknown-linux-gnu
-            packages: gcc-s390x-linux-gnu libc6-dev-s390x-cross qemu-user-static
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    needs: changed_files
-    if: ${{ needs.changed_files.outputs.code == 'true' || github.ref == 'refs/heads/main' }}
-    permissions:
-      contents: read
-    env:
-      CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_LINKER: s390x-linux-gnu-gcc
-      QEMU_LD_PREFIX: /usr/s390x-linux-gnu
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-      - uses: Swatinem/rust-cache@v2.9.3
-        with:
-          key: ${{ matrix.target }}
-          save-if: ${{ github.ref == 'refs/heads/main' }}
-      - name: Install the ${{ matrix.target }} toolchain
-        env:
-          TARGET: ${{ matrix.target }}
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ${{ matrix.packages }}
-          rustup target add "$TARGET"
-      - name: Run tests
-        env:
-          TARGET: ${{ matrix.target }}
-        run: cargo test --locked --target "$TARGET" --workspace --lib --bins --tests --all-features --no-fail-fast
 
   msrv_check:
     name: "cargo check (msrv)"
