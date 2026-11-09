@@ -1,0 +1,52 @@
+# Checks against moving targets (the next Rust release, external links),
+# kept off PRs so they never fail a change for reasons unrelated to it.
+name: "[djangofmt] Scheduled checks"
+
+on:
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/scheduled.yml
+
+permissions: {}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  beta-clippy:
+    # Restriction lints are denied wholesale, so new ones fail here before the Renovate toolchain bump.
+    name: "cargo +beta clippy"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    if: ${{ github.repository == 'UnknownPlatypus/djangofmt' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install beta toolchain
+        run: rustup toolchain install beta --profile minimal --component clippy
+      - name: Run Clippy
+        run: cargo +beta clippy --locked --all-targets --all-features
+
+  lychee:
+    name: "lychee"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    if: ${{ github.repository == 'UnknownPlatypus/djangofmt' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      # External links only, the strict docs build already catches broken internal ones.
+      - uses: lycheeverse/lychee-action@v2.9.0
+        with:
+          args: >-
+            --no-progress --scheme https --scheme http
+            docs README.md CONTRIBUTING.md 'crates/djangofmt_lint/src/rules/**/*.rs'

@@ -198,6 +198,11 @@ jobs:
         run: rustup component add clippy
       - name: Run Clippy
         run: cargo clippy --locked --all-targets --all-features
+      - name: Check docs
+        if: ${{ !cancelled() }}
+        env:
+          RUSTDOCFLAGS: -Dwarnings
+        run: cargo doc --locked --no-deps --workspace --all-features --document-private-items
 
   cargo-shear-deny:
     name: "cargo shear + deny"
@@ -307,7 +312,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2025, macos-15]
+        os: [windows-2025, macos-15, ubuntu-24.04-arm]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     needs: changed_files
@@ -322,7 +327,7 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Run tests
-        run: cargo test --workspace --lib --bins --tests --all-features --no-fail-fast
+        run: cargo test --locked --workspace --lib --bins --tests --all-features --no-fail-fast
 
   msrv_check:
     name: "cargo check (msrv)"

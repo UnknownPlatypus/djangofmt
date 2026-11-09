@@ -23,8 +23,7 @@ use djangofmt::{ExitStatus, install_report_hook, run};
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
-#[must_use]
-pub fn main() -> ExitCode {
+fn main() -> ExitCode {
     install_report_hook();
 
     let args = Args::parse();
