@@ -191,8 +191,8 @@ const fn is_ascii_word_char(c: char) -> bool {
     c.is_ascii_alphanumeric() || c == '_'
 }
 
-/// Returns true if `value` begins with an RFC 3986 scheme, e.g. `https://…`, `mailto:…`, or
-/// `ftp://…`. A scheme is `ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )` followed by `:`.
+/// Returns true if `value` begins with an RFC 3986 scheme, e.g. `https:`, `mailto:` or `ftp:`.
+/// A scheme is `ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )` followed by `:`.
 fn has_url_scheme(value: &str) -> bool {
     let bytes = value.as_bytes();
     // A scheme must start with a letter.

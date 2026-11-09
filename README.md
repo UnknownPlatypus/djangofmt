@@ -2,7 +2,7 @@
 
 <!-- Begin section: Overview -->
 
-[![Pypi Version](https://img.shields.io/pypi/v/djangofmt.svg)](https://pypi.python.org/djangofmt)
+[![Pypi Version](https://img.shields.io/pypi/v/djangofmt.svg)](https://pypi.org/project/djangofmt/)
 [![License](https://img.shields.io/pypi/l/djangofmt.svg)](https://github.com/UnknownPlatypus/djangofmt/blob/main/LICENSE)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/djangofmt.svg)](https://pypi.python.org/pypi/djangofmt)
 [![Actions status](https://github.com/UnknownPlatypus/djangofmt/actions/workflows/ci.yml/badge.svg)](https://github.com/UnknownPlatypus/djangofmt/actions)
