@@ -14,7 +14,7 @@ workflows:
         - 'codspeedhq/action@v5.6.0'
         - 'swatinem/rust-cache@v2.9.3'
     '.github/workflows/pr-comment-ecosystem.yml':
-        - 'dawidd6/action-download-artifact@v27'
+        - 'dawidd6/action-download-artifact@v28'
     '.github/workflows/publish-playground-and-docs.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/configure-pages@v6.0.0'
@@ -122,9 +122,9 @@ dependencies:
         uses:
             - 'actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7'
             - 'actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd'
-    'dawidd6/action-download-artifact@v27':
-        ref: 'v27'
-        commit: 'sha1-eab87c9830c39eff17e5a6eadb20bfb4bc880477'
+    'dawidd6/action-download-artifact@v28':
+        ref: 'v28'
+        commit: 'sha1-a92c7ae74cf1df8810783758581e485ac3aaa309'
         owner_id: 9713907
         repo_id: 239218448
     'denoland/setup-deno@v2.0.5':
