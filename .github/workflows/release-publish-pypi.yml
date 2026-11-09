@@ -15,8 +15,8 @@ on:
 env:
   ACTIONS_CACHE_MODE: none
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.6
-  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645 # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.7
+  UV_CHECKSUM: c5221ff41b7892bfc223543883600125f6a47fe845093e0f5bdff4f359196d83 # x86_64-unknown-linux-gnu
 
 jobs:
   pypi-publish:
@@ -30,7 +30,7 @@ jobs:
       id-token: write
     steps:
       - name: "Install uv"
-        uses: astral-sh/setup-uv@v10.3.2
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
