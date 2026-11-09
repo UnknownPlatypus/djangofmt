@@ -56,7 +56,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           command: sdist
           args: --out dist
       - name: "Test sdist"
@@ -93,7 +93,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: ${{ matrix.target }}
           manylinux: "2_17"
           args: --release --locked --out dist --compatibility pypi
@@ -181,7 +181,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: ${{ matrix.platform.target }}
           manylinux: ${{ matrix.platform.manylinux }}
           docker-options: ${{ matrix.platform.maturin_docker_options }}
@@ -253,7 +253,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: ${{ matrix.target }}
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
@@ -320,7 +320,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: ${{ matrix.platform.target }}
           manylinux: musllinux_1_2
           args: --release --locked --out dist --compatibility pypi
@@ -381,7 +381,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: x86_64
           args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
@@ -431,7 +431,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: aarch64
           args: --release --locked --out dist --compatibility pypi
       - name: "Test wheels"
@@ -492,7 +492,7 @@ jobs:
         uses: PyO3/maturin-action@v1.51.0
         with:
           sccache: false
-          maturin-version: v1.15.0
+          maturin-version: v1.16.0
           target: ${{ matrix.platform.target }}
           args: --release --locked --out dist --compatibility pypi
       - name: "Verify static Windows runtime"

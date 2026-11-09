@@ -19,11 +19,11 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.6
-  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645 # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.7
+  UV_CHECKSUM: c5221ff41b7892bfc223543883600125f6a47fe845093e0f5bdff4f359196d83 # x86_64-unknown-linux-gnu
   # renovate: datasource=github-release-attachments depName=astral-sh/hawk
-  HAWK_VERSION: 0.1.15
-  HAWK_CHECKSUM: c50189129c43f026b19a0e7da2a405ab2599ff9426a826f7db8ab64d7274d1d5 # x86_64-unknown-linux-gnu
+  HAWK_VERSION: 0.1.17
+  HAWK_CHECKSUM: f5a76a43aa6be1e55e44f5eac13310193ba77729673799250065f1d201018016 # x86_64-unknown-linux-gnu
   HAWK_TOOLCHAIN: 1.99.0 # channel of hawk's rust-toolchain.toml at HAWK_VERSION
   # renovate: datasource=github-release-attachments depName=sourcefrog/cargo-mutants
   CARGO_MUTANTS_VERSION: v27.1.0
@@ -93,7 +93,7 @@ jobs:
         run: cargo build --locked -p djangofmt --release --verbose && mv target/release/djangofmt ./pr_djangofmt
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@v10.3.2
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
@@ -212,7 +212,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Setup uv
-        uses: astral-sh/setup-uv@v10.3.2
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
@@ -243,10 +243,9 @@ jobs:
           curl --proto '=https' --tlsv1.2 -LsSf -o "$RUNNER_TEMP/cargo-hawk.tar.gz" \
             "https://github.com/astral-sh/hawk/releases/download/${HAWK_VERSION}/cargo-hawk-x86_64-unknown-linux-gnu.tar.gz"
           echo "${HAWK_CHECKSUM}  $RUNNER_TEMP/cargo-hawk.tar.gz" | sha256sum --check
-          tar xzf "$RUNNER_TEMP/cargo-hawk.tar.gz" -C ~/.cargo/bin --strip-components=1 \
-            cargo-hawk-x86_64-unknown-linux-gnu/cargo-hawk cargo-hawk-x86_64-unknown-linux-gnu/cargo-hawk-driver
+          tar xzf "$RUNNER_TEMP/cargo-hawk.tar.gz" -C ~/.cargo/bin --strip-components=1 --wildcards '*/cargo-hawk*'
       - name: Find dead pub items
-        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --target-dir target/hawk --only dead-public --color=always -D warnings
+        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --only dead-public --color=always -D warnings
 
   test:
     name: "cargo test + coverage"
@@ -264,7 +263,7 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Setup uv
-        uses: astral-sh/setup-uv@v10.3.2
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}

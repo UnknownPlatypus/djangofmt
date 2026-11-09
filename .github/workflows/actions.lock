@@ -6,12 +6,12 @@ workflows:
     '.github/workflows/ci.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/upload-artifact@v7.0.2'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
         - 'swatinem/rust-cache@v2.9.3'
     '.github/workflows/codspeed.yml':
         - 'actions/checkout@v7.0.1'
-        - 'astral-sh/setup-uv@v10.3.2'
-        - 'codspeedhq/action@v5.6.0'
+        - 'astral-sh/setup-uv@v10.3.3'
+        - 'codspeedhq/action@v5.6.3'
         - 'swatinem/rust-cache@v2.9.3'
     '.github/workflows/pr-comment-ecosystem.yml':
         - 'dawidd6/action-download-artifact@v28'
@@ -20,7 +20,7 @@ workflows:
         - 'actions/configure-pages@v6.0.0'
         - 'actions/deploy-pages@v5.0.1'
         - 'actions/upload-pages-artifact@v5.0.0'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
         - 'denoland/setup-deno@v2.0.5'
     '.github/workflows/release-build-binaries.yml':
         - 'actions/checkout@v7.0.1'
@@ -32,13 +32,13 @@ workflows:
         - 'actions/github-script@v9.0.0'
     '.github/workflows/release-publish-pypi.yml':
         - 'actions/download-artifact@v8.0.2'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
     '.github/workflows/release.yml':
         - 'actions/attest@v4.2.2'
         - 'actions/checkout@v7.0.1'
         - 'actions/download-artifact@v8.0.2'
         - 'actions/upload-artifact@v7.0.2'
-        - 'astral-sh/setup-uv@v10.3.2'
+        - 'astral-sh/setup-uv@v10.3.3'
 dependencies:
     'actions/attest@v4.2.2':
         ref: 'v4.2.2'
@@ -109,14 +109,14 @@ dependencies:
         repo_id: 1356026433
         uses:
             - 'docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a'
-    'astral-sh/setup-uv@v10.3.2':
-        ref: 'v10.3.2'
-        commit: 'sha1-07a047e608db84b3d8c06cd9a7c7dcc9c355c18e'
+    'astral-sh/setup-uv@v10.3.3':
+        ref: 'v10.3.3'
+        commit: 'sha1-68559e99cc807c1eb7e9238fd43a15bba460eec2'
         owner_id: 115962839
         repo_id: 846733598
-    'codspeedhq/action@v5.6.0':
-        ref: 'v5.6.0'
-        commit: 'sha1-78102a468f96d8e0ccb92d0ec49425753fc42062'
+    'codspeedhq/action@v5.6.3':
+        ref: 'v5.6.3'
+        commit: 'sha1-af75f77f17a054769abefaa42fe8dc2975469b5f'
         owner_id: 116658140
         repo_id: 561699778
         uses:

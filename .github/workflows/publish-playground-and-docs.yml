@@ -42,11 +42,11 @@ env:
   # Fail instead of silently re-resolving when `uv.lock` is out of date.
   UV_LOCKED: 1
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.6
-  UV_CHECKSUM: f29c3e94ffabd7e6f3ba521dba169a9b7ec12100bf3257087f0f24f6123f3645 # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.7
+  UV_CHECKSUM: c5221ff41b7892bfc223543883600125f6a47fe845093e0f5bdff4f359196d83 # x86_64-unknown-linux-gnu
   # renovate: datasource=github-release-attachments depName=wasm-bindgen/wasm-pack
-  WASM_PACK_VERSION: v0.15.0
-  WASM_PACK_CHECKSUM: c09f971ecaed9a2efc80fdcea7a00ef6b53c7fadc8c57d1f61b53a6aa66b668a # x86_64-unknown-linux-musl
+  WASM_PACK_VERSION: v0.15.1
+  WASM_PACK_CHECKSUM: 410101009739b9d01c7d5affaaad6e9c9a24b4cba6791a4805db8e89b9bf7af2 # x86_64-unknown-linux-musl
 
 # Scope the concurrency group per PR so simultaneous PR builds don't cancel each other.
 # `main` deploys (and workflow_dispatch / workflow_call runs) share a single `pages-deploy`
@@ -87,7 +87,7 @@ jobs:
         run: deno task build
         working-directory: playground
       - name: Setup uv
-        uses: astral-sh/setup-uv@v10.3.2
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           version: ${{ env.UV_VERSION }}
           checksum: ${{ env.UV_CHECKSUM }}
