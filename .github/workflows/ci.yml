@@ -243,10 +243,9 @@ jobs:
           curl --proto '=https' --tlsv1.2 -LsSf -o "$RUNNER_TEMP/cargo-hawk.tar.gz" \
             "https://github.com/astral-sh/hawk/releases/download/${HAWK_VERSION}/cargo-hawk-x86_64-unknown-linux-gnu.tar.gz"
           echo "${HAWK_CHECKSUM}  $RUNNER_TEMP/cargo-hawk.tar.gz" | sha256sum --check
-          tar xzf "$RUNNER_TEMP/cargo-hawk.tar.gz" -C ~/.cargo/bin --strip-components=1 \
-            cargo-hawk-x86_64-unknown-linux-gnu/cargo-hawk cargo-hawk-x86_64-unknown-linux-gnu/cargo-hawk-driver
+          tar xzf "$RUNNER_TEMP/cargo-hawk.tar.gz" -C ~/.cargo/bin --strip-components=1 --wildcards '*/cargo-hawk*'
       - name: Find dead pub items
-        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --target-dir target/hawk --only dead-public --color=always -D warnings
+        run: cargo "+${HAWK_TOOLCHAIN}" hawk check --only dead-public --color=always -D warnings
 
   test:
     name: "cargo test + coverage"
