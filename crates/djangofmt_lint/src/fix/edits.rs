@@ -22,8 +22,16 @@ pub fn delete_attr_fix(ctx: &LintContext<'_>, name: &str, value_str: &str, quote
     let name_start = ctx.source_offset(name);
     let attr_end = ctx.source_end(value_str) + usize::from(quoted);
 
-    let fix_start = source[..name_start].trim_ascii_end().len();
-    let fix_end = match source[attr_end..].trim_start_matches([' ', '\t']) {
+    let rest = &source[attr_end..];
+    // Glued to the next token (`class=""{% if x %}`): the whitespace before the attribute
+    // is the only separator left, so it stays.
+    let glued = !rest.starts_with(|c: char| c.is_ascii_whitespace() || matches!(c, '>' | '/'));
+    let fix_start = if glued {
+        name_start
+    } else {
+        source[..name_start].trim_ascii_end().len()
+    };
+    let fix_end = match rest.trim_start_matches([' ', '\t']) {
         rest if rest.starts_with('>') => source.len() - rest.len(),
         _ => attr_end,
     };
