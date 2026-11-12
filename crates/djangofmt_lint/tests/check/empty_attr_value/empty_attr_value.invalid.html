@@ -43,3 +43,9 @@
 {% if show %}
     <span id=""></span>
 {% endif %}
+
+<!-- Directly followed by `/>` -->
+<input id=""/>
+
+<!-- Glued to the next token: the space before the attribute stays -->
+<div class=""{% if x %}hidden{% endif %}>x</div>
