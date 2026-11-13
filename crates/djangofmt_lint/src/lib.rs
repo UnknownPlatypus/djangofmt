@@ -46,6 +46,7 @@ use std::path::Path;
 use djangofmt_syntax::{FileIgnores, Parsed, parse};
 use markup_fmt::{Language, SyntaxError};
 use miette::{Diagnostic, GraphicalReportHandler, NamedSource, Report, SourceSpan};
+use registry::LintSource;
 use rustc_hash::FxHashMap;
 use std::fmt;
 use std::sync::{Arc, LazyLock};
@@ -189,23 +190,28 @@ fn check_rules(
         ..settings.clone()
     });
     let settings = quarantine_settings.as_ref().unwrap_or(settings);
-    let mut checker = Checker::new(
+    let context = LintContext::new(
         parsed.source(),
         settings,
         parsed.language(),
         path,
         quarantined,
     );
-    // Walk the ast and collect diagnostics.
-    checker.visit_root(parsed.ast());
-
-    // Collect ignore comments and drop the ignored diagnostics.
-    let mut ignore_comments = suppression::collect_ignore_comments(parsed.ast(), &checker);
-    checker.visit_ignore_comments(&ignore_comments);
-    suppression::record_matches(&checker, &mut ignore_comments);
-    checker.visit_unused_ignore_codes(&ignore_comments);
-    suppression::drop_ignored_diagnostics(&checker, &ignore_comments);
-    checker.into_diagnostics()
+    Checker::new(&context).visit_root(parsed.ast());
+    // Like ruff's gate on `check_noqa`: there is something to silence, or a rule on the comments is on.
+    let has_diagnostics = !context.diagnostics().is_empty();
+    if has_diagnostics
+        || settings
+            .rules
+            .iter()
+            .any(|rule| rule.lint_source() == LintSource::Ignore)
+    {
+        suppression::check_ignores(&context, parsed.ast());
+    }
+    let mut diagnostics = context.into_diagnostics();
+    // Passes, and some rules within a pass, report out of source order.
+    diagnostics.sort_by_key(|diagnostic| diagnostic.span.offset());
+    diagnostics
 }
 
 /// [`parse`], falling back to the leading comment alone when that comment quarantines

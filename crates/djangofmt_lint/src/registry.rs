@@ -269,3 +269,25 @@ define_rules! {
     (DeprecatedStaticLibrary, rules::suspicious::deprecated_static_library::DeprecatedStaticLibrary<'static>),
     (RedundantJsonScriptId, rules::complexity::redundant_json_script_id::RedundantJsonScriptId),
 }
+
+/// The representation of a template a rule reads, which picks the pass that runs it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LintSource {
+    /// The `markup_fmt` tree: elements, attributes and the blocks the parser paired.
+    Ast,
+    /// The ignore comments, once the other passes have reported what they may silence.
+    Ignore,
+}
+
+impl Rule {
+    /// Where the rule reads the template: a rule on ignore comments runs from `check_ignores`,
+    /// an AST rule from the `visit_*` hook of its node.
+    pub(crate) const fn lint_source(self) -> LintSource {
+        match self {
+            Self::InvalidIgnoreComment | Self::InvalidIgnoreCode | Self::UnusedIgnoreCode => {
+                LintSource::Ignore
+            }
+            _ => LintSource::Ast,
+        }
+    }
+}
