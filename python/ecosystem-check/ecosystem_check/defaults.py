@@ -560,18 +560,11 @@ DEFAULT_TARGETS = [
                 ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
                     "docs/_templates/breadcrumbs.html",  # Sphinx template using {{ super() }}
                 ),
-                ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
-                    "readthedocs/templates/search/elastic_search.html",
-                ),
-                ExcludeReason.MISSING_END_TAG: (
-                    "readthedocs/templates/projects/project_notifications.html",  # </p>
-                ),
                 ExcludeReason.INVALID_SOURCE_HTML: (
                     # <b> where </b> was intended
                     "readthedocs/subscriptions/templates/subscriptions/notifications/organization_disabled_email.html",
                     "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_ended_email.html",
                     "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_required_email.html",
-                    "readthedocs/templates/projects/legend.html",  # Stray </em>
                 ),
             },
         ),
