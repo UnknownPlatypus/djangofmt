@@ -2,7 +2,6 @@ use djangofmt_lint::{Applicability, FileDiagnostics, RuleFixSummary, Settings, l
 use djangofmt_syntax::{ParseError, Profile};
 use markup_fmt::FormatError;
 use miette::{SourceCode, SpanContents};
-use rayon::iter::Either::{Left, Right};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
@@ -67,6 +66,9 @@ impl CheckConfig {
     }
 }
 
+/// What `check_source` returns for one file.
+pub(crate) type CheckOutcome = std::result::Result<CheckResult, Box<CommandError>>;
+
 /// Per-file outcome of `check_source`.
 pub(crate) struct CheckResult {
     /// Relativized path, or `-` for stdin.
@@ -79,6 +81,8 @@ pub(crate) struct CheckResult {
     fixes_by_rule: FxHashMap<&'static str, RuleFixSummary>,
     /// Whether the file was skipped via `file-ignore[invalid-syntax]`.
     skipped: bool,
+    /// Why the file does not parse, reported alongside the diagnostics of the rules needing no tree.
+    syntax_error: Option<CommandError>,
 }
 
 /// Aggregate counts behind the run summary.
@@ -187,14 +191,25 @@ impl CheckRun {
     }
 
     /// Print diagnostics, errors and the summary, then fold them into the exit code.
-    pub(crate) fn report(&self, results: &[CheckResult], errors: Vec<CommandError>) -> ExitStatus {
+    pub(crate) fn report(&self, outcomes: Vec<CheckOutcome>) -> ExitStatus {
+        let mut results = Vec::with_capacity(outcomes.len());
+        let mut errors = Vec::new();
+        for outcome in outcomes {
+            match outcome {
+                Ok(mut result) => {
+                    errors.extend(result.syntax_error.take());
+                    results.push(result);
+                }
+                Err(err) => errors.push(*err),
+            }
+        }
         let nb_errors = super::report_errors(errors, "check", self.config.output_format);
 
-        let totals = Totals::of(results);
+        let totals = Totals::of(&results);
 
         match self.config.output_format {
-            OutputFormat::Full => print_full(results),
-            OutputFormat::Concise => print_concise(results, self.config.threshold()),
+            OutputFormat::Full => print_full(&results),
+            OutputFormat::Concise => print_concise(&results, self.config.threshold()),
         }
 
         print_summary(&totals, &self.config, nb_errors);
@@ -202,7 +217,7 @@ impl CheckRun {
         print_skipped(totals.skipped);
 
         if self.config.show_fixes && totals.applied > 0 {
-            print_show_fixes(results, totals.applied);
+            print_show_fixes(&results, totals.applied);
         }
 
         // I/O, parse and panic errors take precedence over lint violations in the exit code.
@@ -222,7 +237,7 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
     let run = CheckRun::new(args, &resolved.pyproject, &resolved.project_root)?;
 
     let start = Instant::now();
-    let (results, errors): (Vec<_>, Vec<_>) = resolved
+    let outcomes: Vec<_> = resolved
         .files
         .par_iter()
         .map(|path| {
@@ -242,15 +257,12 @@ pub fn check(args: &CheckCommand) -> Result<ExitStatus> {
                 )
             })
         })
-        .partition_map(|result| match result {
-            Ok(r) => Left(r),
-            Err(err) => Right(*err),
-        });
+        .collect();
 
     let duration = start.elapsed();
     debug!("Checked {} files in {:.2?}", resolved.files.len(), duration);
 
-    Ok(run.report(&results, errors))
+    Ok(run.report(outcomes))
 }
 
 /// Render each diagnostic as its own block, with source snippet and help text.
@@ -421,7 +433,7 @@ pub(crate) fn check_source(
     settings: &Settings,
     custom_blocks: &[String],
     fix: Option<Applicability>,
-) -> std::result::Result<CheckResult, Box<CommandError>> {
+) -> CheckOutcome {
     let path = source.path();
     let display_path = path.map_or_else(|| STDIN_SENTINEL.to_owned(), relativize_path);
     let text = source.read()?;
@@ -433,8 +445,7 @@ pub(crate) fn check_source(
     if matches!(source, Source::Stdin(_)) && fix.is_some() {
         let echoed = outcome
             .as_ref()
-            .ok()
-            .and_then(|outcome| outcome.as_ref()?.fixed.as_deref())
+            .and_then(|outcome| outcome.fixed.as_deref())
             .unwrap_or(&text);
         io::stdout()
             .lock()
@@ -442,21 +453,15 @@ pub(crate) fn check_source(
             .map_err(|err| CommandError::Write(path.map(Path::to_path_buf), err))?;
     }
 
-    let outcome = match outcome {
-        Ok(outcome) => outcome,
-        Err(err) => {
-            let err = ParseError::new(&display_path, text, &FormatError::Syntax(err));
-            return Err(Box::new(CommandError::Parse(
-                path.map(Path::to_path_buf),
-                err,
-            )));
-        }
-    };
     let skipped = outcome.is_none();
     if skipped {
         debug!("Skipping {display_path} (file-ignore[invalid-syntax])");
     }
     let outcome = outcome.unwrap_or_default();
+    let syntax_error = outcome.syntax_error.map(|err| {
+        let err = ParseError::new(&display_path, text.clone(), &FormatError::Syntax(err));
+        CommandError::Parse(path.map(Path::to_path_buf), err)
+    });
 
     if let (Source::File(path), Some(fixed)) = (source, &outcome.fixed) {
         fs::write(path, fixed).map_err(|err| CommandError::Write(Some(path.to_path_buf()), err))?;
@@ -475,6 +480,7 @@ pub(crate) fn check_source(
         applied_count: outcome.applied_count,
         fixes_by_rule: outcome.applied_by_rule,
         skipped,
+        syntax_error,
     })
 }
 

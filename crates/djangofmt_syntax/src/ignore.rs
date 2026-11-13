@@ -105,17 +105,11 @@ impl FileIgnores {
             .unwrap_or_default()
     }
 
-    /// The source up to the end of its leading comment, when that comment quarantines the file,
-    /// which is all the linter reads of a file that does not parse.
-    #[must_use]
-    pub fn quarantine_head(source: &str) -> Option<&str> {
-        let (ignores, head) = Self::parse_head(source)?;
-        ignores.invalid_syntax.then_some(head)
-    }
-
     /// Opt-outs from the file's leading comment, a BOM and whitespace before it tolerated,
-    /// with the source up to the end of that comment.
-    fn parse_head(source: &str) -> Option<(Self, &str)> {
+    /// with the source up to the end of that comment, which the linter parses alone
+    /// when the whole file does not parse.
+    #[must_use]
+    pub fn parse_head(source: &str) -> Option<(Self, &str)> {
         let unmarked = strip_bom(source);
         let rest = unmarked.trim_start();
         let (delimiters, (body, after)) = [TEMPLATE_COMMENT, HTML_COMMENT]

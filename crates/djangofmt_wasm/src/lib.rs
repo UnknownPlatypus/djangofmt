@@ -197,29 +197,21 @@ pub fn lint(source: &str, profile: &str) -> Result<Ts<LintResult>, JsError> {
 }
 
 fn lint_inner(source: &str, profile: Profile) -> Result<LintResult, std::fmt::Error> {
-    let outcome = match lint_text(source, &Settings::all(), profile.into(), &[], None, None) {
-        Ok(Some(outcome)) => outcome,
-        // A leading `file-ignore[invalid-syntax]` quarantines the file.
-        Ok(None) => return Ok(LintResult::new(0, String::new())),
-        Err(e) => {
-            let err = markup_fmt::FormatError::Syntax(e);
-            return Ok(LintResult::new(1, render_parse_error(source, &err)));
-        }
+    // A leading `file-ignore[invalid-syntax]` quarantines the file.
+    let Some(outcome) = lint_text(source, &Settings::all(), profile.into(), &[], None, None) else {
+        return Ok(LintResult::new(0, String::new()));
     };
-    let error_count = outcome.diagnostics.len();
-
-    if error_count == 0 {
-        let result = LintResult::new(0, String::new());
-        return Ok(result);
-    }
+    let parse_error = outcome
+        .syntax_error
+        .map(|e| render_parse_error(source, &markup_fmt::FormatError::Syntax(e)));
+    let error_count = usize::from(parse_error.is_some()) + outcome.diagnostics.len();
+    let mut output = parse_error.unwrap_or_default();
 
     let file_diagnostics = FileDiagnostics::new("", source, outcome.diagnostics);
     let handler = graphical_handler(GraphicalTheme::unicode());
-    let mut output = String::new();
     file_diagnostics.render(&handler, &mut output)?;
 
-    let result = LintResult::new(error_count, output);
-    Ok(result)
+    Ok(LintResult::new(error_count, output))
 }
 
 fn render_parse_error(source: &str, err: &markup_fmt::FormatError) -> String {
@@ -253,6 +245,14 @@ mod tests {
         let linted = lint_inner("<img src=\"a.png\">", Profile::Jinja).unwrap();
         assert_eq!(linted.error_count, 2);
         assert!(linted.output.contains("Missing `alt` attribute on `<img>`"));
+    }
+
+    #[test]
+    fn lint_renders_token_diagnostics_alongside_the_parse_error() {
+        let linted = lint_inner("{% block a %}{% block a %}", Profile::Django).unwrap();
+        assert_eq!(linted.error_count, 2);
+        assert!(linted.output.contains("unclosed {% block %} block."));
+        assert!(linted.output.contains("Duplicate `{% block %}` name `a`"));
     }
 
     #[test]

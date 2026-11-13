@@ -835,6 +835,22 @@ fn check_malformed_file_with_fix_surfaces_parse_error() {
 }
 
 #[test]
+fn check_reports_token_diagnostics_alongside_the_parse_error() {
+    let project = Project::new().file("test.html", "{% block a %}{% block a %}\n");
+    assert_cmd_snapshot_tmpdir!(cli().args(["check", "--output-format", "concise"]).arg(project.join("test.html")), @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    [TMP]/test.html:1:17: unclosed {% block %} block.
+    Couldn't check 1 files!
+    [TMP]/test.html:1:23: duplicate-block-name Duplicate `{% block %}` name `a`
+    Found 1 errors.
+    ");
+}
+
+#[test]
 fn check_respects_pyproject_custom_blocks() {
     // `check` must parse with the same custom blocks as `format`: without them
     // this unclosed `{% stage %}` is two flat tags and silently passes.

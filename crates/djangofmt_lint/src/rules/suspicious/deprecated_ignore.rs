@@ -167,7 +167,7 @@ fn scope(checker: &Checker<'_>, comment: &str) -> Scope {
     let before = &checker.context().source()[..checker.source_offset(comment)];
     if !strip_bom(before).is_empty() {
         Scope::Node
-    } else if checker.context().is_quarantined() {
+    } else if !checker.context().has_valid_syntax() {
         Scope::Quarantine
     } else {
         Scope::File

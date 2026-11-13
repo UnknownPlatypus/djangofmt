@@ -41,7 +41,8 @@ fn check_invalid() {
         let file_diagnostics = collect_diagnostics(path, &input);
         assert!(
             !file_diagnostics.is_empty(),
-            "Expected diagnostics, got none"
+            "Expected diagnostics, got none for {}",
+            path.display()
         );
         let output = render_check_output(path, input, file_diagnostics);
         build_settings(path).bind(|| {
@@ -151,14 +152,19 @@ fn settings_for(path: &Path) -> Settings {
 }
 
 fn collect_diagnostics(path: &Path, input: &str) -> Vec<LintDiagnostic> {
-    lint_source(
+    let outcome = lint_source(
         input,
         language_for(path),
         &custom_blocks(),
         &settings_for(path),
         Some(path),
-    )
-    .expect("Failed to parse AST in test")
+    );
+    assert!(
+        outcome.syntax_error.is_none(),
+        "Failed to parse {}",
+        path.display()
+    );
+    outcome.diagnostics
 }
 
 /// Fixtures may use `{% stage %}` as a `custom-blocks` entry.

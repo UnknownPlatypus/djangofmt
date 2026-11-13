@@ -156,7 +156,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
-The signature follows what the rule reads, which picks its `LintSource` and the hook that dispatches it in Step 4. AST rules read the `markup_fmt` tree: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share. Token rules read Django's token stream from `check_tokens`, which has no visitor and so passes the `LintContext` instead of the checker: tag rules take `(context, tag)` from the arm of their tag name, `{{ }}` rules `(context, expr)` from the `Var` arm, and a rule that reads the whole stream takes `tokens` too. Most rules are attribute rules:
+The signature follows what the rule reads, which picks its `LintSource` and the hook that dispatches it in Step 4. AST rules read the `markup_fmt` tree: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share. Token rules read Django's token stream from `check_tokens`, which has no visitor and so passes the `LintContext` instead of the checker: tag rules take `(context, tag)` from the arm of their tag name, `{{ }}` rules `(context, expr)` from the `Var` arm, and a rule that reads the whole stream takes `tokens` too. Unlike the AST rules, they also run on a file that does not parse. Most rules are attribute rules:
 
 ```rust
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {

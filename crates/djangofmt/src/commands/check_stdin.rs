@@ -42,9 +42,5 @@ pub fn check_stdin(cli: &CheckCommand) -> Result<ExitStatus> {
             run.fix,
         )
     });
-    let (results, errors) = match outcome {
-        Ok(result) => (vec![result], Vec::new()),
-        Err(err) => (Vec::new(), vec![*err]),
-    };
-    Ok(run.report(&results, errors))
+    Ok(run.report(vec![outcome]))
 }
