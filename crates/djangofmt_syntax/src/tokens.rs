@@ -1,9 +1,5 @@
-//! Django's view of a template: the tokens its lexer reads before any HTML.
-//!
-//! The HTML parser keeps the `{% %}` and `{{ }}` inside attribute values,
-//! HTML comments and `<script>`, `<style>`, `<pre>` or `<textarea>` bodies as text,
-//! but Django compiles them like any other.
-//! The rules that read tags lint this stream instead of the tree.
+//! The tokens Django's lexer reads before any HTML,
+//! including the tags the HTML parser keeps as text, such as in attribute values or `<script>` bodies.
 
 use std::iter;
 use std::ops::Deref;
@@ -37,8 +33,7 @@ impl<'s> Token<'s> {
 }
 
 /// The tokens of a template in source order,
-/// less the bodies of `{% verbatim %}` (text to Django's lexer),
-/// `{% comment %}` (skipped by its parser) and Jinja's `{% raw %}`.
+/// less the bodies of `{% verbatim %}`, `{% comment %}` and Jinja's `{% raw %}`.
 #[derive(Debug)]
 pub struct Tokens<'s>(Vec<Token<'s>>);
 
@@ -108,12 +103,15 @@ pub fn tag_name<'s>(tag: &JinjaTag<'s>, language: Language) -> &'s str {
 
 /// The bit after the tag name, such as a block's name, past Jinja's whitespace-control markers.
 #[must_use]
-pub fn tag_argument<'s>(tag: &JinjaTag<'s>) -> Option<&'s str> {
-    tag.content
-        .trim_start_matches(['+', '-'])
-        .split(is_space)
-        .filter(|bit| !bit.is_empty())
-        .nth(1)
+pub fn tag_argument<'s>(tag: &JinjaTag<'s>, language: Language) -> Option<&'s str> {
+    let content = tag.content.trim_start_matches(['+', '-']);
+    // Django has no closing marker, so a trailing `-` is part of its argument.
+    let content = if matches!(language, Language::Django) {
+        content
+    } else {
+        content.trim_end_matches(['+', '-'])
+    };
+    content.split(is_space).filter(|bit| !bit.is_empty()).nth(1)
 }
 
 /// `parse_jinja_tag_name` on bytes, deferring to the fork for non-ASCII whitespace.
@@ -339,6 +337,18 @@ mod tests {
     )]
     fn jinja_tokens(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
         assert_eq!(lexed(text, Language::Jinja), expected);
+    }
+
+    #[rstest]
+    #[case::jinja_closing_marker("block foo-", Language::Jinja, Some("foo"))]
+    #[case::django_trailing_dash(" block foo- ", Language::Django, Some("foo-"))]
+    fn tag_argument(
+        #[case] content: &str,
+        #[case] language: Language,
+        #[case] expected: Option<&str>,
+    ) {
+        let tag = JinjaTag { content, start: 0 };
+        assert_eq!(super::tag_argument(&tag, language), expected);
     }
 
     #[test]
