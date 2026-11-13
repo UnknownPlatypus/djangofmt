@@ -44,6 +44,7 @@ A rule whose fix is unsafe says why under "Fix safety" on its documentation page
 ## Suppressing diagnostics
 
 A `{# djangofmt: ignore[...] #}` comment silences the listed rules on the next node.
+It also covers the HTML comments right after it, since Django still runs the tags inside `<!-- -->`.
 
 ```jinja
 {# djangofmt: ignore[invalid-attr-value, empty-attr-value] #}

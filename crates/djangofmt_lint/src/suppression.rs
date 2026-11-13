@@ -172,8 +172,8 @@ fn siblings_after<'n, 's>(
     }
 }
 
-/// Byte ranges the comment at `offset` guards: the first node after it, minus that node's children.
-/// For an element that is its opening and closing tags; for a block, its `{% %}` tags.
+/// What the comment at `offset` guards: the first node after it and the HTML comments in between,
+/// minus that node's children other than text and HTML comments, which can hold no ignore comment.
 fn guarded_ranges(
     root: &Root<'_>,
     offset: usize,
@@ -184,16 +184,31 @@ fn guarded_ranges(
     let Some(siblings) = siblings_after(&root.children, offset, context) else {
         return ranges;
     };
-    let Some(target) = siblings.iter().find(|node| {
-        !is_whitespace_text(node)
-            && !matches!(node.kind, NodeKind::JinjaComment(_) | NodeKind::Comment(_))
-    }) else {
+    let mut target = None;
+    for node in siblings {
+        match &node.kind {
+            // Django reads the tags in an HTML comment too, and no ignore comment can bind to one.
+            NodeKind::Comment(_) => {
+                ranges.push(context.source_offset(node.raw)..context.source_end(node.raw));
+            }
+            NodeKind::JinjaComment(_) => {}
+            _ if is_whitespace_text(node) => {}
+            _ => {
+                target = Some(node);
+                break;
+            }
+        }
+    }
+    let Some(target) = target else {
         return ranges;
     };
     let start = context.source_offset(target.raw);
     let end = context.source_end(target.raw);
     let mut cursor = start;
     for child in child_slices(target).flatten() {
+        if matches!(child.kind, NodeKind::Text(_) | NodeKind::Comment(_)) {
+            continue;
+        }
         let child_start = context.source_offset(child.raw);
         if child_start > cursor {
             ranges.push(cursor..child_start);
@@ -260,6 +275,39 @@ mod tests {
                 "<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
             ),
             ["invalid-ignore-comment", "invalid-attr-value"]
+        );
+    }
+
+    /// Django reads the tags inside a `<script>` body and an HTML comment,
+    /// which hold no node an ignore comment could bind to,
+    /// so the enclosing node's ignore covers them.
+    #[test]
+    fn node_ignore_covers_the_text_and_comments_inside_it() {
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[duplicate-block-name] #}\n\
+                 <script>{% block a %}{% endblock %}{% block a %}{% endblock %}</script>"
+            ),
+            Vec::<&str>::new()
+        );
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[duplicate-block-name] #}\n\
+                 <div><!-- {% block a %}{% block a %} --></div>"
+            ),
+            Vec::<&str>::new()
+        );
+    }
+
+    /// An ignore comment reaches past an HTML comment to its target, and covers both.
+    #[test]
+    fn node_ignore_covers_the_html_comments_before_its_target() {
+        assert_eq!(
+            codes(
+                "{# djangofmt: ignore[duplicate-block-name, invalid-attr-value] #}\n\
+                 <!-- {% block a %}{% block a %} -->\n<form method=\"yes\"></form>"
+            ),
+            Vec::<&str>::new()
         );
     }
 
