@@ -135,16 +135,15 @@ pub struct FixerResult {
     pub applied_count: usize,
     /// Per-rule applied summaries, used by `--show-fixes`.
     pub applied_by_rule: FxHashMap<&'static str, RuleFixSummary>,
-    /// Whether `source` only got its leading comment linted, see `parse_or_quarantine`.
+    /// Whether `source` does not parse and its leading comment opts out of the syntax error.
     pub quarantined: bool,
+    /// Why `source` does not parse, unless quarantined.
+    pub syntax_error: Option<SyntaxError>,
 }
 
 /// Errors from [`lint_fix`].
 #[derive(Debug, thiserror::Error)]
 pub enum FixerError {
-    /// `source` failed to parse; no fix was attempted.
-    #[error("source failed to parse, no fix was attempted")]
-    InitialParse(#[source] SyntaxError),
     /// A fix introduced a syntax error in source that previously parsed.
     #[error("a fix introduced a syntax error at iteration {iteration}")]
     SyntaxRegression {
@@ -158,8 +157,8 @@ pub enum FixerError {
 ///
 /// 1. Parse → lint → apply.
 /// 2. If anything was applied, re-parse and repeat up to [`MAX_FIX_ITERATIONS`].
-/// 3. Bail with [`FixerError::InitialParse`] if `source` never parsed,
-///    or [`FixerError::SyntaxRegression`] if a fix broke source that previously parsed.
+/// 3. Bail with [`FixerError::SyntaxRegression`] if a fix broke source that previously parsed;
+///    a `source` that never parsed only gets the fixes within its leading comment.
 /// 4. On convergence-failure (iteration limit reached with more fixes pending),
 ///    log a warning and return the work done so far.
 ///
@@ -189,6 +188,8 @@ fn fix_loop(
     let mut total_applied = 0usize;
     let mut iterations = 0usize;
     let mut quarantined = false;
+    let mut syntax_error = None;
+    let mut had_valid_syntax = true;
     let mut applied_by_rule: FxHashMap<&'static str, RuleFixSummary> = FxHashMap::default();
 
     loop {
@@ -205,26 +206,19 @@ fn fix_loop(
                 applied_count: total_applied,
                 applied_by_rule,
                 quarantined,
+                syntax_error,
             });
         }
 
-        let input = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
-            Ok(input) => input,
-            Err(err) if iterations > 0 => {
-                return Err(FixerError::SyntaxRegression {
-                    iteration: iterations,
-                    error: err,
-                });
-            }
-            Err(err) => return Err(FixerError::InitialParse(err)),
-        };
+        let input = LintInput::parse(&current, profile, custom_blocks);
         if iterations == 0 {
-            quarantined = input.quarantined();
-        } else if !quarantined && let Some(error) = input.syntax_error {
-            // A file that parsed on the first pass and no longer does was broken by a fix.
+            quarantined = input.quarantined;
+            syntax_error = input.reported_syntax_error();
+            had_valid_syntax = input.syntax_error.is_none();
+        } else if had_valid_syntax && let Some(error) = &input.syntax_error {
             return Err(FixerError::SyntaxRegression {
                 iteration: iterations,
-                error,
+                error: error.clone(),
             });
         }
 
@@ -245,6 +239,7 @@ fn fix_loop(
                 applied_count: total_applied,
                 applied_by_rule,
                 quarantined,
+                syntax_error,
             });
         }
 

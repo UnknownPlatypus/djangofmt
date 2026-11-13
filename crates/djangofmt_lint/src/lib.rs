@@ -10,8 +10,8 @@
 //! use markup_fmt::Language;
 //!
 //! let source = r#"<form method="put"></form>"#;
-//! let diagnostics = lint_source(source, Language::Jinja, &[], &Settings::default(), None).unwrap();
-//! assert_eq!(diagnostics.len(), 1);
+//! let outcome = lint_source(source, Language::Jinja, &[], &Settings::default(), None);
+//! assert_eq!(outcome.diagnostics.len(), 1);
 //! ```
 
 mod checker;
@@ -148,133 +148,150 @@ impl FileDiagnostics {
 ///
 /// Runs all enabled lint rules over the AST and the token stream,
 /// returning any diagnostics found in source order.
-/// Expects the whole file to have parsed: a file quarantined by `file-ignore[invalid-syntax]`
-/// goes through [`lint_source`] or [`lint_text`], which parse it themselves.
+/// Expects the whole file to have parsed: a file that does not parse goes through
+/// [`lint_source`] or [`lint_text`], which parse it themselves.
 ///
 /// `path` enables path-aware rules; pass [`None`] when linting a buffer without a
 /// backing file.
 #[must_use]
 pub fn check(parsed: &Parsed<'_>, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
-    check_rules(parsed, false, settings, path)
+    check_rules(
+        parsed.source(),
+        parsed.language(),
+        Some(parsed),
+        true,
+        settings,
+        path,
+    )
 }
 
-/// A file as the linter reads it: parsed whole, or quarantined to its leading comment.
+/// A file as the linter reads it: parsed whole, or only its leading comment when it does not parse.
 pub(crate) struct LintInput<'a> {
-    parsed: Parsed<'a>,
-    /// Why the whole file did not parse, when only its leading comment did, see [`parse_or_quarantine`].
-    pub(crate) syntax_error: Option<SyntaxError>,
+    source: &'a str,
+    language: Language,
+    /// The whole file, or its leading comment parsed alone, see [`LintInput::parse`].
+    parsed: Option<Parsed<'a>>,
+    /// Why the whole file does not parse.
+    syntax_error: Option<SyntaxError>,
+    /// The leading comment opts out of the syntax error with `file-ignore[invalid-syntax]`.
+    pub(crate) quarantined: bool,
 }
 
-impl LintInput<'_> {
-    /// Only the leading comment parsed.
-    pub(crate) const fn quarantined(&self) -> bool {
-        self.syntax_error.is_some()
+impl<'a> LintInput<'a> {
+    /// [`parse`], falling back to the leading comment alone for a file that does not parse.
+    ///
+    /// The AST then borrows a prefix of the file, so spans stay valid against the whole of it.
+    pub(crate) fn parse(source: &'a str, language: Language, custom_blocks: &[String]) -> Self {
+        let (parsed, syntax_error, quarantined) = match parse(source, language, custom_blocks) {
+            Ok(parsed) => (Some(parsed), None, false),
+            Err(error) => {
+                let head = FileIgnores::parse_head(source);
+                let quarantined = head
+                    .as_ref()
+                    .is_some_and(|(ignores, _)| ignores.invalid_syntax);
+                let parsed = head.and_then(|(_, head)| parse(head, language, custom_blocks).ok());
+                (parsed, Some(error), quarantined)
+            }
+        };
+        Self {
+            source,
+            language,
+            parsed,
+            syntax_error,
+            quarantined,
+        }
     }
 
     pub(crate) fn check(&self, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
-        check_rules(&self.parsed, self.quarantined(), settings, path)
+        check_rules(
+            self.source,
+            self.language,
+            self.parsed.as_ref(),
+            self.syntax_error.is_none(),
+            settings,
+            path,
+        )
+    }
+
+    /// The syntax error to report, none for a quarantined file.
+    pub(crate) fn reported_syntax_error(&self) -> Option<SyntaxError> {
+        self.syntax_error.clone().filter(|_| !self.quarantined)
     }
 }
 
+/// Run the passes over `source`. `parsed` is the whole file when `has_valid_syntax`,
+/// otherwise its leading comment, if any.
 fn check_rules(
-    parsed: &Parsed<'_>,
-    quarantined: bool,
+    source: &str,
+    language: Language,
+    parsed: Option<&Parsed<'_>>,
+    has_valid_syntax: bool,
     settings: &Settings,
     path: Option<&Path>,
 ) -> Vec<LintDiagnostic> {
-    // Like ruff skips its AST rules on a file with syntax errors, a quarantined file
-    // only gets the rules on ignore comments: its leading comment is all that parsed.
-    let quarantine_settings = quarantined.then(|| Settings {
-        rules: QUARANTINE_RULES
-            .into_iter()
-            .filter(|&rule| settings.is_enabled(rule))
-            .collect(),
-        ..settings.clone()
-    });
-    let settings = quarantine_settings.as_ref().unwrap_or(settings);
-    let context = LintContext::new(
-        parsed.source(),
-        settings,
-        parsed.language(),
-        path,
-        quarantined,
-    );
-    Checker::new(&context).visit_root(parsed.ast());
+    let context = LintContext::new(source, settings, language, path, has_valid_syntax);
+    let root = parsed.map(Parsed::ast);
+    // The AST rules skip a file that does not parse: its leading comment alone
+    // gives them nothing to read but `deprecated-ignore`.
+    if let Some(root) = root {
+        Checker::new(&context).visit_root(root);
+    }
     // The token rules read Django's token stream, lexed only when one of them is on.
     if settings
         .rules
         .iter()
         .any(|rule| rule.lint_source() == LintSource::Tokens)
     {
-        let tokens = Tokens::lex(parsed.source(), parsed.language());
-        checker::check_tokens(&tokens, &context);
+        checker::check_tokens(&Tokens::lex(source, language), &context);
     }
     // Only when there is something to silence, or a rule on the comments is on.
     let has_diagnostics = !context.diagnostics().is_empty();
-    if has_diagnostics
-        || settings
-            .rules
-            .iter()
-            .any(|rule| rule.lint_source() == LintSource::Ignore)
+    if let Some(root) = root
+        && (has_diagnostics
+            || settings
+                .rules
+                .iter()
+                .any(|rule| rule.lint_source() == LintSource::Ignore))
     {
-        suppression::check_ignores(&context, parsed.ast());
+        suppression::check_ignores(&context, root);
     }
     let mut diagnostics = context.into_diagnostics();
+    if !has_valid_syntax {
+        // No fix on what does not parse: only one within the leading comment stays.
+        let head = parsed.map_or(0, |head| head.source().len());
+        for diagnostic in &mut diagnostics {
+            diagnostic
+                .fix
+                .take_if(|fix| fix.edits().iter().any(|edit| edit.end() > head));
+        }
+    }
     // Passes, and some rules within a pass, report out of source order.
     diagnostics.sort_by_key(|diagnostic| diagnostic.span.offset());
     diagnostics
 }
 
-/// [`parse`], falling back to the leading comment alone when that comment quarantines
-/// a file that does not parse.
+/// Parse and lint `source` in one call, without fixing.
 ///
-/// The lint equivalent of ruff still running its `noqa` rules on a file with syntax errors.
-/// The AST then borrows a prefix of the file, so spans and fixes stay valid against the whole of it.
-pub(crate) fn parse_or_quarantine<'a>(
-    source: &'a str,
-    language: Language,
-    custom_blocks: &[String],
-) -> Result<LintInput<'a>, SyntaxError> {
-    let error = match parse(source, language, custom_blocks) {
-        Ok(parsed) => {
-            return Ok(LintInput {
-                parsed,
-                syntax_error: None,
-            });
-        }
-        Err(error) => error,
-    };
-    let Some(head) = FileIgnores::quarantine_head(source) else {
-        return Err(error);
-    };
-    Ok(LintInput {
-        parsed: parse(head, language, custom_blocks)?,
-        syntax_error: Some(error),
-    })
-}
-
-/// Parse and lint `source` in one call, a quarantined file linted as its leading comment.
-///
+/// A file that does not parse gets the rules that need no tree, alongside its syntax error.
 /// `path` is forwarded to path-aware rules; pass [`None`] when there is no backing file.
+#[must_use]
 pub fn lint_source(
     source: &str,
     language: Language,
     custom_blocks: &[String],
     settings: &Settings,
     path: Option<&Path>,
-) -> Result<Vec<LintDiagnostic>, SyntaxError> {
-    Ok(parse_or_quarantine(source, language, custom_blocks)?.check(settings, path))
+) -> LintOutcome {
+    let input = LintInput::parse(source, language, custom_blocks);
+    LintOutcome {
+        diagnostics: input.check(settings, path),
+        quarantined: input.quarantined,
+        syntax_error: input.reported_syntax_error(),
+        ..LintOutcome::default()
+    }
 }
 
-/// The rules checking ignore comments, the only ones run on a quarantined file's leading comment.
-/// `unused-ignore-code` is left out: with the rest of the file unchecked, no code can be unused.
-const QUARANTINE_RULES: [Rule; 3] = [
-    Rule::DeprecatedIgnore,
-    Rule::InvalidIgnoreComment,
-    Rule::InvalidIgnoreCode,
-];
-
-/// A completed [`lint_text`] run.
+/// A completed [`lint_source`] or [`lint_text`] run.
 #[derive(Debug, Default)]
 pub struct LintOutcome {
     /// The rewritten source, set only when fixes changed it: write exactly when this is [`Some`].
@@ -285,14 +302,17 @@ pub struct LintOutcome {
     pub applied_count: usize,
     /// Per-rule applied summaries, for `--show-fixes`.
     pub applied_by_rule: FxHashMap<&'static str, RuleFixSummary>,
-    /// Whether only the leading comment was linted, see `parse_or_quarantine`.
+    /// Whether the file does not parse and its leading comment opts out of the syntax error.
     pub quarantined: bool,
+    /// Why the file does not parse, unless quarantined: [`Self::diagnostics`] then come
+    /// from the rules that need no tree, fixable only within the leading comment.
+    pub syntax_error: Option<SyntaxError>,
 }
 
 /// Lint `source`, applying fixes up to the given threshold when `fix` is [`Some`].
 ///
 /// Returns [`None`] for a file that does not parse and is quarantined by its leading comment,
-/// like the formatter's `format_text`, unless that comment has something to report or fix.
+/// like the formatter's `format_text`, unless something is reported in it.
 pub fn lint_text(
     source: &str,
     settings: &Settings,
@@ -300,15 +320,8 @@ pub fn lint_text(
     custom_blocks: &[String],
     fix: Option<Applicability>,
     path: Option<&Path>,
-) -> Result<Option<LintOutcome>, SyntaxError> {
-    let check_only = || {
-        let input = parse_or_quarantine(source, language, custom_blocks)?;
-        Ok(LintOutcome {
-            diagnostics: input.check(settings, path),
-            quarantined: input.quarantined(),
-            ..LintOutcome::default()
-        })
-    };
+) -> Option<LintOutcome> {
+    let check_only = || lint_source(source, language, custom_blocks, settings, path);
     let outcome = match fix
         .map(|threshold| lint_fix(source, settings, language, custom_blocks, threshold, path))
     {
@@ -318,19 +331,19 @@ pub fn lint_text(
             applied_count: result.applied_count,
             applied_by_rule: result.applied_by_rule,
             quarantined: result.quarantined,
+            syntax_error: result.syntax_error,
         },
-        Some(Err(FixerError::InitialParse(err))) => return Err(err),
         Some(Err(FixerError::SyntaxRegression { iteration, .. })) => {
             tracing::error!(
                 "Fix introduced a syntax error in {} at iteration {iteration}, leaving file unchanged",
                 path.unwrap_or_else(|| Path::new("<source>")).display()
             );
-            check_only()?
+            check_only()
         }
-        None => check_only()?,
+        None => check_only(),
     };
     let skipped = outcome.quarantined && outcome.diagnostics.is_empty() && outcome.fixed.is_none();
-    Ok((!skipped).then_some(outcome))
+    (!skipped).then_some(outcome)
 }
 
 #[cfg(test)]
@@ -343,12 +356,57 @@ mod tests {
         let quarantined = "{# djangofmt: file-ignore[invalid-syntax] #}\n<div>";
         for fix in [None, Some(Applicability::Safe)] {
             let lint = |source| lint_text(source, &settings, Language::Jinja, &[], fix, None);
+            assert!(lint(quarantined).is_none(), "{fix:?}");
             assert!(
-                lint(quarantined).is_ok_and(|outcome| outcome.is_none()),
+                lint("<div>").is_some_and(|outcome| outcome.syntax_error.is_some()),
                 "{fix:?}"
             );
-            assert!(lint("<div>").is_err(), "{fix:?}");
         }
+    }
+
+    /// `<form method="yes">` trips `invalid-attr-value`, an AST rule, and the second
+    /// `{% block a %}` `duplicate-block-name`, a token rule; the unclosed tags do not parse.
+    const UNPARSABLE: &str = "<form method=\"yes\">{% block a %}{% block a %}";
+
+    fn lint_unparsable(head: &str) -> LintOutcome {
+        let source = format!("{head}{UNPARSABLE}");
+        lint_source(&source, Language::Django, &[], &Settings::all(), None)
+    }
+
+    fn codes(outcome: &LintOutcome) -> Vec<&'static str> {
+        outcome
+            .diagnostics
+            .iter()
+            .map(|diagnostic| diagnostic.code)
+            .collect()
+    }
+
+    #[test]
+    fn a_file_that_does_not_parse_gets_the_token_rules_alongside_its_syntax_error() {
+        let outcome = lint_unparsable("");
+        assert_eq!(codes(&outcome), ["duplicate-block-name"]);
+        assert!(outcome.syntax_error.is_some());
+    }
+
+    #[test]
+    fn the_token_rules_read_the_whole_of_a_quarantined_file() {
+        let outcome = lint_unparsable("{# djangofmt: file-ignore[invalid-syntax] #}\n");
+        assert_eq!(codes(&outcome), ["duplicate-block-name"]);
+        assert!(outcome.syntax_error.is_none());
+    }
+
+    #[test]
+    fn a_file_ignore_silences_the_token_rules_of_a_file_that_does_not_parse() {
+        let outcome = lint_unparsable("{# djangofmt: file-ignore[duplicate-block-name] #}\n");
+        assert_eq!(codes(&outcome), Vec::<&str>::new());
+    }
+
+    /// Without nodes, an `ignore[...]` guards nothing, and with the AST rules skipped,
+    /// `unused-ignore-code` cannot tell it unused.
+    #[test]
+    fn a_node_ignore_does_nothing_on_a_file_that_does_not_parse() {
+        let outcome = lint_unparsable("{# djangofmt: ignore[duplicate-block-name] #}\n");
+        assert_eq!(codes(&outcome), ["duplicate-block-name"]);
     }
 
     #[test]
@@ -358,9 +416,20 @@ mod tests {
         let outcome = lint_text(legacy, &Settings::all(), Language::Jinja, &[], fix, None);
         // Not `file-ignore[format]`, which would surface the parse error the directive was hiding.
         assert_eq!(
-            outcome.unwrap().unwrap().fixed.as_deref(),
+            outcome.expect("a fix to report").fixed.as_deref(),
             Some("{# djangofmt: file-ignore[invalid-syntax] #}\n<div>")
         );
+    }
+
+    #[test]
+    fn no_fix_applies_past_the_leading_comment_of_a_file_that_does_not_parse() {
+        let source = "{% load staticfiles %}<div>";
+        let fix = Some(Applicability::Unsafe);
+        let outcome = lint_text(source, &Settings::all(), Language::Django, &[], fix, None);
+        let outcome = outcome.expect("a diagnostic to report");
+        assert_eq!(codes(&outcome), ["deprecated-static-library"]);
+        assert!(outcome.fixed.is_none());
+        assert!(outcome.diagnostics[0].fix.is_none());
     }
 
     #[test]
@@ -370,7 +439,7 @@ mod tests {
                       {% include \"tpl.html#card\" %}";
         let codes = |path| {
             lint_source(source, Language::Jinja, &[], &settings, path)
-                .unwrap()
+                .diagnostics
                 .into_iter()
                 .map(|diagnostic| diagnostic.code)
                 .collect::<Vec<_>>()

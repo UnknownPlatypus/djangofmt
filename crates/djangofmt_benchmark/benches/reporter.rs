@@ -24,14 +24,19 @@ static DIAGNOSTIC_HEAVY: [&TestFile; 3] = [
 /// Every diagnostic of a file, rendered as its own self-contained block.
 #[divan::bench(args = DIAGNOSTIC_HEAVY)]
 fn render(bencher: divan::Bencher, template: &'static TestFile) {
-    let diagnostics = lint_source(
+    let outcome = lint_source(
         template.code,
         template.profile.into(),
         &[],
         &Settings::all(),
         None,
-    )
-    .expect("Parsing to succeed");
+    );
+    assert!(
+        outcome.syntax_error.is_none(),
+        "{} does not parse",
+        template.name
+    );
+    let diagnostics = outcome.diagnostics;
     assert!(!diagnostics.is_empty(), "{} tripped no rule", template.name);
     let file_diagnostics = FileDiagnostics::new(template.name, template.code, diagnostics);
 

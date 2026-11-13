@@ -52,7 +52,7 @@ A `{# djangofmt: ignore[...] #}` comment silences the listed rules on the next n
 
 A `{# djangofmt: file-ignore[...] #}` comment at the **very top of the file**, before any markup, covers the whole file. It also accepts two codes that are not rules:
 
-- `invalid-syntax` skips a file failing to parse
+- `invalid-syntax` hides the parse error of a file failing to parse (see [Files that do not parse](#files-that-do-not-parse))
 - `format` skips the formatter (see [Disabling formatting](formatting.md#disabling-formatting) for more details)
 
 ```jinja
@@ -64,6 +64,13 @@ The linter contains a few meta-rules to ensure proper usage of these ignore dire
 - [`invalid-ignore-comment`](rules/invalid-ignore-comment.md) for a malformed or misplaced one
 - [`invalid-ignore-code`](rules/invalid-ignore-code.md) for a code naming no rule
 - [`unused-ignore-code`](rules/unused-ignore-code.md) for a code that silences nothing
+
+## Files that do not parse
+
+A file that does not parse is reported with its parse error, and only gets the rules that read the template tags straight from the source, such as [`duplicate-block-name`](rules/duplicate-block-name.md), and the rules on its leading ignore comment.
+Only a fix within the leading comment applies, such as migrating a legacy `djangofmt:ignore`: `--fix` leaves the rest of the file unchanged.
+
+A leading `file-ignore[...]` comment still silences them, while an `ignore[...]` has no node to guard.
 
 ## Exit codes
 

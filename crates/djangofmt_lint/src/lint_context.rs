@@ -29,7 +29,7 @@ pub struct LintContext<'a> {
     settings: &'a Settings,
     language: Language,
     path: Option<&'a Path>,
-    quarantined: bool,
+    has_valid_syntax: bool,
 }
 
 impl<'a> LintContext<'a> {
@@ -39,14 +39,14 @@ impl<'a> LintContext<'a> {
         settings: &'a Settings,
         language: Language,
         path: Option<&'a Path>,
-        quarantined: bool,
+        has_valid_syntax: bool,
     ) -> Self {
         Self {
             source,
             settings,
             language,
             path,
-            quarantined,
+            has_valid_syntax,
             diagnostics: RefCell::new(Vec::new()),
         }
     }
@@ -69,10 +69,10 @@ impl<'a> LintContext<'a> {
         self.path
     }
 
-    /// Whether this run lints only the leading comment of a quarantined file.
+    /// Whether the whole file parsed. When it did not, the AST holds at most its leading comment.
     #[must_use]
-    pub const fn is_quarantined(&self) -> bool {
-        self.quarantined
+    pub const fn has_valid_syntax(&self) -> bool {
+        self.has_valid_syntax
     }
 
     /// The settings active for this run.
@@ -216,7 +216,7 @@ mod tests {
     fn source_offset_rejects_a_slice_running_past_the_source() {
         let text = "<p>a</p><p>b</p>";
         let settings = Settings::all();
-        let context = LintContext::new(&text[..8], &settings, Language::Django, None, false);
+        let context = LintContext::new(&text[..8], &settings, Language::Django, None, true);
         let _ = context.source_offset(&text[4..12]);
     }
 }

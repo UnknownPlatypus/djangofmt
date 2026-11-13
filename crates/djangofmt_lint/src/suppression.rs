@@ -86,7 +86,8 @@ pub fn check_ignores(context: &LintContext<'_>, root: &Root<'_>) {
         rules::suspicious::invalid_ignore_code::check(context, &comments);
     }
     record_matches(context, &mut comments);
-    if context.is_rule_enabled(Rule::UnusedIgnoreCode) {
+    // With the AST rules skipped, no code can be called unused.
+    if context.has_valid_syntax() && context.is_rule_enabled(Rule::UnusedIgnoreCode) {
         rules::suspicious::unused_ignore_code::check(context, &comments);
     }
     drop_ignored_diagnostics(context, &comments);
@@ -349,7 +350,9 @@ mod tests {
     }
 
     fn diagnostics(source: &str) -> Vec<LintDiagnostic> {
-        lint_source(source, Language::Django, &[], &Settings::all(), None).expect("parse")
+        let outcome = lint_source(source, Language::Django, &[], &Settings::all(), None);
+        assert!(outcome.syntax_error.is_none(), "{source}");
+        outcome.diagnostics
     }
 
     /// Suppression does not hinge on the rules about ignore comments being on.
@@ -360,8 +363,8 @@ mod tests {
             ..Settings::all()
         };
         let source = "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>";
-        let diagnostics = lint_source(source, Language::Django, &[], &settings, None);
-        assert!(diagnostics.expect("parse").is_empty());
+        let outcome = lint_source(source, Language::Django, &[], &settings, None);
+        assert!(outcome.diagnostics.is_empty());
     }
 
     #[test]
