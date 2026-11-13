@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 use markup_fmt::Language;
 use markup_fmt::ast::JinjaTag;
 use markup_fmt::parser::parse_jinja_tag_name;
-use memchr::{memchr, memchr2, memchr2_iter};
+use memchr::{memchr, memchr2_iter, memchr3};
 use regex::Regex;
 
 use crate::dtl::{self, is_space};
@@ -22,7 +22,11 @@ pub enum Token<'s> {
 /// dropping comments and the bodies of `{% verbatim %}`, `{% comment %}` and Jinja's `{% raw %}`.
 #[must_use]
 pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
-    static ENDRAW: LazyLock<Regex> = LazyLock::new(|| {
+    // Jinja's `raw_begin` and `raw_end`, where Python's `\s` also matches `\x1C` to `\x1F`.
+    static RAW_BEGIN: LazyLock<Regex> = LazyLock::new(|| {
+        Regex::new(r"\A\{%[-+]?[\s\x1C-\x1F]*raw[\s\x1C-\x1F]*-?%\}\z").expect("valid pattern")
+    });
+    static RAW_END: LazyLock<Regex> = LazyLock::new(|| {
         Regex::new(r"\{%[-+]?[\s\x1C-\x1F]*endraw[\s\x1C-\x1F]*[-+]?%\}").expect("valid pattern")
     });
     let django = language == Language::Django;
@@ -46,8 +50,8 @@ pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
             continue;
         }
         let body = open + 2;
-        let found = if !django && close == b'%' {
-            jinja_tag_closer(&bytes[body..])
+        let found = if !django && close != b'#' {
+            jinja_closer(&bytes[body..], close)
         } else {
             closer(&bytes[body..], close, django)
         };
@@ -87,11 +91,8 @@ pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
                 }
                 tokens.push(Token::Tag { tag, name });
                 // Jinja reads a raw body as text up to the `{% endraw %}` it searches for.
-                if !django
-                    && name == "raw"
-                    && content.trim_matches(['-', '+']).trim_matches(is_space) == "raw"
-                {
-                    let Some(endraw) = ENDRAW.find_at(source, pos) else {
+                if !django && name == "raw" && RAW_BEGIN.is_match(&source[open..pos]) {
+                    let Some(endraw) = RAW_END.find_at(source, pos) else {
                         break;
                     };
                     let start = endraw.start() + 2;
@@ -110,8 +111,8 @@ pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
     tokens
 }
 
-/// The offset of the first `close` byte followed by `}`, or where the search gave up:
-/// Django's tokens end at a newline.
+/// The offset of the first `close` byte followed by `}`,
+/// or where the search gave up, at a newline for Django.
 fn closer(rest: &[u8], close: u8, django: bool) -> Result<usize, usize> {
     for i in memchr2_iter(b'}', if django { b'\n' } else { b'}' }, rest) {
         if rest[i] == b'\n' {
@@ -124,22 +125,25 @@ fn closer(rest: &[u8], close: u8, django: bool) -> Result<usize, usize> {
     Err(rest.len())
 }
 
-/// The offset of the first `%}` outside a string literal, which Jinja lexes in a tag.
-fn jinja_tag_closer(rest: &[u8]) -> Result<usize, usize> {
-    // Few tags quote anything, and with no quote before it the first `%}` closes the tag.
-    if let Ok(first) = closer(rest, b'%', false)
-        && memchr2(b'"', b'\'', &rest[..first]).is_none()
-    {
+/// The offset of the first `close` byte followed by `}` outside string literals and `{ }` pairs,
+/// which Jinja lexes in a `{% %}` or `{{ }}`.
+fn jinja_closer(rest: &[u8], close: u8) -> Result<usize, usize> {
+    let first = closer(rest, close, false)?;
+    // Most tokens hold no string or dict, so their first closer ends them.
+    if memchr3(b'"', b'\'', b'{', &rest[..first]).is_none() {
         return Ok(first);
     }
-    let mut quote = None;
-    let mut i = 0;
+    let (mut quote, mut depth, mut i) = (None, 0usize, 0);
     while i < rest.len() {
         match (quote, rest[i]) {
             (Some(_), b'\\') => i += 1,
             (Some(open), b) if b == open => quote = None,
             (None, b @ (b'"' | b'\'')) => quote = Some(b),
-            (None, b'%') if rest.get(i + 1) == Some(&b'}') => return Ok(i),
+            (None, b) if b == close && depth == 0 && rest.get(i + 1) == Some(&b'}') => {
+                return Ok(i);
+            }
+            (None, b'{') => depth += 1,
+            (None, b'}') => depth = depth.saturating_sub(1),
             _ => {}
         }
         i += 1;
@@ -160,14 +164,13 @@ pub fn tag_name<'s>(tag: &JinjaTag<'s>, language: Language) -> &'s str {
 /// The bit after the tag name, such as a block's name, past Jinja's whitespace-control markers.
 #[must_use]
 pub fn tag_argument<'s>(tag: &JinjaTag<'s>, language: Language) -> Option<&'s str> {
-    let content = tag.content.trim_start_matches(['+', '-']);
-    // Django has no closing marker, so a trailing `-` is part of its argument.
+    // Django has no whitespace-control markers, so a `-` there is part of a bit.
     let content = if language == Language::Django {
-        content
+        tag.content
     } else {
-        content.trim_end_matches(['+', '-'])
+        tag.content.trim_matches(['+', '-'])
     };
-    content.split(is_space).filter(|bit| !bit.is_empty()).nth(1)
+    dtl::bits(content).into_iter().nth(1)
 }
 
 #[cfg(test)]
@@ -219,13 +222,23 @@ mod tests {
         &[("- raw -", 2), (" endraw ", 29), (" d ", 41)]
     )]
     #[case::unclosed_raw_hides_the_rest("{% raw %}{% a %}", &[(" raw ", 2)])]
+    #[case::raw_begin_takes_no_closing_plus("{% raw +%}{% a %}", &[(" raw +", 2), (" a ", 12)])]
+    #[case::variable_skips_strings_and_dicts(
+        r#"{{ {"a": {"b": "}}"}} }}{{ c }}"#,
+        &[(r#" {"a": {"b": "}}"}} "#, 2), (" c ", 26)]
+    )]
     fn jinja_tokens(#[case] text: &str, #[case] expected: &[(&str, usize)]) {
         assert_eq!(lexed(text, Language::Jinja), expected);
     }
 
     #[rstest]
-    #[case::jinja_closing_marker("block foo-", Language::Jinja, Some("foo"))]
-    #[case::django_trailing_dash(" block foo- ", Language::Django, Some("foo-"))]
+    #[case::jinja_markers_stripped("- block foo-", Language::Jinja, Some("foo"))]
+    #[case::django_has_no_markers("- block foo-", Language::Django, Some("block"))]
+    #[case::quoted_bit_kept_whole(
+        r#" include "my file.html" "#,
+        Language::Django,
+        Some(r#""my file.html""#)
+    )]
     fn tag_argument(
         #[case] content: &str,
         #[case] language: Language,
