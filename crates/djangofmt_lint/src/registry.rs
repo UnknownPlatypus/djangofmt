@@ -81,7 +81,8 @@ impl RuleCategory {
 /// # Adding a new rule
 /// 1. Create the violation struct in `rules/` implementing `Violation`
 /// 2. Add entry here: `(RuleName, ViolationStruct)`
-/// 3. Wire up the check in the appropriate `visit_*` method in `checker.rs`
+/// 3. Wire up the check in the appropriate `visit_*` method in `checker.rs`,
+///    or for a rule reading Django's tokens in `check_tokens`, and list it in `Rule::lint_source`
 ///
 /// The compiler will error if:
 /// - The violation struct doesn't exist
@@ -275,15 +276,21 @@ define_rules! {
 pub enum LintSource {
     /// The `markup_fmt` tree: elements, attributes and the blocks the parser paired.
     Ast,
+    /// Django's token stream: every `{% %}` and `{{ }}`, inside text too.
+    Tokens,
     /// The ignore comments, once the other passes have reported what they may silence.
     Ignore,
 }
 
 impl Rule {
-    /// Where the rule reads the template: a rule on ignore comments runs from `check_ignores`,
-    /// an AST rule from the `visit_*` hook of its node.
+    /// Where the rule reads the template: a token rule runs from `check_tokens`,
+    /// a rule on ignore comments from `check_ignores`, an AST rule from the `visit_*` hook of its node.
     pub(crate) const fn lint_source(self) -> LintSource {
         match self {
+            Self::DuplicateBlockName
+            | Self::SameFilePartialInclude
+            | Self::DeprecatedStaticLibrary
+            | Self::RedundantJsonScriptId => LintSource::Tokens,
             Self::InvalidIgnoreComment | Self::InvalidIgnoreCode | Self::UnusedIgnoreCode => {
                 LintSource::Ignore
             }

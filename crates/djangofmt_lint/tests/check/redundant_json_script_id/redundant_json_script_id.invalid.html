@@ -4,3 +4,6 @@
 
 <!-- Between other filters -->
 {{ user_data|default:"{}"|json_script:""|safe }}
+
+<!-- Django reads the `{{ }}` in attribute values -->
+<div data-user="{{ user_data|json_script:"" }}"></div>

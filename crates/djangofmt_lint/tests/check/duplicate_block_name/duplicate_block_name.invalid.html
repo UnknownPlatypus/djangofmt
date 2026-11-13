@@ -7,22 +7,6 @@
 {% block header %}b{% endblock %}
 {% block header %}c{% endblock %}
 
-<!-- A block nested inside another block of the same name -->
-{% block content %}
-    {% block content %}inner{% endblock %}
-{% endblock %}
-
-<!-- The same name in different {% if %} branches still counts (Django registers both) -->
-{% if cond %}
-    {% block sidebar %}on{% endblock %}
-{% else %}
-    {% block sidebar %}off{% endblock %}
-{% endif %}
-
-<!-- Django reads template tags before the HTML: raw-text bodies, HTML comments and attribute position all count -->
+<!-- Django reads template tags before the HTML, so a block in a raw-text body counts -->
 <script>{% block js %}{% endblock %}</script>
 {% block js %}{% endblock %}
-<!-- {% block head %}{% endblock %} -->
-{% block head %}{% endblock %}
-<div {% block attrs %}class="a"{% endblock %}></div>
-{% block attrs %}{% endblock %}

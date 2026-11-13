@@ -9,8 +9,9 @@ use crate::rules::helpers::contains_interpolation;
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
+use djangofmt_syntax::tokens::{Token, Tokens, tag_argument};
 
-use crate::Checker;
+use crate::LintContext;
 
 /// ## What it does
 /// Checks for `{% include %}` tags that render a partial defined in the same template file.
@@ -64,7 +65,12 @@ impl Violation for SameFilePartialInclude<'_> {
 }
 
 /// The caller guarantees the tag is an `include`.
-pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
+pub fn check(
+    context: &LintContext<'_>,
+    tokens: &Tokens<'_>,
+    tag: &JinjaTag<'_>,
+    current_path: &Path,
+) {
     // Only a `#fragment` names a partial, so the other includes are not lexed.
     if !tag.content.contains('#') {
         return;
@@ -78,12 +84,12 @@ pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>, current_path: &Path) {
     }
 
     // Without a local partialdef, the suffix-matched include necessarily resolves to another file.
-    if !defines_partial(checker.context().source(), fragment) {
+    if !defines_partial(tokens, fragment) {
         return;
     }
 
     let span = span(tag.start - "{%".len(), tag.content.len() + "{%%}".len());
-    let mut guard = checker.report_diagnostic(&SameFilePartialInclude { name: fragment }, span);
+    let mut guard = context.report_diagnostic(&SameFilePartialInclude { name: fragment }, span);
 
     // Carry the tag's whitespace-control markers over to the replacement.
     let lead = whitespace_control_marker(tag.content.chars().next());
@@ -131,17 +137,9 @@ fn parse_partial_include<'s>(tag: &JinjaTag<'s>) -> Option<(&'s str, &'s str)> {
     Some((template_path, fragment))
 }
 
-/// Whether the source contains a `{% partialdef <name> %}` opening tag.
-fn defines_partial(source: &str, name: &str) -> bool {
-    // Each `{%`-delimited chunk that opens with `partialdef <name>` as whole tokens. Splitting on
-    // `{%` rejects `endpartialdef` for free (its chunk starts with `end`).
-    source.split("{%").skip(1).any(|tag| {
-        tag.trim_start_matches(['-', '+'])
-            .trim_start()
-            .strip_prefix("partialdef")
-            .filter(|rest| rest.starts_with(char::is_whitespace))
-            .map(str::trim_start)
-            .and_then(|rest| rest.strip_prefix(name))
-            .is_some_and(|rest| rest.starts_with(|c: char| c.is_whitespace() || c == '%'))
+/// Whether the template defines the partial with a `{% partialdef <name> %}`.
+fn defines_partial(tokens: &Tokens<'_>, name: &str) -> bool {
+    tokens.iter().any(|token| {
+        matches!(token, Token::Tag { tag, name: "partialdef" } if tag_argument(tag) == Some(name))
     })
 }

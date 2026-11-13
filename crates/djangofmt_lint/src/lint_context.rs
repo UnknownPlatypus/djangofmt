@@ -12,6 +12,7 @@ use miette::SourceSpan;
 
 use crate::LintDiagnostic;
 use crate::Settings;
+use crate::django_version::DjangoVersion;
 use crate::fix::Fix;
 use crate::registry::Rule;
 use crate::violation::Violation;
@@ -78,6 +79,19 @@ impl<'a> LintContext<'a> {
     #[must_use]
     pub const fn settings(&self) -> &'a Settings {
         self.settings
+    }
+
+    /// Whether the source is parsed as a Django template rather than a Jinja one.
+    #[must_use]
+    pub const fn is_django(&self) -> bool {
+        matches!(self.language, Language::Django)
+    }
+
+    /// The Django version the templates target, [`None`] when it is neither set nor inferred;
+    /// no version-gated rule can fire without one.
+    #[must_use]
+    pub const fn target_version(&self) -> Option<DjangoVersion> {
+        self.settings.target_version
     }
 
     /// Returns whether the given rule should be checked.

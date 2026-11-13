@@ -156,7 +156,7 @@ Reference: `MissingTitle` / `TitleViolation` (`accessibility/missing_title.rs`).
 
 ### 1d. The check function
 
-The signature follows the AST node the rule inspects, and picks the `visit_*` hook that dispatches it in Step 4: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share, single-tag rules `(checker, tag)` from the arm of their tag name in `visit_jinja_tag`, which also sees block openers, and `{{ }}` rules `(checker, interpolation)` from `visit_jinja_interpolation`. Most rules are attribute rules:
+The signature follows what the rule reads, which picks its `LintSource` and the hook that dispatches it in Step 4. AST rules read the `markup_fmt` tree: attribute rules take `(checker, attr, element)` or `(checker, attr)` from `visit_native_attribute`, element rules `(checker, element)` from `visit_element`, Jinja block rules `(checker, block)` from `visit_opener`, which both block visitors share. Token rules read Django's token stream from `check_tokens`, which has no visitor and so passes the `LintContext` instead of the checker: tag rules take `(context, tag)` from the arm of their tag name, `{{ }}` rules `(context, expr)` from the `Var` arm, and a rule that reads the whole stream takes `tokens` too. Most rules are attribute rules:
 
 ```rust
 pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Element<'_>) {
@@ -175,12 +175,13 @@ pub fn check(checker: &Checker<'_>, attr: &NativeAttribute<'_>, element: &Elemen
 
 Key points:
 
-- The `Checker` is passed as `&Checker<'_>`; diagnostics are buffered through interior mutability (`RefCell`), so no `&mut` is needed.
+- The `Checker` is passed as `&Checker<'_>`, a token rule's context as `&LintContext<'_>`, with the same `source_span` and `report_diagnostic`; diagnostics are buffered through interior mutability (`RefCell`), so no `&mut` is needed.
 - `checker.report_diagnostic(&violation, span)` returns a `DiagnosticGuard`. On `Drop` the guard pushes the diagnostic into the context's buffer. Hold the guard in a `let mut guard = ...` binding only if you need to attach a fix or override fields; otherwise let the temporary drop immediately.
 - For fixes: build an `Edit` (`Edit::deletion`, `Edit::insertion`, `Edit::replacement`) and wrap it with `Fix::safe_edit(...)` or `Fix::unsafe_edit(...)`, then call `guard.set_fix(fix)`. Deleting a whole attribute is `delete_attr_fix` from `fix/edits.rs`, which widens the deletion over the surrounding whitespace.
 - **A slice locates itself**: build spans with `checker.source_span(slice)`. `checker.source_offset(slice)` / `checker.source_end(slice)` are its bounds, for range arithmetic; the free `span(start, len)` is for offsets no slice provides.
 - **Report the narrowest span that names the problem** — the offending value or attribute, not the whole element. Each failure mode can point at its own slice: `source_span(value)` for a bad value, `source_span(attr.name)` for a bad attribute, `source_span(element.tag_name)` when the element itself is at fault.
 - **Match HTML case-insensitively** — tag names, attribute names, and enumerated values alike: `name.eq_ignore_ascii_case("scope")`, `value.eq_ignore_ascii_case("col")`.
+- **Tag and `{{ }}` rules read Django's token stream, not the tree**: Django compiles the `{% %}` and `{{ }}` inside HTML comments, `<script>`/`<style>`/`<pre>`/`<textarea>` bodies and attribute values, which the parser keeps as text. `djangofmt_syntax::tokens::Tokens` lexes the whole source the way Django's lexer does, `{% comment %}`, `{% verbatim %}` and Jinja `{% raw %}` bodies dropped, and `check_tokens` dispatches every token, so a token rule never has a blind spot.
 - **Keep the per-node path light**: every `{{ }}` of the template goes through each `{{ }}` rule, every tag of a name through that name's rules, and `djangofmt_syntax::dtl::bits()` and `filter_expression()` run regexes. Reject on bytes first (`content.contains("static")`, `expr.contains(':')`), then move the rest into a `#[cold]` function: LLVM saves the registers a body needs before its first early return, so a heavy body taxes every node even when it bails out. Never `#[inline]` a rule into the visitor, which taxes every node the same way. Measure with `just bench-rs`.
 
 ### 1e. Version-gated rules
@@ -188,21 +189,21 @@ Key points:
 A rule that only applies from some Django release onwards, the one that deprecated the old spelling or introduced the new one, gates on the target version the way ruff's rules gate on `target-version` and clippy's on `msrv`. As in ruff, the gate sits in the checker next to `is_rule_enabled`, with the release inline, and the rule never sees the version:
 
 ```rust
-// checker.rs, the `load` arm of `visit_jinja_tag`
+// checker.rs, the `load` arm of `check_tokens`
 "load"
-    if self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
-        && self.is_django()
-        && self
+    if context.is_rule_enabled(Rule::DeprecatedStaticLibrary)
+        && context.is_django()
+        && context
             .target_version()
             .is_some_and(|version| version >= DjangoVersion::new(2, 1)) =>
 {
-    rules::suspicious::deprecated_static_library::check(self, tag);
+    rules::suspicious::deprecated_static_library::check(context, tag);
 }
 ```
 
-- `checker.target_version()` is `None` when `target-version` is neither set nor inferable from `[project] dependencies`. The rule then stays silent: nothing says the newer spelling is available.
-- A rule reads `checker.target_version()` itself only when the version changes what it reports or fixes, not just whether it runs.
-- Pair the gate with `self.is_django()`: a Django release means nothing for a Jinja template.
+- `context.target_version()` is `None` when `target-version` is neither set nor inferable from `[project] dependencies`. The rule then stays silent: nothing says the newer spelling is available.
+- A rule reads `context.target_version()` itself only when the version changes what it reports or fixes, not just whether it runs.
+- Pair the gate with `is_django()`: a Django release means nothing for a Jinja template.
 - Say so in the docstring ("The rule is version-gated: it reports nothing until `lint.target-version` names Django 2.1 or newer") and list `lint.target-version` under `## Options`.
 - Fixtures run at `DjangoVersion::MAX`, so the gate is always open for them; `check_gates_version_specific_rules_on_target_version` in `crates/djangofmt/tests/cli.rs` covers the closed gate once for every rule. Cover the Jinja half with a `.valid.jinja` fixture.
 
@@ -236,6 +237,8 @@ fn visit_native_attribute(&self, attr: &NativeAttribute<'a>, element: &Element<'
 }
 ```
 
+A token rule goes in the arm of its tag name in `check_tokens` instead, and in the `LintSource::Tokens` arm of `Rule::lint_source` in `registry.rs`, which is what makes the lexer run for it.
+
 **Several rules keyed off the same tag?** See **[checker-gating.md](checker-gating.md)** for classify-once dispatch.
 
 ## Step 5: Create test fixtures
@@ -249,7 +252,7 @@ the only one that allows whitespace-control markers.
 
 ### `{rule_name}.invalid.html`
 
-Contains **only** cases that should produce diagnostics. Every line/block that looks like it might be valid should be in the valid file instead. Group cases with HTML comments (`<!-- Case-insensitive tag name -->`) — the snapshot becomes much easier to review.
+Contains **only** cases that should produce diagnostics. Every line/block that looks like it might be valid should be in the valid file instead. Group cases with HTML comments (`<!-- Case-insensitive tag name -->`) — the snapshot becomes much easier to review. The token rules lint the tags inside those comments too, so name a tag there without its `{% %}`.
 
 ### `{rule_name}.valid.html`
 
