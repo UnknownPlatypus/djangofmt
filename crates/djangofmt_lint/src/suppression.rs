@@ -13,8 +13,9 @@ use smallvec::{SmallVec, smallvec};
 
 use crate::registry::Rule;
 use crate::rule_set::RuleSet;
+use crate::rules;
 use crate::rules::helpers::enclosing_comment;
-use crate::{Checker, LintDiagnostic};
+use crate::{LintContext, LintDiagnostic};
 
 /// How far a directive in force reaches.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,26 +76,41 @@ impl IgnoreComment<'_> {
     }
 }
 
+/// Lint the ignore comments, then drop the diagnostics they silence.
+pub fn check_ignores(context: &LintContext<'_>, root: &Root<'_>) {
+    let mut comments = collect_ignore_comments(root, context);
+    if context.is_rule_enabled(Rule::InvalidIgnoreComment) {
+        rules::suspicious::invalid_ignore_comment::check(context, &comments);
+    }
+    if context.is_rule_enabled(Rule::InvalidIgnoreCode) {
+        rules::suspicious::invalid_ignore_code::check(context, &comments);
+    }
+    record_matches(context, &mut comments);
+    if context.is_rule_enabled(Rule::UnusedIgnoreCode) {
+        rules::suspicious::unused_ignore_code::check(context, &comments);
+    }
+    drop_ignored_diagnostics(context, &comments);
+}
+
 /// Every `{# djangofmt: ... #}` comment of the file, in source order.
-#[must_use]
-pub fn collect_ignore_comments<'s>(
+fn collect_ignore_comments<'s>(
     root: &Root<'s>,
-    checker: &Checker<'s>,
+    context: &LintContext<'s>,
 ) -> Vec<IgnoreComment<'s>> {
-    let source = checker.context().source();
+    let source = context.source();
     root.jinja_comments
         .iter()
         .filter_map(|comment_body| {
             let directive = IgnoreDirective::parse(comment_body)?;
-            let offset = checker.source_offset(comment_body);
+            let offset = context.source_offset(comment_body);
 
-            let raw = enclosing_comment(checker, TEMPLATE_COMMENT, comment_body);
-            let is_leading = strip_bom(&source[..checker.source_offset(raw)])
+            let raw = enclosing_comment(context, TEMPLATE_COMMENT, comment_body);
+            let is_leading = strip_bom(&source[..context.source_offset(raw)])
                 .trim_start()
                 .is_empty();
             let scope = scope(&directive, is_leading);
             let guarded_ranges = match scope {
-                Some(IgnoreScope::Node) => guarded_ranges(root, offset, checker),
+                Some(IgnoreScope::Node) => guarded_ranges(root, offset, context),
                 Some(IgnoreScope::File) => smallvec![0..source.len()],
                 None => SmallVec::new(),
             };
@@ -113,8 +129,8 @@ pub fn collect_ignore_comments<'s>(
 /// Record on each comment the rules of the diagnostics it silences. Dropping them waits for
 /// [`drop_ignored_diagnostics`], once `unused-ignore-code` has reported from these records.
 /// A diagnostic counts for the first comment covering it, so a repeated code is unused.
-pub fn record_matches(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>]) {
-    for diagnostic in checker.context().diagnostics().iter() {
+fn record_matches(context: &LintContext<'_>, comments: &mut [IgnoreComment<'_>]) {
+    for diagnostic in context.diagnostics().iter() {
         if let Ok(rule) = Rule::from_str(diagnostic.code)
             && let Some(comment) = comments.iter_mut().find(|c| c.suppresses(diagnostic))
         {
@@ -123,25 +139,23 @@ pub fn record_matches(checker: &Checker<'_>, comments: &mut [IgnoreComment<'_>])
     }
 }
 
-/// Drop from `checker` the diagnostics the comments silence, those of the rules on the
+/// Drop from `context` the diagnostics the comments silence, those of the rules on the
 /// comments themselves included.
-pub fn drop_ignored_diagnostics(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
+fn drop_ignored_diagnostics(context: &LintContext<'_>, comments: &[IgnoreComment<'_>]) {
     if comments.is_empty() {
         return;
     }
-    checker
-        .context()
-        .retain_diagnostics(|diagnostic| !comments.iter().any(|c| c.suppresses(diagnostic)));
+    context.retain_diagnostics(|diagnostic| !comments.iter().any(|c| c.suppresses(diagnostic)));
 }
 
 /// The siblings following the `{# #}` comment node whose body sits at `offset`.
 fn siblings_after<'n, 's>(
     mut nodes: &'n [Node<'s>],
     offset: usize,
-    checker: &Checker<'_>,
+    context: &LintContext<'_>,
 ) -> Option<&'n [Node<'s>]> {
-    let start = |node: &Node<'_>| checker.source_offset(node.raw);
-    let end = |node: &Node<'_>| checker.source_end(node.raw);
+    let start = |node: &Node<'_>| context.source_offset(node.raw);
+    let end = |node: &Node<'_>| context.source_end(node.raw);
     loop {
         // Siblings are ordered and disjoint: the container is the first one ending past `offset`.
         let index = nodes.partition_point(|node| end(node) <= offset);
@@ -163,11 +177,11 @@ fn siblings_after<'n, 's>(
 fn guarded_ranges(
     root: &Root<'_>,
     offset: usize,
-    checker: &Checker<'_>,
+    context: &LintContext<'_>,
 ) -> SmallVec<[Range<usize>; 2]> {
     let mut ranges = SmallVec::new();
     // At attribute position the comment is no node, so it has no siblings and guards nothing.
-    let Some(siblings) = siblings_after(&root.children, offset, checker) else {
+    let Some(siblings) = siblings_after(&root.children, offset, context) else {
         return ranges;
     };
     let Some(target) = siblings.iter().find(|node| {
@@ -176,15 +190,15 @@ fn guarded_ranges(
     }) else {
         return ranges;
     };
-    let start = checker.source_offset(target.raw);
-    let end = checker.source_end(target.raw);
+    let start = context.source_offset(target.raw);
+    let end = context.source_end(target.raw);
     let mut cursor = start;
     for child in child_slices(target).flatten() {
-        let child_start = checker.source_offset(child.raw);
+        let child_start = context.source_offset(child.raw);
         if child_start > cursor {
             ranges.push(cursor..child_start);
         }
-        cursor = checker.source_end(child.raw);
+        cursor = context.source_end(child.raw);
     }
     if cursor < end {
         ranges.push(cursor..end);
@@ -245,7 +259,7 @@ mod tests {
             codes(
                 "<p>hi</p>\n{# djangofmt: file-ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>"
             ),
-            ["invalid-attr-value", "invalid-ignore-comment"]
+            ["invalid-ignore-comment", "invalid-attr-value"]
         );
     }
 
@@ -291,6 +305,18 @@ mod tests {
         lint_source(source, Language::Django, &[], &Settings::all(), None).expect("parse")
     }
 
+    /// Suppression does not hinge on the rules about ignore comments being on.
+    #[test]
+    fn ignore_applies_with_the_directive_rules_off() {
+        let settings = Settings {
+            rules: RuleSet::from_rule(Rule::InvalidAttrValue),
+            ..Settings::all()
+        };
+        let source = "{# djangofmt: ignore[invalid-attr-value] #}\n<form method=\"yes\"></form>";
+        let diagnostics = lint_source(source, Language::Django, &[], &settings, None);
+        assert!(diagnostics.expect("parse").is_empty());
+    }
+
     #[test]
     fn ignore_binds_to_the_following_node() {
         assert_eq!(
@@ -305,7 +331,7 @@ mod tests {
         // sibling all keep their diagnostic; the first two comments are unused on top.
         assert_eq!(
             codes("{# djangofmt: ignore[empty-attr-value] #}\n<form method=\"yes\"></form>"),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
         assert_eq!(
             codes("<form method=\"yes\"></form>\n{# djangofmt: ignore[invalid-attr-value] #}"),
@@ -332,7 +358,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\nLegacy: <form method=\"yes\"></form>"
             ),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
         // Stacked ignore comments all reach the same target.
         assert_eq!(
@@ -380,7 +406,7 @@ mod tests {
             codes(
                 "{# djangofmt: ignore[invalid-attr-value] #}\n{% if x %}<form method=\"yes\"></form>{% endif %}"
             ),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
     }
 
@@ -405,7 +431,7 @@ mod tests {
     fn attribute_position_comments_never_suppress() {
         assert_eq!(
             codes("<form {# djangofmt: ignore[invalid-attr-value] #} method=\"yes\"></form>"),
-            ["invalid-attr-value", "unused-ignore-code"]
+            ["unused-ignore-code", "invalid-attr-value"]
         );
     }
 }

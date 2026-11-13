@@ -1,6 +1,6 @@
 //! [`LintContext`] and [`DiagnosticGuard`].
 //!
-//! The `LintContext` owns the diagnostic buffer and is shared by reference through the AST visitor.
+//! The `LintContext` owns the diagnostic buffer and is shared by reference with every pass.
 //! Reporting a diagnostic returns a guard that buffers a partial diagnostic; on Drop the guard
 //! pushes it into the context's buffer.
 

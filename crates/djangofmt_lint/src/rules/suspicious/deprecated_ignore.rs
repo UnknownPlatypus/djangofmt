@@ -142,7 +142,7 @@ fn reason(body: &str) -> &str {
 /// Lint a comment of either style, `body` being its text between `delimiters`.
 pub fn check(checker: &Checker<'_>, delimiters: CommentDelimiters, body: &str) {
     if markup_fmt::matches_directive(body, LEGACY_IGNORE_DIRECTIVE) {
-        let whole_comment = enclosing_comment(checker, delimiters, body);
+        let whole_comment = enclosing_comment(checker.context(), delimiters, body);
         report(checker, whole_comment, body, delimiters == HTML_COMMENT);
     }
 }

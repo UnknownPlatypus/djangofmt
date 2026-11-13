@@ -5,7 +5,7 @@ use djangofmt_syntax::CommentDelimiters;
 use markup_fmt::ast::{Attribute, JinjaTagOrChildren, NativeAttribute};
 use smallvec::{SmallVec, smallvec};
 
-use crate::Checker;
+use crate::{Checker, LintContext};
 
 /// Returns true if the value contains Jinja/Django template markers.
 ///
@@ -84,12 +84,12 @@ pub fn native_attrs<'a, 's>(
 /// The whole comment around `comment_body`, delimiters included.
 /// An unterminated comment runs to the end of the source.
 pub fn enclosing_comment<'s>(
-    checker: &Checker<'s>,
+    context: &LintContext<'s>,
     delimiters: CommentDelimiters,
     comment_body: &str,
 ) -> &'s str {
-    let source = checker.context().source();
-    let start = checker.source_offset(comment_body) - delimiters.open.len();
-    let end = checker.source_end(comment_body) + delimiters.close.len();
+    let source = context.source();
+    let start = context.source_offset(comment_body) - delimiters.open.len();
+    let end = context.source_end(comment_body) + delimiters.close.len();
     &source[start..end.min(source.len())]
 }

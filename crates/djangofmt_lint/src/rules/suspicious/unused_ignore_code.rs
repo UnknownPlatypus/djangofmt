@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::str::FromStr;
 
-use crate::Checker;
+use crate::LintContext;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_codes_or_comment;
 use crate::registry::{Rule, RuleCategory};
@@ -85,13 +85,13 @@ impl Unused {
 }
 
 /// Report the unused codes of every comment, once per comment.
-pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
+pub fn check(context: &LintContext<'_>, comments: &[IgnoreComment<'_>]) {
     for comment in comments {
-        check_comment(checker, comment);
+        check_comment(context, comment);
     }
 }
 
-fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
+fn check_comment(context: &LintContext<'_>, comment: &IgnoreComment<'_>) {
     // Malformed and misplaced directives are `invalid-ignore-comment`'s to report.
     if comment.scope.is_none() {
         return;
@@ -105,24 +105,26 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
 
     // One slot per code, so of a repeated code only the repeat is dropped.
     let unused: Vec<Option<Unused>> = (0..codes.len())
-        .map(|index| classify(checker, comment, index))
+        .map(|index| classify(context, comment, index))
         .collect();
     if unused.iter().all(Option::is_none) {
         return;
     }
 
-    let deletion = delete_codes_or_comment(checker.context(), comment, |index, _| {
-        unused[index].is_some()
-    });
+    let deletion = delete_codes_or_comment(context, comment, |index, _| unused[index].is_some());
     let violation = UnusedIgnoreCode {
         codes: format_by_reason(codes, &unused),
         whole_comment: deletion.whole_comment,
     };
-    deletion.report(checker.context(), &violation);
+    deletion.report(context, &violation);
 }
 
 /// Why the code at `index` is unused, `None` when it is used or not this rule's to judge.
-fn classify(checker: &Checker<'_>, comment: &IgnoreComment<'_>, index: usize) -> Option<Unused> {
+fn classify(
+    context: &LintContext<'_>,
+    comment: &IgnoreComment<'_>,
+    index: usize,
+) -> Option<Unused> {
     let codes = comment.directive.codes();
     let code = codes[index];
     let earlier = &codes[..index];
@@ -131,7 +133,7 @@ fn classify(checker: &Checker<'_>, comment: &IgnoreComment<'_>, index: usize) ->
             Some(Unused::Duplicated)
         } else if comment.matched.contains(rule) {
             None
-        } else if checker.is_rule_enabled(rule) {
+        } else if context.is_rule_enabled(rule) {
             Some(Unused::Unmatched)
         } else {
             Some(Unused::Disabled)

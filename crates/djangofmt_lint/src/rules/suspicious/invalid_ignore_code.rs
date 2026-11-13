@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use strum::{IntoEnumIterator, VariantNames};
 
-use crate::Checker;
+use crate::LintContext;
 use crate::fix::FixAvailability;
 use crate::fix::edits::delete_codes_or_comment;
 use crate::registry::{Rule, RuleCategory};
@@ -71,13 +71,13 @@ impl Violation for InvalidIgnoreCode {
 }
 
 /// Report the codes naming neither a rule nor a reserved code, once per comment.
-pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
+pub fn check(context: &LintContext<'_>, comments: &[IgnoreComment<'_>]) {
     for comment in comments {
-        check_comment(checker, comment);
+        check_comment(context, comment);
     }
 }
 
-fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
+fn check_comment(context: &LintContext<'_>, comment: &IgnoreComment<'_>) {
     let codes = comment.directive.codes();
     let mut invalid: Vec<&str> = Vec::new();
     for &code in codes {
@@ -90,9 +90,7 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
     if invalid.is_empty() {
         return;
     }
-    let deletion = delete_codes_or_comment(checker.context(), comment, |_, code| {
-        invalid.contains(&code)
-    });
+    let deletion = delete_codes_or_comment(context, comment, |_, code| invalid.contains(&code));
     let violation = InvalidIgnoreCode {
         codes: invalid
             .iter()
@@ -107,7 +105,7 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
         },
         whole_comment: deletion.whole_comment,
     };
-    deletion.report(checker.context(), &violation);
+    deletion.report(context, &violation);
 }
 
 /// The known code `code` was likely meant to be, when one is close enough to name.

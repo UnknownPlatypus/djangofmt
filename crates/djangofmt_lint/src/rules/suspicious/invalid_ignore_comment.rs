@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::Checker;
+use crate::LintContext;
 use crate::fix::edits::{delete_codes_or_comment, delete_comment};
 use crate::fix::{Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
@@ -100,19 +100,18 @@ impl Violation for InvalidIgnoreComment {
 }
 
 /// Lint every ignore comment of the file.
-pub fn check(checker: &Checker<'_>, comments: &[IgnoreComment<'_>]) {
+pub fn check(context: &LintContext<'_>, comments: &[IgnoreComment<'_>]) {
     for comment in comments {
-        check_comment(checker, comment);
+        check_comment(context, comment);
     }
 }
 
-fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
-    let ctx = checker.context();
+fn check_comment(context: &LintContext<'_>, comment: &IgnoreComment<'_>) {
     let remove_comment = |kind| {
         (
             kind,
-            ctx.source_span(comment.raw),
-            Fix::unsafe_edit(delete_comment(ctx, comment.raw)),
+            context.source_span(comment.raw),
+            Fix::unsafe_edit(delete_comment(context, comment.raw)),
         )
     };
     let (kind, span, fix) = match &comment.directive {
@@ -129,7 +128,8 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
             if !codes.contains(&invalid_syntax) {
                 return;
             }
-            let deletion = delete_codes_or_comment(ctx, comment, |_, code| code == invalid_syntax);
+            let deletion =
+                delete_codes_or_comment(context, comment, |_, code| code == invalid_syntax);
             (
                 IgnoreCommentViolation::InvalidSyntaxOnNode {
                     whole_comment: deletion.whole_comment,
@@ -139,6 +139,6 @@ fn check_comment(checker: &Checker<'_>, comment: &IgnoreComment<'_>) {
             )
         }
     };
-    let mut guard = checker.report_diagnostic(&InvalidIgnoreComment { kind }, span);
+    let mut guard = context.report_diagnostic(&InvalidIgnoreComment { kind }, span);
     guard.set_fix(fix);
 }

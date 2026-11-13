@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use markup_fmt::Language;
 use markup_fmt::ast::{
     Attribute, Element, JinjaBlock, JinjaInterpolation, JinjaTag, JinjaTagOrChildren,
@@ -9,21 +7,18 @@ use markup_fmt::parser::parse_jinja_tag_name;
 use miette::SourceSpan;
 use smallvec::SmallVec;
 
-use crate::LintDiagnostic;
-use crate::Settings;
 use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
-use crate::suppression::IgnoreComment;
 use crate::violation::Violation;
 use djangofmt_syntax::dtl;
 use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 
-/// AST visitor that collects lint diagnostics.
+/// Runs the AST rules from a visitor over the `markup_fmt` tree.
 #[derive(Debug)]
 pub struct Checker<'a> {
-    context: LintContext<'a>,
+    context: &'a LintContext<'a>,
     /// Block names collected during the traversal.
     /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
     block_names: SmallVec<[&'a str; 8]>,
@@ -33,15 +28,9 @@ pub struct Checker<'a> {
 
 impl<'a> Checker<'a> {
     #[must_use]
-    pub const fn new(
-        source: &'a str,
-        settings: &'a Settings,
-        language: Language,
-        path: Option<&'a Path>,
-        quarantined: bool,
-    ) -> Self {
+    pub const fn new(context: &'a LintContext<'a>) -> Self {
         Self {
-            context: LintContext::new(source, settings, language, path, quarantined),
+            context,
             block_names: SmallVec::new_const(),
             in_raw: false,
         }
@@ -49,8 +38,8 @@ impl<'a> Checker<'a> {
 
     /// Borrow the underlying [`LintContext`].
     #[must_use]
-    pub const fn context(&self) -> &LintContext<'a> {
-        &self.context
+    pub const fn context(&self) -> &'a LintContext<'a> {
+        self.context
     }
 
     /// Whether the source is parsed as a Django template rather than a Jinja one.
@@ -122,12 +111,6 @@ impl<'a> Checker<'a> {
         self.context.report_diagnostic(violation, span)
     }
 
-    /// Consume the checker and return all collected diagnostics.
-    #[must_use]
-    pub fn into_diagnostics(self) -> Vec<LintDiagnostic> {
-        self.context.into_diagnostics()
-    }
-
     /// Visit the root of the AST and run all lint rules.
     pub fn visit_root(&mut self, root: &Root<'a>) {
         if self.is_rule_enabled(Rule::MissingDoctype) {
@@ -141,23 +124,6 @@ impl<'a> Checker<'a> {
         // Cross-node finalize: now that every `{% block %}` has been recorded, flag duplicates.
         if self.is_rule_enabled(Rule::DuplicateBlockName) {
             rules::correctness::duplicate_block_name::check(self);
-        }
-    }
-
-    /// Lint the ignore comments themselves.
-    pub(crate) fn visit_ignore_comments(&self, comments: &[IgnoreComment<'_>]) {
-        if self.is_rule_enabled(Rule::InvalidIgnoreComment) {
-            rules::suspicious::invalid_ignore_comment::check(self, comments);
-        }
-        if self.is_rule_enabled(Rule::InvalidIgnoreCode) {
-            rules::suspicious::invalid_ignore_code::check(self, comments);
-        }
-    }
-
-    /// Report the codes that silence nothing, once each comment knows what it matched.
-    pub(crate) fn visit_unused_ignore_codes(&self, comments: &[IgnoreComment<'_>]) {
-        if self.is_rule_enabled(Rule::UnusedIgnoreCode) {
-            rules::suspicious::unused_ignore_code::check(self, comments);
         }
     }
 
