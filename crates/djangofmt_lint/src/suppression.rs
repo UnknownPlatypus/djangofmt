@@ -76,7 +76,7 @@ impl IgnoreComment<'_> {
     }
 }
 
-/// Lint the ignore comments, then drop the diagnostics they silence: ruff's `check_noqa`.
+/// Lint the ignore comments, then drop the diagnostics they silence.
 pub fn check_ignores(context: &LintContext<'_>, root: &Root<'_>) {
     let mut comments = collect_ignore_comments(root, context);
     if context.is_rule_enabled(Rule::InvalidIgnoreComment) {

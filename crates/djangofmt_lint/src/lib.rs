@@ -198,7 +198,7 @@ fn check_rules(
         quarantined,
     );
     Checker::new(&context).visit_root(parsed.ast());
-    // Like ruff's gate on `check_noqa`: there is something to silence, or a rule on the comments is on.
+    // Only when there is something to silence, or a rule on the comments is on.
     let has_diagnostics = !context.diagnostics().is_empty();
     if has_diagnostics
         || settings
