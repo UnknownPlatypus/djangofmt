@@ -279,8 +279,7 @@ mod tests {
     }
 
     /// Django reads the tags inside a `<script>` body and an HTML comment,
-    /// which hold no node an ignore comment could bind to,
-    /// so the enclosing node's ignore covers them.
+    /// where no ignore comment can bind, so the enclosing node's ignore covers them.
     #[test]
     fn node_ignore_covers_the_text_and_comments_inside_it() {
         assert_eq!(
