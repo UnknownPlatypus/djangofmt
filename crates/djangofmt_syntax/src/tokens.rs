@@ -194,6 +194,7 @@ mod tests {
     #[case::variable_kept_comment_dropped("{{ '{% a %}' }} {# {% b %} #}", &[(" '{% a %}' ", 2)])]
     #[case::newline_ends_token("{% abc\n{% b %}", &[(" b ", 9)])]
     #[case::unclosed_variable_retries("{{% a %}", &[(" a ", 3)])]
+    #[case::empty_token("{{}}", &[("", 2)])]
     #[case::verbatim_body_dropped(
         "{% verbatim x %}{% a %}{% endverbatim %}{% endverbatim x %}{% b %}",
         &[(" verbatim x ", 2), (" endverbatim x ", 42), (" b ", 61)]
@@ -222,6 +223,7 @@ mod tests {
         &[("- raw -", 2), (" endraw ", 29), (" d ", 41)]
     )]
     #[case::unclosed_raw_hides_the_rest("{% raw %}{% a %}", &[(" raw ", 2)])]
+    #[case::comment_is_no_body("{% comment %}{% a %}", &[(" comment ", 2), (" a ", 15)])]
     #[case::raw_begin_takes_no_closing_plus("{% raw +%}{% a %}", &[(" raw +", 2), (" a ", 12)])]
     #[case::variable_skips_strings_and_dicts(
         r#"{{ {"a": {"b": "}}"}} }}{{ c }}"#,
