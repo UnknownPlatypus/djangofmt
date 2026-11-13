@@ -209,12 +209,7 @@ fn fix_loop(
         }
 
         let input = match crate::parse_or_quarantine(&current, profile, custom_blocks) {
-            Ok(input) => {
-                if iterations == 0 {
-                    quarantined = input.quarantined;
-                }
-                input
-            }
+            Ok(input) => input,
             Err(err) if iterations > 0 => {
                 return Err(FixerError::SyntaxRegression {
                     iteration: iterations,
@@ -223,6 +218,15 @@ fn fix_loop(
             }
             Err(err) => return Err(FixerError::InitialParse(err)),
         };
+        if iterations == 0 {
+            quarantined = input.quarantined();
+        } else if !quarantined && let Some(error) = input.syntax_error {
+            // A file that parsed on the first pass and no longer does was broken by a fix.
+            return Err(FixerError::SyntaxRegression {
+                iteration: iterations,
+                error,
+            });
+        }
 
         let diagnostics = check(&input);
         let result = apply_fixes(&current, &diagnostics, threshold);
@@ -420,18 +424,27 @@ mod tests {
 
     #[test]
     fn lint_fix_reports_a_fix_that_breaks_the_syntax() {
-        // `<p id=></p>` does not parse.
-        let fix = Fix::safe_edit(Edit::insertion(" id=", 2));
-        let result = fix_loop(
+        // The second source leads with a comment that would quarantine the broken output.
+        for source in [
             "<p></p>",
-            markup_fmt::Language::Django,
-            &[],
-            Applicability::Safe,
-            |_| vec![diag_with_fix(fix.clone())],
-        );
-        assert!(matches!(
-            result,
-            Err(FixerError::SyntaxRegression { iteration: 1, .. })
-        ));
+            "{# djangofmt: file-ignore[invalid-syntax] #}\n<p></p>",
+        ] {
+            // `<p id=></p>` does not parse.
+            let fix = Fix::safe_edit(Edit::insertion(" id=", source.len() - "></p>".len()));
+            let result = fix_loop(
+                source,
+                markup_fmt::Language::Django,
+                &[],
+                Applicability::Safe,
+                |_| vec![diag_with_fix(fix.clone())],
+            );
+            assert!(
+                matches!(
+                    result,
+                    Err(FixerError::SyntaxRegression { iteration: 1, .. })
+                ),
+                "{source}"
+            );
+        }
     }
 }

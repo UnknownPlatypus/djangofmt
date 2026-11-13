@@ -158,13 +158,18 @@ pub fn check(parsed: &Parsed<'_>, settings: &Settings, path: Option<&Path>) -> V
 /// A file as the linter reads it: parsed whole, or quarantined to its leading comment.
 pub(crate) struct LintInput<'a> {
     parsed: Parsed<'a>,
-    /// Only the leading comment parsed, see [`parse_or_quarantine`].
-    pub(crate) quarantined: bool,
+    /// Why the whole file did not parse, when only its leading comment did, see [`parse_or_quarantine`].
+    pub(crate) syntax_error: Option<SyntaxError>,
 }
 
 impl LintInput<'_> {
+    /// Only the leading comment parsed.
+    pub(crate) const fn quarantined(&self) -> bool {
+        self.syntax_error.is_some()
+    }
+
     pub(crate) fn check(&self, settings: &Settings, path: Option<&Path>) -> Vec<LintDiagnostic> {
-        check_rules(&self.parsed, self.quarantined, settings, path)
+        check_rules(&self.parsed, self.quarantined(), settings, path)
     }
 }
 
@@ -217,7 +222,7 @@ pub(crate) fn parse_or_quarantine<'a>(
         Ok(parsed) => {
             return Ok(LintInput {
                 parsed,
-                quarantined: false,
+                syntax_error: None,
             });
         }
         Err(error) => error,
@@ -227,7 +232,7 @@ pub(crate) fn parse_or_quarantine<'a>(
     };
     Ok(LintInput {
         parsed: parse(head, language, custom_blocks)?,
-        quarantined: true,
+        syntax_error: Some(error),
     })
 }
 
@@ -283,7 +288,7 @@ pub fn lint_text(
         let input = parse_or_quarantine(source, language, custom_blocks)?;
         Ok(LintOutcome {
             diagnostics: input.check(settings, path),
-            quarantined: input.quarantined,
+            quarantined: input.quarantined(),
             ..LintOutcome::default()
         })
     };
