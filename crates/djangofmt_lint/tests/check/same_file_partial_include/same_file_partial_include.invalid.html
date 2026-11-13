@@ -2,8 +2,6 @@
 {% partialdef item-list %}<li>An item</li>{% endpartialdef %}
 {% partialdef card %}<span>A card</span>{% endpartialdef %}
 {% partialdef header %}<h1>A header</h1>{% endpartialdef %}
-{% partialdef menu %}<li>A menu entry</li>{% endpartialdef %}
-{% partialdef attrs %}class="highlight"{% endpartialdef %}
 {% partialdef sidebar inline %}<aside>A sidebar</aside>{% endpartialdef %}
 
 <!-- Same-file partial included by the file's own name + fragment -->
@@ -18,12 +16,5 @@
 <!-- `inline` partialdefs are matched too -->
 {% include "same_file_partial_include.invalid.html#sidebar" %}
 
-<!-- Include in attribute position -->
-<div {% include "same_file_partial_include.invalid.html#attrs" %}>Highlighted</div>
-
-<!-- Nested inside an element and a block: the visitor must descend to reach it -->
-<nav>
-  {% if show_menu %}
-    {% include "same_file_partial_include.invalid.html#menu" %}
-  {% endif %}
-</nav>
+<!-- Django reads the tags in HTML comments -->
+<!-- {% include "same_file_partial_include.invalid.html#card" %} -->

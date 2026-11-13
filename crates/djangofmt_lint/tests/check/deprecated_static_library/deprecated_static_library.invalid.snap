@@ -58,5 +58,15 @@ source: crates/djangofmt_lint/tests/check/main.rs
  12 │ {% load static from staticfiles %}{% static 'testfile.txt' %}
     ·                     ─────┬─────
     ·                          ╰── here
+ 13 │ 
+    ╰────
+  help: Load `static` instead
+
+  × Deprecated template library `staticfiles`
+    ╭─[tests/check/deprecated_static_library/deprecated_static_library.invalid.html:15:21]
+ 14 │ <!-- Django reads the tags in attribute values -->
+ 15 │ <div title="{% load staticfiles %}"></div>
+    ·                     ─────┬─────
+    ·                          ╰── here
     ╰────
   help: Load `static` instead
