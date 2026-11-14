@@ -5,7 +5,6 @@ use std::sync::LazyLock;
 
 use markup_fmt::Language;
 use markup_fmt::ast::JinjaTag;
-use markup_fmt::parser::parse_jinja_tag_name;
 use memchr::{memchr, memchr2_iter, memchr3};
 use regex::Regex;
 
@@ -92,8 +91,7 @@ pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
         }
         tokens.push(Token::Tag { tag, name });
         // Jinja reads a raw body as text up to the `{% endraw %}` it searches for, lexed next.
-        // The name is empty when only Python counts the whitespace before `raw`.
-        if !django && matches!(name, "raw" | "") && RAW_BEGIN.is_match(&source[open..pos]) {
+        if !django && name == "raw" && RAW_BEGIN.is_match(&source[open..pos]) {
             pos = RAW_END
                 .find_at(source, pos)
                 .map_or(source.len(), |end| end.start());
@@ -148,7 +146,15 @@ pub fn tag_name<'s>(tag: &JinjaTag<'s>, language: Language) -> &'s str {
     if language == Language::Django {
         dtl::tag_name(tag.content)
     } else {
-        parse_jinja_tag_name(tag, language)
+        // Unlike the fork's `parse_jinja_tag_name`, skips Python-only whitespace such as `\x1C`.
+        let rest = tag
+            .content
+            .trim_start_matches(['+', '-'])
+            .trim_start_matches(is_space);
+        let end = rest
+            .find(|c: char| !c.is_ascii_alphanumeric() && c != '_')
+            .unwrap_or(rest.len());
+        &rest[..end]
     }
 }
 
