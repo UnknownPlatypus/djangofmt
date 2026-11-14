@@ -64,48 +64,39 @@ pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
         };
         pos = body + len + 2;
         let content = &source[body..body + len];
-        match close {
-            b'}' if verbatim.is_none() && !in_comment => tokens.push(Token::Var(content)),
-            b'%' => {
-                let tag = JinjaTag {
-                    content,
-                    start: body,
-                };
-                let name = tag_name(&tag, language);
-                if django
-                    && (verbatim.is_some() || in_comment || matches!(name, "verbatim" | "comment"))
-                {
-                    let stripped = content.trim_matches(is_space);
-                    if let Some(opener) = verbatim {
-                        if stripped.strip_prefix("end") != Some(opener) {
-                            continue;
-                        }
-                        verbatim = None;
-                    } else if stripped == "verbatim" || stripped.starts_with("verbatim ") {
-                        verbatim = Some(stripped);
-                    }
-                    if in_comment && stripped != "endcomment" {
-                        continue;
-                    }
-                    in_comment = !in_comment && name == "comment";
-                }
-                tokens.push(Token::Tag { tag, name });
-                // Jinja reads a raw body as text up to the `{% endraw %}` it searches for.
-                if !django && name == "raw" && RAW_BEGIN.is_match(&source[open..pos]) {
-                    let Some(endraw) = RAW_END.find_at(source, pos) else {
-                        break;
-                    };
-                    let start = endraw.start() + 2;
-                    let content = &source[start..endraw.end() - 2];
-                    let tag = JinjaTag { content, start };
-                    tokens.push(Token::Tag {
-                        tag,
-                        name: "endraw",
-                    });
-                    pos = endraw.end();
-                }
+        if close != b'%' {
+            if close == b'}' && verbatim.is_none() && !in_comment {
+                tokens.push(Token::Var(content));
             }
-            _ => {}
+            continue;
+        }
+        let tag = JinjaTag {
+            content,
+            start: body,
+        };
+        let name = tag_name(&tag, language);
+        if django && (verbatim.is_some() || in_comment || matches!(name, "verbatim" | "comment")) {
+            let stripped = content.trim_matches(is_space);
+            if let Some(opener) = verbatim {
+                if stripped.strip_prefix("end") != Some(opener) {
+                    continue;
+                }
+                verbatim = None;
+            } else if stripped == "verbatim" || stripped.starts_with("verbatim ") {
+                verbatim = Some(stripped);
+            }
+            if in_comment && stripped != "endcomment" {
+                continue;
+            }
+            in_comment = name == "comment";
+        }
+        tokens.push(Token::Tag { tag, name });
+        // Jinja reads a raw body as text up to the `{% endraw %}` it searches for, lexed next.
+        // The name is empty when only Python counts the whitespace before `raw`.
+        if !django && matches!(name, "raw" | "") && RAW_BEGIN.is_match(&source[open..pos]) {
+            pos = RAW_END
+                .find_at(source, pos)
+                .map_or(source.len(), |end| end.start());
         }
     }
     tokens
@@ -224,6 +215,10 @@ mod tests {
     )]
     #[case::unclosed_raw_hides_the_rest("{% raw %}{% a %}", &[(" raw ", 2)])]
     #[case::comment_is_no_body("{% comment %}{% a %}", &[(" comment ", 2), (" a ", 15)])]
+    #[case::raw_after_python_whitespace(
+        "{%\x1Craw %}{{ a }}{% endraw %}",
+        &[("\x1Craw ", 2), (" endraw ", 18)]
+    )]
     #[case::raw_begin_takes_no_closing_plus("{% raw +%}{% a %}", &[(" raw +", 2), (" a ", 12)])]
     #[case::variable_skips_strings_and_dicts(
         r#"{{ {"a": {"b": "}}"}} }}{{ c }}"#,
