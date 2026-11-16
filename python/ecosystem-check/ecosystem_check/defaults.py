@@ -647,6 +647,7 @@ DEFAULT_TARGETS = [
                     # <a> opened and closed in separate {% if %} blocks
                     "fairdm/contrib/contributors/templates/cotton/contributor/avatar.html",
                     "fairdm/contrib/contributors/templates/cotton/contributor/stack.html",
+                    "fairdm/templates/cotton/overview/figure.html",
                     # <optgroup> opened and closed in separate {% if %} blocks
                     "fairdm/templates/forms/widgets/quantity_field.html",
                 ),
