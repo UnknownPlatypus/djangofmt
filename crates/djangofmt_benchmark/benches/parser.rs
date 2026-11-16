@@ -1,5 +1,5 @@
 use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
-use djangofmt_syntax::parse;
+use djangofmt_syntax::{parse, tokens};
 
 fn main() {
     divan::main();
@@ -14,6 +14,21 @@ fn parse_templates(bencher: divan::Bencher, template: &'static TestFile) {
             &[],
         )
         .expect("Parsing to succeed")
+    };
+    warmup(run);
+
+    bencher
+        .counter(divan::counter::BytesCount::of_str(template.code))
+        .bench(run);
+}
+
+#[divan::bench(args = ALL_TEMPLATES)]
+fn lex_tokens(bencher: divan::Bencher, template: &'static TestFile) {
+    let run = || {
+        tokens::lex(
+            divan::black_box(template.code),
+            divan::black_box(template.profile.into()),
+        )
     };
     warmup(run);
 
