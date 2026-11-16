@@ -88,3 +88,15 @@ Requiring the close tag keeps the document unambiguous for both readers and the 
 Line endings are always normalized to `\n`: CRLF input is converted, and `.editorconfig`'s `end_of_line` is ignored.
 
 Making this configurable is skipped for now, but will be added if there is demand.
+
+## Multi-line template tags are not linted
+
+Django reads a `{% %}` or `{{ }}` that spans several lines as plain text, so with the `django` profile the rules that check a tag on its own, such as `duplicate-block-name`, skip it:
+
+```html
+{% load staticfiles
+%}
+```
+
+The formatter joins such a tag onto one line, after which those rules see it.
+The `jinja` profile is not affected, since a Jinja tag may span lines.

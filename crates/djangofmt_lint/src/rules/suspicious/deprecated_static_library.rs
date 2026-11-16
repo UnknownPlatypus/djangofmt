@@ -4,7 +4,7 @@ use djangofmt_syntax::dtl::bits;
 use djangofmt_syntax::span;
 use markup_fmt::ast::JinjaTag;
 
-use crate::Checker;
+use crate::LintContext;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -65,20 +65,20 @@ impl Violation for DeprecatedStaticLibrary<'_> {
 const DEPRECATED_LIBRARIES: [&str; 2] = ["staticfiles", "admin_static"];
 
 /// The caller guarantees a Django `load` tag and a target version of 2.1 or newer.
-pub fn check(checker: &Checker<'_>, tag: &JinjaTag<'_>) {
+pub fn check(context: &LintContext<'_>, tag: &JinjaTag<'_>) {
     // Both aliases contain `static`, so the other loads are not lexed.
     if tag.content.contains("static") {
-        check_libraries(checker, tag.content);
+        check_libraries(context, tag.content);
     }
 }
 
 #[cold]
-fn check_libraries(checker: &Checker<'_>, content: &str) {
-    let bits = bits(content);
+fn check_libraries(context: &LintContext<'_>, tag_content: &str) {
+    let bits = bits(tag_content);
     match bits[..] {
         // `static` is the only tag either alias defines, so a `from` load of anything else is left alone.
         [_, kept @ "static", "from", library] if DEPRECATED_LIBRARIES.contains(&library) => {
-            report(checker, library, delete_after(checker, kept, library));
+            report(context, library, delete_after(context, kept, library));
         }
         // Django reads `{% load a b from library %}` only from four bits on.
         [_, _, .., "from", _] => {}
@@ -90,11 +90,11 @@ fn check_libraries(checker: &Checker<'_>, content: &str) {
                     continue;
                 }
                 let edit = if loads_static {
-                    delete_after(checker, previous, library)
+                    delete_after(context, previous, library)
                 } else {
-                    Edit::replacement("static", checker.source_span(library))
+                    Edit::replacement("static", context.source_span(library))
                 };
-                report(checker, library, edit);
+                report(context, library, edit);
                 loads_static = true;
             }
         }
@@ -102,16 +102,16 @@ fn check_libraries(checker: &Checker<'_>, content: &str) {
 }
 
 /// Delete `library` along with the whitespace before it, from the end of the `kept` bit.
-fn delete_after(checker: &Checker<'_>, kept: &str, library: &str) -> Edit {
-    let start = checker.source_end(kept);
-    Edit::deletion(span(start, checker.source_end(library) - start))
+fn delete_after(context: &LintContext<'_>, kept: &str, library: &str) -> Edit {
+    let start = context.source_end(kept);
+    Edit::deletion(span(start, context.source_end(library) - start))
 }
 
-fn report(checker: &Checker<'_>, library: &str, edit: Edit) {
-    checker
+fn report(context: &LintContext<'_>, library: &str, edit: Edit) {
+    context
         .report_diagnostic(
             &DeprecatedStaticLibrary { library },
-            checker.source_span(library),
+            context.source_span(library),
         )
         .set_fix(Fix::safe_edit(edit));
 }

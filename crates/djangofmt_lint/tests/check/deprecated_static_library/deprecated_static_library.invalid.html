@@ -10,3 +10,6 @@
 
 <!-- Django 2.0: tests/staticfiles_tests/test_templatetags.py::test_template_tag -->
 {% load static from staticfiles %}{% static 'testfile.txt' %}
+
+<!-- Django reads the tags in attribute values -->
+<div title="{% load staticfiles %}"></div>

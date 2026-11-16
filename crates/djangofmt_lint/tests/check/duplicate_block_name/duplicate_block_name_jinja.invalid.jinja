@@ -1,5 +1,3 @@
-<!-- Only `{% raw %}` hides template tags: blocks inside any other block still count -->
-{% if cond %}
-{% block a %}{% endblock %}
-{% endif %}
-{% block a %}{% endblock %}
+<!-- Whitespace-control markers shift neither the tag name nor the block name -->
+{%- block a %}{% endblock %}
+{% block a -%}{% endblock %}
