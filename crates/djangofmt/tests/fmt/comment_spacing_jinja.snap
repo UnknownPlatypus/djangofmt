@@ -1,0 +1,8 @@
+---
+source: crates/djangofmt/tests/fmt/main.rs
+---
+{#choo choo#}
+{#- trimmed -#}
+{# multi
+   line #}
+<div></div>
