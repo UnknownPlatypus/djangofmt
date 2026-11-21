@@ -55,8 +55,13 @@ pub fn install_report_hook() {
             .word_separator(textwrap::WordSeparator::AsciiSpace)
             .word_splitter(textwrap::WordSplitter::NoHyphenation)
             .break_words(false);
-        // `miette` lets `FORCE_COLOR` win, but a non-empty `NO_COLOR` is the more explicit request.
-        if std::env::var_os("NO_COLOR").is_some_and(|value| !value.is_empty()) {
+        // Unlike `miette`, a non-empty `NO_COLOR` beats `FORCE_COLOR`,
+        // and `CLICOLOR=0` disables color on color terminals unless forced.
+        let var = std::env::var_os;
+        let clicolor_off = var("CLICOLOR").is_some_and(|value| value == "0")
+            && var("FORCE_COLOR").is_none()
+            && var("CLICOLOR_FORCE").is_none();
+        if var("NO_COLOR").is_some_and(|value| !value.is_empty()) || clicolor_off {
             opts.color(false).build()
         } else {
             opts.build()
