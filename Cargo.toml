@@ -32,7 +32,7 @@ insta = { version = "1.47.2", features = ["filters", "glob", "yaml"] }
 insta-cmd = { version = "0.7.0" }
 malva = {
   git = "https://github.com/UnknownPlatypus/malva",
-  rev = "9a7ee71bfad747490ebe0428d07d1f82467f0c3f",
+  rev = "79446365ed0cfc78afae88edfe24e256e611fcce",
   features = ["config_serde"],
 }
 markup_fmt = {
