@@ -189,6 +189,23 @@ fn no_color_beats_force_color() {
     assert!(!stderr.contains('\x1b'), "{stderr}");
 }
 
+#[test]
+fn clicolor_zero_disables_color_on_a_color_terminal() {
+    let project = Project::new().file("test.html", "<div>");
+    let output = cli()
+        .arg(project.join("test.html"))
+        .env("IGNORE_IS_TERMINAL", "1")
+        .env("TERM", "xterm-256color")
+        .env("CLICOLOR", "0")
+        .env_remove("FORCE_COLOR")
+        .env_remove("CLICOLOR_FORCE")
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("expected close tag"), "{stderr}");
+    assert!(!stderr.contains('\x1b'), "{stderr}");
+}
+
 // ── Format from stdin ────────────────────────────────────────────────
 
 #[test]
