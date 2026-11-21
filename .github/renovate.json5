@@ -1,281 +1,201 @@
 {
-  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-  dependencyDashboard: {
-    enabled: true,
-  },
-  suppressNotifications: [
-    'prEditedNotification',
-  ],
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  dependencyDashboard: { enabled: true },
+  suppressNotifications: ["prEditedNotification"],
   extends: [
-    'config:best-practices',
-    'group:allNonMajor',
+    "config:best-practices",
+    "group:allNonMajor",
   ],
-  labels: [
-    'dependencies',
-  ],
-  schedule: [
-    'before 4am on Monday',
-  ],
+  labels: ["dependencies"],
+  schedule: ["before 4am on Monday"],
   separateMajorMinor: false,
-  minimumReleaseAge: '5 days',
-  lockFileMaintenance: {
-    enabled: false,
-  },
+  minimumReleaseAge: "5 days",
+  // Disable lock file maintenance (enabled by `config:best-practices`), it refreshes transitive deps to releases younger than `minimumReleaseAge`.
+  lockFileMaintenance: { enabled: false },
   prHourlyLimit: 10,
-  enabledManagers: [
-    'github-actions',
-    'cargo',
-    'pep621',
-    'npm',
-    'deno',
-    'custom.regex',
-  ],
+  enabledManagers: ["github-actions", "cargo", "pep621", "npm", "deno", "custom.regex"],
   cargo: {
-    rangeStrategy: 'update-lockfile',
+    // See https://docs.renovatebot.com/configuration-options/#rangestrategy
+    rangeStrategy: "update-lockfile",
   },
   npm: {
-    managerFilePatterns: [
-      '/^python/.*package\\.json$/',
-    ],
+    // Only python/benchmarks uses npm; the deno manager owns playground/package.json.
+    managerFilePatterns: ["/^python/.*package\\.json$/"],
   },
   packageRules: [
     {
-      groupName: 'Artifact GitHub Actions dependencies',
-      matchManagers: [
-        'github-actions',
-        'custom.regex',
-      ],
-      matchDatasources: [
-        'gitea-tags',
-        'github-tags',
-      ],
-      matchPackageNames: [
-        'actions/*-artifact',
-      ],
-      description: 'Weekly update of artifact-related GitHub Actions dependencies',
+      // Group upload/download artifact updates, the versions are dependent only match git tags too otherwise this spams too much.
+      groupName: "Artifact GitHub Actions dependencies",
+      matchManagers: ["github-actions", "custom.regex"],
+      matchDatasources: ["gitea-tags", "github-tags"],
+      matchPackageNames: ["actions/*-artifact"],
+      description: "Weekly update of artifact-related GitHub Actions dependencies",
     },
     {
-      groupName: 'GitHub runners',
-      matchManagers: [
-        'github-actions',
-      ],
-      matchDatasources: [
-        'github-runners',
-      ],
+      // This package rule disables updates for GitHub runners: we'd only pin them to a specific version if there was a deliberate reason to do so
+      groupName: "GitHub runners",
+      matchManagers: ["github-actions"],
+      matchDatasources: ["github-runners"],
       description: "Disable PRs updating GitHub runners (e.g. 'runs-on: macos-14')",
       enabled: false,
     },
     {
-      matchDepNames: [
-        'markup_fmt',
-      ],
+      // Disable automatic updates for markup_fmt (cargo dep and dprint plugin), updates are handled manually.
+      matchDepNames: ["markup_fmt"],
       enabled: false,
-      description: 'Disable updates for markup_fmt due to known issue',
+      description: "Disable updates for markup_fmt due to known issue"
     },
     {
-      matchPackageNames: [
-        'oxc-miette',
-        'miette',
-      ],
+      // oxc archived oxc-miette and stripped it down for their own use, 3.0.1 is the last version
+      // with the APIs and performance we need. We'll move to ruff's annotate-snippets renderer instead.
+      matchPackageNames: ["oxc-miette", "miette"],
       enabled: false,
-      description: 'Pin oxc-miette to 3.0.1, later versions dropped features we rely on',
+      description: "Pin oxc-miette to 3.0.1, later versions dropped features we rely on",
     },
     {
-      groupName: 'Rust toolchain and MSRV',
-      matchManagers: [
-        'custom.regex',
-      ],
-      matchDepNames: [
-        'rust',
-        'msrv',
-      ],
+      // Bump the toolchain and the MSRV in one PR, so each Rust release's new lints are fixed once.
+      groupName: "Rust toolchain and MSRV",
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["rust", "msrv"],
     },
     {
-      matchManagers: [
-        'custom.regex',
-      ],
-      matchDepNames: [
-        'msrv',
-      ],
-      minimumReleaseAge: '89 days',
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["msrv"],
+      // Rolling MSRV policy of 2 releases back: 2 * 6 weeks * 7 days + the 5 days the toolchain waits,
+      // so release N-2 becomes eligible on the same day as toolchain N.
+      minimumReleaseAge: "89 days",
     },
     {
-      matchManagers: [
-        'custom.regex',
-      ],
-      matchDepNames: [
-        'msrv',
-      ],
-      matchUpdateTypes: [
-        'patch',
-      ],
+      // A patch MSRV bump only forces users to upgrade, the MSRV moves on new minors with the toolchain.
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["msrv"],
+      matchUpdateTypes: ["patch"],
       enabled: false,
     },
     {
-      matchManagers: [
-        'custom.regex',
-      ],
-      matchDatasources: [
-        'docker',
-      ],
-      matchUpdateTypes: [
-        'major',
-        'minor',
-        'patch',
-      ],
+      // Smoke-test images: only refresh the digest, the tags are chosen for the oldest glibc and pip each wheel must support.
+      matchManagers: ["custom.regex"],
+      matchDatasources: ["docker"],
+      matchUpdateTypes: ["major", "minor", "patch"],
       enabled: false,
     },
     {
-      matchManagers: [
-        'custom.regex',
-      ],
-      matchDepNames: [
-        'maturin',
-      ],
-      commitMessageTopic: 'maturin',
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["maturin"],
+      commitMessageTopic: "maturin",
     },
     {
-      matchManagers: [
-        'custom.regex',
-      ],
-      matchDepNames: [
-        'cargo-dist',
-      ],
-      commitMessageTopic: 'cargo-dist',
+      matchManagers: ["custom.regex"],
+      matchDepNames: ["cargo-dist"],
+      commitMessageTopic: "cargo-dist",
     },
   ],
   customManagers: [
+    // Annotated `*_VERSION` env vars in workflow files, like `customManagers:githubActionsVersions`,
+    // plus an optional release asset `*_CHECKSUM` on the next line, bumped with the version.
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/.+\\.yml$/',
-      ],
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/workflows/.+\\.yml$/"],
       matchStrings: [
-        '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+_VERSION: (?<currentValue>\\S+)(?:\\s+\\w+_CHECKSUM: (?<currentDigest>[a-f0-9]{64}))?',
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+_VERSION: (?<currentValue>\\S+)(?:\\s+\\w+_CHECKSUM: (?<currentDigest>[a-f0-9]{64}))?",
       ],
     },
+    // Maturin version used in maturin-action
     {
-      customType: 'regex',
+      customType: "regex",
       managerFilePatterns: [
-        '/.github/workflows/release-build-binaries\\.yml$/',
+        "/.github/workflows/release-build-binaries\\.yml$/",
       ],
-      matchStrings: [
-        'maturin-version: (?<currentValue>v\\d+\\.\\d+\\.\\d+)',
-      ],
-      depNameTemplate: 'maturin',
-      packageNameTemplate: 'PyO3/maturin',
-      datasourceTemplate: 'github-releases',
+      matchStrings: ["maturin-version: (?<currentValue>v\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "maturin",
+      packageNameTemplate: "PyO3/maturin",
+      datasourceTemplate: "github-releases",
     },
+    // Minimum supported Rust toolchain version
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/(^|/)Cargo\\.toml?$/',
-      ],
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)Cargo\\.toml?$/"],
       matchStrings: [
         'rust-version\\s*=\\s*"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)"',
       ],
-      depNameTemplate: 'msrv',
-      packageNameTemplate: 'rust-lang/rust',
-      datasourceTemplate: 'github-releases',
+      depNameTemplate: "msrv",
+      packageNameTemplate: "rust-lang/rust",
+      datasourceTemplate: "github-releases",
     },
+    // Rust toolchain version
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/(^|/)rust-toolchain\\.toml?$/',
-      ],
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)rust-toolchain\\.toml?$/"],
       matchStrings: [
         'channel\\s*=\\s*"(?<currentValue>\\d+\\.\\d+(\\.\\d+)?)"',
       ],
-      depNameTemplate: 'rust',
-      packageNameTemplate: 'rust-lang/rust',
-      datasourceTemplate: 'github-releases',
+      depNameTemplate: "rust",
+      packageNameTemplate: "rust-lang/rust",
+      datasourceTemplate: "github-releases",
     },
+    // Deno version used in setup-deno
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/.github/workflows/publish-playground-and-docs\\.yml$/',
-      ],
-      matchStrings: [
-        'deno-version: "(?<currentValue>\\d+\\.\\d+\\.\\d+)"',
-      ],
-      depNameTemplate: 'deno',
-      packageNameTemplate: 'denoland/deno',
-      datasourceTemplate: 'github-releases',
-      extractVersionTemplate: '^v(?<version>.*)$',
+      customType: "regex",
+      managerFilePatterns: ["/.github/workflows/publish-playground-and-docs\\.yml$/"],
+      matchStrings: ['deno-version: "(?<currentValue>\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "deno",
+      packageNameTemplate: "denoland/deno",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.*)$",
     },
+    // Official dprint plugins (plugins.dprint.dev/<name>-<version>.wasm)
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^dprint\\.json$/',
-      ],
-      matchStrings: [
-        '"https://plugins\\.dprint\\.dev/(?<depName>[a-z0-9_]+)-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.wasm"',
-      ],
-      packageNameTemplate: 'dprint/dprint-plugin-{{depName}}',
-      datasourceTemplate: 'github-releases',
+      customType: "regex",
+      managerFilePatterns: ["/^dprint\\.json$/"],
+      matchStrings: ['"https://plugins\\.dprint\\.dev/(?<depName>[a-z0-9_]+)-(?<currentValue>\\d+\\.\\d+\\.\\d+)\\.wasm"'],
+      packageNameTemplate: "dprint/dprint-plugin-{{depName}}",
+      datasourceTemplate: "github-releases",
     },
+    // g-plane dprint plugins (plugins.dprint.dev/g-plane/<name>-v<version>.wasm)
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^dprint\\.json$/',
-      ],
-      matchStrings: [
-        '"https://plugins\\.dprint\\.dev/g-plane/(?<depName>[a-z0-9_]+)-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\.wasm"',
-      ],
-      packageNameTemplate: 'g-plane/{{depName}}',
-      datasourceTemplate: 'github-releases',
+      customType: "regex",
+      managerFilePatterns: ["/^dprint\\.json$/"],
+      matchStrings: ['"https://plugins\\.dprint\\.dev/g-plane/(?<depName>[a-z0-9_]+)-(?<currentValue>v\\d+\\.\\d+\\.\\d+)\\.wasm"'],
+      packageNameTemplate: "g-plane/{{depName}}",
+      datasourceTemplate: "github-releases",
     },
+    // cargo-dist version in dist-workspace.toml, tracked from the wheel pinned in pyproject.toml so both bump together.
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/(^|/)dist-workspace\\.toml$/',
-      ],
-      matchStrings: [
-        'cargo-dist-version = "(?<currentValue>\\d+\\.\\d+\\.\\d+)"',
-      ],
-      depNameTemplate: 'cargo-dist',
-      packageNameTemplate: 'astral-dev-toolchain-cargo-dist',
-      datasourceTemplate: 'pypi',
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)dist-workspace\\.toml$/"],
+      matchStrings: ['cargo-dist-version = "(?<currentValue>\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "cargo-dist",
+      packageNameTemplate: "astral-dev-toolchain-cargo-dist",
+      datasourceTemplate: "pypi",
     },
+    // Container images pinned by digest in workflow step inputs (`image:`), which the github-actions manager does not parse.
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/.+\\.yml$/',
-      ],
-      matchStrings: [
-        '(?<depName>[a-z0-9][a-z0-9./_-]*):(?<currentValue>[A-Za-z0-9][\\w.-]*)@(?<currentDigest>sha256:[a-f0-9]{64})',
-      ],
-      datasourceTemplate: 'docker',
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/workflows/.+\\.yml$/"],
+      matchStrings: ["(?<depName>[a-z0-9][a-z0-9./_-]*):(?<currentValue>[A-Za-z0-9][\\w.-]*)@(?<currentDigest>sha256:[a-f0-9]{64})"],
+      datasourceTemplate: "docker",
     },
+    // Action pins `dist generate` writes into release.yml, kept at the versions Renovate pins in the workflows.
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/(^|/)dist-workspace\\.toml$/',
-      ],
-      matchStrings: [
-        '"(?<depName>[\\w.-]+/[\\w.-]+)" = "(?<currentDigest>[a-f0-9]{40})"\\s+# (?<currentValue>v\\d+\\.\\d+\\.\\d+)',
-      ],
-      datasourceTemplate: 'github-tags',
-      extractVersionTemplate: '^(?<version>v?\\d+\\.\\d+\\.\\d+)$',
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)dist-workspace\\.toml$/"],
+      matchStrings: ['"(?<depName>[\\w.-]+/[\\w.-]+)" = "(?<currentDigest>[a-f0-9]{40})"\\s+# (?<currentValue>v\\d+\\.\\d+\\.\\d+)'],
+      datasourceTemplate: "github-tags",
+      extractVersionTemplate: "^(?<version>v?\\d+\\.\\d+\\.\\d+)$",
     },
+    // gh-actions-lock in the `actions-lock` pre-commit hook, which pre-commit.ci autoupdate doesn't bump.
     {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.pre-commit-config\\.yaml$/',
-      ],
-      matchStrings: [
-        '"github\\.com/github/gh-actions-lock/cmd/gh-actions-lock@(?<currentValue>v\\d+\\.\\d+\\.\\d+)"',
-      ],
-      depNameTemplate: 'github/gh-actions-lock',
-      datasourceTemplate: 'github-releases',
+      customType: "regex",
+      managerFilePatterns: ["/^\\.pre-commit-config\\.yaml$/"],
+      matchStrings: ['"github\\.com/github/gh-actions-lock/cmd/gh-actions-lock@(?<currentValue>v\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "github/gh-actions-lock",
+      datasourceTemplate: "github-releases",
     },
   ],
   vulnerabilityAlerts: {
-    commitMessageSuffix: '',
-    labels: [
-      'dependencies',
-      'security',
-    ],
+    commitMessageSuffix: "",
+    labels: ["dependencies", "security"],
   },
+  // Also source vulnerability alerts from OSV (better crates.io coverage).
   osvVulnerabilityAlerts: true,
 }
