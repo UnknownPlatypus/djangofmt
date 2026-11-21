@@ -29,7 +29,6 @@ from ecosystem_check.types import Comparison, Result, Serializable
 from ecosystem_check.validate import markdown_validate_result, validate_project
 
 T = TypeVar("T")
-GITHUB_MAX_COMMENT_LENGTH = 65536
 
 
 class OutputFormat(StrEnum):
