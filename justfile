@@ -1,4 +1,5 @@
-ecosystem_cache_dir := "/tmp/djangofmt-ecosystem-repos"
+# Not under /tmp: its age-based cleanup leaves the cached checkouts with empty `.git` directories.
+ecosystem_cache_dir := cache_directory() / "djangofmt-ecosystem-repos"
 export INSTA_UPDATE := "always"
 
 # `uv run` recipes pass `--only-dev`/`--only-group`: both omit the root project,

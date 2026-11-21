@@ -14,6 +14,7 @@ required-git-spec = "rev"
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-git = [
+  "https://github.com/g-plane/raffia",
   "https://github.com/UnknownPlatypus/malva",
   "https://github.com/UnknownPlatypus/markup_fmt",
 ]

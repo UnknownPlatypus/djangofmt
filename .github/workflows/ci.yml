@@ -13,7 +13,8 @@ defaults:
     shell: bash
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  # A rerun of an older commit must not cancel the run of the latest push.
+  group: ${{ github.workflow }}-${{ github.run_attempt == 1 && github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 env:
