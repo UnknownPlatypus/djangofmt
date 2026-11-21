@@ -28,7 +28,8 @@ env:
   UV_CHECKSUM: c5221ff41b7892bfc223543883600125f6a47fe845093e0f5bdff4f359196d83 # x86_64-unknown-linux-gnu
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # A new push supersedes a PR's run, but every main commit keeps its baseline run.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
