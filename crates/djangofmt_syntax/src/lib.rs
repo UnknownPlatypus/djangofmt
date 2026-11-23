@@ -4,6 +4,7 @@ mod comment;
 mod diagnostic;
 pub mod dtl;
 mod ignore;
+mod jinja;
 mod parse;
 mod parse_error;
 mod profile;

@@ -1,14 +1,14 @@
 //! The tokens Django's or Jinja's lexer reads before any HTML,
 //! including the tags the HTML parser keeps as text, such as in attribute values or `<script>` bodies.
 
-use std::sync::LazyLock;
-
+use dtl_lexer::START_TAG_LEN;
+use dtl_lexer::core::{Lexer, TokenType};
+use dtl_lexer::types::TemplateString;
 use markup_fmt::Language;
 use markup_fmt::ast::JinjaTag;
-use memchr::{memchr, memchr2_iter, memchr3};
-use regex::Regex;
 
 use crate::dtl::{self, is_space};
+use crate::jinja;
 
 /// A `{% %}` or `{{ }}` token the template engine compiles.
 #[derive(Debug)]
@@ -21,123 +21,33 @@ pub enum Token<'s> {
 /// dropping comments and the bodies of `{% verbatim %}`, `{% comment %}` and Jinja's `{% raw %}`.
 #[must_use]
 pub fn lex(source: &str, language: Language) -> Vec<Token<'_>> {
-    // Jinja's `raw_begin` and `raw_end`, where Python's `\s` also matches `\x1C` to `\x1F`.
-    static RAW_BEGIN: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"\A\{%[-+]?[\s\x1C-\x1F]*raw[\s\x1C-\x1F]*-?%\}\z").expect("valid pattern")
-    });
-    static RAW_END: LazyLock<Regex> = LazyLock::new(|| {
-        Regex::new(r"\{%[-+]?[\s\x1C-\x1F]*endraw[\s\x1C-\x1F]*[-+]?%\}").expect("valid pattern")
-    });
-    let django = language == Language::Django;
-    let bytes = source.as_bytes();
-    let (mut tokens, mut pos) = (Vec::new(), 0);
-    // Per token kind, the offset before which its closer is known missing, keeping the scan linear.
-    let mut missing = [0; 3];
-    // Django's lexer skips a verbatim body up to `end` + its opener, its parser a comment body.
-    let (mut verbatim, mut in_comment) = (None, false);
-    while let Some(i) = memchr(b'{', &bytes[pos..]) {
-        let open = pos + i;
-        // Like Django's regex, a failed match retries from the next byte.
-        pos = open + 1;
-        let (kind, close) = match bytes.get(pos) {
-            Some(b'%') => (0, b'%'),
-            Some(b'{') => (1, b'}'),
-            Some(b'#') => (2, b'#'),
-            _ => continue,
-        };
-        if open < missing[kind] {
-            continue;
-        }
-        let body = open + 2;
-        let found = if !django && close != b'#' {
-            jinja_closer(&bytes[body..], close)
-        } else {
-            closer(&bytes[body..], close, django)
-        };
-        let len = match found {
-            Ok(len) => len,
-            Err(end) => {
-                missing[kind] = body + end;
-                continue;
-            }
-        };
-        pos = body + len + 2;
-        let content = &source[body..body + len];
-        if close != b'%' {
-            if close == b'}' && verbatim.is_none() && !in_comment {
-                tokens.push(Token::Var(content));
-            }
-            continue;
-        }
-        let tag = JinjaTag {
-            content,
-            start: body,
-        };
-        let name = tag_name(&tag, language);
-        if django && (verbatim.is_some() || in_comment || matches!(name, "verbatim" | "comment")) {
-            let stripped = content.trim_matches(is_space);
-            if let Some(opener) = verbatim {
-                if stripped.strip_prefix("end") != Some(opener) {
+    if language != Language::Django {
+        return jinja::lex(source);
+    }
+    let template = TemplateString(source);
+    let mut tokens = Vec::new();
+    // Django's lexer skips a verbatim body, but its parser skips a comment body.
+    let mut in_comment = false;
+    for token in Lexer::new(template) {
+        match token.token_type {
+            TokenType::Variable if !in_comment => tokens.push(Token::Var(token.content(template))),
+            TokenType::Tag => {
+                let content = token.content(template);
+                if in_comment && content.trim_matches(is_space) != "endcomment" {
                     continue;
                 }
-                verbatim = None;
-            } else if stripped == "verbatim" || stripped.starts_with("verbatim ") {
-                verbatim = Some(stripped);
+                let name = dtl::tag_name(content);
+                in_comment = name == "comment";
+                let start = token.at.0 + START_TAG_LEN;
+                tokens.push(Token::Tag {
+                    tag: JinjaTag { content, start },
+                    name,
+                });
             }
-            if in_comment && stripped != "endcomment" {
-                continue;
-            }
-            in_comment = name == "comment";
-        }
-        tokens.push(Token::Tag { tag, name });
-        // Jinja reads a raw body as text up to the `{% endraw %}` it searches for, lexed next.
-        if !django && name == "raw" && RAW_BEGIN.is_match(&source[open..pos]) {
-            pos = RAW_END
-                .find_at(source, pos)
-                .map_or(source.len(), |end| end.start());
+            _ => {}
         }
     }
     tokens
-}
-
-/// The offset of the first `close` byte followed by `}`,
-/// or where the search gave up, at a newline for Django.
-fn closer(rest: &[u8], close: u8, django: bool) -> Result<usize, usize> {
-    for i in memchr2_iter(b'}', if django { b'\n' } else { b'}' }, rest) {
-        if rest[i] == b'\n' {
-            return Err(i);
-        }
-        if i > 0 && rest[i - 1] == close {
-            return Ok(i - 1);
-        }
-    }
-    Err(rest.len())
-}
-
-/// The offset of the first `close` byte followed by `}` outside string literals and `{ }` pairs,
-/// which Jinja lexes in a `{% %}` or `{{ }}`.
-fn jinja_closer(rest: &[u8], close: u8) -> Result<usize, usize> {
-    let first = closer(rest, close, false)?;
-    // Most tokens hold no string or dict, so their first closer ends them.
-    if memchr3(b'"', b'\'', b'{', &rest[..first]).is_none() {
-        return Ok(first);
-    }
-    let (mut quote, mut depth, mut i) = (None, 0usize, 0);
-    while i < rest.len() {
-        match (quote, rest[i]) {
-            (Some(_), b'\\') => i += 1,
-            (Some(open), b) if b == open => quote = None,
-            (None, b @ (b'"' | b'\'')) => quote = Some(b),
-            (None, b) if b == close && depth == 0 && rest.get(i + 1) == Some(&b'}') => {
-                return Ok(i);
-            }
-            (None, b'{') => depth += 1,
-            (None, b'}') => depth = depth.saturating_sub(1),
-            _ => {}
-        }
-        i += 1;
-    }
-    Err(rest.len())
 }
 
 /// Django names a tag by its first bit; Jinja strips whitespace-control markers first.

@@ -9,7 +9,7 @@ version = "1.1.0"
 authors = ["Thibaut Decombe <thibaut.decombe@gmail.com>"]
 # Please update rustfmt.toml when bumping the Rust edition
 edition = "2024"
-rust-version = "1.97.0"
+rust-version = "1.99"
 repository = "https://github.com/UnknownPlatypus/djangofmt"
 license = "MIT"
 
@@ -24,6 +24,10 @@ djangofmt_lint = { path = "crates/djangofmt_lint" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
 djangofmt_syntax = { path = "crates/djangofmt_syntax" }
 dprint-plugin-json = { version = "0.25.0" }
+dtl-lexer = {
+  git = "https://github.com/UnknownPlatypus/django-rusty-templates",
+  rev = "7b7cb537b5abcfd994fda42ade86544c8dd4837e",
+}
 editorconfig-parser = { version = "0.0.4" }
 globset = { version = "0.4.18" }
 ignore = { version = "0.4.25" }
