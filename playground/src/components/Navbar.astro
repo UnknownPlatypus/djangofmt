@@ -16,11 +16,11 @@ import PlusMinusInput from "./PlusMinusInput.astro";
             height="32"
             class="h-8 w-8"
         >
-        <span class="font-bold text-lg tracking-tight max-md:hidden">djangofmt</span>
+        <span class="font-bold text-lg tracking-tight max-sm:hidden">djangofmt</span>
     </div>
 
-    <div id="controls" class="flex items-end gap-2 max-md:min-w-0 max-md:flex-1 md:gap-8">
-        <fieldset class="fieldset max-md:min-w-0 max-md:flex-1">
+    <div id="controls" class="flex items-end gap-2 max-md:min-w-0 max-md:flex-1 max-md:justify-end md:gap-8">
+        <fieldset class="fieldset max-md:min-w-0 max-md:flex-1 max-md:max-w-24">
             <legend class="fieldset-legend max-md:py-1 text-xs font-bold text-base-content/90">
                 Profile
             </legend>
@@ -72,7 +72,7 @@ import PlusMinusInput from "./PlusMinusInput.astro";
     {/* Blur after an action so the speed dial closes (it is open while focus is inside). */}
     <div
         class="fab bottom-10 md:hidden"
-        data-on:click="evt.target.closest('a, button') && document.activeElement.blur()"
+        data-on:click="evt.target.closest('a, button, input') && document.activeElement.blur()"
     >
         <div tabindex="0" role="button" class="btn btn-circle btn-primary shadow-lg" aria-label="More actions">
             <IconMore />
@@ -111,7 +111,7 @@ import PlusMinusInput from "./PlusMinusInput.astro";
         </div>
         <div>
             <span class="badge badge-neutral">Toggle theme</span>
-            <label class="swap swap-rotate btn btn-circle shadow-lg">
+            <label tabindex="-1" class="swap swap-rotate btn btn-circle shadow-lg">
                 <input type="checkbox" aria-label="Toggle theme" data-bind="lightTheme">
                 <LightTheme />
                 <DarkTheme />
