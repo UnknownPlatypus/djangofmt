@@ -50,8 +50,8 @@ pub static DJANGO_TEMPLATE_LARGE: TestFile = TestFile {
     profile: Profile::Django,
 };
 pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile = TestFile {
-    name: "deeply_nested/project_invitation.html",
-    code: include_str!("../resources/makeplane/project_invitation.html"),
+    name: "deeply_nested/deeply_nested.html",
+    code: include_str!("../resources/synthetic/deeply_nested.html"),
     profile: Profile::Django,
 };
 
@@ -70,6 +70,11 @@ pub static DJANGO_TEMPLATE_ATTR_DENSE: TestFile = TestFile {
     code: include_str!("../resources/wagtail/slim_header.html"),
     profile: Profile::Django,
 };
+pub static DJANGO_TEMPLATE_COTTON: TestFile = TestFile {
+    name: "cotton/home.html",
+    code: include_str!("../resources/django-cotton/home.html"),
+    profile: Profile::Django,
+};
 
 pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
     name: "jinja_large/comparison_table_integrated.html",
@@ -82,7 +87,7 @@ pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
     profile: Profile::Jinja,
 };
 
-pub static ALL_TEMPLATES: [&TestFile; 9] = [
+pub static ALL_TEMPLATES: [&TestFile; 10] = [
     &DJANGO_TEMPLATE_SMALL,
     &DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
     &DJANGO_TEMPLATE_LARGE,
@@ -90,6 +95,7 @@ pub static ALL_TEMPLATES: [&TestFile; 9] = [
     &DJANGO_TEMPLATE_TAG_DENSE,
     &DJANGO_TEMPLATE_FORM_HEAVY,
     &DJANGO_TEMPLATE_ATTR_DENSE,
+    &DJANGO_TEMPLATE_COTTON,
     &JINJA_TEMPLATE_FORM_HEAVY,
     &JINJA_TEMPLATE_LARGE,
 ];
