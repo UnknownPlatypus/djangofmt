@@ -24,7 +24,7 @@ env:
   # renovate: datasource=github-release-attachments depName=astral-sh/hawk
   HAWK_VERSION: 0.1.18
   HAWK_CHECKSUM: 84e2b65a8571d0aaa84fe1fea154abdbf88effff64e59a890abfb1d554ad78a1 # x86_64-unknown-linux-gnu
-  HAWK_TOOLCHAIN: 1.99.0 # channel of hawk's rust-toolchain.toml at HAWK_VERSION
+  HAWK_TOOLCHAIN: 1.100.0 # channel of hawk's rust-toolchain.toml at HAWK_VERSION
   # renovate: datasource=github-release-attachments depName=sourcefrog/cargo-mutants
   CARGO_MUTANTS_VERSION: v27.1.0
   CARGO_MUTANTS_CHECKSUM: dfe6dc37d0342c891d2829b5a695aa57c2d0edecef7e7d0399a30cc6e206411e # x86_64-unknown-linux-gnu
