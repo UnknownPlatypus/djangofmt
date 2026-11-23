@@ -181,3 +181,7 @@ inherits = "release"
 [profile.mutants]
 inherits = "test"
 debug = "none"
+
+[profile.profiling]
+inherits = "release"
+codegen-units = 1

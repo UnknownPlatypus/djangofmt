@@ -25,7 +25,7 @@ permissions: # optional for public repositories
 env:
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
   UV_VERSION: 0.13.9
-  UV_CHECKSUM: a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5 # x86_64-unknown-linux-gnu
+  UV_CHECKSUM: 0797542018e541a9288855df555c8077eed06f7a47d206362030480e8ecc9f3d # aarch64-unknown-linux-gnu
 
 concurrency:
   # A new push supersedes a PR's run, but every main commit keeps its baseline run.
@@ -35,11 +35,9 @@ concurrency:
 jobs:
   benchmarks:
     name: Run benchmarks
-    runs-on: ubuntu-latest
+    # Unlike `ubuntu-latest`'s mix of Intel and AMD CPUs, every arm runner is a Neoverse-N2.
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 15
-    env:
-      # See https://github.com/msgspec/msgspec/pull/1082
-      GLIBC_TUNABLES: "glibc.cpu.hwcaps=-AVX512F,-AVX512DQ,-AVX512_VBMI2,-AVX2,-AVX,-ERMS,-FSRM"
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -55,7 +53,7 @@ jobs:
           enable-cache: false
 
       - name: Build the benchmark target(s)
-        run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile release
+        run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile profiling
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v5.6.3
         with:
