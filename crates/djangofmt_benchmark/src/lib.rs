@@ -1,8 +1,7 @@
-//! Corpus templates with their profile, and the allocator shared by the divan micro-benchmarks.
+//! Helpers and the allocator shared by the divan micro-benchmarks.
 
-use djangofmt_corpus::{self as corpus, Template};
+use djangofmt_corpus::{Syntax, Template};
 use djangofmt_syntax::Profile;
-use std::fmt;
 
 // Benchmark the allocator the CLI ships with, minus its deferred work: page purging, and the
 // tcache GC, whose flush lands inside a random measurement window. 1TiB, not 0, disables the GC:
@@ -34,48 +33,6 @@ mod allocator {
         &b"dirty_decay_ms:-1,muzzy_decay_ms:-1,tcache_gc_incr_bytes:1099511627776\0"[0];
 }
 
-pub static DJANGO_TEMPLATE_SMALL: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_SMALL, Profile::Django);
-pub static DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS: TestFile = TestFile::new(
-    &corpus::DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
-    Profile::Django,
-);
-pub static DJANGO_TEMPLATE_LARGE: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_LARGE, Profile::Django);
-pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_DEEPLY_NESTED, Profile::Django);
-pub static DJANGO_TEMPLATE_TAG_DENSE: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_TAG_DENSE, Profile::Django);
-pub static DJANGO_TEMPLATE_FORM_HEAVY: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_FORM_HEAVY, Profile::Django);
-pub static DJANGO_TEMPLATE_ATTR_DENSE: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_ATTR_DENSE, Profile::Django);
-pub static DJANGO_TEMPLATE_COTTON: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_COTTON, Profile::Django);
-pub static DJANGO_TEMPLATE_LARGE_TAG_DENSE: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_LARGE_TAG_DENSE, Profile::Django);
-pub static DJANGO_TEMPLATE_RAW_BLOCKS: TestFile =
-    TestFile::new(&corpus::DJANGO_TEMPLATE_RAW_BLOCKS, Profile::Django);
-pub static JINJA_TEMPLATE_LARGE: TestFile =
-    TestFile::new(&corpus::JINJA_TEMPLATE_LARGE, Profile::Jinja);
-pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile =
-    TestFile::new(&corpus::JINJA_TEMPLATE_FORM_HEAVY, Profile::Jinja);
-
-pub static ALL_TEMPLATES: [&TestFile; 12] = [
-    &DJANGO_TEMPLATE_SMALL,
-    &DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
-    &DJANGO_TEMPLATE_LARGE,
-    &DJANGO_TEMPLATE_DEEPLY_NESTED,
-    &DJANGO_TEMPLATE_TAG_DENSE,
-    &DJANGO_TEMPLATE_FORM_HEAVY,
-    &DJANGO_TEMPLATE_ATTR_DENSE,
-    &DJANGO_TEMPLATE_COTTON,
-    &DJANGO_TEMPLATE_LARGE_TAG_DENSE,
-    &DJANGO_TEMPLATE_RAW_BLOCKS,
-    &JINJA_TEMPLATE_FORM_HEAVY,
-    &JINJA_TEMPLATE_LARGE,
-];
-
 /// Directives no corpus template carries: the bare *formatter* one, which the linter must
 /// leave free, and a bracketed lint code list, which it must resolve to a guarded node.
 pub const FORMATTER_DIRECTIVE: &str = "{# djangofmt:ignore #}";
@@ -83,7 +40,7 @@ pub const LINT_DIRECTIVE: &str = "{# djangofmt: ignore[empty-attr-value] #}";
 
 /// A corpus template with `directive` in front of its body, guarding the node that follows.
 #[must_use]
-pub fn with_directive(template: &TestFile, directive: &str) -> String {
+pub fn with_directive(template: &Template, directive: &str) -> String {
     format!("<p>head</p>\n{directive}\n{}", template.code)
 }
 
@@ -99,29 +56,11 @@ pub fn warmup<T>(f: impl Fn() -> T) {
     }
 }
 
-#[derive(Clone)]
-pub struct TestFile {
-    pub name: &'static str,
-    pub code: &'static str,
-    pub profile: Profile,
-}
-
-impl TestFile {
-    const fn new(template: &'static Template, profile: Profile) -> Self {
-        Self {
-            name: template.name,
-            code: template.code,
-            profile,
-        }
-    }
-}
-
-impl fmt::Debug for TestFile {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        Template {
-            name: self.name,
-            code: self.code,
-        }
-        .fmt(f)
+/// The profile to parse a corpus template with.
+#[must_use]
+pub const fn profile(template: &Template) -> Profile {
+    match template.syntax {
+        Syntax::Django => Profile::Django,
+        Syntax::Jinja => Profile::Jinja,
     }
 }

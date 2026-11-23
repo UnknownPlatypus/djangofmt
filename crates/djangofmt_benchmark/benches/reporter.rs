@@ -1,8 +1,9 @@
 //! Diagnostic rendering: the `miette` path the linter benches stop before, and
 //! the dominant cost of `djangofmt check` on a dirty codebase.
 
-use djangofmt_benchmark::{
-    DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, TestFile, warmup,
+use djangofmt_benchmark::{profile, warmup};
+use djangofmt_corpus::{
+    DJANGO_TEMPLATE_DEEPLY_NESTED, DJANGO_TEMPLATE_LARGE, JINJA_TEMPLATE_LARGE, Template,
 };
 use djangofmt_lint::{FileDiagnostics, Settings, lint_source};
 use djangofmt_syntax::graphical_handler;
@@ -15,7 +16,7 @@ fn main() {
 }
 
 /// Templates that trip enough rules to measure rendering on.
-static DIAGNOSTIC_HEAVY: [&TestFile; 3] = [
+static DIAGNOSTIC_HEAVY: [&Template; 3] = [
     &DJANGO_TEMPLATE_DEEPLY_NESTED,
     &DJANGO_TEMPLATE_LARGE,
     &JINJA_TEMPLATE_LARGE,
@@ -23,10 +24,10 @@ static DIAGNOSTIC_HEAVY: [&TestFile; 3] = [
 
 /// Every diagnostic of a file, rendered as its own self-contained block.
 #[divan::bench(args = DIAGNOSTIC_HEAVY)]
-fn render(bencher: divan::Bencher, template: &'static TestFile) {
+fn render(bencher: divan::Bencher, template: &'static Template) {
     let diagnostics = lint_source(
         template.code,
-        template.profile.into(),
+        profile(template).into(),
         &[],
         &Settings::all(),
         None,

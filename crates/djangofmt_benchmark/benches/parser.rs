@@ -1,4 +1,5 @@
-use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
+use djangofmt_benchmark::{profile, warmup};
+use djangofmt_corpus::{ALL_TEMPLATES, Template};
 use djangofmt_syntax::parse;
 
 fn main() {
@@ -6,11 +7,11 @@ fn main() {
 }
 
 #[divan::bench(args = ALL_TEMPLATES)]
-fn parse_templates(bencher: divan::Bencher, template: &'static TestFile) {
+fn parse_templates(bencher: divan::Bencher, template: &'static Template) {
     let run = || {
         parse(
             divan::black_box(template.code),
-            divan::black_box(template.profile.into()),
+            divan::black_box(profile(template).into()),
             &[],
         )
         .expect("Parsing to succeed")
