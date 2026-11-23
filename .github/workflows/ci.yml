@@ -24,7 +24,6 @@ env:
   # renovate: datasource=github-release-attachments depName=astral-sh/hawk
   HAWK_VERSION: 0.1.18
   HAWK_CHECKSUM: 84e2b65a8571d0aaa84fe1fea154abdbf88effff64e59a890abfb1d554ad78a1 # x86_64-unknown-linux-gnu
-  HAWK_TOOLCHAIN: 1.100.0 # channel of hawk's rust-toolchain.toml at HAWK_VERSION
   # renovate: datasource=github-release-attachments depName=sourcefrog/cargo-mutants
   CARGO_MUTANTS_VERSION: v27.1.0
   CARGO_MUTANTS_CHECKSUM: dfe6dc37d0342c891d2829b5a695aa57c2d0edecef7e7d0399a30cc6e206411e # x86_64-unknown-linux-gnu
@@ -240,15 +239,22 @@ jobs:
           persist-credentials: false
       - uses: Swatinem/rust-cache@v2.9.3
         with:
-          key: ${{ env.HAWK_TOOLCHAIN }}
+          key: ${{ env.HAWK_VERSION }}
           save-if: ${{ github.ref == 'refs/heads/main' }}
-      # hawk only runs on the exact toolchain it was built for, which lags behind rust-toolchain.toml.
+      # hawk only runs on the exact toolchain it was built for, so read it from hawk's rust-toolchain.toml,
+      # renovate can't bump it alongside HAWK_VERSION.
       - name: Install hawk
         run: |
           curl --proto '=https' --tlsv1.2 -LsSf -o "$RUNNER_TEMP/cargo-hawk.tar.gz" \
             "https://github.com/astral-sh/hawk/releases/download/${HAWK_VERSION}/cargo-hawk-x86_64-unknown-linux-gnu.tar.gz"
           echo "${HAWK_CHECKSUM}  $RUNNER_TEMP/cargo-hawk.tar.gz" | sha256sum --check
           tar xzf "$RUNNER_TEMP/cargo-hawk.tar.gz" -C ~/.cargo/bin --strip-components=1 --wildcards '*/cargo-hawk*'
+          toolchain=$(curl --proto '=https' --tlsv1.2 -LsSf \
+              "https://raw.githubusercontent.com/astral-sh/hawk/${HAWK_VERSION}/rust-toolchain.toml" \
+            | sed -n 's/^channel = "\([0-9]*\.[0-9]*\.[0-9]*\)"$/\1/p')
+          # Only a single X.Y.Z passes, so the fetched file can't pick an arbitrary rustup toolchain.
+          [[ $toolchain =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::no X.Y.Z channel in hawk's rust-toolchain.toml"; exit 1; }
+          echo "HAWK_TOOLCHAIN=$toolchain" >> "$GITHUB_ENV"
       - name: Find dead pub items
         run: cargo "+${HAWK_TOOLCHAIN}" hawk check --only dead-public --color=always -D warnings
 
