@@ -19,6 +19,7 @@ clap = { version = "4.6.1", features = ["derive", "wrap_help"] }
 clap_complete_command = { version = "0.6.1" }
 divan = { package = "codspeed-divan-compat", version = "6.0.0" }
 djangofmt = { path = "crates/djangofmt", default-features = false }
+djangofmt_corpus = { path = "crates/djangofmt_corpus" }
 djangofmt_formatter = { path = "crates/djangofmt_formatter" }
 djangofmt_lint = { path = "crates/djangofmt_lint" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }

@@ -35,6 +35,7 @@ harness = false
 name = "summary"
 
 [dependencies]
+djangofmt_corpus = { workspace = true }
 djangofmt_syntax = { workspace = true }
 
 [dev-dependencies]

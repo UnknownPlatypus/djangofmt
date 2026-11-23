@@ -1,4 +1,5 @@
-use djangofmt_benchmark::{ALL_TEMPLATES, TestFile, warmup};
+use djangofmt_benchmark::{profile, warmup};
+use djangofmt_corpus::{ALL_TEMPLATES, Template};
 use djangofmt_formatter::line_width::{IndentWidth, LineLength, SelfClosing};
 use djangofmt_formatter::{FormatterConfig, format_text};
 
@@ -7,7 +8,7 @@ fn main() {
 }
 
 #[divan::bench(args = ALL_TEMPLATES)]
-fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
+fn format_templates(bencher: divan::Bencher, template: &'static Template) {
     let config = FormatterConfig::new(
         LineLength::default(),
         IndentWidth::default(),
@@ -16,11 +17,12 @@ fn format_templates(bencher: divan::Bencher, template: &'static TestFile) {
         false,
     );
 
+    let profile = profile(template);
     let run = || {
         format_text(
             divan::black_box(template.code),
             divan::black_box(&config),
-            divan::black_box(template.profile),
+            divan::black_box(profile),
             None,
         )
         .expect("Formatting to succeed")

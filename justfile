@@ -133,7 +133,7 @@ fuzz time="0" *args="":
         crates/djangofmt/tests/fmt \
         crates/djangofmt/tests/parse_error \
         crates/djangofmt_lint/tests/check \
-        crates/djangofmt_benchmark/resources \
+        crates/djangofmt_corpus/resources \
         -- -dict=fuzz/django.dict -timeout=2 -max_total_time={{ time }} {{ args }}
 
 # Minimize a fuzz crash artifact from fuzz/artifacts/fmt_idempotency/

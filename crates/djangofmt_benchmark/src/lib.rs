@@ -1,7 +1,7 @@
-//! Real-world templates and the allocator shared by the divan micro-benchmarks.
+//! Helpers and the allocator shared by the divan micro-benchmarks.
 
+use djangofmt_corpus::{Syntax, Template};
 use djangofmt_syntax::Profile;
-use std::fmt;
 
 // Benchmark the allocator the CLI ships with, minus its deferred work: page purging, and the
 // tcache GC, whose flush lands inside a random measurement window. 1TiB, not 0, disables the GC:
@@ -33,85 +33,6 @@ mod allocator {
         &b"dirty_decay_ms:-1,muzzy_decay_ms:-1,tcache_gc_incr_bytes:1099511627776\0"[0];
 }
 
-pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {
-    name: "small/404.html",
-    code: include_str!("../resources/django/404.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS: TestFile = TestFile {
-    name: "external_format/technical_500.html",
-    code: include_str!("../resources/django/technical_500.html"),
-    profile: Profile::Django,
-};
-
-pub static DJANGO_TEMPLATE_LARGE: TestFile = TestFile {
-    name: "large/strip_tags1.html",
-    code: include_str!("../resources/django/strip_tags1.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile = TestFile {
-    name: "deeply_nested/deeply_nested.html",
-    code: include_str!("../resources/synthetic/deeply_nested.html"),
-    profile: Profile::Django,
-};
-
-pub static DJANGO_TEMPLATE_TAG_DENSE: TestFile = TestFile {
-    name: "tag_dense/change_form.html",
-    code: include_str!("../resources/django/change_form.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
-    name: "form_heavy/login.html",
-    code: include_str!("../resources/wagtail/login.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_ATTR_DENSE: TestFile = TestFile {
-    name: "attr_dense/slim_header.html",
-    code: include_str!("../resources/wagtail/slim_header.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_COTTON: TestFile = TestFile {
-    name: "cotton/home.html",
-    code: include_str!("../resources/django-cotton/home.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_LARGE_TAG_DENSE: TestFile = TestFile {
-    name: "large_tag_dense/order_detail.html",
-    code: include_str!("../resources/django-oscar/order_detail.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_RAW_BLOCKS: TestFile = TestFile {
-    name: "raw_blocks/components.html",
-    code: include_str!("../resources/django-cotton/components.html"),
-    profile: Profile::Django,
-};
-
-pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
-    name: "jinja_large/comparison_table_integrated.html",
-    code: include_str!("../resources/zulip/comparison_table_integrated.html"),
-    profile: Profile::Jinja,
-};
-pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
-    name: "jinja_form_heavy/upgrade.html",
-    code: include_str!("../resources/zulip/upgrade.html"),
-    profile: Profile::Jinja,
-};
-
-pub static ALL_TEMPLATES: [&TestFile; 12] = [
-    &DJANGO_TEMPLATE_SMALL,
-    &DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
-    &DJANGO_TEMPLATE_LARGE,
-    &DJANGO_TEMPLATE_DEEPLY_NESTED,
-    &DJANGO_TEMPLATE_TAG_DENSE,
-    &DJANGO_TEMPLATE_FORM_HEAVY,
-    &DJANGO_TEMPLATE_ATTR_DENSE,
-    &DJANGO_TEMPLATE_COTTON,
-    &DJANGO_TEMPLATE_LARGE_TAG_DENSE,
-    &DJANGO_TEMPLATE_RAW_BLOCKS,
-    &JINJA_TEMPLATE_FORM_HEAVY,
-    &JINJA_TEMPLATE_LARGE,
-];
-
 /// Directives no corpus template carries: the bare *formatter* one, which the linter must
 /// leave free, and a bracketed lint code list, which it must resolve to a guarded node.
 pub const FORMATTER_DIRECTIVE: &str = "{# djangofmt:ignore #}";
@@ -119,7 +40,7 @@ pub const LINT_DIRECTIVE: &str = "{# djangofmt: ignore[empty-attr-value] #}";
 
 /// A corpus template with `directive` in front of its body, guarding the node that follows.
 #[must_use]
-pub fn with_directive(template: &TestFile, directive: &str) -> String {
+pub fn with_directive(template: &Template, directive: &str) -> String {
     format!("<p>head</p>\n{directive}\n{}", template.code)
 }
 
@@ -135,32 +56,11 @@ pub fn warmup<T>(f: impl Fn() -> T) {
     }
 }
 
-#[derive(Clone)]
-pub struct TestFile {
-    pub name: &'static str,
-    pub code: &'static str,
-    pub profile: Profile,
-}
-impl TestFile {
-    #[must_use]
-    pub fn loc(&self) -> usize {
-        self.code.lines().count()
-    }
-
-    #[must_use]
-    pub const fn total_len(&self) -> usize {
-        self.code.len()
-    }
-}
-
-impl fmt::Debug for TestFile {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{} ({} lines, {} bytes)",
-            self.name,
-            self.loc(),
-            self.total_len()
-        )
+/// The profile to parse a corpus template with.
+#[must_use]
+pub const fn profile(template: &Template) -> Profile {
+    match template.syntax {
+        Syntax::Django => Profile::Django,
+        Syntax::Jinja => Profile::Jinja,
     }
 }
