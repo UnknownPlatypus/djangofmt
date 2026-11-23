@@ -74,8 +74,7 @@ impl PerFileIgnores {
 
         let mut rules = base;
         let matches = by_name
-            .map(|name| self.basenames.matches_candidate(&name))
-            .unwrap_or_default()
+            .map_or_default(|name| self.basenames.matches_candidate(&name))
             .into_iter()
             .chain(if by_path {
                 self.absolutes.matches_candidate(&full)
