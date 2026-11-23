@@ -12,5 +12,7 @@ The following files are included, under their original licenses:
 - [`wagtail/admin/templates/wagtailadmin/login.html`](https://github.com/wagtail/wagtail/blob/6e809784bda871df1bd5987833870e22cb1af940/wagtail/admin/templates/wagtailadmin/login.html) (BSD-3-Clause)
 - [`wagtail/admin/templates/wagtailadmin/shared/headers/slim_header.html`](https://github.com/wagtail/wagtail/blob/6e809784bda871df1bd5987833870e22cb1af940/wagtail/admin/templates/wagtailadmin/shared/headers/slim_header.html) (BSD-3-Clause)
 - [`django-cotton/docs/docs_project/docs_project/templates/ui_docs/home.html`](https://github.com/wrabit/django-cotton/blob/982671f2eba62340264c0ee7084033c1c76b0d57/docs/docs_project/docs_project/templates/ui_docs/home.html) (MIT)
+- [`django-cotton/docs/docs_project/docs_project/templates/components.html`](https://github.com/wrabit/django-cotton/blob/d3e1ccdd1754ea5682a3af260bccfc6ba84ea5c3/docs/docs_project/docs_project/templates/components.html) (MIT)
+- [`django-oscar/src/oscar/templates/oscar/dashboard/orders/order_detail.html`](https://github.com/django-oscar/django-oscar/blob/9bc531349519c4448eaec5d4c402f9bdcebd85bb/src/oscar/templates/oscar/dashboard/orders/order_detail.html) (BSD-3-Clause)
 
 The files are included in the `resources` directory to allow running benchmarks offline and for simplicity.
