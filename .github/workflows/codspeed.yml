@@ -24,8 +24,8 @@ permissions: # optional for public repositories
 
 env:
   # renovate: datasource=github-release-attachments depName=astral-sh/uv
-  UV_VERSION: 0.13.7
-  UV_CHECKSUM: c5221ff41b7892bfc223543883600125f6a47fe845093e0f5bdff4f359196d83 # x86_64-unknown-linux-gnu
+  UV_VERSION: 0.13.9
+  UV_CHECKSUM: a7fbaff2b9a271d85c1bdb540941090fd1ce011797b4abeb48e4dcd39c2471d5 # x86_64-unknown-linux-gnu
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
