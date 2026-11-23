@@ -75,6 +75,16 @@ pub static DJANGO_TEMPLATE_COTTON: TestFile = TestFile {
     code: include_str!("../resources/django-cotton/home.html"),
     profile: Profile::Django,
 };
+pub static DJANGO_TEMPLATE_LARGE_TAG_DENSE: TestFile = TestFile {
+    name: "large_tag_dense/order_detail.html",
+    code: include_str!("../resources/django-oscar/order_detail.html"),
+    profile: Profile::Django,
+};
+pub static DJANGO_TEMPLATE_RAW_BLOCKS: TestFile = TestFile {
+    name: "raw_blocks/components.html",
+    code: include_str!("../resources/django-cotton/components.html"),
+    profile: Profile::Django,
+};
 
 pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
     name: "jinja_large/comparison_table_integrated.html",
@@ -87,7 +97,7 @@ pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
     profile: Profile::Jinja,
 };
 
-pub static ALL_TEMPLATES: [&TestFile; 10] = [
+pub static ALL_TEMPLATES: [&TestFile; 12] = [
     &DJANGO_TEMPLATE_SMALL,
     &DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
     &DJANGO_TEMPLATE_LARGE,
@@ -96,6 +106,8 @@ pub static ALL_TEMPLATES: [&TestFile; 10] = [
     &DJANGO_TEMPLATE_FORM_HEAVY,
     &DJANGO_TEMPLATE_ATTR_DENSE,
     &DJANGO_TEMPLATE_COTTON,
+    &DJANGO_TEMPLATE_LARGE_TAG_DENSE,
+    &DJANGO_TEMPLATE_RAW_BLOCKS,
     &JINJA_TEMPLATE_FORM_HEAVY,
     &JINJA_TEMPLATE_LARGE,
 ];
