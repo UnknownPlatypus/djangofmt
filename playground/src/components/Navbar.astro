@@ -2,11 +2,12 @@
 import BookIcon from "./icons/BookIcon.astro";
 import BugIcon from "./icons/BugIcon.astro";
 import DarkTheme from "./icons/DarkTheme.astro";
+import IconMore from "./icons/IconMore.astro";
 import IconShare from "./icons/IconShare.astro";
 import LightTheme from "./icons/LightTheme.astro";
 import PlusMinusInput from "./PlusMinusInput.astro";
 ---
-<nav class="navbar bg-base-300 border-b border-base-300 min-h-16 px-4 flex justify-between gap-8 shrink-0 overflow-x-auto">
+<nav class="navbar bg-base-300 border-b border-base-300 min-h-0 px-3 py-1 flex justify-between gap-2 shrink-0 md:min-h-16 md:px-4 md:py-2 md:gap-8">
     <div class="flex items-center gap-2">
         <img
             src={`${import.meta.env.BASE_URL}android-chrome-192x192.png`}
@@ -15,16 +16,16 @@ import PlusMinusInput from "./PlusMinusInput.astro";
             height="32"
             class="h-8 w-8"
         >
-        <span class="font-bold text-lg tracking-tight">djangofmt</span>
+        <span class="font-bold text-lg tracking-tight max-md:hidden">djangofmt</span>
     </div>
 
-    <div id="controls" class="flex items-end gap-8">
-        <fieldset class="fieldset">
-            <legend class="fieldset-legend text-xs font-bold text-base-content/90">
+    <div id="controls" class="flex items-end gap-2 max-md:min-w-0 max-md:flex-1 md:gap-8">
+        <fieldset class="fieldset max-md:min-w-0 max-md:flex-1">
+            <legend class="fieldset-legend max-md:py-1 text-xs font-bold text-base-content/90">
                 Profile
             </legend>
             <select
-                class="select select-sm w-24 font-medium bg-base-100 text-base-content/70"
+                class="select select-sm w-full max-md:ps-2.5 max-md:pe-6 md:w-24 font-medium bg-base-100 text-base-content/70"
                 data-bind="mode"
             >
                 <option>Django</option>
@@ -35,7 +36,7 @@ import PlusMinusInput from "./PlusMinusInput.astro";
         <PlusMinusInput signalName="indent" title="Indent" max={16} />
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="hidden md:flex items-center gap-2">
         <a
             class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
             data-tip="Open the documentation"
@@ -67,5 +68,54 @@ import PlusMinusInput from "./PlusMinusInput.astro";
             <LightTheme />
             <DarkTheme />
         </label>
+    </div>
+    {/* Blur after an action so the speed dial closes (it is open while focus is inside). */}
+    <div
+        class="fab bottom-10 md:hidden"
+        data-on:click="evt.target.closest('a, button') && document.activeElement.blur()"
+    >
+        <div tabindex="0" role="button" class="btn btn-circle btn-primary shadow-lg" aria-label="More actions">
+            <IconMore />
+        </div>
+        <div>
+            <span class="badge badge-neutral">Documentation</span>
+            <a
+                class="btn btn-circle shadow-lg"
+                aria-label="Documentation"
+                href="https://unknownplatypus.github.io/djangofmt/docs/"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <BookIcon />
+            </a>
+        </div>
+        <div>
+            <span class="badge badge-neutral">Report an issue</span>
+            <button
+                class="btn btn-circle shadow-lg"
+                aria-label="Report an issue"
+                data-on:click="openGithubIssue($inputCode, $mode, $width, $indent, monacoOutput.editor.getValue())"
+            >
+                <BugIcon />
+            </button>
+        </div>
+        <div>
+            <span class="badge badge-neutral">Copy permalink</span>
+            <button
+                class="btn btn-circle shadow-lg"
+                aria-label="Copy permalink"
+                data-on:click="savePermalinkToClipboard($inputCode, $mode, $width, $indent)"
+            >
+                <IconShare />
+            </button>
+        </div>
+        <div>
+            <span class="badge badge-neutral">Toggle theme</span>
+            <label class="swap swap-rotate btn btn-circle shadow-lg">
+                <input type="checkbox" aria-label="Toggle theme" data-bind="lightTheme">
+                <LightTheme />
+                <DarkTheme />
+            </label>
+        </div>
     </div>
 </nav>
