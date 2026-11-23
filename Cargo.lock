@@ -463,12 +463,17 @@ version = "1.1.0"
 dependencies = [
  "codspeed-divan-compat",
  "djangofmt",
+ "djangofmt_corpus",
  "djangofmt_formatter",
  "djangofmt_lint",
  "djangofmt_syntax",
  "oxc-miette",
  "tikv-jemallocator",
 ]
+
+[[package]]
+name = "djangofmt_corpus"
+version = "1.1.0"
 
 [[package]]
 name = "djangofmt_dev"

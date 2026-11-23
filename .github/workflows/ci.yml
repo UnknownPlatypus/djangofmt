@@ -284,7 +284,7 @@ jobs:
         run: |
           eval "$(uv run --only-dev cargo llvm-cov show-env --sh)"
           uv run --only-dev cargo insta test --unreferenced reject --workspace --lib --bins --tests --all-features
-          uv run --only-dev cargo llvm-cov report --fail-under-lines 85 --ignore-filename-regex 'djangofmt_(dev|benchmark)/'
+          uv run --only-dev cargo llvm-cov report --fail-under-lines 85 --ignore-filename-regex 'djangofmt_(dev|benchmark|corpus)/'
 
   mutants:
     name: "cargo mutants (PR diff)"

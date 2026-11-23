@@ -1,5 +1,6 @@
-//! Real-world templates and the allocator shared by the divan micro-benchmarks.
+//! Corpus templates with their profile, and the allocator shared by the divan micro-benchmarks.
 
+use djangofmt_corpus::{self as corpus, Template};
 use djangofmt_syntax::Profile;
 use std::fmt;
 
@@ -33,69 +34,32 @@ mod allocator {
         &b"dirty_decay_ms:-1,muzzy_decay_ms:-1,tcache_gc_incr_bytes:1099511627776\0"[0];
 }
 
-pub static DJANGO_TEMPLATE_SMALL: TestFile = TestFile {
-    name: "small/404.html",
-    code: include_str!("../resources/django/404.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS: TestFile = TestFile {
-    name: "external_format/technical_500.html",
-    code: include_str!("../resources/django/technical_500.html"),
-    profile: Profile::Django,
-};
-
-pub static DJANGO_TEMPLATE_LARGE: TestFile = TestFile {
-    name: "large/strip_tags1.html",
-    code: include_str!("../resources/django/strip_tags1.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile = TestFile {
-    name: "deeply_nested/deeply_nested.html",
-    code: include_str!("../resources/synthetic/deeply_nested.html"),
-    profile: Profile::Django,
-};
-
-pub static DJANGO_TEMPLATE_TAG_DENSE: TestFile = TestFile {
-    name: "tag_dense/change_form.html",
-    code: include_str!("../resources/django/change_form.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
-    name: "form_heavy/login.html",
-    code: include_str!("../resources/wagtail/login.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_ATTR_DENSE: TestFile = TestFile {
-    name: "attr_dense/slim_header.html",
-    code: include_str!("../resources/wagtail/slim_header.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_COTTON: TestFile = TestFile {
-    name: "cotton/home.html",
-    code: include_str!("../resources/django-cotton/home.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_LARGE_TAG_DENSE: TestFile = TestFile {
-    name: "large_tag_dense/order_detail.html",
-    code: include_str!("../resources/django-oscar/order_detail.html"),
-    profile: Profile::Django,
-};
-pub static DJANGO_TEMPLATE_RAW_BLOCKS: TestFile = TestFile {
-    name: "raw_blocks/components.html",
-    code: include_str!("../resources/django-cotton/components.html"),
-    profile: Profile::Django,
-};
-
-pub static JINJA_TEMPLATE_LARGE: TestFile = TestFile {
-    name: "jinja_large/comparison_table_integrated.html",
-    code: include_str!("../resources/zulip/comparison_table_integrated.html"),
-    profile: Profile::Jinja,
-};
-pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile = TestFile {
-    name: "jinja_form_heavy/upgrade.html",
-    code: include_str!("../resources/zulip/upgrade.html"),
-    profile: Profile::Jinja,
-};
+pub static DJANGO_TEMPLATE_SMALL: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_SMALL, Profile::Django);
+pub static DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS: TestFile = TestFile::new(
+    &corpus::DJANGO_TEMPLATE_WITH_SCRIPT_AND_STYLE_TAGS,
+    Profile::Django,
+);
+pub static DJANGO_TEMPLATE_LARGE: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_LARGE, Profile::Django);
+pub static DJANGO_TEMPLATE_DEEPLY_NESTED: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_DEEPLY_NESTED, Profile::Django);
+pub static DJANGO_TEMPLATE_TAG_DENSE: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_TAG_DENSE, Profile::Django);
+pub static DJANGO_TEMPLATE_FORM_HEAVY: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_FORM_HEAVY, Profile::Django);
+pub static DJANGO_TEMPLATE_ATTR_DENSE: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_ATTR_DENSE, Profile::Django);
+pub static DJANGO_TEMPLATE_COTTON: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_COTTON, Profile::Django);
+pub static DJANGO_TEMPLATE_LARGE_TAG_DENSE: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_LARGE_TAG_DENSE, Profile::Django);
+pub static DJANGO_TEMPLATE_RAW_BLOCKS: TestFile =
+    TestFile::new(&corpus::DJANGO_TEMPLATE_RAW_BLOCKS, Profile::Django);
+pub static JINJA_TEMPLATE_LARGE: TestFile =
+    TestFile::new(&corpus::JINJA_TEMPLATE_LARGE, Profile::Jinja);
+pub static JINJA_TEMPLATE_FORM_HEAVY: TestFile =
+    TestFile::new(&corpus::JINJA_TEMPLATE_FORM_HEAVY, Profile::Jinja);
 
 pub static ALL_TEMPLATES: [&TestFile; 12] = [
     &DJANGO_TEMPLATE_SMALL,
@@ -141,26 +105,23 @@ pub struct TestFile {
     pub code: &'static str,
     pub profile: Profile,
 }
-impl TestFile {
-    #[must_use]
-    pub fn loc(&self) -> usize {
-        self.code.lines().count()
-    }
 
-    #[must_use]
-    pub const fn total_len(&self) -> usize {
-        self.code.len()
+impl TestFile {
+    const fn new(template: &'static Template, profile: Profile) -> Self {
+        Self {
+            name: template.name,
+            code: template.code,
+            profile,
+        }
     }
 }
 
 impl fmt::Debug for TestFile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{} ({} lines, {} bytes)",
-            self.name,
-            self.loc(),
-            self.total_len()
-        )
+        Template {
+            name: self.name,
+            code: self.code,
+        }
+        .fmt(f)
     }
 }

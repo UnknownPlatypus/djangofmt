@@ -3,6 +3,7 @@
 test_package = ["djangofmt", "djangofmt_formatter", "djangofmt_lint", "djangofmt_syntax"]
 exclude_globs = [
   "crates/djangofmt_benchmark/**",
+  "crates/djangofmt_corpus/**",
   "crates/djangofmt_dev/**",
   "crates/djangofmt_wasm/**",
   "crates/djangofmt_macros/**",

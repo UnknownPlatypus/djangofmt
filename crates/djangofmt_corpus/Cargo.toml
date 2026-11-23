@@ -1,0 +1,18 @@
+[package]
+name = "djangofmt_corpus"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Real-world Django and Jinja templates for benchmarks"
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+bench = false
+doctest = false
+test = false
+
+[lints]
+workspace = true
