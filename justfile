@@ -1,4 +1,4 @@
-ecosystem_cache_dir := "/tmp/djangofmt-ecosystem-repos"
+ecosystem_cache_dir := quote(cache_directory() / "djangofmt-ecosystem-repos")
 export INSTA_UPDATE := "always"
 
 # `uv run` recipes pass `--only-dev`/`--only-group`: both omit the root project,
