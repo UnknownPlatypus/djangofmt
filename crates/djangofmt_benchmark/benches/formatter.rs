@@ -17,11 +17,12 @@ fn format_templates(bencher: divan::Bencher, template: &'static Template) {
         false,
     );
 
+    let profile = profile(template);
     let run = || {
         format_text(
             divan::black_box(template.code),
             divan::black_box(&config),
-            divan::black_box(profile(template)),
+            divan::black_box(profile),
             None,
         )
         .expect("Formatting to succeed")

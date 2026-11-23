@@ -8,10 +8,11 @@ fn main() {
 
 #[divan::bench(args = ALL_TEMPLATES)]
 fn parse_templates(bencher: divan::Bencher, template: &'static Template) {
+    let language = profile(template).into();
     let run = || {
         parse(
             divan::black_box(template.code),
-            divan::black_box(profile(template).into()),
+            divan::black_box(language),
             &[],
         )
         .expect("Parsing to succeed")
