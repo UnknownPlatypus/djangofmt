@@ -61,12 +61,10 @@ pub fn resolve_lint_configuration(
     // Per-rule config is pyproject-only, it has no CLI flags.
     let endblock_label = lint
         .and_then(|l| l.endblock_label.clone())
-        .map(EndblockLabelOptions::into_settings)
-        .unwrap_or_default();
+        .map_or_default(EndblockLabelOptions::into_settings);
     let unsorted_tailwind_classes = lint
         .and_then(|l| l.unsorted_tailwind_classes.clone())
-        .map(UnsortedTailwindClassesOptions::into_settings)
-        .unwrap_or_default();
+        .map_or_default(UnsortedTailwindClassesOptions::into_settings);
 
     LintConfiguration {
         select,

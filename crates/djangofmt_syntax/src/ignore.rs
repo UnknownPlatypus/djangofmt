@@ -100,9 +100,7 @@ impl FileIgnores {
     /// so they can be honored even when the file fails to parse.
     #[must_use]
     pub fn parse(source: &str) -> Self {
-        Self::parse_head(source)
-            .map(|(ignores, _)| ignores)
-            .unwrap_or_default()
+        Self::parse_head(source).map_or_default(|(ignores, _)| ignores)
     }
 
     /// The source up to the end of its leading comment, when that comment quarantines the file,

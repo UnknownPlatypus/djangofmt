@@ -973,3 +973,133 @@ fn check_endblock_label_custom_block_must_be_parsed() {
       Error: `lint.endblock-label.custom-blocks` lists `stage`, which is not in `custom-blocks`
     ");
 }
+
+// ── Argument parsing ─────────────────────────────────────────────────
+
+#[test]
+fn cli_help() {
+    // clap takes the usage name from argv[0], `djangofmt.exe` on Windows.
+    let mut settings = insta::Settings::clone_current();
+    settings.add_filter(r"djangofmt\.exe", "djangofmt");
+    let _bound = settings.bind_to_scope();
+    assert_cmd_snapshot!(cli().arg("--help"), @"
+    success: true
+    exit_code: 0
+    ----- stdout -----
+    A fast, HTML aware, Django template formatter and linter, written in Rust.
+
+    Usage: djangofmt [OPTIONS] [FILES]...
+           djangofmt [OPTIONS] [FILES]... <COMMAND>
+
+    Commands:
+      check
+              Check files for lint errors
+      help
+              Print this message or the help of the given subcommand(s)
+
+    Arguments:
+      [FILES]...
+              List of files or directories to format
+
+    Options:
+          --stdin-filename <PATH>
+              The name of the file when passing it through stdin
+
+          --line-length <LINE_LENGTH>
+              Set the line-length [default: 120]
+
+          --indent-width <INDENT_WIDTH>
+              Set the indent width [default: 4]
+
+          --profile <PROFILE>
+              Template language profile to use [default: django]
+              
+              [possible values: django, jinja]
+
+          --custom-blocks <BLOCK_NAMES>
+              Comma-separated list of custom block name to enable
+
+          --html-void-self-closing <HTML_VOID_SELF_CLOSING>
+              Self-closing style for void HTML elements (e.g. <br> vs <br />) [default: never]
+
+              Possible values:
+              - never:     Never use self-closing syntax
+              - always:    Always use self-closing syntax
+              - unchanged: Keep existing style as-is
+
+          --check
+              Avoid writing any formatted files back; instead, exit with a non-zero status code if any
+              files would have been modified, and zero otherwise
+
+      -h, --help
+              Print help (see a summary with '-h')
+
+      -V, --version
+              Print version
+
+    File selection:
+          --exclude <FILE_PATTERN>
+              List of file path patterns to exclude. If provided, replaces the default excludes
+
+          --extend-exclude <FILE_PATTERN>
+              List of file path patterns to add to the excluded paths
+
+          --respect-gitignore
+              Respect `.gitignore` files when discovering files. Use `--no-respect-gitignore` to disable
+
+          --force-exclude
+              Enforce exclusions, even for paths passed to djangofmt directly on the command-line. Use
+              `--no-force-exclude` to disable
+
+    Log levels:
+      -v, --verbose
+              Enable verbose logging
+
+      -q, --quiet
+              Disable all logging
+
+    ----- stderr -----
+    ");
+}
+
+#[test]
+fn cli_invalid_line_length() {
+    assert_cmd_snapshot!(cli().args(["--line-length", "321", "test.html"]), @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    error: invalid value '321' for '--line-length <LINE_LENGTH>': line-length must be between 1 and 320 (got 321)
+
+    For more information, try '--help'.
+    ");
+}
+
+#[test]
+fn cli_invalid_target_version() {
+    assert_cmd_snapshot!(cli().args(["check", "--target-version", "5", "test.html"]), @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    error: invalid value '5' for '--target-version <VERSION>': target-version must be a `major.minor` version (got `5`)
+
+    For more information, try '--help'.
+    ");
+}
+
+#[test]
+fn cli_invalid_indent_width() {
+    assert_cmd_snapshot!(cli().args(["--indent-width", "17", "test.html"]), @"
+    success: false
+    exit_code: 2
+    ----- stdout -----
+
+    ----- stderr -----
+    error: invalid value '17' for '--indent-width <INDENT_WIDTH>': indent-width must be between 1 and 16 (got 17)
+
+    For more information, try '--help'.
+    ");
+}
