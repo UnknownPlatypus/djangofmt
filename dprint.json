@@ -35,9 +35,9 @@
   "plugins": [
     "https://plugins.dprint.dev/markdown-0.29.0.wasm",
     "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.6.0.wasm",
-    "https://plugins.dprint.dev/typescript-0.99.2.wasm",
+    "https://plugins.dprint.dev/typescript-0.101.0.wasm",
     "https://plugins.dprint.dev/json-0.26.0.wasm",
     "https://plugins.dprint.dev/g-plane/markup_fmt-v0.25.3.wasm",
-    "https://plugins.dprint.dev/g-plane/malva-v0.16.0.wasm"
+    "https://plugins.dprint.dev/g-plane/malva-v0.16.1.wasm"
   ]
 }

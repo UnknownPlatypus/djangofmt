@@ -4,7 +4,7 @@
     "npm:@tailwindcss/vite@4.3.5": "4.3.5_vite@8.3.8",
     "npm:ansi-to-html@~0.7.2": "0.7.2",
     "npm:astro@7": "7.1.3_@emnapi+core@1.11.1_@emnapi+runtime@1.11.3",
-    "npm:daisyui@5.8.0": "5.8.0",
+    "npm:daisyui@5.8.1": "5.8.1",
     "npm:diff@9": "9.0.0",
     "npm:lz-string@^1.5.0": "1.5.0",
     "npm:monaco-editor@0.57": "0.57.0",
@@ -581,16 +581,12 @@
     "@napi-rs/wasm-runtime@1.2.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1": {
       "integrity": "sha512-mRyDmEw9/fCDXCGfL1sbgIw/GUK0PVxRW4YwgPN61F3LQ+fSyoBFarJVzgGyhF6kRzEQZ0FejDqm4WLXSeqQmw==",
       "dependencies": [
-        "@emnapi/core@1.11.1",
-        "@emnapi/runtime@1.11.1",
         "@tybys/wasm-util"
       ]
     },
     "@napi-rs/wasm-runtime@1.2.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.3": {
       "integrity": "sha512-mRyDmEw9/fCDXCGfL1sbgIw/GUK0PVxRW4YwgPN61F3LQ+fSyoBFarJVzgGyhF6kRzEQZ0FejDqm4WLXSeqQmw==",
       "dependencies": [
-        "@emnapi/core@1.11.1",
-        "@emnapi/runtime@1.11.3",
         "@tybys/wasm-util"
       ]
     },
@@ -1169,8 +1165,8 @@
         "css-tree@2.2.1"
       ]
     },
-    "daisyui@5.8.0": {
-      "integrity": "sha512-pIdff0OLXTgCNvbRZlY2W2qjCnJd7DgRLyTpzhHgg+JqMzVDsQoRzJXyDKyPCOUYvTFHlOt97+JCeGyxQav4Zw=="
+    "daisyui@5.8.1": {
+      "integrity": "sha512-ptP4WHOJ6WltNnA5zwkg3GypOLhsyUM2FHuXCckWVEpWviioInFKsjnShCWYGYHsQ5P9bUCOH1tn45cKLeTUpg=="
     },
     "defu@6.1.7": {
       "integrity": "sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ=="
@@ -2095,7 +2091,7 @@
         "npm:@tailwindcss/vite@4.3.5",
         "npm:ansi-to-html@~0.7.2",
         "npm:astro@7",
-        "npm:daisyui@5.8.0",
+        "npm:daisyui@5.8.1",
         "npm:diff@9",
         "npm:lz-string@^1.5.0",
         "npm:monaco-editor@0.57",
