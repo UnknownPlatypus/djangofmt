@@ -1,0 +1,516 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+  <head>
+    <title>{% translate "Your weekly digest" %}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="x-apple-disable-message-reformatting">
+    <!--[if mso]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->
+    <style type="text/css">
+      #outlook a { padding:0; }
+      body { margin:0;padding:0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%; }
+      table, td { border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt; }
+      img { border:0;height:auto;line-height:100%;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic; }
+      p { display:block;margin:13px 0; }
+      a[x-apple-data-detectors] { color:inherit !important;text-decoration:none !important;font-size:inherit !important; }
+    </style>
+    <style type="text/css">
+      @media only screen and (max-width:620px) {
+        .container { width:100% !important;max-width:100% !important; }
+        .stack-column { display:block !important;width:100% !important;max-width:100% !important; }
+        .stack-column-center { text-align:center !important; }
+        .hide-mobile { display:none !important;max-height:0 !important;overflow:hidden !important; }
+        .px-mobile { padding-left:16px !important;padding-right:16px !important; }
+      }
+    </style>
+    <style type="text/css">
+      @media (prefers-color-scheme: dark) {
+        .card { background-color:#1f2430 !important; }
+        .card p, .card span { color:#e6e9ef !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;word-spacing:normal;background-color:#f2f4f7;">
+    <div class="hide-mobile" style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+      {% blocktranslate count counter=digest.issue_count %}{{ counter }} issue changed this week{% plural %}{{ counter }} issues changed this week{% endblocktranslate %}
+    </div>
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+      <tbody>
+        <tr>
+          <td align="center" valign="top" bgcolor="#f2f4f7" style="padding:24px 0;">
+            <!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" width="640" style="width:640px;"><tr><td><![endif]-->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="container" width="640" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;max-width:640px;margin:0 auto;">
+              <tbody>
+                <tr>
+                  <td align="center" valign="top" bgcolor="#ffffff" style="padding:0;border-radius:12px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="px-mobile" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td align="left" valign="top" style="padding:24px 32px 16px 32px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                              <tbody>
+                                <tr>
+                                  <td class="stack-column" width="50%" valign="top" style="vertical-align:middle;">
+                                    <a href="{{ base_url }}" target="_blank" style="text-decoration:none;">
+                                      <img src="{% static 'emails/logo.png' %}" width="120" height="32" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;width:120px;height:32px;">
+                                    </a>
+                                  </td>
+                                  <td class="stack-column" width="50%" valign="top" style="vertical-align:middle;text-align:right;">
+                                    <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:right;"><a href="{{ base_url }}{% url 'digests:web' digest.pk %}" target="_blank" style="color:#8a93a3;text-decoration:underline;">{% translate "View in browser" %}</a></p>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="px-mobile" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td align="left" valign="top" style="padding:8px 32px 24px 32px;">
+                            <h1 style="margin:0 0 8px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;line-height:32px;font-weight:700;color:#121a26;">
+                              {% blocktranslate with name=user.get_short_name %}Hi {{ name }},{% endblocktranslate %}
+                            </h1>
+                            <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:21px;color:#3d4451;mso-line-height-rule:exactly;">{% blocktranslate with start=digest.start|date:'M j' end=digest.end|date:'M j' %}Here is what happened in your projects between {{ start }} and {{ end }}.{% endblocktranslate %}</p>
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                              <tbody>
+                                <tr>
+                                  <td align="left" valign="top" style="padding:20px 0 0 0;">
+                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                      <tbody>
+                                        <tr>
+                                          {% for stat in stats %}
+                                            <!--[if mso | IE]><td width="178" valign="top"><![endif]-->
+                                            <td class="stack-column" width="33%" valign="top" style="padding:0 4px;">
+                                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="card" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                <tbody>
+                                                  <tr>
+                                                    <td align="left" valign="top" bgcolor="#f8f9fb" style="padding:16px;border-radius:8px;border:1px solid #e3e7ee;">
+                                                      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:28px;line-height:34px;font-weight:700;color:{{ stat.color|default:'#121a26' }};">{{ stat.value }}</p>
+                                                      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;padding-top:4px;">{{ stat.label }}</p>
+                                                      {% if stat.delta %}
+                                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                          <tbody>
+                                                            <tr>
+                                                              <td align="left" valign="top" style="padding:8px 0 0 0;">
+                                                                {% if stat.delta > 0 %}
+                                                                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;display:inline-table;margin:0 4px 4px 0;">
+                                                                    <tbody>
+                                                                      <tr>
+                                                                        <td align="left" valign="top" style="padding:2px 8px;border-radius:10px;background-color:#0fa968;">
+                                                                          <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;font-weight:600;color:#ffffff;white-space:nowrap;">+{{ stat.delta }}</span>
+                                                                        </td>
+                                                                      </tr>
+                                                                    </tbody>
+                                                                  </table>
+                                                                {% endif %}
+                                                                {% else %}
+                                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;display:inline-table;margin:0 4px 4px 0;">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td align="left" valign="top" style="padding:2px 8px;border-radius:10px;background-color:#e5484d;">
+                                                                        <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;font-weight:600;color:#ffffff;white-space:nowrap;">{{ stat.delta }}</span>
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                              </td>
+                                                            </tr>
+                                                          </tbody>
+                                                        </table>
+                                                      {% endif %}
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                            <!--[if mso | IE]></td><![endif]-->
+                                          {% endfor %}
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="px-mobile" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td align="left" valign="top" style="padding:0 32px 8px 32px;">
+                            {% for project in projects %}
+                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="card" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin:0 0 16px 0;">
+                                <tbody>
+                                  <tr>
+                                    <td align="left" valign="top" bgcolor="#ffffff" style="padding:0;border:1px solid #e3e7ee;border-radius:8px;">
+                                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                        <tbody>
+                                          <tr>
+                                            <td align="left" valign="top" style="padding:16px 20px 8px 20px;">
+                                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                <tbody>
+                                                  <tr>
+                                                    <td class="stack-column" width="32" valign="top" style="vertical-align:middle;">
+                                                      <img src="{{ project.logo_url|default:default_project_logo_url }}" width="24" height="24" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:4px;">
+                                                    </td>
+                                                    <td class="stack-column" width="*" valign="top" style="vertical-align:middle;">
+                                                      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;font-weight:700;color:#121a26;">{{ project.name }}</p>
+                                                    </td>
+                                                    <td class="stack-column" width="120" valign="top" style="vertical-align:middle;text-align:right;">
+                                                      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:right;">{% blocktranslate with done=project.completed_count total=project.issue_count %}{{ done }} of {{ total }} done{% endblocktranslate %}</p>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                <tbody>
+                                                  <tr>
+                                                    <td align="left" valign="top" style="padding:8px 0 0 0;">
+                                                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                        <tbody>
+                                                          <tr>
+                                                            <td align="left" valign="top" bgcolor="#eef0f3" style="padding:0;border-radius:3px;font-size:0;line-height:0;">
+                                                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="{{ project.progress }}%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                <tbody>
+                                                                  <tr>
+                                                                    <td align="left" valign="top" bgcolor="#3f76ff" style="padding:0;height:6px;border-radius:3px;font-size:0;line-height:0;">
+                                                                      &nbsp;
+                                                                    </td>
+                                                                  </tr>
+                                                                </tbody>
+                                                              </table>
+                                                            </td>
+                                                          </tr>
+                                                        </tbody>
+                                                      </table>
+                                                    </td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                        <tbody>
+                                          <tr>
+                                            <td align="left" valign="top" style="padding:0 20px 8px 20px;">
+                                              {% for issue in project.digest_issues %}
+                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;border-top:1px solid #eef0f3;">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td class="stack-column" width="28" valign="top" style="padding:14px 0 0 0;">
+                                                        {% if issue.priority == "urgent" %}
+                                                          <img src="{% static 'emails/icons/priority-urgent.png' %}" width="16" height="16" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">
+                                                          {% elif issue.priority == "high" %}
+                                                          <img src="{% static 'emails/icons/priority-high.png' %}" width="16" height="16" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">
+                                                          {% else %}
+                                                          <img src="{% static 'emails/icons/priority-none.png' %}" width="16" height="16" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">
+                                                        {% endif %}
+                                                      </td>
+                                                      <td class="stack-column" width="*" valign="top" style="padding:12px 0 12px 4px;">
+                                                        <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:21px;color:#3d4451;mso-line-height-rule:exactly;"><a href="{{ base_url }}{% url 'issues:detail' project.slug issue.sequence_id %}" target="_blank" style="color:#121a26;text-decoration:none;font-weight:600;">{{ project.identifier }}-{{ issue.sequence_id }} {{ issue.title|truncatechars:90 }}</a></p>
+                                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;margin-top:6px;">
+                                                          <tbody>
+                                                            <tr>
+                                                              <td class="stack-column" width="auto" valign="top" style="padding:0 8px 0 0;">
+                                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td align="left" valign="top" style="padding:0;">
+                                                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;display:inline-table;margin:0 4px 4px 0;">
+                                                                          <tbody>
+                                                                            <tr>
+                                                                              <td align="left" valign="top" style="padding:2px 8px;border-radius:10px;background-color:{{ issue.state.color|default:'#8a93a3' }};">
+                                                                                <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;font-weight:600;color:#ffffff;white-space:nowrap;">{{ issue.state.name }}</span>
+                                                                              </td>
+                                                                            </tr>
+                                                                          </tbody>
+                                                                        </table>
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                              </td>
+                                                              <td class="stack-column" width="auto" valign="top" style="padding:0 8px 0 0;">
+                                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td align="left" valign="top" style="padding:0;">
+                                                                        {% for label in issue.labels.all|slice:":3" %}
+                                                                          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;display:inline-table;margin:0 4px 4px 0;">
+                                                                            <tbody>
+                                                                              <tr>
+                                                                                <td align="left" valign="top" style="padding:2px 8px;border-radius:10px;background-color:{{ label.color }};">
+                                                                                  <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;font-weight:600;color:#ffffff;white-space:nowrap;">{{ label.name }}</span>
+                                                                                </td>
+                                                                              </tr>
+                                                                            </tbody>
+                                                                          </table>
+                                                                        {% endfor %}
+                                                                        {% if issue.labels.count > 3 %}
+                                                                          <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;">+{{ issue.labels.count|add:"-3" }}</span>
+                                                                        {% endif %}
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                              </td>
+                                                              <td class="stack-column" width="auto" valign="top" style="padding:0 8px 0 0;vertical-align:middle;">
+                                                                {% with assignee=issue.assignees.first %}
+                                                                  {% if assignee %}
+                                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;width:auto;">
+                                                                      <tbody>
+                                                                        <tr>
+                                                                          <td class="stack-column" width="20" valign="top" style="padding:0 6px 0 0;vertical-align:middle;">
+                                                                            <img src="{{ assignee.avatar_url|default:default_avatar_url }}" width="20" height="20" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:10px;">
+                                                                          </td>
+                                                                          <td class="stack-column" width="auto" valign="top" style="vertical-align:middle;">
+                                                                            <span class="" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;">{{ assignee.display_name }}</span>
+                                                                          </td>
+                                                                        </tr>
+                                                                      </tbody>
+                                                                    </table>
+                                                                  {% endif %}
+                                                                {% endwith %}
+                                                              </td>
+                                                              <td class="stack-column" width="auto" valign="top" style="padding:0;vertical-align:middle;text-align:right;">
+                                                                {% if issue.target_date %}
+                                                                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                    <tbody>
+                                                                      <tr>
+                                                                        <td align="right" valign="top" style="padding:0;">
+                                                                          {% if issue.is_overdue %}
+                                                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;display:inline-table;margin:0 4px 4px 0;">
+                                                                              <tbody>
+                                                                                <tr>
+                                                                                  <td align="left" valign="top" style="padding:2px 8px;border-radius:10px;background-color:#e5484d;">
+                                                                                    <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;font-weight:600;color:#ffffff;white-space:nowrap;">{% blocktranslate with date=issue.target_date|date:"M j" %}Overdue since {{ date }}{% endblocktranslate %}</span>
+                                                                                  </td>
+                                                                                </tr>
+                                                                              </tbody>
+                                                                            </table>
+                                                                            {% else %}
+                                                                            <span style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;">{% blocktranslate with date=issue.target_date|date:"M j" %}Due {{ date }}{% endblocktranslate %}</span>
+                                                                          {% endif %}
+                                                                        </td>
+                                                                      </tr>
+                                                                    </tbody>
+                                                                  </table>
+                                                                {% endif %}
+                                                              </td>
+                                                            </tr>
+                                                          </tbody>
+                                                        </table>
+                                                        {% if issue.latest_comment %}
+                                                          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                            <tbody>
+                                                              <tr>
+                                                                <td align="left" valign="top" style="padding:8px 0 0 0;">
+                                                                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                    <tbody>
+                                                                      <tr>
+                                                                        <td align="left" valign="top" bgcolor="#f8f9fb" style="padding:8px 12px;border-left:3px solid #d0d6e0;">
+                                                                          <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;color:#5b6473;">{{ issue.latest_comment.text|striptags|truncatewords:30 }}</p>
+                                                                          <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;padding-top:4px;">{% blocktranslate count counter=issue.comment_count %}{{ counter }} comment{% plural %}{{ counter }} comments{% endblocktranslate %} &middot; {{ issue.latest_comment.created_at|timesince }}</p>
+                                                                        </td>
+                                                                      </tr>
+                                                                    </tbody>
+                                                                  </table>
+                                                                </td>
+                                                              </tr>
+                                                            </tbody>
+                                                          </table>
+                                                        {% endif %}
+                                                      </td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                                {% empty %}
+                                                <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;padding:12px 0;">{% translate "No issue changed in this project." %}</p>
+                                              {% endfor %}
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      {% if project.digest_issues|length > 5 %}
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                          <tbody>
+                                            <tr>
+                                              <td align="left" valign="top" style="padding:0 20px 16px 20px;">
+                                                <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:21px;color:#3d4451;mso-line-height-rule:exactly;"><a href="{{ base_url }}{% url 'projects:issues' project.slug %}" target="_blank" style="color:#3f76ff;text-decoration:none;font-weight:600;">{% blocktranslate with count=project.digest_issues|length %}See all {{ count }} updates{% endblocktranslate %} &rarr;</a></p>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      {% endif %}
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              {% empty %}
+                              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                <tbody>
+                                  <tr>
+                                    <td align="center" valign="top" style="padding:24px;border:1px dashed #d0d6e0;border-radius:8px;text-align:center;">
+                                      <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:21px;color:#3d4451;mso-line-height-rule:exactly;text-align:center;">{% translate "Nothing moved in your projects this week." %}</p>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            {% endfor %}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    {% if mentions %}
+                      <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="px-mobile" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                        <tbody>
+                          <tr>
+                            <td align="left" valign="top" style="padding:8px 32px 8px 32px;">
+                              <h2 style="margin:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;line-height:26px;font-weight:700;color:#121a26;">{% translate "Mentions" %}</h2>
+                              {% for mention in mentions %}
+                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                  <tbody>
+                                    <tr>
+                                      <td align="left" valign="top" style="padding:0 0 12px 0;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="card" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                          <tbody>
+                                            <tr>
+                                              <td align="left" valign="top" bgcolor="#ffffff" style="padding:12px 16px;border:1px solid #e3e7ee;border-radius:8px;">
+                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td class="stack-column" width="36" valign="top" style="padding:0 12px 0 0;">
+                                                        <img src="{{ mention.actor.avatar_url|default:default_avatar_url }}" width="32" height="32" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:16px;">
+                                                      </td>
+                                                      <td class="stack-column" width="*" valign="top" style="">
+                                                        <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:21px;color:#3d4451;mso-line-height-rule:exactly;">{% blocktranslate with actor=mention.actor.display_name issue=mention.issue.title %}<strong>{{ actor }}</strong> mentioned you in <strong>{{ issue }}</strong>{% endblocktranslate %}</p>
+                                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                          <tbody>
+                                                            <tr>
+                                                              <td align="left" valign="top" style="padding:6px 0 0 0;">
+                                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td align="left" valign="top" bgcolor="#f5f8ff" style="padding:8px 12px;border-left:3px solid #3f76ff;">
+                                                                        <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:21px;color:#3d4451;mso-line-height-rule:exactly;color:#5b6473;">{{ mention.comment.html|safe|truncatewords_html:40 }}</p>
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                              </td>
+                                                            </tr>
+                                                          </tbody>
+                                                        </table>
+                                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                          <tbody>
+                                                            <tr>
+                                                              <td align="left" valign="top" style="padding:8px 0 0 0;">
+                                                                <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                                                                  <tbody>
+                                                                    <tr>
+                                                                      <td class="stack-column" width="auto" valign="top" style="vertical-align:middle;">
+                                                                        <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;">{{ mention.created_at|date:'D, M j' }} &middot; {{ mention.created_at|time:'H:i' }}</p>
+                                                                      </td>
+                                                                      <td class="stack-column" width="auto" valign="top" style="vertical-align:middle;text-align:right;">
+                                                                        <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:right;"><a href="{{ base_url }}{% url 'issues:detail' mention.issue.project.slug mention.issue.sequence_id %}#comment-{{ mention.comment.pk }}" target="_blank" style="color:#3f76ff;text-decoration:none;font-weight:600;">{% translate "Reply" %}</a></p>
+                                                                      </td>
+                                                                    </tr>
+                                                                  </tbody>
+                                                                </table>
+                                                              </td>
+                                                            </tr>
+                                                          </tbody>
+                                                        </table>
+                                                      </td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              {% endfor %}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    {% endif %}
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="px-mobile" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td align="center" valign="top" style="padding:16px 32px 32px 32px;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                              <tbody>
+                                <tr>
+                                  <td align="center" valign="top" bgcolor="#3f76ff" style="padding:0;border-radius:6px;">
+                                    <!--[if mso]>
+                                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ base_url }}{% url 'dashboard' %}" style="height:44px;v-text-anchor:middle;width:240px;" arcsize="14%" stroke="f" fillcolor="#3f76ff">
+                                    <w:anchorlock/>
+                                    <center style="color:#ffffff;font-family:sans-serif;font-size:15px;font-weight:bold;">{% translate "Open your dashboard" %}</center>
+                                    </v:roundrect>
+                                    <![endif]-->
+                                    <a class="" href="{{ base_url }}{% url 'dashboard' %}" target="_blank" style="display:inline-block;padding:12px 28px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:20px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:6px;mso-hide:all;">{% translate "Open your dashboard" %}</a>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <!--[if mso | IE]></td></tr></table><![endif]-->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="px-mobile" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+              <tbody>
+                <tr>
+                  <td align="center" valign="top" style="padding:24px 32px 40px 32px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="auto" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                      <tbody>
+                        <tr>
+                          <td align="center" valign="top" style="padding:0 0 16px 0;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt;">
+                              <tbody>
+                                <tr>
+                                  {% for link in social_links %}
+                                    <td class="stack-column" width="32" valign="top" style="padding:0 6px;">
+                                      <a href="{{ link.url }}" target="_blank" style="text-decoration:none;">
+                                        <img src="{% static link.icon %}" width="20" height="20" style="display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">
+                                      </a>
+                                    </td>
+                                  {% endfor %}
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:center;">{{ company_address|linebreaksbr }}</p>
+                    <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:center;padding-top:8px;">{% blocktranslate with workspace=workspace.name %}You receive this email because you subscribed to weekly digests of {{ workspace }}.{% endblocktranslate %}</p>
+                    <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:center;padding-top:8px;"><a href="{{ base_url }}{% url 'notifications:preferences' %}" target="_blank" style="color:#8a93a3;text-decoration:underline;">{% translate "Notification settings" %}</a> &middot; <a href="{{ base_url }}{% url 'notifications:unsubscribe' token=unsubscribe_token %}" target="_blank" style="color:#8a93a3;text-decoration:underline;">{% translate "Unsubscribe" %}</a></p>
+                    <p style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#8a93a3;mso-line-height-rule:exactly;text-align:center;padding-top:8px;">&copy; {% now 'Y' %} {{ site_name }}</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
