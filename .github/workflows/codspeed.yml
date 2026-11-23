@@ -55,7 +55,7 @@ jobs:
           enable-cache: false
 
       - name: Build the benchmark target(s)
-        run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile release
+        run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile profiling
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v5.6.3
         with:
