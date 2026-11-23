@@ -634,6 +634,7 @@ DEFAULT_TARGETS = [
             exclude={
                 ExcludeReason.TAG_SPANS_TEMPLATE_BLOCK: (
                     # <div> opened and closed in separate {% if %} blocks
+                    "mvp/templates/cotton/mvp/form/formset/index.html",
                     "mvp/templates/cotton/mvp/form/formset/row.html",
                 ),
             },
