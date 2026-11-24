@@ -1,5 +1,77 @@
 # Changelog
 
+## [1.2.0](https://github.com/UnknownPlatypus/djangofmt/compare/v1.1.0..v1.2.0) - 2026-11-24
+
+[**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
+
+### ⛰️ Features
+
+- *(lint)* Let an ignore comment cover the text and HTML comments of its node ([#635](https://github.com/UnknownPlatypus/djangofmt/issues/635)) - ([f1430d6](https://github.com/UnknownPlatypus/djangofmt/commit/f1430d6e86c89c884ec7eacd98342d9824caaba2))
+- *(lint)* Add a `complexity` category: new `redundant-json-script-id`, `redundant-type-attr` moved from `style` ([#591](https://github.com/UnknownPlatypus/djangofmt/issues/591)) - ([4bce30a](https://github.com/UnknownPlatypus/djangofmt/commit/4bce30acd4312caa6cf6e9baf708541aaabc96c7))
+- *(lint)* Add `deprecated-static-library` lint rule ([#571](https://github.com/UnknownPlatypus/djangofmt/issues/571)) - ([bf9268a](https://github.com/UnknownPlatypus/djangofmt/commit/bf9268a086d96269d073377fcfe33b39b28b03de))
+
+### 🐛 Bug Fixes
+
+- *(cli)* Let a non-empty `NO_COLOR` override `FORCE_COLOR` in diagnostics ([#618](https://github.com/UnknownPlatypus/djangofmt/issues/618)) - ([fe57fc3](https://github.com/UnknownPlatypus/djangofmt/commit/fe57fc3529b79a68aabb7caaee4d8c76e03c8f80))
+- *(format)* Stop exponential parsing of unclosed CSS calls ([#646](https://github.com/UnknownPlatypus/djangofmt/issues/646)) - ([f60f799](https://github.com/UnknownPlatypus/djangofmt/commit/f60f799e108c90a36fb6c4d5c4a3223f00b8480d))
+- *(format)* Keep invalid CSS in style attributes verbatim instead of joining its lines ([#596](https://github.com/UnknownPlatypus/djangofmt/issues/596)) - ([9b77c00](https://github.com/UnknownPlatypus/djangofmt/commit/9b77c0065f4760c6854c75855ee3186df4aa9b58))
+- *(lint)* Report a fix that breaks a file leading with file-ignore[invalid-syntax] ([#632](https://github.com/UnknownPlatypus/djangofmt/issues/632)) - ([9233cbb](https://github.com/UnknownPlatypus/djangofmt/commit/9233cbb7b2127687a8349f2cf65c0caebf987cc5))
+- *(lint)* Keep the separator when removing an attribute glued to the next token ([#631](https://github.com/UnknownPlatypus/djangofmt/issues/631)) - ([2e179f5](https://github.com/UnknownPlatypus/djangofmt/commit/2e179f5f8d9726f109fcad20c808dc3f8710a105))
+- *(lint)* Stop `use-https` panicking on non-ASCII hosts ([#619](https://github.com/UnknownPlatypus/djangofmt/issues/619)) - ([db070b4](https://github.com/UnknownPlatypus/djangofmt/commit/db070b4c87df4705317ee06c349cfd7e93604abb))
+- *(playground)* Fit the navbar on mobile ([#652](https://github.com/UnknownPlatypus/djangofmt/issues/652)) - ([f5fbbf1](https://github.com/UnknownPlatypus/djangofmt/commit/f5fbbf13816b6045bbc78921dc0dd7a0eb0ceeb2))
+- *(playground)* Reject invalid options instead of silently using defaults ([#620](https://github.com/UnknownPlatypus/djangofmt/issues/620)) - ([a0a1a5c](https://github.com/UnknownPlatypus/djangofmt/commit/a0a1a5c2815c0734b14494c33466f7d7d41bd278))
+- Honor `CLICOLOR=0` and stop CI runs cancelling newer ones ([#643](https://github.com/UnknownPlatypus/djangofmt/issues/643)) - ([51b894e](https://github.com/UnknownPlatypus/djangofmt/commit/51b894e4f2fdc7ff72fed1073c35fa9b26045773))
+
+### 🚜 Refactor
+
+- *(lint)* Run the ignore rules as their own pass over a shared `LintContext` ([#633](https://github.com/UnknownPlatypus/djangofmt/issues/633)) - ([2a2767a](https://github.com/UnknownPlatypus/djangofmt/commit/2a2767aa497597aa4d00b10a9bb09aedad662204))
+- *(lint)* Expose each djangofmt_lint item through a single path ([#609](https://github.com/UnknownPlatypus/djangofmt/issues/609)) - ([3a78b2d](https://github.com/UnknownPlatypus/djangofmt/commit/3a78b2d592c7d362d6622560393270bede2487fb))
+
+### 📚 Documentation
+
+- Fix or drop doc comments that no longer match the code ([#621](https://github.com/UnknownPlatypus/djangofmt/issues/621)) - ([03320fc](https://github.com/UnknownPlatypus/djangofmt/commit/03320fc2968888de24363ce9313721b17cd2c74b))
+
+### ⚡ Performance
+
+- *(bench)* Track benchmark memory usage with CodSpeed's memory instrument ([#657](https://github.com/UnknownPlatypus/djangofmt/issues/657)) - ([66ee952](https://github.com/UnknownPlatypus/djangofmt/commit/66ee952da622e48c630ff1bc920f409f05c33983))
+- *(bench)* Pin CodSpeed to one codegen unit and the arm runner ([#651](https://github.com/UnknownPlatypus/djangofmt/issues/651)) - ([59e6b02](https://github.com/UnknownPlatypus/djangofmt/commit/59e6b022e1a608fe2a9539b118e4a9eb7de95b3b))
+- *(bench)* Move the template corpus into a dependency-free `djangofmt_corpus` crate ([#650](https://github.com/UnknownPlatypus/djangofmt/issues/650)) - ([2d10300](https://github.com/UnknownPlatypus/djangofmt/commit/2d103003859fef78ee497f9a353f574f2f3857af))
+- *(bench)* Add large tag-dense and verbatim targets ([#648](https://github.com/UnknownPlatypus/djangofmt/issues/648)) - ([60c411a](https://github.com/UnknownPlatypus/djangofmt/commit/60c411ae613cdc34551c8e878a1031947615dbab))
+- *(bench)* Replace the AGPL deeply nested template and add a cotton target ([#647](https://github.com/UnknownPlatypus/djangofmt/issues/647)) - ([fa2d9a5](https://github.com/UnknownPlatypus/djangofmt/commit/fa2d9a5cda988336376fda7fbc683a9493cdeb19))
+- *(lint)* Skip the per-file Settings clone when per-file-ignores leave the rules unchanged ([#623](https://github.com/UnknownPlatypus/djangofmt/issues/623)) - ([21afd22](https://github.com/UnknownPlatypus/djangofmt/commit/21afd228de7cc2af5d365260224ac0eae5a9614d))
+- *(lint)* Build the diagnostic report handler once instead of per diagnostic ([#599](https://github.com/UnknownPlatypus/djangofmt/issues/599)) - ([bea18e6](https://github.com/UnknownPlatypus/djangofmt/commit/bea18e691eece0e6bd81c08fd250ce3c6d9b8c99))
+- *(lint)* Write concise diagnostics once per file, plus CI download and upload tweaks ([#595](https://github.com/UnknownPlatypus/djangofmt/issues/595)) - ([3efe30c](https://github.com/UnknownPlatypus/djangofmt/commit/3efe30cc8c628edd482b3b53ff948e793185494c))
+
+### 🧪 Testing
+
+- *(ecosystem)* Drop exclusions for readthedocs templates deleted upstream ([#637](https://github.com/UnknownPlatypus/djangofmt/issues/637)) - ([66746a6](https://github.com/UnknownPlatypus/djangofmt/commit/66746a6ed87d5245c2aeb89d780e84b97ab0a27d))
+- *(fuzz)* Re-raise embedded formatter panics instead of falling back ([#622](https://github.com/UnknownPlatypus/djangofmt/issues/622)) - ([eb45307](https://github.com/UnknownPlatypus/djangofmt/commit/eb453078e7fbea06c453d0c635031e1000199ea4))
+
+### ⚙️ Miscellaneous Tasks
+
+- *(agents)* Add a PR description guideline ([#649](https://github.com/UnknownPlatypus/djangofmt/issues/649)) - ([cceead0](https://github.com/UnknownPlatypus/djangofmt/commit/cceead0570ee2b4abc8b0a3ef37cffc4356d8a6d))
+- *(agents)* Trim AGENTS.md to what a fresh agent cannot discover, add design scope and markup_fmt local testing ([#598](https://github.com/UnknownPlatypus/djangofmt/issues/598)) - ([a39a08f](https://github.com/UnknownPlatypus/djangofmt/commit/a39a08fafef45f54abaa2133137a1465a2692855))
+- *(ci)* Check docs, test on arm64, add weekly beta clippy and link checks ([#628](https://github.com/UnknownPlatypus/djangofmt/issues/628)) - ([ec41d8e](https://github.com/UnknownPlatypus/djangofmt/commit/ec41d8e3b0f87fa7486629a479575f0a8c20ef9c))
+- *(ci)* Autofix with zizmor, run actionlint on pre-commit.ci and format the justfile ([#625](https://github.com/UnknownPlatypus/djangofmt/issues/625)) - ([7967364](https://github.com/UnknownPlatypus/djangofmt/commit/7967364aa55069541db3d79a25b7ebad4487762d))
+- *(ci)* Lock GitHub Actions dependencies in actions.lock ([#616](https://github.com/UnknownPlatypus/djangofmt/issues/616)) - ([e344ffc](https://github.com/UnknownPlatypus/djangofmt/commit/e344ffc898435ec397ff97720daa61f02bb2106b))
+- *(config)* Migrate Renovate config ([#641](https://github.com/UnknownPlatypus/djangofmt/issues/641)) - ([0d28b95](https://github.com/UnknownPlatypus/djangofmt/commit/0d28b959a7ad4e6d4c1c900c71c19ffad6c1b283))
+- *(docs)* Check rustdoc in pre-commit and require rule docs ([#608](https://github.com/UnknownPlatypus/djangofmt/issues/608)) - ([55612f8](https://github.com/UnknownPlatypus/djangofmt/commit/55612f8bd72bf190a4bae821d307d527bf12d929))
+- *(ecosystem)* Remove unused `GITHUB_MAX_COMMENT_LENGTH` constant ([#642](https://github.com/UnknownPlatypus/djangofmt/issues/642)) - ([d198d54](https://github.com/UnknownPlatypus/djangofmt/commit/d198d54591e2492d4504357103dab45fd61b1610))
+- *(lint)* Deny missing Debug impls, unnameable types and unsafe code ([#606](https://github.com/UnknownPlatypus/djangofmt/issues/606)) - ([5899388](https://github.com/UnknownPlatypus/djangofmt/commit/5899388050343f51d8c6e3256820391b7f1b939f))
+- *(lint)* Guard the panic boundary, hasher and argument count in clippy.toml ([#605](https://github.com/UnknownPlatypus/djangofmt/issues/605)) - ([678e04e](https://github.com/UnknownPlatypus/djangofmt/commit/678e04e8918cda32878a52f8354de75496c72a50))
+- *(lint)* Rename the ReportHandler::debug parameter to match the trait ([#600](https://github.com/UnknownPlatypus/djangofmt/issues/600)) - ([d9a822d](https://github.com/UnknownPlatypus/djangofmt/commit/d9a822d9f6730a48cc70315f999fe9c668a92147))
+- *(lint)* Deny all warnings and enable every clippy restriction lint ([#597](https://github.com/UnknownPlatypus/djangofmt/issues/597)) - ([6ed7783](https://github.com/UnknownPlatypus/djangofmt/commit/6ed77833b2a21abac38fc07af45bef4709e70eb4))
+- *(playground)* Make the base path configurable for PR previews ([#653](https://github.com/UnknownPlatypus/djangofmt/issues/653)) - ([cba86f7](https://github.com/UnknownPlatypus/djangofmt/commit/cba86f7ab0fa99bb5e2334d02ee13a49ce2f5002))
+- Give each playground preview push its own URL to skip the browser cache ([#656](https://github.com/UnknownPlatypus/djangofmt/issues/656)) - ([9ce22d8](https://github.com/UnknownPlatypus/djangofmt/commit/9ce22d86598239f78a05f74b795c6b04cce97854))
+- Deploy playground previews for pull requests ([#655](https://github.com/UnknownPlatypus/djangofmt/issues/655)) - ([f4ab132](https://github.com/UnknownPlatypus/djangofmt/commit/f4ab132c286601343ac660e5f66a238fdf7f0e6c))
+- Deploy the playground and docs from the gh-pages branch ([#654](https://github.com/UnknownPlatypus/djangofmt/issues/654)) - ([cc38642](https://github.com/UnknownPlatypus/djangofmt/commit/cc38642bee22982a13c5957d836acb55550628e6))
+- Deny unescaped doc backticks and lint pub items like private ones ([#624](https://github.com/UnknownPlatypus/djangofmt/issues/624)) - ([465d15b](https://github.com/UnknownPlatypus/djangofmt/commit/465d15b14ca4180eac4013dbb2fa723afa315ab5))
+- Lint release.yml with actionlint and drop the announce checkout ([#617](https://github.com/UnknownPlatypus/djangofmt/issues/617)) - ([2b9b8db](https://github.com/UnknownPlatypus/djangofmt/commit/2b9b8dbd9db31240f68858b5325446ac7949dbb9))
+- Byte-order file sort, dawidd6 v27, checksummed wasm-pack, pinned dev tools ([#602](https://github.com/UnknownPlatypus/djangofmt/issues/602)) - ([5ed3111](https://github.com/UnknownPlatypus/djangofmt/commit/5ed3111fb3faa354b1156bab3a42420707d21829))
+- Tidy tests, error types and the summary bench ([#607](https://github.com/UnknownPlatypus/djangofmt/issues/607)) - ([b642ef3](https://github.com/UnknownPlatypus/djangofmt/commit/b642ef39aa6a9fe8bf0e59d5b32bc1ce0ec9d70e))
+- Cache Rust dependencies in CI jobs with Swatinem/rust-cache ([#601](https://github.com/UnknownPlatypus/djangofmt/issues/601)) - ([3ae7b91](https://github.com/UnknownPlatypus/djangofmt/commit/3ae7b91df87500634f0a2c9a478aeb45ab55997a))
+- Restore mutation testing, scope ecosystem comments per PR, bump tiny_pretty ([#603](https://github.com/UnknownPlatypus/djangofmt/issues/603)) - ([d00665b](https://github.com/UnknownPlatypus/djangofmt/commit/d00665b149e3e385b00b8dab86b2f9f1f3d43ff3))
+
 ## [1.1.0](https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.1..v1.1.0) - 2026-10-20
 
 [**Docs**](https://unknownplatypus.github.io/djangofmt/docs/) | [**Playground**](https://unknownplatypus.github.io/djangofmt/)
@@ -470,7 +542,7 @@
 
 ### New Contributors ❤️
 
-- @Mouarius made their first contribution in [#156](https://github.com/UnknownPlatypus/djangofmt/pull/156)
+- @sttellastar made their first contribution in [#156](https://github.com/UnknownPlatypus/djangofmt/pull/156)
 
 ## [0.2.3](https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.2..v0.2.3) - 2025-11-30
 

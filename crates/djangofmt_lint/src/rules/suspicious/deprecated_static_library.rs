@@ -38,7 +38,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [Django 2.1 release notes: deprecated features](https://docs.djangoproject.com/en/stable/releases/2.1/#deprecated-features-2-1)
 /// - [Django 3.0 release notes: removed features](https://docs.djangoproject.com/en/stable/releases/3.0/#features-removed-in-3-0)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.2.0")]
 pub struct DeprecatedStaticLibrary<'a> {
     pub library: &'a str,
 }

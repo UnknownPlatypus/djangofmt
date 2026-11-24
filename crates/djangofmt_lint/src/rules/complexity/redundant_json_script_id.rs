@@ -37,7 +37,7 @@ use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
 /// - [Django template filters: `json_script`](https://docs.djangoproject.com/en/stable/ref/templates/builtins/#json-script)
 /// - [Django 4.1 release notes: templates](https://docs.djangoproject.com/en/stable/releases/4.1/#templates-4-1)
 #[derive(Debug, PartialEq, Eq, ViolationMetadata)]
-#[violation_metadata(stable_since = "NEXT_DJANGOFMT_VERSION")]
+#[violation_metadata(stable_since = "1.2.0")]
 pub struct RedundantJsonScriptId;
 
 impl Violation for RedundantJsonScriptId {
