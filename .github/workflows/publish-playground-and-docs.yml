@@ -1,5 +1,6 @@
 # Builds the playground (Deno + WASM) and the Zensical docs site, then
 # pushes both to the `gh-pages` branch: playground at `/`, docs at `/docs/`.
+# Same-repo PRs get a playground preview at `/pr-preview/pr-<N>/`, removed on close.
 name: "[djangofmt] Publish Playground and Docs"
 
 on:
@@ -13,8 +14,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-  # Run build (no deploy) on PRs touching playground, docs, their sources, or build config
+  # Build and preview PRs touching playground, docs, their sources, or build config
   pull_request:
+    types: [opened, reopened, synchronize, closed]
     paths:
       - "playground/**"
       - "docs/**"
@@ -56,6 +58,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event.action != 'closed'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -85,6 +88,15 @@ jobs:
       - name: Build playground
         run: deno task build
         working-directory: playground
+        env:
+          # Must match the path the preview action deploys to. Empty outside PRs.
+          PLAYGROUND_BASE: ${{ github.event_name == 'pull_request' && format('/djangofmt/pr-preview/pr-{0}/', github.event.pull_request.number) || '' }}
+      - name: Upload preview
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: preview
+          path: playground/dist
       - name: Setup uv
         uses: astral-sh/setup-uv@v10.3.3
         with:
@@ -142,5 +154,55 @@ jobs:
           branch: gh-pages
           # PR previews live there; production deploys must not delete them.
           clean-exclude: pr-preview/
-          # The preview workflow also pushes here, so rebase instead of force-pushing.
+          # PR previews also push here, so rebase instead of force-pushing.
           force: false
+
+  preview:
+    needs: build
+    # Fork PRs only get a read-only token.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: playground-preview
+      url: ${{ steps.preview.outputs.preview-url }}
+    permissions:
+      contents: write # push to gh-pages
+      pages: read # wait for the Pages build
+      pull-requests: write # sticky comment
+    steps:
+      # The preview action runs git inside a checkout.
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download preview
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: preview
+          path: preview
+      - name: Deploy preview
+        id: preview
+        uses: rossjrw/pr-preview-action@v1.8.2
+        with:
+          source-dir: preview
+          # The default `auto` does nothing on `reopened`.
+          action: deploy
+          wait-for-pages-deployment: true
+
+  preview-remove:
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # remove from gh-pages
+      pull-requests: write # sticky comment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - name: Remove preview
+        uses: rossjrw/pr-preview-action@v1.8.2
+        with:
+          action: remove

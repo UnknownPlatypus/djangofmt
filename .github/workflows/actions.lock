@@ -22,6 +22,7 @@ workflows:
         - 'astral-sh/setup-uv@v10.3.3'
         - 'denoland/setup-deno@v2.0.5'
         - 'jamesives/github-pages-deploy-action@v4.9.0'
+        - 'rossjrw/pr-preview-action@v1.8.2'
     '.github/workflows/release-build-binaries.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-python@v7.1.0'
@@ -118,6 +119,11 @@ dependencies:
         commit: 'sha1-1f40c72289eff860ee54a304f1438e3cff362e0a'
         owner_id: 5429470
         repo_id: 288487894
+    'jamesives/github-pages-deploy-action@4a3abc783e1a24aeb44c16e869ad83caf6b4cc23':
+        ref: 'v4.7.4'
+        commit: 'sha1-4a3abc783e1a24aeb44c16e869ad83caf6b4cc23'
+        owner_id: 10888441
+        repo_id: 173468816
     'jamesives/github-pages-deploy-action@v4.9.0':
         ref: 'v4.9.0'
         commit: 'sha1-fa24774553152dd7873cd16ebd8d959b010c5445'
@@ -128,11 +134,24 @@ dependencies:
         commit: 'sha1-e7477775783ea5526144ba13e8db5eec57747ce8'
         owner_id: 74027027
         repo_id: 320929718
+    'marocchino/sticky-pull-request-comment@67d0dec7b07ed060a405f9b2a64b8ab319fdd7db':
+        ref: 'v2.9.2'
+        commit: 'sha1-67d0dec7b07ed060a405f9b2a64b8ab319fdd7db'
+        owner_id: 128431
+        repo_id: 223043916
     'pyo3/maturin-action@v1.51.0':
         ref: 'v1.51.0'
         commit: 'sha1-e83996d129638aa358a18fbd1dfb82f0b0fb5d3b'
         owner_id: 28156855
         repo_id: 363801746
+    'rossjrw/pr-preview-action@v1.8.2':
+        ref: 'v1.8.2'
+        commit: 'sha1-873417d2df72380da1f3978378fb58560bcde976'
+        owner_id: 29130152
+        repo_id: 462466591
+        uses:
+            - 'jamesives/github-pages-deploy-action@4a3abc783e1a24aeb44c16e869ad83caf6b4cc23'
+            - 'marocchino/sticky-pull-request-comment@67d0dec7b07ed060a405f9b2a64b8ab319fdd7db'
     'swatinem/rust-cache@v2.9.3':
         ref: 'v2.9.3'
         commit: 'sha1-d1527c8f67ef9af357290475d4af4b0fab8f12e0'
