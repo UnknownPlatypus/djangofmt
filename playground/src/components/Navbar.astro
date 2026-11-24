@@ -19,7 +19,7 @@ import PlusMinusInput from "./PlusMinusInput.astro";
         <span class="font-bold text-lg tracking-tight max-sm:hidden">djangofmt</span>
     </div>
 
-    <div id="controls" class="flex items-end gap-2 max-md:min-w-0 max-md:flex-1 max-md:justify-end md:gap-8">
+    <div id="controls" class="flex items-end gap-2 max-md:min-w-0 max-md:flex-1 max-md:justify-center md:gap-8">
         <fieldset class="fieldset max-md:min-w-0 max-md:flex-1 max-md:max-w-24">
             <legend class="fieldset-legend max-md:py-1 text-xs font-bold text-base-content/90">
                 Profile
@@ -36,9 +36,9 @@ import PlusMinusInput from "./PlusMinusInput.astro";
         <PlusMinusInput signalName="indent" title="Indent" max={16} />
     </div>
 
-    <div class="hidden md:flex items-center gap-2">
+    <div class="flex items-center gap-2">
         <a
-            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
+            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm max-md:hidden"
             data-tip="Open the documentation"
             href="https://unknownplatypus.github.io/djangofmt/docs/"
             target="_blank"
@@ -47,21 +47,21 @@ import PlusMinusInput from "./PlusMinusInput.astro";
             <BookIcon />
         </a>
         <button
-            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
+            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm max-md:hidden"
             data-tip="Report an issue on GitHub"
             data-on:click="openGithubIssue($inputCode, $mode, $width, $indent, monacoOutput.editor.getValue())"
         >
             <BugIcon />
         </button>
         <button
-            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm"
+            class="btn btn-sm btn-ghost text-base-content/60 tooltip tooltip-left text-sm max-md:hidden"
             data-tip="Copy permalink"
             data-on:click="savePermalinkToClipboard($inputCode, $mode, $width, $indent)"
         >
             <IconShare />
         </button>
         <label
-            class="swap swap-rotate btn btn-sm btn-circle btn-ghost text-base-content/60 tooltip tooltip-left"
+            class="swap swap-rotate btn btn-sm btn-circle btn-ghost text-base-content/60 max-[360px]:hidden md:tooltip md:tooltip-left"
             data-tip="Toggle theme"
         >
             <input type="checkbox" data-bind="lightTheme">
@@ -72,7 +72,7 @@ import PlusMinusInput from "./PlusMinusInput.astro";
     {/* Blur after an action so the speed dial closes (it is open while focus is inside). */}
     <div
         class="fab bottom-10 md:hidden"
-        data-on:click="evt.target.closest('a, button, input') && document.activeElement.blur()"
+        data-on:click="evt.target.closest('a, button') && document.activeElement.blur()"
     >
         <div tabindex="0" role="button" class="btn btn-circle btn-primary shadow-lg" aria-label="More actions">
             <IconMore />
@@ -108,14 +108,6 @@ import PlusMinusInput from "./PlusMinusInput.astro";
             >
                 <IconShare />
             </button>
-        </div>
-        <div>
-            <span class="badge badge-neutral">Toggle theme</span>
-            <label tabindex="-1" class="swap swap-rotate btn btn-circle shadow-lg">
-                <input type="checkbox" aria-label="Toggle theme" data-bind="lightTheme">
-                <LightTheme />
-                <DarkTheme />
-            </label>
         </div>
     </div>
 </nav>
