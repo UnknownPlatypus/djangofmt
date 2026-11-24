@@ -321,3 +321,5 @@ jobs:
     secrets: inherit
     permissions:
       "contents": "write"
+      "pages": "read"
+      "pull-requests": "write"
