@@ -1,0 +1,1810 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A fast, HTML aware, Django template formatter and linter, written in Rust.">
+      
+      
+      
+        <link rel="canonical" href="https://unknownplatypus.github.io/djangofmt/docs/settings/">
+      
+      
+        <link rel="prev" href="../rules/">
+      
+      
+        <link rel="next" href="../editor-integration/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.42">
+    
+    
+      
+        <title>Settings - djangofmt</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#settings" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="djangofmt" class="md-header__button md-logo" aria-label="djangofmt" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            djangofmt
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Settings
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <a href="https://unknownplatypus.github.io/djangofmt/" title="Playground" class="md-header__button md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-code-xml" viewBox="0 0 24 24"><path d="m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16"/></svg>
+      </a>
+    
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/UnknownPlatypus/djangofmt" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    UnknownPlatypus/djangofmt
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="djangofmt" class="md-nav__button md-logo" aria-label="djangofmt" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    djangofmt
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UnknownPlatypus/djangofmt" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    UnknownPlatypus/djangofmt
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Formatting
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Formatting
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../formatting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Controlling the formatting
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../known-limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Known limitations
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Linting
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Linting
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Running the linter
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Lint rules
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Settings
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Settings
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#top-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Top-level
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Top-level">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#line-length" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>line-length</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#indent-width" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>indent-width</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>profile</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>custom-blocks</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#html-void-self-closing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>html-void-self-closing</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preserve-unquoted-attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>preserve-unquoted-attrs</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>exclude</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extend-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>extend-exclude</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>include</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extend-include" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>extend-include</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#respect-gitignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>respect-gitignore</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>force-exclude</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lint" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>lint</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lint_select" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>select</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_ignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>ignore</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_preview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>preview</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_target-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>target-version</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>fix</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_unsafe-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>unsafe-fixes</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_show-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>show-fixes</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_output-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>output-format</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_per-file-ignores" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>per-file-ignores</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lintendblock-label" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>lint.endblock-label</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lint.endblock-label">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lint_endblock-label_custom-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>custom-blocks</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lintunsorted-tailwind-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>lint.unsorted-tailwind-classes</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lint.unsorted-tailwind-classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lint_unsorted-tailwind-classes_prefix" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>prefix</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../editor-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Editor integration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Project
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Project
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Benchmarks
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing to djangofmt
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Changelog
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#top-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Top-level
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Top-level">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#line-length" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>line-length</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#indent-width" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>indent-width</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>profile</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>custom-blocks</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#html-void-self-closing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>html-void-self-closing</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preserve-unquoted-attrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>preserve-unquoted-attrs</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>exclude</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extend-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>extend-exclude</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#include" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>include</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extend-include" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>extend-include</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#respect-gitignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>respect-gitignore</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#force-exclude" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>force-exclude</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lint" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>lint</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lint">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lint_select" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>select</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_ignore" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>ignore</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_preview" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>preview</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_target-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>target-version</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_fix" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>fix</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_unsafe-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>unsafe-fixes</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_show-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>show-fixes</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_output-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>output-format</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lint_per-file-ignores" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>per-file-ignores</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lintendblock-label" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>lint.endblock-label</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lint.endblock-label">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lint_endblock-label_custom-blocks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>custom-blocks</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lintunsorted-tailwind-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>lint.unsorted-tailwind-classes</code>
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="lint.unsorted-tailwind-classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lint_unsorted-tailwind-classes_prefix" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>prefix</code>
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+<!-- WARNING: This file is auto-generated by `cargo run -p djangofmt_dev -- generate-all`. Do not edit. -->
+
+<h1 id="settings">Settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h1>
+<p>djangofmt reads its configuration from the <code>[tool.djangofmt]</code> table of the closest <code>pyproject.toml</code>; command-line arguments take precedence over it.</p>
+<h2 id="top-level">Top-level<a class="headerlink" href="#top-level" title="Permanent link">&para;</a></h2>
+<p>Options shared by the formatter (<code>djangofmt</code>) and the linter (<code>djangofmt check</code>).</p>
+<h3 id="line-length"><a href="#line-length"><code>line-length</code></a><a class="headerlink" href="#line-length" title="Permanent link">&para;</a></h3>
+<p>The line length the formatter should fit code into when possible.</p>
+<p><strong>Default value</strong>: <code>120</code></p>
+<p><strong>Type</strong>: <code>int</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">line-length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">88</span>
+</span></code></pre></div>
+<hr />
+<h3 id="indent-width"><a href="#indent-width"><code>indent-width</code></a><a class="headerlink" href="#indent-width" title="Permanent link">&para;</a></h3>
+<p>The number of spaces per indentation level.</p>
+<p><strong>Default value</strong>: <code>4</code></p>
+<p><strong>Type</strong>: <code>int</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">indent-width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span>
+</span></code></pre></div>
+<hr />
+<h3 id="profile"><a href="#profile"><code>profile</code></a><a class="headerlink" href="#profile" title="Permanent link">&para;</a></h3>
+<p>The template language to parse. Defaults to the file extension when unset
+(<code>.html</code> is Django, <code>.jinja</code>/<code>.jinja2</code>/<code>.j2</code> are Jinja).</p>
+<p><strong>Default value</strong>: <code>"django"</code></p>
+<p><strong>Type</strong>: <code>"django" | "jinja"</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">profile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;jinja&quot;</span>
+</span></code></pre></div>
+<hr />
+<h3 id="custom-blocks"><a href="#custom-blocks"><code>custom-blocks</code></a><a class="headerlink" href="#custom-blocks" title="Permanent link">&para;</a></h3>
+<p>Names of custom block tags to treat as paired blocks, so their content is indented
+instead of left untouched.</p>
+<p><strong>Default value</strong>: <code>[]</code></p>
+<p><strong>Type</strong>: <code>list[str]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">custom-blocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;cache&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;spaceless&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="html-void-self-closing"><a href="#html-void-self-closing"><code>html-void-self-closing</code></a><a class="headerlink" href="#html-void-self-closing" title="Permanent link">&para;</a></h3>
+<p>Whether void HTML elements are written self-closing (<code>&lt;br /&gt;</code>) or not (<code>&lt;br&gt;</code>).
+<code>unchanged</code> keeps whatever the source uses.</p>
+<p><strong>Default value</strong>: <code>"never"</code></p>
+<p><strong>Type</strong>: <code>"never" | "always" | "unchanged"</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">html-void-self-closing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;always&quot;</span>
+</span></code></pre></div>
+<hr />
+<h3 id="preserve-unquoted-attrs"><a href="#preserve-unquoted-attrs"><code>preserve-unquoted-attrs</code></a><a class="headerlink" href="#preserve-unquoted-attrs" title="Permanent link">&para;</a></h3>
+<p>Whether to leave unquoted attribute values (e.g. <code>prop=True</code>) as-is instead of quoting
+them. Useful for template syntaxes that assign non-string values through attributes.</p>
+<p><strong>Deprecated</strong>, to be removed in djangofmt 2.0: in the <code>django</code> profile, unquoted values
+on <a href="https://django-cotton.com">Cotton</a> components (<code>c-*</code>) are now preserved automatically.</p>
+<p><strong>Default value</strong>: <code>false</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">preserve-unquoted-attrs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span></code></pre></div>
+<hr />
+<h3 id="exclude"><a href="#exclude"><code>exclude</code></a><a class="headerlink" href="#exclude" title="Permanent link">&para;</a></h3>
+<p>File and directory patterns to exclude from discovery, replacing the default excludes.</p>
+<p>A pattern without <code>/</code> (e.g. <code>node_modules</code>) excludes any file or directory with that
+name at any depth; a pattern with <code>/</code> (e.g. <code>templates/vendor</code>) is a glob anchored at
+the project root (the <code>pyproject.toml</code> directory), where <code>*</code> also crosses <code>/</code>.</p>
+<p><strong>Default value</strong>: <code>[".bzr", ".direnv", ".eggs", ".git", ".git-rewrite", ".hg", ".mypy_cache", ".nox", ".pants.d", ".pytype", ".ruff_cache", ".svn", ".tox", ".venv", "__pypackages__", "_build", "buck-out", "dist", "node_modules", "venv"]</code></p>
+<p><strong>Type</strong>: <code>list[str]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="n">exclude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;generated&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="extend-exclude"><a href="#extend-exclude"><code>extend-exclude</code></a><a class="headerlink" href="#extend-exclude" title="Permanent link">&para;</a></h3>
+<p>File and directory patterns to exclude in addition to the default excludes.</p>
+<p><strong>Default value</strong>: <code>[]</code></p>
+<p><strong>Type</strong>: <code>list[str]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">extend-exclude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;templates/vendor&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="include"><a href="#include"><code>include</code></a><a class="headerlink" href="#include" title="Permanent link">&para;</a></h3>
+<p>File patterns to format and lint, replacing the default includes.</p>
+<p>Globs are anchored at the project root like <code>exclude</code> and matched against a file's
+full path, where <code>*</code> also crosses <code>/</code> (so <code>*.html</code> matches at any depth).</p>
+<p><strong>Default value</strong>: <code>["*.html", "*.jinja", "*.jinja2", "*.j2"]</code></p>
+<p><strong>Type</strong>: <code>list[str]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">include</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*.html&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="extend-include"><a href="#extend-include"><code>extend-include</code></a><a class="headerlink" href="#extend-include" title="Permanent link">&para;</a></h3>
+<p>File patterns to format and lint in addition to the default includes.</p>
+<p><strong>Default value</strong>: <code>[]</code></p>
+<p><strong>Type</strong>: <code>list[str]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">extend-include</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;*.djhtml&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="respect-gitignore"><a href="#respect-gitignore"><code>respect-gitignore</code></a><a class="headerlink" href="#respect-gitignore" title="Permanent link">&para;</a></h3>
+<p>Whether to skip files ignored by <code>.gitignore</code>, <code>.ignore</code> and friends when discovering files.</p>
+<p><strong>Default value</strong>: <code>true</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">respect-gitignore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+</span></code></pre></div>
+<hr />
+<h3 id="force-exclude"><a href="#force-exclude"><code>force-exclude</code></a><a class="headerlink" href="#force-exclude" title="Permanent link">&para;</a></h3>
+<p>Whether to apply <code>exclude</code> patterns to files passed on the command line too. Useful when
+running under pre-commit, which passes every changed file explicitly.</p>
+<p><strong>Default value</strong>: <code>false</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">[tool.djangofmt]</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">force-exclude</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span></code></pre></div>
+<hr />
+<h2 id="lint"><code>lint</code><a class="headerlink" href="#lint" title="Permanent link">&para;</a></h2>
+<p>Options for the <code>check</code> command.</p>
+<h3 id="lint_select"><a href="#lint_select"><code>select</code></a><a class="headerlink" href="#lint_select" title="Permanent link">&para;</a></h3>
+<p>Rules and categories to enable, e.g. <code>category:all</code>, <code>category:correctness</code> or a rule name.
+<code>category:default</code> is every category except <code>pedantic</code>.</p>
+<p><strong>Default value</strong>: <code>["category:default"]</code></p>
+<p><strong>Type</strong>: <code>list[RuleSelector]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">select</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;category:default&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;unsorted-tailwind-classes&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_ignore"><a href="#lint_ignore"><code>ignore</code></a><a class="headerlink" href="#lint_ignore" title="Permanent link">&para;</a></h3>
+<p>Rules and categories to disable. A more specific selector always wins, regardless of order.</p>
+<p><strong>Default value</strong>: <code>[]</code></p>
+<p><strong>Type</strong>: <code>list[RuleSelector]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">ignore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;category:style&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_preview"><a href="#lint_preview"><code>preview</code></a><a class="headerlink" href="#lint_preview" title="Permanent link">&para;</a></h3>
+<p>Whether to enable rules that are still in preview.</p>
+<p><strong>Default value</strong>: <code>false</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">preview</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_target-version"><a href="#lint_target-version"><code>target-version</code></a><a class="headerlink" href="#lint_target-version" title="Permanent link">&para;</a></h3>
+<p>The Django version the templates target, as a <code>major.minor</code> string.</p>
+<p>When unset, it comes from the minimum supported Django version in <code>[project] dependencies</code>.
+Rules that depend on it stay disabled until it is known.</p>
+<p><strong>Default value</strong>: <code>null</code></p>
+<p><strong>Type</strong>: <code>str</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="n">target-version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;5.2&quot;</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_fix"><a href="#lint_fix"><code>fix</code></a><a class="headerlink" href="#lint_fix" title="Permanent link">&para;</a></h3>
+<p>Whether to apply safe fixes automatically.</p>
+<p><strong>Default value</strong>: <code>false</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">fix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_unsafe-fixes"><a href="#lint_unsafe-fixes"><code>unsafe-fixes</code></a><a class="headerlink" href="#lint_unsafe-fixes" title="Permanent link">&para;</a></h3>
+<p>Whether to include unsafe fixes when applying with <code>fix</code>. Without <code>fix</code>, diagnostics from
+unsafe fixes are still reported as fixable.</p>
+<p><strong>Default value</strong>: <code>false</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">unsafe-fixes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_show-fixes"><a href="#lint_show-fixes"><code>show-fixes</code></a><a class="headerlink" href="#lint_show-fixes" title="Permanent link">&para;</a></h3>
+<p>Whether to list per-rule fix counts after applying fixes.</p>
+<p><strong>Default value</strong>: <code>false</code></p>
+<p><strong>Type</strong>: <code>bool</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-18-1"><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-18-2"><a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="n">show-fixes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_output-format"><a href="#lint_output-format"><code>output-format</code></a><a class="headerlink" href="#lint_output-format" title="Permanent link">&para;</a></h3>
+<p>How diagnostics are rendered.</p>
+<p><strong>Default value</strong>: <code>"full"</code></p>
+<p><strong>Type</strong>: <code>"full" | "concise"</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-19-1"><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="k">[tool.djangofmt.lint]</span>
+</span><span id="__span-19-2"><a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">output-format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;concise&quot;</span>
+</span></code></pre></div>
+<hr />
+<h3 id="lint_per-file-ignores"><a href="#lint_per-file-ignores"><code>per-file-ignores</code></a><a class="headerlink" href="#lint_per-file-ignores" title="Permanent link">&para;</a></h3>
+<p>Rules to disable for files matching a glob pattern, relative to the <code>pyproject.toml</code>
+directory.</p>
+<p><strong>Default value</strong>: <code>{}</code></p>
+<p><strong>Type</strong>: <code>dict[str, list[RuleSelector]]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-20-1"><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">[tool.djangofmt.lint.per-file-ignores]</span>
+</span><span id="__span-20-2"><a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="s2">&quot;templates/admin/*.html&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;missing-img-alt&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h2 id="lintendblock-label"><code>lint.endblock-label</code><a class="headerlink" href="#lintendblock-label" title="Permanent link">&para;</a></h2>
+<p>Options for the <a href="../rules/endblock-label/"><code>endblock-label</code></a> rule.</p>
+<h3 id="lint_endblock-label_custom-blocks"><a href="#lint_endblock-label_custom-blocks"><code>custom-blocks</code></a><a class="headerlink" href="#lint_endblock-label_custom-blocks" title="Permanent link">&para;</a></h3>
+<p>The <code>custom-blocks</code> entries whose end tag, like <code>{% endblock %}</code>, takes an optional label
+repeating the opening tag's single argument. Only list a tag whose end tag accepts both
+<code>{% endtag %}</code> and <code>{% endtag NAME %}</code>; a tag requiring or rejecting the label breaks once
+the fix is applied.</p>
+<p><strong>Default value</strong>: <code>[]</code></p>
+<p><strong>Type</strong>: <code>list[str]</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-21-1"><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">[tool.djangofmt.lint.endblock-label]</span>
+</span><span id="__span-21-2"><a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="n">custom-blocks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;stage&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;flatblock&quot;</span><span class="p">]</span>
+</span></code></pre></div>
+<hr />
+<h2 id="lintunsorted-tailwind-classes"><code>lint.unsorted-tailwind-classes</code><a class="headerlink" href="#lintunsorted-tailwind-classes" title="Permanent link">&para;</a></h2>
+<p>Options for the <a href="../rules/unsorted-tailwind-classes/"><code>unsorted-tailwind-classes</code></a> rule.</p>
+<h3 id="lint_unsorted-tailwind-classes_prefix"><a href="#lint_unsorted-tailwind-classes_prefix"><code>prefix</code></a><a class="headerlink" href="#lint_unsorted-tailwind-classes_prefix" title="Permanent link">&para;</a></h3>
+<p>The Tailwind prefix your utilities are configured with. Without it, prefixed utilities are
+treated as unknown classes and left unsorted.</p>
+<p><strong>Default value</strong>: <code>null</code></p>
+<p><strong>Type</strong>: <code>str</code></p>
+<p><strong>Example usage</strong>:</p>
+<div class="language-toml highlight"><pre><span></span><code><span id="__span-22-1"><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="k">[tool.djangofmt.lint.unsorted-tailwind-classes]</span>
+</span><span id="__span-22-2"><a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="n">prefix</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tw-&quot;</span><span class="w">  </span><span class="c1"># Tailwind v3; use &quot;tw:&quot; for v4</span>
+</span></code></pre></div>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../rules/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Lint rules">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Lint rules
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../editor-integration/" class="md-footer__link md-footer__link--next" aria-label="Next: Editor integration">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Editor integration
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.sections","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.instant.progress","navigation.tracking","navigation.path","navigation.footer","navigation.top","toc.follow","search.highlight","content.code.copy","content.code.select","content.code.annotate","content.tooltips"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      
+    
+  </body>
+</html>

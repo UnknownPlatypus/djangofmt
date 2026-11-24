@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/formatting/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/known-limitations/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/linter/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/rules/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/settings/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/editor-integration/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/benchmarks/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/contributing/</loc>
+      </url>
+      <url>
+        <loc>https://unknownplatypus.github.io/djangofmt/docs/changelog/</loc>
+      </url>
+</urlset>

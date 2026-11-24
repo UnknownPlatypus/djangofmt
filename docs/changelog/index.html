@@ -1,0 +1,3499 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A fast, HTML aware, Django template formatter and linter, written in Rust.">
+      
+      
+      
+        <link rel="canonical" href="https://unknownplatypus.github.io/djangofmt/docs/changelog/">
+      
+      
+        <link rel="prev" href="../contributing/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="zensical-0.0.42">
+    
+    
+      
+        <title>Changelog - djangofmt</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../assets/stylesheets/modern/main.fba56155.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../assets/stylesheets/modern/palette.dfe2e883.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,500,500i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"JetBrains Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="./.." title="djangofmt" class="md-header__button md-logo" aria-label="djangofmt" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-menu" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            djangofmt
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <a href="https://unknownplatypus.github.io/djangofmt/" title="Playground" class="md-header__button md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-code-xml" viewBox="0 0 24 24"><path d="m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16"/></svg>
+      </a>
+    
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/UnknownPlatypus/djangofmt" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    UnknownPlatypus/djangofmt
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="./.." title="djangofmt" class="md-nav__button md-logo" aria-label="djangofmt" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-book-open" viewBox="0 0 24 24"><path d="M12 7v14M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>
+
+    </a>
+    djangofmt
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/UnknownPlatypus/djangofmt" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    UnknownPlatypus/djangofmt
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Home
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Formatting
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Formatting
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../formatting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Controlling the formatting
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../known-limitations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Known limitations
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Linting
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Linting
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../linter/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Running the linter
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Lint rules
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../settings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Settings
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../editor-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Editor integration
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Project
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Project
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../benchmarks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Benchmarks
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Contributing to djangofmt
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Changelog
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Changelog
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#110-2026-10-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1.1.0 - 2026-10-20
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1.0 - 2026-10-20">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#101-2026-10-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1.0.1 - 2026-10-09
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.0.1 - 2026-10-09">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#100-2026-09-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1.0.0 - 2026-09-20
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.0.0 - 2026-09-20">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0212-2026-07-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.12 - 2026-07-15
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.12 - 2026-07-15">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0211-2026-06-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.11 - 2026-06-26
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.11 - 2026-06-26">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0210-2026-06-03" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.10 - 2026-06-03
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.10 - 2026-06-03">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#029-2026-05-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.9 - 2026-05-29
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.9 - 2026-05-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#028-2026-05-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.8 - 2026-05-18
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.8 - 2026-05-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Build
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#027-2026-04-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.7 - 2026-04-16
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.7 - 2026-04-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#026-2026-02-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.6 - 2026-02-10
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.6 - 2026-02-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#025-2026-01-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.5 - 2026-01-12
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.5 - 2026-01-12">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#023-2025-11-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.3 - 2025-11-30
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.3 - 2025-11-30">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#022-2025-06-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.2 - 2025-06-12
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.2 - 2025-06-12">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021-2025-06-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.1 - 2025-06-07
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1 - 2025-06-07">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020-2025-05-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.0 - 2025-05-23
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0 - 2025-05-23">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010-2025-03-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.1.0 - 2025-03-16
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0 - 2025-03-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                    
+                    
+                    
+                      
+                    
+                    
+                      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+                      <div class="md-sidebar-button__wrapper">
+                        <label class="md-sidebar-button" for="__toc"></label>
+                      </div>
+                    
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--secondary" aria-label="On this page">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      On this page
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#110-2026-10-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1.1.0 - 2026-10-20
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.1.0 - 2026-10-20">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#101-2026-10-09" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1.0.1 - 2026-10-09
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.0.1 - 2026-10-09">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#100-2026-09-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        1.0.0 - 2026-09-20
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.0.0 - 2026-09-20">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0212-2026-07-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.12 - 2026-07-15
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.12 - 2026-07-15">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0211-2026-06-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.11 - 2026-06-26
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.11 - 2026-06-26">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#0210-2026-06-03" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.10 - 2026-06-03
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.10 - 2026-06-03">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#029-2026-05-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.9 - 2026-05-29
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.9 - 2026-05-29">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#028-2026-05-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.8 - 2026-05-18
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.8 - 2026-05-18">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Build
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#027-2026-04-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.7 - 2026-04-16
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.7 - 2026-04-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#026-2026-02-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.6 - 2026-02-10
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.6 - 2026-02-10">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#documentation_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        📚 Documentation
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#025-2026-01-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.5 - 2026-01-12
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.5 - 2026-01-12">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚡ Performance
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#023-2025-11-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.3 - 2025-11-30
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.3 - 2025-11-30">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refactor_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🚜 Refactor
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#022-2025-06-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.2 - 2025-06-12
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.2 - 2025-06-12">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#021-2025-06-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.1 - 2025-06-07
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.1 - 2025-06-07">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#020-2025-05-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.2.0 - 2025-05-23
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.2.0 - 2025-05-23">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#features_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⛰️ Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bug-fixes_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🐛 Bug Fixes
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        🧪 Testing
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous-tasks_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        ⚙️ Miscellaneous Tasks
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#010-2025-03-16" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        0.1.0 - 2025-03-16
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="0.1.0 - 2025-03-16">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-contributors_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        New Contributors ❤️
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="./.." class="md-path__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-path__item">
+        <a href="../benchmarks/" class="md-path__link">
+          
+  
+  <span class="md-ellipsis">
+    Project
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+  
+  
+
+
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">&para;</a></h1>
+<h2 id="110-2026-10-20"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.1..v1.1.0">1.1.0</a> - 2026-10-20<a class="headerlink" href="#110-2026-10-20" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features">⛰️ Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Normalize whitespace inside Django tags and filter expressions (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/542">#542</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e82c32bbff8cb55d649d80ab36d0feebb24c1dce">e82c32b</a>)</li>
+<li><em>(lint)</em> Add <code>endblock-label</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/569">#569</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/38e7094074dba1ce9d014990440fcf29565ed0f9">38e7094</a>)</li>
+</ul>
+<h3 id="bug-fixes">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Keep attribute quotes around template syntax (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/565">#565</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/3b11cc542ddfad0ad830a685d54f8228b44f61f9">3b11cc5</a>)</li>
+<li><em>(release)</em> Drop empty uv publish env vars that broke the PyPI upload - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/967e6c6fef9feb53f9f5c69cc4da955417a3c1b0">967e6c6</a>)</li>
+<li><em>(release)</em> Link the MSVC C runtime statically (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/562">#562</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e0867a9272c09c9c85f8c8737cf3b5909dbaf945">e0867a9</a>)</li>
+</ul>
+<h3 id="testing">🧪 Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ecosystem)</em> Update exclusions for upstream django-unfold, django-mvp and django-helpdesk changes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/558">#558</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a4258c3fd407db2b4956e3db7f30d5cd3ce3f6ec">a4258c3</a>)</li>
+<li><em>(fuzz)</em> Refuse to fuzz a corpus that holds libFuzzer artifacts (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/546">#546</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/500bebd9198fa062f4ec8092f6dda8f543545856">500bebd</a>)</li>
+<li>Close coverage gaps in the CLI, fix loop and wasm bindings (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/581">#581</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8422ec0c9765c493347ce5d2b2d040bb8c91eb14">8422ec0</a>)</li>
+<li>Set up cargo-mutants and close the gaps it found (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/568">#568</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0f59ad36349282ead535de223bf52367eae6f14a">0f59ad3</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(agents)</em> Add the babysit-pr skill for driving an open PR to green (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/582">#582</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c1d87f06c9f7100a9d7580adbe7ac028ac79d79e">c1d87f0</a>)</li>
+<li><em>(benchmark)</em> Install cargo-codspeed and cargo-bloat through uv (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/555">#555</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/07d12cfc2770114accb0ff8c2695031c9bccc59f">07d12cf</a>)</li>
+<li><em>(docs)</em> Build the Pages site without deploy permissions (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/548">#548</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5e164b90728ba110cddf2abc1fcfb07f3edf6b94">5e164b9</a>)</li>
+<li><em>(lint)</em> Remove dead pub items and check for them with hawk (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/557">#557</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d1c241ed8ead64695ef55f8ba6c7981d86b230a3">d1c241e</a>)</li>
+<li><em>(release)</em> Smoke-test wheels from a read-only dist in pinned images (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/564">#564</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/610b42984affc8d4ba25ffd41f36fcf5e636aae3">610b429</a>)</li>
+<li><em>(release)</em> Publish build provenance attestations (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/551">#551</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/fad5eb9f7f7bade5e47f8f3d819b20d442f66fdb">fad5eb9</a>)</li>
+<li><em>(release)</em> Install dist from the uv lockfile instead of curl | sh (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/553">#553</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b644d45f1c6e8763739818fba46c2851e174b499">b644d45</a>)</li>
+<li><em>(renovate)</em> Let Renovate update the action pins in release.yml (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/550">#550</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6c690fc1373f98b8a78755a193c8f898aec97f8d">6c690fc</a>)</li>
+<li>Smoke-test Intel macOS wheels, track stale pins with Renovate and drop dead config (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/586">#586</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c54d4aa9b0f7d3eff26efbddba8662ff3ddc5c49">c54d4aa</a>)</li>
+<li>Run cargo-mutants on the lines each PR changes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/580">#580</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ac69e7a6a3262a35282fbcd1bf4664822012c627">ac69e7a</a>)</li>
+<li>Run the tests on Windows and macOS (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/567">#567</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/08fc556923d5ac30bc735a723a1e5fc2bee9c7a5">08fc556</a>)</li>
+<li>Add job timeouts, bash pipefail and per-PR concurrency groups (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/561">#561</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a3d75d85662ea10dac33c23f01c2e88c43a08043">a3d75d8</a>)</li>
+<li>Build the workspace once in the test job and trim the cheap jobs (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/559">#559</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6607468bfcec00075ecafb4bbb60fb15662dea9a">6607468</a>)</li>
+<li>Check licenses, sources and bans with cargo-deny (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/554">#554</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5cac0b54059de3658feeea3e40586139c092b965">5cac0b5</a>)</li>
+<li>Detect changed files with git diff instead of tj-actions (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/552">#552</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/3ce0d058a7ff4abe858ce5fcef5ce790023a3e10">3ce0d05</a>)</li>
+<li>Fix small CI, packaging and test gaps (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/547">#547</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2328d223f6bdc5fe84d17dbf0c770e8d9b5fd647">2328d22</a>)</li>
+</ul>
+<h2 id="101-2026-10-09"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v1.0.0..v1.0.1">1.0.1</a> - 2026-10-09<a class="headerlink" href="#101-2026-10-09" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_1">⛰️ Features<a class="headerlink" href="#features_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Support Django Cotton components in the <code>django</code> profile (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/531">#531</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1476d3bfad55965ac6061db25b9325dabbba116b">1476d3b</a>)</li>
+<li><em>(lint)</em> Add a fix for <code>missing-doctype</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/526">#526</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/25fa291fe15e58dc8ce588092dc005be422b00f8">25fa291</a>)</li>
+</ul>
+<h3 id="bug-fixes_1">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(lint)</em> Report <code>deprecated-ignore</code> in files that fail to parse (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/527">#527</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4b6bf8d8de4a4863966d395816069a1362bb4648">4b6bf8d</a>)</li>
+<li><em>(lint)</em> Read Django tag names like Django and skip rules on attribute spreads (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/530">#530</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a2e4a2517f514dfa4ca271a76385e64c727efb39">a2e4a25</a>)</li>
+</ul>
+<h3 id="refactor">🚜 Refactor<a class="headerlink" href="#refactor" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(workspace)</em> Split djangofmt_syntax and djangofmt_formatter out of the lint and CLI crates (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/540">#540</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/84ec4a96b3527418c817837564cb03e117cee620">84ec4a9</a>)</li>
+</ul>
+<h3 id="testing_1">🧪 Testing<a class="headerlink" href="#testing_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ecosystem)</em> Update exclusions for upstream fairdm and django changes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/538">#538</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6edbea7a59f8251f129e329a9fa6f9e9e1211c3c">6edbea7</a>)</li>
+<li><em>(ecosystem)</em> Declare the corpus projects' custom block tags and pass them to <code>check</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/535">#535</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/002b11abbb72a7b88d405f541c5ff847fd53e267">002b11a</a>)</li>
+<li><em>(ecosystem)</em> Add six Django Cotton projects to the corpus (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/529">#529</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/943a05881e03fd6a2421374cc8c6cc37bd37fa03">943a058</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_1">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(agents)</em> Drop the CLAUDE.md symlink and fix stale agent instructions (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/539">#539</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/559b21aa8f17b2441e0fe53c7a2219cb1317a6eb">559b21a</a>)</li>
+<li><em>(pre-commit)</em> Stop formatting <code>uv.lock</code> and <code>playground/package.json</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/533">#533</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4c6333abf30759bedf4c50823941ab557af8959f">4c6333a</a>)</li>
+</ul>
+<h2 id="100-2026-09-20"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.12..v1.0.0">1.0.0</a> - 2026-09-20<a class="headerlink" href="#100-2026-09-20" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<blockquote>
+<p>🎉 <strong>djangofmt 1.0 is here!</strong>
+The formatter is now stable, hardened by extensive fuzzing, ecosystem check and bug fixing.
+The new <code>check</code> command also gained automatic Tailwind CSS class sorting, powered by <a href="https://github.com/avencera/rustywind">rustywind</a>.</p>
+</blockquote>
+<h3 id="features_2">⛰️ Features<a class="headerlink" href="#features_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(check)</em> Add <code>--output-format concise</code> - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4fe930f7286ba058e3c3959c2423e6642926e9c0">4fe930f</a>)</li>
+<li><em>(cli)</em> Add <code>--target-version</code> option (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/492">#492</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/eb317d315d772343b19f05a817516c8ebb0b67f2">eb317d3</a>)</li>
+<li><em>(cli)</em> Add <code>{# djangofmt: file-ignore[...] #}</code> file-level opt-outs (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/440">#440</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a24f7bec2376503e4860b590922a085ef17dfefc">a24f7be</a>)</li>
+<li><em>(cli)</em> Hint at the conditional open/close tag limitation on parse errors (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/426">#426</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7c6c67b8500fca0820e5960e52c43bbe63dfa0a6">7c6c67b</a>)</li>
+<li><em>(dev)</em> Add cargo-fuzz idempotency fuzzing for the formatter (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/435">#435</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2e0e66e4cab2c2afa83b723e103980337fe59bd1">2e0e66e</a>)</li>
+<li><em>(ecosystem)</em> Report exclusions that are no longer needed (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/401">#401</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0fda5d674e3a9d260818a27e7f31819c28152c30">0fda5d6</a>)</li>
+<li><em>(ecosystem)</em> Add EvaP, djangoproject.com, healthchecks, babybuddy, InvenTree and netbox targets (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/400">#400</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/969a64cfcc29d1689e9a8ed453d9d645c27a218c">969a64c</a>)</li>
+<li><em>(ecosystem-check)</em> Add 12 Django projects to the corpus (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/463">#463</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/788afe8aff5233bd3a7f291e63524a7f8b6c5eaa">788afe8</a>)</li>
+<li><em>(format)</em> Support <code>--check</code> option for checking formatting without making changes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/496">#496</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4d92de48869726bebe9c3442f5e342f0e4d29f1a">4d92de4</a>)</li>
+<li><em>(format)</em> Accept whitespace around <code>:</code> in the ignore directive (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/449">#449</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4f149a24111f0da2aa08118c77e5ce9d97ffc0a5">4f149a2</a>)</li>
+<li><em>(lint)</em> Stabilize the linter for 1.0 (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/517">#517</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/49e56ed763ebac3e3645dc7e1474975c632cfddd">49e56ed</a>)</li>
+<li><em>(lint)</em> Add a <code>pedantic</code> category and leave it out of the default rule set (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/508">#508</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6a7ead9e78ba71f01b3b13498d6d75390fcee0e3">6a7ead9</a>)</li>
+<li><em>(lint)</em> Add <code>unused-ignore-code</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/487">#487</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/486e2d6c2db32b06bea1081badce6865c79605c4">486e2d6</a>)</li>
+<li><em>(lint)</em> Add <code>deprecated-ignore</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/443">#443</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/59b2d586b994164cc66adcade4dab72eabb4fa2e">59b2d58</a>)</li>
+<li><em>(lint)</em> Infer <code>target-version</code> from the <code>django</code> requirement (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/495">#495</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/95b98e667175606e44a7a283300679081929e96a">95b98e6</a>)</li>
+<li><em>(lint)</em> Add <code>invalid-ignore-comment</code> and <code>invalid-ignore-code</code> lint rules (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/442">#442</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6e8f422081535065d7933d11446582e787afac74">6e8f422</a>)</li>
+<li><em>(lint)</em> Suppress diagnostics with <code>{# djangofmt: ignore[rule] #}</code> comments (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/441">#441</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ef3335f776df4a274a54d11de59a0a5c40ea5183">ef3335f</a>)</li>
+<li><em>(lint)</em> Honor rule codes in <code>{# djangofmt: file-ignore[...] #}</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/470">#470</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a4aea6de004f25750ccb2f89899932966a00d992">a4aea6d</a>)</li>
+<li><em>(lint)</em> Add <code>unsorted-tailwind-classes</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/332">#332</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/da2a7aaf233b5e6e4a3290929e833abea43e7ad7">da2a7aa</a>)</li>
+<li><em>(lint)</em> Add <code>same-file-partial-include</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/344">#344</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a1034193dbdd526c79d7e00d0eea996d03469749">a103419</a>)</li>
+<li><em>(lint)</em> Add <code>per-file-ignores</code> configuration (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/411">#411</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/fefdd9b173c0607bf921e51cd118a1c620307275">fefdd9b</a>)</li>
+</ul>
+<h3 id="bug-fixes_2">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(check)</em> Render parse errors concisely with <code>--output-format concise</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/394">#394</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b821e101826b60a55df2023b74f571c27b041c65">b821e10</a>)</li>
+<li><em>(ci)</em> Actually truncate the ecosystem comment body - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/58bbd22bf70473aa9b60d677eaafd5b9f81a6255">58bbd22</a>)</li>
+<li><em>(cli)</em> Stop breaking help URLs across lines (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/458">#458</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/63af80616eea2b22b85221f402e89c271c21c313">63af806</a>)</li>
+<li><em>(cli)</em> Honor a leading <code>djangofmt:ignore</code> on unparsable files in <code>check</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/439">#439</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8974a3bf42750202ff39c4c5b899311f0204d64d">8974a3b</a>)</li>
+<li><em>(cli)</em> Anchor include and exclude patterns at the project root (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/433">#433</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2e98311cdd9e3cdf9af417ce9dc8d17ae771abbb">2e98311</a>)</li>
+<li><em>(cli)</em> Report accurate parse error locations (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/430">#430</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/de1ddde8a176cfc80cb5a5380e01636941453d1b">de1ddde</a>)</li>
+<li><em>(cli)</em> Exit 2 on I/O and parse errors in file mode (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/429">#429</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/34f574561d6494124a6359d8c9a35920f540d3c6">34f5745</a>)</li>
+<li><em>(format)</em> Reject self-closing non-void HTML elements as a parse error (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/516">#516</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2e90033ad2c6a528dc7ced36da817755d1f367b7">2e90033</a>)</li>
+<li><em>(format)</em> Keep a comment-only CSS block instead of emptying it (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/499">#499</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/f39c760bc7ac6c25a3a0effe82cd624ec5de6971">f39c760</a>)</li>
+<li><em>(format)</em> Keep <code>/*!</code>, <code>/*#</code> and <code>/**</code> CSS comment markers intact (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/498">#498</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/25c46f7fe65487a887fe5f778f70055d32130336">25c46f7</a>)</li>
+<li><em>(format)</em> Leave JSON with raw control characters in strings unformatted (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/485">#485</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/69edc82e712422c339ed0e6e364cfc6ed501d850">69edc82</a>)</li>
+<li><em>(format)</em> Stop reordering CSS shorthands past the longhands they override (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/483">#483</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c77d667ae670fc1f92c7dccfe9d0108d922cedcd">c77d667</a>)</li>
+<li><em>(format)</em> Respect internal attr loop separator (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/480">#480</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/11aee2ff0d0cdf053393d3111d9b2ada2dcfabd1">11aee2f</a>)</li>
+<li><em>(format)</em> Honor <code>{# djangofmt: ignore[format] #}</code> on the next node (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/473">#473</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e4ea817012a391e1e909c545af917886088d4e64">e4ea817</a>)</li>
+<li><em>(format)</em> Reject malformed template syntax instead of silently corrupting it (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/457">#457</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/04e8d72f6f94a1e520b7861838c52285ddb229eb">04e8d72</a>)</li>
+<li><em>(format)</em> Recover from panics instead of crashing the whole run (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/459">#459</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5c3837b3d4b0a2fe1f39be043d05b4587ffb2c01">5c3837b</a>)</li>
+<li><em>(format)</em> Keep the opening tag of an ignored nested block tag (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/434">#434</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4a56d53e80c767fee1dc459b137cd5c49be5e640">4a56d53</a>)</li>
+<li><em>(format)</em> Resolve stdin profile with the same precedence as files (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/413">#413</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/78bed0d497f2af3c56c5d4069d4746fe11f0f9e3">78bed0d</a>)</li>
+<li><em>(format)</em> Don't treat <code>---</code> as front matter outside the top of the file (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/407">#407</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d41752d28abba97ac0d09d47e8df52ed965f99cf">d41752d</a>)</li>
+<li><em>(format)</em> Only treat Django's built-in tags as block tags (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/402">#402</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/275acaa2df5d48d600d29cc9161fa86852651e15">275acaa</a>)</li>
+<li><em>(format)</em> Re-indent <code>{% endcomment %}</code> with its block (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/395">#395</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6612b1be14bfe4adf7b089f2d11df04e8feaa652">6612b1b</a>)</li>
+<li><em>(format)</em> Don't panic on <code>{% comment %}</code> among tag attributes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/393">#393</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/9522c6e34e34a11647ddb2fac98b0382c22b0788">9522c6e</a>)</li>
+<li><em>(lint)</em> More small linter fixes and perf improvements (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/521">#521</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/efd6d4dddfaeeb511234a3990376635268ff91f7">efd6d4d</a>)</li>
+<li><em>(lint)</em> Minor lint rule fixes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/520">#520</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/fc3eec906f601d3bb293cc219888a20bdc3ed5c2">fc3eec9</a>)</li>
+<li><em>(lint)</em> Detect whitespace-padded URLs in django-static-url and django-url-pattern (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/431">#431</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7de1dd7aba1f9c36d5ec29ee217f5a2cb373f2dd">7de1dd7</a>)</li>
+<li><em>(lint)</em> Don't disable missing-doctype on root-level Jinja blocks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/427">#427</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b74d4d4300772cd521cf87e6b1aec6504cd6860d">b74d4d4</a>)</li>
+<li><em>(lint)</em> Restore build for <code>form-action-whitespace</code> fix content (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/399">#399</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1ec0946d1a38fdcb26138d67c34dd37632d263fa">1ec0946</a>)</li>
+<li><em>(playground)</em> Fix border of plus/minus inputs (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/382">#382</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c0263816fe9e38f9b73a46e57b1b238f8a5b0420">c026381</a>)</li>
+<li><em>(release)</em> Opt the binary back into <code>dist</code> after <code>publish = false</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/509">#509</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2735037c2ea37ed2493c175f9b186d211a6d35a3">2735037</a>)</li>
+</ul>
+<h3 id="refactor_1">🚜 Refactor<a class="headerlink" href="#refactor_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(cli)</em> Count check results in a single pass (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/468">#468</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/06e3aa59c422dd9564b4f3815dffc5c36578ede6">06e3aa5</a>)</li>
+<li><em>(cli)</em> Unify parsing into a <code>lint_source</code> and <code>parse_source</code> interface (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/404">#404</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/017e23ea77df8f9bef117a2d09c2ff3792cdfba7">017e23e</a>)</li>
+<li><em>(dev)</em> Move generated-page prose out of Rust into Markdown files (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/437">#437</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/178114403e8a4ecafd1da03b7631fedf00b30cfd">1781144</a>)</li>
+<li><em>(ecosystem)</em> Document ecosystem exclusion reasons (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/410">#410</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/96f070cd6492632b43f4b615859705e3c9297da9">96f070c</a>)</li>
+<li><em>(format)</em> Delete dead display only fix api (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/414">#414</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2e5b7d27530e6f3fcfad25c5085ea69f18217bb4">2e5b7d2</a>)</li>
+<li><em>(lint)</em> Pass checker as the first argument to rule check functions (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/505">#505</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5678cbb316e0cabf98366f57a7e8979f82885ffc">5678cbb</a>)</li>
+<li><em>(lint)</em> Route <code>check</code>, <code>--fix</code> and the playground through one <code>lint_text</code> api (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/490">#490</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6c8d3e9ea11f3789a636316df744a22371f6dd8e">6c8d3e9</a>)</li>
+<li><em>(lint)</em> Add <code>source_span</code>/<code>source_end</code> helpers and derive spans from slices (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/484">#484</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/35653ce377ad3e6bfc282832795bb501f3712193">35653ce</a>)</li>
+<li><em>(lint)</em> Tighten diagnostic messages and help text (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/481">#481</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/253e26f48183897b638346d91096e9827defb836">253e26f</a>)</li>
+<li><em>(lint)</em> Parse suppression directives with one shared grammar (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/472">#472</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e8a5667ce16ce49e86c1bbac5e58e1a79b45063a">e8a5667</a>)</li>
+</ul>
+<h3 id="documentation">📚 Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(agents)</em> Sync the add-lint-rule skill and AGENTS.md with the current code - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0226c888f0833929bbe112519d63a2a1d52eccdf">0226c88</a>)</li>
+<li><em>(benchmark)</em> Update benchmark numbers (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/454">#454</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c72557493533d0296125e459188eeda1c62e1282">c725574</a>)</li>
+<li><em>(format)</em> Document the omitted end tag limitation and link the hint to it (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/515">#515</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7d00e1aa68c8dc8e9d546e6c0a193f7b65790c1a">7d00e1a</a>)</li>
+<li><em>(skill)</em> Insist rule doc comments say what, never how (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/424">#424</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2b6a2431172b87b655505a788f0f52fcb29beae9">2b6a243</a>)</li>
+<li>Document LF-only output as a known limitation (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/461">#461</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/de59f2bc624f2977e44a53c600a6e194098e0664">de59f2b</a>)</li>
+</ul>
+<h3 id="performance">⚡ Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(bench)</em> Add a reporter benchmark covering diagnostic rendering (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/390">#390</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/70c2820ae5ebb85f31c4e81d73e3b0fc0a84a547">70c2820</a>)</li>
+<li><em>(format)</em> Use <code>oxc-miette</code> for ~5x faster diagnostic rendering (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/392">#392</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/822a21fb6f87fc8a870e7ef389ace7cf29ce5378">822a21f</a>)</li>
+<li><em>(lint)</em> Avoid allocating for static violation messages, help and fix titles (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/397">#397</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e67ab923fed9de61da461969d34af2ad543d5d35">e67ab92</a>)</li>
+<li><em>(lint)</em> Avoid allocating for static fix content (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/398">#398</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/72551ccab5d07769d9493d592afae425deabd46f">72551cc</a>)</li>
+<li><em>(lint)</em> Use &amp;'static str for diagnostic rule codes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/396">#396</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/be7ed4f5f5e967bb198663674c07f86b6e86a72c">be7ed4f</a>)</li>
+</ul>
+<h3 id="testing_2">🧪 Testing<a class="headerlink" href="#testing_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(bench)</em> Benchmark the default rule selection, not just none and all (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/412">#412</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b9e959101702d406d67337e25e1e9de62602601e">b9e9591</a>)</li>
+<li><em>(benchmark)</em> Benchmark templates carrying a <code>djangofmt:</code> directive (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/469">#469</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/00c455344ca8a1888efb7a0ed3b7aebeab152e26">00c4553</a>)</li>
+<li><em>(ecosystem)</em> Drop the stale bookwyrm <code>manual-merge.html</code> exclusion (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/497">#497</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/9be0f74df6aa2fe4c31ab1613471a04d6737cffb">9be0f74</a>)</li>
+<li><em>(ecosystem)</em> Exclude django-unfold <code>avatar.html</code> (dynamic tag name) (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/455">#455</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/30ba2c8ace0dc87689bf8446268a81b22201cdfd">30ba2c8</a>)</li>
+<li><em>(ecosystem)</em> Update ecosystem exclusion list and also check stability false positives (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/403">#403</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/671704f130a45215f2d093a045422b1ad24f0b38">671704f</a>)</li>
+<li><em>(ecosystem-check)</em> Report fixable lint changes as a source diff - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/cfa4d669650f070cc2651753431ef9719e040598">cfa4d66</a>)</li>
+<li><em>(format)</em> Pin lowercased CSS property names as intended (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/486">#486</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/60d599d1f463e1a03ae31fee8c6093c57d974703">60d599d</a>)</li>
+<li><em>(fuzz)</em> Skip control-character inputs in the idempotency target (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/504">#504</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1f0b3df0aa943a8e3e988944ef1f16299b6f42f3">1f0b3df</a>)</li>
+<li><em>(refactor)</em> Drop tests already covered elsewhere (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/438">#438</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e5b827f4fa3bd6546dcb65ad803880c5c91402fc">e5b827f</a>)</li>
+<li><em>(refactor)</em> Each rule test fixture now only enable the rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/406">#406</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d0921dfbb1c96f11bba66a227887b4d1f5d034ea">d0921df</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_2">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(benchmark)</em> Fix codspeed flakiness after v5 (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/448">#448</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2dfa6519e72f81018dfd6bf9379dd03b4709ec66">2dfa651</a>)</li>
+<li><em>(changelog)</em> Add a one-off 1.0 banner to the generated changelog (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/464">#464</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d4994effbb57632d4362a74ee7bc016f67837e3f">d4994ef</a>)</li>
+<li><em>(ecosystem)</em> Add a parse check that fails when formatting breaks templates (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/494">#494</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/43a650712bbc646caa90d499ff0b8ef7274ca0ef">43a6507</a>)</li>
+<li><em>(ecosystem)</em> Stop rebuilding <code>djangofmt</code> a third time in the ecosystem check (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/456">#456</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/43fd2378544557d05d88d5b24e7ed1882c9a634e">43fd237</a>)</li>
+<li><em>(release)</em> Fix s390x cross build of psm assembly (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/453">#453</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0d8e8de31c90a3519ff2ea70d2c93ec3efda2b31">0d8e8de</a>)</li>
+<li><em>(security)</em> Reject a tampered <code>pr-number</code> artifact before it reaches <code>GITHUB_OUTPUT</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/514">#514</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/21a11e0fbdb4e136929f7c78549f978d1b1ee962">21a11e0</a>)</li>
+<li><em>(security)</em> Harden release workflow permissions, inputs, and caching (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/422">#422</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4df167d0b309b66c1ede09a164f697809fd2d07a">4df167d</a>)</li>
+<li><em>(stability)</em> Reduce codspeed variance (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/465">#465</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/657918fcd069280169140b61eff9827c8ba52e01">657918f</a>)</li>
+<li><em>(tests)</em> Regenerate snapshots in insta's current format (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/475">#475</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/23cca6383314e7dcfb83593268fdbe1420c85b24">23cca63</a>)</li>
+<li>Pin cargo dev tools through uv.lock (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/477">#477</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/f92f89c07a3e20657c08865d805f265148774525">f92f89c</a>)</li>
+<li>Drop the cargo-bloat workflow for a just recipe (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/479">#479</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/110c8a24cd09277148a0b0fef0cc32577846c660">110c8a2</a>)</li>
+<li>Build and test with --locked (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/476">#476</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7a87cea44dfdbf83fb3f5830a55ed23b80c0a3ca">7a87cea</a>)</li>
+<li>Set UV_LOCKED in workflows that resolve dependencies (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/478">#478</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/81e72fd3d40d543b76bb434b03a07a63fbf176e4">81e72fd</a>)</li>
+</ul>
+<h3 id="new-contributors">New Contributors ❤️<a class="headerlink" href="#new-contributors" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/nzlaura" title="GitHub User: nzlaura">@nzlaura</a> made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/496">#496</a></li>
+</ul>
+<h2 id="0212-2026-07-15"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.11..v0.2.12">0.2.12</a> - 2026-07-15<a class="headerlink" href="#0212-2026-07-15" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_3">⛰️ Features<a class="headerlink" href="#features_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(lint)</em> Add <code>table-header-missing-scope</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/345">#345</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4d9f72c7bf953bc0d69366243fb213491c67bd32">4d9f72c</a>)</li>
+</ul>
+<h3 id="bug-fixes_3">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Skip formatting Django <code>verbatim</code> blocks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/370">#370</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/caf2fe41c3f4c1b35d64682973583daa3b2b7aa2">caf2fe4</a>)</li>
+</ul>
+<h2 id="0211-2026-06-26"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.10..v0.2.11">0.2.11</a> - 2026-06-26<a class="headerlink" href="#0211-2026-06-26" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_4">⛰️ Features<a class="headerlink" href="#features_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Preserve single-line Django blocks inside attribute lists (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/360">#360</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ca3d825aa7dd8f1eff93d76bd52670085c3b3682">ca3d825</a>)</li>
+<li><em>(format)</em> Support <code>.editorconfig</code> configuration files (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/349">#349</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0df2c71c63db5c497cbf4d6e34cd3bb42d644f58">0df2c71</a>)</li>
+<li><em>(lint)</em> Add duplicate-block-name lint rule - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4fe9aef5534b55680b1e921a99cc9bb329dd4a10">4fe9aef</a>)</li>
+<li><em>(lint)</em> Add rule selection (select/ignore + preview) (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/350">#350</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7d0eb76d78eca7d94fa420d522dc42e46ce97646">7d0eb76</a>)</li>
+<li><em>(playground)</em> Add documentation link to navbar (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/351">#351</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0923257c860fa39a50c2c1ccdf6e02cb7964e8b4">0923257</a>)</li>
+</ul>
+<h3 id="bug-fixes_4">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Fix formatting of multiline django template tags (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/359">#359</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/290846188d5a3c2920f8d29edf81f944abe328b5">2908461</a>)</li>
+<li><em>(lint)</em> Restore correct ANSI display in error messages (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/346">#346</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d4c21ba49ed3de0f7d5212ccd7f645512789b8ec">d4c21ba</a>)</li>
+</ul>
+<h3 id="refactor_2">🚜 Refactor<a class="headerlink" href="#refactor_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(lint)</em> Avoid double parse when fixing (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/362">#362</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/621980e9988a896e094903a9705d60c8fe1fb2ae">621980e</a>)</li>
+<li><em>(lint)</em> Drop redundant help on empty-attr-value rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/357">#357</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e10ed1e91783d1db5ead6d56acd687e7270497ca">e10ed1e</a>)</li>
+<li><em>(lint)</em> Cleanup RuleSet implementation and simplify (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/336">#336</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/17c06682b8dda632b0d343b60a79cc6e2ca9b5b8">17c0668</a>)</li>
+<li><em>(misc)</em> Minor cleanup (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/356">#356</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2b1346bdb144bfed8c0fc3020a9cbba1d4fa69f7">2b1346b</a>)</li>
+<li><em>(tests)</em> Misc test simplification (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/348">#348</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/cdda76a57c2ed99c50bbfc6dcc7d93a74179f5d7">cdda76a</a>)</li>
+</ul>
+<h3 id="testing_3">🧪 Testing<a class="headerlink" href="#testing_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(bench)</em> Isolate check_ast cost from parsing (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/364">#364</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8251c110d182c192b71e67dee9821c621fc9183d">8251c11</a>)</li>
+<li><em>(clippy)</em> Enable more clippy restriction rules (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/363">#363</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/539450c56345ee74bf482a6cc5953f243c4621e3">539450c</a>)</li>
+<li><em>(ecosystem-check)</em> Select all rules + preview in check ecosystem run (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/352">#352</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/17110efb4e931ea97ba9320db6a88e7c59f379f9">17110ef</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_3">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(codspeed)</em> Pin glibc CPU-feature dispatch to reduce benchmark variance (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/366">#366</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5175539b81f8836c533a66748d117d8d0b42667b">5175539</a>)</li>
+</ul>
+<h2 id="0210-2026-06-03"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.9..v0.2.10">0.2.10</a> - 2026-06-03<a class="headerlink" href="#0210-2026-06-03" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_5">⛰️ Features<a class="headerlink" href="#features_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Allow <code>{# djangofmt:ignore #}</code> to disable formatting (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/333">#333</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8de13fc09e22779d903dda472f506b44b827954e">8de13fc</a>)</li>
+<li><em>(lint)</em> Add <code>django-url-pattern</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/314">#314</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/9cfc71c9fc530f18f04bbcf49d622aecbf9ee4b2">9cfc71c</a>)</li>
+<li><em>(lint)</em> Add <code>empty-tag-pair</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/313">#313</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5ac93dfe72040647eb1568ba7a3e5a1ae68c8e25">5ac93df</a>)</li>
+<li><em>(lint)</em> Add <code>missing-img-alt</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/312">#312</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d7e3d3802992d472279cc260fc08761a9fddf29f">d7e3d38</a>)</li>
+<li><em>(lint)</em> Add <code>django-static-url</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/311">#311</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/27836b62f6cb1236b0168204d9d89ce21412ffb2">27836b6</a>)</li>
+<li><em>(lint)</em> Add <code>use-https</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/308">#308</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/3503bc73b7fbe9a21ea111456d416be70dd74873">3503bc7</a>)</li>
+<li><em>(playground)</em> Add ast + Doc IR representation in playground (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/331">#331</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c9489bb8e1291c048d961e7e548100e2d5b38e97">c9489bb</a>)</li>
+</ul>
+<h3 id="bug-fixes_5">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Stabilize indentation of <code>&lt;script&gt;</code> tag content (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/335">#335</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8c98e1e235bac6cbfe208e2a02c0f2b287f1d83a">8c98e1e</a>)</li>
+</ul>
+<h3 id="refactor_3">🚜 Refactor<a class="headerlink" href="#refactor_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(lint)</em> Dispatch per-attribute rules from a single attribute visitor (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/330">#330</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d02925cf815622d92a13b0db2192bdc71c294fd3">d02925c</a>)</li>
+<li><em>(lint)</em> Dispatch tag-scoped rules by tag (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/326">#326</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4c1a0594f1d284c21bf4e5bc8b9bbc3bf1e598de">4c1a059</a>)</li>
+<li><em>(lint)</em> Check img height and width attributes in a single pass (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/322">#322</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5164cea1512d440fc563fbcecb11070157004894">5164cea</a>)</li>
+<li><em>(lint)</em> Reuse fs::get_cwd and drop build_walk_filters wrapper (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/320">#320</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/9aab7b707538e1c700ce2b02edf6683c09404bc6">9aab7b7</a>)</li>
+<li><em>(lint)</em> Add <code>fix::edits</code> module with <code>delete_attr_fix</code> helper (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/319">#319</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d7cc9ad8b33ccc67a4c56413d14a2e21902fa878">d7cc9ad</a>)</li>
+<li><em>(lint)</em> Extract jinja-aware attr-presence helper (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/318">#318</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6910bd972adad609506edd9e82b014fb01071fc9">6910bd9</a>)</li>
+<li><em>(lint)</em> Fold attribute value match into NativeAttribute pattern (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/317">#317</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/67f58023fa7a58952cd580996f8d7b1f83d84aba">67f5802</a>)</li>
+<li><em>(playground)</em> Switch to deno (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/316">#316</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2abd19d6ff5967ae8fd2e6f9e4a42c5f6194119c">2abd19d</a>)</li>
+<li><em>(test)</em> Share benchmark template list via <code>ALL_TEMPLATES</code> const (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/321">#321</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2eab77b5cb9bf5bdcd4d6a802238fc27419021cc">2eab77b</a>)</li>
+</ul>
+<h3 id="performance_1">⚡ Performance<a class="headerlink" href="#performance_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Update <code>markup_fmt</code> leading to average perf improvement of 2x (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/329">#329</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d0329caa34e3fd6d128f1cb5a0f383dfc793d3fc">d0329ca</a>)</li>
+<li><em>(lint)</em> Use a BitSet to store enabled rules (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/325">#325</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/347d0b95f736ca87bd5630a79a5e4f0585f2137b">347d0b9</a>)</li>
+</ul>
+<h2 id="029-2026-05-29"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.8..v0.2.9">0.2.9</a> - 2026-05-29<a class="headerlink" href="#029-2026-05-29" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_6">⛰️ Features<a class="headerlink" href="#features_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(check)</em> Expose --fix, --unsafe-fixes, --show-fixes in pyproject config (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/290">#290</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/448f487b01479666f2aee31356e6f111f3f80af0">448f487</a>)</li>
+<li><em>(docs)</em> Publish Zensical-based documentation site (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/300">#300</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5f29df37dab0f641f0aaafc43608ab526b79a294">5f29df3</a>)</li>
+<li><em>(lint)</em> Add <code>missing-doctype</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/310">#310</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e3723748b443d8d00234872dce252265fb3d5212">e372374</a>)</li>
+<li><em>(lint)</em> Add <code>missing-title</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/309">#309</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b243792eb5320978668606c763add93648a258b5">b243792</a>)</li>
+<li><em>(lint)</em> Add <code>duplicate-attr</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/304">#304</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ef732afa5cdec1fded8198a34c5928fe3e9876ef">ef732af</a>)</li>
+<li><em>(lint)</em> Add <code>form-action-whitespace</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/303">#303</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c2b3d53beb6fb2cc4ac511c9e2ed4be4eb3c84dd">c2b3d53</a>)</li>
+<li><em>(lint)</em> Add <code>empty-attr-value</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/298">#298</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/559313c473efc0f7e3f54748e8ea26ed40bf9a49">559313c</a>)</li>
+<li><em>(lint)</em> Add <code>uppercase-form-method</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/294">#294</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4d37afe760426e7866b7c9ee355c405fc19bd8e0">4d37afe</a>)</li>
+<li><em>(lint)</em> Add <code>javascript-url</code> lint rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/293">#293</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/791e9282c68ab39c7fda12b2fc6ee52e56f00958">791e928</a>)</li>
+<li><em>(lint)</em> Add <code>redundant-type-attr</code> rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/260">#260</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/3d65c267922eff9a2dfacd1d10d6100e5fe3a859">3d65c26</a>)</li>
+</ul>
+<h3 id="refactor_4">🚜 Refactor<a class="headerlink" href="#refactor_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(lint)</em> Align violation structs with owned-data convention (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/296">#296</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1f0e05f81a448aa8d9c7c8764701146d36634103">1f0e05f</a>)</li>
+</ul>
+<h3 id="documentation_1">📚 Documentation<a class="headerlink" href="#documentation_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(lint)</em> Auto-generate lint rule docs from violation struct doc comments (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/297">#297</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/3670b7156eb102799aaa3332a08b0985925fa9ec">3670b71</a>)</li>
+<li><em>(pycharm)</em> Pycharm editor integration (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/301">#301</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/bbf6823898d656c0169e81dfee6cde62488d37ab">bbf6823</a>)</li>
+<li><em>(readme)</em> Extract some part of the README to dedicated doc page (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/291">#291</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1ea7baea683778643547cde205d3244df0ab4654">1ea7bae</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_4">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(pre-commit)</em> Chore/pre commit autoupdate and zizmor (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/299">#299</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2dd2c0e0d47ea7566e05e5c1f8575a2f333873e8">2dd2c0e</a>)</li>
+<li>Scope pages concurrency per PR (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/315">#315</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/57ae9476617c9ac8614542ebfe587979208b9935">57ae947</a>)</li>
+</ul>
+<h2 id="028-2026-05-18"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.7..v0.2.8">0.2.8</a> - 2026-05-18<a class="headerlink" href="#028-2026-05-18" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_7">⛰️ Features<a class="headerlink" href="#features_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(check)</em> Add autofix framework to the <code>djangofmt check</code> command and the <code>blocktranslate-no-trimmed</code> rule (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/276">#276</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0b0443991042464e3de9cc7b9a1e75a81c5592a7">0b04439</a>)</li>
+<li><em>(cli)</em> Format from stdin via <code>-</code> or <code>--stdin-filename</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/284">#284</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a87675721f29e793bc384f306af421bebb76e8ae">a876757</a>)</li>
+<li><em>(format)</em> Add <code>--preserve-unquoted-attrs</code> option (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/271">#271</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/081ab4a3a70af275e3b38ba0237ced910636ca30">081ab4a</a>)</li>
+<li><em>(format)</em> Add support for Django template partials (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/275">#275</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a13115e7ef3f856eb8540e20d3986b6f5b54583e">a13115e</a>)</li>
+</ul>
+<h3 id="bug-fixes_6">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(docs)</em> Remove smart quotes from example code (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/267">#267</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/adc40d668a64b406f6bf13ff6141389565399d44">adc40d6</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_5">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(msrv)</em> Track MSRV and rust-toolchain version with renovate (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/281">#281</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/690170faf4927b0ebe3349d2e9c56f7ad8b8a2ce">690170f</a>)</li>
+<li><em>(perf)</em> Include all rust-related files in changed_files detection (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/280">#280</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/f182cfade7ff0fc02e8f64548e033b52d5e11366">f182cfa</a>)</li>
+<li><em>(renovate)</em> Add 7-day cooldown to mitigate supply chain attacks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/266">#266</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ce3759f565a80012c13a7a1011406014cd5812fa">ce3759f</a>)</li>
+<li>Set CARGO_PROFILE_DEV_DEBUG=line-tables-only for faster builds (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/270">#270</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/06486be3ffba4aa55c4f3db966e1f959f48aa72c">06486be</a>)</li>
+</ul>
+<h3 id="build">Build<a class="headerlink" href="#build" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(playground)</em> Migrate from npm to bun, gate dep release age (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/279">#279</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b4915def7dfa4687c23ae03ed639b3fd0855b4b9">b4915de</a>)</li>
+</ul>
+<h3 id="new-contributors_1">New Contributors ❤️<a class="headerlink" href="#new-contributors_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/nickpetrovic" title="GitHub User: nickpetrovic">@nickpetrovic</a> made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/271">#271</a></li>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/meshy" title="GitHub User: meshy">@meshy</a> made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/267">#267</a></li>
+</ul>
+<h2 id="027-2026-04-16"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.6..v0.2.7">0.2.7</a> - 2026-04-16<a class="headerlink" href="#027-2026-04-16" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_8">⛰️ Features<a class="headerlink" href="#features_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ci)</em> Build pipeline improvements (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/225">#225</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/3e3b009f89ed039c376409d13aca3fd1faeba879">3e3b009</a>)</li>
+<li><em>(config)</em> Use kebab-case for pyproject.toml settings (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/227">#227</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/f26e834b9402f5b90d804ab98b17170645747c18">f26e834</a>)</li>
+<li><em>(format)</em> Add recursive file discovery -- enable <code>djangofmt .</code> to format the current folder (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/229">#229</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/385f60a68328a97888e9419ecc2372f47c3becff">385f60a</a>)</li>
+<li><em>(format)</em> Add flag to allow self closing void elements (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/219">#219</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d0d85b0c12637812eb3e65dc6c28ecc1c6b7397a">d0d85b0</a>)</li>
+<li><em>(format)</em> Improve error message for cut off html (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/207">#207</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/decbaec5460a0a0c0ca47e79b361c8b5e2ebf5e8">decbaec</a>)</li>
+<li><em>(format)</em> Add JSON external formatter (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/188">#188</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/07e770ba4fd37c9e60a52fd49e524cf6267eca4e">07e770b</a>)</li>
+</ul>
+<h3 id="bug-fixes_7">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Fixes extra indent for {% plural %} inside blocktranslate (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/208">#208</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c7de06d0f536bc7b99da9760f5e46747f958fd65">c7de06d</a>)</li>
+<li><em>(format)</em> Fix formatting issues for nested template blocks in html opening tag (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/205">#205</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/378bc360e18b96f29ae9079aca34c3c98a2a4e04">378bc36</a>)</li>
+</ul>
+<h3 id="refactor_5">🚜 Refactor<a class="headerlink" href="#refactor_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Reuse <code>LineLength</code> and <code>PrintWidth</code> newtypes to remove hardcoded default values (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/189">#189</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/13e89b5cd0a8db911ae1d05ae6c0afc272f65498">13e89b5</a>)</li>
+<li><em>(misc)</em> Avoid clone on check error path, add force_exclude tests (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/239">#239</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/abc267d1c52ad49c0d47a114b601f259b3d78765">abc267d</a>)</li>
+<li><em>(misc)</em> Hoist Settings::default(), remove dead Hash derive, avoid clone on error path (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/237">#237</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/292326797545a0c47325cb1a77201d6f243a2aaf">2923267</a>)</li>
+<li><em>(misc)</em> Minor code quality improvement and simplifications (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/235">#235</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1c1c856033c2dc5bad4daca8e7042589015e999c">1c1c856</a>)</li>
+<li><em>(rules)</em> Declare lint rule category on the Violation (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/230">#230</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6dd81ab0c19ef8d11c7d5e507efdf13652fc5dfc">6dd81ab</a>)</li>
+</ul>
+<h3 id="documentation_2">📚 Documentation<a class="headerlink" href="#documentation_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ai)</em> Add AI policy to CONTRIBUTING.md (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/228">#228</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/479c575646d742641a7ed550059e7d860f649df3">479c575</a>)</li>
+<li><em>(check)</em> Document check mode workaround (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/200">#200</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8be5ca6025402da808f6ac8de335575854b37ee4">8be5ca6</a>)</li>
+</ul>
+<h3 id="performance_2">⚡ Performance<a class="headerlink" href="#performance_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(bench)</em> Bench linter and parser (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/232">#232</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d1644eb60b87f95363e7badf95ccb2d6862adf09">d1644eb</a>)</li>
+<li><em>(summary)</em> Add micro bench build summary (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/236">#236</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6ba6a80e7cd7bdba7209d171f843316603f1fb85">6ba6a80</a>)</li>
+</ul>
+<h3 id="testing_4">🧪 Testing<a class="headerlink" href="#testing_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ci)</em> Add <code>djangofmt check</code> to ecosystem check (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/253">#253</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e9ac5473fba7b27a5000574f60cb653d69940c24">e9ac547</a>)</li>
+<li><em>(ci)</em> Add code coverage with cargo-llvm-cov and 85% CI threshold (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/240">#240</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/78a97a6a73fde7d8c49dd03e1366ddd5864878b3">78a97a6</a>)</li>
+<li><em>(ci)</em> Re-enable djade ecosystem check (+ tidy up justfile) (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/206">#206</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/461db3b9e64d9052eb30af5662d558ae9e1aeae3">461db3b</a>)</li>
+<li><em>(ci)</em> Remove docker-run-action (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/195">#195</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c1c080b1ac45f6120c63e8d7d8aa351fa5ad0f75">c1c080b</a>)</li>
+<li><em>(ecosystem-check)</em> Allows pr comment on forks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/196">#196</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/54b204d9a080cb2e7095adab6d87fbe9b212889d">54b204d</a>)</li>
+<li><em>(lint)</em> Cleanup lint test structure (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/254">#254</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5bf935e549e2a21594e7af58658245a96d1b635d">5bf935e</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_6">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(playground)</em> Upgrade all node dependencies to latest (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/252">#252</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/da82da25939d4903847c883b5159b6e77146956f">da82da2</a>)</li>
+</ul>
+<h3 id="new-contributors_2">New Contributors ❤️<a class="headerlink" href="#new-contributors_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/jonathan-s" title="GitHub User: jonathan-s">@jonathan-s</a> made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/200">#200</a></li>
+</ul>
+<h2 id="026-2026-02-10"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.5..v0.2.6">0.2.6</a> - 2026-02-10<a class="headerlink" href="#026-2026-02-10" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_9">⛰️ Features<a class="headerlink" href="#features_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(config)</em> Implement loading options from a <code>pyproject.toml</code> file (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/186">#186</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5df4a989fe69114f6149a86a795de3ac684d2512">5df4a98</a>)</li>
+</ul>
+<h3 id="bug-fixes_8">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Always swap wrapping quotes if attribute contains one (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/180">#180</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0fd9ed3e4a74939caba33eb9c7adac61c950b79e">0fd9ed3</a>)</li>
+<li><em>(format)</em> Fix formatting of <code>{% for %}</code>/<code>{% empty %}</code> blocks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/178">#178</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/98f8ef7b0db7552b22bcfcc2eac6165ee5a4905b">98f8ef7</a>)</li>
+</ul>
+<h3 id="documentation_3">📚 Documentation<a class="headerlink" href="#documentation_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Documents workarounds for unsupported formatting (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/174">#174</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/15b1f324df68e15b34e774ed3f023378f2de10f0">15b1f32</a>)</li>
+<li><em>(github)</em> Add Github issue template (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/173">#173</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5821c0725d140382334ad2a48dfdbc439d7a1fbf">5821c07</a>)</li>
+<li><em>(ignore)</em> Document ignore comment (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/172">#172</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/50a2fddb336570bf14173f90dd282fffd23adeef">50a2fdd</a>)</li>
+</ul>
+<h3 id="testing_5">🧪 Testing<a class="headerlink" href="#testing_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ci)</em> Only build djangofmt in ci, not other workspace crates (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/170">#170</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7bbbfc8f66a3d5f018a55355366c6d72ea8db5b9">7bbbfc8</a>)</li>
+</ul>
+<h2 id="025-2026-01-12"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.3..v0.2.5">0.2.5</a> - 2026-01-12<a class="headerlink" href="#025-2026-01-12" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_10">⛰️ Features<a class="headerlink" href="#features_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(debug)</em> Add debug logs on external formatter failures (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/143">#143</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a5dda3bf4d11c94d0da4f667835d03074fb43cc2">a5dda3b</a>)</li>
+<li><em>(format)</em> Don't format django multiline comment tags (<code>{% comment %}...{% endcomment %}</code>) (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/162">#162</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6a6ca106c3009fa85d7555b7f019f6c6de500620">6a6ca10</a>)</li>
+<li><em>(format)</em> Auto-sort css statements using <code>smacss</code> ordering and enforce <code>%</code> in keyframes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/114">#114</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1dd641fedc4a07f826c95935d4ceb9d68e0a0070">1dd641f</a>)</li>
+<li><em>(format)</em> Auto-indent <code>&lt;script&gt;</code> tag content (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/115">#115</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/d959cf060622a9e6b20f022e22b9c7ad538852f3">d959cf0</a>)</li>
+<li><em>(format)</em> Keep style attribute value on a single line (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/113">#113</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/7c2f33ca3987ed659dcfb91e4b13999bb4694dde">7c2f33c</a>)</li>
+<li><em>(format)</em> Skip file parsing if there is a top-level <code>&lt;!-- djangofmt:ignore --&gt;</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/112">#112</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/fcbab9b3cc2315b930314a78b4643dd23ce5ba10">fcbab9b</a>)</li>
+<li><em>(format)</em> Improve formatting of <code>style</code> tags and attributes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/111">#111</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/24920db6e561ae3360d5b972dd66c7d8fe3b777b">24920db</a>)</li>
+<li><em>(lint)</em> Show source file name in lint diagnostics (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/159">#159</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/6ee8c963af1bdefad0c6509f4f672be371e397aa">6ee8c96</a>)</li>
+<li><em>(lint)</em> Add building blocks for linting (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/144">#144</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/08a12a05fb4037a8569b7ee10dfc49672058e682">08a12a0</a>)</li>
+<li><em>(playground)</em> Add a "Open issue on Github" button in the playground (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/163">#163</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ae247b36c92434aa643c48515b017262312378a8">ae247b3</a>)</li>
+<li><em>(playground)</em> Add a new collapsible panel to display linting errors (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/148">#148</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/067e4a090d5a801cb31483461a90ed485797b4af">067e4a0</a>)</li>
+<li><em>(playground)</em> Add playground deploy to release workflow (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/124">#124</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/124b14995a7a5611bc84f00d6493f1cddb1ca928">124b149</a>)</li>
+<li><em>(playground)</em> Add an online playground (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/118">#118</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/a655190832fbd78e06c86f00cc5d7ecb3e7bb28b">a655190</a>)</li>
+<li><em>(playground)</em> Expose a wasm format command (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/122">#122</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/847d3d830a66239ef06d07827a73ec7d4914aa1a">847d3d8</a>)</li>
+</ul>
+<h3 id="bug-fixes_9">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Fixes handling of deprecated django <code>{% trans %}</code> tag (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/154">#154</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8a7a64f041c7eecf4c04c84f3942a97e94ca578f">8a7a64f</a>)</li>
+</ul>
+<h3 id="refactor_6">🚜 Refactor<a class="headerlink" href="#refactor_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(cargo)</em> Switch to workspace setup (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/121">#121</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ad75960ee2a7d972a92b7ec078837d9031ef451e">ad75960</a>)</li>
+<li><em>(format)</em> Remove <code>line_col_to_offset</code> and use miette <code>SourceOffset::from_location</code> for error reporting (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/145">#145</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/f8acc953b8d34dd382c7e86b54f013b9fb5130e8">f8acc95</a>)</li>
+</ul>
+<h3 id="performance_3">⚡ Performance<a class="headerlink" href="#performance_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(allocator)</em> Use jemalloc on linux (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/128">#128</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/4e92927ac3f3de5b2629ddcda446bd3b7462357f">4e92927</a>)</li>
+<li><em>(codspeed)</em> Setup Codspeed CI benchmarks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/125">#125</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/0ea2b399dfd19c31b1d82c06c7cf10186f39456b">0ea2b39</a>)</li>
+<li><em>(perf)</em> Update the <code>lto</code> and <code>codegen-units</code> benchmark script (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/126">#126</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ccd7edea4eaa3e30b2a1017b833d498b34b95c34">ccd7ede</a>)</li>
+</ul>
+<h3 id="testing_6">🧪 Testing<a class="headerlink" href="#testing_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(binary-size)</em> Add cargo-bloat (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/136">#136</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2855cb24535d75daa40d224e307f14f7729f41d5">2855cb2</a>)</li>
+<li><em>(ci)</em> Skip codspeed in CI if no rust code changes (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/158">#158</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8bf4432cef316027a50324ce8dae9c54d480a459">8bf4432</a>)</li>
+<li><em>(ci)</em> Cancel outdated ci jobs - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/18595c32391b441601fdd13d668f8fb32325b68a">18595c3</a>)</li>
+<li><em>(clippy)</em> Improve clippy configuration (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/156">#156</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/2de17b3e70d3ec630e2f11cf28c3c5a86c949eaf">2de17b3</a>)</li>
+<li><em>(pre-commit)</em> Switch to a managed <code>dprint</code> pre-commit integration (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/138">#138</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/1ccfba0f23dd5069aeb9ca3eb2709a82edf2a966">1ccfba0</a>)</li>
+<li><em>(pre-commit)</em> Simplify dprint discovery in pre-commit (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/137">#137</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/f4eb28c2ed38ac3a55f1aeb111749da32176b4ea">f4eb28c</a>)</li>
+<li><em>(review)</em> Add coderrabit (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/141">#141</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/bac6128b6f38dc2ac77dee8e8b727ab5b30b5f84">bac6128</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_7">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(rust)</em> Bump rust version to 1.89 (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/110">#110</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/dcf68aa2b68ff01dc8e959d32b7b31fff6173cfe">dcf68aa</a>)</li>
+<li>Update release script - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/815fd8c6470dfc19656b74412b72bf6f7a58e2bf">815fd8c</a>)</li>
+</ul>
+<h3 id="new-contributors_3">New Contributors ❤️<a class="headerlink" href="#new-contributors_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/Mouarius" title="GitHub User: Mouarius">@Mouarius</a> made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/156">#156</a></li>
+</ul>
+<h2 id="023-2025-11-30"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.2..v0.2.3">0.2.3</a> - 2025-11-30<a class="headerlink" href="#023-2025-11-30" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_11">⛰️ Features<a class="headerlink" href="#features_11" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Add pretty-printing of parse errors (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/104">#104</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/fee4ee3eacb748e77d6062813e044bace68adda1">fee4ee3</a>)</li>
+<li><em>(format)</em> Add custom <code>&lt;!-- djangofmt:ignore --&gt;</code> directive (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/102">#102</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/c9b20bb6a8e22fb4c9bf9bde89a51154de04a1aa">c9b20bb</a>)</li>
+<li><em>(format)</em> Improvements on inline node formatting (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/75">#75</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/58a4f8fa3479cbd33ecbe02b22c8792440b2560b">58a4f8f</a>)</li>
+</ul>
+<h3 id="refactor_7">🚜 Refactor<a class="headerlink" href="#refactor_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(error)</em> Remove <code>anyhow</code> and use custom error enum (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/100">#100</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/e39f71a0c90086cc5f0080059b2dd201c37cf006">e39f71a</a>)</li>
+</ul>
+<h3 id="testing_7">🧪 Testing<a class="headerlink" href="#testing_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(clippy)</em> Enable strict clippy rules (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/97">#97</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/cd7d6eaaf0a42990fade3c813660b4f40fbf140e">cd7d6ea</a>)</li>
+<li><em>(ecosystem-check)</em> Fix ecosystem check comment urls and support codeberg.com (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/101">#101</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/337592cb96d8d8e3a12f3992bddf87e77f9fe925">337592c</a>)</li>
+<li><em>(ecosystem-check)</em> Fix ecosystem-check and support other providers than github (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/99">#99</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/13e8bb28c4913d38fc2c1fe52b2ce8e1d9d30b94">13e8bb2</a>)</li>
+</ul>
+<h2 id="022-2025-06-12"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.1..v0.2.2">0.2.2</a> - 2025-06-12<a class="headerlink" href="#022-2025-06-12" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_12">⛰️ Features<a class="headerlink" href="#features_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Document svg files support (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/74">#74</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/60ba20fc33a9ccbe6d908031e7513f974ee8c6d6">60ba20f</a>)</li>
+<li><em>(format)</em> Support unquoted attr value recovery for jinja tags &amp; blocks (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/73">#73</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/ca7efc6c12c97cb8a9210c265569ad1a4b0f213d">ca7efc6</a>)</li>
+</ul>
+<h2 id="021-2025-06-07"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.2.0..v0.2.1">0.2.1</a> - 2025-06-07<a class="headerlink" href="#021-2025-06-07" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_13">⛰️ Features<a class="headerlink" href="#features_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(format)</em> Improve whitespace-sensitive node formatting (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/70">#70</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/cfaa21e2ca37134bb9e315b17a0bc6f82f6ac289">cfaa21e</a>)</li>
+</ul>
+<h2 id="020-2025-05-23"><a href="https://github.com/UnknownPlatypus/djangofmt/compare/v0.1.0..v0.2.0">0.2.0</a> - 2025-05-23<a class="headerlink" href="#020-2025-05-23" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="features_14">⛰️ Features<a class="headerlink" href="#features_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(cli)</em> Add <code>indent_width</code> cli parameter (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/48">#48</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b0d021948d564282f32b95688f0d31cbd6d8e633">b0d0219</a>)</li>
+<li><em>(fmt)</em> Never wrap opening tag with no attrs (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/20">#20</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/8fb993a37f3ce1fbeb911eb91f8d92485a7db62c">8fb993a</a>)</li>
+<li><em>(format)</em> Converge in one pass formatting style attr (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/50">#50</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/fadce6b31b8345543419eb0c6c5703e80810b2ec">fadce6b</a>)</li>
+</ul>
+<h3 id="bug-fixes_10">🐛 Bug Fixes<a class="headerlink" href="#bug-fixes_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(cli)</em> Exit <code>1</code> on handled formatting failure - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/b7ebb789a865f62a58bb3b34cccaafea8f0e20e7">b7ebb78</a>)</li>
+</ul>
+<h3 id="testing_8">🧪 Testing<a class="headerlink" href="#testing_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(ecosystem-check)</em> Stability test + Integration test with djade (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/51">#51</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/449456e3c2da1f643402772ee555dc34fa8af132">449456e</a>)</li>
+<li><em>(pre-commit.ci)</em> Enable <code>pre-commit.ci</code> (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/15">#15</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/5ce836f701c8082bfe56ebdbba05a00cf8644e5b">5ce836f</a>)</li>
+</ul>
+<h3 id="miscellaneous-tasks_8">⚙️ Miscellaneous Tasks<a class="headerlink" href="#miscellaneous-tasks_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li><em>(markup_fmt)</em> Bump <code>markup_fmt</code> to v0.20.0 (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/65">#65</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/070e2af30a1d888d66592324af5d77b10820b249">070e2af</a>)</li>
+<li><em>(rust)</em> Rust 1.87 edition 2024 (<a href="https://github.com/UnknownPlatypus/djangofmt/issues/55">#55</a>) - (<a href="https://github.com/UnknownPlatypus/djangofmt/commit/9aeb174595bbb8d2da893dc41b3f4054368c71c9">9aeb174</a>)</li>
+</ul>
+<h3 id="new-contributors_4">New Contributors ❤️<a class="headerlink" href="#new-contributors_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/renovate" title="GitHub User: renovate">@renovate</a>[bot] made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/64">#64</a></li>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/pre-commit-ci" title="GitHub User: pre-commit-ci">@pre-commit-ci</a>[bot] made their first contribution in <a href="https://github.com/UnknownPlatypus/djangofmt/pull/52">#52</a></li>
+</ul>
+<h2 id="010-2025-03-16"><a href="https://github.com/UnknownPlatypus/djangofmt/releases/tag/v0.1.0">0.1.0</a> - 2025-03-16<a class="headerlink" href="#010-2025-03-16" title="Permanent link">&para;</a></h2>
+<p><a href="https://unknownplatypus.github.io/djangofmt/docs/"><strong>Docs</strong></a> | <a href="https://unknownplatypus.github.io/djangofmt/"><strong>Playground</strong></a></p>
+<h3 id="new-contributors_5">New Contributors ❤️<a class="headerlink" href="#new-contributors_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><a class="magiclink magiclink-github magiclink-mention" href="https://github.com/UnknownPlatypus" title="GitHub User: UnknownPlatypus">@UnknownPlatypus</a> made their first contribution</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-circle-arrow-up" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4M12 16V8"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../contributing/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Contributing to djangofmt">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="lucide lucide-arrow-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7M19 12H5"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Contributing to djangofmt
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://zensical.org/" target="_blank" rel="noopener">
+      Zensical
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"..","features":["navigation.sections","navigation.indexes","navigation.instant","navigation.instant.prefetch","navigation.instant.progress","navigation.tracking","navigation.path","navigation.footer","navigation.top","toc.follow","search.highlight","content.code.copy","content.code.select","content.code.annotate","content.tooltips"],"search":"../assets/javascripts/workers/search.e2d2d235.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.6e5f0216.min.js"></script>
+      
+    
+  </body>
+</html>
