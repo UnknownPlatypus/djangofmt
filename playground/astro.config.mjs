@@ -9,5 +9,5 @@ export default defineConfig({
     server: { watch: { ignored: ["**/pkg/**"] } },
   },
   // PR previews deploy under `/djangofmt/pr-preview/pr-<N>/`.
-  base: (process.env.PLAYGROUND_BASE ?? "/djangofmt/").replace(/\/?$/, "/"),
+  base: (process.env.PLAYGROUND_BASE || "/djangofmt/").replace(/\/?$/, "/"),
 });
