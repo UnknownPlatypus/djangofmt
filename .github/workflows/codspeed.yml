@@ -53,10 +53,11 @@ jobs:
           enable-cache: false
 
       - name: Build the benchmark target(s)
-        run: uv run --only-dev cargo codspeed build -p djangofmt_benchmark --profile profiling
+        # Built for every mode the action runs, which then sets `CODSPEED_RUNNER_MODE` for each run.
+        run: uv run --only-dev cargo codspeed build -m simulation,memory -p djangofmt_benchmark --profile profiling
       - name: Run the benchmarks
         uses: CodSpeedHQ/action@v5.6.3
         with:
-          mode: simulation
+          mode: simulation,memory
           cycle-estimation: false
           run: uv run --only-dev cargo codspeed run -p djangofmt_benchmark
