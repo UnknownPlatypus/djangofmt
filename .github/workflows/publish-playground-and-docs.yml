@@ -165,7 +165,8 @@ jobs:
     timeout-minutes: 15
     environment:
       name: playground-preview
-      url: ${{ steps.preview.outputs.preview-url }}
+      # Pages caches `index.html` for 10 minutes, so give each push its own URL.
+      url: ${{ steps.preview.outputs.preview-url }}?v=${{ github.event.pull_request.head.sha }}
     permissions:
       contents: write # push to gh-pages
       pages: read # wait for the Pages build
