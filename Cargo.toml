@@ -26,7 +26,7 @@ djangofmt_syntax = { path = "crates/djangofmt_syntax" }
 dprint-plugin-json = { version = "0.25.0" }
 dtl-lexer = {
   git = "https://github.com/UnknownPlatypus/django-rusty-templates",
-  rev = "7b7cb537b5abcfd994fda42ade86544c8dd4837e",
+  rev = "9d0575327ea61519f38a2d55ccf3a87abb3c5570",
 }
 editorconfig-parser = { version = "0.0.4" }
 globset = { version = "0.4.18" }

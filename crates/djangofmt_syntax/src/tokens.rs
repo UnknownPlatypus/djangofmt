@@ -106,6 +106,14 @@ mod tests {
         "{% verbatim x %}{% a %}{% endverbatim %}{% endverbatim x %}{% b %}",
         &[(" verbatim x ", 2), (" endverbatim x ", 42), (" b ", 61)]
     )]
+    #[case::verbatim_after_python_whitespace(
+        "{%\x1Cverbatim %}{{ a }}{% endverbatim %}",
+        &[("\x1Cverbatim ", 2), (" endverbatim ", 23)]
+    )]
+    #[case::verbatim_end_hidden_in_comment(
+        "{% verbatim %}{# {% endverbatim %} #}{{ a }}{% endverbatim %}{% b %}",
+        &[(" verbatim ", 2), (" endverbatim ", 46), (" b ", 63)]
+    )]
     #[case::comment_body_dropped(
         r#"{% comment "note" %}{% a %}{{ c }}{% endcomment %}{% b %}"#,
         &[(r#" comment "note" "#, 2), (" endcomment ", 36), (" b ", 52)]

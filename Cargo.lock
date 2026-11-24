@@ -599,7 +599,7 @@ dependencies = [
 [[package]]
 name = "dtl-lexer"
 version = "0.1.0"
-source = "git+https://github.com/UnknownPlatypus/django-rusty-templates?rev=7b7cb537b5abcfd994fda42ade86544c8dd4837e#7b7cb537b5abcfd994fda42ade86544c8dd4837e"
+source = "git+https://github.com/UnknownPlatypus/django-rusty-templates?rev=9d0575327ea61519f38a2d55ccf3a87abb3c5570#9d0575327ea61519f38a2d55ccf3a87abb3c5570"
 dependencies = [
  "memchr",
  "miette",
@@ -1078,16 +1078,8 @@ version = "7.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f98efec8807c63c752b5bd61f862c165c115b0a35685bdcfd9238c7aeb592b7"
 dependencies = [
- "backtrace",
- "backtrace-ext",
  "cfg-if",
  "miette-derive",
- "owo-colors",
- "supports-color",
- "supports-hyperlinks",
- "supports-unicode",
- "terminal_size",
- "textwrap",
  "unicode-width 0.1.14",
 ]
 
