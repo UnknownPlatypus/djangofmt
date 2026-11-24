@@ -8,5 +8,6 @@ export default defineConfig({
     build: { chunkSizeWarningLimit: 4000 },
     server: { watch: { ignored: ["**/pkg/**"] } },
   },
-  base: "/djangofmt/",
+  // PR previews deploy under `/djangofmt/pr-preview/pr-<N>/`.
+  base: process.env.PLAYGROUND_BASE ?? "/djangofmt/",
 });
