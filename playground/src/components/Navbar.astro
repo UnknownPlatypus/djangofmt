@@ -71,7 +71,7 @@ import PlusMinusInput from "./PlusMinusInput.astro";
     </div>
     {/* Blur after an action so the speed dial closes (it is open while focus is inside). */}
     <div
-        class="fab bottom-10 md:hidden"
+        class="fab bottom-20 md:hidden"
         data-on:click="evt.target.closest('a, button') && document.activeElement.blur()"
     >
         <div tabindex="0" role="button" class="btn btn-circle btn-primary shadow-lg" aria-label="More actions">

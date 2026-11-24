@@ -53,7 +53,7 @@ const base = import.meta.env.BASE_URL;
             class="relative flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden"
             data-on:monaco-change="$inputCode = evt.detail.value"
         >
-            <div class="flex-1 flex flex-col min-w-0 h-1/2 md:h-full">
+            <div class="flex-1 flex flex-col min-w-0 max-md:contents md:h-full">
                 <EditorPanel id="monacoInput">
                     <span class="text-xs font-bold text-base-content/50 uppercase tracking-wider">Input Template</span>
                 </EditorPanel>
