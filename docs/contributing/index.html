@@ -1057,7 +1057,8 @@ and benchmark templates.</p>
    <a href="https://github.com/UnknownPlatypus/markup_fmt">markup_fmt fork</a>, the target
    reaches <code>djangofmt</code> itself (<code>format_text</code>, <code>ParseError</code>) and the embedded
    <code>malva</code> and <code>dprint-plugin-json</code> formatters. Fix the bug where it lives, and
-   bump the pinned <code>rev</code> in the root <code>Cargo.toml</code> only for <code>markup_fmt</code> fixes.</li>
+   for a fix in the <code>markup_fmt</code> or <code>malva</code> fork, bump its pinned <code>rev</code> in the
+   root <code>Cargo.toml</code>. A <code>raffia</code> (CSS parser) fix reaches us through the <code>malva</code> fork.</li>
 <li>Keep the minimized case as a fixture in <code>crates/djangofmt/tests/fmt/</code>
    or <code>crates/djangofmt/tests/parse_error/</code>.</li>
 </ol>
