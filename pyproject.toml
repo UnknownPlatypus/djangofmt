@@ -160,7 +160,7 @@ commit_preprocessors = [
   { pattern = 'with file-ignore\[invalid-syntax\]', replace = "with `file-ignore[invalid-syntax]`" },
   # Check spelling of the commit message using https://github.com/crate-ci/typos.
   # If the spelling is incorrect, it will be fixed automatically.
-  { pattern = ".*", replace_command = "typos --write-changes -" },
+  { pattern = ".*", replace_command = "typos --format silent --write-changes - || true" },
 ]
 # An array of regex based parsers for extracting data from the commit message.
 # Assigns commits to groups.
