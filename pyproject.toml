@@ -156,6 +156,8 @@ commit_preprocessors = [
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))" },
   # The rule shipped as `deprecated-ignore` (#443); the squashed commit title kept its pre-review name.
   { pattern = "redirected-ignore", replace = "deprecated-ignore" },
+  # Unquoted in #632's title, mkdocs --strict reads `[invalid-syntax]` as a broken reference-style link.
+  { pattern = 'with file-ignore\[invalid-syntax\]', replace = "with `file-ignore[invalid-syntax]`" },
   # Check spelling of the commit message using https://github.com/crate-ci/typos.
   # If the spelling is incorrect, it will be fixed automatically.
   { pattern = ".*", replace_command = "typos --write-changes -" },
