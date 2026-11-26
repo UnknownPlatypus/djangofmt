@@ -1,6 +1,6 @@
 [package]
 name = "djangofmt_corpus"
-version.workspace = true
+version = "1.0.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true

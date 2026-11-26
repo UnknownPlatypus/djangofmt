@@ -473,7 +473,7 @@ dependencies = [
 
 [[package]]
 name = "djangofmt_corpus"
-version = "1.2.0"
+version = "1.0.0"
 
 [[package]]
 name = "djangofmt_dev"

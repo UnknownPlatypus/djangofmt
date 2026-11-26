@@ -16,3 +16,5 @@ The following files are included, under their original licenses:
 - [`django-oscar/src/oscar/templates/oscar/dashboard/orders/order_detail.html`](https://github.com/django-oscar/django-oscar/blob/9bc531349519c4448eaec5d4c402f9bdcebd85bb/src/oscar/templates/oscar/dashboard/orders/order_detail.html) (BSD-3-Clause)
 
 The files are included in the `resources` directory to allow running benchmarks offline and for simplicity.
+
+Other projects pin this corpus by git tag. After changing it, bump `version` in `crates/djangofmt_corpus/Cargo.toml` and push a `corpus-v<version>` tag on the merged commit.

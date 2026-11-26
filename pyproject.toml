@@ -156,9 +156,11 @@ commit_preprocessors = [
   { pattern = '\((\w+\s)?#([0-9]+)\)', replace = "([#${2}](<REPO>/issues/${2}))" },
   # The rule shipped as `deprecated-ignore` (#443); the squashed commit title kept its pre-review name.
   { pattern = "redirected-ignore", replace = "deprecated-ignore" },
+  # Unquoted in #632's title, mkdocs --strict reads `[invalid-syntax]` as a broken reference-style link.
+  { pattern = 'with file-ignore\[invalid-syntax\]', replace = "with `file-ignore[invalid-syntax]`" },
   # Check spelling of the commit message using https://github.com/crate-ci/typos.
   # If the spelling is incorrect, it will be fixed automatically.
-  { pattern = ".*", replace_command = "typos --write-changes -" },
+  { pattern = ".*", replace_command = "typos --format silent --write-changes - || true" },
 ]
 # An array of regex based parsers for extracting data from the commit message.
 # Assigns commits to groups.
@@ -189,7 +191,7 @@ protect_breaking_commits = false
 # Exclude commits that are not matched by any commit parser.
 filter_commits = false
 # Regex to select git tags that represent releases.
-tag_pattern = "v[0-9].*"
+tag_pattern = "^v[0-9].*"
 # Regex to select git tags that do not represent proper releases.
 # Takes precedence over `tag_pattern`.
 # Changes belonging to these releases will be included in the next release.
