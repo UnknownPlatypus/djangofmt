@@ -7,7 +7,8 @@
 - Adding or porting a lint rule: follow `.agents/skills/add-lint-rule/SKILL.md` end to end.
 - Babysitting a PR to green (conflicts, failing CI jobs, review threads, CodSpeed, ecosystem check): follow `.agents/skills/babysit-pr/SKILL.md`.
 - Branches are squash-merged under the PR title, which becomes the changelog entry, so the PR title carries a conventional-commit `type(scope):` prefix, e.g. `feat(lint):`, `fix(format):`, `chore(deps):`. Commits get plain descriptive titles, except on a single-commit branch: GitHub reuses that commit's title as the PR title, so it carries the prefix.
-- PR descriptions: one or two sentences on what the change solves, then a code block wherever one can replace prose, then one-line bullets for what the diff can't show (a behaviour change, a measured number). Under ~100 words of prose, argued on djangofmt's own terms.
+- PR descriptions and every thread comment or reply: write like a busy maintainer, in short plain sentences. A PR description is at most two sentences on what changes and why, plus a `Closes #N`/`References #N` line when there is one. When the PR changes formatter output or lint diagnostics, show it with one small block: a `diff` of a template before/after formatting, or a snippet with the diagnostic it raises. Use one bullet per change only when the PR makes several unrelated changes, and add no headings, follow-up steps, or recap of the diff. A review reply answers the question or names the fix in one short sentence.
+- Pass PR and comment bodies to `gh` with `--body-file -` and a `<<'EOF'` heredoc, with backticks left unescaped.
 - Keep commit descriptions minimal or empty — write a body only when explicitly asked, or when a skill documents otherwise (e.g. `add-lint-rule`).
 
 ## Commands
