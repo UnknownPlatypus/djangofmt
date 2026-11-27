@@ -3,9 +3,9 @@ source: crates/djangofmt_lint/tests/check/main.rs
 ---
 
   × Duplicate `{% block %}` name `a`
-   ╭─[tests/check/duplicate_block_name/duplicate_block_name_jinja.invalid.jinja:5:10]
- 4 │ {% endif %}
- 5 │ {% block a %}{% endblock %}
+   ╭─[tests/check/duplicate_block_name/duplicate_block_name_jinja.invalid.jinja:3:10]
+ 2 │ {%- block a %}{% endblock %}
+ 3 │ {% block a -%}{% endblock %}
    ·          ┬
    ·          ╰── here
    ╰────

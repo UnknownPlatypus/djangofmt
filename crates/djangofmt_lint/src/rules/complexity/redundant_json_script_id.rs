@@ -2,9 +2,8 @@ use std::borrow::Cow;
 
 use djangofmt_syntax::dtl::{filter_expression, is_space};
 use djangofmt_syntax::span;
-use markup_fmt::ast::JinjaInterpolation;
 
-use crate::Checker;
+use crate::LintContext;
 use crate::fix::{Edit, Fix, FixAvailability};
 use crate::registry::{Rule, RuleCategory};
 use crate::violation::{Violation, ViolationMetadata, derive_message_formats};
@@ -60,15 +59,15 @@ impl Violation for RedundantJsonScriptId {
 }
 
 /// The caller guarantees a Django template and a target version of 4.1 or newer.
-pub fn check(checker: &Checker<'_>, interpolation: &JinjaInterpolation<'_>) {
+pub fn check(context: &LintContext<'_>, expr: &str) {
     // Every `{{ }}` gets here, so only a filter argument's `:` sends it out of line.
-    if interpolation.expr.contains(':') {
-        check_filters(checker, interpolation.expr);
+    if expr.contains(':') {
+        check_filters(context, expr);
     }
 }
 
 #[cold]
-fn check_filters(checker: &Checker<'_>, expr: &str) {
+fn check_filters(context: &LintContext<'_>, expr: &str) {
     // Django allows no whitespace between a filter and its `:`, so this skips lexing safely.
     if !expr.contains("json_script:") {
         return;
@@ -80,9 +79,9 @@ fn check_filters(checker: &Checker<'_>, expr: &str) {
         if filter.name == "json_script"
             && let Some(arg @ ("\"\"" | "''")) = filter.arg
         {
-            let start = checker.source_offset(arg) - ":".len();
-            let argument = span(start, checker.source_end(arg) - start);
-            checker
+            let start = context.source_offset(arg) - ":".len();
+            let argument = span(start, context.source_end(arg) - start);
+            context
                 .report_diagnostic(&RedundantJsonScriptId, argument)
                 .set_fix(Fix::safe_edit(Edit::deletion(argument)));
         }

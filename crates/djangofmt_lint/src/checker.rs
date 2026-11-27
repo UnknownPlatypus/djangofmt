@@ -1,27 +1,20 @@
-use markup_fmt::Language;
 use markup_fmt::ast::{
-    Attribute, Element, JinjaBlock, JinjaInterpolation, JinjaTag, JinjaTagOrChildren,
-    NativeAttribute, Node, NodeKind, Root,
+    Attribute, Element, JinjaBlock, JinjaTagOrChildren, NativeAttribute, Node, NodeKind, Root,
 };
-use markup_fmt::parser::parse_jinja_tag_name;
 use miette::SourceSpan;
-use smallvec::SmallVec;
 
 use crate::django_version::DjangoVersion;
 use crate::lint_context::{DiagnosticGuard, LintContext};
 use crate::registry::Rule;
 use crate::rules;
 use crate::violation::Violation;
-use djangofmt_syntax::dtl;
+use djangofmt_syntax::tokens::{Token, Tokens, tag_name};
 use djangofmt_syntax::{CommentDelimiters, HTML_COMMENT, TEMPLATE_COMMENT};
 
 /// Runs the AST rules from a visitor over the `markup_fmt` tree.
 #[derive(Debug)]
 pub struct Checker<'a> {
     context: &'a LintContext<'a>,
-    /// Block names collected during the traversal.
-    /// Inline-backed: templates rarely exceed a handful of blocks, so the common case never allocates.
-    block_names: SmallVec<[&'a str; 8]>,
     /// Inside a Jinja `{% raw %}` body, where template tags are literal text.
     in_raw: bool,
 }
@@ -31,7 +24,6 @@ impl<'a> Checker<'a> {
     pub const fn new(context: &'a LintContext<'a>) -> Self {
         Self {
             context,
-            block_names: SmallVec::new_const(),
             in_raw: false,
         }
     }
@@ -45,20 +37,7 @@ impl<'a> Checker<'a> {
     /// Whether the source is parsed as a Django template rather than a Jinja one.
     #[must_use]
     pub const fn is_django(&self) -> bool {
-        matches!(self.context.language(), Language::Django)
-    }
-
-    /// The Django version the templates target, [`None`] when it is neither set nor inferred;
-    /// no version-gated rule can fire without one.
-    #[must_use]
-    const fn target_version(&self) -> Option<DjangoVersion> {
-        self.context.settings().target_version
-    }
-
-    /// Block names recorded during the traversal, borrowed from the source.
-    #[must_use]
-    pub fn block_names(&self) -> &[&'a str] {
-        &self.block_names
+        self.context.is_django()
     }
 
     /// Compute the byte offset of a string slice within the source.
@@ -120,92 +99,21 @@ impl<'a> Checker<'a> {
         for node in &root.children {
             self.visit_node(node);
         }
-
-        // Cross-node finalize: now that every `{% block %}` has been recorded, flag duplicates.
-        if self.is_rule_enabled(Rule::DuplicateBlockName) {
-            rules::correctness::duplicate_block_name::check(self);
-        }
     }
 
     fn visit_node(&mut self, node: &Node<'a>) {
         match &node.kind {
             NodeKind::Element(element) => self.visit_element(element),
             NodeKind::JinjaBlock(block) => self.visit_jinja_block(block),
-            NodeKind::JinjaTag(tag) => self.visit_jinja_tag(tag, self.tag_name(tag)),
-            NodeKind::Comment(comment) => {
-                self.visit_comment(HTML_COMMENT, comment.raw);
-                self.record_text_block_names(comment.raw);
-            }
+            NodeKind::Comment(comment) => self.visit_comment(HTML_COMMENT, comment.raw),
             NodeKind::JinjaComment(comment) => self.visit_comment(TEMPLATE_COMMENT, comment.raw),
-            NodeKind::JinjaInterpolation(interpolation) => {
-                self.visit_jinja_interpolation(interpolation);
-            }
             _ => {}
-        }
-    }
-
-    /// Only node-position `{{ }}` reaches here: in an attribute value it stays part of the
-    /// value string.
-    fn visit_jinja_interpolation(&self, interpolation: &JinjaInterpolation<'_>) {
-        if self.is_rule_enabled(Rule::RedundantJsonScriptId)
-            && self.is_django()
-            && self
-                .target_version()
-                .is_some_and(|version| version >= DjangoVersion::new(4, 1))
-        {
-            rules::complexity::redundant_json_script_id::check(self, interpolation);
         }
     }
 
     fn visit_comment(&self, delimiters: CommentDelimiters, body: &str) {
         if self.is_rule_enabled(Rule::DeprecatedIgnore) {
             rules::suspicious::deprecated_ignore::check(self, delimiters, body);
-        }
-    }
-
-    /// Django names a tag by its first bit; Jinja strips whitespace-control markers first.
-    fn tag_name(&self, tag: &JinjaTag<'a>) -> &'a str {
-        if self.is_django() {
-            dtl::tag_name(tag.content)
-        } else {
-            jinja_tag_name(tag, self.context.language())
-        }
-    }
-
-    /// The caller reads `name`, so a block's opener shares it with the block rules.
-    fn visit_jinja_tag(&mut self, tag: &JinjaTag<'a>, name: &'a str) {
-        if self.in_raw {
-            return;
-        }
-        match name {
-            "block" => {
-                if self.is_rule_enabled(Rule::DuplicateBlockName)
-                    && let Some(name) =
-                        rules::correctness::duplicate_block_name::block_name_from_content(
-                            tag.content,
-                        )
-                {
-                    self.block_names.push(name);
-                }
-            }
-            "include" => {
-                // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
-                if let Some(path) = self.context.path()
-                    && self.is_rule_enabled(Rule::SameFilePartialInclude)
-                {
-                    rules::style::same_file_partial_include::check(self, tag, path);
-                }
-            }
-            "load"
-                if self.is_rule_enabled(Rule::DeprecatedStaticLibrary)
-                    && self.is_django()
-                    && self
-                        .target_version()
-                        .is_some_and(|version| version >= DjangoVersion::new(2, 1)) =>
-            {
-                rules::suspicious::deprecated_static_library::check(self, tag);
-            }
-            _ => {}
         }
     }
 
@@ -249,25 +157,12 @@ impl<'a> Checker<'a> {
         for child in &element.children {
             self.visit_node(child);
         }
-
-        // The parser keeps these bodies as raw text, but Django still reads the tags in them.
-        if ["script", "style", "pre", "textarea"]
-            .iter()
-            .any(|tag| element.tag_name.eq_ignore_ascii_case(tag))
-        {
-            for child in &element.children {
-                if let NodeKind::Text(text) = &child.kind {
-                    self.record_text_block_names(text.raw);
-                }
-            }
-        }
     }
 
     fn visit_attribute(&mut self, attr: &Attribute<'a>, element: &Element<'a>) {
         match attr {
             Attribute::Native(native) => self.visit_native_attribute(native, element),
             Attribute::JinjaBlock(block) => self.visit_jinja_attr_block(block, element),
-            Attribute::JinjaTag(tag) => self.visit_jinja_tag(tag, self.tag_name(tag)),
             _ => {}
         }
     }
@@ -332,14 +227,13 @@ impl<'a> Checker<'a> {
 
     /// Shared by both block visitors, which differ only in how they visit children.
     fn visit_opener<T>(&mut self, block: &JinjaBlock<'a, T>) {
-        let Some(JinjaTagOrChildren::Tag(opener)) = block.body.first() else {
-            return;
-        };
-        let name = self.tag_name(opener);
-        self.visit_jinja_tag(opener, name);
         if self.in_raw {
             return;
         }
+        let Some(JinjaTagOrChildren::Tag(opener)) = block.body.first() else {
+            return;
+        };
+        let name = tag_name(opener, self.context.language());
         if matches!(name, "blocktranslate" | "blocktrans")
             && self.is_rule_enabled(Rule::UntrimmedBlocktranslate)
         {
@@ -350,13 +244,6 @@ impl<'a> Checker<'a> {
         }
         // Django has no `raw` tag; only Jinja parses one into a block.
         self.in_raw = !self.is_django() && name == "raw";
-    }
-
-    fn record_text_block_names(&mut self, raw: &'a str) {
-        if !self.in_raw && self.is_rule_enabled(Rule::DuplicateBlockName) {
-            self.block_names
-                .extend(rules::correctness::duplicate_block_name::block_names_in_text(raw));
-        }
     }
 
     fn visit_jinja_attr_block(
@@ -377,48 +264,44 @@ impl<'a> Checker<'a> {
     }
 }
 
-/// `parse_jinja_tag_name` on bytes: the name is the run of `[A-Za-z0-9_]` past the
-/// whitespace-control markers and the whitespace. The fork decodes non-ASCII whitespace.
-fn jinja_tag_name<'s>(tag: &JinjaTag<'s>, language: Language) -> &'s str {
-    let rest = tag
-        .content
-        .trim_start_matches(['+', '-'])
-        .trim_ascii_start();
-    match rest.bytes().next() {
-        // `\x0B` and the non-ASCII code points are the whitespace ASCII trimming leaves behind.
-        Some(b) if b == b'\x0B' || b >= 0x80 => parse_jinja_tag_name(tag, language),
-        _ => {
-            let end = rest
-                .bytes()
-                .position(|b| !(b.is_ascii_alphanumeric() || b == b'_'))
-                .unwrap_or(rest.len());
-            &rest[..end]
+/// Run the token rules over Django's token stream: the tags by name,
+/// the `{{ }}` and the rules that read the whole stream.
+pub fn check_tokens(tokens: &Tokens<'_>, context: &LintContext<'_>) {
+    for token in tokens.iter() {
+        match token {
+            Token::Tag { tag, name } => match *name {
+                "include" => {
+                    // Same-file detection needs the linted file's path (absent in e.g. the WASM playground).
+                    if let Some(path) = context.path()
+                        && context.is_rule_enabled(Rule::SameFilePartialInclude)
+                    {
+                        rules::style::same_file_partial_include::check(context, tokens, tag, path);
+                    }
+                }
+                "load"
+                    if context.is_rule_enabled(Rule::DeprecatedStaticLibrary)
+                        && context.is_django()
+                        && context
+                            .target_version()
+                            .is_some_and(|version| version >= DjangoVersion::new(2, 1)) =>
+                {
+                    rules::suspicious::deprecated_static_library::check(context, tag);
+                }
+                _ => {}
+            },
+            Token::Var(expr) => {
+                if context.is_rule_enabled(Rule::RedundantJsonScriptId)
+                    && context.is_django()
+                    && context
+                        .target_version()
+                        .is_some_and(|version| version >= DjangoVersion::new(4, 1))
+                {
+                    rules::complexity::redundant_json_script_id::check(context, expr);
+                }
+            }
         }
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn jinja_tag_name_matches_the_parser() {
-        for content in [
-            "- if x -",
-            "+for",
-            " raw ",
-            "",
-            "set-x",
-            "\u{a0}set",
-            "\x0Bset",
-            "é",
-        ] {
-            let tag = JinjaTag { content, start: 0 };
-            assert_eq!(
-                jinja_tag_name(&tag, Language::Jinja),
-                parse_jinja_tag_name(&tag, Language::Jinja),
-                "{content:?}"
-            );
-        }
+    if context.is_rule_enabled(Rule::DuplicateBlockName) {
+        rules::correctness::duplicate_block_name::check(context, tokens);
     }
 }
