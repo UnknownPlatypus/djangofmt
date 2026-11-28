@@ -6,14 +6,14 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Final
 
 import jinja2
 from django.template import Engine, Origin, TemplateSyntaxError
 from django.template.base import Lexer, Node, Parser, TextNode, Token
 from django.template.library import Library
 
-JINJA_ENV = jinja2.Environment(
+JINJA_ENV: Final[jinja2.Environment] = jinja2.Environment(
     extensions=[
         "jinja2.ext.i18n",
         "jinja2.ext.do",
@@ -22,7 +22,7 @@ JINJA_ENV = jinja2.Environment(
     ]
 )
 # Parsing never reads settings, so neither `settings.configure()` nor `django.setup()` is needed.
-DJANGO_ENGINE = Engine()
+DJANGO_ENGINE: Final[Engine] = Engine()
 
 
 def noop_tag(parser: Parser, token: Token) -> Node:

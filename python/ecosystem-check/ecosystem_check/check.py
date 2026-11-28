@@ -11,8 +11,8 @@ from pathlib import Path
 from subprocess import PIPE
 from typing import TYPE_CHECKING
 
-from . import logger
 from .format import add_s
+from .log import logger
 from .markdown import markdown_project_section
 from .projects import Command
 from .types import (

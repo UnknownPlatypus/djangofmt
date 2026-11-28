@@ -15,9 +15,9 @@ from signal import SIGINT, SIGTERM
 from types import TracebackType
 from typing import Literal
 
-from . import logger
 from .defaults import DEFAULT_TARGETS
 from .format import FormatComparison
+from .log import logger
 from .main import OutputFormat, main
 from .projects import Command
 

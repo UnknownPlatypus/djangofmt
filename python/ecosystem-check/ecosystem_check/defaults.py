@@ -4,6 +4,8 @@ Default projects for ecosystem checks
 
 from __future__ import annotations
 
+from typing import Final
+
 from .projects import (
     CliOptions,
     ExcludeReason,
@@ -13,7 +15,7 @@ from .projects import (
     Repository,
 )
 
-DEFAULT_TARGETS = [
+DEFAULT_TARGETS: Final[list[Project]] = [
     # Jinja templates
     Project(
         repo=Repository(owner="zulip", name="zulip", ref="main"),

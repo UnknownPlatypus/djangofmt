@@ -191,7 +191,7 @@ class ParseRegressions(dict[str, str]):
         )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Result(Serializable):
     """
     The result of an ecosystem check for a collection of projects.
@@ -201,7 +201,7 @@ class Result(Serializable):
     completed: list[tuple[Project, Comparison]]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Comparison(Serializable):
     """
     The result of a completed ecosystem comparison for a single project.

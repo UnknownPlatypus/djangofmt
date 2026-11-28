@@ -105,8 +105,8 @@ class Profile(NamedTuple):
 BENCHMARK_ARGS: Final[str] = "--profile django --line-length 120 --quiet"
 WARMUP_RUNS: Final[int] = 10
 BENCHMARK_RUNS: Final[int] = 100
-CARGO_TOML_PATH = Path("Cargo.toml")
-ALL_PROFILES = tuple(
+CARGO_TOML_PATH: Final[Path] = Path("Cargo.toml")
+ALL_PROFILES: Final[tuple[Profile, ...]] = tuple(
     Profile(codegen_unit, lto_option)
     for lto_option in LtoOptions
     for codegen_unit in CodegenUnits
@@ -129,7 +129,7 @@ def rich_print(msg: str) -> None:
     _rich_print(f"[bold cyan]{msg}[/bold cyan]")
 
 
-def update_cargo_toml(initial_cargo_toml_content: str) -> str:
+def update_cargo_toml(initial_cargo_toml_content: str) -> None:
     """Create a temporary Cargo.toml based on the original"""
     rich_print("Setting up temporary Cargo.toml...")
 
@@ -139,8 +139,6 @@ def update_cargo_toml(initial_cargo_toml_content: str) -> str:
         with open(CARGO_TOML_PATH, "a") as f:
             f.write(_generate_additional_profiles())
         rich_print("Profiles added to Cargo.toml")
-
-    return initial_cargo_toml_content
 
 
 def _generate_additional_profiles() -> str:
