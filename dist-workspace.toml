@@ -68,7 +68,7 @@ local-artifacts-jobs = ["./release-build-binaries"]
 # Publish jobs to run in CI
 publish-jobs = ["./release-publish-pypi"]
 # Custom permissions for GitHub Jobs
-github-custom-job-permissions = { "publish-playground-and-docs" = { contents = "write", pages = "read", pull-requests = "write" } }
+github-custom-job-permissions = { "publish-playground-and-docs" = { contents = "write", pages = "read" } }
 # Post-announce jobs to run in CI
 post-announce-jobs = [
   "./release-notify-pre-commit-mirror",

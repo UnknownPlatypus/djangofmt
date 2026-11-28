@@ -1,6 +1,6 @@
 # Builds the playground (Deno + WASM) and the Zensical docs site, then
 # pushes both to the `gh-pages` branch: playground at `/`, docs at `/docs/`.
-# Same-repo PRs get a playground preview at `/pr-preview/pr-<N>/`, removed on close.
+# PRs touching `playground/` get a preview at `/pr-preview/pr-<N>/`, removed on close.
 name: "[djangofmt] Publish Playground and Docs"
 
 on:
@@ -63,11 +63,19 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    outputs:
+      playground: ${{ steps.changed.outputs.playground }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
         with:
+          fetch-depth: 2
           persist-credentials: false
+      - name: Check if the playground changed
+        id: changed
+        if: github.event_name == 'pull_request'
+        # HEAD is the PR merge commit, its first parent is the base branch tip.
+        run: git diff --quiet HEAD^1 HEAD -- playground || echo "playground=true" >> "$GITHUB_OUTPUT"
       - name: "Install Rust toolchain"
         run: rustup target add wasm32-unknown-unknown
       - name: Install wasm-pack
@@ -92,7 +100,7 @@ jobs:
           # Must match the path the preview action deploys to. Empty outside PRs.
           PLAYGROUND_BASE: ${{ github.event_name == 'pull_request' && format('/djangofmt/pr-preview/pr-{0}/', github.event.pull_request.number) || '' }}
       - name: Upload preview
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: steps.changed.outputs.playground == 'true'
         uses: actions/upload-artifact@v7.0.2
         with:
           name: preview
@@ -160,7 +168,7 @@ jobs:
   preview:
     needs: build
     # Fork PRs only get a read-only token.
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    if: needs.build.outputs.playground == 'true' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment:
@@ -170,7 +178,6 @@ jobs:
     permissions:
       contents: write # push to gh-pages
       pages: read # wait for the Pages build
-      pull-requests: write # sticky comment
     steps:
       # The preview action runs git inside a checkout.
       - name: Checkout
@@ -190,6 +197,8 @@ jobs:
           # The default `auto` does nothing on `reopened`.
           action: deploy
           wait-for-pages-deployment: true
+          # The environment URL links the preview, and the ecosystem check's `--edit-last` overwrites a bot comment.
+          comment: false
 
   preview-remove:
     if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
@@ -197,7 +206,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write # remove from gh-pages
-      pull-requests: write # sticky comment
     steps:
       - name: Checkout
         uses: actions/checkout@v7.0.1
@@ -207,3 +215,4 @@ jobs:
         uses: rossjrw/pr-preview-action@v1.8.2
         with:
           action: remove
+          comment: false
