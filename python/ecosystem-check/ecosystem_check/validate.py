@@ -8,14 +8,14 @@ import glob
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ecosystem_check.format import add_s, format
-from ecosystem_check.markdown import markdown_project_section
-from ecosystem_check.oracle import parse_django, parse_jinja
-from ecosystem_check.projects import Profile
-from ecosystem_check.types import Comparison, ParseRegressions, Result
+from .format import add_s, format
+from .markdown import markdown_project_section
+from .oracle import parse_django, parse_jinja
+from .projects import Profile
+from .types import Comparison, ParseRegressions, Result
 
 if TYPE_CHECKING:
-    from ecosystem_check.projects import CliOptions, ClonedRepository
+    from .projects import CliOptions, ClonedRepository
 
 
 def markdown_validate_result(result: Result, title: str) -> str:

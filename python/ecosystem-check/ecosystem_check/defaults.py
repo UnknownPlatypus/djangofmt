@@ -4,7 +4,7 @@ Default projects for ecosystem checks
 
 from __future__ import annotations
 
-from ecosystem_check.projects import (
+from .projects import (
     CliOptions,
     ExcludeReason,
     GitDomain,

@@ -9,24 +9,24 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any, TypeVar
 
-from ecosystem_check import logger
-from ecosystem_check.check import (
+from . import logger
+from .check import (
     compare_check,
     markdown_check_result,
 )
-from ecosystem_check.format import (
+from .format import (
     FormatComparison,
     can_format_project,
     compare_format,
     markdown_format_result,
     markdown_stale_exclusions,
 )
-from ecosystem_check.projects import (
+from .projects import (
     Command,
     Project,
 )
-from ecosystem_check.types import Comparison, Result, Serializable
-from ecosystem_check.validate import markdown_validate_result, validate_project
+from .types import Comparison, Result, Serializable
+from .validate import markdown_validate_result, validate_project
 
 T = TypeVar("T")
 

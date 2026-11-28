@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from unidiff import PatchSet
 
 if TYPE_CHECKING:
-    from ecosystem_check.projects import CliOptions, ClonedRepository, Project
+    from .projects import CliOptions, ClonedRepository, Project
 
 
 def format_patchset(
