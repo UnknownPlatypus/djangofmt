@@ -240,8 +240,30 @@ allowed-confusables = ["σ"]
 [tool.ruff.lint.isort]
 required-imports = ["from __future__ import annotations"]
 
+[tool.simplint]
+select = ["ALL"]
+# ALL leaves out opt-in rules; this is the only one in v0.14.7.
+extend-select = ["init-module-content"]
+ignore = [
+  "function-docstring",  # wants docstrings removed from internal functions
+  "missing-from-all",  # internal tooling, no public API to declare
+  "module-variable-prefix",  # same: wants `_` on every module constant
+  "definition-before-use",  # whole-file reorders, wrecks git blame
+  "module-variable-case",  # wants `logger` renamed `LOGGER`
+  "imprecise-annotation",  # false positive on JSONEncoder.default(self, o: object)
+  "callable-ellipsis",  # a Protocol is overkill for the Django filter registry
+  "indistinct-error-class",  # named exception classes are fine
+  "private-import-path",  # `print as _rich_print` is deliberate, avoids shadowing print
+  "long-docstring-paragraph",  # flags a benchmark results table in a docstring
+]
+
 [tool.typos.default]
 extend-ignore-re = ["60ba20f"]
+
+[[tool.unref.overrides]]
+# Django's template engine calls these Parser hooks itself.
+base-classes = ["django.template.base.Parser"]
+used-names = ["find_filter"]
 
 [tool.uv]
 # Supply chain mitigation: ignore package versions released in the last week.
