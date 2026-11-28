@@ -322,4 +322,3 @@ jobs:
     permissions:
       "contents": "write"
       "pages": "read"
-      "pull-requests": "write"
