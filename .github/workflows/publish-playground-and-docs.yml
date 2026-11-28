@@ -167,7 +167,8 @@ jobs:
 
   preview:
     needs: build
-    if: needs.build.outputs.playground == 'true'
+    # Fork PRs only get a read-only token.
+    if: needs.build.outputs.playground == 'true' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment:
@@ -200,7 +201,7 @@ jobs:
           comment: false
 
   preview-remove:
-    if: github.event.action == 'closed'
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
