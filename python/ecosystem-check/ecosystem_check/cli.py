@@ -15,9 +15,9 @@ from signal import SIGINT, SIGTERM
 from types import TracebackType
 from typing import Literal
 
-from ecosystem_check import logger
 from ecosystem_check.defaults import DEFAULT_TARGETS
 from ecosystem_check.format import FormatComparison
+from ecosystem_check.log import logger
 from ecosystem_check.main import OutputFormat, main
 from ecosystem_check.projects import Command
 
@@ -177,8 +177,7 @@ def _get_executable_path(name: str) -> Path | None:
         return Path(path)
 
     # The executable in the global environment.
-    environment_path = shutil.which(name)
-    if environment_path:
+    if environment_path := shutil.which(name):
         return Path(environment_path)
 
     return None

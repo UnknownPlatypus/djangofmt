@@ -31,8 +31,7 @@ def format_patchset(
             hunk_lines = str(hunk).splitlines()
 
             # Add a link before the hunk
-            link_title = file_patch.path + "~L" + str(hunk.source_start)
-            title = f"<a href='{hunk_link}'>{link_title}</a>"
+            title = f"<a href='{hunk_link}'>{file_patch.path}~L{hunk.source_start}</a>"
             if commit_msg:
                 title += f" <span style='white-space: nowrap;'>(`{commit_msg}`)</span>"
             lines.append(title)

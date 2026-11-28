@@ -14,7 +14,7 @@ from pathlib import Path
 from subprocess import DEVNULL, PIPE, run
 from typing import TYPE_CHECKING
 
-from ecosystem_check import logger
+from ecosystem_check.log import logger
 from ecosystem_check.markdown import markdown_project_section
 from ecosystem_check.projects import Command, Formatter, Profile
 from ecosystem_check.types import (
@@ -77,8 +77,7 @@ def markdown_format_result(result: Result, title: str) -> str:
         )
         if error_count:
             summary += f"; {error_count} project error{add_s(error_count)}"
-        unchanged_projects = len(result.completed) - projects_with_changes
-        if unchanged_projects:
+        if unchanged_projects := len(result.completed) - projects_with_changes:
             summary += (
                 f"; {unchanged_projects} project{add_s(unchanged_projects)} unchanged"
             )

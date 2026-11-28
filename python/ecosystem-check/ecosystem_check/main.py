@@ -9,7 +9,6 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any, TypeVar
 
-from ecosystem_check import logger
 from ecosystem_check.check import (
     compare_check,
     markdown_check_result,
@@ -21,6 +20,7 @@ from ecosystem_check.format import (
     markdown_format_result,
     markdown_stale_exclusions,
 )
+from ecosystem_check.log import logger
 from ecosystem_check.projects import (
     Command,
     Project,
@@ -45,8 +45,8 @@ async def main(
     output_format: OutputFormat,
     format_comparison: FormatComparison | None,
     title: str,
+    raise_on_failure: bool,
     max_parallelism: int = 50,
-    raise_on_failure: bool = False,
 ) -> None:
     logger.debug("Using command %s", command.value)
     logger.debug("Using baseline executable at %s", baseline_executable)
@@ -178,8 +178,8 @@ class JSONEncoder(json.JSONEncoder):
     def default(self, o: object) -> Any:
         if isinstance(o, Serializable):
             return o.jsonable()
-        if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)  # type: ignore[arg-type]
+        if dataclasses.is_dataclass(o) and not isinstance(o, type):
+            return dataclasses.asdict(o)
         if isinstance(o, set):
             return tuple(o)
         if isinstance(o, Path):

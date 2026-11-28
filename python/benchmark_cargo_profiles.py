@@ -65,7 +65,7 @@ import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 from subprocess import CompletedProcess
-from typing import Any, NamedTuple
+from typing import Any, Final, NamedTuple
 
 from rich import print as _rich_print
 from rich.console import Console
@@ -102,16 +102,15 @@ class Profile(NamedTuple):
         return f"lto{self.lto_option.name.lower()}_cg{self.codegen_unit}"
 
 
-# Configuration for benchmarking #####
-BENCHMARK_ARGS = "--profile django --line-length 120 --quiet"
-WARMUP_RUNS = 10
-BENCHMARK_RUNS = 100
-CARGO_TOML_PATH = Path("Cargo.toml")
-ALL_PROFILES = [
+BENCHMARK_ARGS: Final[str] = "--profile django --line-length 120 --quiet"
+WARMUP_RUNS: Final[int] = 10
+BENCHMARK_RUNS: Final[int] = 100
+CARGO_TOML_PATH: Final[Path] = Path("Cargo.toml")
+ALL_PROFILES: Final[tuple[Profile, ...]] = tuple(
     Profile(codegen_unit, lto_option)
     for lto_option in LtoOptions
     for codegen_unit in CodegenUnits
-]
+)
 
 
 def _run(cmd: Sequence[str], **kwargs: Any) -> CompletedProcess[str]:
@@ -130,7 +129,7 @@ def rich_print(msg: str) -> None:
     _rich_print(f"[bold cyan]{msg}[/bold cyan]")
 
 
-def update_cargo_toml(initial_cargo_toml_content: str) -> str:
+def update_cargo_toml(initial_cargo_toml_content: str) -> None:
     """Create a temporary Cargo.toml based on the original"""
     rich_print("Setting up temporary Cargo.toml...")
 
@@ -140,8 +139,6 @@ def update_cargo_toml(initial_cargo_toml_content: str) -> str:
         with open(CARGO_TOML_PATH, "a") as f:
             f.write(_generate_additional_profiles())
         rich_print("Profiles added to Cargo.toml")
-
-    return initial_cargo_toml_content
 
 
 def _generate_additional_profiles() -> str:
@@ -167,10 +164,14 @@ def _get_file_size_mb(file_path: str) -> float:
     return os.path.getsize(file_path) / (1024 * 1024)
 
 
+_PARSE_BUILD_TIME_SECONDS_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"Finished .+ in (\d+\.\d+)s"
+)
+
+
 def _parse_build_time_seconds(output: str) -> float:
     """Parse build time from cargo output"""
-    match = re.search(r"Finished .+ in (\d+\.\d+)s", output)
-    if match:
+    if match := _PARSE_BUILD_TIME_SECONDS_PATTERN.search(output):
         return float(match.group(1))
     return 0.0
 
@@ -178,8 +179,7 @@ def _parse_build_time_seconds(output: str) -> float:
 def _sanity_checks(args: argparse.Namespace) -> None:
     """Check for required tool and files"""
     for tool in ["cargo", "maturin", "hyperfine"]:
-        tool_path = shutil.which(tool)
-        if not tool_path:
+        if not shutil.which(tool):
             rich_print(
                 f"Error: {tool} not found. Please install it before running this script."
             )
@@ -239,8 +239,7 @@ def build_binaries() -> dict[Profile, BuildResult]:
             ],
         )
         # Find the wheel file
-        wheel_files = list(Path("target/wheels").glob("djangofmt*.whl"))
-        if wheel_files:
+        if wheel_files := list(Path("target/wheels").glob("djangofmt*.whl")):
             latest_wheel = wheel_files[0]
             wheel_dest = f"target/release/djangofmt-{profile}.whl"
             shutil.copyfile(str(latest_wheel), wheel_dest)
@@ -324,8 +323,7 @@ def output_rich_table(
     for row in sorted(table_data, key=lambda x: float(x[4])):
         table.add_row(*row)
 
-    console = Console()
-    console.print(table)
+    Console().print(table)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -350,11 +348,7 @@ def main() -> int:
     try:
         update_cargo_toml(initial_cargo_toml_content)
 
-        build_results = build_binaries()
-
-        bench_results = run_benchmarks(args.files_list)
-
-        output_rich_table(build_results, bench_results)
+        output_rich_table(build_binaries(), run_benchmarks(args.files_list))
 
     finally:
         # Reset the cargo toml file to the initial state

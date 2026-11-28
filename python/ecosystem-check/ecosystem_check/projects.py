@@ -11,11 +11,11 @@ from pathlib import Path
 from subprocess import DEVNULL, PIPE
 from typing import Self
 
-from ecosystem_check import logger
+from ecosystem_check.log import logger
 from ecosystem_check.types import HunkDetail, Serializable
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Project(Serializable):
     """
     An ecosystem target
@@ -99,7 +99,7 @@ class ExcludeReason(enum.StrEnum):
     UNKNOWN = enum.auto()
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class CliOptions(Serializable):
     """
     Option to pass to the cli.
@@ -150,7 +150,7 @@ class ProjectSetupError(Exception):
     """An error setting up a project."""
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Repository(Serializable):
     """
     A remote GitHub repository.
@@ -262,7 +262,7 @@ class Repository(Serializable):
         Reset the cloned repository to the ref it started at.
         """
         process = await create_subprocess_exec(
-            *["git", "reset", "--hard", *(["origin/" + self.ref] if self.ref else [])],
+            *["git", "reset", "--hard", *([f"origin/{self.ref}"] if self.ref else [])],
             cwd=checkout_dir,
             env={"GIT_TERMINAL_PROMPT": "0"},
             stdout=PIPE,
@@ -273,7 +273,7 @@ class Repository(Serializable):
             raise RuntimeError(f"Failed to reset: {stderr.decode()}")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class ClonedRepository(Repository, Serializable):
     """
     A cloned GitHub repository, which includes the hash of the current commit.

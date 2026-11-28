@@ -5,7 +5,7 @@ import difflib
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, is_dataclass
 from functools import cached_property
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, override
 
 from unidiff import PatchSet
 
@@ -38,14 +38,14 @@ class Diff(Serializable):
         self.added = [
             line[2:]
             for line in self.lines
-            if line.startswith("+" + " " * leading_spaces)
+            if line.startswith(f"+{' ' * leading_spaces}")
             # Do not include patch headers
             and not line.startswith("+++")
         ]
         self.removed = [
             line[2:]
             for line in self.lines
-            if line.startswith("-" + " " * leading_spaces)
+            if line.startswith(f"-{' ' * leading_spaces}")
             # Do not include patch headers
             and not line.startswith("---")
         ]
@@ -72,6 +72,7 @@ class Diff(Serializable):
     def lines_removed(self) -> int:
         return len(self.removed)
 
+    @override
     def jsonable(self) -> Any:
         return self.lines
 
@@ -152,6 +153,7 @@ class CheckDiff(Serializable):
             if line.startswith("-") and not line.startswith("---")
         )
 
+    @override
     def jsonable(self) -> Any:
         return {
             "diagnostics": self._diff_lines,
@@ -170,7 +172,7 @@ class CheckDiff(Serializable):
         return "\n".join(lines)
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class HunkDetail:
     """The minimal details of a patch hunk that makes it unique."""
 
@@ -189,7 +191,7 @@ class ParseRegressions(dict[str, str]):
         )
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Result(Serializable):
     """
     The result of an ecosystem check for a collection of projects.
@@ -199,7 +201,7 @@ class Result(Serializable):
     completed: list[tuple[Project, Comparison]]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class Comparison(Serializable):
     """
     The result of a completed ecosystem comparison for a single project.

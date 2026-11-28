@@ -4,6 +4,8 @@ Default projects for ecosystem checks
 
 from __future__ import annotations
 
+from typing import Final
+
 from ecosystem_check.projects import (
     CliOptions,
     ExcludeReason,
@@ -13,7 +15,7 @@ from ecosystem_check.projects import (
     Repository,
 )
 
-DEFAULT_TARGETS = [
+DEFAULT_TARGETS: Final[list[Project]] = [
     # Jinja templates
     Project(
         repo=Repository(owner="zulip", name="zulip", ref="main"),
@@ -559,12 +561,6 @@ DEFAULT_TARGETS = [
             exclude={
                 ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
                     "docs/_templates/breadcrumbs.html",  # Sphinx template using {{ super() }}
-                ),
-                ExcludeReason.INVALID_SOURCE_HTML: (
-                    # <b> where </b> was intended
-                    "readthedocs/subscriptions/templates/subscriptions/notifications/organization_disabled_email.html",
-                    "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_ended_email.html",
-                    "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_required_email.html",
                 ),
             },
         ),
