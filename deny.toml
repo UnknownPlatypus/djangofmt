@@ -2,7 +2,7 @@
 all-features = true
 
 [licenses]
-allow = ["Apache-2.0", "ISC", "MIT", "Unicode-3.0", "Zlib"]
+allow = ["Apache-2.0", "Apache-2.0 WITH LLVM-exception", "ISC", "MIT", "Unicode-3.0", "Zlib"]
 
 [bans]
 wildcards = "deny"

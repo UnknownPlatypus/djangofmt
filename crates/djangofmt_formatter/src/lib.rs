@@ -478,6 +478,7 @@ mod tests {
     #[case::bare_tag_rewritten("foo(); {{ x }}", "foo();\n{\n  {\n    x;\n  }\n}\n", false)]
     #[case::tag_in_string_kept("a('{{ x }}')", "a(\"{{ x }}\");\n", true)]
     #[case::block_tag_requoted("a('{% url \"b\" %}')", "a(\"{% url \\\"b\\\" %}\");\n", false)]
+    #[case::comment_tag_requoted("a('{# \"b\" #}')", "a(\"{# \\\"b\\\" #}\");\n", false)]
     #[case::no_tag("a({b: 1})", "a({ b: 1 });\n", true)]
     fn template_tags_preserved_cases(
         #[case] source: &str,

@@ -14,7 +14,7 @@ exclude_globs = [
 exclude_re = [
   "::fix_title -> ",
   "Display for (FixAvailability|PanicError)>",
-  "Debug for RuleSet>",
+  "Debug for (RuleSet|FormatterConfig)>",
   # Equivalent: shortcuts whose slow path gives the same result.
   "is_single_spaced -> bool with false",
   "has_spaced_pipe -> bool with true",
