@@ -15,11 +15,11 @@ from signal import SIGINT, SIGTERM
 from types import TracebackType
 from typing import Literal
 
-from .defaults import DEFAULT_TARGETS
-from .format import FormatComparison
-from .log import logger
-from .main import OutputFormat, main
-from .projects import Command
+from ecosystem_check.defaults import DEFAULT_TARGETS
+from ecosystem_check.format import FormatComparison
+from ecosystem_check.log import logger
+from ecosystem_check.main import OutputFormat, main
+from ecosystem_check.projects import Command
 
 
 def excepthook(

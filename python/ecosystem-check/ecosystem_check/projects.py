@@ -11,8 +11,8 @@ from pathlib import Path
 from subprocess import DEVNULL, PIPE
 from typing import Self
 
-from .log import logger
-from .types import HunkDetail, Serializable
+from ecosystem_check.log import logger
+from ecosystem_check.types import HunkDetail, Serializable
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

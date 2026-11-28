@@ -256,6 +256,7 @@ ignore = [
   "private-import-path",  # `print as _rich_print` is deliberate, avoids shadowing print
   "long-docstring-paragraph",  # flags a benchmark results table in a docstring
   "single-letter-name",  # `except ... as e`, `open() as f` and loop indexes are idiomatic
+  "absolute-sibling-import",  # we prefer absolute imports
 ]
 
 [tool.typos.default]

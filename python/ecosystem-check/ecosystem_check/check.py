@@ -11,11 +11,11 @@ from pathlib import Path
 from subprocess import PIPE
 from typing import TYPE_CHECKING
 
-from .format import add_s
-from .log import logger
-from .markdown import markdown_project_section
-from .projects import Command
-from .types import (
+from ecosystem_check.format import add_s
+from ecosystem_check.log import logger
+from ecosystem_check.markdown import markdown_project_section
+from ecosystem_check.projects import Command
+from ecosystem_check.types import (
     CheckDiff,
     Comparison,
     Diff,
@@ -24,7 +24,7 @@ from .types import (
 )
 
 if TYPE_CHECKING:
-    from .projects import (
+    from ecosystem_check.projects import (
         CliOptions,
         ClonedRepository,
     )

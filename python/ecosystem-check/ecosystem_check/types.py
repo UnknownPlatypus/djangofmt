@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING, Any, override
 
 from unidiff import PatchSet
 
-from .markdown import format_patchset
+from ecosystem_check.markdown import format_patchset
 
 if TYPE_CHECKING:
-    from .projects import ClonedRepository, Project
+    from ecosystem_check.projects import ClonedRepository, Project
 
 
 class Serializable:

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Final
 
-from .projects import (
+from ecosystem_check.projects import (
     CliOptions,
     ExcludeReason,
     GitDomain,
