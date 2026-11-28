@@ -62,12 +62,12 @@ repos:
     hooks:
       - id: zizmor
         args: ["--fix"]
-  - repo: https://github.com/rhysd/actionlint
-    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # frozen: v1.7.12
+  - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
+    rev: 357f7eec6dec49bf7693dc0dbec30212226d5492  # frozen: v1.7.12.25
     hooks:
       - id: actionlint
-        additional_dependencies:
-          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1"
+        # Native shellcheck: the wasm build from go-shellcheck took ~2 min on pre-commit.ci.
+        additional_dependencies: ["shellcheck-py==0.11.0.1"]
   - repo: local
     hooks:
       - id: actions-lock
