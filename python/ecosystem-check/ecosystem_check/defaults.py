@@ -562,12 +562,6 @@ DEFAULT_TARGETS: Final[list[Project]] = [
                 ExcludeReason.FOREIGN_TEMPLATE_ENGINE: (
                     "docs/_templates/breadcrumbs.html",  # Sphinx template using {{ super() }}
                 ),
-                ExcludeReason.INVALID_SOURCE_HTML: (
-                    # <b> where </b> was intended
-                    "readthedocs/subscriptions/templates/subscriptions/notifications/organization_disabled_email.html",
-                    "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_ended_email.html",
-                    "readthedocs/subscriptions/templates/subscriptions/notifications/subscription_required_email.html",
-                ),
             },
         ),
     ),
