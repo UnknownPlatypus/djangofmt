@@ -25,6 +25,7 @@ djangofmt_lint = { path = "crates/djangofmt_lint" }
 djangofmt_macros = { path = "crates/djangofmt_macros" }
 djangofmt_syntax = { path = "crates/djangofmt_syntax" }
 dprint-plugin-json = { version = "0.26.0" }
+dprint-plugin-typescript = { version = "0.99.2" }
 editorconfig-parser = { version = "0.0.4" }
 globset = { version = "0.4.18" }
 ignore = { version = "0.4.25" }
@@ -37,7 +38,7 @@ malva = {
 }
 markup_fmt = {
   git = "https://github.com/UnknownPlatypus/markup_fmt",
-  rev = "82ba55ca86570c88788a8c526fdfdf939a6adfd8",
+  rev = "d5fa383f898f84e52cb5770764644099ad8ccb03",
 }
 memchr = { version = "2.8.3" }
 miette = { package = "oxc-miette", version = "3.0.1", features = ["fancy"] }
